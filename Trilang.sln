@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		README.md = README.md
 		.gitignore = .gitignore
+		example.tri = example.tri
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tri.Interpreter", "Tri.Interpreter\Tri.Interpreter.csproj", "{3B276CA5-D9AE-45B4-83B1-CE0E36A83046}"

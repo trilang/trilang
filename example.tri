@@ -1,0 +1,12 @@
+external function print(text: string): void;
+
+function main(): i32 {
+    var number: i32 = 2 + 2 * 2;
+    if (number == 6) {
+        print("2 + 2 * 2 = 6\n");
+    } else {
+        print("2 + 2 * 2 != 6\n");
+    }
+
+    return 0;
+}
