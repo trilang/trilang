@@ -53,20 +53,17 @@ public class Token : IEquatable<Token>
     public static Token CreateNumber(int value)
         => new Token(TokenKind.Number, value);
 
+    public static Token CreateChar(string value)
+        => new Token(TokenKind.Char, value);
+
     public static Token CreateString(string value)
         => new Token(TokenKind.String, value);
 
-    public static Token CreateWhiteSpace()
-        => new Token(TokenKind.WhiteSpace, null);
-
-    public static Token CreateNewLine()
-        => new Token(TokenKind.NewLine, null);
-
-    public static Token CreateCarriageReturn()
-        => new Token(TokenKind.CarriageReturn, null);
-
     public static Token Create(TokenKind kind)
         => new Token(kind, null);
+
+    public bool Is(TokenKind kind)
+        => Kind == kind;
 
     public TokenKind Kind { get; }
 

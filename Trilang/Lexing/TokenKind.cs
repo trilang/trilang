@@ -3,19 +3,19 @@ namespace Trilang.Lexing;
 public enum TokenKind
 {
     EndOfFile,
-    NewLine,
-    CarriageReturn,
-    WhiteSpace,
+    // NewLine,
+    // CarriageReturn,
+    // WhiteSpace,
 
     Identifier,
     Number,
     String,
+    Char,
 
     // Symbols
     Colon,
     SemiColon,
     Comma,
-    DoubleQuote,
     OpenParenthesis,
     CloseParenthesis,
     OpenBrace,
@@ -38,6 +38,7 @@ public enum TokenKind
     AmpersandAmpersand,
     Pipe,
     PipePipe,
+    Caret,
 
     // Keywords
     Var,
@@ -46,4 +47,6 @@ public enum TokenKind
     Function,
     External,
     Return,
+    True,
+    False,
 }

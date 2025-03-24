@@ -11,8 +11,6 @@ public class LexerTests
         var tokens = lexer.Tokenize("\n\n");
         var expected = new[]
         {
-            Token.CreateNewLine(),
-            Token.CreateNewLine(),
             Token.CreateEof(),
         };
 
@@ -26,8 +24,6 @@ public class LexerTests
         var tokens = lexer.Tokenize("\r\r");
         var expected = new[]
         {
-            Token.CreateCarriageReturn(),
-            Token.CreateCarriageReturn(),
             Token.CreateEof(),
         };
 
@@ -41,8 +37,6 @@ public class LexerTests
         var tokens = lexer.Tokenize("  ");
         var expected = new[]
         {
-            Token.CreateWhiteSpace(),
-            Token.CreateWhiteSpace(),
             Token.CreateEof(),
         };
 
@@ -73,6 +67,8 @@ public class LexerTests
     [TestCase("else", TokenKind.Else)]
     [TestCase("external", TokenKind.External)]
     [TestCase("return", TokenKind.Return)]
+    [TestCase("true", TokenKind.True)]
+    [TestCase("false", TokenKind.False)]
     public void TokenizeKeywordTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();
@@ -129,6 +125,7 @@ public class LexerTests
     [TestCase("||", TokenKind.PipePipe)]
     [TestCase("&", TokenKind.Ampersand)]
     [TestCase("|", TokenKind.Pipe)]
+    [TestCase("^", TokenKind.Caret)]
     public void TokenizeOperatorTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();
@@ -136,6 +133,38 @@ public class LexerTests
         var expected = new[]
         {
             Token.Create(kind),
+            Token.CreateEof(),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    [TestCase("1")]
+    [TestCase("xxx")]
+    public void TokenizeCharTest(string code)
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize($"'{code}'");
+        var expected = new[]
+        {
+            Token.CreateChar(code),
+            Token.CreateEof(),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    [TestCase("1")]
+    [TestCase("xxx")]
+    public void TokenizeStringTest(string code)
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize($"\"{code}\"");
+        var expected = new[]
+        {
+            Token.CreateString(code),
             Token.CreateEof(),
         };
 

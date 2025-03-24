@@ -2,7 +2,7 @@ namespace Trilang.Lexing;
 
 public class Lexer
 {
-    public IEnumerable<Token> Tokenize(string code)
+    public IReadOnlyList<Token> Tokenize(string code)
     {
         var span = code.AsSpan();
         var tokens = new List<Token>();
@@ -10,23 +10,8 @@ public class Lexer
         while (span.Length > 0)
         {
             var c = span[0];
-            if (c == '\n')
+            if (char.IsWhiteSpace(c) || c is '\n' or '\r')
             {
-                tokens.Add(Token.CreateNewLine());
-                span = span[1..];
-                continue;
-            }
-
-            if (c == '\r')
-            {
-                tokens.Add(Token.CreateCarriageReturn());
-                span = span[1..];
-                continue;
-            }
-
-            if (char.IsWhiteSpace(c))
-            {
-                tokens.Add(Token.CreateWhiteSpace());
                 span = span[1..];
                 continue;
             }
@@ -59,11 +44,53 @@ public class Lexer
                     "else" => Token.Create(TokenKind.Else),
                     "external" => Token.Create(TokenKind.External),
                     "return" => Token.Create(TokenKind.Return),
+                    "true" => Token.Create(TokenKind.True),
+                    "false" => Token.Create(TokenKind.False),
 
                     _ => Token.CreateId(id.ToString()),
                 });
 
                 span = span[length..];
+                continue;
+            }
+
+            if (c is '\'')
+            {
+                span = span[1..];
+
+                var length = span.IndexOfAny('\'', '\n');
+                if (length == -1)
+                    throw new Exception("Unterminated string");
+
+                var str = span[..length].ToString();
+                tokens.Add(Token.CreateChar(str));
+
+                span = span[length..];
+
+                if (span.Length == 0 || span[0] != '\'')
+                    throw new Exception("Unterminated string");
+
+                span = span[1..];
+                continue;
+            }
+
+            if (c is '"')
+            {
+                span = span[1..];
+
+                var length = span.IndexOfAny('"', '\n');
+                if (length == -1)
+                    throw new Exception("Unterminated string");
+
+                var str = span[..length].ToString();
+                tokens.Add(Token.CreateString(str));
+
+                span = span[length..];
+
+                if (span.Length == 0 || span[0] != '"')
+                    throw new Exception("Unterminated string");
+
+                span = span[1..];
                 continue;
             }
 
@@ -99,6 +126,7 @@ public class Lexer
                 ('|', '|') => (Token.Create(TokenKind.PipePipe), 2),
                 ('&', _) => (Token.Create(TokenKind.Ampersand), 1),
                 ('|', _) => (Token.Create(TokenKind.Pipe), 1),
+                ('^', _) => (Token.Create(TokenKind.Caret), 1),
 
                 _ => throw new Exception($"Unexpected character '{c}'")
             };
