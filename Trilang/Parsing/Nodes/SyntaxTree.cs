@@ -1,6 +1,8 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
-public class SyntaxTree : IEquatable<SyntaxTree>
+public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 {
     public SyntaxTree(IReadOnlyList<FunctionStatementNode> functions)
     {
@@ -40,6 +42,17 @@ public class SyntaxTree : IEquatable<SyntaxTree>
 
     public override int GetHashCode()
         => HashCode.Combine(Functions);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public IReadOnlyList<FunctionStatementNode> Functions { get; }
 }

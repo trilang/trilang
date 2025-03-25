@@ -1,3 +1,5 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
 public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressionNode>
@@ -41,6 +43,17 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
 
     public override int GetHashCode()
         => HashCode.Combine((int)Kind, Value);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public LiteralExpressionKind Kind { get; }
 

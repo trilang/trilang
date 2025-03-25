@@ -1,6 +1,8 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
-public class FunctionParameterNode : IEquatable<FunctionParameterNode>
+public class FunctionParameterNode : ISyntaxNode, IEquatable<FunctionParameterNode>
 {
     public FunctionParameterNode(string name, string type)
     {
@@ -41,6 +43,17 @@ public class FunctionParameterNode : IEquatable<FunctionParameterNode>
 
     public override int GetHashCode()
         => HashCode.Combine(Name, Type);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public string Name { get; }
 

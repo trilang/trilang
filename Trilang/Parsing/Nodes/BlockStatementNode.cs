@@ -1,3 +1,5 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
 public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
@@ -43,6 +45,17 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
 
     public override int GetHashCode()
         => HashCode.Combine(Statements);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public IReadOnlyList<IStatementNode> Statements { get; }
 }

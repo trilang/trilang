@@ -1,3 +1,5 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
 public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpressionNode>
@@ -38,6 +40,17 @@ public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpres
 
     public override int GetHashCode()
         => HashCode.Combine(Name);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public string Name { get; }
 }

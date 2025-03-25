@@ -1,3 +1,5 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
 public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNode>
@@ -38,6 +40,17 @@ public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNod
 
     public override int GetHashCode()
         => HashCode.Combine(Expression);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public IExpressionNode Expression { get; }
 }

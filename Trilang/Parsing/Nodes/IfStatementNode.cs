@@ -1,8 +1,10 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
 public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
 {
-    public IfStatementNode(IExpressionNode condition, BlockStatementNode then, BlockStatementNode? @else)
+    public IfStatementNode(IExpressionNode condition, BlockStatementNode then, BlockStatementNode? @else = null)
     {
         Condition = condition;
         Then = then;
@@ -44,6 +46,17 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
 
     public override int GetHashCode()
         => HashCode.Combine(Condition, Then, Else);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public IExpressionNode Condition { get; }
 

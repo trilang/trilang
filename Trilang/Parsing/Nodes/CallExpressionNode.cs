@@ -1,3 +1,5 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
 public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode>
@@ -41,6 +43,17 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
 
     public override int GetHashCode()
         => HashCode.Combine(FunctionName, Parameters);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public string FunctionName { get; }
 

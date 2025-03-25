@@ -1,3 +1,5 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
 public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNode>
@@ -40,8 +42,16 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     public override int GetHashCode()
         => Operand.GetHashCode();
 
-    public override string ToString()
-        => $"{Kind}({Operand})";
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public UnaryExpressionKind Kind { get; }
 

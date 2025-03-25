@@ -1,3 +1,5 @@
+using Trilang.Parsing.Formatters;
+
 namespace Trilang.Parsing.Nodes;
 
 public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpressionNode>
@@ -42,6 +44,17 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
 
     public override int GetHashCode()
         => HashCode.Combine(Left, Right);
+
+    public override string? ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
 
     public BinaryExpressionKind Kind { get; }
 
