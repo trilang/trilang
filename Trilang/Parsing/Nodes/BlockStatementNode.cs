@@ -1,16 +1,20 @@
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
 namespace Trilang.Parsing.Nodes;
 
 public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
 {
-    public BlockStatementNode()
-        : this([])
+    public BlockStatementNode(SymbolTable symbolTable)
+        : this([], symbolTable)
     {
     }
 
-    public BlockStatementNode(IReadOnlyList<IStatementNode> statements)
-        => Statements = statements;
+    public BlockStatementNode(IReadOnlyList<IStatementNode> statements, SymbolTable symbolTable)
+    {
+        Statements = statements;
+        SymbolTable = symbolTable;
+    }
 
     public static bool operator ==(BlockStatementNode? left, BlockStatementNode? right)
         => Equals(left, right);
@@ -26,7 +30,8 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Statements.SequenceEqual(other.Statements);
+        return Statements.SequenceEqual(other.Statements) &&
+               SymbolTable.Equals(other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -58,4 +63,6 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
         => visitor.Visit(this);
 
     public IReadOnlyList<IStatementNode> Statements { get; }
+
+    public SymbolTable SymbolTable { get; }
 }

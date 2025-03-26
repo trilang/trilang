@@ -1,12 +1,14 @@
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
 namespace Trilang.Parsing.Nodes;
 
 public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 {
-    public SyntaxTree(IReadOnlyList<FunctionStatementNode> functions)
+    public SyntaxTree(IReadOnlyList<FunctionDeclarationNode> functions, SymbolTable symbolTable)
     {
         Functions = functions;
+        SymbolTable = symbolTable;
     }
 
     public static bool operator ==(SyntaxTree? left, SyntaxTree? right)
@@ -23,7 +25,8 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Functions.SequenceEqual(other.Functions);
+        return Functions.SequenceEqual(other.Functions) &&
+               SymbolTable.Equals(other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -54,5 +57,7 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
-    public IReadOnlyList<FunctionStatementNode> Functions { get; }
+    public IReadOnlyList<FunctionDeclarationNode> Functions { get; }
+
+    public SymbolTable SymbolTable { get; }
 }

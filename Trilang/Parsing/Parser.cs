@@ -1,5 +1,6 @@
 using Trilang.Lexing;
 using Trilang.Parsing.Nodes;
+using Trilang.Symbols;
 
 namespace Trilang.Parsing;
 
@@ -10,7 +11,7 @@ public class Parser
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code);
         var context = new ParserContext(tokens);
-        var functions = new List<FunctionStatementNode>();
+        var functions = new List<FunctionDeclarationNode>();
 
         while (!context.Reader.HasEnded)
         {
@@ -19,35 +20,39 @@ public class Parser
                 throw new ParseException("Expected a function.");
 
             functions.Add(function);
+            var symbol = new FunctionSymbol(function);
+            if (!context.SymbolTable.TryAddFunction(symbol))
+                throw new ParseException($"The '{function.Name}' function already exists.");
         }
 
-        return new SyntaxTree(functions);
+        return new SyntaxTree(functions, context.SymbolTable);
     }
 
-    private FunctionStatementNode? TryParseFunction(ParserContext context)
-    {
-        if (!context.Reader.Check(TokenKind.Function))
-            return null;
+    private FunctionDeclarationNode? TryParseFunction(ParserContext context)
+        => context.Scoped(c =>
+        {
+            if (!c.Reader.Check(TokenKind.Function))
+                return null;
 
-        var name = TryParseId(context);
-        if (name is null)
-            throw new ParseException("Expected a function name.");
+            var name = TryParseId(c);
+            if (name is null)
+                throw new ParseException("Expected a function name.");
 
-        var parameters = ParseFunctionParameters(context);
+            var parameters = ParseFunctionParameters(c);
 
-        if (!context.Reader.Check(TokenKind.Colon))
-            throw new ParseException("Expected a colon.");
+            if (!c.Reader.Check(TokenKind.Colon))
+                throw new ParseException("Expected a colon.");
 
-        var returnType = TryParseId(context);
-        if (returnType is null)
-            throw new ParseException("Expected a function return type.");
+            var returnType = TryParseId(c);
+            if (returnType is null)
+                throw new ParseException("Expected a function return type.");
 
-        var block = TryParseBlock(context);
-        if (block is null)
-            throw new ParseException("Expected a function block.");
+            var block = TryParseBlock(c);
+            if (block is null)
+                throw new ParseException("Expected a function block.");
 
-        return FunctionStatementNode.Create(name, parameters, returnType, block);
-    }
+            return FunctionDeclarationNode.Create(name, parameters, returnType, block);
+        });
 
     private List<FunctionParameterNode> ParseFunctionParameters(ParserContext context)
     {
@@ -90,8 +95,14 @@ public class Parser
         if (type is null)
             throw new ParseException("Expected a type.");
 
-        return new FunctionParameterNode(name, type);
+        var node = new FunctionParameterNode(name, type);
+        context.SymbolTable.TryAddVariable(new VariableSymbol(node.Name, node));
+
+        return node;
     }
+
+    private BlockStatementNode? TryParseScopedBlock(ParserContext context)
+        => context.Scoped(TryParseBlock);
 
     private BlockStatementNode? TryParseBlock(ParserContext context)
     {
@@ -108,7 +119,7 @@ public class Parser
             statements.Add(statement);
         }
 
-        return new BlockStatementNode(statements);
+        return new BlockStatementNode(statements, context.SymbolTable);
     }
 
     private IStatementNode? TryParseStatement(ParserContext context)
@@ -117,7 +128,7 @@ public class Parser
            TryParseReturnStatement(context) ??
            TryParseExpressionStatement(context) as IStatementNode;
 
-    private VariableStatementNode? TryParseVariableStatement(ParserContext context)
+    private VariableDeclarationNode? TryParseVariableStatement(ParserContext context)
     {
         if (!context.Reader.Check(TokenKind.Var))
             return null;
@@ -143,7 +154,10 @@ public class Parser
         if (!context.Reader.Check(TokenKind.SemiColon))
             throw new ParseException("Expected a semicolon.");
 
-        return new VariableStatementNode(name, type, expression);
+        var node = new VariableDeclarationNode(name, type, expression);
+        context.SymbolTable.TryAddVariable(new VariableSymbol(node.Name, node));
+
+        return node;
     }
 
     private IfStatementNode? TryParseIfStatement(ParserContext context)
@@ -161,14 +175,14 @@ public class Parser
         if (!context.Reader.Check(TokenKind.CloseParenthesis))
             throw new ParseException("Expected a close parenthesis.");
 
-        var then = TryParseBlock(context);
+        var then = TryParseScopedBlock(context);
         if (then is null)
             throw new ParseException("Expected a 'then' block.");
 
         if (!context.Reader.Check(TokenKind.Else))
             return new IfStatementNode(condition, then, null);
 
-        var @else = TryParseBlock(context);
+        var @else = TryParseScopedBlock(context);
         if (@else is null)
             throw new ParseException("Expected a 'else' block.");
 

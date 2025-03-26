@@ -2,22 +2,22 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Nodes;
 
-public class VariableStatementNode : IStatementNode, IEquatable<VariableStatementNode>
+public class VariableDeclarationNode : IStatementNode, IEquatable<VariableDeclarationNode>
 {
-    public VariableStatementNode(string name, string type, IExpressionNode expression)
+    public VariableDeclarationNode(string name, string type, IExpressionNode expression)
     {
         Name = name;
         Type = type;
         Expression = expression;
     }
 
-    public static bool operator ==(VariableStatementNode? left, VariableStatementNode? right)
+    public static bool operator ==(VariableDeclarationNode? left, VariableDeclarationNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(VariableStatementNode? left, VariableStatementNode? right)
+    public static bool operator !=(VariableDeclarationNode? left, VariableDeclarationNode? right)
         => !Equals(left, right);
 
-    public bool Equals(VariableStatementNode? other)
+    public bool Equals(VariableDeclarationNode? other)
     {
         if (other is null)
             return false;
@@ -41,7 +41,7 @@ public class VariableStatementNode : IStatementNode, IEquatable<VariableStatemen
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((VariableStatementNode)obj);
+        return Equals((VariableDeclarationNode)obj);
     }
 
     public override int GetHashCode()

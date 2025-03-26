@@ -82,7 +82,7 @@ public partial class CommonFormatter : IFormatter
         writer.Write(node.Type);
     }
 
-    public void Visit(FunctionStatementNode node)
+    public void Visit(FunctionDeclarationNode node)
     {
         if (node.IsExternal)
             writer.Write("external ");
@@ -185,7 +185,7 @@ public partial class CommonFormatter : IFormatter
     public void Visit(VariableExpressionNode node)
         => writer.Write(node.Name);
 
-    public void Visit(VariableStatementNode node)
+    public void Visit(VariableDeclarationNode node)
     {
         writer.Write("var ");
         writer.Write(node.Name);

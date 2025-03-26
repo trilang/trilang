@@ -14,7 +14,7 @@ public interface IVisitor
 
     void Visit(FunctionParameterNode node);
 
-    void Visit(FunctionStatementNode node);
+    void Visit(FunctionDeclarationNode node);
 
     void Visit(IfStatementNode node);
 
@@ -28,5 +28,5 @@ public interface IVisitor
 
     void Visit(VariableExpressionNode node);
 
-    void Visit(VariableStatementNode node);
+    void Visit(VariableDeclarationNode node);
 }

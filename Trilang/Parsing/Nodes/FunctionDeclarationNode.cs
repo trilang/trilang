@@ -3,9 +3,9 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Nodes;
 
-public class FunctionStatementNode : IStatementNode, IEquatable<FunctionStatementNode>
+public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclarationNode>
 {
-    private FunctionStatementNode(
+    private FunctionDeclarationNode(
         bool isExternal,
         string name,
         IReadOnlyList<FunctionParameterNode> parameters,
@@ -19,26 +19,26 @@ public class FunctionStatementNode : IStatementNode, IEquatable<FunctionStatemen
         Body = body;
     }
 
-    public static FunctionStatementNode Create(
+    public static FunctionDeclarationNode Create(
         string name,
         IReadOnlyList<FunctionParameterNode> parameters,
         string returnType,
         BlockStatementNode body)
-        => new FunctionStatementNode(false, name, parameters, returnType, body);
+        => new FunctionDeclarationNode(false, name, parameters, returnType, body);
 
-    public static FunctionStatementNode CreateExternal(
+    public static FunctionDeclarationNode CreateExternal(
         string name,
         IReadOnlyList<FunctionParameterNode> parameters,
         string returnType)
-        => new FunctionStatementNode(true, name, parameters, returnType, null);
+        => new FunctionDeclarationNode(true, name, parameters, returnType, null);
 
-    public static bool operator ==(FunctionStatementNode? left, FunctionStatementNode? right)
+    public static bool operator ==(FunctionDeclarationNode? left, FunctionDeclarationNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(FunctionStatementNode? left, FunctionStatementNode? right)
+    public static bool operator !=(FunctionDeclarationNode? left, FunctionDeclarationNode? right)
         => !Equals(left, right);
 
-    public bool Equals(FunctionStatementNode? other)
+    public bool Equals(FunctionDeclarationNode? other)
     {
         if (other is null)
             return false;
@@ -64,7 +64,7 @@ public class FunctionStatementNode : IStatementNode, IEquatable<FunctionStatemen
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((FunctionStatementNode)obj);
+        return Equals((FunctionDeclarationNode)obj);
     }
 
     public override int GetHashCode()
