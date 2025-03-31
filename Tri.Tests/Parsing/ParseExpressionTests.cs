@@ -86,6 +86,62 @@ public class ParseExpressionTests
     }
 
     [Test]
+    public void ParseLogicalNotTest()
+    {
+        var parse = new Parser();
+        var tree = parse.Parse(
+            """
+            function main(): void {
+                var x: i32 = !2;
+            }
+            """);
+
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
+            "x",
+            "i32",
+            new UnaryExpressionNode(
+                UnaryExpressionKind.LogicalNot,
+                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+            )
+        );
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseBitwiseNotTest()
+    {
+        var parse = new Parser();
+        var tree = parse.Parse(
+            """
+            function main(): void {
+                var x: i32 = ~2;
+            }
+            """);
+
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
+            "x",
+            "i32",
+            new UnaryExpressionNode(
+                UnaryExpressionKind.BitwiseNot,
+                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+            )
+        );
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void ParseAdditionTest()
     {
         var parse = new Parser();

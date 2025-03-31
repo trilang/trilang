@@ -127,6 +127,7 @@ public class Lexer
                 ('&', _) => (Token.Create(TokenKind.Ampersand), 1),
                 ('|', _) => (Token.Create(TokenKind.Pipe), 1),
                 ('^', _) => (Token.Create(TokenKind.Caret), 1),
+                ('~', _) => (Token.Create(TokenKind.Tilde), 1),
 
                 _ => throw new Exception($"Unexpected character '{c}'")
             };

@@ -614,6 +614,35 @@ public class CommonFormatterTests
     }
 
     [Test]
+    public void FormatBitwiseNotTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "add",
+                [new FunctionParameterNode("x", "i32")],
+                "void",
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new UnaryExpressionNode(
+                            UnaryExpressionKind.BitwiseNot,
+                            new VariableExpressionNode("x")
+                        )
+                    )
+                ])
+            ),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function add(x: i32): void {
+                return ~x;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void FormatIfTest()
     {
         var tree = new SyntaxTree([

@@ -126,6 +126,7 @@ public class LexerTests
     [TestCase("&", TokenKind.Ampersand)]
     [TestCase("|", TokenKind.Pipe)]
     [TestCase("^", TokenKind.Caret)]
+    [TestCase("~", TokenKind.Tilde)]
     public void TokenizeOperatorTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();

@@ -39,6 +39,7 @@ public enum TokenKind
     Pipe,
     PipePipe,
     Caret,
+    Tilde,
 
     // Keywords
     Var,

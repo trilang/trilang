@@ -175,6 +175,7 @@ public partial class CommonFormatter : IFormatter
             UnaryExpressionKind.UnaryPlus => '+',
             UnaryExpressionKind.UnaryMinus => '-',
             UnaryExpressionKind.LogicalNot => '!',
+            UnaryExpressionKind.BitwiseNot => '~',
 
             _ => throw new ArgumentOutOfRangeException(nameof(node.Kind)),
         });

@@ -8,4 +8,5 @@ public enum UnaryExpressionKind
     UnaryPlus,
 
     LogicalNot,
+    BitwiseNot,
 }

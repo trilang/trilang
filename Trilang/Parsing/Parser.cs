@@ -269,6 +269,10 @@ public class Parser
             kind = UnaryExpressionKind.UnaryMinus;
         else if (context.Reader.Check(TokenKind.Plus))
             kind = UnaryExpressionKind.UnaryPlus;
+        else if (context.Reader.Check(TokenKind.Exclamation))
+            kind = UnaryExpressionKind.LogicalNot;
+        else if (context.Reader.Check(TokenKind.Tilde))
+            kind = UnaryExpressionKind.BitwiseNot;
         else
             return TryParseOperand(context);
 
