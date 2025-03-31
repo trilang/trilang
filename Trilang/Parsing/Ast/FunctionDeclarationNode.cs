@@ -60,7 +60,7 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
                Parameters.SequenceEqual(other.Parameters) &&
                Equals(SymbolTable, other.SymbolTable) &&
                Equals(Body, other.Body) &&
-               Equals(FunctionMetadata, other.FunctionMetadata);
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)
@@ -107,7 +107,7 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
 
     public BlockStatementNode? Body { get; }
 
-    public FunctionMetadata? FunctionMetadata { get; set; }
+    public FunctionMetadata? Metadata { get; set; }
 
     public SymbolTable? SymbolTable { get; set; }
 }

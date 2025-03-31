@@ -12,29 +12,29 @@ public class TypeChecker : IVisitor
     public TypeChecker()
         => typeStore = new TypeMetadataStore();
 
-    private void MatchSymbolTable(SymbolTable? symbolTable)
+    private void BuildSymbolTableTypes(SymbolTable? symbolTable)
     {
+        // TODO: extract to a symbol table class or another visitor
         if (symbolTable is null)
             throw new ArgumentNullException(nameof(symbolTable));
 
-        MatchTypes(symbolTable.Types);
-        MatchFunctions(symbolTable.Functions);
-        MatchVariables(symbolTable.Variables);
+        BuildTypes(symbolTable.Types);
+        BuildFunctionTypes(symbolTable.Functions);
     }
 
-    private void MatchTypes(IReadOnlyDictionary<string, TypeSymbol> types)
+    private void BuildTypes(IReadOnlyDictionary<string, TypeSymbol> types)
     {
         foreach (var (_, symbol) in types)
         {
         }
     }
 
-    private void MatchFunctions(IReadOnlyDictionary<string, FunctionSymbol> functions)
+    private void BuildFunctionTypes(IReadOnlyDictionary<string, FunctionSymbol> functions)
     {
         foreach (var (_, symbol) in functions)
         {
             var function = symbol.Node;
-            if (function.FunctionMetadata is not null)
+            if (function.Metadata is not null)
                 continue;
 
             var parameters = new TypeMetadata[function.Parameters.Count];
@@ -47,27 +47,11 @@ public class TypeChecker : IVisitor
                                 throw new TypeCheckerException($"Unknown type '{parameter.Type}'");
             }
 
-            var returnType = typeStore.GetType(function.ReturnType);
-            if (returnType is null)
-                throw new TypeCheckerException($"Unknown type '{function.ReturnType}'");
+            var returnType = typeStore.GetType(function.ReturnType) ??
+                             throw new TypeCheckerException($"Unknown type '{function.ReturnType}'");
 
-            function.FunctionMetadata = new FunctionMetadata(function.Name, parameters, returnType);
-        }
-    }
-
-    private void MatchVariables(IReadOnlyDictionary<string, VariableSymbol> variables)
-    {
-        foreach (var (_, symbol) in variables)
-        {
-            var node = symbol.Node;
-            if (node.TypeMetadata is not null)
-                continue;
-
-            var type = typeStore.GetType(node.Type);
-            if (type is null)
-                throw new TypeCheckerException($"Unknown type '{node.Type}'");
-
-            node.TypeMetadata = type;
+            // TODO: add function type to types
+            function.Metadata = new FunctionMetadata(parameters, returnType);
         }
     }
 
@@ -103,7 +87,7 @@ public class TypeChecker : IVisitor
 
     public void Visit(BlockStatementNode node)
     {
-        MatchSymbolTable(node.SymbolTable);
+        BuildSymbolTableTypes(node.SymbolTable);
 
         foreach (var statement in node.Statements)
             statement.Accept(this);
@@ -118,7 +102,7 @@ public class TypeChecker : IVisitor
         var symbol = node.SymbolTable?.GetFunction(node.FunctionName) ??
                      throw new TypeCheckerException();
 
-        var function = symbol.Node.FunctionMetadata ??
+        var function = symbol.Node.Metadata ??
                        throw new TypeCheckerException();
 
         node.Metadata = function;
@@ -138,11 +122,22 @@ public class TypeChecker : IVisitor
     public void Visit(FunctionParameterNode node)
     {
         if (node.TypeMetadata is null)
-            throw new TypeCheckerException();
+        {
+            var type = typeStore.GetType(node.Type);
+            if (type is null)
+                throw new TypeCheckerException($"Unknown type '{node.Type}'");
+
+            node.TypeMetadata = type;
+        }
     }
 
     public void Visit(FunctionDeclarationNode node)
-        => node.Body?.Accept(this);
+    {
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        node.Body?.Accept(this);
+    }
 
     public void Visit(IfStatementNode node)
     {
@@ -176,13 +171,13 @@ public class TypeChecker : IVisitor
         if (function is null)
             throw new TypeCheckerException();
 
-        if (function.FunctionMetadata?.ReturnType != node.Expression.ReturnTypeMetadata)
+        if (function.Metadata?.ReturnType != node.Expression.ReturnTypeMetadata)
             throw new TypeCheckerException();
     }
 
     public void Visit(SyntaxTree node)
     {
-        MatchSymbolTable(node.SymbolTable);
+        BuildSymbolTableTypes(node.SymbolTable);
 
         foreach (var statement in node.Functions)
             statement.Accept(this);
@@ -215,7 +210,16 @@ public class TypeChecker : IVisitor
     {
         node.Expression.Accept(this);
 
-        if (node.TypeMetadata is null || node.Expression.ReturnTypeMetadata is null)
+        if (node.TypeMetadata is null)
+        {
+            var type = typeStore.GetType(node.Type);
+            if (type is null)
+                throw new TypeCheckerException($"Unknown type '{node.Type}'");
+
+            node.TypeMetadata = type;
+        }
+
+        if (node.Expression.ReturnTypeMetadata is null)
             throw new TypeCheckerException();
 
         if (node.Expression.ReturnTypeMetadata != node.TypeMetadata)

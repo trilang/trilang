@@ -84,8 +84,8 @@ public class TypeCheckerTests
 
         tree.Accept(new TypeChecker());
 
-        var expected = new FunctionMetadata("main", [], TypeMetadata.Void);
-        Assert.That(tree.Functions[0].FunctionMetadata, Is.EqualTo(expected));
+        var expected = new FunctionMetadata([], TypeMetadata.Void);
+        Assert.That(tree.Functions[0].Metadata, Is.EqualTo(expected));
     }
 
     [Test]
@@ -112,13 +112,10 @@ public class TypeCheckerTests
 
         tree.Accept(new TypeChecker());
 
-        var expected = new FunctionMetadata(
-            "main",
-            [TypeMetadata.I32, TypeMetadata.Bool],
-            TypeMetadata.Void);
+        var expected = new FunctionMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void);
 
         var function = tree.Functions[0];
-        Assert.That(function.FunctionMetadata, Is.EqualTo(expected));
+        Assert.That(function.Metadata, Is.EqualTo(expected));
         Assert.That(function.Parameters[0].TypeMetadata, Is.EqualTo(TypeMetadata.I32));
         Assert.That(function.Parameters[1].TypeMetadata, Is.EqualTo(TypeMetadata.Bool));
     }
@@ -137,7 +134,7 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void MatchVariableTypeTest()
+    public void VariableTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
@@ -153,7 +150,7 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void MatchIncorrectVariableTypeTest()
+    public void IncorrectVariableTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
