@@ -1,6 +1,8 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNode>
 {
@@ -8,6 +10,7 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     {
         Kind = kind;
         Operand = operand;
+        Operand.Parent = this;
     }
 
     public static bool operator ==(UnaryExpressionNode? left, UnaryExpressionNode? right)
@@ -23,7 +26,10 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
         if (ReferenceEquals(this, other))
             return true;
 
-        return Kind.Equals(other.Kind) && Operand.Equals(other.Operand);
+        return Kind.Equals(other.Kind) &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
+               Operand.Equals(other.Operand) &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -42,7 +48,7 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     public override int GetHashCode()
         => Operand.GetHashCode();
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -53,7 +59,16 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public UnaryExpressionKind Kind { get; }
 
     public IExpressionNode Operand { get; }
+
+    public TypeMetadata? ReturnTypeMetadata { get; set; }
+
+    public SymbolTable? SymbolTable { get; set; }
 }

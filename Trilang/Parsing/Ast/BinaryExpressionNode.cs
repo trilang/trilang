@@ -1,14 +1,22 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpressionNode>
 {
-    public BinaryExpressionNode(BinaryExpressionKind kind, IExpressionNode left, IExpressionNode right)
+    public BinaryExpressionNode(
+        BinaryExpressionKind kind,
+        IExpressionNode left,
+        IExpressionNode right)
     {
         Kind = kind;
         Left = left;
         Right = right;
+
+        Left.Parent = this;
+        Right.Parent = this;
     }
 
     public static bool operator ==(BinaryExpressionNode? left, BinaryExpressionNode? right)
@@ -25,7 +33,11 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
         if (ReferenceEquals(this, other))
             return true;
 
-        return Kind.Equals(other.Kind) && Left.Equals(other.Left) && Right.Equals(other.Right);
+        return Kind.Equals(other.Kind) &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
+               Left.Equals(other.Left) &&
+               Right.Equals(other.Right) &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -45,7 +57,7 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
     public override int GetHashCode()
         => HashCode.Combine(Left, Right);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -56,9 +68,18 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public BinaryExpressionKind Kind { get; }
 
     public IExpressionNode Left { get; }
 
     public IExpressionNode Right { get; }
+
+    public TypeMetadata? ReturnTypeMetadata { get; set; }
+
+    public SymbolTable? SymbolTable { get; set; }
 }

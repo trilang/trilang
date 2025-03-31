@@ -1,14 +1,15 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
-public class VariableDeclarationNode : IStatementNode, IEquatable<VariableDeclarationNode>
+public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<VariableDeclarationNode>
 {
-    public VariableDeclarationNode(string name, string type, IExpressionNode expression)
+    protected VariableDeclarationNode(string name, string type)
     {
         Name = name;
         Type = type;
-        Expression = expression;
     }
 
     public static bool operator ==(VariableDeclarationNode? left, VariableDeclarationNode? right)
@@ -27,7 +28,8 @@ public class VariableDeclarationNode : IStatementNode, IEquatable<VariableDeclar
 
         return Name == other.Name &&
                Type == other.Type &&
-               Expression.Equals(other.Expression);
+               Equals(TypeMetadata, other.TypeMetadata) &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -45,9 +47,9 @@ public class VariableDeclarationNode : IStatementNode, IEquatable<VariableDeclar
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, Type, Expression);
+        => HashCode.Combine(Name, Type);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -55,12 +57,17 @@ public class VariableDeclarationNode : IStatementNode, IEquatable<VariableDeclar
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+    public abstract void Accept(IVisitor visitor);
+
+    public abstract void Accept<TContext>(IVisitor<TContext> visitor, TContext context);
+
+    public ISyntaxNode? Parent { get; set; }
 
     public string Name { get; }
 
     public string Type { get; }
 
-    public IExpressionNode Expression { get; }
+    public TypeMetadata? TypeMetadata { get; set; }
+
+    public SymbolTable? SymbolTable { get; set; }
 }

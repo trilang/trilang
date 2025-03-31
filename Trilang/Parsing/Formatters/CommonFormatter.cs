@@ -1,4 +1,4 @@
-using Trilang.Parsing.Nodes;
+using Trilang.Parsing.Ast;
 
 namespace Trilang.Parsing.Formatters;
 
@@ -185,7 +185,7 @@ public partial class CommonFormatter : IFormatter
     public void Visit(VariableExpressionNode node)
         => writer.Write(node.Name);
 
-    public void Visit(VariableDeclarationNode node)
+    public void Visit(VariableDeclarationStatementNode node)
     {
         writer.Write("var ");
         writer.Write(node.Name);

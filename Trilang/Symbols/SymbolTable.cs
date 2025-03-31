@@ -36,8 +36,7 @@ public class SymbolTable : IEquatable<SymbolTable>
         if (ReferenceEquals(this, other))
             return true;
 
-        return // TODO: fix circular ref Equals(parent, other.parent) &&
-               types.DictionaryEquals(other.types) &&
+        return types.DictionaryEquals(other.types) &&
                functions.DictionaryEquals(other.functions) &&
                variables.DictionaryEquals(other.variables);
     }
@@ -85,4 +84,13 @@ public class SymbolTable : IEquatable<SymbolTable>
 
     public SymbolTable CreateChild()
         => new SymbolTable(this);
+
+    public IReadOnlyDictionary<string, TypeSymbol> Types
+        => types;
+
+    public IReadOnlyDictionary<string, FunctionSymbol> Functions
+        => functions;
+
+    public IReadOnlyDictionary<string, VariableSymbol> Variables
+        => variables;
 }

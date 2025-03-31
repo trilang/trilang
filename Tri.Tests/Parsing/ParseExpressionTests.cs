@@ -1,6 +1,5 @@
 using Trilang.Parsing;
-using Trilang.Parsing.Nodes;
-using Trilang.Symbols;
+using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Parsing;
 
@@ -17,19 +16,15 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new LiteralExpressionNode(LiteralExpressionKind.Number, 5)
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable))
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode]))
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -45,9 +40,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new UnaryExpressionNode(
@@ -57,11 +50,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -77,9 +68,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new UnaryExpressionNode(
@@ -89,11 +78,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -109,9 +96,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -122,11 +107,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -142,9 +125,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -155,11 +136,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -175,9 +154,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -188,11 +165,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -208,9 +183,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -221,11 +194,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -241,9 +212,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -254,11 +223,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -274,9 +241,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -287,11 +252,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -307,9 +270,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -320,11 +281,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -339,9 +298,8 @@ public class ParseExpressionTests
                 var x: bool = true && true;
             }
             """);
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "bool",
             new BinaryExpressionNode(
@@ -354,11 +312,9 @@ public class ParseExpressionTests
             FunctionDeclarationNode.Create(
                 "main", [], "void", new BlockStatementNode([
                     variableDeclarationNode
-                ], funcTable)
+                ])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -374,9 +330,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "bool",
             new BinaryExpressionNode(
@@ -387,11 +341,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -407,9 +359,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "bool",
             new BinaryExpressionNode(
@@ -420,11 +370,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -440,9 +388,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "bool",
             new BinaryExpressionNode(
@@ -453,11 +399,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -473,9 +417,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "bool",
             new BinaryExpressionNode(
@@ -486,11 +428,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -506,9 +446,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "bool",
             new BinaryExpressionNode(
@@ -521,11 +459,9 @@ public class ParseExpressionTests
             FunctionDeclarationNode.Create(
                 "main", [], "void", new BlockStatementNode([
                     variableDeclarationNode
-                ], funcTable)
+                ])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -541,9 +477,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "bool",
             new BinaryExpressionNode(
@@ -554,11 +488,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -574,9 +506,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "bool",
             new BinaryExpressionNode(
@@ -587,11 +517,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -607,9 +535,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -623,11 +549,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -643,9 +567,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -659,12 +581,9 @@ public class ParseExpressionTests
                 "main",
                 [new FunctionParameterNode("y", "i32")],
                 "void",
-                new BlockStatementNode([variableDeclarationNode], funcTable)
+                new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("y", expected.Functions[0].Parameters[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -680,9 +599,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -725,11 +642,9 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode], funcTable)
+                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }

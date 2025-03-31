@@ -1,6 +1,5 @@
 using Trilang.Parsing;
-using Trilang.Parsing.Nodes;
-using Trilang.Symbols;
+using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Parsing;
 
@@ -76,15 +75,14 @@ public class ParserFunctionTests
     {
         var parser = new Parser();
         var tree = parser.Parse("function test(): void { }");
-        var rootTable = new SymbolTable();
+
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "test",
                 [],
                 "void",
-                new BlockStatementNode(rootTable.CreateChild()))
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
+                new BlockStatementNode())
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -94,8 +92,7 @@ public class ParserFunctionTests
     {
         var parser = new Parser();
         var tree = parser.Parse("function test(x: i32): void { }");
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
+
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "test",
@@ -103,10 +100,8 @@ public class ParserFunctionTests
                     new FunctionParameterNode("x", "i32"),
                 ],
                 "void",
-                new BlockStatementNode(funcTable))
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", expected.Functions[0].Parameters[0]));
+                new BlockStatementNode())
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -116,8 +111,7 @@ public class ParserFunctionTests
     {
         var parser = new Parser();
         var tree = parser.Parse("function test(x: i32, y: i32, z: i32): void { }");
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
+
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "test",
@@ -127,12 +121,8 @@ public class ParserFunctionTests
                     new FunctionParameterNode("z", "i32"),
                 ],
                 "void",
-                new BlockStatementNode(funcTable))
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", expected.Functions[0].Parameters[0]));
-        funcTable.TryAddVariable(new VariableSymbol("y", expected.Functions[0].Parameters[1]));
-        funcTable.TryAddVariable(new VariableSymbol("z", expected.Functions[0].Parameters[2]));
+                new BlockStatementNode())
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }

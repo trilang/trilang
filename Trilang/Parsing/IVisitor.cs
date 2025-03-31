@@ -1,4 +1,4 @@
-using Trilang.Parsing.Nodes;
+using Trilang.Parsing.Ast;
 
 namespace Trilang.Parsing;
 
@@ -28,5 +28,5 @@ public interface IVisitor
 
     void Visit(VariableExpressionNode node);
 
-    void Visit(VariableDeclarationNode node);
+    void Visit(VariableDeclarationStatementNode node);
 }

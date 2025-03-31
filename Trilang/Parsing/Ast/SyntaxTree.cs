@@ -1,14 +1,16 @@
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 {
-    public SyntaxTree(IReadOnlyList<FunctionDeclarationNode> functions, SymbolTable symbolTable)
+    public SyntaxTree(IReadOnlyList<FunctionDeclarationNode> functions)
     {
         Functions = functions;
-        SymbolTable = symbolTable;
+
+        foreach (var function in functions)
+            function.Parent = this;
     }
 
     public static bool operator ==(SyntaxTree? left, SyntaxTree? right)
@@ -26,7 +28,7 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
             return true;
 
         return Functions.SequenceEqual(other.Functions) &&
-               SymbolTable.Equals(other.SymbolTable);
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -46,7 +48,7 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
     public override int GetHashCode()
         => HashCode.Combine(Functions);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -57,7 +59,12 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public IReadOnlyList<FunctionDeclarationNode> Functions { get; }
 
-    public SymbolTable SymbolTable { get; }
+    public SymbolTable? SymbolTable { get; set; }
 }

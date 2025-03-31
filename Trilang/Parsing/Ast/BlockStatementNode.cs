@@ -1,19 +1,21 @@
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
 {
-    public BlockStatementNode(SymbolTable symbolTable)
-        : this([], symbolTable)
+    public BlockStatementNode()
+        : this([])
     {
     }
 
-    public BlockStatementNode(IReadOnlyList<IStatementNode> statements, SymbolTable symbolTable)
+    public BlockStatementNode(IReadOnlyList<IStatementNode> statements)
     {
         Statements = statements;
-        SymbolTable = symbolTable;
+
+        foreach (var statement in statements)
+            statement.Parent = this;
     }
 
     public static bool operator ==(BlockStatementNode? left, BlockStatementNode? right)
@@ -31,7 +33,7 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
             return true;
 
         return Statements.SequenceEqual(other.Statements) &&
-               SymbolTable.Equals(other.SymbolTable);
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -51,7 +53,7 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
     public override int GetHashCode()
         => HashCode.Combine(Statements);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -62,7 +64,12 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public IReadOnlyList<IStatementNode> Statements { get; }
 
-    public SymbolTable SymbolTable { get; }
+    public SymbolTable? SymbolTable { get; set; }
 }

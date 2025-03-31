@@ -1,6 +1,8 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressionNode>
 {
@@ -9,6 +11,21 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
         Kind = kind;
         Value = value;
     }
+
+    public static LiteralExpressionNode Number(int number)
+        => new LiteralExpressionNode(LiteralExpressionKind.Number, number);
+
+    public static LiteralExpressionNode True()
+        => new LiteralExpressionNode(LiteralExpressionKind.Boolean, true);
+
+    public static LiteralExpressionNode False()
+        => new LiteralExpressionNode(LiteralExpressionKind.Boolean, false);
+
+    public static LiteralExpressionNode String(string str)
+        => new LiteralExpressionNode(LiteralExpressionKind.String, str);
+
+    public static LiteralExpressionNode Char(char c)
+        => new LiteralExpressionNode(LiteralExpressionKind.Char, c);
 
     public static bool operator ==(LiteralExpressionNode? left, LiteralExpressionNode? right)
         => Equals(left, right);
@@ -24,7 +41,10 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
         if (ReferenceEquals(this, other))
             return true;
 
-        return Kind == other.Kind && Value.Equals(other.Value);
+        return Kind == other.Kind &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
+               Value.Equals(other.Value) &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -44,7 +64,7 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
     public override int GetHashCode()
         => HashCode.Combine((int)Kind, Value);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -55,7 +75,16 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public LiteralExpressionKind Kind { get; }
 
     public object Value { get; }
+
+    public TypeMetadata? ReturnTypeMetadata { get; set; }
+
+    public SymbolTable? SymbolTable { get; set; }
 }

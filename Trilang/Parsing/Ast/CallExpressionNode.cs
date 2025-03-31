@@ -1,6 +1,8 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode>
 {
@@ -8,6 +10,9 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
     {
         FunctionName = functionName;
         Parameters = parameters;
+
+        foreach (var parameter in parameters)
+            parameter.Parent = this;
     }
 
     public static bool operator ==(CallExpressionNode? left, CallExpressionNode? right)
@@ -24,7 +29,10 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
         if (ReferenceEquals(this, other))
             return true;
 
-        return FunctionName == other.FunctionName && Parameters.SequenceEqual(other.Parameters);
+        return FunctionName == other.FunctionName &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
+               Parameters.SequenceEqual(other.Parameters) &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -44,7 +52,7 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
     public override int GetHashCode()
         => HashCode.Combine(FunctionName, Parameters);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -55,7 +63,19 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public string FunctionName { get; }
 
     public IReadOnlyList<IExpressionNode> Parameters { get; }
+
+    public FunctionMetadata? Metadata { get; set; }
+
+    public TypeMetadata? ReturnTypeMetadata
+        => Metadata?.ReturnType;
+
+    public SymbolTable? SymbolTable { get; set; }
 }

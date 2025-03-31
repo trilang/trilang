@@ -1,11 +1,15 @@
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStatementNode>
 {
     public ExpressionStatementNode(IExpressionNode expression)
-        => Expression = expression;
+    {
+        Expression = expression;
+        Expression.Parent = this;
+    }
 
     public static bool operator ==(ExpressionStatementNode? left, ExpressionStatementNode? right)
         => Equals(left, right);
@@ -21,7 +25,8 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
         if (ReferenceEquals(this, other))
             return true;
 
-        return Expression.Equals(other.Expression);
+        return Expression.Equals(other.Expression) &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -41,7 +46,7 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
     public override int GetHashCode()
         => HashCode.Combine(Expression);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -52,5 +57,12 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public IExpressionNode Expression { get; }
+
+    public SymbolTable? SymbolTable { get; set; }
 }

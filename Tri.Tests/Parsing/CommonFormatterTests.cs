@@ -1,5 +1,4 @@
-using Trilang.Parsing.Nodes;
-using Trilang.Symbols;
+using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Parsing;
 
@@ -8,10 +7,9 @@ public class CommonFormatterTests
     [Test]
     public void FormatEmptyFunctionTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
-            FunctionDeclarationNode.Create("main", [], "void", new BlockStatementNode(rootTable.CreateChild()))
-        ], rootTable);
+            FunctionDeclarationNode.Create("main", [], "void", new BlockStatementNode())
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -25,7 +23,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatTwoFunctionsWithParametersTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -33,9 +30,9 @@ public class CommonFormatterTests
                     new FunctionParameterNode("y", "i32"),
                 ],
                 "void",
-                new BlockStatementNode(rootTable.CreateChild())),
-            FunctionDeclarationNode.Create("main", [], "void", new BlockStatementNode(rootTable.CreateChild())),
-        ], rootTable);
+                new BlockStatementNode()),
+            FunctionDeclarationNode.Create("main", [], "void", new BlockStatementNode()),
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -52,7 +49,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatAdditionTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -68,9 +64,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -85,7 +81,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatSubtractionTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -101,9 +96,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -118,7 +113,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatMultiplicationTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -134,9 +128,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -151,7 +145,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatDivisionTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -167,9 +160,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -184,7 +177,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatBitwiseAndTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -200,9 +192,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -217,7 +209,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatBitwiseOrTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -233,9 +224,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -250,7 +241,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatBitwiseXorTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -266,9 +256,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -283,7 +273,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatConditionalAndTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -299,9 +288,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -316,7 +305,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatConditionalOrTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -332,9 +320,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -349,7 +337,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatEqualityTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -365,9 +352,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -382,7 +369,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatInequalityTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -398,9 +384,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -415,7 +401,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatLessThanTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -431,9 +416,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -448,7 +433,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatLessThanOrEqualTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -464,9 +448,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -481,7 +465,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatGreaterThanTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -497,9 +480,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -514,7 +497,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatGreaterThanOrEqualTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -530,9 +512,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -547,7 +529,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatUnaryPlusTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
@@ -560,9 +541,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("x")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -577,7 +558,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatUnaryMinusTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
@@ -590,9 +570,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("x")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -607,7 +587,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatLogicalNotTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
@@ -620,9 +599,9 @@ public class CommonFormatterTests
                             new VariableExpressionNode("x")
                         )
                     )
-                ], rootTable.CreateChild())
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -637,8 +616,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatIfTest()
     {
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
@@ -658,14 +635,14 @@ public class CommonFormatterTests
                                     new VariableExpressionNode("x")
                                 )
                             )
-                        ], funcTable.CreateChild())
+                        ])
                     ),
                     new ReturnStatementNode(
                         new VariableExpressionNode("x")
                     )
-                ], funcTable)
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -683,8 +660,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatIfElseTest()
     {
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
@@ -704,16 +679,16 @@ public class CommonFormatterTests
                                     new VariableExpressionNode("x")
                                 )
                             )
-                        ], funcTable.CreateChild()),
+                        ]),
                         new BlockStatementNode([
                             new ReturnStatementNode(
                                 new VariableExpressionNode("x")
                             )
-                        ], funcTable.CreateChild())
+                        ])
                     )
-                ], funcTable)
+                ])
             ),
-        ], rootTable);
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
@@ -732,7 +707,6 @@ public class CommonFormatterTests
     [Test]
     public void FormatFunctionCallTest()
     {
-        var rootTable = new SymbolTable();
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
@@ -748,7 +722,7 @@ public class CommonFormatterTests
                             new VariableExpressionNode("y")
                         )
                     )
-                ], rootTable.CreateChild())),
+                ])),
             FunctionDeclarationNode.Create(
                 "main",
                 [],
@@ -760,8 +734,8 @@ public class CommonFormatterTests
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
                         ])
                     )
-                ], rootTable.CreateChild())),
-        ], rootTable);
+                ])),
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """

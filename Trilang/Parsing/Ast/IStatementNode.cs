@@ -1,4 +1,4 @@
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public interface IStatementNode : ISyntaxNode
 {

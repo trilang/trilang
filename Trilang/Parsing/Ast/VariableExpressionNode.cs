@@ -1,6 +1,8 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpressionNode>
 {
@@ -21,7 +23,9 @@ public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpres
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return Name == other.Name &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -41,7 +45,7 @@ public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpres
     public override int GetHashCode()
         => HashCode.Combine(Name);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -52,5 +56,14 @@ public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpres
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public string Name { get; }
+
+    public TypeMetadata? ReturnTypeMetadata { get; set; }
+
+    public SymbolTable? SymbolTable { get; set; }
 }

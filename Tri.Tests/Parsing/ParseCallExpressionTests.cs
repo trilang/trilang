@@ -1,6 +1,5 @@
 using Trilang.Parsing;
-using Trilang.Parsing.Nodes;
-using Trilang.Symbols;
+using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Parsing;
 
@@ -16,7 +15,7 @@ public class ParseCallExpressionTests
                 print("Hello, World!");
             }
             """);
-        var rootTable = new SymbolTable();
+
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "main",
@@ -28,10 +27,9 @@ public class ParseCallExpressionTests
                             new LiteralExpressionNode(LiteralExpressionKind.String, "Hello, World!")
                         ])
                     )
-                ], rootTable.CreateChild())
+                ])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -46,7 +44,7 @@ public class ParseCallExpressionTests
                 sum(1, 2, 3);
             }
             """);
-        var rootTable = new SymbolTable();
+
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "main",
@@ -60,10 +58,9 @@ public class ParseCallExpressionTests
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 3),
                         ])
                     )
-                ], rootTable.CreateChild())
+                ])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }
@@ -78,9 +75,8 @@ public class ParseCallExpressionTests
                 var x: i32 = 1 + sum(1, 2, 3);
             }
             """);
-        var rootTable = new SymbolTable();
-        var funcTable = rootTable.CreateChild();
-        var variableDeclarationNode = new VariableDeclarationNode(
+
+        var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
@@ -98,11 +94,9 @@ public class ParseCallExpressionTests
                 "main",
                 [],
                 "void",
-                new BlockStatementNode([variableDeclarationNode], funcTable)
+                new BlockStatementNode([variableDeclarationNode])
             )
-        ], rootTable);
-        rootTable.TryAddFunction(new FunctionSymbol(expected.Functions[0]));
-        funcTable.TryAddVariable(new VariableSymbol("x", variableDeclarationNode));
+        ]);
 
         Assert.That(tree, Is.EqualTo(expected));
     }

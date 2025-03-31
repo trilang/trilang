@@ -1,13 +1,12 @@
 using Trilang.Parsing.Formatters;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
-public class FunctionParameterNode : ISyntaxNode, IEquatable<FunctionParameterNode>
+public class FunctionParameterNode : VariableDeclarationNode
 {
     public FunctionParameterNode(string name, string type)
+        : base(name, type)
     {
-        Name = name;
-        Type = type;
     }
 
     public static bool operator ==(FunctionParameterNode? left, FunctionParameterNode? right)
@@ -24,7 +23,9 @@ public class FunctionParameterNode : ISyntaxNode, IEquatable<FunctionParameterNo
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name && Type == other.Type;
+        return Name == other.Name &&
+               Type == other.Type &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -44,7 +45,7 @@ public class FunctionParameterNode : ISyntaxNode, IEquatable<FunctionParameterNo
     public override int GetHashCode()
         => HashCode.Combine(Name, Type);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -52,10 +53,9 @@ public class FunctionParameterNode : ISyntaxNode, IEquatable<FunctionParameterNo
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public override void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
-    public string Name { get; }
-
-    public string Type { get; }
+    public override void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
 }

@@ -1,6 +1,7 @@
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
 {
@@ -9,6 +10,12 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
         Condition = condition;
         Then = then;
         Else = @else;
+
+        Condition.Parent = this;
+        Then.Parent = this;
+
+        if (Else is not null)
+            Else.Parent = this;
     }
 
     public static bool operator ==(IfStatementNode? left, IfStatementNode? right)
@@ -27,7 +34,8 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
 
         return Condition.Equals(other.Condition) &&
                Then.Equals(other.Then) &&
-               Equals(Else, other.Else);
+               Equals(Else, other.Else) &&
+               Equals(SymbolTable, other.SymbolTable);
     }
 
     public override bool Equals(object? obj)
@@ -47,7 +55,7 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
     public override int GetHashCode()
         => HashCode.Combine(Condition, Then, Else);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -58,9 +66,16 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
     public IExpressionNode Condition { get; }
 
     public BlockStatementNode Then { get; }
 
     public BlockStatementNode? Else { get; }
+
+    public SymbolTable? SymbolTable { get; set; }
 }

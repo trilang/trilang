@@ -1,4 +1,4 @@
-using Trilang.Parsing.Nodes;
+using Trilang.Parsing.Ast;
 
 namespace Trilang.Symbols;
 

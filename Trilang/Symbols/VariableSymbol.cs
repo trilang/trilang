@@ -1,11 +1,11 @@
-using Trilang.Parsing.Nodes;
+using Trilang.Parsing.Ast;
 
 namespace Trilang.Symbols;
 
-public class VariableSymbol : Symbol<ISyntaxNode>
+public class VariableSymbol : Symbol<VariableDeclarationNode>
 {
-    public VariableSymbol(string name, ISyntaxNode node)
-        : base(SymbolKind.Variable, name, node)
+    public VariableSymbol(VariableDeclarationNode node)
+        : base(SymbolKind.Variable, node.Name, node)
     {
     }
 }

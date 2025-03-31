@@ -1,7 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
-namespace Trilang.Parsing.Nodes;
+namespace Trilang.Parsing.Ast;
 
 public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclarationNode>
 {
@@ -17,6 +19,12 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
         Parameters = parameters;
         ReturnType = returnType;
         Body = body;
+
+        foreach (var parameter in parameters)
+            parameter.Parent = this;
+
+        if (body is not null)
+            body.Parent = this;
     }
 
     public static FunctionDeclarationNode Create(
@@ -48,9 +56,11 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
 
         return IsExternal == other.IsExternal &&
                Name == other.Name &&
-               Parameters.SequenceEqual(other.Parameters) &&
                ReturnType == other.ReturnType &&
-               Equals(Body, other.Body);
+               Parameters.SequenceEqual(other.Parameters) &&
+               Equals(SymbolTable, other.SymbolTable) &&
+               Equals(Body, other.Body) &&
+               Equals(FunctionMetadata, other.FunctionMetadata);
     }
 
     public override bool Equals(object? obj)
@@ -70,7 +80,7 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
     public override int GetHashCode()
         => HashCode.Combine(IsExternal, Name, Parameters, ReturnType, Body);
 
-    public override string? ToString()
+    public override string ToString()
     {
         var formatter = new CommonFormatter();
         Accept(formatter);
@@ -80,6 +90,11 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
 
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
+
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
 
     [MemberNotNullWhen(false, nameof(Body))]
     public bool IsExternal { get; }
@@ -91,4 +106,8 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
     public string ReturnType { get; }
 
     public BlockStatementNode? Body { get; }
+
+    public FunctionMetadata? FunctionMetadata { get; set; }
+
+    public SymbolTable? SymbolTable { get; set; }
 }
