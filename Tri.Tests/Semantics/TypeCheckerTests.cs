@@ -381,4 +381,16 @@ public class TypeCheckerTests
 
         Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
     }
+
+    [Test]
+    public void WhileNonBoolConditionTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("main", builder => builder
+                .DefineBody(body => body
+                    .While(exp => exp.Number(1), _ => { })))
+            .Build();
+
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
+    }
 }

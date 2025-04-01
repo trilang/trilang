@@ -90,6 +90,10 @@ public class TypeChecker : IVisitor
             statement.Accept(this);
     }
 
+    public void Visit(BreakNode node)
+    {
+    }
+
     public void Visit(CallExpressionNode node)
     {
         foreach (var parameter in node.Parameters)
@@ -111,6 +115,10 @@ public class TypeChecker : IVisitor
             if (expected != actual)
                 throw new TypeCheckerException($"Expected '{expected}' but got '{actual}'");
         }
+    }
+
+    public void Visit(ContinueNode node)
+    {
     }
 
     public void Visit(ExpressionStatementNode node)
@@ -221,5 +229,14 @@ public class TypeChecker : IVisitor
 
         if (node.Expression.ReturnTypeMetadata != node.TypeMetadata)
             throw new TypeCheckerException();
+    }
+
+    public void Visit(WhileNode node)
+    {
+        node.Condition.Accept(this);
+        node.Body.Accept(this);
+
+        if (node.Condition.ReturnTypeMetadata != TypeMetadata.Bool)
+            throw new TypeCheckerException("Condition must be a boolean");
     }
 }

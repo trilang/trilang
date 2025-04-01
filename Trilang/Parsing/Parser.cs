@@ -115,7 +115,10 @@ public class Parser
         => TryParseVariableStatement(context) ??
            TryParseIfStatement(context) ??
            TryParseReturnStatement(context) ??
-           TryParseExpressionStatement(context) as IStatementNode;
+           TryParseExpressionStatement(context) ??
+           TryParseWhileStatement(context) ??
+           TryParseBreakStatement(context) ??
+           TryParseContinueStatement(context) as IStatementNode;
 
     private VariableDeclarationStatementNode? TryParseVariableStatement(ParserContext context)
     {
@@ -188,6 +191,50 @@ public class Parser
             throw new ParseException("Expected a semicolon.");
 
         return new ReturnStatementNode(expression);
+    }
+
+    private WhileNode? TryParseWhileStatement(ParserContext context)
+    {
+        if (!context.Reader.Check(TokenKind.While))
+            return null;
+
+        if (!context.Reader.Check(TokenKind.OpenParenthesis))
+            throw new ParseException("Expected an open parenthesis.");
+
+        var condition = TryParseExpression(context);
+        if (condition is null)
+            throw new ParseException("Expected a condition.");
+
+        if (!context.Reader.Check(TokenKind.CloseParenthesis))
+            throw new ParseException("Expected a close parenthesis.");
+
+        var block = TryParseBlock(context);
+        if (block is null)
+            throw new ParseException("Expected a block.");
+
+        return new WhileNode(condition, block);
+    }
+
+    private BreakNode? TryParseBreakStatement(ParserContext context)
+    {
+        if (!context.Reader.Check(TokenKind.Break))
+            return null;
+
+        if (!context.Reader.Check(TokenKind.SemiColon))
+            throw new ParseException("Expected a semicolon.");
+
+        return new BreakNode();
+    }
+
+    private ContinueNode? TryParseContinueStatement(ParserContext context)
+    {
+        if (!context.Reader.Check(TokenKind.Continue))
+            return null;
+
+        if (!context.Reader.Check(TokenKind.SemiColon))
+            throw new ParseException("Expected a semicolon.");
+
+        return new ContinueNode();
     }
 
     private ExpressionStatementNode? TryParseExpressionStatement(ParserContext context)

@@ -21,6 +21,9 @@ public class SymbolTableBuilder : IVisitor<SymbolTableBuilderContext>
                 statement.Accept(this, c);
         });
 
+    public void Visit(BreakNode node, SymbolTableBuilderContext context)
+        => node.SymbolTable = context.SymbolTable;
+
     public void Visit(CallExpressionNode node, SymbolTableBuilderContext context)
     {
         node.SymbolTable = context.SymbolTable;
@@ -28,6 +31,9 @@ public class SymbolTableBuilder : IVisitor<SymbolTableBuilderContext>
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, context);
     }
+
+    public void Visit(ContinueNode node, SymbolTableBuilderContext context)
+        => node.SymbolTable = context.SymbolTable;
 
     public void Visit(ExpressionStatementNode node, SymbolTableBuilderContext context)
     {
@@ -114,5 +120,13 @@ public class SymbolTableBuilder : IVisitor<SymbolTableBuilderContext>
         node.SymbolTable = context.SymbolTable;
 
         node.Expression.Accept(this, context);
+    }
+
+    public void Visit(WhileNode node, SymbolTableBuilderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        node.Condition.Accept(this, context);
+        node.Body.Accept(this, context);
     }
 }

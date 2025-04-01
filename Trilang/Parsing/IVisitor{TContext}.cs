@@ -8,7 +8,11 @@ public interface IVisitor<in TContext>
 
     void Visit(BlockStatementNode node, TContext context);
 
+    void Visit(BreakNode node, TContext context);
+
     void Visit(CallExpressionNode node, TContext context);
+
+    void Visit(ContinueNode node, TContext context);
 
     void Visit(ExpressionStatementNode node, TContext context);
 
@@ -29,4 +33,6 @@ public interface IVisitor<in TContext>
     void Visit(VariableExpressionNode node, TContext context);
 
     void Visit(VariableDeclarationStatementNode node, TContext context);
+
+    void Visit(WhileNode node, TContext context);
 }

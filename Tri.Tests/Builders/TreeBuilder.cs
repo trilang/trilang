@@ -170,6 +170,23 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IBlockBuilder While(Action<IExpressionBuilder> condition, Action<IBlockBuilder> body)
+        {
+            var conditionBuilder = new ExpressionBuilder(symbolTable);
+            condition(conditionBuilder);
+
+            var bodyBuilder = new BlockBuilder(symbolTable.CreateChild());
+            body(bodyBuilder);
+
+            var whileStatement = new WhileNode(conditionBuilder.Build(), bodyBuilder.Build())
+            {
+                SymbolTable = symbolTable
+            };
+            statements.Add(whileStatement);
+
+            return this;
+        }
+
         public BlockStatementNode Build()
             => new BlockStatementNode(statements) { SymbolTable = symbolTable };
     }

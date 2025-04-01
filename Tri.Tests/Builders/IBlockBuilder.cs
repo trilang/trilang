@@ -15,5 +15,9 @@ public interface IBlockBuilder
         Action<IBlockBuilder> then,
         Action<IBlockBuilder>? @else = null);
 
+    IBlockBuilder While(
+        Action<IExpressionBuilder> condition,
+        Action<IBlockBuilder> body);
+
     BlockStatementNode Build();
 }

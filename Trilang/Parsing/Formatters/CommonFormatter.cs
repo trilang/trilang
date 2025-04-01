@@ -64,6 +64,9 @@ public partial class CommonFormatter : IFormatter
         writer.Write('}');
     }
 
+    public void Visit(BreakNode node)
+        => writer.WriteLine("break;");
+
     public void Visit(CallExpressionNode node)
     {
         writer.Write(node.FunctionName);
@@ -80,6 +83,9 @@ public partial class CommonFormatter : IFormatter
 
         writer.Write(")");
     }
+
+    public void Visit(ContinueNode node)
+        => writer.WriteLine("continue;");
 
     public void Visit(ExpressionStatementNode node)
     {
@@ -207,6 +213,15 @@ public partial class CommonFormatter : IFormatter
         writer.Write(" = ");
         node.Expression.Accept(this);
         writer.WriteLine(';');
+    }
+
+    public void Visit(WhileNode node)
+    {
+        writer.Write("while (");
+        node.Condition.Accept(this);
+        writer.Write(") ");
+        node.Body.Accept(this);
+        writer.WriteLine();
     }
 
     public override string ToString()

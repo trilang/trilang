@@ -8,7 +8,11 @@ public interface IVisitor
 
     void Visit(BlockStatementNode node);
 
+    void Visit(BreakNode node);
+
     void Visit(CallExpressionNode node);
+
+    void Visit(ContinueNode node);
 
     void Visit(ExpressionStatementNode node);
 
@@ -29,4 +33,6 @@ public interface IVisitor
     void Visit(VariableExpressionNode node);
 
     void Visit(VariableDeclarationStatementNode node);
+
+    void Visit(WhileNode node);
 }

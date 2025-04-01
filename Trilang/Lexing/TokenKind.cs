@@ -60,4 +60,8 @@ public enum TokenKind
     Return,
     True,
     False,
+    While,
+    For,
+    Break,
+    Continue,
 }

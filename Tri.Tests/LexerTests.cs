@@ -69,6 +69,10 @@ public class LexerTests
     [TestCase("return", TokenKind.Return)]
     [TestCase("true", TokenKind.True)]
     [TestCase("false", TokenKind.False)]
+    [TestCase("for", TokenKind.For)]
+    [TestCase("while", TokenKind.While)]
+    [TestCase("break", TokenKind.Break)]
+    [TestCase("continue", TokenKind.Continue)]
     public void TokenizeKeywordTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();

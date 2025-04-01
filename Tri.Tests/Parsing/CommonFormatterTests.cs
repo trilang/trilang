@@ -817,4 +817,106 @@ public class CommonFormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatWhileTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "add",
+                [new FunctionParameterNode("x", "i32")],
+                "void",
+                new BlockStatementNode([
+                    new WhileNode(
+                        new BinaryExpressionNode(
+                            BinaryExpressionKind.LessThan,
+                            new VariableExpressionNode("x"),
+                            LiteralExpressionNode.Number(0)
+                        ),
+                        new BlockStatementNode()
+                    )
+                ])
+            ),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function add(x: i32): void {
+                while (x < 0) {
+                }
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatBreakTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "add",
+                [new FunctionParameterNode("x", "i32")],
+                "void",
+                new BlockStatementNode([
+                    new WhileNode(
+                        new BinaryExpressionNode(
+                            BinaryExpressionKind.LessThan,
+                            new VariableExpressionNode("x"),
+                            LiteralExpressionNode.Number(0)
+                        ),
+                        new BlockStatementNode([
+                            new BreakNode()
+                        ])
+                    )
+                ])
+            ),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function add(x: i32): void {
+                while (x < 0) {
+                    break;
+                }
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatContinueTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "add",
+                [new FunctionParameterNode("x", "i32")],
+                "void",
+                new BlockStatementNode([
+                    new WhileNode(
+                        new BinaryExpressionNode(
+                            BinaryExpressionKind.LessThan,
+                            new VariableExpressionNode("x"),
+                            LiteralExpressionNode.Number(0)
+                        ),
+                        new BlockStatementNode([
+                            new ContinueNode()
+                        ])
+                    )
+                ])
+            ),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function add(x: i32): void {
+                while (x < 0) {
+                    continue;
+                }
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

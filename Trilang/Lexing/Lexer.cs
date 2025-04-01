@@ -46,6 +46,10 @@ public class Lexer
                     "return" => Token.Create(TokenKind.Return),
                     "true" => Token.Create(TokenKind.True),
                     "false" => Token.Create(TokenKind.False),
+                    "for" => Token.Create(TokenKind.For),
+                    "while" => Token.Create(TokenKind.While),
+                    "break" => Token.Create(TokenKind.Break),
+                    "continue" => Token.Create(TokenKind.Continue),
 
                     _ => Token.CreateId(id.ToString()),
                 });
