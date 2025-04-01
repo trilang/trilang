@@ -8,6 +8,8 @@ public interface IBlockBuilder
 
     IBlockBuilder Return(Action<IExpressionBuilder> action);
 
+    IBlockBuilder Statement(Action<IExpressionBuilder> action);
+
     IBlockBuilder If(
         Action<IExpressionBuilder> condition,
         Action<IBlockBuilder> then,

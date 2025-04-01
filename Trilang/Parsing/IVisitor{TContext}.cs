@@ -2,7 +2,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Parsing;
 
-public interface IVisitor<TContext>
+public interface IVisitor<in TContext>
 {
     void Visit(BinaryExpressionNode node, TContext context);
 

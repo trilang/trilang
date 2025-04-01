@@ -108,9 +108,13 @@ public class Lexer
                 (';', _) => (Token.Create(TokenKind.SemiColon), 1),
                 (',', _) => (Token.Create(TokenKind.Comma), 1),
 
+                ('+', '=') => (Token.Create(TokenKind.PlusEqual), 2),
                 ('+', _) => (Token.Create(TokenKind.Plus), 1),
+                ('-', '=') => (Token.Create(TokenKind.MinusEqual), 2),
                 ('-', _) => (Token.Create(TokenKind.Minus), 1),
+                ('*', '=') => (Token.Create(TokenKind.AsteriskEqual), 2),
                 ('*', _) => (Token.Create(TokenKind.Asterisk), 1),
+                ('/', '=') => (Token.Create(TokenKind.SlashEqual), 2),
                 ('/', _) => (Token.Create(TokenKind.Slash), 1),
 
                 ('=', '=') => (Token.Create(TokenKind.EqualEqual), 2),
@@ -124,10 +128,15 @@ public class Lexer
 
                 ('&', '&') => (Token.Create(TokenKind.AmpersandAmpersand), 2),
                 ('|', '|') => (Token.Create(TokenKind.PipePipe), 2),
+                ('&', '=') => (Token.Create(TokenKind.AmpersandEqual), 2),
                 ('&', _) => (Token.Create(TokenKind.Ampersand), 1),
+                ('|', '=') => (Token.Create(TokenKind.PipeEqual), 2),
                 ('|', _) => (Token.Create(TokenKind.Pipe), 1),
+                ('^', '=') => (Token.Create(TokenKind.CaretEqual), 2),
                 ('^', _) => (Token.Create(TokenKind.Caret), 1),
                 ('~', _) => (Token.Create(TokenKind.Tilde), 1),
+                ('%', '=') => (Token.Create(TokenKind.PercentEqual), 2),
+                ('%', _) => (Token.Create(TokenKind.Percent), 1),
 
                 _ => throw new Exception($"Unexpected character '{c}'")
             };

@@ -311,19 +311,6 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void BinaryExpressionIncorrectTypeTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("i32")
-                .DefineBody(body => body
-                    .Return(exp => exp.Number(1).True().Add())))
-            .Build();
-
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
-    }
-
-    [Test]
     public void LogicalNotIncorrectOperandTest()
     {
         var tree = new TreeBuilder()

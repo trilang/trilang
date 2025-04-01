@@ -79,9 +79,6 @@ public class TypeChecker : IVisitor
         if (node.Left.ReturnTypeMetadata is null || node.Right.ReturnTypeMetadata is null)
             throw new TypeCheckerException();
 
-        if (node.Left.ReturnTypeMetadata != node.Right.ReturnTypeMetadata)
-            throw new TypeCheckerException("Binary expressions must have the same return type");
-
         node.ReturnTypeMetadata = node.Left.ReturnTypeMetadata;
     }
 

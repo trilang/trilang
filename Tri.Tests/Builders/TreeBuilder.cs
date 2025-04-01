@@ -129,6 +129,17 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IBlockBuilder Statement(Action<IExpressionBuilder> action)
+        {
+            var builder = new ExpressionBuilder(symbolTable);
+            action(builder);
+
+            var statement = new ExpressionStatementNode(builder.Build()) { SymbolTable = symbolTable };
+            statements.Add(statement);
+
+            return this;
+        }
+
         public IBlockBuilder If(
             Action<IExpressionBuilder> condition,
             Action<IBlockBuilder> then,
@@ -232,7 +243,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        private IExpressionBuilder Unary(UnaryExpressionKind kind)
+        public IExpressionBuilder Unary(UnaryExpressionKind kind)
         {
             var plus = new UnaryExpressionNode(kind, stack.Pop()) { SymbolTable = symbolTable };
             stack.Push(plus);
@@ -249,7 +260,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public IExpressionBuilder LogicalNot()
             => Unary(UnaryExpressionKind.LogicalNot);
 
-        private IExpressionBuilder BinaryExpression(BinaryExpressionKind kind)
+        public IExpressionBuilder BinaryExpression(BinaryExpressionKind kind)
         {
             var right = stack.Pop();
             var left = stack.Pop();
@@ -270,6 +281,33 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IExpressionBuilder Div()
             => BinaryExpression(BinaryExpressionKind.Division);
+
+        public IExpressionBuilder Assign()
+            => BinaryExpression(BinaryExpressionKind.Assignment);
+
+        public IExpressionBuilder AddAssign()
+            => BinaryExpression(BinaryExpressionKind.AdditionAssignment);
+
+        public IExpressionBuilder SubAssign()
+            => BinaryExpression(BinaryExpressionKind.SubtractionAssignment);
+
+        public IExpressionBuilder MulAssign()
+            => BinaryExpression(BinaryExpressionKind.MultiplicationAssignment);
+
+        public IExpressionBuilder DivAssign()
+            => BinaryExpression(BinaryExpressionKind.DivisionAssignment);
+
+        public IExpressionBuilder ModAssign()
+            => BinaryExpression(BinaryExpressionKind.ModulusAssignment);
+
+        public IExpressionBuilder AndAssign()
+            => BinaryExpression(BinaryExpressionKind.BitwiseAndAssignment);
+
+        public IExpressionBuilder OrAssign()
+            => BinaryExpression(BinaryExpressionKind.BitwiseOrAssignment);
+
+        public IExpressionBuilder XorAssign()
+            => BinaryExpression(BinaryExpressionKind.BitwiseXorAssignment);
 
         public IExpressionBuilder Call(string name)
         {

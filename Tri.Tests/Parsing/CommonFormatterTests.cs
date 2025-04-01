@@ -779,4 +779,42 @@ public class CommonFormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    [TestCase(BinaryExpressionKind.Assignment, "=")]
+    [TestCase(BinaryExpressionKind.AdditionAssignment, "+=")]
+    [TestCase(BinaryExpressionKind.SubtractionAssignment, "-=")]
+    [TestCase(BinaryExpressionKind.MultiplicationAssignment, "*=")]
+    [TestCase(BinaryExpressionKind.DivisionAssignment, "/=")]
+    [TestCase(BinaryExpressionKind.ModulusAssignment, "%=")]
+    [TestCase(BinaryExpressionKind.BitwiseAndAssignment, "&=")]
+    [TestCase(BinaryExpressionKind.BitwiseOrAssignment, "|=")]
+    [TestCase(BinaryExpressionKind.BitwiseXorAssignment, "^=")]
+    public void FormatAssignmentTest(BinaryExpressionKind kind, string @operator)
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "add",
+                [new FunctionParameterNode("x", "i32")],
+                "void",
+                new BlockStatementNode([
+                    new ExpressionStatementNode(
+                        new BinaryExpressionNode(
+                            kind,
+                            new VariableExpressionNode("x"),
+                            LiteralExpressionNode.Number(1))
+                    )
+                ])
+            ),
+        ]);
+        var formatted = tree.ToString();
+        var expected =
+            $$"""
+              function add(x: i32): void {
+                  x {{@operator}} 1;
+              }
+              """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

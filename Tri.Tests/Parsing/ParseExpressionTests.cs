@@ -142,110 +142,28 @@ public class ParseExpressionTests
     }
 
     [Test]
-    public void ParseAdditionTest()
+    [TestCase("+", BinaryExpressionKind.Addition)]
+    [TestCase("-", BinaryExpressionKind.Subtraction)]
+    [TestCase("*", BinaryExpressionKind.Multiplication)]
+    [TestCase("/", BinaryExpressionKind.Division)]
+    [TestCase("%", BinaryExpressionKind.Modulus)]
+    public void ParseBinaryNumberTest(string @operator, BinaryExpressionKind kind)
     {
         var parse = new Parser();
         var tree = parse.Parse(
-            """
-            function main(): void {
-                var x: i32 = 2 + 2;
-            }
-            """);
+            $$"""
+              function main(): void {
+                  var x: i32 = 2 {{@operator}} 2;
+              }
+              """);
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             "i32",
             new BinaryExpressionNode(
-                BinaryExpressionKind.Addition,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
-            )
-        );
-        var expected = new SyntaxTree([
-            FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
-            )
-        ]);
-
-        Assert.That(tree, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void ParseSubtractionTest()
-    {
-        var parse = new Parser();
-        var tree = parse.Parse(
-            """
-            function main(): void {
-                var x: i32 = 2 - 2;
-            }
-            """);
-
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
-            "x",
-            "i32",
-            new BinaryExpressionNode(
-                BinaryExpressionKind.Subtraction,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
-            )
-        );
-        var expected = new SyntaxTree([
-            FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
-            )
-        ]);
-
-        Assert.That(tree, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void ParseMultiplicationTest()
-    {
-        var parse = new Parser();
-        var tree = parse.Parse(
-            """
-            function main(): void {
-                var x: i32 = 2 * 2;
-            }
-            """);
-
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
-            "x",
-            "i32",
-            new BinaryExpressionNode(
-                BinaryExpressionKind.Multiplication,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
-            )
-        );
-        var expected = new SyntaxTree([
-            FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
-            )
-        ]);
-
-        Assert.That(tree, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void ParseDivisionTest()
-    {
-        var parse = new Parser();
-        var tree = parse.Parse(
-            """
-            function main(): void {
-                var x: i32 = 2 / 2;
-            }
-            """);
-
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
-            "x",
-            "i32",
-            new BinaryExpressionNode(
-                BinaryExpressionKind.Division,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                kind,
+                LiteralExpressionNode.Number(2),
+                LiteralExpressionNode.Number(2)
             )
         );
         var expected = new SyntaxTree([
@@ -574,6 +492,43 @@ public class ParseExpressionTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    [TestCase("=", BinaryExpressionKind.Assignment)]
+    [TestCase("+=", BinaryExpressionKind.AdditionAssignment)]
+    [TestCase("-=", BinaryExpressionKind.SubtractionAssignment)]
+    [TestCase("*=", BinaryExpressionKind.MultiplicationAssignment)]
+    [TestCase("/=", BinaryExpressionKind.DivisionAssignment)]
+    [TestCase("%=", BinaryExpressionKind.ModulusAssignment)]
+    [TestCase("&=", BinaryExpressionKind.BitwiseAndAssignment)]
+    [TestCase("|=", BinaryExpressionKind.BitwiseOrAssignment)]
+    [TestCase("^=", BinaryExpressionKind.BitwiseXorAssignment)]
+    public void ParseAssignmentTest(string @operator, BinaryExpressionKind kind)
+    {
+        var parse = new Parser();
+        var tree = parse.Parse(
+            $$"""
+              function main(): void {
+                  x {{@operator}} 1;
+              }
+              """);
+
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main", [], "void", new BlockStatementNode([
+                    new ExpressionStatementNode(
+                        new BinaryExpressionNode(
+                            kind,
+                            new VariableExpressionNode("x"),
+                            LiteralExpressionNode.Number(1)
+                        )
+                    )
+                ])
             )
         ]);
 

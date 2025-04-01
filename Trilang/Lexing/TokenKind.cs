@@ -26,6 +26,7 @@ public enum TokenKind
     Minus,
     Asterisk,
     Slash,
+    Percent,
     Equal,
     Exclamation,
     EqualEqual,
@@ -40,6 +41,15 @@ public enum TokenKind
     PipePipe,
     Caret,
     Tilde,
+
+    PlusEqual,
+    MinusEqual,
+    AsteriskEqual,
+    SlashEqual,
+    PercentEqual,
+    AmpersandEqual,
+    PipeEqual,
+    CaretEqual,
 
     // Keywords
     Var,

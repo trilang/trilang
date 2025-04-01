@@ -34,6 +34,18 @@ public partial class CommonFormatter : IFormatter
             BinaryExpressionKind.GreaterThan => ">",
             BinaryExpressionKind.GreaterThanOrEqual => ">=",
 
+            BinaryExpressionKind.Assignment => "=",
+
+            BinaryExpressionKind.AdditionAssignment => "+=",
+            BinaryExpressionKind.SubtractionAssignment => "-=",
+            BinaryExpressionKind.MultiplicationAssignment => "*=",
+            BinaryExpressionKind.DivisionAssignment => "/=",
+            BinaryExpressionKind.ModulusAssignment => "%=",
+
+            BinaryExpressionKind.BitwiseAndAssignment => "&=",
+            BinaryExpressionKind.BitwiseOrAssignment => "|=",
+            BinaryExpressionKind.BitwiseXorAssignment => "^=",
+
             _ => throw new ArgumentOutOfRangeException(nameof(node.Kind)),
         });
 

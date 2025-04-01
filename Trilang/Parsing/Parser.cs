@@ -224,6 +224,8 @@ public class Parser
                 kind = BinaryExpressionKind.Division;
             else if (context.Reader.Current.Is(TokenKind.Ampersand))
                 kind = BinaryExpressionKind.BitwiseAnd;
+            else if (context.Reader.Current.Is(TokenKind.Percent))
+                kind = BinaryExpressionKind.Modulus;
             else if (context.Reader.Current.Is(TokenKind.Pipe))
                 kind = BinaryExpressionKind.BitwiseOr;
             else if (context.Reader.Current.Is(TokenKind.Caret))
@@ -244,6 +246,24 @@ public class Parser
                 kind = BinaryExpressionKind.GreaterThan;
             else if (context.Reader.Current.Is(TokenKind.GreaterEqual))
                 kind = BinaryExpressionKind.GreaterThanOrEqual;
+            else if (context.Reader.Current.Is(TokenKind.Equal))
+                kind = BinaryExpressionKind.Assignment;
+            else if (context.Reader.Current.Is(TokenKind.PlusEqual))
+                kind = BinaryExpressionKind.AdditionAssignment;
+            else if (context.Reader.Current.Is(TokenKind.MinusEqual))
+                kind = BinaryExpressionKind.SubtractionAssignment;
+            else if (context.Reader.Current.Is(TokenKind.AsteriskEqual))
+                kind = BinaryExpressionKind.MultiplicationAssignment;
+            else if (context.Reader.Current.Is(TokenKind.SlashEqual))
+                kind = BinaryExpressionKind.DivisionAssignment;
+            else if (context.Reader.Current.Is(TokenKind.PercentEqual))
+                kind = BinaryExpressionKind.ModulusAssignment;
+            else if (context.Reader.Current.Is(TokenKind.AmpersandEqual))
+                kind = BinaryExpressionKind.BitwiseAndAssignment;
+            else if (context.Reader.Current.Is(TokenKind.PipeEqual))
+                kind = BinaryExpressionKind.BitwiseOrAssignment;
+            else if (context.Reader.Current.Is(TokenKind.CaretEqual))
+                kind = BinaryExpressionKind.BitwiseXorAssignment;
             else
                 break;
 
