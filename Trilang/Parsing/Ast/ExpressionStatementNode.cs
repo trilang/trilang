@@ -64,5 +64,5 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
 
     public IExpressionNode Expression { get; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

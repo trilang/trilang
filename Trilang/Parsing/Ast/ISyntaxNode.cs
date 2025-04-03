@@ -10,5 +10,5 @@ public interface ISyntaxNode
 
     ISyntaxNode? Parent { get; set; }
 
-    SymbolTable? SymbolTable { get; set; }
+    ISymbolTable? SymbolTable { get; set; }
 }

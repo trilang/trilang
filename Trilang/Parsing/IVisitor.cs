@@ -28,6 +28,8 @@ public interface IVisitor
 
     void Visit(SyntaxTree node);
 
+    void Visit(TypeNode node);
+
     void Visit(UnaryExpressionNode node);
 
     void Visit(VariableExpressionNode node);

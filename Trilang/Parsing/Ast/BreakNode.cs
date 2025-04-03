@@ -46,5 +46,5 @@ public class BreakNode : IStatementNode, IEquatable<BreakNode>
 
     public ISyntaxNode? Parent { get; set; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

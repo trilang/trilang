@@ -80,7 +80,7 @@ public class ParserFunctionTests
             FunctionDeclarationNode.Create(
                 "test",
                 [],
-                "void",
+                TypeNode.Create("void"),
                 new BlockStatementNode())
         ]);
 
@@ -97,9 +97,9 @@ public class ParserFunctionTests
             FunctionDeclarationNode.Create(
                 "test",
                 [
-                    new FunctionParameterNode("x", "i32"),
+                    new FunctionParameterNode("x", TypeNode.Create("i32")),
                 ],
-                "void",
+                TypeNode.Create("void"),
                 new BlockStatementNode())
         ]);
 
@@ -116,11 +116,28 @@ public class ParserFunctionTests
             FunctionDeclarationNode.Create(
                 "test",
                 [
-                    new FunctionParameterNode("x", "i32"),
-                    new FunctionParameterNode("y", "i32"),
-                    new FunctionParameterNode("z", "i32"),
+                    new FunctionParameterNode("x", TypeNode.Create("i32")),
+                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new FunctionParameterNode("z", TypeNode.Create("i32")),
                 ],
-                "void",
+                TypeNode.Create("void"),
+                new BlockStatementNode())
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseArrayTypeTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("function test(x: i32[]): void { }");
+
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "test",
+                [new FunctionParameterNode("x", TypeNode.Array("i32"))],
+                TypeNode.Create("void"),
                 new BlockStatementNode())
         ]);
 

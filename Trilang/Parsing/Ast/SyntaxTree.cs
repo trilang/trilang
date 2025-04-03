@@ -66,5 +66,5 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 
     public IReadOnlyList<FunctionDeclarationNode> Functions { get; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

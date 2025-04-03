@@ -46,5 +46,5 @@ public class ContinueNode : IStatementNode, IEquatable<ContinueNode>
 
     public ISyntaxNode? Parent { get; set; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

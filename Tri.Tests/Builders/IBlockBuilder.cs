@@ -10,6 +10,8 @@ public interface IBlockBuilder
 
     IBlockBuilder Statement(Action<IExpressionBuilder> action);
 
+    IBlockBuilder Block(Action<IBlockBuilder> action);
+
     IBlockBuilder If(
         Action<IExpressionBuilder> condition,
         Action<IBlockBuilder> then,

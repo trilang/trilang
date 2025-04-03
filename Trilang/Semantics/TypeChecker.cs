@@ -2,6 +2,9 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Symbols;
+using static Trilang.Parsing.Ast.BinaryExpressionKind;
+using static Trilang.Parsing.Ast.UnaryExpressionKind;
+using static Trilang.Metadata.TypeMetadata;
 
 namespace Trilang.Semantics;
 
@@ -12,7 +15,7 @@ public class TypeChecker : IVisitor
     public TypeChecker()
         => typeStore = new TypeMetadataStore();
 
-    private void BuildSymbolTableTypes(SymbolTable? symbolTable)
+    private void BuildSymbolTableTypes(ISymbolTable? symbolTable)
     {
         // TODO: extract to a symbol table class or another visitor
         if (symbolTable is null)
@@ -26,6 +29,13 @@ public class TypeChecker : IVisitor
     {
         foreach (var (_, symbol) in types)
         {
+            if (symbol.IsArray)
+            {
+                var type = typeStore.GetType(symbol.Name[..^2]) ??
+                           throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
+
+                typeStore.DefineType(symbol.Name, type);
+            }
         }
     }
 
@@ -37,17 +47,17 @@ public class TypeChecker : IVisitor
             if (function.Metadata is not null)
                 continue;
 
-            var parameters = new TypeMetadata[function.Parameters.Count];
+            var parameters = new IMetadata[function.Parameters.Count];
             for (var i = 0; i < function.Parameters.Count; i++)
             {
                 var parameter = function.Parameters[i];
-                var type = typeStore.GetType(parameter.Type);
+                var type = typeStore.GetType(parameter.Type.Name);
 
                 parameters[i] = type ??
                                 throw new TypeCheckerException($"Unknown type '{parameter.Type}'");
             }
 
-            var returnType = typeStore.GetType(function.ReturnType) ??
+            var returnType = typeStore.GetType(function.ReturnType.Name) ??
                              throw new TypeCheckerException($"Unknown type '{function.ReturnType}'");
 
             // TODO: add function type to types
@@ -76,16 +86,94 @@ public class TypeChecker : IVisitor
         node.Right.Accept(this);
 
         // TODO: more complex logic
-        if (node.Left.ReturnTypeMetadata is null || node.Right.ReturnTypeMetadata is null)
+        if (node.Kind == BinaryExpressionKind.Unknown ||
+            node.Left.ReturnTypeMetadata is null ||
+            node.Right.ReturnTypeMetadata is null)
             throw new TypeCheckerException();
 
-        node.ReturnTypeMetadata = node.Left.ReturnTypeMetadata;
+        if (node.Kind is Addition or Subtraction or Multiplication or Division or Modulus &&
+            ((Equals(node.Left.ReturnTypeMetadata, I8) && Equals(node.Right.ReturnTypeMetadata, I8)) ||
+             (Equals(node.Left.ReturnTypeMetadata, I16) && Equals(node.Right.ReturnTypeMetadata, I16)) ||
+             (Equals(node.Left.ReturnTypeMetadata, I32) && Equals(node.Right.ReturnTypeMetadata, I32)) ||
+             (Equals(node.Left.ReturnTypeMetadata, I64) && Equals(node.Right.ReturnTypeMetadata, I64)) ||
+             (Equals(node.Left.ReturnTypeMetadata, U8) && Equals(node.Right.ReturnTypeMetadata, U8)) ||
+             (Equals(node.Left.ReturnTypeMetadata, U16) && Equals(node.Right.ReturnTypeMetadata, U16)) ||
+             (Equals(node.Left.ReturnTypeMetadata, U32) && Equals(node.Right.ReturnTypeMetadata, U32)) ||
+             (Equals(node.Left.ReturnTypeMetadata, U64) && Equals(node.Right.ReturnTypeMetadata, U64)) ||
+             (Equals(node.Left.ReturnTypeMetadata, F32) && Equals(node.Right.ReturnTypeMetadata, F32)) ||
+             (Equals(node.Left.ReturnTypeMetadata, F64) && Equals(node.Right.ReturnTypeMetadata, F64))))
+        {
+            node.ReturnTypeMetadata = node.Left.ReturnTypeMetadata;
+        }
+        else if (node.Kind is BitwiseAnd or BitwiseOr or BitwiseXor &&
+                 ((Equals(node.Left.ReturnTypeMetadata, I8) && Equals(node.Right.ReturnTypeMetadata, I8)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, I16) && Equals(node.Right.ReturnTypeMetadata, I16)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, I32) && Equals(node.Right.ReturnTypeMetadata, I32)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, I64) && Equals(node.Right.ReturnTypeMetadata, I64)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, U8) && Equals(node.Right.ReturnTypeMetadata, U8)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, U16) && Equals(node.Right.ReturnTypeMetadata, U16)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, U32) && Equals(node.Right.ReturnTypeMetadata, U32)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, U64) && Equals(node.Right.ReturnTypeMetadata, U64))))
+        {
+            node.ReturnTypeMetadata = node.Left.ReturnTypeMetadata;
+        }
+        else if (node.Kind is ConditionalAnd or ConditionalOr &&
+                 Equals(node.Left.ReturnTypeMetadata, Bool) && Equals(node.Right.ReturnTypeMetadata, Bool))
+        {
+            node.ReturnTypeMetadata = Bool;
+        }
+        else if (node.Kind is Equality or Inequality or
+                     LessThan or LessThanOrEqual or
+                     GreaterThan or GreaterThanOrEqual &&
+                 ((Equals(node.Left.ReturnTypeMetadata, I8) && Equals(node.Right.ReturnTypeMetadata, I8)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, I16) && Equals(node.Right.ReturnTypeMetadata, I16)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, I32) && Equals(node.Right.ReturnTypeMetadata, I32)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, I64) && Equals(node.Right.ReturnTypeMetadata, I64)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, U8) && Equals(node.Right.ReturnTypeMetadata, U8)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, U16) && Equals(node.Right.ReturnTypeMetadata, U16)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, U32) && Equals(node.Right.ReturnTypeMetadata, U32)) ||
+                  (Equals(node.Left.ReturnTypeMetadata, U64) && Equals(node.Right.ReturnTypeMetadata, U64))))
+        {
+            node.ReturnTypeMetadata = Bool;
+        }
+        else if (node.Kind is Assignment or AdditionAssignment or
+                     SubtractionAssignment or MultiplicationAssignment or
+                     DivisionAssignment or ModulusAssignment &&
+                 node.Left is VariableExpressionNode &&
+                 (Equals(node.Right.ReturnTypeMetadata, I8) ||
+                  Equals(node.Right.ReturnTypeMetadata, I16) ||
+                  Equals(node.Right.ReturnTypeMetadata, I32) ||
+                  Equals(node.Right.ReturnTypeMetadata, I64) ||
+                  Equals(node.Right.ReturnTypeMetadata, U8) ||
+                  Equals(node.Right.ReturnTypeMetadata, U16) ||
+                  Equals(node.Right.ReturnTypeMetadata, U32) ||
+                  Equals(node.Right.ReturnTypeMetadata, U64) ||
+                  Equals(node.Right.ReturnTypeMetadata, F32) ||
+                  Equals(node.Right.ReturnTypeMetadata, F64)))
+        {
+            node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
+        }
+        else if (node.Kind is BitwiseAndAssignment or BitwiseOrAssignment or BitwiseXorAssignment &&
+                 node.Left is VariableExpressionNode &&
+                 (Equals(node.Right.ReturnTypeMetadata, I8) ||
+                  Equals(node.Right.ReturnTypeMetadata, I16) ||
+                  Equals(node.Right.ReturnTypeMetadata, I32) ||
+                  Equals(node.Right.ReturnTypeMetadata, I64) ||
+                  Equals(node.Right.ReturnTypeMetadata, U8) ||
+                  Equals(node.Right.ReturnTypeMetadata, U16) ||
+                  Equals(node.Right.ReturnTypeMetadata, U32) ||
+                  Equals(node.Right.ReturnTypeMetadata, U64)))
+        {
+            node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
+        }
+        else
+        {
+            throw new TypeCheckerException();
+        }
     }
 
     public void Visit(BlockStatementNode node)
     {
-        BuildSymbolTableTypes(node.SymbolTable);
-
         foreach (var statement in node.Statements)
             statement.Accept(this);
     }
@@ -112,7 +200,7 @@ public class TypeChecker : IVisitor
         {
             var actual = node.Parameters[i].ReturnTypeMetadata;
             var expected = function.ParameterTypes[i];
-            if (expected != actual)
+            if (!expected.Equals(actual))
                 throw new TypeCheckerException($"Expected '{expected}' but got '{actual}'");
         }
     }
@@ -126,13 +214,13 @@ public class TypeChecker : IVisitor
 
     public void Visit(FunctionParameterNode node)
     {
-        if (node.TypeMetadata is null)
+        if (node.Type.Metadata is null)
         {
-            var type = typeStore.GetType(node.Type);
+            var type = typeStore.GetType(node.Type.Name);
             if (type is null)
                 throw new TypeCheckerException($"Unknown type '{node.Type}'");
 
-            node.TypeMetadata = type;
+            node.Type.Metadata = type;
         }
     }
 
@@ -150,7 +238,7 @@ public class TypeChecker : IVisitor
         node.Then.Accept(this);
         node.Else?.Accept(this);
 
-        if (node.Condition.ReturnTypeMetadata != TypeMetadata.Bool)
+        if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
             throw new TypeCheckerException();
     }
 
@@ -159,8 +247,8 @@ public class TypeChecker : IVisitor
         node.ReturnTypeMetadata = node.Kind switch
         {
             // TODO: other types
-            LiteralExpressionKind.Number => TypeMetadata.I32,
-            LiteralExpressionKind.Boolean => TypeMetadata.Bool,
+            LiteralExpressionKind.Number => I32,
+            LiteralExpressionKind.Boolean => Bool,
             LiteralExpressionKind.String => TypeMetadata.String,
             LiteralExpressionKind.Char => TypeMetadata.Char,
 
@@ -176,7 +264,7 @@ public class TypeChecker : IVisitor
         if (function is null)
             throw new TypeCheckerException();
 
-        if (function.Metadata?.ReturnType != node.Expression.ReturnTypeMetadata)
+        if (!Equals(function.Metadata?.ReturnType, node.Expression.ReturnTypeMetadata))
             throw new TypeCheckerException();
     }
 
@@ -188,46 +276,98 @@ public class TypeChecker : IVisitor
             statement.Accept(this);
     }
 
+    public void Visit(TypeNode node)
+    {
+        var type = typeStore.GetType(node.Name);
+        if (type is null)
+            throw new TypeCheckerException($"Unknown type '{node.Name}'");
+
+        node.Metadata = type;
+    }
+
     public void Visit(UnaryExpressionNode node)
     {
         node.Operand.Accept(this);
 
-        if (node.Kind == UnaryExpressionKind.UnaryMinus && node.Operand.ReturnTypeMetadata == TypeMetadata.I32)
-            node.ReturnTypeMetadata = TypeMetadata.I32;
-        else if (node.Kind == UnaryExpressionKind.UnaryPlus && node.Operand.ReturnTypeMetadata == TypeMetadata.I32)
-            node.ReturnTypeMetadata = TypeMetadata.I32;
-        else if (node.Kind == UnaryExpressionKind.LogicalNot && node.Operand.ReturnTypeMetadata == TypeMetadata.Bool)
-            node.ReturnTypeMetadata = TypeMetadata.Bool;
-        else
+        // TODO: more complex logic
+        if (node.Kind == UnaryExpressionKind.Unknown || node.Operand.ReturnTypeMetadata is null)
             throw new TypeCheckerException();
+
+        if (node.Kind == UnaryMinus &&
+            (Equals(node.Operand.ReturnTypeMetadata, I8) ||
+             Equals(node.Operand.ReturnTypeMetadata, I16) ||
+             Equals(node.Operand.ReturnTypeMetadata, I32) ||
+             Equals(node.Operand.ReturnTypeMetadata, I64) ||
+             Equals(node.Operand.ReturnTypeMetadata, U8) ||
+             Equals(node.Operand.ReturnTypeMetadata, U16) ||
+             Equals(node.Operand.ReturnTypeMetadata, U32) ||
+             Equals(node.Operand.ReturnTypeMetadata, U64) ||
+             Equals(node.Operand.ReturnTypeMetadata, F32) ||
+             Equals(node.Operand.ReturnTypeMetadata, F64)))
+        {
+            node.ReturnTypeMetadata = node.Operand.ReturnTypeMetadata;
+        }
+        else if (node.Kind == UnaryPlus &&
+                 (Equals(node.Operand.ReturnTypeMetadata, I8) ||
+                  Equals(node.Operand.ReturnTypeMetadata, I16) ||
+                  Equals(node.Operand.ReturnTypeMetadata, I32) ||
+                  Equals(node.Operand.ReturnTypeMetadata, I64) ||
+                  Equals(node.Operand.ReturnTypeMetadata, U8) ||
+                  Equals(node.Operand.ReturnTypeMetadata, U16) ||
+                  Equals(node.Operand.ReturnTypeMetadata, U32) ||
+                  Equals(node.Operand.ReturnTypeMetadata, U64) ||
+                  Equals(node.Operand.ReturnTypeMetadata, F32) ||
+                  Equals(node.Operand.ReturnTypeMetadata, F64)))
+        {
+            node.ReturnTypeMetadata = node.Operand.ReturnTypeMetadata;
+        }
+        else if (node.Kind == LogicalNot && Equals(node.Operand.ReturnTypeMetadata, Bool))
+        {
+            node.ReturnTypeMetadata = Bool;
+        }
+        else if (node.Kind == BitwiseNot &&
+                 (Equals(node.Operand.ReturnTypeMetadata, I8) ||
+                  Equals(node.Operand.ReturnTypeMetadata, I16) ||
+                  Equals(node.Operand.ReturnTypeMetadata, I32) ||
+                  Equals(node.Operand.ReturnTypeMetadata, I64) ||
+                  Equals(node.Operand.ReturnTypeMetadata, U8) ||
+                  Equals(node.Operand.ReturnTypeMetadata, U16) ||
+                  Equals(node.Operand.ReturnTypeMetadata, U32) ||
+                  Equals(node.Operand.ReturnTypeMetadata, U64)))
+        {
+            node.ReturnTypeMetadata = node.Operand.ReturnTypeMetadata;
+        }
+        else
+        {
+            throw new TypeCheckerException();
+        }
     }
 
     public void Visit(VariableExpressionNode node)
     {
-        var symbol = node.SymbolTable?.GetVariable(node.Name);
-        if (symbol is null)
-            throw new TypeCheckerException();
+        var symbol = node.SymbolTable?.GetVariable(node.Name) ??
+                     throw new TypeCheckerException();
 
-        node.ReturnTypeMetadata = symbol.Node.TypeMetadata;
+        node.ReturnTypeMetadata = symbol.Node.Type.Metadata;
     }
 
     public void Visit(VariableDeclarationStatementNode node)
     {
         node.Expression.Accept(this);
 
-        if (node.TypeMetadata is null)
+        if (node.Type.Metadata is null)
         {
-            var type = typeStore.GetType(node.Type);
+            var type = typeStore.GetType(node.Type.Name);
             if (type is null)
                 throw new TypeCheckerException($"Unknown type '{node.Type}'");
 
-            node.TypeMetadata = type;
+            node.Type.Metadata = type;
         }
 
         if (node.Expression.ReturnTypeMetadata is null)
             throw new TypeCheckerException();
 
-        if (node.Expression.ReturnTypeMetadata != node.TypeMetadata)
+        if (!node.Expression.ReturnTypeMetadata.Equals(node.Type.Metadata))
             throw new TypeCheckerException();
     }
 
@@ -236,7 +376,7 @@ public class TypeChecker : IVisitor
         node.Condition.Accept(this);
         node.Body.Accept(this);
 
-        if (node.Condition.ReturnTypeMetadata != TypeMetadata.Bool)
+        if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
             throw new TypeCheckerException("Condition must be a boolean");
     }
 }

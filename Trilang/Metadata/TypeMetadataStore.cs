@@ -2,11 +2,11 @@ namespace Trilang.Metadata;
 
 public class TypeMetadataStore
 {
-    private readonly Dictionary<string, TypeMetadata> types;
+    private readonly Dictionary<string, IMetadata> types;
 
     public TypeMetadataStore()
     {
-        types = new Dictionary<string, TypeMetadata>
+        types = new Dictionary<string, IMetadata>
         {
             { "void", TypeMetadata.Void },
 
@@ -29,6 +29,14 @@ public class TypeMetadataStore
         };
     }
 
-    public TypeMetadata? GetType(string name)
+    public IMetadata? GetType(string name)
         => types.GetValueOrDefault(name);
+
+    public void DefineType(string name, IMetadata type)
+    {
+        if (type is ArrayMetadata)
+            types[name] = type;
+        else
+            types.Add(name, type);
+    }
 }

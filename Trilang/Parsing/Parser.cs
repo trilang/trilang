@@ -38,7 +38,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var returnType = TryParseId(context);
+        var returnType = TryParseTypeNode(context);
         if (returnType is null)
             throw new ParseException("Expected a function return type.");
 
@@ -86,7 +86,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var type = TryParseId(context);
+        var type = TryParseTypeNode(context);
         if (type is null)
             throw new ParseException("Expected a type.");
 
@@ -132,7 +132,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var type = TryParseId(context);
+        var type = TryParseTypeNode(context);
         if (type is null)
             throw new ParseException("Expected a type.");
 
@@ -429,6 +429,20 @@ public class Parser
             return new LiteralExpressionNode(LiteralExpressionKind.Char, token.String);
 
         return null;
+    }
+
+    private TypeNode? TryParseTypeNode(ParserContext context)
+    {
+        if (!context.Reader.Check(TokenKind.Identifier, out var token))
+            return null;
+
+        if (!context.Reader.Check(TokenKind.OpenBracket))
+            return TypeNode.Create(token.Identifier);
+
+        if (!context.Reader.Check(TokenKind.CloseBracket))
+            throw new ParseException("Expected a close bracket.");
+
+        return TypeNode.Array(token.Identifier);
     }
 
     private string? TryParseId(ParserContext context)

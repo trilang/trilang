@@ -3,7 +3,7 @@ using Trilang.Parsing.Ast;
 namespace Trilang.Symbols;
 
 public abstract class Symbol<T> : IEquatable<Symbol<T>>
-    where T : ISyntaxNode
+    where T : ISyntaxNode?
 {
     protected Symbol(SymbolKind kind, string name, T node)
     {
@@ -28,7 +28,7 @@ public abstract class Symbol<T> : IEquatable<Symbol<T>>
 
         return Kind == other.Kind &&
                Name == other.Name &&
-               Node.Equals(other.Node);
+               Equals(Node, other.Node);
     }
 
     public override bool Equals(object? obj)
@@ -53,6 +53,4 @@ public abstract class Symbol<T> : IEquatable<Symbol<T>>
     public string Name { get; }
 
     public T Node { get; }
-
-    // public object? Reference { get; }
 }

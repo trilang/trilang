@@ -20,7 +20,7 @@ public class ParseCallExpressionTests
             FunctionDeclarationNode.Create(
                 "main",
                 [],
-                "void",
+                TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ExpressionStatementNode(
                         new CallExpressionNode("print", [
@@ -49,7 +49,7 @@ public class ParseCallExpressionTests
             FunctionDeclarationNode.Create(
                 "main",
                 [],
-                "void",
+                TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ExpressionStatementNode(
                         new CallExpressionNode("sum", [
@@ -78,7 +78,7 @@ public class ParseCallExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.Addition,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
@@ -93,7 +93,7 @@ public class ParseCallExpressionTests
             FunctionDeclarationNode.Create(
                 "main",
                 [],
-                "void",
+                TypeNode.Create("void"),
                 new BlockStatementNode([variableDeclarationNode])
             )
         ]);

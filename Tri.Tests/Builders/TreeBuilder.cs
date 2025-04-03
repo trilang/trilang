@@ -1,4 +1,3 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using Trilang.Symbols;
 
@@ -7,12 +6,12 @@ namespace Tri.Tests.Builders;
 internal sealed class TreeBuilder : ISyntaxTreeBuilder
 {
     private readonly List<FunctionDeclarationNode> functions;
-    private readonly SymbolTable symbolTable;
+    private readonly ISymbolTable symbolTable;
 
     public TreeBuilder()
     {
         functions = [];
-        symbolTable = new SymbolTable();
+        symbolTable = new RootSymbolTable();
     }
 
     public ISyntaxTreeBuilder DefineFunction(string name, Action<IFunctionBuilder> action)
@@ -37,22 +36,25 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     private sealed class FunctionBuilder : IFunctionBuilder
     {
-        private readonly SymbolTable symbolTable;
+        private readonly ISymbolTable symbolTable;
 
         private readonly string functionName;
         private readonly List<FunctionParameterNode> parameters;
-        private string returnType;
+        private TypeNode returnType;
         private BlockStatementNode? body;
 
-        public FunctionBuilder(SymbolTable symbolTable, string functionName)
+        public FunctionBuilder(ISymbolTable symbolTable, string functionName)
         {
             this.symbolTable = symbolTable;
             this.functionName = functionName;
             parameters = [];
-            returnType = "void";
+            returnType = TypeNode.Create("void");
         }
 
         public IFunctionBuilder DefineParameter(string name, string type)
+            => DefineParameter(name, TypeNode.Create(type));
+
+        public IFunctionBuilder DefineParameter(string name, TypeNode type)
         {
             var parameter = new FunctionParameterNode(name, type) { SymbolTable = symbolTable };
             parameters.Add(parameter);
@@ -67,7 +69,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IFunctionBuilder ReturnType(string type)
         {
-            returnType = type;
+            returnType = TypeNode.Create(type);
 
             return this;
         }
@@ -92,10 +94,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     private sealed class BlockBuilder : IBlockBuilder
     {
-        private readonly SymbolTable symbolTable;
+        private readonly ISymbolTable symbolTable;
         private readonly List<IStatementNode> statements;
 
-        public BlockBuilder(SymbolTable symbolTable)
+        public BlockBuilder(ISymbolTable symbolTable)
         {
             this.symbolTable = symbolTable;
             statements = [];
@@ -106,7 +108,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             var builder = new ExpressionBuilder(symbolTable);
             action(builder);
 
-            var variable = new VariableDeclarationStatementNode(name, type, builder.Build())
+            var variable = new VariableDeclarationStatementNode(name, TypeNode.Create(type), builder.Build())
             {
                 SymbolTable = symbolTable
             };
@@ -136,6 +138,17 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
             var statement = new ExpressionStatementNode(builder.Build()) { SymbolTable = symbolTable };
             statements.Add(statement);
+
+            return this;
+        }
+
+        public IBlockBuilder Block(Action<IBlockBuilder> action)
+        {
+            var builder = new BlockBuilder(symbolTable.CreateChild());
+            action(builder);
+
+            var block = builder.Build();
+            statements.Add(block);
 
             return this;
         }
@@ -193,10 +206,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     private sealed class ExpressionBuilder : IExpressionBuilder
     {
-        private readonly SymbolTable symbolTable;
+        private readonly ISymbolTable symbolTable;
         private readonly Stack<IExpressionNode> stack;
 
-        public ExpressionBuilder(SymbolTable symbolTable)
+        public ExpressionBuilder(ISymbolTable symbolTable)
         {
             this.symbolTable = symbolTable;
             stack = [];

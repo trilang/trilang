@@ -28,6 +28,8 @@ public interface IVisitor<in TContext>
 
     void Visit(SyntaxTree node, TContext context);
 
+    void Visit(TypeNode node, TContext context);
+
     void Visit(UnaryExpressionNode node, TContext context);
 
     void Visit(VariableExpressionNode node, TContext context);

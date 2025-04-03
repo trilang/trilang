@@ -2,9 +2,9 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class FunctionParameterNode : VariableDeclarationNode
+public class FunctionParameterNode : VariableDeclarationNode, IEquatable<FunctionParameterNode>
 {
-    public FunctionParameterNode(string name, string type)
+    public FunctionParameterNode(string name, TypeNode type)
         : base(name, type)
     {
     }

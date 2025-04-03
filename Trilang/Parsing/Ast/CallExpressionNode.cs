@@ -74,8 +74,8 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
 
     public FunctionMetadata? Metadata { get; set; }
 
-    public TypeMetadata? ReturnTypeMetadata
+    public IMetadata? ReturnTypeMetadata
         => Metadata?.ReturnType;
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

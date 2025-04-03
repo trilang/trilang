@@ -6,7 +6,7 @@ namespace Trilang.Parsing.Ast;
 
 public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<VariableDeclarationNode>
 {
-    protected VariableDeclarationNode(string name, string type)
+    protected VariableDeclarationNode(string name, TypeNode type)
     {
         Name = name;
         Type = type;
@@ -28,7 +28,6 @@ public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<Variable
 
         return Name == other.Name &&
                Type == other.Type &&
-               Equals(TypeMetadata, other.TypeMetadata) &&
                Equals(SymbolTable, other.SymbolTable);
     }
 
@@ -63,11 +62,9 @@ public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<Variable
 
     public ISyntaxNode? Parent { get; set; }
 
+    public ISymbolTable? SymbolTable { get; set; }
+
     public string Name { get; }
 
-    public string Type { get; }
-
-    public TypeMetadata? TypeMetadata { get; set; }
-
-    public SymbolTable? SymbolTable { get; set; }
+    public TypeNode Type { get; }
 }

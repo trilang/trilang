@@ -1,21 +1,29 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpressionNode>
+public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
 {
-    public VariableExpressionNode(string name)
-        => Name = name;
+    private TypeNode(string name, bool isArray)
+    {
+        Name = name;
+        IsArray = isArray;
+    }
 
-    public static bool operator ==(VariableExpressionNode? left, VariableExpressionNode? right)
+    public static TypeNode Create(string name)
+        => new TypeNode(name, false);
+
+    public static TypeNode Array(string name)
+        => new TypeNode(name, true);
+
+    public static bool operator ==(TypeNode? left, TypeNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(VariableExpressionNode? left, VariableExpressionNode? right)
+    public static bool operator !=(TypeNode? left, TypeNode? right)
         => !Equals(left, right);
 
-    public bool Equals(VariableExpressionNode? other)
+    public bool Equals(TypeNode? other)
     {
         if (other is null)
             return false;
@@ -24,7 +32,7 @@ public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpres
             return true;
 
         return Name == other.Name &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
+               IsArray == other.IsArray &&
                Equals(SymbolTable, other.SymbolTable);
     }
 
@@ -39,19 +47,11 @@ public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpres
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((VariableExpressionNode)obj);
+        return Equals((TypeNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
-
-    public override string ToString()
-    {
-        var formatter = new CommonFormatter();
-        Accept(formatter);
-
-        return formatter.ToString();
-    }
+        => HashCode.Combine(Name, IsArray);
 
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
@@ -61,9 +61,11 @@ public class VariableExpressionNode : IExpressionNode, IEquatable<VariableExpres
 
     public ISyntaxNode? Parent { get; set; }
 
+    public ISymbolTable? SymbolTable { get; set; }
+
     public string Name { get; }
 
-    public IMetadata? ReturnTypeMetadata { get; set; }
+    public bool IsArray { get; }
 
-    public ISymbolTable? SymbolTable { get; set; }
+    public IMetadata? Metadata { get; set; }
 }

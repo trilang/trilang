@@ -77,5 +77,5 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
 
     public BlockStatementNode? Else { get; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

@@ -71,5 +71,5 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
 
     public IReadOnlyList<IStatementNode> Statements { get; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

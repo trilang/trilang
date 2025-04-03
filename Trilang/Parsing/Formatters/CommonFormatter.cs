@@ -97,7 +97,7 @@ public partial class CommonFormatter : IFormatter
     {
         writer.Write(node.Name);
         writer.Write(": ");
-        writer.Write(node.Type);
+        node.Type.Accept(this);
     }
 
     public void Visit(FunctionDeclarationNode node)
@@ -118,7 +118,7 @@ public partial class CommonFormatter : IFormatter
         }
 
         writer.Write("): ");
-        writer.Write(node.ReturnType);
+        node.ReturnType.Accept(this);
         writer.Write(' ');
 
         node.Body?.Accept(this);
@@ -186,6 +186,14 @@ public partial class CommonFormatter : IFormatter
         }
     }
 
+    public void Visit(TypeNode node)
+    {
+        writer.Write(node.Name);
+
+        if (node.IsArray)
+            writer.Write("[]");
+    }
+
     public void Visit(UnaryExpressionNode node)
     {
         writer.Write(node.Kind switch
@@ -209,7 +217,7 @@ public partial class CommonFormatter : IFormatter
         writer.Write("var ");
         writer.Write(node.Name);
         writer.Write(": ");
-        writer.Write(node.Type);
+        node.Type.Accept(this);
         writer.Write(" = ");
         node.Expression.Accept(this);
         writer.WriteLine(';');

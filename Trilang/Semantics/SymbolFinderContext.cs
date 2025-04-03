@@ -2,27 +2,27 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics;
 
-public class SymbolTableBuilderContext
+public class SymbolFinderContext
 {
     private bool noScope;
 
-    public SymbolTableBuilderContext()
-        : this(new SymbolTable())
+    public SymbolFinderContext()
+        : this(new RootSymbolTable())
     {
     }
 
-    private SymbolTableBuilderContext(SymbolTable symbolTable)
+    private SymbolFinderContext(ISymbolTable symbolTable)
     {
         SymbolTable = symbolTable;
         noScope = false;
     }
 
-    public void Scoped(Action<SymbolTableBuilderContext> action)
+    public void Scoped(Action<SymbolFinderContext> action)
     {
         var child = noScope
             ? SymbolTable
             : SymbolTable.CreateChild();
-        var context = new SymbolTableBuilderContext(child)
+        var context = new SymbolFinderContext(child)
         {
             noScope = false
         };
@@ -33,5 +33,5 @@ public class SymbolTableBuilderContext
     public void DisableNextScope()
         => noScope = true;
 
-    public SymbolTable SymbolTable { get; }
+    public ISymbolTable SymbolTable { get; }
 }

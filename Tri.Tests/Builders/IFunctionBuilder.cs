@@ -6,6 +6,8 @@ public interface IFunctionBuilder
 {
     IFunctionBuilder DefineParameter(string name, string type);
 
+    IFunctionBuilder DefineParameter(string name, TypeNode type);
+
     IFunctionBuilder ReturnType(string type);
 
     IFunctionBuilder DefineBody(Action<IBlockBuilder> action);

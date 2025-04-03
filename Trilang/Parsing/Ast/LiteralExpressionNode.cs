@@ -84,7 +84,7 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
 
     public object Value { get; }
 
-    public TypeMetadata? ReturnTypeMetadata { get; set; }
+    public IMetadata? ReturnTypeMetadata { get; set; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

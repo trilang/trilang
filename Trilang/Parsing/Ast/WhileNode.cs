@@ -54,7 +54,7 @@ public class WhileNode : IStatementNode, IEquatable<WhileNode>
 
     public ISyntaxNode? Parent { get; set; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 
     public IExpressionNode Condition { get; }
 

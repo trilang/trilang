@@ -2,7 +2,6 @@ using Tri.Tests.Builders;
 using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
-using Trilang.Symbols;
 
 namespace Tri.Tests.Semantics;
 
@@ -19,28 +18,25 @@ public class TypeCheckerTests
 
         return node switch
         {
-            CallExpressionNode callExpressionNode
-                => callExpressionNode.Parameters
-                    .Select(Find<T>)
-                    .FirstOrDefault(x => x is not null),
-
             BinaryExpressionNode binaryExpressionNode
                 => Find<T>(binaryExpressionNode.Left) ??
                    Find<T>(binaryExpressionNode.Right),
-
-            LiteralExpressionNode
-                => null,
-
-            UnaryExpressionNode unaryExpressionNode
-                => Find<T>(unaryExpressionNode.Operand),
-
-            VariableExpressionNode
-                => null,
 
             BlockStatementNode blockStatementNode
                 => blockStatementNode.Statements
                     .Select(Find<T>)
                     .FirstOrDefault(x => x is not null),
+
+            BreakNode breakNode
+                => null,
+
+            CallExpressionNode callExpressionNode
+                => callExpressionNode.Parameters
+                    .Select(Find<T>)
+                    .FirstOrDefault(x => x is not null),
+
+            ContinueNode continueNode
+                => null,
 
             ExpressionStatementNode expressionStatementNode
                 => Find<T>(expressionStatementNode.Expression),
@@ -59,16 +55,32 @@ public class TypeCheckerTests
                    Find<T>(ifStatementNode.Then) ??
                    Find<T>(ifStatementNode.Else),
 
+            LiteralExpressionNode
+                => null,
+
             ReturnStatementNode returnStatementNode
                 => Find<T>(returnStatementNode.Expression),
-
-            VariableDeclarationStatementNode variableDeclarationStatementNode
-                => Find<T>(variableDeclarationStatementNode.Expression),
 
             SyntaxTree syntaxTree
                 => syntaxTree.Functions
                     .Select(Find<T>)
                     .FirstOrDefault(x => x is not null),
+
+            TypeNode typeNode
+                => null,
+
+            VariableDeclarationStatementNode variableDeclarationStatementNode
+                => Find<T>(variableDeclarationStatementNode.Expression),
+
+            VariableExpressionNode
+                => null,
+
+            UnaryExpressionNode unaryExpressionNode
+                => Find<T>(unaryExpressionNode.Operand),
+
+            WhileNode whileNode
+                => Find<T>(whileNode.Condition) ??
+                   Find<T>(whileNode.Body),
 
             _ => throw new ArgumentOutOfRangeException(nameof(node)),
         };
@@ -116,8 +128,8 @@ public class TypeCheckerTests
 
         var function = tree.Functions[0];
         Assert.That(function.Metadata, Is.EqualTo(expected));
-        Assert.That(function.Parameters[0].TypeMetadata, Is.EqualTo(TypeMetadata.I32));
-        Assert.That(function.Parameters[1].TypeMetadata, Is.EqualTo(TypeMetadata.Bool));
+        Assert.That(function.Parameters[0].Type.Metadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(function.Parameters[1].Type.Metadata, Is.EqualTo(TypeMetadata.Bool));
     }
 
     [Test]
@@ -146,7 +158,7 @@ public class TypeCheckerTests
 
         var variable = Find<VariableDeclarationNode>(tree);
         Assert.That(variable, Is.Not.Null);
-        Assert.That(variable.TypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(variable.Type.Metadata, Is.EqualTo(TypeMetadata.I32));
     }
 
     [Test]

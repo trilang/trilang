@@ -5,7 +5,7 @@ public class VariableDeclarationStatementNode :
     IStatementNode,
     IEquatable<VariableDeclarationStatementNode>
 {
-    public VariableDeclarationStatementNode(string name, string type, IExpressionNode expression)
+    public VariableDeclarationStatementNode(string name, TypeNode type, IExpressionNode expression)
         : base(name, type)
     {
         Expression = expression;

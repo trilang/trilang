@@ -2,7 +2,7 @@ namespace Trilang.Metadata;
 
 public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
 {
-    public FunctionMetadata(TypeMetadata[] parameterTypes, TypeMetadata returnType)
+    public FunctionMetadata(IMetadata[] parameterTypes, IMetadata returnType)
     {
         ParameterTypes = parameterTypes;
         ReturnType = returnType;
@@ -43,7 +43,7 @@ public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
     public override int GetHashCode()
         => HashCode.Combine(ParameterTypes, ReturnType);
 
-    public IReadOnlyList<TypeMetadata> ParameterTypes { get; }
+    public IReadOnlyList<IMetadata> ParameterTypes { get; }
 
-    public TypeMetadata ReturnType { get; }
+    public IMetadata ReturnType { get; }
 }

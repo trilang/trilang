@@ -1,23 +1,25 @@
 namespace Trilang.Symbols;
 
-public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
+public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
 {
-    private readonly ISymbolTable parent;
+    private readonly Dictionary<string, TypeSymbol> types;
+    private readonly Dictionary<string, FunctionSymbol> functions;
     private readonly Dictionary<string, VariableSymbol> variables;
 
-    public SymbolTable(ISymbolTable parent)
+    public RootSymbolTable()
     {
-        this.parent = parent;
+        types = new Dictionary<string, TypeSymbol>();
+        functions = new Dictionary<string, FunctionSymbol>();
         variables = new Dictionary<string, VariableSymbol>();
     }
 
-    public static bool operator ==(SymbolTable? left, SymbolTable? right)
+    public static bool operator ==(RootSymbolTable? left, RootSymbolTable? right)
         => Equals(left, right);
 
-    public static bool operator !=(SymbolTable? left, SymbolTable? right)
+    public static bool operator !=(RootSymbolTable? left, RootSymbolTable? right)
         => !Equals(left, right);
 
-    public bool Equals(SymbolTable? other)
+    public bool Equals(RootSymbolTable? other)
     {
         if (other is null)
             return false;
@@ -25,7 +27,9 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
         if (ReferenceEquals(this, other))
             return true;
 
-        return variables.DictionaryEquals(other.variables);
+        return types.DictionaryEquals(other.types) &&
+               functions.DictionaryEquals(other.functions) &&
+               variables.DictionaryEquals(other.variables);
     }
 
     public override bool Equals(object? obj)
@@ -43,24 +47,22 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(parent, variables);
+        => HashCode.Combine(types, functions, variables);
 
     public TypeSymbol? GetType(string name)
-        => parent.GetType(name);
+        => types.GetValueOrDefault(name);
 
     public bool TryAddType(TypeSymbol symbol)
-        => parent.TryAddType(symbol);
+        => types.TryAdd(symbol.Name, symbol);
 
     public FunctionSymbol? GetFunction(string name)
-        => parent.GetFunction(name);
+        => functions.GetValueOrDefault(name);
 
     public bool TryAddFunction(FunctionSymbol symbol)
-        => parent.TryAddFunction(symbol);
+        => functions.TryAdd(symbol.Name, symbol);
 
     public VariableSymbol? GetVariable(string name)
-        => variables.TryGetValue(name, out var symbol)
-            ? symbol
-            : parent?.GetVariable(name);
+        => variables.GetValueOrDefault(name);
 
     public bool TryAddVariable(VariableSymbol symbol)
         => variables.TryAdd(symbol.Name, symbol);
@@ -69,10 +71,10 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
         => new SymbolTable(this);
 
     public IReadOnlyDictionary<string, TypeSymbol> Types
-        => parent.Types;
+        => types;
 
     public IReadOnlyDictionary<string, FunctionSymbol> Functions
-        => parent.Functions;
+        => functions;
 
     public IReadOnlyDictionary<string, VariableSymbol> VariablesInScope
         => variables;

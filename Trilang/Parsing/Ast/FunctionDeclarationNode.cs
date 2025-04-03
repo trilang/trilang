@@ -11,7 +11,7 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
         bool isExternal,
         string name,
         IReadOnlyList<FunctionParameterNode> parameters,
-        string returnType,
+        TypeNode returnType,
         BlockStatementNode? body)
     {
         IsExternal = isExternal;
@@ -30,14 +30,14 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
     public static FunctionDeclarationNode Create(
         string name,
         IReadOnlyList<FunctionParameterNode> parameters,
-        string returnType,
+        TypeNode returnType,
         BlockStatementNode body)
         => new FunctionDeclarationNode(false, name, parameters, returnType, body);
 
     public static FunctionDeclarationNode CreateExternal(
         string name,
         IReadOnlyList<FunctionParameterNode> parameters,
-        string returnType)
+        TypeNode returnType)
         => new FunctionDeclarationNode(true, name, parameters, returnType, null);
 
     public static bool operator ==(FunctionDeclarationNode? left, FunctionDeclarationNode? right)
@@ -103,11 +103,11 @@ public class FunctionDeclarationNode : IStatementNode, IEquatable<FunctionDeclar
 
     public IReadOnlyList<FunctionParameterNode> Parameters { get; }
 
-    public string ReturnType { get; }
+    public TypeNode ReturnType { get; }
 
     public BlockStatementNode? Body { get; }
 
     public FunctionMetadata? Metadata { get; set; }
 
-    public SymbolTable? SymbolTable { get; set; }
+    public ISymbolTable? SymbolTable { get; set; }
 }

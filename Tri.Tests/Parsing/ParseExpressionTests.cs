@@ -18,12 +18,12 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new LiteralExpressionNode(LiteralExpressionKind.Number, 5)
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode]))
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode]))
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
@@ -42,7 +42,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new UnaryExpressionNode(
                 UnaryExpressionKind.UnaryPlus,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
@@ -50,7 +50,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -70,7 +70,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new UnaryExpressionNode(
                 UnaryExpressionKind.UnaryMinus,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
@@ -78,7 +78,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -98,7 +98,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new UnaryExpressionNode(
                 UnaryExpressionKind.LogicalNot,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
@@ -106,7 +106,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -126,7 +126,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new UnaryExpressionNode(
                 UnaryExpressionKind.BitwiseNot,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
@@ -134,7 +134,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -159,7 +159,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new BinaryExpressionNode(
                 kind,
                 LiteralExpressionNode.Number(2),
@@ -168,7 +168,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -188,7 +188,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.BitwiseAnd,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
@@ -197,7 +197,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -217,7 +217,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.BitwiseOr,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
@@ -226,7 +226,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -246,7 +246,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.BitwiseXor,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
@@ -255,7 +255,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -275,7 +275,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "bool",
+            TypeNode.Create("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.ConditionalAnd,
                 new LiteralExpressionNode(LiteralExpressionKind.Boolean, true),
@@ -284,7 +284,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([
                     variableDeclarationNode
                 ])
             )
@@ -306,7 +306,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "bool",
+            TypeNode.Create("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.ConditionalOr,
                 new LiteralExpressionNode(LiteralExpressionKind.Boolean, true),
@@ -315,7 +315,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -335,7 +335,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "bool",
+            TypeNode.Create("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.Equality,
                 new LiteralExpressionNode(LiteralExpressionKind.Boolean, true),
@@ -344,7 +344,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -364,7 +364,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "bool",
+            TypeNode.Create("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.Inequality,
                 new LiteralExpressionNode(LiteralExpressionKind.Boolean, true),
@@ -373,7 +373,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -393,7 +393,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "bool",
+            TypeNode.Create("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.LessThan,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
@@ -402,7 +402,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -422,7 +422,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "bool",
+            TypeNode.Create("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.LessThanOrEqual,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
@@ -431,7 +431,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([
                     variableDeclarationNode
                 ])
             )
@@ -453,7 +453,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "bool",
+            TypeNode.Create("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.GreaterThan,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
@@ -462,7 +462,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -482,7 +482,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "bool",
+            TypeNode.Create("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.GreaterThanOrEqual,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
@@ -491,7 +491,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -520,7 +520,7 @@ public class ParseExpressionTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([
                     new ExpressionStatementNode(
                         new BinaryExpressionNode(
                             kind,
@@ -548,7 +548,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.Multiplication,
                 new BinaryExpressionNode(
@@ -560,7 +560,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
@@ -580,7 +580,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.Multiplication,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
@@ -590,8 +590,8 @@ public class ParseExpressionTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "main",
-                [new FunctionParameterNode("y", "i32")],
-                "void",
+                [new FunctionParameterNode("y", TypeNode.Create("i32"))],
+                TypeNode.Create("void"),
                 new BlockStatementNode([variableDeclarationNode])
             )
         ]);
@@ -612,7 +612,7 @@ public class ParseExpressionTests
 
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
-            "i32",
+            TypeNode.Create("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.ConditionalOr,
                 new LiteralExpressionNode(LiteralExpressionKind.Boolean, true),
@@ -653,7 +653,7 @@ public class ParseExpressionTests
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                "main", [], "void", new BlockStatementNode([variableDeclarationNode])
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([variableDeclarationNode])
             )
         ]);
 
