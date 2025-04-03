@@ -80,6 +80,15 @@ public class TypeChecker : IVisitor
         return (T?)function;
     }
 
+    public void Visit(ArrayAccessExpressionNode node)
+    {
+        node.Member.Accept(this);
+        node.Index.Accept(this);
+
+        if (!Equals(node.Index.ReturnTypeMetadata, I32))
+            throw new TypeCheckerException();
+    }
+
     public void Visit(BinaryExpressionNode node)
     {
         node.Left.Accept(this);
@@ -139,7 +148,7 @@ public class TypeChecker : IVisitor
         else if (node.Kind is Assignment or AdditionAssignment or
                      SubtractionAssignment or MultiplicationAssignment or
                      DivisionAssignment or ModulusAssignment &&
-                 node.Left is VariableExpressionNode &&
+                 node.Left is MemberAccessExpressionNode &&
                  (Equals(node.Right.ReturnTypeMetadata, I8) ||
                   Equals(node.Right.ReturnTypeMetadata, I16) ||
                   Equals(node.Right.ReturnTypeMetadata, I32) ||
@@ -154,7 +163,7 @@ public class TypeChecker : IVisitor
             node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
         }
         else if (node.Kind is BitwiseAndAssignment or BitwiseOrAssignment or BitwiseXorAssignment &&
-                 node.Left is VariableExpressionNode &&
+                 node.Left is MemberAccessExpressionNode &&
                  (Equals(node.Right.ReturnTypeMetadata, I8) ||
                   Equals(node.Right.ReturnTypeMetadata, I16) ||
                   Equals(node.Right.ReturnTypeMetadata, I32) ||
@@ -184,11 +193,13 @@ public class TypeChecker : IVisitor
 
     public void Visit(CallExpressionNode node)
     {
+        node.Member.Accept(this);
+
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
         // TODO: overload support
-        var symbol = node.SymbolTable?.GetFunction(node.FunctionName) ??
+        var symbol = node.SymbolTable?.GetFunction(node.Member.Name) ??
                      throw new TypeCheckerException();
 
         var function = symbol.Node.Metadata ??
@@ -254,6 +265,14 @@ public class TypeChecker : IVisitor
 
             _ => throw new ArgumentOutOfRangeException(),
         };
+    }
+
+    public void Visit(MemberAccessExpressionNode node)
+    {
+        var symbol = node.SymbolTable?.GetVariable(node.Name) ??
+                     throw new TypeCheckerException();
+
+        node.ReturnTypeMetadata = symbol.Node.Type.Metadata;
     }
 
     public void Visit(ReturnStatementNode node)
@@ -341,14 +360,6 @@ public class TypeChecker : IVisitor
         {
             throw new TypeCheckerException();
         }
-    }
-
-    public void Visit(VariableExpressionNode node)
-    {
-        var symbol = node.SymbolTable?.GetVariable(node.Name) ??
-                     throw new TypeCheckerException();
-
-        node.ReturnTypeMetadata = symbol.Node.Type.Metadata;
     }
 
     public void Visit(VariableDeclarationStatementNode node)

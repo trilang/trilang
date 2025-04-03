@@ -4,24 +4,18 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode>
+public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAccessExpressionNode>
 {
-    public CallExpressionNode(MemberAccessExpressionNode member, IReadOnlyList<IExpressionNode> parameters)
-    {
-        Member = member;
-        Parameters = parameters;
+    public MemberAccessExpressionNode(string name)
+        => Name = name;
 
-        foreach (var parameter in parameters)
-            parameter.Parent = this;
-    }
-
-    public static bool operator ==(CallExpressionNode? left, CallExpressionNode? right)
+    public static bool operator ==(MemberAccessExpressionNode? left, MemberAccessExpressionNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(CallExpressionNode? left, CallExpressionNode? right)
+    public static bool operator !=(MemberAccessExpressionNode? left, MemberAccessExpressionNode? right)
         => !Equals(left, right);
 
-    public bool Equals(CallExpressionNode? other)
+    public bool Equals(MemberAccessExpressionNode? other)
     {
         if (other is null)
             return false;
@@ -29,9 +23,8 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
         if (ReferenceEquals(this, other))
             return true;
 
-        return Member.Equals(other.Member) &&
+        return Name == other.Name &&
                Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
-               Parameters.SequenceEqual(other.Parameters) &&
                Equals(SymbolTable, other.SymbolTable);
     }
 
@@ -46,11 +39,11 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((CallExpressionNode)obj);
+        return Equals((MemberAccessExpressionNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Member, Parameters);
+        => HashCode.Combine(Name);
 
     public override string ToString()
     {
@@ -68,14 +61,9 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
 
     public ISyntaxNode? Parent { get; set; }
 
-    public MemberAccessExpressionNode Member { get; }
-
-    public IReadOnlyList<IExpressionNode> Parameters { get; }
-
-    public FunctionMetadata? Metadata { get; set; }
-
-    public IMetadata? ReturnTypeMetadata
-        => Metadata?.ReturnType;
-
     public ISymbolTable? SymbolTable { get; set; }
+
+    public string Name { get; }
+
+    public IMetadata? ReturnTypeMetadata { get; set; }
 }

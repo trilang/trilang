@@ -18,6 +18,10 @@ public class TypeCheckerTests
 
         return node switch
         {
+            ArrayAccessExpressionNode arrayNode
+                => Find<T>(arrayNode.Member) ??
+                   Find<T>(arrayNode.Index),
+
             BinaryExpressionNode binaryExpressionNode
                 => Find<T>(binaryExpressionNode.Left) ??
                    Find<T>(binaryExpressionNode.Right),
@@ -72,7 +76,7 @@ public class TypeCheckerTests
             VariableDeclarationStatementNode variableDeclarationStatementNode
                 => Find<T>(variableDeclarationStatementNode.Expression),
 
-            VariableExpressionNode
+            MemberAccessExpressionNode
                 => null,
 
             UnaryExpressionNode unaryExpressionNode

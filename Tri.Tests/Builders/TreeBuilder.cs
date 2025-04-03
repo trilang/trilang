@@ -267,7 +267,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IExpressionBuilder Variable(string name)
         {
-            var variable = new VariableExpressionNode(name) { SymbolTable = symbolTable };
+            var variable = new MemberAccessExpressionNode(name) { SymbolTable = symbolTable };
             stack.Push(variable);
 
             return this;
@@ -345,7 +345,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             for (var i = stack.Count - 1; i >= 0; i--)
                 parameters[i] = stack.Pop();
 
-            var call = new CallExpressionNode(name, parameters) { SymbolTable = symbolTable };
+            var call = new CallExpressionNode(new MemberAccessExpressionNode(name), parameters)
+            {
+                SymbolTable = symbolTable
+            };
             stack.Push(call);
 
             return this;

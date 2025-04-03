@@ -60,8 +60,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Addition,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -92,8 +92,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Subtraction,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -124,8 +124,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Multiplication,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -156,8 +156,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Division,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -188,8 +188,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.BitwiseAnd,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -220,8 +220,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.BitwiseOr,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -252,8 +252,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.BitwiseXor,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -284,8 +284,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.ConditionalAnd,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -316,8 +316,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.ConditionalOr,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -348,8 +348,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Equality,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -380,8 +380,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Inequality,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -412,8 +412,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.LessThan,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -444,8 +444,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.LessThanOrEqual,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -476,8 +476,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThan,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -508,8 +508,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThanOrEqual,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])
@@ -538,7 +538,7 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new UnaryExpressionNode(
                             UnaryExpressionKind.UnaryPlus,
-                            new VariableExpressionNode("x")
+                            new MemberAccessExpressionNode("x")
                         )
                     )
                 ])
@@ -567,7 +567,7 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new UnaryExpressionNode(
                             UnaryExpressionKind.UnaryMinus,
-                            new VariableExpressionNode("x")
+                            new MemberAccessExpressionNode("x")
                         )
                     )
                 ])
@@ -596,7 +596,7 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new UnaryExpressionNode(
                             UnaryExpressionKind.LogicalNot,
-                            new VariableExpressionNode("x")
+                            new MemberAccessExpressionNode("x")
                         )
                     )
                 ])
@@ -625,7 +625,7 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new UnaryExpressionNode(
                             UnaryExpressionKind.BitwiseNot,
-                            new VariableExpressionNode("x")
+                            new MemberAccessExpressionNode("x")
                         )
                     )
                 ])
@@ -654,20 +654,20 @@ public class CommonFormatterTests
                     new IfStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.LessThan,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                         ),
                         new BlockStatementNode([
                             new ReturnStatementNode(
                                 new UnaryExpressionNode(
                                     UnaryExpressionKind.UnaryMinus,
-                                    new VariableExpressionNode("x")
+                                    new MemberAccessExpressionNode("x")
                                 )
                             )
                         ])
                     ),
                     new ReturnStatementNode(
-                        new VariableExpressionNode("x")
+                        new MemberAccessExpressionNode("x")
                     )
                 ])
             ),
@@ -698,20 +698,20 @@ public class CommonFormatterTests
                     new IfStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.LessThan,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                         ),
                         new BlockStatementNode([
                             new ReturnStatementNode(
                                 new UnaryExpressionNode(
                                     UnaryExpressionKind.UnaryMinus,
-                                    new VariableExpressionNode("x")
+                                    new MemberAccessExpressionNode("x")
                                 )
                             )
                         ]),
                         new BlockStatementNode([
                             new ReturnStatementNode(
-                                new VariableExpressionNode("x")
+                                new MemberAccessExpressionNode("x")
                             )
                         ])
                     )
@@ -747,8 +747,8 @@ public class CommonFormatterTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Addition,
-                            new VariableExpressionNode("x"),
-                            new VariableExpressionNode("y")
+                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("y")
                         )
                     )
                 ])),
@@ -758,10 +758,12 @@ public class CommonFormatterTests
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
-                        new CallExpressionNode("add", [
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                        ])
+                        new CallExpressionNode(
+                            new MemberAccessExpressionNode("add"),
+                            [
+                                new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
+                                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
+                            ])
                     )
                 ])),
         ]);
@@ -801,7 +803,7 @@ public class CommonFormatterTests
                     new ExpressionStatementNode(
                         new BinaryExpressionNode(
                             kind,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             LiteralExpressionNode.Number(1))
                     )
                 ])
@@ -830,7 +832,7 @@ public class CommonFormatterTests
                     new WhileNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.LessThan,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             LiteralExpressionNode.Number(0)
                         ),
                         new BlockStatementNode()
@@ -862,7 +864,7 @@ public class CommonFormatterTests
                     new WhileNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.LessThan,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             LiteralExpressionNode.Number(0)
                         ),
                         new BlockStatementNode([
@@ -897,7 +899,7 @@ public class CommonFormatterTests
                     new WhileNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.LessThan,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             LiteralExpressionNode.Number(0)
                         ),
                         new BlockStatementNode([
@@ -940,6 +942,34 @@ public class CommonFormatterTests
             """
             function add(x: i32[]): void {
                 return 0;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ArrayAccessTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "add",
+                [new FunctionParameterNode("x", TypeNode.Array("i32"))],
+                TypeNode.Create("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new ArrayAccessExpressionNode(
+                            new MemberAccessExpressionNode("x"),
+                            LiteralExpressionNode.Number(0))
+                    )
+                ])
+            ),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function add(x: i32[]): void {
+                return x[0];
             }
             """;
 

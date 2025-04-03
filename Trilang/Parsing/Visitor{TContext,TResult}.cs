@@ -5,6 +5,20 @@ namespace Trilang.Parsing;
 public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     where TContext : VisitorContext<TResult>
 {
+    public void Visit(ArrayAccessExpressionNode node, TContext context)
+    {
+        VisitEnter(node, context);
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(ArrayAccessExpressionNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(ArrayAccessExpressionNode node, TContext context)
+    {
+    }
+
     public void Visit(BinaryExpressionNode node, TContext context)
     {
         if (context.IsFinished)
@@ -70,6 +84,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
             return;
 
         VisitEnter(node, context);
+
+        node.Member.Accept(this, context);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, context);
@@ -205,6 +221,23 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(MemberAccessExpressionNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(MemberAccessExpressionNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(MemberAccessExpressionNode node, TContext context)
+    {
+    }
+
     public void Visit(ReturnStatementNode node, TContext context)
     {
         if (context.IsFinished)
@@ -280,23 +313,6 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     }
 
     protected virtual void VisitExit(UnaryExpressionNode node, TContext context)
-    {
-    }
-
-    public void Visit(VariableExpressionNode node, TContext context)
-    {
-        if (context.IsFinished)
-            return;
-
-        VisitEnter(node, context);
-        VisitExit(node, context);
-    }
-
-    protected virtual void VisitEnter(VariableExpressionNode node, TContext context)
-    {
-    }
-
-    protected virtual void VisitExit(VariableExpressionNode node, TContext context)
     {
     }
 

@@ -524,7 +524,7 @@ public class ParseExpressionTests
                     new ExpressionStatementNode(
                         new BinaryExpressionNode(
                             kind,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             LiteralExpressionNode.Number(1)
                         )
                     )
@@ -584,7 +584,7 @@ public class ParseExpressionTests
             new BinaryExpressionNode(
                 BinaryExpressionKind.Multiplication,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new VariableExpressionNode("y")
+                new MemberAccessExpressionNode("y")
             )
         );
         var expected = new SyntaxTree([
@@ -658,5 +658,51 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseArrayAccessTest()
+    {
+        var parse = new Parser();
+        var tree = parse.Parse(
+            """
+            function test(x: i32[]): void {
+                var a: i32 = x[0];
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "test",
+                [new FunctionParameterNode("x", TypeNode.Array("i32"))],
+                TypeNode.Create("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "a",
+                        TypeNode.Create("i32"),
+                        new ArrayAccessExpressionNode(
+                            new MemberAccessExpressionNode("x"),
+                            LiteralExpressionNode.Number(0)
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseArrayAccessMissingCloseTest()
+    {
+        var parse = new Parser();
+        const string code =
+            """
+            function test(x: i32[]): void {
+                var a: i32 = x[0;
+            }
+            """;
+
+        Assert.Throws<ParseException>(() => parse.Parse(code));
     }
 }

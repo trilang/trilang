@@ -4,6 +4,8 @@ namespace Trilang.Parsing;
 
 public interface IVisitor<in TContext>
 {
+    void Visit(ArrayAccessExpressionNode node, TContext context);
+
     void Visit(BinaryExpressionNode node, TContext context);
 
     void Visit(BlockStatementNode node, TContext context);
@@ -24,6 +26,8 @@ public interface IVisitor<in TContext>
 
     void Visit(LiteralExpressionNode node, TContext context);
 
+    void Visit(MemberAccessExpressionNode node, TContext context);
+
     void Visit(ReturnStatementNode node, TContext context);
 
     void Visit(SyntaxTree node, TContext context);
@@ -31,8 +35,6 @@ public interface IVisitor<in TContext>
     void Visit(TypeNode node, TContext context);
 
     void Visit(UnaryExpressionNode node, TContext context);
-
-    void Visit(VariableExpressionNode node, TContext context);
 
     void Visit(VariableDeclarationStatementNode node, TContext context);
 

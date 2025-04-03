@@ -23,7 +23,7 @@ public class VariableUsedBeforeDeclared : Visitor<VisitorContext<object>, object
             scope.Add(node.Name);
     }
 
-    protected override void VisitEnter(VariableExpressionNode node, VisitorContext<object> context)
+    protected override void VisitEnter(MemberAccessExpressionNode node, VisitorContext<object> context)
     {
         var symbol = node.SymbolTable?.GetVariable(node.Name) ??
                      throw new TypeCheckerException();

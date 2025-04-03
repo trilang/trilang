@@ -26,7 +26,7 @@ public class ParseLoopTests
                     new WhileNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThan,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             LiteralExpressionNode.Number(0)
                         ),
                         new BlockStatementNode([])
@@ -116,7 +116,7 @@ public class ParseLoopTests
                     new WhileNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThan,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             LiteralExpressionNode.Number(0)
                         ),
                         new BlockStatementNode([new BreakNode()])
@@ -150,7 +150,7 @@ public class ParseLoopTests
                     new WhileNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThan,
-                            new VariableExpressionNode("x"),
+                            new MemberAccessExpressionNode("x"),
                             LiteralExpressionNode.Number(0)
                         ),
                         new BlockStatementNode([new ContinueNode()])

@@ -9,6 +9,14 @@ public partial class CommonFormatter : IFormatter
     public CommonFormatter()
         => writer = new Writer();
 
+    public void Visit(ArrayAccessExpressionNode node)
+    {
+        node.Member.Accept(this);
+        writer.Write('[');
+        node.Index.Accept(this);
+        writer.Write(']');
+    }
+
     public void Visit(BinaryExpressionNode node)
     {
         node.Left.Accept(this);
@@ -69,7 +77,7 @@ public partial class CommonFormatter : IFormatter
 
     public void Visit(CallExpressionNode node)
     {
-        writer.Write(node.FunctionName);
+        node.Member.Accept(this);
         writer.Write('(');
 
         for (var i = 0; i < node.Parameters.Count; i++)
@@ -165,6 +173,9 @@ public partial class CommonFormatter : IFormatter
         }
     }
 
+    public void Visit(MemberAccessExpressionNode node)
+        => writer.Write(node.Name);
+
     public void Visit(ReturnStatementNode node)
     {
         writer.Write("return ");
@@ -208,9 +219,6 @@ public partial class CommonFormatter : IFormatter
 
         node.Operand.Accept(this);
     }
-
-    public void Visit(VariableExpressionNode node)
-        => writer.Write(node.Name);
 
     public void Visit(VariableDeclarationStatementNode node)
     {

@@ -23,9 +23,10 @@ public class ParseCallExpressionTests
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ExpressionStatementNode(
-                        new CallExpressionNode("print", [
-                            new LiteralExpressionNode(LiteralExpressionKind.String, "Hello, World!")
-                        ])
+                        new CallExpressionNode(
+                            new MemberAccessExpressionNode("print"),
+                            [new LiteralExpressionNode(LiteralExpressionKind.String, "Hello, World!")]
+                        )
                     )
                 ])
             )
@@ -52,11 +53,13 @@ public class ParseCallExpressionTests
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ExpressionStatementNode(
-                        new CallExpressionNode("sum", [
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 3),
-                        ])
+                        new CallExpressionNode(
+                            new MemberAccessExpressionNode("sum"),
+                            [
+                                new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
+                                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
+                                new LiteralExpressionNode(LiteralExpressionKind.Number, 3),
+                            ])
                     )
                 ])
             )
@@ -82,11 +85,13 @@ public class ParseCallExpressionTests
             new BinaryExpressionNode(
                 BinaryExpressionKind.Addition,
                 new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
-                new CallExpressionNode("sum", [
-                    new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
-                    new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                    new LiteralExpressionNode(LiteralExpressionKind.Number, 3),
-                ])
+                new CallExpressionNode(
+                    new MemberAccessExpressionNode("sum"),
+                    [
+                        new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
+                        new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
+                        new LiteralExpressionNode(LiteralExpressionKind.Number, 3),
+                    ])
             )
         );
         var expected = new SyntaxTree([

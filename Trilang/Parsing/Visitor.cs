@@ -4,6 +4,20 @@ namespace Trilang.Parsing;
 
 public abstract class Visitor : IVisitor
 {
+    public void Visit(ArrayAccessExpressionNode node)
+    {
+        VisitEnter(node);
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(ArrayAccessExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitExit(ArrayAccessExpressionNode node)
+    {
+    }
+
     public void Visit(BinaryExpressionNode node)
     {
         VisitEnter(node);
@@ -57,6 +71,8 @@ public abstract class Visitor : IVisitor
     public void Visit(CallExpressionNode node)
     {
         VisitEnter(node);
+
+        node.Member.Accept(this);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
@@ -174,6 +190,20 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(MemberAccessExpressionNode node)
+    {
+        VisitEnter(node);
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(MemberAccessExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitExit(MemberAccessExpressionNode node)
+    {
+    }
+
     public void Visit(ReturnStatementNode node)
     {
         VisitEnter(node);
@@ -237,20 +267,6 @@ public abstract class Visitor : IVisitor
     }
 
     protected virtual void VisitExit(UnaryExpressionNode node)
-    {
-    }
-
-    public void Visit(VariableExpressionNode node)
-    {
-        VisitEnter(node);
-        VisitExit(node);
-    }
-
-    protected virtual void VisitEnter(VariableExpressionNode node)
-    {
-    }
-
-    protected virtual void VisitExit(VariableExpressionNode node)
     {
     }
 

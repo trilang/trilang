@@ -6,6 +6,14 @@ namespace Trilang.Semantics;
 
 public class SymbolFinder : IVisitor<SymbolFinderContext>
 {
+    public void Visit(ArrayAccessExpressionNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        node.Member.Accept(this, context);
+        node.Index.Accept(this, context);
+    }
+
     public void Visit(BinaryExpressionNode node, SymbolFinderContext context)
     {
         node.Left.Accept(this, context);
@@ -27,6 +35,8 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
     public void Visit(CallExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
+
+        node.Member.Accept(this, context);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, context);
@@ -88,6 +98,11 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable = context.SymbolTable;
     }
 
+    public void Visit(MemberAccessExpressionNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+    }
+
     public void Visit(ReturnStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
@@ -116,11 +131,6 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable = context.SymbolTable;
 
         node.Operand.Accept(this, context);
-    }
-
-    public void Visit(VariableExpressionNode node, SymbolFinderContext context)
-    {
-        node.SymbolTable = context.SymbolTable;
     }
 
     public void Visit(VariableDeclarationStatementNode node, SymbolFinderContext context)
