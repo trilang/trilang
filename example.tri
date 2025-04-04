@@ -1,5 +1,39 @@
 external function print(text: string): void;
 
+// empty type
+type T1;
+
+// alias to interface
+type T2 = { }
+
+// class
+type Point {
+    public x: i32;
+    public y: i32;
+
+    public constructor(x: i32, y: i32) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public distance(other: Point): f64 {
+        return sqrt((this.x - other.x) * (this.x - other.x) + (this.y - other.y) * (this.y - other.y));
+    }
+}
+
+// du
+type Numbers = i8 | i16 | i32 | i64;
+type NullableNumber = Numbers | null;
+type Days = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+
+type Result<T> =
+    | Success<T> { value: T }
+    | Failure    { error: string }
+
+// enums???
+type Color = { Red, Green, Blue };
+type Color = Red | Green | Blue;
+
 function main(): i32 {
     var number: i32 = 2 + 2 * 2;
     if (number == 6) {

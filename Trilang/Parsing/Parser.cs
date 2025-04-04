@@ -9,7 +9,7 @@ public class Parser
     {
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code);
-        var context = new ParserContext(tokens);
+        var context = new ParserContext(tokens, this);
         var functions = new List<FunctionDeclarationNode>();
 
         while (!context.Reader.HasEnded)
@@ -340,19 +340,23 @@ public class Parser
             kind = UnaryExpressionKind.LogicalNot;
         else if (context.Reader.Check(TokenKind.Tilde))
             kind = UnaryExpressionKind.BitwiseNot;
-        else
-            return TryParseOperand(context);
 
-        var operand = TryParseOperand(context);
-        if (operand is null)
-            throw new ParseException("Expected an operand.");
+        if (kind != UnaryExpressionKind.Unknown)
+        {
+            var operand = TryParseUnaryExpression(context) ??
+                          throw new ParseException("Expected an operand.");
 
-        return new UnaryExpressionNode(kind, operand);
+            return new UnaryExpressionNode(kind, operand);
+        }
+
+        return TryParseOperand(context);
     }
 
     private IExpressionNode? TryParseOperand(ParserContext context)
         => TryParseParenExpression(context) ??
            TryParseCallExpression(context) ??
+           TryParseArrayAccessExpression(context) ??
+           TryParseMemberExpression(context) ??
            TryParseLiteral(context);
 
     private IExpressionNode? TryParseParenExpression(ParserContext context)
@@ -371,48 +375,62 @@ public class Parser
     }
 
     private IExpressionNode? TryParseCallExpression(ParserContext context)
-    {
-        var name = TryParseId(context);
-        if (name is null)
-            return null;
-
-        var member = new MemberAccessExpressionNode(name);
-
-        if (context.Reader.Check(TokenKind.OpenParenthesis))
+        => context.Reader.Scoped(context, static c =>
         {
+            var name = c.Parser.TryParseId(c);
+            if (name is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.OpenParenthesis))
+                return null;
+
             var arguments = new List<IExpressionNode>();
-            var argument = TryParseExpression(context);
+            var argument = c.Parser.TryParseExpression(c);
             if (argument is not null)
             {
                 arguments.Add(argument);
 
-                while (context.Reader.Check(TokenKind.Comma))
+                while (c.Reader.Check(TokenKind.Comma))
                 {
-                    argument = TryParseExpression(context) ??
+                    argument = c.Parser.TryParseExpression(c) ??
                                throw new ParseException("Expected an argument.");
 
                     arguments.Add(argument);
                 }
             }
 
-            if (!context.Reader.Check(TokenKind.CloseParenthesis))
+            if (!c.Reader.Check(TokenKind.CloseParenthesis))
                 throw new ParseException("Expected a close parenthesis.");
 
-            return new CallExpressionNode(member, arguments);
-        }
+            return new CallExpressionNode(new MemberAccessExpressionNode(name), arguments);
+        });
 
-        if (context.Reader.Check(TokenKind.OpenBracket))
+    private IExpressionNode? TryParseArrayAccessExpression(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
         {
-            var index = TryParseExpression(context) ??
+            var name = c.Parser.TryParseId(c);
+            if (name is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.OpenBracket))
+                return null;
+
+            var index = c.Parser.TryParseExpression(c) ??
                         throw new ParseException("Expected an index.");
 
-            if (!context.Reader.Check(TokenKind.CloseBracket))
+            if (!c.Reader.Check(TokenKind.CloseBracket))
                 throw new ParseException("Expected a close bracket.");
 
-            return new ArrayAccessExpressionNode(member, index);
-        }
+            return new ArrayAccessExpressionNode(new MemberAccessExpressionNode(name), index);
+        });
 
-        return member;
+    private IExpressionNode? TryParseMemberExpression(ParserContext context)
+    {
+        var name = TryParseId(context);
+        if (name is null)
+            return null;
+
+        return new MemberAccessExpressionNode(name);
     }
 
     private LiteralExpressionNode? TryParseLiteral(ParserContext context)

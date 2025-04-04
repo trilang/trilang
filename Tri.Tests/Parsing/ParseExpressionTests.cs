@@ -142,6 +142,38 @@ public class ParseExpressionTests
     }
 
     [Test]
+    public void MultipleUnaryOperatorsTest()
+    {
+        var parse = new Parser();
+        var tree = parse.Parse(
+            """
+            function main(): void {
+                var x: i32 = ~+2;
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main", [], TypeNode.Create("void"), new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "x",
+                        TypeNode.Create("i32"),
+                        new UnaryExpressionNode(
+                            UnaryExpressionKind.BitwiseNot,
+                            new UnaryExpressionNode(
+                                UnaryExpressionKind.UnaryPlus,
+                                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                            )
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
     [TestCase("+", BinaryExpressionKind.Addition)]
     [TestCase("-", BinaryExpressionKind.Subtraction)]
     [TestCase("*", BinaryExpressionKind.Multiplication)]

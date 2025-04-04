@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Trilang.Lexing;
+using Trilang.Parsing.Ast;
 
 namespace Trilang.Parsing;
 
@@ -33,6 +34,18 @@ internal sealed class TokenReader
             token = Current;
             Advance();
         }
+
+        return result;
+    }
+
+    public TResult Scoped<TResult>(ParserContext context, Func<ParserContext, TResult> action)
+        where TResult : ISyntaxNode?
+    {
+        var savedIndex = index;
+
+        var result = action(context);
+        if (result is null)
+            index = savedIndex;
 
         return result;
     }
