@@ -54,7 +54,7 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

@@ -57,7 +57,7 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

@@ -42,6 +42,21 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
             parameter.Accept(this, context);
     }
 
+    public void Visit(ConstructorDeclarationNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        context.Scoped(c =>
+        {
+            c.DisableNextScope();
+
+            foreach (var parameter in node.Parameters)
+                parameter.Accept(this, c);
+
+            node.Body.Accept(this, c);
+        });
+    }
+
     public void Visit(ContinueNode node, SymbolFinderContext context)
         => node.SymbolTable = context.SymbolTable;
 
@@ -124,7 +139,7 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
     {
         node.SymbolTable = context.SymbolTable;
 
-        node.Expression.Accept(this, context);
+        node.Expression?.Accept(this, context);
     }
 
     public void Visit(ParameterNode node, SymbolFinderContext context)
@@ -159,6 +174,9 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         {
             foreach (var field in node.Fields)
                 field.Accept(this, c);
+
+            foreach (var constructor in node.Constructors)
+                constructor.Accept(this, c);
 
             foreach (var method in node.Methods)
                 method.Accept(this, c);

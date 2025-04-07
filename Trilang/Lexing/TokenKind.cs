@@ -68,4 +68,5 @@ public enum TokenKind
     Private,
     Type,
     This,
+    Constructor,
 }

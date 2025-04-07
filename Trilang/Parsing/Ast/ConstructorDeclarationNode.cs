@@ -1,21 +1,27 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAccessExpressionNode>
+public class ConstructorDeclarationNode : ISyntaxNode, IEquatable<ConstructorDeclarationNode>
 {
-    public MemberAccessExpressionNode(string name)
-        => Name = name;
+    public ConstructorDeclarationNode(
+        AccessModifier accessModifier,
+        IReadOnlyList<ParameterNode> parameters,
+        BlockStatementNode body)
+    {
+        AccessModifier = accessModifier;
+        Parameters = parameters;
+        Body = body;
+    }
 
-    public static bool operator ==(MemberAccessExpressionNode? left, MemberAccessExpressionNode? right)
+    public static bool operator ==(ConstructorDeclarationNode? left, ConstructorDeclarationNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(MemberAccessExpressionNode? left, MemberAccessExpressionNode? right)
+    public static bool operator !=(ConstructorDeclarationNode? left, ConstructorDeclarationNode? right)
         => !Equals(left, right);
 
-    public bool Equals(MemberAccessExpressionNode? other)
+    public bool Equals(ConstructorDeclarationNode? other)
     {
         if (other is null)
             return false;
@@ -23,8 +29,9 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
+        return AccessModifier == other.AccessModifier &&
+               Parameters.SequenceEqual(other.Parameters) &&
+               Body.Equals(other.Body) &&
                Equals(SymbolTable, other.SymbolTable);
     }
 
@@ -39,11 +46,11 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((MemberAccessExpressionNode)obj);
+        return Equals((ConstructorDeclarationNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
+        => HashCode.Combine((int)AccessModifier, Parameters, Body);
 
     public override string ToString()
     {
@@ -63,7 +70,9 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public string Name { get; }
+    public AccessModifier AccessModifier { get; }
 
-    public IMetadata? ReturnTypeMetadata { get; set; }
+    public IReadOnlyList<ParameterNode> Parameters { get; }
+
+    public BlockStatementNode Body { get; }
 }

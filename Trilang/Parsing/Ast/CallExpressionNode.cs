@@ -55,7 +55,7 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

@@ -52,7 +52,7 @@ public class WhileNode : IStatementNode, IEquatable<WhileNode>
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

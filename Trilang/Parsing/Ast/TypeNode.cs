@@ -56,7 +56,7 @@ public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

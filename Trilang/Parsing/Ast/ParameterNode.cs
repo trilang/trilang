@@ -47,7 +47,7 @@ public class ParameterNode : VariableDeclarationNode, IEquatable<ParameterNode>
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

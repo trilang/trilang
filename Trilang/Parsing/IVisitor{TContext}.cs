@@ -14,6 +14,8 @@ public interface IVisitor<in TContext>
 
     void Visit(CallExpressionNode node, TContext context);
 
+    void Visit(ConstructorDeclarationNode node, TContext context);
+
     void Visit(ContinueNode node, TContext context);
 
     void Visit(ExpressionStatementNode node, TContext context);

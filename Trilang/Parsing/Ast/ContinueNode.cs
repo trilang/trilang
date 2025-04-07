@@ -41,7 +41,7 @@ public class ContinueNode : IStatementNode, IEquatable<ContinueNode>
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

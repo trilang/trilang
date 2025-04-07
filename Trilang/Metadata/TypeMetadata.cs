@@ -1,5 +1,3 @@
-using Trilang.Parsing.Ast;
-
 namespace Trilang.Metadata;
 
 public class TypeMetadata : IMetadata, IEquatable<TypeMetadata>

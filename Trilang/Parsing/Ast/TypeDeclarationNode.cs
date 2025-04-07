@@ -10,15 +10,20 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
         AccessModifier accessModifier,
         string name,
         IReadOnlyList<FieldDeclarationNode> fields,
+        IReadOnlyList<ConstructorDeclarationNode> constructors,
         IReadOnlyList<MethodDeclarationNode> methods)
     {
         AccessModifier = accessModifier;
         Name = name;
         Fields = fields;
+        Constructors = constructors;
         Methods = methods;
 
         foreach (var field in fields)
             field.Parent = this;
+
+        foreach (var constructor in constructors)
+            constructor.Parent = this;
 
         foreach (var method in methods)
             method.Parent = this;
@@ -41,6 +46,7 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
                Fields.SequenceEqual(other.Fields) &&
+               Constructors.SequenceEqual(other.Constructors) &&
                Methods.SequenceEqual(other.Methods) &&
                Equals(SymbolTable, other.SymbolTable) &&
                Equals(Metadata, other.Metadata);
@@ -65,7 +71,7 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();
@@ -86,6 +92,8 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
     public string Name { get; }
 
     public IReadOnlyList<FieldDeclarationNode> Fields { get; }
+
+    public IReadOnlyList<ConstructorDeclarationNode> Constructors { get; }
 
     public IReadOnlyList<MethodDeclarationNode> Methods { get; }
 

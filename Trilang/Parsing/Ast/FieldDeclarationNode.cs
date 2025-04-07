@@ -49,7 +49,7 @@ public class FieldDeclarationNode : VariableDeclarationNode, IEquatable<FieldDec
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

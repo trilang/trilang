@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Trilang.Parsing.Formatters;
 
-public partial class CommonFormatter
+public partial class Formatter
 {
     private sealed class Writer
     {

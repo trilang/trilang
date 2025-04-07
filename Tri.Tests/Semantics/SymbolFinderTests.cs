@@ -258,6 +258,7 @@ public class SymbolFinderTests
             AccessModifier.Public,
             "Point",
             [],
+            [],
             []);
         var tree = new SyntaxTree([type]);
 
@@ -277,6 +278,7 @@ public class SymbolFinderTests
             AccessModifier.Public,
             "Point",
             [field1, field2],
+            [],
             []);
         var tree = new SyntaxTree([type]);
 
@@ -306,6 +308,7 @@ public class SymbolFinderTests
             AccessModifier.Public,
             "Point",
             [field1],
+            [],
             [method]);
         var tree = new SyntaxTree([type]);
 
@@ -318,5 +321,25 @@ public class SymbolFinderTests
         Assert.That(field2.SymbolTable, Is.Not.Null);
         Assert.That(field2.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
         Assert.That(field2.SymbolTable.VariablesInScope, Contains.Key(field1.Name).WithValue(new VariableSymbol(field2)));
+    }
+
+    [Test]
+    public void CtorDeclarationVariableTest()
+    {
+        var parameter = new ParameterNode("a", TypeNode.Create("i32"));
+        var ctor = new ConstructorDeclarationNode(AccessModifier.Public, [parameter], new BlockStatementNode());
+        var type = new TypeDeclarationNode(
+            AccessModifier.Public,
+            "Point",
+            [],
+            [ctor],
+            []);
+        var tree = new SyntaxTree([type]);
+
+        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+
+        Assert.That(parameter.SymbolTable, Is.Not.Null);
+        Assert.That(parameter.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
+        Assert.That(parameter.SymbolTable.VariablesInScope, Contains.Key(parameter.Name).WithValue(new VariableSymbol(parameter)));
     }
 }

@@ -2,11 +2,11 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Parsing.Formatters;
 
-public partial class CommonFormatter : IFormatter
+public partial class Formatter : IFormatter
 {
     private readonly Writer writer;
 
-    public CommonFormatter()
+    public Formatter()
         => writer = new Writer();
 
     private void WriteAccessModifier(AccessModifier accessModifier)
@@ -101,6 +101,24 @@ public partial class CommonFormatter : IFormatter
         }
 
         writer.Write(")");
+    }
+
+    public void Visit(ConstructorDeclarationNode node)
+    {
+        WriteAccessModifier(node.AccessModifier);
+        writer.Write(" constructor(");
+
+        for (var i = 0; i < node.Parameters.Count; i++)
+        {
+            node.Parameters[i].Accept(this);
+
+            if (i < node.Parameters.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write(") ");
+
+        node.Body.Accept(this);
     }
 
     public void Visit(ContinueNode node)
@@ -221,9 +239,16 @@ public partial class CommonFormatter : IFormatter
 
     public void Visit(ReturnStatementNode node)
     {
-        writer.Write("return ");
-        node.Expression.Accept(this);
-        writer.WriteLine(';');
+        if (node.Expression is not null)
+        {
+            writer.Write("return ");
+            node.Expression.Accept(this);
+            writer.WriteLine(';');
+        }
+        else
+        {
+            writer.WriteLine("return;");
+        }
     }
 
     public void Visit(SyntaxTree node)
@@ -251,6 +276,12 @@ public partial class CommonFormatter : IFormatter
         {
             foreach (var field in node.Fields)
                 field.Accept(this);
+
+            foreach (var constructor in node.Constructors)
+            {
+                constructor.Accept(this);
+                writer.WriteLine();
+            }
 
             foreach (var method in node.Methods)
             {

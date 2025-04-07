@@ -6,7 +6,7 @@ public interface IBlockBuilder
 {
     IBlockBuilder DefineVariable(string name, string type, Action<IExpressionBuilder> action);
 
-    IBlockBuilder Return(Action<IExpressionBuilder> action);
+    IBlockBuilder Return(Action<IExpressionBuilder>? action = null);
 
     IBlockBuilder Statement(Action<IExpressionBuilder> action);
 

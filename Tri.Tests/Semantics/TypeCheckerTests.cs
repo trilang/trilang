@@ -473,4 +473,30 @@ public class TypeCheckerTests
 
         Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
     }
+
+    [Test]
+    public void ReturnInConstructorTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .DefineConstructor(ctor => ctor
+                    .Body(body => body
+                        .Return())))
+            .Build();
+
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
+    }
+
+    [Test]
+    public void ReturnWithExpressionInConstructorTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .DefineConstructor(ctor => ctor
+                    .Body(body => body
+                        .Return(exp => exp.Number(0)))))
+            .Build();
+
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
+    }
 }

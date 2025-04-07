@@ -2,7 +2,7 @@ using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Parsing;
 
-public class CommonFormatterTests
+public class FormatterTests
 {
     [Test]
     public void FormatEmptyFunctionTest()
@@ -40,6 +40,30 @@ public class CommonFormatterTests
             }
 
             function main(): void {
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatEmptyReturnTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                TypeNode.Create("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode()
+                ])
+            ),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                return;
             }
             """;
 
@@ -980,7 +1004,7 @@ public class CommonFormatterTests
     public void PrivateTypeTest()
     {
         var tree = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Private, "MyType", [], [])
+            new TypeDeclarationNode(AccessModifier.Private, "MyType", [], [], [])
         ]);
         var formatted = tree.ToString();
         const string expected =
@@ -996,7 +1020,7 @@ public class CommonFormatterTests
     public void PublicTypeTest()
     {
         var tree = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Public, "MyType", [], [])
+            new TypeDeclarationNode(AccessModifier.Public, "MyType", [], [], [])
         ]);
         var formatted = tree.ToString();
         const string expected =
@@ -1012,8 +1036,8 @@ public class CommonFormatterTests
     public void TwoTypesTest()
     {
         var tree = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Private, "MyType1", [], []),
-            new TypeDeclarationNode(AccessModifier.Public, "MyType2", [], []),
+            new TypeDeclarationNode(AccessModifier.Private, "MyType1", [], [], []),
+            new TypeDeclarationNode(AccessModifier.Public, "MyType2", [], [], []),
         ]);
         var formatted = tree.ToString();
         const string expected =
@@ -1039,6 +1063,7 @@ public class CommonFormatterTests
                     new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32")),
                     new FieldDeclarationNode(AccessModifier.Private, "y", TypeNode.Create("i32")),
                 ],
+                [],
                 [])
         ]);
         var formatted = tree.ToString();
@@ -1054,7 +1079,7 @@ public class CommonFormatterTests
     }
 
     [Test]
-    public void PointTypeWithMethodsTest()
+    public void PointTypeWithEverythingTest()
     {
         var tree = new SyntaxTree([
             new TypeDeclarationNode(
@@ -1063,6 +1088,15 @@ public class CommonFormatterTests
                 [
                     new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32")),
                     new FieldDeclarationNode(AccessModifier.Private, "y", TypeNode.Create("i32")),
+                ],
+                [
+                    new ConstructorDeclarationNode(
+                        AccessModifier.Public,
+                        [
+                            new ParameterNode("x", TypeNode.Create("i32")),
+                            new ParameterNode("y", TypeNode.Create("i32")),
+                        ],
+                        new BlockStatementNode())
                 ],
                 [
                     new MethodDeclarationNode(
@@ -1085,6 +1119,8 @@ public class CommonFormatterTests
             public type Point {
                 private x: i32;
                 private y: i32;
+                public constructor(x: i32, y: i32) {
+                }
                 public toString(): string {
                 }
                 public distance(other: Point): string {

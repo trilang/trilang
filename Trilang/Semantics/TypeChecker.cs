@@ -287,6 +287,14 @@ public class TypeChecker : IVisitor
         }
     }
 
+    public void Visit(ConstructorDeclarationNode node)
+    {
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        node.Body.Accept(this);
+    }
+
     public void Visit(ContinueNode node)
     {
     }
@@ -351,12 +359,15 @@ public class TypeChecker : IVisitor
 
     public void Visit(ReturnStatementNode node)
     {
-        node.Expression.Accept(this);
+        node.Expression?.Accept(this);
+
+        if (node.Expression is not null && FindInParent<ConstructorDeclarationNode>(node) is not null)
+            throw new TypeCheckerException();
 
         var function = FindInParent<MethodDeclarationNode>(node);
         if (function is not null)
         {
-            if (!Equals(function.Metadata?.ReturnType, node.Expression.ReturnTypeMetadata))
+            if (!Equals(function.Metadata?.ReturnType, node.Expression?.ReturnTypeMetadata))
                 throw new TypeCheckerException();
         }
         else
@@ -365,7 +376,7 @@ public class TypeChecker : IVisitor
             if (method is null)
                 throw new TypeCheckerException();
 
-            if (!Equals(method.Metadata?.ReturnType, node.Expression.ReturnTypeMetadata))
+            if (!Equals(method.Metadata?.ReturnType, node.Expression?.ReturnTypeMetadata))
                 throw new TypeCheckerException();
         }
     }
@@ -394,6 +405,9 @@ public class TypeChecker : IVisitor
     {
         foreach (var field in node.Fields)
             field.Accept(this);
+
+        foreach (var constructor in node.Constructors)
+            constructor.Accept(this);
 
         foreach (var method in node.Methods)
             method.Accept(this);

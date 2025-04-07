@@ -5,10 +5,11 @@ namespace Trilang.Parsing.Ast;
 
 public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNode>
 {
-    public ReturnStatementNode(IExpressionNode expression)
+    public ReturnStatementNode(IExpressionNode? expression = null)
     {
         Expression = expression;
-        Expression.Parent = this;
+        if (Expression is not null)
+            Expression.Parent = this;
     }
 
     public static bool operator ==(ReturnStatementNode? left, ReturnStatementNode? right)
@@ -25,7 +26,7 @@ public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNod
         if (ReferenceEquals(this, other))
             return true;
 
-        return Expression.Equals(other.Expression) &&
+        return Equals(Expression, other.Expression) &&
                Equals(SymbolTable, other.SymbolTable);
     }
 
@@ -48,7 +49,7 @@ public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNod
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();
@@ -62,7 +63,7 @@ public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNod
 
     public ISyntaxNode? Parent { get; set; }
 
-    public IExpressionNode Expression { get; }
+    public IExpressionNode? Expression { get; }
 
     public ISymbolTable? SymbolTable { get; set; }
 }

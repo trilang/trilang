@@ -88,6 +88,26 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(ConstructorDeclarationNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        node.Body.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(ConstructorDeclarationNode node)
+    {
+    }
+
+    protected virtual void VisitExit(ConstructorDeclarationNode node)
+    {
+    }
+
     public void Visit(ContinueNode node)
     {
         VisitEnter(node);
@@ -229,7 +249,7 @@ public abstract class Visitor : IVisitor
     {
         VisitEnter(node);
 
-        node.Expression.Accept(this);
+        node.Expression?.Accept(this);
 
         VisitExit(node);
     }

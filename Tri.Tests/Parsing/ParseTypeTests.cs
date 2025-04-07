@@ -19,6 +19,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "Point",
                 [],
+                [],
                 []
             )
         ]);
@@ -90,6 +91,7 @@ public class ParseTypeTests
                     new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32")),
                     new FieldDeclarationNode(AccessModifier.Private, "y", TypeNode.Create("i32")),
                 ],
+                [],
                 []
             )
         ]);
@@ -166,6 +168,7 @@ public class ParseTypeTests
             new TypeDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 [],
                 [
                     new MethodDeclarationNode(
@@ -317,5 +320,38 @@ public class ParseTypeTests
                             """;
 
         Assert.Throws<ParseException>(() => parser.Parse(code));
+    }
+
+    [Test]
+    public void ParseCtorTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Point {
+                public constructor(x: i32, y: i32) { }
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new ConstructorDeclarationNode(
+                        AccessModifier.Public,
+                        [
+                            new ParameterNode("x", TypeNode.Create("i32")),
+                            new ParameterNode("y", TypeNode.Create("i32")),
+                        ],
+                        new BlockStatementNode([])
+                    )
+                ],
+                []
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
     }
 }

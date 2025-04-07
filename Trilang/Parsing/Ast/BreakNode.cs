@@ -41,7 +41,7 @@ public class BreakNode : IStatementNode, IEquatable<BreakNode>
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

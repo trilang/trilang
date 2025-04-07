@@ -101,6 +101,29 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(ConstructorDeclarationNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this, context);
+
+        node.Body.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(ConstructorDeclarationNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(ConstructorDeclarationNode node, TContext context)
+    {
+    }
+
     public void Visit(ContinueNode node, TContext context)
     {
         if (context.IsFinished)
@@ -269,7 +292,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitEnter(node, context);
 
-        node.Expression.Accept(this, context);
+        node.Expression?.Accept(this, context);
 
         VisitExit(node, context);
     }

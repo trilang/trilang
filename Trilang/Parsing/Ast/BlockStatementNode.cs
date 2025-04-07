@@ -55,7 +55,7 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

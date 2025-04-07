@@ -48,7 +48,7 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
 
     public override string ToString()
     {
-        var formatter = new CommonFormatter();
+        var formatter = new Formatter();
         Accept(formatter);
 
         return formatter.ToString();

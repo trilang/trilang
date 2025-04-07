@@ -139,10 +139,18 @@ public class Parser
             throw new ParseException("Expected an open brace.");
 
         var fields = new List<FieldDeclarationNode>();
+        var constructors = new List<ConstructorDeclarationNode>();
         var methods = new List<MethodDeclarationNode>();
 
         while (!context.Reader.Check(TokenKind.CloseBrace))
         {
+            var constructor = TryParseConstructor(context);
+            if (constructor is not null)
+            {
+                constructors.Add(constructor);
+                continue;
+            }
+
             var field = TryParseField(context);
             if (field is not null)
             {
@@ -160,8 +168,32 @@ public class Parser
             throw new ParseException("Expected a field or a method.");
         }
 
-        return new TypeDeclarationNode(accessModifier.Value, name, fields, methods);
+        return new TypeDeclarationNode(
+            accessModifier.Value,
+            name,
+            fields,
+            constructors,
+            methods);
     }
+
+    private ConstructorDeclarationNode? TryParseConstructor(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var accessModifier = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.Constructor))
+                return null;
+
+            var parameters = c.Parser.ParseFunctionParameters(c);
+
+            var block = c.Parser.TryParseBlock(c);
+            if (block is null)
+                throw new ParseException("Expected a constructor block.");
+
+            return new ConstructorDeclarationNode(accessModifier.Value, parameters, block);
+        });
 
     private FieldDeclarationNode? TryParseField(ParserContext context)
         => context.Reader.Scoped(context, static c =>
@@ -286,8 +318,6 @@ public class Parser
             return null;
 
         var expression = TryParseExpression(context);
-        if (expression is null)
-            throw new ParseException("Expected an expression.");
 
         if (!context.Reader.Check(TokenKind.SemiColon))
             throw new ParseException("Expected a semicolon.");

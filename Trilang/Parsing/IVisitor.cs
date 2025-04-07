@@ -14,6 +14,8 @@ public interface IVisitor
 
     void Visit(CallExpressionNode node);
 
+    void Visit(ConstructorDeclarationNode node);
+
     void Visit(ContinueNode node);
 
     void Visit(ExpressionStatementNode node);
