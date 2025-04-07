@@ -64,4 +64,8 @@ public enum TokenKind
     For,
     Break,
     Continue,
+    Public,
+    Private,
+    Type,
+    This,
 }

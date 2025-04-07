@@ -5,11 +5,11 @@ namespace Trilang.Parsing.Ast;
 
 public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 {
-    public SyntaxTree(IReadOnlyList<FunctionDeclarationNode> functions)
+    public SyntaxTree(IReadOnlyList<IDeclarationNode> declarations)
     {
-        Functions = functions;
+        Declarations = declarations;
 
-        foreach (var function in functions)
+        foreach (var function in declarations)
             function.Parent = this;
     }
 
@@ -27,7 +27,7 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Functions.SequenceEqual(other.Functions) &&
+        return Declarations.SequenceEqual(other.Declarations) &&
                Equals(SymbolTable, other.SymbolTable);
     }
 
@@ -46,7 +46,7 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Functions);
+        => HashCode.Combine(Declarations);
 
     public override string ToString()
     {
@@ -64,7 +64,7 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 
     public ISyntaxNode? Parent { get; set; }
 
-    public IReadOnlyList<FunctionDeclarationNode> Functions { get; }
+    public IReadOnlyList<IDeclarationNode> Declarations { get; }
 
     public ISymbolTable? SymbolTable { get; set; }
 }

@@ -6,5 +6,7 @@ public interface ISyntaxTreeBuilder
 {
     ISyntaxTreeBuilder DefineFunction(string name, Action<IFunctionBuilder> action);
 
+    ISyntaxTreeBuilder DefineType(string name, Action<ITypeBuilder> action);
+
     SyntaxTree Build();
 }

@@ -16,8 +16,8 @@ public class SymbolFinderTests
         tree.Accept(builder, new SymbolFinderContext());
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Functions, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Functions, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
     }
 
     [Test]
@@ -31,9 +31,9 @@ public class SymbolFinderTests
         tree.Accept(builder, new SymbolFinderContext());
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Functions, Has.Count.EqualTo(2));
-        Assert.That(tree.SymbolTable.Functions, Contains.Key(function1.Name).WithValue(new FunctionSymbol(function1)));
-        Assert.That(tree.SymbolTable.Functions, Contains.Key(function2.Name).WithValue(new FunctionSymbol(function2)));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(2));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function1.Name).WithValue(new FunctionSymbol(function1)));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function2.Name).WithValue(new FunctionSymbol(function2)));
     }
 
     [Test]
@@ -51,8 +51,8 @@ public class SymbolFinderTests
     public void FunctionWithParametersInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var a = new FunctionParameterNode("a", TypeNode.Create("i32"));
-        var b = new FunctionParameterNode("b", TypeNode.Create("i32"));
+        var a = new ParameterNode("a", TypeNode.Create("i32"));
+        var b = new ParameterNode("b", TypeNode.Create("i32"));
         var function = FunctionDeclarationNode.Create(
             "add",
             [a, b],
@@ -63,8 +63,8 @@ public class SymbolFinderTests
         tree.Accept(builder, new SymbolFinderContext());
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Functions, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Functions, Contains.Key("add").WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key("add").WithValue(new FunctionSymbol(function)));
 
         Assert.That(function.Body, Is.Not.Null);
         Assert.That(function.Body.SymbolTable, Is.Not.Null);
@@ -77,8 +77,8 @@ public class SymbolFinderTests
     public void FunctionWithSameParametersInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var a = new FunctionParameterNode("a", TypeNode.Create("i32"));
-        var b = new FunctionParameterNode("a", TypeNode.Create("i32"));
+        var a = new ParameterNode("a", TypeNode.Create("i32"));
+        var b = new ParameterNode("a", TypeNode.Create("i32"));
         var function = FunctionDeclarationNode.Create(
             "add",
             [a, b],
@@ -105,8 +105,8 @@ public class SymbolFinderTests
         tree.Accept(builder, new SymbolFinderContext());
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Functions, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Functions, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
 
         Assert.That(function.Body, Is.Not.Null);
         Assert.That(function.Body.SymbolTable, Is.Not.Null);
@@ -153,8 +153,8 @@ public class SymbolFinderTests
         tree.Accept(builder, new SymbolFinderContext());
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Functions, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Functions, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
 
         Assert.That(ifStatement.Then.SymbolTable, Is.Not.Null);
         Assert.That(ifStatement.Then.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
@@ -183,8 +183,8 @@ public class SymbolFinderTests
         tree.Accept(builder, new SymbolFinderContext());
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Functions, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Functions, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
 
         Assert.That(ifStatement.Then.SymbolTable, Is.Not.Null);
         Assert.That(ifStatement.Then.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
@@ -219,8 +219,8 @@ public class SymbolFinderTests
         tree.Accept(builder, new SymbolFinderContext());
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Functions, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Functions, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
 
         Assert.That(function.Body, Is.Not.Null);
         Assert.That(function.Body.SymbolTable, Is.Not.Null);
@@ -249,5 +249,74 @@ public class SymbolFinderTests
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
         Assert.That(tree.SymbolTable.Types, Contains.Key("i32[]").WithValue(symbol));
+    }
+
+    [Test]
+    public void TypeDeclarationTest()
+    {
+        var type = new TypeDeclarationNode(
+            AccessModifier.Public,
+            "Point",
+            [],
+            []);
+        var tree = new SyntaxTree([type]);
+
+        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type(type.Name, type)));
+    }
+
+    [Test]
+    public void FieldDeclarationTest()
+    {
+        var field1 = new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32"));
+        var field2 = new FieldDeclarationNode(AccessModifier.Private, "y", TypeNode.Create("i32"));
+        var type = new TypeDeclarationNode(
+            AccessModifier.Public,
+            "Point",
+            [field1, field2],
+            []);
+        var tree = new SyntaxTree([type]);
+
+        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+
+        Assert.That(field1.SymbolTable, Is.Not.Null);
+        Assert.That(field1.SymbolTable.VariablesInScope, Has.Count.EqualTo(2));
+        Assert.That(field1.SymbolTable.VariablesInScope, Contains.Key(field1.Name).WithValue(new VariableSymbol(field1)));
+        Assert.That(field1.SymbolTable.VariablesInScope, Contains.Key(field2.Name).WithValue(new VariableSymbol(field2)));
+    }
+
+    [Test]
+    public void FieldDeclarationAndMethodVariableTest()
+    {
+        var field1 = new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32"));
+        var field2 = new VariableDeclarationStatementNode(
+            "x",
+            TypeNode.Create("i32"),
+            LiteralExpressionNode.Number(1));
+        var method = new MethodDeclarationNode(
+            AccessModifier.Public,
+            "test",
+            [],
+            TypeNode.Create("void"),
+            new BlockStatementNode([field2]));
+        var type = new TypeDeclarationNode(
+            AccessModifier.Public,
+            "Point",
+            [field1],
+            [method]);
+        var tree = new SyntaxTree([type]);
+
+        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+
+        Assert.That(field1.SymbolTable, Is.Not.Null);
+        Assert.That(field1.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
+        Assert.That(field1.SymbolTable.VariablesInScope, Contains.Key(field1.Name).WithValue(new VariableSymbol(field1)));
+
+        Assert.That(field2.SymbolTable, Is.Not.Null);
+        Assert.That(field2.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
+        Assert.That(field2.SymbolTable.VariablesInScope, Contains.Key(field1.Name).WithValue(new VariableSymbol(field2)));
     }
 }

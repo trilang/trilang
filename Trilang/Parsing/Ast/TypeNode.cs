@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
@@ -52,6 +53,14 @@ public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
 
     public override int GetHashCode()
         => HashCode.Combine(Name, IsArray);
+
+    public override string ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
 
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);

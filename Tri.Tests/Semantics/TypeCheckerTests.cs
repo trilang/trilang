@@ -2,6 +2,7 @@ using Tri.Tests.Builders;
 using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Symbols;
 
 namespace Tri.Tests.Semantics;
 
@@ -45,14 +46,14 @@ public class TypeCheckerTests
             ExpressionStatementNode expressionStatementNode
                 => Find<T>(expressionStatementNode.Expression),
 
+            FieldDeclarationNode fieldDeclarationNode
+                => Find<T>(fieldDeclarationNode.Type),
+
             FunctionDeclarationNode functionDeclarationNode
                 => functionDeclarationNode.Parameters
                        .Select(Find<T>)
                        .FirstOrDefault(x => x is not null) ??
                    Find<T>(functionDeclarationNode.Body),
-
-            FunctionParameterNode
-                => null,
 
             IfStatementNode ifStatementNode
                 => Find<T>(ifStatementNode.Condition) ??
@@ -62,22 +63,40 @@ public class TypeCheckerTests
             LiteralExpressionNode
                 => null,
 
+            MethodDeclarationNode methodDeclarationNode
+                => methodDeclarationNode.Parameters
+                       .Select(Find<T>)
+                       .FirstOrDefault(x => x is not null) ??
+                   Find<T>(methodDeclarationNode.ReturnType) ??
+                   Find<T>(methodDeclarationNode.Body),
+
+            MemberAccessExpressionNode
+                => null,
+
+            ParameterNode
+                => null,
+
             ReturnStatementNode returnStatementNode
                 => Find<T>(returnStatementNode.Expression),
 
             SyntaxTree syntaxTree
-                => syntaxTree.Functions
+                => syntaxTree.Declarations
                     .Select(Find<T>)
                     .FirstOrDefault(x => x is not null),
+
+            TypeDeclarationNode typeDeclarationNode
+                => typeDeclarationNode.Fields
+                       .Select(Find<T>)
+                       .FirstOrDefault(x => x is not null) ??
+                   typeDeclarationNode.Methods
+                       .Select(Find<T>)
+                       .FirstOrDefault(x => x is not null),
 
             TypeNode typeNode
                 => null,
 
             VariableDeclarationStatementNode variableDeclarationStatementNode
                 => Find<T>(variableDeclarationStatementNode.Expression),
-
-            MemberAccessExpressionNode
-                => null,
 
             UnaryExpressionNode unaryExpressionNode
                 => Find<T>(unaryExpressionNode.Operand),
@@ -91,70 +110,73 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void MatchFunctionReturnTypeTest()
+    public void SetMetadataForFunctionReturnTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(_ => { }))
+                .Body(_ => { }))
             .Build();
 
         tree.Accept(new TypeChecker());
 
-        var expected = new FunctionMetadata([], TypeMetadata.Void);
-        Assert.That(tree.Functions[0].Metadata, Is.EqualTo(expected));
+        var expected = new FunctionMetadata("main", [], TypeMetadata.Void);
+        var function = tree.Declarations[0] as FunctionDeclarationNode;
+        Assert.That(function, Is.Not.Null);
+        Assert.That(function.Metadata, Is.EqualTo(expected));
     }
 
     [Test]
-    public void MatchIncorrectFunctionReturnTypeTest()
+    public void SetMetadataForIncorrectFunctionReturnTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("xxx")
-                .DefineBody(_ => { }))
+                .Body(_ => { }))
             .Build();
 
         Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
     }
 
     [Test]
-    public void MatchFunctionParameterTypesTest()
+    public void SetMetadataForFunctionParameterTypesTest()
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .DefineParameter("a", "i32")
                 .DefineParameter("b", "bool")
-                .DefineBody(_ => { }))
+                .Body(_ => { }))
             .Build();
 
         tree.Accept(new TypeChecker());
 
-        var expected = new FunctionMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void);
+        var expected = new FunctionMetadata("main", [TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void);
 
-        var function = tree.Functions[0];
+        var function = tree.Declarations[0] as FunctionDeclarationNode;
+        Assert.That(function, Is.Not.Null);
         Assert.That(function.Metadata, Is.EqualTo(expected));
         Assert.That(function.Parameters[0].Type.Metadata, Is.EqualTo(TypeMetadata.I32));
         Assert.That(function.Parameters[1].Type.Metadata, Is.EqualTo(TypeMetadata.Bool));
     }
 
     [Test]
-    public void MatchIncorrectFunctionParameterTypesTest()
+    public void SetMetadataForIncorrectFunctionParameterTypesTest()
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .DefineParameter("a", "i32")
                 .DefineParameter("b", "xxx")
-                .DefineBody(_ => { }))
+                .Body(_ => { }))
             .Build();
 
         Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
     }
 
     [Test]
-    public void VariableTypeTest()
+    public void SetMetadataForVariableTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .DefineVariable("a", "i32", exp => exp.Number(1))))
             .Build();
 
@@ -166,15 +188,57 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void IncorrectVariableTypeTest()
+    public void SetMetadataForIncorrectVariableTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .DefineVariable("a", "xxx", exp => exp.Number(1))))
             .Build();
 
         Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
+    }
+
+    [Test]
+    public void SetMetadataForTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .DefineField("x", "i32")
+                .DefineField("y", "i32")
+                .DefineMethod("toString", b => b.Body())
+                .DefineMethod("distance", b => b
+                    .DefineParameter("other", "i32")
+                    .ReturnType("f64")
+                    .Body()))
+            .Build();
+
+        var store = new TypeMetadataStore();
+        tree.Accept(new TypeChecker(store));
+
+        var type = Find<TypeDeclarationNode>(tree);
+        Assert.That(type, Is.Not.Null);
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type("Point", type)));
+
+        var metadata = store.GetType("Point");
+        var expectedMetadata = new TypeMetadata(
+            "Point",
+            [
+                new FieldMetadata(AccessModifierMetadata.Public, "x", TypeMetadata.I32),
+                new FieldMetadata(AccessModifierMetadata.Public, "y", TypeMetadata.I32),
+            ],
+            [
+                new MethodMetadata(AccessModifierMetadata.Public, "toString", [], TypeMetadata.Void),
+                new MethodMetadata(
+                    AccessModifierMetadata.Public,
+                    "distance",
+                    [new ParameterMetadata("other", TypeMetadata.I32)],
+                    TypeMetadata.F64),
+            ]);
+
+        Assert.That(metadata, Is.EqualTo(expectedMetadata));
     }
 
     [Test]
@@ -183,7 +247,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("i32")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.Number(1))))
             .Build();
 
@@ -200,7 +264,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("bool")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.True())))
             .Build();
 
@@ -217,7 +281,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("char")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.Char('x'))))
             .Build();
 
@@ -234,7 +298,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("string")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.String("xxx"))))
             .Build();
 
@@ -251,7 +315,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("bool")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.Number(1))))
             .Build();
 
@@ -264,7 +328,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("i32")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.Number(1).UnaryMinus())))
             .Build();
 
@@ -281,7 +345,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("i32")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.Number(1).UnaryMinus())))
             .Build();
 
@@ -298,7 +362,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("bool")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.True().LogicalNot())))
             .Build();
 
@@ -315,7 +379,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("i32")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.Number(1).Number(2).Add())))
             .Build();
 
@@ -332,7 +396,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .ReturnType("i32")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.Number(1).LogicalNot())))
             .Build();
 
@@ -346,7 +410,7 @@ public class TypeCheckerTests
             .DefineFunction("main", builder => builder
                 .DefineParameter("a", "i32")
                 .ReturnType("i32")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.Variable("a"))))
             .Build();
 
@@ -362,7 +426,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .DefineVariable("a", "i32", exp => exp.True())))
             .Build();
 
@@ -374,7 +438,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .If(exp => exp.Number(1), _ => { })))
             .Build();
 
@@ -388,10 +452,10 @@ public class TypeCheckerTests
             .DefineFunction("add", builder => builder
                 .DefineParameter("a", "i32")
                 .ReturnType("i32")
-                .DefineBody(_ => { }))
+                .Body(_ => { }))
             .DefineFunction("main", builder => builder
                 .ReturnType("i32")
-                .DefineBody(body => body
+                .Body(body => body
                     .Return(exp => exp.True().Call("add"))))
             .Build();
 
@@ -403,7 +467,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .While(exp => exp.Number(1), _ => { })))
             .Build();
 

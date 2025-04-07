@@ -14,6 +14,6 @@ public interface ISymbolTable
     ISymbolTable CreateChild();
 
     IReadOnlyDictionary<string, TypeSymbol> Types { get; }
-    IReadOnlyDictionary<string, FunctionSymbol> Functions { get; }
+    IReadOnlyDictionary<string, FunctionSymbol> FunctionsInScope { get; }
     IReadOnlyDictionary<string, VariableSymbol> VariablesInScope { get; }
 }

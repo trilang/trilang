@@ -18,7 +18,7 @@ public interface IVisitor
 
     void Visit(ExpressionStatementNode node);
 
-    void Visit(FunctionParameterNode node);
+    void Visit(FieldDeclarationNode node);
 
     void Visit(FunctionDeclarationNode node);
 
@@ -28,9 +28,15 @@ public interface IVisitor
 
     void Visit(MemberAccessExpressionNode node);
 
+    void Visit(MethodDeclarationNode node);
+
+    void Visit(ParameterNode node);
+
     void Visit(ReturnStatementNode node);
 
     void Visit(SyntaxTree node);
+
+    void Visit(TypeDeclarationNode node);
 
     void Visit(TypeNode node);
 

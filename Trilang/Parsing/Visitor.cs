@@ -119,7 +119,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void Visit(FunctionParameterNode node)
+    public void Visit(FieldDeclarationNode node)
     {
         VisitEnter(node);
 
@@ -128,11 +128,11 @@ public abstract class Visitor : IVisitor
         VisitExit(node);
     }
 
-    protected virtual void VisitEnter(FunctionParameterNode node)
+    protected virtual void VisitEnter(FieldDeclarationNode node)
     {
     }
 
-    protected virtual void VisitExit(FunctionParameterNode node)
+    protected virtual void VisitExit(FieldDeclarationNode node)
     {
     }
 
@@ -204,6 +204,27 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(MethodDeclarationNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        node.ReturnType.Accept(this);
+        node.Body.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(MethodDeclarationNode node)
+    {
+    }
+
+    protected virtual void VisitExit(MethodDeclarationNode node)
+    {
+    }
+
     public void Visit(ReturnStatementNode node)
     {
         VisitEnter(node);
@@ -221,11 +242,28 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(ParameterNode node)
+    {
+        VisitEnter(node);
+
+        node.Type.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(ParameterNode node)
+    {
+    }
+
+    protected virtual void VisitExit(ParameterNode node)
+    {
+    }
+
     public void Visit(SyntaxTree node)
     {
         VisitEnter(node);
 
-        foreach (var function in node.Functions)
+        foreach (var function in node.Declarations)
             function.Accept(this);
 
         VisitExit(node);
@@ -236,6 +274,27 @@ public abstract class Visitor : IVisitor
     }
 
     protected virtual void VisitExit(SyntaxTree node)
+    {
+    }
+
+    public void Visit(TypeDeclarationNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var field in node.Fields)
+            field.Accept(this);
+
+        foreach (var method in node.Methods)
+            method.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(TypeDeclarationNode node)
+    {
+    }
+
+    protected virtual void VisitExit(TypeDeclarationNode node)
     {
     }
 

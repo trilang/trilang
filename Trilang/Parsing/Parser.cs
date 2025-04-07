@@ -10,15 +10,15 @@ public class Parser
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code);
         var context = new ParserContext(tokens, this);
-        var functions = new List<FunctionDeclarationNode>();
+        var functions = new List<IDeclarationNode>();
 
         while (!context.Reader.HasEnded)
         {
-            var function = TryParseFunction(context);
-            if (function is null)
-                throw new ParseException("Expected a function.");
+            var declaration = TryParseFunction(context) ??
+                              TryParseTypeDeclarationNode(context) as IDeclarationNode ??
+                              throw new ParseException("Expected a type or a function.");
 
-            functions.Add(function);
+            functions.Add(declaration);
         }
 
         return new SyntaxTree(functions);
@@ -49,12 +49,12 @@ public class Parser
         return FunctionDeclarationNode.Create(name, parameters, returnType, block);
     }
 
-    private List<FunctionParameterNode> ParseFunctionParameters(ParserContext context)
+    private List<ParameterNode> ParseFunctionParameters(ParserContext context)
     {
         if (!context.Reader.Check(TokenKind.OpenParenthesis))
             throw new ParseException("Expected an open parenthesis.");
 
-        var parameters = new List<FunctionParameterNode>();
+        var parameters = new List<ParameterNode>();
 
         var parameter = TryParseFunctionParameter(context);
         if (parameter is not null)
@@ -77,7 +77,7 @@ public class Parser
         return parameters;
     }
 
-    private FunctionParameterNode? TryParseFunctionParameter(ParserContext context)
+    private ParameterNode? TryParseFunctionParameter(ParserContext context)
     {
         var name = TryParseId(context);
         if (name is null)
@@ -90,7 +90,7 @@ public class Parser
         if (type is null)
             throw new ParseException("Expected a type.");
 
-        return new FunctionParameterNode(name, type);
+        return new ParameterNode(name, type);
     }
 
     private BlockStatementNode? TryParseBlock(ParserContext context)
@@ -109,6 +109,108 @@ public class Parser
         }
 
         return new BlockStatementNode(statements);
+    }
+
+    private AccessModifier? TryParseAccessModifier(ParserContext context)
+    {
+        if (context.Reader.Check(TokenKind.Public))
+            return AccessModifier.Public;
+
+        if (context.Reader.Check(TokenKind.Private))
+            return AccessModifier.Private;
+
+        return null;
+    }
+
+    private TypeDeclarationNode? TryParseTypeDeclarationNode(ParserContext context)
+    {
+        var accessModifier = TryParseAccessModifier(context);
+        if (accessModifier is null)
+            return null;
+
+        if (!context.Reader.Check(TokenKind.Type))
+            throw new ParseException("Expected a type declaration.");
+
+        var name = TryParseId(context);
+        if (name is null)
+            throw new ParseException("Expected a type name.");
+
+        if (!context.Reader.Check(TokenKind.OpenBrace))
+            throw new ParseException("Expected an open brace.");
+
+        var fields = new List<FieldDeclarationNode>();
+        var methods = new List<MethodDeclarationNode>();
+
+        while (!context.Reader.Check(TokenKind.CloseBrace))
+        {
+            var field = TryParseField(context);
+            if (field is not null)
+            {
+                fields.Add(field);
+                continue;
+            }
+
+            var method = TryParseMethod(context);
+            if (method is not null)
+            {
+                methods.Add(method);
+                continue;
+            }
+
+            throw new ParseException("Expected a field or a method.");
+        }
+
+        return new TypeDeclarationNode(accessModifier.Value, name, fields, methods);
+    }
+
+    private FieldDeclarationNode? TryParseField(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var accessModifier = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
+
+            var name = c.Parser.TryParseId(c);
+            if (name is null)
+                throw new ParseException("Expected a field name.");
+
+            if (!c.Reader.Check(TokenKind.Colon))
+                return null;
+
+            var type = c.Parser.TryParseTypeNode(c);
+            if (type is null)
+                throw new ParseException("Expected a type.");
+
+            if (!c.Reader.Check(TokenKind.SemiColon))
+                throw new ParseException("Expected a semi-colon.");
+
+            return new FieldDeclarationNode(accessModifier.Value, name, type);
+        });
+
+    private MethodDeclarationNode? TryParseMethod(ParserContext context)
+    {
+        var accessModifier = TryParseAccessModifier(context);
+        if (accessModifier is null)
+            return null;
+
+        var name = TryParseId(context);
+        if (name is null)
+            throw new ParseException("Expected a method name.");
+
+        var parameters = ParseFunctionParameters(context);
+
+        if (!context.Reader.Check(TokenKind.Colon))
+            throw new ParseException("Expected a colon.");
+
+        var returnType = TryParseTypeNode(context);
+        if (returnType is null)
+            throw new ParseException("Expected a function return type.");
+
+        var block = TryParseBlock(context);
+        if (block is null)
+            throw new ParseException("Expected a function block.");
+
+        return new MethodDeclarationNode(accessModifier.Value, name, parameters, returnType, block);
     }
 
     private IStatementNode? TryParseStatement(ParserContext context)

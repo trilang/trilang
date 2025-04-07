@@ -2,20 +2,20 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class FunctionParameterNode : VariableDeclarationNode, IEquatable<FunctionParameterNode>
+public class ParameterNode : VariableDeclarationNode, IEquatable<ParameterNode>
 {
-    public FunctionParameterNode(string name, TypeNode type)
+    public ParameterNode(string name, TypeNode type)
         : base(name, type)
     {
     }
 
-    public static bool operator ==(FunctionParameterNode? left, FunctionParameterNode? right)
+    public static bool operator ==(ParameterNode? left, ParameterNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(FunctionParameterNode? left, FunctionParameterNode? right)
+    public static bool operator !=(ParameterNode? left, ParameterNode? right)
         => !Equals(left, right);
 
-    public bool Equals(FunctionParameterNode? other)
+    public bool Equals(ParameterNode? other)
     {
         if (other is null)
             return false;
@@ -39,7 +39,7 @@ public class FunctionParameterNode : VariableDeclarationNode, IEquatable<Functio
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((FunctionParameterNode)obj);
+        return Equals((ParameterNode)obj);
     }
 
     public override int GetHashCode()

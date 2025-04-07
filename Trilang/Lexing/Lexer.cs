@@ -50,6 +50,10 @@ public class Lexer
                     "while" => Token.Create(TokenKind.While),
                     "break" => Token.Create(TokenKind.Break),
                     "continue" => Token.Create(TokenKind.Continue),
+                    "public" => Token.Create(TokenKind.Public),
+                    "private" => Token.Create(TokenKind.Private),
+                    "type" => Token.Create(TokenKind.Type),
+                    "this" => Token.Create(TokenKind.This),
 
                     _ => Token.CreateId(id.ToString()),
                 });

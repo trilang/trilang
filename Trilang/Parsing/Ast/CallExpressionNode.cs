@@ -11,6 +11,7 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
         Member = member;
         Parameters = parameters;
 
+        Member.Parent = this;
         foreach (var parameter in parameters)
             parameter.Parent = this;
     }

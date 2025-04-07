@@ -1,3 +1,5 @@
+using Trilang.Parsing.Ast;
+
 namespace Trilang.Metadata;
 
 public class TypeMetadata : IMetadata, IEquatable<TypeMetadata>
@@ -17,8 +19,19 @@ public class TypeMetadata : IMetadata, IEquatable<TypeMetadata>
     public static readonly TypeMetadata Bool = new TypeMetadata("bool");
     public static readonly TypeMetadata String = new TypeMetadata("string");
 
-    public TypeMetadata(string name)
-        => Name = name;
+    private readonly HashSet<FieldMetadata> fields;
+    private readonly HashSet<MethodMetadata> methods;
+
+    public TypeMetadata(string name) : this(name, [], [])
+    {
+    }
+
+    public TypeMetadata(string name, IEnumerable<FieldMetadata> fields, IEnumerable<MethodMetadata> methods)
+    {
+        Name = name;
+        this.fields = new HashSet<FieldMetadata>(fields);
+        this.methods = new HashSet<MethodMetadata>(methods);
+    }
 
     public static bool operator ==(TypeMetadata? left, TypeMetadata? right)
         => Equals(left, right);
@@ -34,7 +47,9 @@ public class TypeMetadata : IMetadata, IEquatable<TypeMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return Name == other.Name &&
+               Fields.SequenceEqual(other.Fields) &&
+               Methods.SequenceEqual(other.Methods);
     }
 
     public override bool Equals(object? obj)
@@ -54,5 +69,21 @@ public class TypeMetadata : IMetadata, IEquatable<TypeMetadata>
     public override int GetHashCode()
         => HashCode.Combine(Name);
 
+    public void AddField(FieldMetadata field)
+    {
+        if (!fields.Add(field))
+            throw new ArgumentException($"Field with name {field.Name} already exists in type {Name}");
+    }
+
+    public void AddMethod(MethodMetadata method)
+    {
+        if (!methods.Add(method))
+            throw new ArgumentException($"Method with name {method.Name} already exists in type {Name}");
+    }
+
     public string Name { get; }
+
+    public IReadOnlyCollection<FieldMetadata> Fields => fields;
+
+    public IReadOnlyCollection<MethodMetadata> Methods => methods;
 }

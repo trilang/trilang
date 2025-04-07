@@ -1,4 +1,3 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
@@ -10,6 +9,7 @@ public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<Variable
     {
         Name = name;
         Type = type;
+        Type.Parent = this;
     }
 
     public static bool operator ==(VariableDeclarationNode? left, VariableDeclarationNode? right)

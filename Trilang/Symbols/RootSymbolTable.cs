@@ -73,7 +73,7 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
     public IReadOnlyDictionary<string, TypeSymbol> Types
         => types;
 
-    public IReadOnlyDictionary<string, FunctionSymbol> Functions
+    public IReadOnlyDictionary<string, FunctionSymbol> FunctionsInScope
         => functions;
 
     public IReadOnlyDictionary<string, VariableSymbol> VariablesInScope

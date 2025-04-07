@@ -1,16 +1,18 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Ast;
+using Trilang.Semantics;
 using Trilang.Symbols;
 
 namespace Tri.Tests.Builders;
 
 internal sealed class TreeBuilder : ISyntaxTreeBuilder
 {
-    private readonly List<FunctionDeclarationNode> functions;
+    private readonly List<IDeclarationNode> declaration;
     private readonly ISymbolTable symbolTable;
 
     public TreeBuilder()
     {
-        functions = [];
+        declaration = [];
         symbolTable = new RootSymbolTable();
     }
 
@@ -21,7 +23,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         action(builder);
 
         var function = builder.Build();
-        functions.Add(function);
+        declaration.Add(function);
 
         if (!symbolTable.TryAddFunction(new FunctionSymbol(function)))
             throw new Exception();
@@ -31,15 +33,31 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         return this;
     }
 
+    public ISyntaxTreeBuilder DefineType(string name, Action<ITypeBuilder> action)
+    {
+        var builder = new TypeBuilder(symbolTable, name);
+        action(builder);
+
+        var type = builder.Build();
+        declaration.Add(type);
+
+        if (!symbolTable.TryAddType(TypeSymbol.Type(name, type)))
+            throw new Exception();
+
+        type.SymbolTable = symbolTable;
+
+        return this;
+    }
+
     public SyntaxTree Build()
-        => new SyntaxTree(functions) { SymbolTable = symbolTable };
+        => new SyntaxTree(declaration) { SymbolTable = symbolTable };
 
     private sealed class FunctionBuilder : IFunctionBuilder
     {
         private readonly ISymbolTable symbolTable;
 
         private readonly string functionName;
-        private readonly List<FunctionParameterNode> parameters;
+        private readonly List<ParameterNode> parameters;
         private TypeNode returnType;
         private BlockStatementNode? body;
 
@@ -56,7 +74,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IFunctionBuilder DefineParameter(string name, TypeNode type)
         {
-            var parameter = new FunctionParameterNode(name, type) { SymbolTable = symbolTable };
+            var parameter = new ParameterNode(name, type) { SymbolTable = symbolTable };
             parameters.Add(parameter);
 
             if (!symbolTable.TryAddVariable(new VariableSymbol(parameter)))
@@ -74,7 +92,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public IFunctionBuilder DefineBody(Action<IBlockBuilder> action)
+        public IFunctionBuilder Body(Action<IBlockBuilder> action)
         {
             var builder = new BlockBuilder(symbolTable);
 
@@ -86,6 +104,153 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public FunctionDeclarationNode Build()
             => FunctionDeclarationNode.Create(
+                functionName,
+                parameters,
+                returnType,
+                body ?? throw new ArgumentNullException());
+    }
+
+    private sealed class TypeBuilder : ITypeBuilder
+    {
+        private readonly ISymbolTable symbolTable;
+        private readonly string typeName;
+        private readonly List<FieldDeclarationNode> fields;
+        private readonly List<MethodDeclarationNode> methods;
+        private AccessModifier accessModifier;
+
+        public TypeBuilder(ISymbolTable symbolTable, string typeName)
+        {
+            this.symbolTable = symbolTable;
+            this.typeName = typeName;
+            fields = [];
+            methods = [];
+            accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
+        }
+
+        public ITypeBuilder AccessModifier(AccessModifier modifier)
+        {
+            this.accessModifier = modifier;
+
+            return this;
+        }
+
+        public ITypeBuilder DefineField(string name, string type, Action<IFieldBuilder>? action = null)
+        {
+            var builder = new FieldBuilder(name, type);
+            action?.Invoke(builder);
+
+            var field = builder.Build();
+            fields.Add(field);
+
+            field.SymbolTable = symbolTable;
+
+            return this;
+        }
+
+        public ITypeBuilder DefineMethod(string name, Action<IMethodBuilder> action)
+        {
+            var builder = new MethodBuilder(symbolTable.CreateChild(), name);
+
+            action(builder);
+
+            var method = builder.Build();
+            methods.Add(method);
+
+            method.SymbolTable = symbolTable;
+
+            return this;
+        }
+
+        public TypeDeclarationNode Build()
+            => new TypeDeclarationNode(accessModifier, typeName, fields, methods);
+    }
+
+    private sealed class FieldBuilder : IFieldBuilder
+    {
+        private readonly string name;
+        private readonly string type;
+        private AccessModifier accessModifier;
+
+        public FieldBuilder(string name, string type)
+        {
+            this.name = name;
+            this.type = type;
+            accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
+        }
+
+        public IFieldBuilder AccessModifier(AccessModifier modifier)
+        {
+            this.accessModifier = modifier;
+
+            return this;
+        }
+
+        public FieldDeclarationNode Build()
+            => new FieldDeclarationNode(accessModifier, name, TypeNode.Create(type));
+    }
+
+    private sealed class MethodBuilder : IMethodBuilder
+    {
+        private readonly ISymbolTable symbolTable;
+
+        private readonly string functionName;
+        private readonly List<ParameterNode> parameters;
+        private AccessModifier accessModifier;
+        private TypeNode returnType;
+        private BlockStatementNode? body;
+
+        public MethodBuilder(ISymbolTable symbolTable, string functionName)
+        {
+            this.symbolTable = symbolTable;
+            this.functionName = functionName;
+            accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
+            parameters = [];
+            returnType = TypeNode.Create("void");
+        }
+
+        public IMethodBuilder AccessModifier(AccessModifier modifier)
+        {
+            this.accessModifier = modifier;
+
+            return this;
+        }
+
+        public IMethodBuilder DefineParameter(string name, string type)
+            => DefineParameter(name, TypeNode.Create(type));
+
+        public IMethodBuilder DefineParameter(string name, TypeNode type)
+        {
+            var parameter = new ParameterNode(name, type) { SymbolTable = symbolTable };
+            parameters.Add(parameter);
+
+            if (!symbolTable.TryAddVariable(new VariableSymbol(parameter)))
+                throw new Exception();
+
+            parameter.SymbolTable = symbolTable;
+
+            return this;
+        }
+
+        public IMethodBuilder ReturnType(string type)
+        {
+            returnType = TypeNode.Create(type);
+
+            return this;
+        }
+
+        public IMethodBuilder Body(Action<IBlockBuilder>? action = null)
+        {
+            var builder = new BlockBuilder(symbolTable);
+
+            action?.Invoke(builder);
+            body = builder.Build();
+
+            return this;
+        }
+
+        public MethodDeclarationNode Build()
+            => new MethodDeclarationNode(
+                accessModifier,
                 functionName,
                 parameters,
                 returnType,

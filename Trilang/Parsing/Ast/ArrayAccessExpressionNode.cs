@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
@@ -9,6 +10,9 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
     {
         Member = member;
         Index = index;
+
+        Member.Parent = this;
+        Index.Parent = this;
     }
 
     public static bool operator ==(ArrayAccessExpressionNode? left, ArrayAccessExpressionNode? right)
@@ -47,6 +51,14 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
 
     public override int GetHashCode()
         => HashCode.Combine(Member);
+
+    public override string ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
 
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);

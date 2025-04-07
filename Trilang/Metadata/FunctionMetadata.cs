@@ -2,8 +2,9 @@ namespace Trilang.Metadata;
 
 public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
 {
-    public FunctionMetadata(IMetadata[] parameterTypes, IMetadata returnType)
+    public FunctionMetadata(string name, IReadOnlyList<IMetadata> parameterTypes, IMetadata returnType)
     {
+        Name = name;
         ParameterTypes = parameterTypes;
         ReturnType = returnType;
     }
@@ -22,8 +23,9 @@ public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return ParameterTypes.SequenceEqual(other.ParameterTypes) &&
-               ReturnType.Equals(other.ReturnType);
+        return Name == other.Name &&
+               ReturnType.Equals(other.ReturnType) &&
+               ParameterTypes.SequenceEqual(other.ParameterTypes);
     }
 
     public override bool Equals(object? obj)
@@ -41,7 +43,9 @@ public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(ParameterTypes, ReturnType);
+        => HashCode.Combine(Name, ParameterTypes, ReturnType);
+
+    public string Name { get; }
 
     public IReadOnlyList<IMetadata> ParameterTypes { get; }
 

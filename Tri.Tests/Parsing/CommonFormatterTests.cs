@@ -26,8 +26,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode()),
@@ -52,8 +52,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -84,8 +84,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -116,8 +116,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -148,8 +148,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -180,8 +180,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -212,8 +212,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -244,8 +244,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -276,8 +276,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -308,8 +308,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -340,8 +340,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -372,8 +372,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -404,8 +404,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -436,8 +436,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -468,8 +468,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -500,8 +500,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -532,7 +532,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
@@ -561,7 +561,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
@@ -590,7 +590,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
@@ -619,7 +619,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
@@ -648,7 +648,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new IfStatementNode(
@@ -692,7 +692,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new IfStatementNode(
@@ -739,8 +739,8 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add", [
-                    new FunctionParameterNode("x", TypeNode.Create("i32")),
-                    new FunctionParameterNode("y", TypeNode.Create("i32")),
+                    new ParameterNode("x", TypeNode.Create("i32")),
+                    new ParameterNode("y", TypeNode.Create("i32")),
                 ],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
@@ -797,7 +797,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ExpressionStatementNode(
@@ -826,7 +826,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new WhileNode(
@@ -858,7 +858,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new WhileNode(
@@ -893,7 +893,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Create("i32"))],
+                [new ParameterNode("x", TypeNode.Create("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new WhileNode(
@@ -928,7 +928,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Array("i32"))],
+                [new ParameterNode("x", TypeNode.Array("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
@@ -954,7 +954,7 @@ public class CommonFormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new FunctionParameterNode("x", TypeNode.Array("i32"))],
+                [new ParameterNode("x", TypeNode.Array("i32"))],
                 TypeNode.Create("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
@@ -970,6 +970,125 @@ public class CommonFormatterTests
             """
             function add(x: i32[]): void {
                 return x[0];
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void PrivateTypeTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(AccessModifier.Private, "MyType", [], [])
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            private type MyType {
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void PublicTypeTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(AccessModifier.Public, "MyType", [], [])
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type MyType {
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TwoTypesTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(AccessModifier.Private, "MyType1", [], []),
+            new TypeDeclarationNode(AccessModifier.Public, "MyType2", [], []),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            private type MyType1 {
+            }
+
+            public type MyType2 {
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void PointTypeWithFieldsTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [
+                    new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32")),
+                    new FieldDeclarationNode(AccessModifier.Private, "y", TypeNode.Create("i32")),
+                ],
+                [])
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Point {
+                private x: i32;
+                private y: i32;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void PointTypeWithMethodsTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [
+                    new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32")),
+                    new FieldDeclarationNode(AccessModifier.Private, "y", TypeNode.Create("i32")),
+                ],
+                [
+                    new MethodDeclarationNode(
+                        AccessModifier.Public,
+                        "toString",
+                        [],
+                        TypeNode.Create("string"),
+                        new BlockStatementNode()),
+                    new MethodDeclarationNode(
+                        AccessModifier.Public,
+                        "distance",
+                        [new ParameterNode("other", TypeNode.Create("Point"))],
+                        TypeNode.Create("string"),
+                        new BlockStatementNode()),
+                ])
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Point {
+                private x: i32;
+                private y: i32;
+                public toString(): string {
+                }
+                public distance(other: Point): string {
+                }
             }
             """;
 

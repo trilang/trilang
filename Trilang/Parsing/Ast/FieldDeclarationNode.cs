@@ -1,26 +1,23 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class VariableDeclarationStatementNode :
-    VariableDeclarationNode,
-    IStatementNode,
-    IEquatable<VariableDeclarationStatementNode>
+public class FieldDeclarationNode : VariableDeclarationNode, IEquatable<FieldDeclarationNode>
 {
-    public VariableDeclarationStatementNode(string name, TypeNode type, IExpressionNode expression)
+    public FieldDeclarationNode(AccessModifier accessModifier, string name, TypeNode type)
         : base(name, type)
     {
-        Expression = expression;
-        Expression.Parent = this;
+        AccessModifier = accessModifier;
     }
 
-    public static bool operator ==(VariableDeclarationStatementNode? left, VariableDeclarationStatementNode? right)
+    public static bool operator ==(FieldDeclarationNode? left, FieldDeclarationNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(VariableDeclarationStatementNode? left, VariableDeclarationStatementNode? right)
+    public static bool operator !=(FieldDeclarationNode? left, FieldDeclarationNode? right)
         => !Equals(left, right);
 
-    public bool Equals(VariableDeclarationStatementNode? other)
+    public bool Equals(FieldDeclarationNode? other)
     {
         if (other is null)
             return false;
@@ -28,8 +25,9 @@ public class VariableDeclarationStatementNode :
         if (ReferenceEquals(this, other))
             return true;
 
-        return base.Equals(other) &&
-               Expression.Equals(other.Expression);
+        return AccessModifier == other.AccessModifier &&
+               Equals(Metadata, other.Metadata) &&
+               base.Equals(other);
     }
 
     public override bool Equals(object? obj)
@@ -43,11 +41,11 @@ public class VariableDeclarationStatementNode :
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((VariableDeclarationStatementNode)obj);
+        return Equals((FieldDeclarationNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(base.GetHashCode(), Expression);
+        => HashCode.Combine(base.GetHashCode(), (int)AccessModifier);
 
     public override string ToString()
     {
@@ -63,5 +61,7 @@ public class VariableDeclarationStatementNode :
     public override void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.Visit(this, context);
 
-    public IExpressionNode Expression { get; }
+    public AccessModifier AccessModifier { get; }
+
+    public FieldMetadata? Metadata { get; set; }
 }

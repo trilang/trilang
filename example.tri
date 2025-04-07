@@ -7,7 +7,7 @@ type T1;
 type T2 = { }
 
 // class
-type Point {
+public type Point {
     public x: i32;
     public y: i32;
 
@@ -21,6 +21,9 @@ type Point {
     }
 }
 
+// alias to other type
+type T4 = Point;
+
 // du
 type Numbers = i8 | i16 | i32 | i64;
 type NullableNumber = Numbers | null;
@@ -33,6 +36,9 @@ type Result<T> =
 // enums???
 type Color = { Red, Green, Blue };
 type Color = Red | Green | Blue;
+
+// function type
+type F = (x: i32, y: i32) => i32;
 
 function main(): i32 {
     var number: i32 = 2 + 2 * 2;

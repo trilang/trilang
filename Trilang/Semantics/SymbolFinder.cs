@@ -52,7 +52,7 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Expression.Accept(this, context);
     }
 
-    public void Visit(FunctionParameterNode node, SymbolFinderContext context)
+    public void Visit(FieldDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -103,6 +103,23 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable = context.SymbolTable;
     }
 
+    public void Visit(MethodDeclarationNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        node.ReturnType.Accept(this, context);
+
+        context.Scoped(c =>
+        {
+            c.DisableNextScope();
+
+            foreach (var parameter in node.Parameters)
+                parameter.Accept(this, c);
+
+            node.Body.Accept(this, c);
+        });
+    }
+
     public void Visit(ReturnStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
@@ -110,12 +127,42 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Expression.Accept(this, context);
     }
 
+    public void Visit(ParameterNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        var symbol = new VariableSymbol(node);
+        if (!context.SymbolTable.TryAddVariable(symbol))
+            throw new SymbolTableBuilderException($"The '{node.Name}' variable is already defined.");
+
+        node.Type.Accept(this, context);
+    }
+
     public void Visit(SyntaxTree node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
-        foreach (var function in node.Functions)
+        foreach (var function in node.Declarations)
             function.Accept(this, context);
+    }
+
+    public void Visit(TypeDeclarationNode node, SymbolFinderContext context)
+    {
+        // TODO: define in inner scope?
+        node.SymbolTable = context.SymbolTable;
+
+        var symbol = new TypeSymbol(node.Name, false, node);
+        if (!context.SymbolTable.TryAddType(symbol))
+            throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
+
+        context.Scoped(c =>
+        {
+            foreach (var field in node.Fields)
+                field.Accept(this, c);
+
+            foreach (var method in node.Methods)
+                method.Accept(this, c);
+        });
     }
 
     public void Visit(TypeNode node, SymbolFinderContext context)

@@ -28,7 +28,7 @@ public class VariableUsedBeforeDeclared : Visitor<VisitorContext<object>, object
         var symbol = node.SymbolTable?.GetVariable(node.Name) ??
                      throw new TypeCheckerException();
 
-        if (symbol.Node is FunctionParameterNode)
+        if (symbol.Node is ParameterNode)
             return;
 
         if (!scopes.TryPeek(out var scope) || !scope.Contains(node.Name))

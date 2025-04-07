@@ -1,3 +1,4 @@
+using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
@@ -8,6 +9,9 @@ public class WhileNode : IStatementNode, IEquatable<WhileNode>
     {
         Condition = condition;
         Body = body;
+
+        Condition.Parent = this;
+        Body.Parent = this;
     }
 
     public static bool operator ==(WhileNode? left, WhileNode? right)
@@ -45,6 +49,14 @@ public class WhileNode : IStatementNode, IEquatable<WhileNode>
 
     public override int GetHashCode()
         => HashCode.Combine(Condition, Body);
+
+    public override string ToString()
+    {
+        var formatter = new CommonFormatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
 
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);

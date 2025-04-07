@@ -18,7 +18,7 @@ public interface IVisitor<in TContext>
 
     void Visit(ExpressionStatementNode node, TContext context);
 
-    void Visit(FunctionParameterNode node, TContext context);
+    void Visit(FieldDeclarationNode node, TContext context);
 
     void Visit(FunctionDeclarationNode node, TContext context);
 
@@ -28,9 +28,15 @@ public interface IVisitor<in TContext>
 
     void Visit(MemberAccessExpressionNode node, TContext context);
 
+    void Visit(MethodDeclarationNode node, TContext context);
+
+    void Visit(ParameterNode node, TContext context);
+
     void Visit(ReturnStatementNode node, TContext context);
 
     void Visit(SyntaxTree node, TContext context);
+
+    void Visit(TypeDeclarationNode node, TContext context);
 
     void Visit(TypeNode node, TContext context);
 

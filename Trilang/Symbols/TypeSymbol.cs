@@ -2,14 +2,17 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Symbols;
 
-public class TypeSymbol : Symbol<ISyntaxNode?>, IEquatable<TypeSymbol>
+public class TypeSymbol : Symbol<TypeDeclarationNode?>, IEquatable<TypeSymbol>
 {
-    // TODO:
-    public TypeSymbol(string name, bool isArray, ISyntaxNode? node)
+    public TypeSymbol(string name, bool isArray, TypeDeclarationNode? node)
         : base(SymbolKind.Type, name, node)
-    {
-        IsArray = isArray;
-    }
+        => IsArray = isArray;
+
+    public static TypeSymbol Type(string name, TypeDeclarationNode node)
+        => new TypeSymbol(name, false, node);
+
+    public static TypeSymbol Array(string name)
+        => new TypeSymbol(name, true, null);
 
     public static bool operator ==(TypeSymbol? left, TypeSymbol? right)
         => Equals(left, right);

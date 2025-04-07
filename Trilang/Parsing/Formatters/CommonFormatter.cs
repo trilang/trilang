@@ -9,6 +9,17 @@ public partial class CommonFormatter : IFormatter
     public CommonFormatter()
         => writer = new Writer();
 
+    private void WriteAccessModifier(AccessModifier accessModifier)
+    {
+        writer.Write(accessModifier switch
+        {
+            AccessModifier.Public => "public",
+            AccessModifier.Private => "private",
+
+            _ => throw new ArgumentOutOfRangeException(nameof(accessModifier)),
+        });
+    }
+
     public void Visit(ArrayAccessExpressionNode node)
     {
         node.Member.Accept(this);
@@ -101,11 +112,14 @@ public partial class CommonFormatter : IFormatter
         writer.WriteLine(';');
     }
 
-    public void Visit(FunctionParameterNode node)
+    public void Visit(FieldDeclarationNode node)
     {
+        WriteAccessModifier(node.AccessModifier);
+        writer.Write(' ');
         writer.Write(node.Name);
         writer.Write(": ");
         node.Type.Accept(this);
+        writer.WriteLine(';');
     }
 
     public void Visit(FunctionDeclarationNode node)
@@ -176,6 +190,35 @@ public partial class CommonFormatter : IFormatter
     public void Visit(MemberAccessExpressionNode node)
         => writer.Write(node.Name);
 
+    public void Visit(MethodDeclarationNode node)
+    {
+        WriteAccessModifier(node.AccessModifier);
+        writer.Write(' ');
+        writer.Write(node.Name);
+        writer.Write('(');
+
+        for (var i = 0; i < node.Parameters.Count; i++)
+        {
+            node.Parameters[i].Accept(this);
+
+            if (i < node.Parameters.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write("): ");
+        node.ReturnType.Accept(this);
+        writer.Write(' ');
+
+        node.Body.Accept(this);
+    }
+
+    public void Visit(ParameterNode node)
+    {
+        writer.Write(node.Name);
+        writer.Write(": ");
+        node.Type.Accept(this);
+    }
+
     public void Visit(ReturnStatementNode node)
     {
         writer.Write("return ");
@@ -185,16 +228,38 @@ public partial class CommonFormatter : IFormatter
 
     public void Visit(SyntaxTree node)
     {
-        for (var i = 0; i < node.Functions.Count; i++)
+        for (var i = 0; i < node.Declarations.Count; i++)
         {
-            node.Functions[i].Accept(this);
+            node.Declarations[i].Accept(this);
 
-            if (i < node.Functions.Count - 1)
+            if (i < node.Declarations.Count - 1)
             {
                 writer.WriteLine();
                 writer.WriteLine();
             }
         }
+    }
+
+    public void Visit(TypeDeclarationNode node)
+    {
+        WriteAccessModifier(node.AccessModifier);
+        writer.Write(" type ");
+        writer.Write(node.Name);
+        writer.WriteLine(" {");
+
+        writer.Scoped(_ =>
+        {
+            foreach (var field in node.Fields)
+                field.Accept(this);
+
+            foreach (var method in node.Methods)
+            {
+                method.Accept(this);
+                writer.WriteLine();
+            }
+        });
+
+        writer.Write('}');
     }
 
     public void Visit(TypeNode node)

@@ -10,7 +10,7 @@ public interface IFunctionBuilder
 
     IFunctionBuilder ReturnType(string type);
 
-    IFunctionBuilder DefineBody(Action<IBlockBuilder> action);
+    IFunctionBuilder Body(Action<IBlockBuilder> action);
 
     FunctionDeclarationNode Build();
 }

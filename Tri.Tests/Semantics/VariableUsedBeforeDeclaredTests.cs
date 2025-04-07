@@ -11,7 +11,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .DefineVariable("a", "i32", exp => exp.Number(1))
                     .Statement(exp => exp.Variable("a"))))
             .Build();
@@ -25,7 +25,7 @@ public class VariableUsedBeforeDeclaredTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .DefineParameter("a", "i32")
-                .DefineBody(body => body
+                .Body(body => body
                     .Statement(exp => exp.Variable("a"))))
             .Build();
 
@@ -37,7 +37,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .Statement(exp => exp.Variable("a"))
                     .DefineVariable("a", "i32", exp => exp.Number(1))))
             .Build();
@@ -51,7 +51,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .Block(block => block
                         .Statement(exp => exp.Variable("a")))
                     .DefineVariable("a", "i32", exp => exp.Number(1))))
@@ -66,7 +66,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .Block(block => block.DefineVariable("a", "i32", exp => exp.Number(1)))
                     .Block(block => block.Statement(exp => exp.Variable("a")))))
             .Build();
@@ -80,10 +80,10 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("test", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .DefineVariable("a", "i32", exp => exp.Number(1))))
             .DefineFunction("main", builder => builder
-                .DefineBody(body => body
+                .Body(body => body
                     .Statement(exp => exp.Variable("a"))))
             .Build();
 

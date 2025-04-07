@@ -12,8 +12,12 @@ public class TypeChecker : IVisitor
 {
     private readonly TypeMetadataStore typeStore;
 
-    public TypeChecker()
-        => typeStore = new TypeMetadataStore();
+    public TypeChecker() : this(new TypeMetadataStore())
+    {
+    }
+
+    public TypeChecker(TypeMetadataStore typeStore)
+        => this.typeStore = typeStore;
 
     private void BuildSymbolTableTypes(ISymbolTable? symbolTable)
     {
@@ -22,7 +26,7 @@ public class TypeChecker : IVisitor
             throw new ArgumentNullException(nameof(symbolTable));
 
         BuildTypes(symbolTable.Types);
-        BuildFunctionTypes(symbolTable.Functions);
+        BuildFunctionTypes(symbolTable.FunctionsInScope);
     }
 
     private void BuildTypes(IReadOnlyDictionary<string, TypeSymbol> types)
@@ -36,6 +40,64 @@ public class TypeChecker : IVisitor
 
                 typeStore.DefineType(symbol.Name, type);
             }
+            else
+            {
+                var metadata = new TypeMetadata(symbol.Name);
+
+                typeStore.DefineType(metadata.Name, metadata);
+            }
+        }
+
+        foreach (var (_, symbol) in types)
+        {
+            var node = symbol.Node;
+            if (node is null)
+                continue;
+
+            var metadata = typeStore.GetType(symbol.Name);
+            if (metadata is not TypeMetadata type)
+                continue;
+
+            foreach (var field in node.Fields)
+            {
+                var fieldType = typeStore.GetType(field.Type.Name) ??
+                                throw new TypeCheckerException($"Unknown type '{field.Type.Name}'");
+
+                var fieldMetadata = new FieldMetadata(
+                    GetAccessModifierMetadata(field.AccessModifier),
+                    field.Name,
+                    fieldType);
+
+                type.AddField(fieldMetadata);
+                field.Metadata = fieldMetadata;
+            }
+
+            foreach (var method in node.Methods)
+            {
+                var parameters = new ParameterMetadata[method.Parameters.Count];
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    var parameter = method.Parameters[i];
+                    var parameterType = typeStore.GetType(parameter.Type.Name) ??
+                                        throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
+
+                    parameters[i] = new ParameterMetadata(parameter.Name, parameterType);
+                }
+
+                var returnType = typeStore.GetType(method.ReturnType.Name) ??
+                                 throw new TypeCheckerException($"Unknown type '{method.ReturnType.Name}'");
+
+                var methodMetadata = new MethodMetadata(
+                    GetAccessModifierMetadata(method.AccessModifier),
+                    method.Name,
+                    parameters,
+                    returnType);
+
+                type.AddMethod(methodMetadata);
+                method.Metadata = methodMetadata;
+            }
+
+            node.Metadata = type;
         }
     }
 
@@ -61,23 +123,32 @@ public class TypeChecker : IVisitor
                              throw new TypeCheckerException($"Unknown type '{function.ReturnType}'");
 
             // TODO: add function type to types
-            function.Metadata = new FunctionMetadata(parameters, returnType);
+            function.Metadata = new FunctionMetadata(function.Name, parameters, returnType);
         }
     }
+
+    private static AccessModifierMetadata GetAccessModifierMetadata(AccessModifier accessModifier)
+        => accessModifier switch
+        {
+            AccessModifier.Public => AccessModifierMetadata.Public,
+            AccessModifier.Private => AccessModifierMetadata.Private,
+
+            _ => throw new ArgumentOutOfRangeException(nameof(accessModifier), accessModifier, null)
+        };
 
     private static T? FindInParent<T>(ISyntaxNode node)
         where T : ISyntaxNode
     {
-        var function = node.Parent;
-        while (function is not null)
+        var parent = node.Parent;
+        while (parent is not null)
         {
-            if (function is FunctionDeclarationNode)
-                break;
+            if (parent is T result)
+                return result;
 
-            function = function.Parent;
+            parent = parent.Parent;
         }
 
-        return (T?)function;
+        return default;
     }
 
     public void Visit(ArrayAccessExpressionNode node)
@@ -223,16 +294,9 @@ public class TypeChecker : IVisitor
     public void Visit(ExpressionStatementNode node)
         => node.Expression.Accept(this);
 
-    public void Visit(FunctionParameterNode node)
+    public void Visit(FieldDeclarationNode node)
     {
-        if (node.Type.Metadata is null)
-        {
-            var type = typeStore.GetType(node.Type.Name);
-            if (type is null)
-                throw new TypeCheckerException($"Unknown type '{node.Type}'");
-
-            node.Type.Metadata = type;
-        }
+        node.Type.Accept(this);
     }
 
     public void Visit(FunctionDeclarationNode node)
@@ -240,6 +304,7 @@ public class TypeChecker : IVisitor
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
+        node.ReturnType.Accept(this);
         node.Body?.Accept(this);
     }
 
@@ -275,24 +340,63 @@ public class TypeChecker : IVisitor
         node.ReturnTypeMetadata = symbol.Node.Type.Metadata;
     }
 
+    public void Visit(MethodDeclarationNode node)
+    {
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        node.ReturnType.Accept(this);
+        node.Body.Accept(this);
+    }
+
     public void Visit(ReturnStatementNode node)
     {
         node.Expression.Accept(this);
 
-        var function = FindInParent<FunctionDeclarationNode>(node);
-        if (function is null)
-            throw new TypeCheckerException();
+        var function = FindInParent<MethodDeclarationNode>(node);
+        if (function is not null)
+        {
+            if (!Equals(function.Metadata?.ReturnType, node.Expression.ReturnTypeMetadata))
+                throw new TypeCheckerException();
+        }
+        else
+        {
+            var method = FindInParent<FunctionDeclarationNode>(node);
+            if (method is null)
+                throw new TypeCheckerException();
 
-        if (!Equals(function.Metadata?.ReturnType, node.Expression.ReturnTypeMetadata))
-            throw new TypeCheckerException();
+            if (!Equals(method.Metadata?.ReturnType, node.Expression.ReturnTypeMetadata))
+                throw new TypeCheckerException();
+        }
+    }
+
+    public void Visit(ParameterNode node)
+    {
+        if (node.Type.Metadata is null)
+        {
+            var type = typeStore.GetType(node.Type.Name);
+            if (type is null)
+                throw new TypeCheckerException($"Unknown type '{node.Type}'");
+
+            node.Type.Metadata = type;
+        }
     }
 
     public void Visit(SyntaxTree node)
     {
         BuildSymbolTableTypes(node.SymbolTable);
 
-        foreach (var statement in node.Functions)
+        foreach (var statement in node.Declarations)
             statement.Accept(this);
+    }
+
+    public void Visit(TypeDeclarationNode node)
+    {
+        foreach (var field in node.Fields)
+            field.Accept(this);
+
+        foreach (var method in node.Methods)
+            method.Accept(this);
     }
 
     public void Visit(TypeNode node)
