@@ -265,6 +265,16 @@ public partial class Formatter : IFormatter
         }
     }
 
+    public void Visit(TypeAliasNode node)
+    {
+        WriteAccessModifier(node.AccessModifier);
+        writer.Write(" type ");
+        writer.Write(node.Name);
+        writer.Write(" = ");
+        node.Type.Accept(this);
+        writer.Write(';');
+    }
+
     public void Visit(TypeDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);

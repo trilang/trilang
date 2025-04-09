@@ -161,12 +161,23 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
             function.Accept(this, context);
     }
 
+    public void Visit(TypeAliasNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        var symbol = TypeSymbol.Alias(node.Name, node);
+        if (!context.SymbolTable.TryAddType(symbol))
+            throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
+
+        node.Type.Accept(this, context);
+    }
+
     public void Visit(TypeDeclarationNode node, SymbolFinderContext context)
     {
         // TODO: define in inner scope?
         node.SymbolTable = context.SymbolTable;
 
-        var symbol = new TypeSymbol(node.Name, false, node);
+        var symbol = TypeSymbol.Type(node.Name, node);
         if (!context.SymbolTable.TryAddType(symbol))
             throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
 
@@ -188,7 +199,7 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable = context.SymbolTable;
 
         if (node.IsArray)
-            context.SymbolTable.TryAddType(new TypeSymbol($"{node.Name}[]", true, null));
+            context.SymbolTable.TryAddType(TypeSymbol.Array($"{node.Name}[]"));
     }
 
     public void Visit(UnaryExpressionNode node, SymbolFinderContext context)

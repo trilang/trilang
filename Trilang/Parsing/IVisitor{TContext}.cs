@@ -38,6 +38,8 @@ public interface IVisitor<in TContext>
 
     void Visit(SyntaxTree node, TContext context);
 
+    void Visit(TypeAliasNode node, TContext context);
+
     void Visit(TypeDeclarationNode node, TContext context);
 
     void Visit(TypeNode node, TContext context);

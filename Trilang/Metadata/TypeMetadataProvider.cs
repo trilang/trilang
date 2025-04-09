@@ -1,10 +1,10 @@
 namespace Trilang.Metadata;
 
-public class TypeMetadataStore
+public class TypeMetadataProvider
 {
     private readonly Dictionary<string, IMetadata> types;
 
-    public TypeMetadataStore()
+    public TypeMetadataProvider()
     {
         types = new Dictionary<string, IMetadata>
         {

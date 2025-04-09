@@ -8,5 +8,7 @@ public interface ISyntaxTreeBuilder
 
     ISyntaxTreeBuilder DefineType(string name, Action<ITypeBuilder> action);
 
+    ISyntaxTreeBuilder DefineAliasType(string name, string aliasType);
+
     SyntaxTree Build();
 }

@@ -1130,4 +1130,16 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void TypeAliasTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasNode(AccessModifier.Public, "MyType", TypeNode.Create("i32"))
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type MyType = i32;";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

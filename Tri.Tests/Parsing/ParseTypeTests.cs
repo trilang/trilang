@@ -354,4 +354,45 @@ public class ParseTypeTests
 
         Assert.That(tree, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void ParseTypeAliasTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type MyType = i32;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasNode(
+                AccessModifier.Public,
+                "MyType",
+                TypeNode.Create("i32")
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseTypeAliasMissingNameTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type = i32;"));
+    }
+
+    [Test]
+    public void ParseTypeAliasMissingTypeTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type MyType = ;"));
+    }
+
+    [Test]
+    public void ParseTypeAliasMissingSemiColonTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type MyType = i32"));
+    }
 }

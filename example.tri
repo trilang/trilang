@@ -1,6 +1,6 @@
 external function print(text: string): void;
 
-// empty type
+// empty type?
 type T1;
 
 // alias to interface

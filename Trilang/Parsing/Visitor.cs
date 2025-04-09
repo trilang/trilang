@@ -297,6 +297,23 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(TypeAliasNode node)
+    {
+        VisitEnter(node);
+
+        node.Type.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(TypeAliasNode node)
+    {
+    }
+
+    protected virtual void VisitExit(TypeAliasNode node)
+    {
+    }
+
     public void Visit(TypeDeclarationNode node)
     {
         VisitEnter(node);

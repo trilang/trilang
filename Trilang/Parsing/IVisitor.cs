@@ -38,6 +38,8 @@ public interface IVisitor
 
     void Visit(SyntaxTree node);
 
+    void Visit(TypeAliasNode node);
+
     void Visit(TypeDeclarationNode node);
 
     void Visit(TypeNode node);

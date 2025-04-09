@@ -245,7 +245,7 @@ public class SymbolFinderTests
 
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());
 
-        var symbol = new TypeSymbol("i32[]", true, null);
+        var symbol = TypeSymbol.Array("i32[]");
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
         Assert.That(tree.SymbolTable.Types, Contains.Key("i32[]").WithValue(symbol));
@@ -341,5 +341,18 @@ public class SymbolFinderTests
         Assert.That(parameter.SymbolTable, Is.Not.Null);
         Assert.That(parameter.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
         Assert.That(parameter.SymbolTable.VariablesInScope, Contains.Key(parameter.Name).WithValue(new VariableSymbol(parameter)));
+    }
+
+    [Test]
+    public void TypeAliasTest()
+    {
+        var type = new TypeAliasNode(AccessModifier.Public, "MyInt", TypeNode.Create("i32"));
+        var tree = new SyntaxTree([type]);
+
+        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Alias(type.Name, type)));
     }
 }

@@ -15,6 +15,7 @@ public class Parser
         while (!context.Reader.HasEnded)
         {
             var declaration = TryParseFunction(context) ??
+                              TryParseTypeAlias(context) ??
                               TryParseTypeDeclarationNode(context) as IDeclarationNode ??
                               throw new ParseException("Expected a type or a function.");
 
@@ -121,6 +122,33 @@ public class Parser
 
         return null;
     }
+
+    private TypeAliasNode? TryParseTypeAlias(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var accessModifier = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.Type))
+                return null;
+
+            var name = c.Parser.TryParseId(c);
+            if (name is null)
+                throw new ParseException("Expected a type alias name.");
+
+            if (!c.Reader.Check(TokenKind.Equal))
+                return null;
+
+            var type = c.Parser.TryParseTypeNode(c);
+            if (type is null)
+                throw new ParseException("Expected a type.");
+
+            if (!c.Reader.Check(TokenKind.SemiColon))
+                throw new ParseException("Expected a semicolon.");
+
+            return new TypeAliasNode(accessModifier.Value, name, type);
+        });
 
     private TypeDeclarationNode? TryParseTypeDeclarationNode(ParserContext context)
     {

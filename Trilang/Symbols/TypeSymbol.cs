@@ -2,17 +2,20 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Symbols;
 
-public class TypeSymbol : Symbol<TypeDeclarationNode?>, IEquatable<TypeSymbol>
+public class TypeSymbol : Symbol<ISyntaxNode?>, IEquatable<TypeSymbol>
 {
-    public TypeSymbol(string name, bool isArray, TypeDeclarationNode? node)
+    public TypeSymbol(TypeSymbolKind typeKind, string name, ISyntaxNode? node)
         : base(SymbolKind.Type, name, node)
-        => IsArray = isArray;
+        => TypeKind = typeKind;
 
     public static TypeSymbol Type(string name, TypeDeclarationNode node)
-        => new TypeSymbol(name, false, node);
+        => new TypeSymbol(TypeSymbolKind.Type, name, node);
 
     public static TypeSymbol Array(string name)
-        => new TypeSymbol(name, true, null);
+        => new TypeSymbol(TypeSymbolKind.Array, name, null);
+
+    public static TypeSymbol Alias(string name, TypeAliasNode node)
+        => new TypeSymbol(TypeSymbolKind.Alias, name, node);
 
     public static bool operator ==(TypeSymbol? left, TypeSymbol? right)
         => Equals(left, right);
@@ -28,7 +31,7 @@ public class TypeSymbol : Symbol<TypeDeclarationNode?>, IEquatable<TypeSymbol>
         if (ReferenceEquals(this, other))
             return true;
 
-        return base.Equals(other) && IsArray == other.IsArray;
+        return base.Equals(other) && TypeKind == other.TypeKind;
     }
 
     public override bool Equals(object? obj)
@@ -46,7 +49,13 @@ public class TypeSymbol : Symbol<TypeDeclarationNode?>, IEquatable<TypeSymbol>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(base.GetHashCode(), IsArray);
+        => HashCode.Combine(base.GetHashCode(), Kind);
 
-    public bool IsArray { get; }
+    public TypeSymbolKind TypeKind { get; }
+
+    public bool IsType => TypeKind == TypeSymbolKind.Type;
+
+    public bool IsArray => TypeKind == TypeSymbolKind.Array;
+
+    public bool IsAlias => TypeKind == TypeSymbolKind.Alias;
 }

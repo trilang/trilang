@@ -84,6 +84,9 @@ public class TypeCheckerTests
                     .Select(Find<T>)
                     .FirstOrDefault(x => x is not null),
 
+            TypeAliasNode typeAliasNode
+                => Find<T>(typeAliasNode.Type),
+
             TypeDeclarationNode typeDeclarationNode
                 => typeDeclarationNode.Fields
                        .Select(Find<T>)
@@ -213,7 +216,7 @@ public class TypeCheckerTests
                     .Body()))
             .Build();
 
-        var store = new TypeMetadataStore();
+        var store = new TypeMetadataProvider();
         tree.Accept(new TypeChecker(store));
 
         var type = Find<TypeDeclarationNode>(tree);
@@ -242,6 +245,27 @@ public class TypeCheckerTests
     }
 
     [Test]
+    public void SetMetadataForAliasType()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("MyInt", "i32")
+            .Build();
+
+        var store = new TypeMetadataProvider();
+        tree.Accept(new TypeChecker(store));
+
+        var type = Find<TypeAliasNode>(tree);
+        Assert.That(type, Is.Not.Null);
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Types, Contains.Key("MyInt").WithValue(TypeSymbol.Alias("MyInt", type)));
+
+        var metadata = store.GetType("MyInt");
+        var expectedMetadata = new TypeAliasMetadata("MyInt", TypeMetadata.I32);
+        Assert.That(metadata, Is.EqualTo(expectedMetadata));
+    }
+
+    [Test]
     public void LiteralNumberTest()
     {
         var tree = new TreeBuilder()
@@ -255,6 +279,7 @@ public class TypeCheckerTests
 
         var returnNode = Find<ReturnStatementNode>(tree);
         Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
     }
 
@@ -272,6 +297,7 @@ public class TypeCheckerTests
 
         var returnNode = Find<ReturnStatementNode>(tree);
         Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.Bool));
     }
 
@@ -289,6 +315,7 @@ public class TypeCheckerTests
 
         var returnNode = Find<ReturnStatementNode>(tree);
         Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.Char));
     }
 
@@ -306,6 +333,7 @@ public class TypeCheckerTests
 
         var returnNode = Find<ReturnStatementNode>(tree);
         Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.String));
     }
 
@@ -336,6 +364,7 @@ public class TypeCheckerTests
 
         var returnNode = Find<ReturnStatementNode>(tree);
         Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
     }
 
@@ -353,6 +382,7 @@ public class TypeCheckerTests
 
         var returnNode = Find<ReturnStatementNode>(tree);
         Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
     }
 
@@ -370,6 +400,7 @@ public class TypeCheckerTests
 
         var returnNode = Find<ReturnStatementNode>(tree);
         Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.Bool));
     }
 
@@ -418,6 +449,7 @@ public class TypeCheckerTests
 
         var returnNode = Find<ReturnStatementNode>(tree);
         Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
     }
 

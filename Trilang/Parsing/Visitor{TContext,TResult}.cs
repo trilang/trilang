@@ -346,6 +346,26 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(TypeAliasNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        node.Type.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(TypeAliasNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(TypeAliasNode node, TContext context)
+    {
+    }
+
     public void Visit(TypeDeclarationNode node, TContext context)
     {
         if (context.IsFinished)

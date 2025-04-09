@@ -10,14 +10,14 @@ namespace Trilang.Semantics;
 
 public class TypeChecker : IVisitor
 {
-    private readonly TypeMetadataStore typeStore;
+    private readonly TypeMetadataProvider typeProvider;
 
-    public TypeChecker() : this(new TypeMetadataStore())
+    public TypeChecker() : this(new TypeMetadataProvider())
     {
     }
 
-    public TypeChecker(TypeMetadataStore typeStore)
-        => this.typeStore = typeStore;
+    public TypeChecker(TypeMetadataProvider typeProvider)
+        => this.typeProvider = typeProvider;
 
     private void BuildSymbolTableTypes(ISymbolTable? symbolTable)
     {
@@ -33,71 +33,94 @@ public class TypeChecker : IVisitor
     {
         foreach (var (_, symbol) in types)
         {
+            if (!symbol.IsType)
+                continue;
+
+            var metadata = new TypeMetadata(symbol.Name);
+
+            typeProvider.DefineType(metadata.Name, metadata);
+        }
+
+        // all array and alias types are processed after all types are defined to support forward references
+        foreach (var (_, symbol) in types)
+        {
             if (symbol.IsArray)
             {
-                var type = typeStore.GetType(symbol.Name[..^2]) ??
+                var type = typeProvider.GetType(symbol.Name[..^2]) ??
                            throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
 
-                typeStore.DefineType(symbol.Name, type);
+                typeProvider.DefineType(symbol.Name, type);
             }
-            else
+            else if (symbol is { IsAlias: true, Node: TypeAliasNode typeAliasNode })
             {
-                var metadata = new TypeMetadata(symbol.Name);
+                var type = typeProvider.GetType(typeAliasNode.Type.Name) ??
+                           throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
+                var metadata = new TypeAliasMetadata(symbol.Name, type);
 
-                typeStore.DefineType(metadata.Name, metadata);
+                typeProvider.DefineType(metadata.Name, metadata);
             }
         }
 
+        // populate type metadata
         foreach (var (_, symbol) in types)
         {
             var node = symbol.Node;
             if (node is null)
                 continue;
 
-            var metadata = typeStore.GetType(symbol.Name);
-            if (metadata is not TypeMetadata type)
-                continue;
+            var metadata = typeProvider.GetType(symbol.Name) ??
+                           throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
 
-            foreach (var field in node.Fields)
+            if (node is TypeDeclarationNode typeDeclarationNode)
             {
-                var fieldType = typeStore.GetType(field.Type.Name) ??
-                                throw new TypeCheckerException($"Unknown type '{field.Type.Name}'");
+                if (metadata is not TypeMetadata type)
+                    continue;
 
-                var fieldMetadata = new FieldMetadata(
-                    GetAccessModifierMetadata(field.AccessModifier),
-                    field.Name,
-                    fieldType);
-
-                type.AddField(fieldMetadata);
-                field.Metadata = fieldMetadata;
-            }
-
-            foreach (var method in node.Methods)
-            {
-                var parameters = new ParameterMetadata[method.Parameters.Count];
-                for (var i = 0; i < parameters.Length; i++)
+                foreach (var field in typeDeclarationNode.Fields)
                 {
-                    var parameter = method.Parameters[i];
-                    var parameterType = typeStore.GetType(parameter.Type.Name) ??
-                                        throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
+                    var fieldType = typeProvider.GetType(field.Type.Name) ??
+                                    throw new TypeCheckerException($"Unknown type '{field.Type.Name}'");
 
-                    parameters[i] = new ParameterMetadata(parameter.Name, parameterType);
+                    var fieldMetadata = new FieldMetadata(
+                        GetAccessModifierMetadata(field.AccessModifier),
+                        field.Name,
+                        fieldType);
+
+                    type.AddField(fieldMetadata);
+                    field.Metadata = fieldMetadata;
                 }
 
-                var returnType = typeStore.GetType(method.ReturnType.Name) ??
-                                 throw new TypeCheckerException($"Unknown type '{method.ReturnType.Name}'");
+                foreach (var method in typeDeclarationNode.Methods)
+                {
+                    var parameters = new ParameterMetadata[method.Parameters.Count];
+                    for (var i = 0; i < parameters.Length; i++)
+                    {
+                        var parameter = method.Parameters[i];
+                        var parameterType = typeProvider.GetType(parameter.Type.Name) ??
+                                            throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
 
-                var methodMetadata = new MethodMetadata(
-                    GetAccessModifierMetadata(method.AccessModifier),
-                    method.Name,
-                    parameters,
-                    returnType);
+                        parameters[i] = new ParameterMetadata(parameter.Name, parameterType);
+                    }
 
-                type.AddMethod(methodMetadata);
-                method.Metadata = methodMetadata;
+                    var returnType = typeProvider.GetType(method.ReturnType.Name) ??
+                                     throw new TypeCheckerException($"Unknown type '{method.ReturnType.Name}'");
+
+                    var methodMetadata = new MethodMetadata(
+                        GetAccessModifierMetadata(method.AccessModifier),
+                        method.Name,
+                        parameters,
+                        returnType);
+
+                    type.AddMethod(methodMetadata);
+                    method.Metadata = methodMetadata;
+                }
+
+                typeDeclarationNode.Metadata = type;
             }
-
-            node.Metadata = type;
+            else if (node is TypeAliasNode typeAliasNode)
+            {
+                typeAliasNode.Metadata = metadata;
+            }
         }
     }
 
@@ -113,13 +136,13 @@ public class TypeChecker : IVisitor
             for (var i = 0; i < function.Parameters.Count; i++)
             {
                 var parameter = function.Parameters[i];
-                var type = typeStore.GetType(parameter.Type.Name);
+                var type = typeProvider.GetType(parameter.Type.Name);
 
                 parameters[i] = type ??
                                 throw new TypeCheckerException($"Unknown type '{parameter.Type}'");
             }
 
-            var returnType = typeStore.GetType(function.ReturnType.Name) ??
+            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
                              throw new TypeCheckerException($"Unknown type '{function.ReturnType}'");
 
             // TODO: add function type to types
@@ -385,7 +408,7 @@ public class TypeChecker : IVisitor
     {
         if (node.Type.Metadata is null)
         {
-            var type = typeStore.GetType(node.Type.Name);
+            var type = typeProvider.GetType(node.Type.Name);
             if (type is null)
                 throw new TypeCheckerException($"Unknown type '{node.Type}'");
 
@@ -399,6 +422,11 @@ public class TypeChecker : IVisitor
 
         foreach (var statement in node.Declarations)
             statement.Accept(this);
+    }
+
+    public void Visit(TypeAliasNode node)
+    {
+        node.Type.Accept(this);
     }
 
     public void Visit(TypeDeclarationNode node)
@@ -415,7 +443,7 @@ public class TypeChecker : IVisitor
 
     public void Visit(TypeNode node)
     {
-        var type = typeStore.GetType(node.Name);
+        var type = typeProvider.GetType(node.Name);
         if (type is null)
             throw new TypeCheckerException($"Unknown type '{node.Name}'");
 
@@ -486,7 +514,7 @@ public class TypeChecker : IVisitor
 
         if (node.Type.Metadata is null)
         {
-            var type = typeStore.GetType(node.Type.Name);
+            var type = typeProvider.GetType(node.Type.Name);
             if (type is null)
                 throw new TypeCheckerException($"Unknown type '{node.Type}'");
 

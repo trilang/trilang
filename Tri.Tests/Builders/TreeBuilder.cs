@@ -47,6 +47,20 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         return this;
     }
 
+    public ISyntaxTreeBuilder DefineAliasType(string name, string aliasType)
+    {
+        var type = new TypeAliasNode(AccessModifier.Public, name, TypeNode.Create(aliasType));
+
+        declaration.Add(type);
+
+        if (!symbolTable.TryAddType(TypeSymbol.Alias(name, type)))
+            throw new Exception();
+
+        type.SymbolTable = symbolTable;
+
+        return this;
+    }
+
     public SyntaxTree Build()
         => new SyntaxTree(declaration) { SymbolTable = symbolTable };
 
