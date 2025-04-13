@@ -126,6 +126,8 @@ public class Lexer
                 ('/', '=') => (Token.Create(TokenKind.SlashEqual), 2),
                 ('/', _) => (Token.Create(TokenKind.Slash), 1),
 
+                ('=', '>') => (Token.Create(TokenKind.EqualGreater), 2),
+
                 ('=', '=') => (Token.Create(TokenKind.EqualEqual), 2),
                 ('=', _) => (Token.Create(TokenKind.Equal), 1),
                 ('!', '=') => (Token.Create(TokenKind.ExclamationEqual), 2),

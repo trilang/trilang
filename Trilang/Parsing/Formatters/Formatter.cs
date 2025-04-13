@@ -164,6 +164,26 @@ public partial class Formatter : IFormatter
         node.Body?.Accept(this);
     }
 
+    public void Visit(FunctionTypeDeclarationNode node)
+    {
+        WriteAccessModifier(node.AccessModifier);
+        writer.Write(" type ");
+        writer.Write(node.Name);
+        writer.Write(" = (");
+
+        for (var i = 0; i < node.ParameterTypes.Count; i++)
+        {
+            node.ParameterTypes[i].Accept(this);
+
+            if (i < node.ParameterTypes.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write(") => ");
+        node.ReturnType.Accept(this);
+        writer.Write(';');
+    }
+
     public void Visit(IfStatementNode node)
     {
         writer.Write("if (");
@@ -265,7 +285,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(TypeAliasNode node)
+    public void Visit(TypeAliasDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" type ");

@@ -2,41 +2,38 @@ namespace Trilang.Metadata;
 
 public class TypeMetadataProvider
 {
-    private readonly Dictionary<string, IMetadata> types;
+    private readonly Dictionary<string, ITypeMetadata> types;
 
     public TypeMetadataProvider()
     {
-        types = new Dictionary<string, IMetadata>
-        {
-            { "void", TypeMetadata.Void },
+        types = new Dictionary<string, ITypeMetadata>();
 
-            { "i8", TypeMetadata.I8 },
-            { "i16", TypeMetadata.I16 },
-            { "i32", TypeMetadata.I32 },
-            { "i64", TypeMetadata.I64 },
+        DefineType(TypeMetadata.Void);
 
-            { "u8", TypeMetadata.U8 },
-            { "u16", TypeMetadata.U16 },
-            { "u32", TypeMetadata.U32 },
-            { "u64", TypeMetadata.U64 },
+        DefineType(TypeMetadata.I8);
+        DefineType(TypeMetadata.I16);
+        DefineType(TypeMetadata.I32);
+        DefineType(TypeMetadata.I64);
 
-            { "f32", TypeMetadata.F32 },
-            { "f64", TypeMetadata.F64 },
+        DefineType(TypeMetadata.U8);
+        DefineType(TypeMetadata.U16);
+        DefineType(TypeMetadata.U32);
+        DefineType(TypeMetadata.U64);
 
-            { "bool", TypeMetadata.Bool },
-            { "char", TypeMetadata.Char },
-            { "string", TypeMetadata.String },
-        };
+        DefineType(TypeMetadata.F32);
+        DefineType(TypeMetadata.F64);
+
+        DefineType(TypeMetadata.Bool);
+        DefineType(TypeMetadata.Char);
+        DefineType(TypeMetadata.String);
     }
 
-    public IMetadata? GetType(string name)
+    public ITypeMetadata? GetType(string name)
         => types.GetValueOrDefault(name);
 
-    public void DefineType(string name, IMetadata type)
+    public void DefineType(ITypeMetadata type)
     {
-        if (type is ArrayMetadata)
-            types[name] = type;
-        else
-            types.Add(name, type);
+        if (!types.TryAdd(type.Name, type))
+            throw new Exception($"The '{type.Name}' type is already defined.");
     }
 }

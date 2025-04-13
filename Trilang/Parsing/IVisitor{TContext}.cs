@@ -24,6 +24,8 @@ public interface IVisitor<in TContext>
 
     void Visit(FunctionDeclarationNode node, TContext context);
 
+    void Visit(FunctionTypeDeclarationNode node, TContext context);
+
     void Visit(IfStatementNode node, TContext context);
 
     void Visit(LiteralExpressionNode node, TContext context);
@@ -38,7 +40,7 @@ public interface IVisitor<in TContext>
 
     void Visit(SyntaxTree node, TContext context);
 
-    void Visit(TypeAliasNode node, TContext context);
+    void Visit(TypeAliasDeclarationNode node, TContext context);
 
     void Visit(TypeDeclarationNode node, TContext context);
 

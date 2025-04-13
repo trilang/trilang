@@ -362,7 +362,7 @@ public class ParseTypeTests
         var tree = parser.Parse("public type MyType = i32;");
 
         var expected = new SyntaxTree([
-            new TypeAliasNode(
+            new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "MyType",
                 TypeNode.Create("i32")
@@ -394,5 +394,105 @@ public class ParseTypeTests
         var parser = new Parser();
 
         Assert.Throws<ParseException>(() => parser.Parse("public type MyType = i32"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type F = () => void;");
+
+        var expected = new SyntaxTree([
+            new FunctionTypeDeclarationNode(
+                AccessModifier.Public,
+                "F",
+                [],
+                TypeNode.Create("void")
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseFunctionTypeWithParametersTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type F = (i32, i32) => i32;");
+
+        var expected = new SyntaxTree([
+            new FunctionTypeDeclarationNode(
+                AccessModifier.Public,
+                "F",
+                [TypeNode.Create("i32"), TypeNode.Create("i32")],
+                TypeNode.Create("i32")
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseFunctionTypeMissingNameTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type = (i32, i32) => i32;"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeMissingEqualTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type F (i32, i32) => i32;"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeMissingOpenParenTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type F = i32, i32) => i32;"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeMissingCloseParenTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32 => i32;"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeCommaTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32 i32) => i32;"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeArrowTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32) i32;"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeReturnTypeTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32) => ;"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeSemiColonTest()
+    {
+        var parser = new Parser();
+
+        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32) => i32"));
     }
 }

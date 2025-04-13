@@ -1,17 +1,20 @@
 namespace Trilang.Metadata;
 
-public class ArrayMetadata : IMetadata, IEquatable<ArrayMetadata>
+public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
 {
-    public ArrayMetadata(IMetadata itemMetadata)
-        => ItemMetadata = itemMetadata;
+    public TypeArrayMetadata(ITypeMetadata itemMetadata)
+    {
+        Name = $"{itemMetadata.Name}[]";
+        ItemMetadata = itemMetadata;
+    }
 
-    public static bool operator ==(ArrayMetadata? left, ArrayMetadata? right)
+    public static bool operator ==(TypeArrayMetadata? left, TypeArrayMetadata? right)
         => Equals(left, right);
 
-    public static bool operator !=(ArrayMetadata? left, ArrayMetadata? right)
+    public static bool operator !=(TypeArrayMetadata? left, TypeArrayMetadata? right)
         => !Equals(left, right);
 
-    public bool Equals(ArrayMetadata? other)
+    public bool Equals(TypeArrayMetadata? other)
     {
         if (other is null)
             return false;
@@ -33,11 +36,13 @@ public class ArrayMetadata : IMetadata, IEquatable<ArrayMetadata>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((ArrayMetadata)obj);
+        return Equals((TypeArrayMetadata)obj);
     }
 
     public override int GetHashCode()
         => HashCode.Combine(ItemMetadata);
 
-    public IMetadata ItemMetadata { get; }
+    public string Name { get; }
+
+    public ITypeMetadata ItemMetadata { get; }
 }

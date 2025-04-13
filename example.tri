@@ -4,7 +4,12 @@ external function print(text: string): void;
 type T1;
 
 // alias to interface
-type T2 = { }
+type T2 = {
+    x: i32;
+    y: i32;
+
+    distance(other: T2): f64;
+}
 
 // class
 public type Point {

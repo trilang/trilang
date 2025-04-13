@@ -346,7 +346,7 @@ public class SymbolFinderTests
     [Test]
     public void TypeAliasTest()
     {
-        var type = new TypeAliasNode(AccessModifier.Public, "MyInt", TypeNode.Create("i32"));
+        var type = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", TypeNode.Create("i32"));
         var tree = new SyntaxTree([type]);
 
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());
@@ -354,5 +354,22 @@ public class SymbolFinderTests
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
         Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Alias(type.Name, type)));
+    }
+
+    [Test]
+    public void FunctionTypeAliasTest()
+    {
+        var type = new FunctionTypeDeclarationNode(
+            AccessModifier.Public,
+            "F",
+            [TypeNode.Create("i32"), TypeNode.Create("i32")],
+            TypeNode.Create("i32"));
+        var tree = new SyntaxTree([type]);
+
+        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Function(type.Name, type)));
     }
 }

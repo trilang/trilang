@@ -76,5 +76,5 @@ public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
 
     public bool IsArray { get; }
 
-    public IMetadata? Metadata { get; set; }
+    public ITypeMetadata? Metadata { get; set; }
 }

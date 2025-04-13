@@ -1,8 +1,8 @@
 namespace Trilang.Metadata;
 
-public class TypeAliasMetadata : IMetadata, IEquatable<TypeAliasMetadata>
+public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
 {
-    public TypeAliasMetadata(string name, IMetadata type)
+    public TypeAliasMetadata(string name, ITypeMetadata type)
     {
         Name = name;
         Type = type;
@@ -44,5 +44,5 @@ public class TypeAliasMetadata : IMetadata, IEquatable<TypeAliasMetadata>
 
     public string Name { get; }
 
-    public IMetadata Type { get; }
+    public ITypeMetadata Type { get; }
 }

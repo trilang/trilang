@@ -51,6 +51,8 @@ public enum TokenKind
     PipeEqual,
     CaretEqual,
 
+    EqualGreater,
+
     // Keywords
     Var,
     If,

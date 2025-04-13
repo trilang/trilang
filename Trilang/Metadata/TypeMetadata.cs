@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class TypeMetadata : IMetadata, IEquatable<TypeMetadata>
+public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 {
     public static readonly TypeMetadata Void = new TypeMetadata("void");
     public static readonly TypeMetadata I8 = new TypeMetadata("i8");

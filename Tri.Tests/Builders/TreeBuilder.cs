@@ -49,7 +49,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     public ISyntaxTreeBuilder DefineAliasType(string name, string aliasType)
     {
-        var type = new TypeAliasNode(AccessModifier.Public, name, TypeNode.Create(aliasType));
+        var type = new TypeAliasDeclarationNode(AccessModifier.Public, name, TypeNode.Create(aliasType));
 
         declaration.Add(type);
 
@@ -57,6 +57,22 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             throw new Exception();
 
         type.SymbolTable = symbolTable;
+
+        return this;
+    }
+
+    public ISyntaxTreeBuilder DefineFunctionType(string name, Action<IFunctionTypeBuilder> action)
+    {
+        var builder = new FunctionTypeBuilder(symbolTable, name);
+        action(builder);
+
+        var functionType = builder.Build();
+        declaration.Add(functionType);
+
+        if (!symbolTable.TryAddType(TypeSymbol.Function(name, functionType)))
+            throw new Exception();
+
+        functionType.SymbolTable = symbolTable;
 
         return this;
     }
@@ -614,5 +630,47 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
             return stack.Pop();
         }
+    }
+
+    private sealed class FunctionTypeBuilder : IFunctionTypeBuilder
+    {
+        private readonly ISymbolTable symbolTable;
+        private readonly string name;
+        private readonly List<TypeNode> parameterTypes;
+        private AccessModifier accessModifier;
+        private TypeNode returnType;
+
+        public FunctionTypeBuilder(ISymbolTable symbolTable, string name)
+        {
+            this.symbolTable = symbolTable;
+            this.name = name;
+            parameterTypes = [];
+            accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
+            returnType = TypeNode.Create("void");
+        }
+
+        public IFunctionTypeBuilder AccessModifier(AccessModifier modifier)
+        {
+            accessModifier = modifier;
+
+            return this;
+        }
+
+        public IFunctionTypeBuilder DefineParameter(string type)
+        {
+            parameterTypes.Add(TypeNode.Create(type));
+
+            return this;
+        }
+
+        public IFunctionTypeBuilder ReturnType(string type)
+        {
+            returnType = TypeNode.Create(type);
+
+            return this;
+        }
+
+        public FunctionTypeDeclarationNode Build()
+            => new FunctionTypeDeclarationNode(accessModifier, name, parameterTypes, returnType);
     }
 }

@@ -177,6 +177,26 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(FunctionTypeDeclarationNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var parameter in node.ParameterTypes)
+            parameter.Accept(this);
+
+        node.ReturnType.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(FunctionTypeDeclarationNode node)
+    {
+    }
+
+    protected virtual void VisitExit(FunctionTypeDeclarationNode node)
+    {
+    }
+
     public void Visit(IfStatementNode node)
     {
         VisitEnter(node);
@@ -297,7 +317,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void Visit(TypeAliasNode node)
+    public void Visit(TypeAliasDeclarationNode node)
     {
         VisitEnter(node);
 
@@ -306,11 +326,11 @@ public abstract class Visitor : IVisitor
         VisitExit(node);
     }
 
-    protected virtual void VisitEnter(TypeAliasNode node)
+    protected virtual void VisitEnter(TypeAliasDeclarationNode node)
     {
     }
 
-    protected virtual void VisitExit(TypeAliasNode node)
+    protected virtual void VisitExit(TypeAliasDeclarationNode node)
     {
     }
 

@@ -1135,10 +1135,27 @@ public class FormatterTests
     public void TypeAliasTest()
     {
         var tree = new SyntaxTree([
-            new TypeAliasNode(AccessModifier.Public, "MyType", TypeNode.Create("i32"))
+            new TypeAliasDeclarationNode(AccessModifier.Public, "MyType", TypeNode.Create("i32"))
         ]);
         var formatted = tree.ToString();
         const string expected = "public type MyType = i32;";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FunctionTypeTest()
+    {
+        var tree = new SyntaxTree([
+            new FunctionTypeDeclarationNode(
+                AccessModifier.Public,
+                "MyType",
+                [TypeNode.Create("i32"), TypeNode.Create("i32")],
+                TypeNode.Create("i32")
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type MyType = (i32, i32) => i32;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }

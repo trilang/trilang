@@ -68,7 +68,7 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
 
     public IExpressionNode Operand { get; }
 
-    public IMetadata? ReturnTypeMetadata { get; set; }
+    public ITypeMetadata? ReturnTypeMetadata { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }
 }

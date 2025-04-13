@@ -143,6 +143,7 @@ public class LexerTests
     [TestCase("^", TokenKind.Caret)]
     [TestCase("^=", TokenKind.CaretEqual)]
     [TestCase("~", TokenKind.Tilde)]
+    [TestCase("=>", TokenKind.EqualGreater)]
     public void TokenizeOperatorTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();

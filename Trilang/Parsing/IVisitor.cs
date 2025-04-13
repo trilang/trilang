@@ -24,6 +24,8 @@ public interface IVisitor
 
     void Visit(FunctionDeclarationNode node);
 
+    void Visit(FunctionTypeDeclarationNode node);
+
     void Visit(IfStatementNode node);
 
     void Visit(LiteralExpressionNode node);
@@ -38,7 +40,7 @@ public interface IVisitor
 
     void Visit(SyntaxTree node);
 
-    void Visit(TypeAliasNode node);
+    void Visit(TypeAliasDeclarationNode node);
 
     void Visit(TypeDeclarationNode node);
 

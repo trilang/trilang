@@ -10,5 +10,7 @@ public interface ISyntaxTreeBuilder
 
     ISyntaxTreeBuilder DefineAliasType(string name, string aliasType);
 
+    ISyntaxTreeBuilder DefineFunctionType(string name, Action<IFunctionTypeBuilder> action);
+
     SyntaxTree Build();
 }

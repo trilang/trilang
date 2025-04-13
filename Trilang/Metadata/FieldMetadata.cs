@@ -2,7 +2,7 @@ namespace Trilang.Metadata;
 
 public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
 {
-    public FieldMetadata(AccessModifierMetadata accessModifier, string name, IMetadata type)
+    public FieldMetadata(AccessModifierMetadata accessModifier, string name, ITypeMetadata type)
     {
         AccessModifier = accessModifier;
         Name = name;
@@ -49,5 +49,5 @@ public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
 
     public string Name { get; }
 
-    public IMetadata Type { get; }
+    public ITypeMetadata Type { get; }
 }

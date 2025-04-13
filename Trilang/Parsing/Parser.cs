@@ -15,6 +15,7 @@ public class Parser
         while (!context.Reader.HasEnded)
         {
             var declaration = TryParseFunction(context) ??
+                              TryParseFunctionTypeDeclaration(context) ??
                               TryParseTypeAlias(context) ??
                               TryParseTypeDeclarationNode(context) as IDeclarationNode ??
                               throw new ParseException("Expected a type or a function.");
@@ -123,7 +124,68 @@ public class Parser
         return null;
     }
 
-    private TypeAliasNode? TryParseTypeAlias(ParserContext context)
+    private FunctionTypeDeclarationNode? TryParseFunctionTypeDeclaration(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var accessModifier = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.Type))
+                return null;
+
+            var name = c.Parser.TryParseId(c);
+            if (name is null)
+                throw new ParseException("Expected a function type name.");
+
+            if (!c.Reader.Check(TokenKind.Equal))
+                return null;
+
+            var parameters = c.Parser.TryParseFunctionTypeParameters(c);
+            if (parameters is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.EqualGreater))
+                throw new ParseException("Expected an arrow function.");
+
+            var returnType = c.Parser.TryParseTypeNode(c);
+            if (returnType is null)
+                throw new ParseException("Expected a function return type.");
+
+            if (!c.Reader.Check(TokenKind.SemiColon))
+                throw new ParseException("Expected a semicolon.");
+
+            return new FunctionTypeDeclarationNode(accessModifier.Value, name, parameters, returnType);
+        });
+
+    private IReadOnlyList<TypeNode>? TryParseFunctionTypeParameters(ParserContext context)
+    {
+        if (!context.Reader.Check(TokenKind.OpenParenthesis))
+            return null;
+
+        var parameters = new List<TypeNode>();
+        var parameter = TryParseTypeNode(context);
+        if (parameter is not null)
+        {
+            parameters.Add(parameter);
+
+            while (context.Reader.Check(TokenKind.Comma))
+            {
+                parameter = TryParseTypeNode(context);
+                if (parameter is null)
+                    throw new ParseException("Expected a parameter.");
+
+                parameters.Add(parameter);
+            }
+        }
+
+        if (!context.Reader.Check(TokenKind.CloseParenthesis))
+            throw new ParseException("Expected a close parenthesis.");
+
+        return parameters;
+    }
+
+    private TypeAliasDeclarationNode? TryParseTypeAlias(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
             var accessModifier = c.Parser.TryParseAccessModifier(c);
@@ -147,7 +209,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.SemiColon))
                 throw new ParseException("Expected a semicolon.");
 
-            return new TypeAliasNode(accessModifier.Value, name, type);
+            return new TypeAliasDeclarationNode(accessModifier.Value, name, type);
         });
 
     private TypeDeclarationNode? TryParseTypeDeclarationNode(ParserContext context)

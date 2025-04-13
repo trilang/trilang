@@ -99,6 +99,20 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
+    public void Visit(FunctionTypeDeclarationNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        var symbol = TypeSymbol.Function(node.Name, node);
+        if (!context.SymbolTable.TryAddType(symbol))
+            throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
+
+        foreach (var parameterType in node.ParameterTypes)
+            parameterType.Accept(this, context);
+
+        node.ReturnType.Accept(this, context);
+    }
+
     public void Visit(IfStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
@@ -161,7 +175,7 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
             function.Accept(this, context);
     }
 
-    public void Visit(TypeAliasNode node, SymbolFinderContext context)
+    public void Visit(TypeAliasDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 

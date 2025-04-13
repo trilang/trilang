@@ -38,7 +38,36 @@ public class TypeChecker : IVisitor
 
             var metadata = new TypeMetadata(symbol.Name);
 
-            typeProvider.DefineType(metadata.Name, metadata);
+            typeProvider.DefineType(metadata);
+        }
+
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsFunction)
+                continue;
+
+            if (symbol.Node is not FunctionTypeDeclarationNode function)
+                throw new TypeCheckerException($"Unknown function '{symbol.Name}'");
+
+            var parameterTypes = new ITypeMetadata[function.ParameterTypes.Count];
+            for (var i = 0; i < parameterTypes.Length; i++)
+            {
+                var parameterType = function.ParameterTypes[i];
+                var type = typeProvider.GetType(parameterType.Name) ??
+                           throw new TypeCheckerException($"Unknown type '{parameterType.Name}'");
+
+                parameterTypes[i] = type;
+            }
+
+            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
+                             throw new TypeCheckerException($"Unknown type '{function.ReturnType.Name}'");
+
+            var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
+            if (typeProvider.GetType(functionTypeMetadata.Name) is null)
+                typeProvider.DefineType(functionTypeMetadata);
+
+            var alias = new TypeAliasMetadata(symbol.Name, functionTypeMetadata);
+            typeProvider.DefineType(alias);
         }
 
         // all array and alias types are processed after all types are defined to support forward references
@@ -49,15 +78,16 @@ public class TypeChecker : IVisitor
                 var type = typeProvider.GetType(symbol.Name[..^2]) ??
                            throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
 
-                typeProvider.DefineType(symbol.Name, type);
+                if (typeProvider.GetType(type.Name) is null)
+                    typeProvider.DefineType(type);
             }
-            else if (symbol is { IsAlias: true, Node: TypeAliasNode typeAliasNode })
+            else if (symbol is { IsAlias: true, Node: TypeAliasDeclarationNode typeAliasNode })
             {
                 var type = typeProvider.GetType(typeAliasNode.Type.Name) ??
                            throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
                 var metadata = new TypeAliasMetadata(symbol.Name, type);
 
-                typeProvider.DefineType(metadata.Name, metadata);
+                typeProvider.DefineType(metadata);
             }
         }
 
@@ -92,14 +122,14 @@ public class TypeChecker : IVisitor
 
                 foreach (var method in typeDeclarationNode.Methods)
                 {
-                    var parameters = new ParameterMetadata[method.Parameters.Count];
+                    var parameters = new ITypeMetadata[method.Parameters.Count];
                     for (var i = 0; i < parameters.Length; i++)
                     {
                         var parameter = method.Parameters[i];
                         var parameterType = typeProvider.GetType(parameter.Type.Name) ??
                                             throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
 
-                        parameters[i] = new ParameterMetadata(parameter.Name, parameterType);
+                        parameters[i] = parameterType;
                     }
 
                     var returnType = typeProvider.GetType(method.ReturnType.Name) ??
@@ -108,8 +138,7 @@ public class TypeChecker : IVisitor
                     var methodMetadata = new MethodMetadata(
                         GetAccessModifierMetadata(method.AccessModifier),
                         method.Name,
-                        parameters,
-                        returnType);
+                        new FunctionTypeMetadata(parameters, returnType));
 
                     type.AddMethod(methodMetadata);
                     method.Metadata = methodMetadata;
@@ -117,7 +146,7 @@ public class TypeChecker : IVisitor
 
                 typeDeclarationNode.Metadata = type;
             }
-            else if (node is TypeAliasNode typeAliasNode)
+            else if (node is TypeAliasDeclarationNode typeAliasNode)
             {
                 typeAliasNode.Metadata = metadata;
             }
@@ -132,7 +161,7 @@ public class TypeChecker : IVisitor
             if (function.Metadata is not null)
                 continue;
 
-            var parameters = new IMetadata[function.Parameters.Count];
+            var parameters = new ITypeMetadata[function.Parameters.Count];
             for (var i = 0; i < function.Parameters.Count; i++)
             {
                 var parameter = function.Parameters[i];
@@ -145,8 +174,10 @@ public class TypeChecker : IVisitor
             var returnType = typeProvider.GetType(function.ReturnType.Name) ??
                              throw new TypeCheckerException($"Unknown type '{function.ReturnType}'");
 
-            // TODO: add function type to types
-            function.Metadata = new FunctionMetadata(function.Name, parameters, returnType);
+            var functionTypeMetadata = new FunctionTypeMetadata(parameters, returnType);
+            function.Metadata = new FunctionMetadata(function.Name, functionTypeMetadata);
+
+            typeProvider.DefineType(functionTypeMetadata);
         }
     }
 
@@ -304,7 +335,7 @@ public class TypeChecker : IVisitor
         for (var i = 0; i < node.Parameters.Count; i++)
         {
             var actual = node.Parameters[i].ReturnTypeMetadata;
-            var expected = function.ParameterTypes[i];
+            var expected = function.TypeMetadata.ParameterTypes[i];
             if (!expected.Equals(actual))
                 throw new TypeCheckerException($"Expected '{expected}' but got '{actual}'");
         }
@@ -337,6 +368,14 @@ public class TypeChecker : IVisitor
 
         node.ReturnType.Accept(this);
         node.Body?.Accept(this);
+    }
+
+    public void Visit(FunctionTypeDeclarationNode node)
+    {
+        foreach (var parameterType in node.ParameterTypes)
+            parameterType.Accept(this);
+
+        node.ReturnType.Accept(this);
     }
 
     public void Visit(IfStatementNode node)
@@ -390,7 +429,7 @@ public class TypeChecker : IVisitor
         var function = FindInParent<MethodDeclarationNode>(node);
         if (function is not null)
         {
-            if (!Equals(function.Metadata?.ReturnType, node.Expression?.ReturnTypeMetadata))
+            if (!Equals(function.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
                 throw new TypeCheckerException();
         }
         else
@@ -399,7 +438,7 @@ public class TypeChecker : IVisitor
             if (method is null)
                 throw new TypeCheckerException();
 
-            if (!Equals(method.Metadata?.ReturnType, node.Expression?.ReturnTypeMetadata))
+            if (!Equals(method.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
                 throw new TypeCheckerException();
         }
     }
@@ -424,7 +463,7 @@ public class TypeChecker : IVisitor
             statement.Accept(this);
     }
 
-    public void Visit(TypeAliasNode node)
+    public void Visit(TypeAliasDeclarationNode node)
     {
         node.Type.Accept(this);
     }

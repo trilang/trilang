@@ -65,5 +65,5 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public string Name { get; }
 
-    public IMetadata? ReturnTypeMetadata { get; set; }
+    public ITypeMetadata? ReturnTypeMetadata { get; set; }
 }

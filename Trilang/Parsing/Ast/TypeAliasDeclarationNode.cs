@@ -3,22 +3,22 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeAliasNode : IDeclarationNode, IEquatable<TypeAliasNode>
+public class TypeAliasDeclarationNode : IDeclarationNode, IEquatable<TypeAliasDeclarationNode>
 {
-    public TypeAliasNode(AccessModifier accessModifier, string name, TypeNode type)
+    public TypeAliasDeclarationNode(AccessModifier accessModifier, string name, TypeNode type)
     {
         AccessModifier = accessModifier;
         Name = name;
         Type = type;
     }
 
-    public static bool operator ==(TypeAliasNode? left, TypeAliasNode? right)
+    public static bool operator ==(TypeAliasDeclarationNode? left, TypeAliasDeclarationNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(TypeAliasNode? left, TypeAliasNode? right)
+    public static bool operator !=(TypeAliasDeclarationNode? left, TypeAliasDeclarationNode? right)
         => !Equals(left, right);
 
-    public bool Equals(TypeAliasNode? other)
+    public bool Equals(TypeAliasDeclarationNode? other)
     {
         if (other is null)
             return false;
@@ -43,7 +43,7 @@ public class TypeAliasNode : IDeclarationNode, IEquatable<TypeAliasNode>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((TypeAliasNode)obj);
+        return Equals((TypeAliasDeclarationNode)obj);
     }
 
     public override int GetHashCode()
@@ -65,5 +65,5 @@ public class TypeAliasNode : IDeclarationNode, IEquatable<TypeAliasNode>
 
     public TypeNode Type { get; }
 
-    public IMetadata? Metadata { get; set; }
+    public ITypeMetadata? Metadata { get; set; }
 }

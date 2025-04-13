@@ -4,5 +4,6 @@ public enum TypeSymbolKind
 {
     Type,
     Array,
-    Alias
+    Alias,
+    Function,
 }

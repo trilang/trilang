@@ -74,5 +74,5 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
 
     public IExpressionNode Index { get; }
 
-    public IMetadata? ReturnTypeMetadata { get; set; }
+    public ITypeMetadata? ReturnTypeMetadata { get; set; }
 }

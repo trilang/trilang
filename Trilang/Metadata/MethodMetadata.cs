@@ -1,15 +1,15 @@
 namespace Trilang.Metadata;
 
-public class MethodMetadata : FunctionMetadata, IEquatable<MethodMetadata>
+public class MethodMetadata : IMetadata, IEquatable<MethodMetadata>
 {
     public MethodMetadata(
         AccessModifierMetadata accessModifier,
         string name,
-        IReadOnlyList<IMetadata> parameterTypes,
-        IMetadata returnType)
-        : base(name, parameterTypes, returnType)
+        FunctionTypeMetadata typeMetadata)
     {
         AccessModifier = accessModifier;
+        Name = name;
+        TypeMetadata = typeMetadata;
     }
 
     public static bool operator ==(MethodMetadata? left, MethodMetadata? right)
@@ -26,7 +26,9 @@ public class MethodMetadata : FunctionMetadata, IEquatable<MethodMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return base.Equals(other) && AccessModifier == other.AccessModifier;
+        return AccessModifier == other.AccessModifier &&
+               Name == other.Name &&
+               TypeMetadata.Equals(other.TypeMetadata);
     }
 
     public override bool Equals(object? obj)
@@ -44,7 +46,11 @@ public class MethodMetadata : FunctionMetadata, IEquatable<MethodMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(base.GetHashCode(), (int)AccessModifier);
+        => HashCode.Combine((int)AccessModifier, Name, TypeMetadata);
 
     public AccessModifierMetadata AccessModifier { get; }
+
+    public string Name { get; }
+
+    public FunctionTypeMetadata TypeMetadata { get; }
 }

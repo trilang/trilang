@@ -79,7 +79,7 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
 
     public IExpressionNode Right { get; }
 
-    public IMetadata? ReturnTypeMetadata { get; set; }
+    public ITypeMetadata? ReturnTypeMetadata { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }
 }
