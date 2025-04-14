@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -9,6 +10,9 @@ public class SemanticAnalysis
     {
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());
         tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>());
-        tree.Accept(new TypeChecker());
+
+        var typeMetadataProvider = new TypeMetadataProvider();
+        tree.Accept(new GenerateMetadata(typeMetadataProvider));
+        tree.Accept(new TypeChecker(typeMetadataProvider));
     }
 }

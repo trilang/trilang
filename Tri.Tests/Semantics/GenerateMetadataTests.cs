@@ -2,219 +2,298 @@ using Tri.Tests.Builders;
 using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
-using Trilang.Symbols;
 
 namespace Tri.Tests.Semantics;
 
 public class GenerateMetadataTests
 {
     [Test]
-    public void SetMetadataForFunctionReturnTypeTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(_ => { }))
-            .Build();
-
-        tree.Accept(new TypeChecker());
-
-        var expected = new FunctionMetadata("main", new FunctionTypeMetadata([], TypeMetadata.Void));
-        var function = tree.Declarations[0] as FunctionDeclarationNode;
-        Assert.That(function, Is.Not.Null);
-        Assert.That(function.Metadata, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void SetMetadataForIncorrectFunctionReturnTypeTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("xxx")
-                .Body(_ => { }))
-            .Build();
-
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
-    }
-
-    [Test]
-    public void SetMetadataForFunctionParameterTypesTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .DefineParameter("a", "i32")
-                .DefineParameter("b", "bool")
-                .Body(_ => { }))
-            .Build();
-
-        tree.Accept(new TypeChecker());
-
-        var expected = new FunctionMetadata(
-            "main",
-            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void));
-
-        var function = tree.Declarations[0] as FunctionDeclarationNode;
-        Assert.That(function, Is.Not.Null);
-        Assert.That(function.Metadata, Is.EqualTo(expected));
-        Assert.That(function.Parameters[0].Type.Metadata, Is.EqualTo(TypeMetadata.I32));
-        Assert.That(function.Parameters[1].Type.Metadata, Is.EqualTo(TypeMetadata.Bool));
-    }
-
-    [Test]
-    public void SetMetadataForIncorrectFunctionParameterTypesTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .DefineParameter("a", "i32")
-                .DefineParameter("b", "xxx")
-                .Body(_ => { }))
-            .Build();
-
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
-    }
-
-    [Test]
-    public void SetMetadataForVariableTypeTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", "i32", exp => exp.Number(1))))
-            .Build();
-
-        tree.Accept(new TypeChecker());
-
-        var variable = tree.Find<VariableDeclarationNode>();
-        Assert.That(variable, Is.Not.Null);
-        Assert.That(variable.Type.Metadata, Is.EqualTo(TypeMetadata.I32));
-    }
-
-    [Test]
-    public void SetMetadataForIncorrectVariableTypeTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", "xxx", exp => exp.Number(1))))
-            .Build();
-
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker()));
-    }
-
-    [Test]
-    public void SetMetadataForTypeTest()
+    public void GenerateMetadataForTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineType("Point", builder => builder
                 .DefineField("x", "i32")
                 .DefineField("y", "i32")
-                .DefineMethod("toString", b => b.Body())
+                .DefineConstructor(b => b
+                    .DefineParameter("x", "i32")
+                    .DefineParameter("y", "i32")
+                    .Body(body => body.Return()))
+                .DefineMethod("toString", b => b
+                    .ReturnType("string")
+                    .Body(body => body.Return()))
                 .DefineMethod("distance", b => b
+                    .AccessModifier(AccessModifier.Private)
                     .DefineParameter("other", "i32")
                     .ReturnType("f64")
-                    .Body()))
+                    .Body(body => body.Return())))
             .Build();
 
-        var store = new TypeMetadataProvider();
-        tree.Accept(new TypeChecker(store));
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
 
-        var type = tree.Find<TypeDeclarationNode>();
-        Assert.That(type, Is.Not.Null);
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type("Point", type)));
+        var expected = new TypeMetadata("Point", [], [], []);
+        expected.AddField(new FieldMetadata(
+            expected,
+            AccessModifierMetadata.Public,
+            "x",
+            TypeMetadata.I32));
+        expected.AddField(new FieldMetadata(
+            expected,
+            AccessModifierMetadata.Public,
+            "y",
+            TypeMetadata.I32));
+        expected.AddConstructor(new ConstructorMetadata(
+            expected,
+            AccessModifierMetadata.Public,
+            [TypeMetadata.I32, TypeMetadata.I32]));
+        expected.AddMethod(new MethodMetadata(
+            expected,
+            AccessModifierMetadata.Public,
+            "toString",
+            new FunctionTypeMetadata([], TypeMetadata.String)));
+        expected.AddMethod(new MethodMetadata(
+            expected,
+            AccessModifierMetadata.Private,
+            "distance",
+            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
 
-        var metadata = store.GetType("Point");
-        var expectedMetadata = new TypeMetadata(
-            "Point",
-            [
-                new FieldMetadata(AccessModifierMetadata.Public, "x", TypeMetadata.I32),
-                new FieldMetadata(AccessModifierMetadata.Public, "y", TypeMetadata.I32),
-            ],
-            [
-                new MethodMetadata(
-                    AccessModifierMetadata.Public,
-                    "toString",
-                    new FunctionTypeMetadata([], TypeMetadata.Void)),
-                new MethodMetadata(
-                    AccessModifierMetadata.Public,
-                    "distance",
-                    new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)),
-            ]);
-
-        Assert.That(metadata, Is.EqualTo(expectedMetadata));
+        var actual = provider.GetType("Point");
+        Assert.That(actual, Is.EqualTo(expected));
     }
 
     [Test]
-    public void SetMetadataForAliasType()
+    public void GenerateMetadataForTypeMissingFieldTypeTest()
     {
         var tree = new TreeBuilder()
-            .DefineAliasType("MyInt", "i32")
+            .DefineType("Point", builder => builder
+                .DefineField("x", "xxx"))
             .Build();
 
-        var store = new TypeMetadataProvider();
-        tree.Accept(new TypeChecker(store));
-
-        var type = tree.Find<TypeAliasDeclarationNode>();
-        Assert.That(type, Is.Not.Null);
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key("MyInt").WithValue(TypeSymbol.Alias("MyInt", type)));
-
-        var metadata = store.GetType("MyInt");
-        var expectedMetadata = new TypeAliasMetadata("MyInt", TypeMetadata.I32);
-        Assert.That(metadata, Is.EqualTo(expectedMetadata));
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
     }
 
     [Test]
-    public void SetMetadataForFunctionTypeTest()
+    public void GenerateMetadataForTypeMissingParameterTypeTest()
     {
         var tree = new TreeBuilder()
-            .DefineFunctionType("MyF", builder => builder
-                .DefineParameter("i32")
-                .DefineParameter("bool")
-                .ReturnType("f64"))
+            .DefineType("Point", builder => builder
+                .DefineMethod("distance", b => b
+                    .DefineParameter("other", "xxx")
+                    .ReturnType("f64")
+                    .Body(body => body.Return())))
             .Build();
 
-        var store = new TypeMetadataProvider();
-        tree.Accept(new TypeChecker(store));
-
-        var type = tree.Find<FunctionTypeDeclarationNode>();
-        Assert.That(type, Is.Not.Null);
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key("MyF").WithValue(TypeSymbol.Function("MyF", type)));
-
-        var functionTypeMetadata = store.GetType("(i32, bool) => f64");
-        var expectedMetadata = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.F64);
-        Assert.That(functionTypeMetadata, Is.EqualTo(expectedMetadata));
-
-        var aliasTypeMetadata = store.GetType("MyF");
-        var expectedAliasMetadata = new TypeAliasMetadata("MyF", functionTypeMetadata);
-        Assert.That(aliasTypeMetadata, Is.EqualTo(expectedAliasMetadata));
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
     }
 
     [Test]
-    public void SetMetadataForFunctionTest()
+    public void GenerateMetadataForTypeMissingReturnTypeTest()
     {
         var tree = new TreeBuilder()
-            .DefineFunction("add", builder => builder
+            .DefineType("Point", builder => builder
+                .DefineMethod("toString", b => b
+                    .ReturnType("xxx")
+                    .Body(body => body.Return())))
+            .Build();
+
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+    }
+
+    [Test]
+    public void GenerateMetadataForTypeAliasTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("MyInt", new TypeNode("i32"))
+            .Build();
+
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
+
+        var expected = new TypeAliasMetadata("MyInt", TypeMetadata.I32);
+
+        var actual = provider.GetType("MyInt");
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void GenerateMetadataForTypeAliasMissingTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("MyInt", new TypeNode("xxx"))
+            .Build();
+
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+    }
+
+    [Test]
+    public void GenerateMetadataForTypeArrayTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .DefineParameter("arr", new TypeNode("i32[]"))
+                .Body(body => body.Return()))
+            .Build();
+
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
+
+        var expected = new TypeArrayMetadata(TypeMetadata.I32);
+
+        var actual = provider.GetType("i32[]");
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void GenerateMetadataForTypeArrayMissingTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .DefineParameter("arr", new TypeNode("xxx"))
+                .Body(body => body.Return()))
+            .Build();
+
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+    }
+
+    [Test]
+    public void GenerateMetadataForFunctionTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
                 .DefineParameter("a", "i32")
                 .DefineParameter("b", "i32")
-                .ReturnType("i32")
-                .Body(body => body.Return(exp => exp.Number(0))))
+                .ReturnType("f64")
+                .Body(body => body.Return()))
             .Build();
 
-        var store = new TypeMetadataProvider();
-        tree.Accept(new TypeChecker(store));
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
 
-        var type = tree.Find<FunctionDeclarationNode>();
-        Assert.That(type, Is.Not.Null);
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key("add").WithValue(new FunctionSymbol(type)));
+        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.F64);
 
-        var functionTypeMetadata = store.GetType("(i32, i32) => i32");
-        var expectedMetadata = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
-        Assert.That(functionTypeMetadata, Is.EqualTo(expectedMetadata));
+        var actual = provider.GetType("(i32, i32) => f64");
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void GenerateMetadataForFunctionTypeMissingParameterTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .DefineParameter("a", "xxx")
+                .Body(body => body.Return()))
+            .Build();
+
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+    }
+
+    [Test]
+    public void GenerateMetadataForFunctionTypeMissingReturnTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .ReturnType("xxx")
+                .Body(body => body.Return()))
+            .Build();
+
+        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+    }
+
+    [Test]
+    public void GenerateMetadataForAliasAndTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point")
+            .DefineAliasType("MyPoint", new TypeNode("Point"))
+            .Build();
+
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
+
+        var expectedType = new TypeMetadata("Point");
+        var expectedAlias = new TypeAliasMetadata("MyPoint", expectedType);
+
+        var actualType = provider.GetType("Point");
+        var actualAlias = provider.GetType("MyPoint");
+
+        Assert.That(actualType, Is.EqualTo(expectedType));
+        Assert.That(actualAlias, Is.EqualTo(expectedAlias));
+    }
+
+    [Test]
+    public void GenerateMetadataForForwardRefAliasAndTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("MyPoint", new TypeNode("Point"))
+            .DefineType("Point")
+            .Build();
+
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
+
+        var expectedType = new TypeMetadata("Point");
+        var expectedAlias = new TypeAliasMetadata("MyPoint", expectedType);
+
+        var actualType = provider.GetType("Point");
+        var actualAlias = provider.GetType("MyPoint");
+
+        Assert.That(actualType, Is.EqualTo(expectedType));
+        Assert.That(actualAlias, Is.EqualTo(expectedAlias));
+    }
+
+    [Test]
+    public void GenerateMetadataForAliasAndArrayTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point")
+            .DefineAliasType("MyPoint", new TypeNode("Point[]"))
+            .Build();
+
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
+
+        var expectedType = new TypeMetadata("Point");
+        var expectedArrayType = new TypeArrayMetadata(expectedType);
+        var expectedAlias = new TypeAliasMetadata("MyPoint", expectedArrayType);
+
+        var actualType = provider.GetType("Point");
+        var actualArrayType = provider.GetType("Point[]");
+        var actualAlias = provider.GetType("MyPoint");
+
+        Assert.That(actualType, Is.EqualTo(expectedType));
+        Assert.That(actualArrayType, Is.EqualTo(expectedArrayType));
+        Assert.That(actualAlias, Is.EqualTo(expectedAlias));
+    }
+
+    [Test]
+    public void GenerateMetadataForForwardRefAliasAndArrayTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("MyPoint", new TypeNode("Point[]"))
+            .DefineType("Point")
+            .Build();
+
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
+
+        var expectedType = new TypeMetadata("Point");
+        var expectedArrayType = new TypeArrayMetadata(expectedType);
+        var expectedAlias = new TypeAliasMetadata("MyPoint", expectedArrayType);
+
+        var actualType = provider.GetType("Point");
+        var actualArrayType = provider.GetType("Point[]");
+        var actualAlias = provider.GetType("MyPoint");
+
+        Assert.That(actualType, Is.EqualTo(expectedType));
+        Assert.That(actualArrayType, Is.EqualTo(expectedArrayType));
+        Assert.That(actualAlias, Is.EqualTo(expectedAlias));
     }
 }

@@ -18,16 +18,22 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public static readonly TypeMetadata String = new TypeMetadata("string");
 
     private readonly HashSet<FieldMetadata> fields;
+    private readonly HashSet<ConstructorMetadata> constructors;
     private readonly HashSet<MethodMetadata> methods;
 
-    public TypeMetadata(string name) : this(name, [], [])
+    public TypeMetadata(string name) : this(name, [], [], [])
     {
     }
 
-    public TypeMetadata(string name, IEnumerable<FieldMetadata> fields, IEnumerable<MethodMetadata> methods)
+    public TypeMetadata(
+        string name,
+        IEnumerable<FieldMetadata> fields,
+        IEnumerable<ConstructorMetadata> constructors,
+        IEnumerable<MethodMetadata> methods)
     {
         Name = name;
         this.fields = new HashSet<FieldMetadata>(fields);
+        this.constructors = new HashSet<ConstructorMetadata>(constructors);
         this.methods = new HashSet<MethodMetadata>(methods);
     }
 
@@ -45,9 +51,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name &&
-               Fields.SequenceEqual(other.Fields) &&
-               Methods.SequenceEqual(other.Methods);
+        return Name == other.Name;
     }
 
     public override bool Equals(object? obj)
@@ -67,11 +71,29 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public override int GetHashCode()
         => HashCode.Combine(Name);
 
+    public override string ToString()
+        => Name;
+
+    public FieldMetadata? GetField(string name)
+        => fields.FirstOrDefault(f => f.Name == name);
+
     public void AddField(FieldMetadata field)
     {
         if (!fields.Add(field))
             throw new ArgumentException($"Field with name {field.Name} already exists in type {Name}");
     }
+
+    public ConstructorMetadata? GetConstructor(IEnumerable<ITypeMetadata> parameters)
+        => constructors.FirstOrDefault(c => c.ParameterTypes.SequenceEqual(parameters));
+
+    public void AddConstructor(ConstructorMetadata constructor)
+    {
+        if (!constructors.Add(constructor))
+            throw new ArgumentException($"Constructor already exists in type {Name}");
+    }
+
+    public MethodMetadata? GetMethod(string name)
+        => methods.FirstOrDefault(m => m.Name == name);
 
     public void AddMethod(MethodMetadata method)
     {
@@ -82,6 +104,8 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public string Name { get; }
 
     public IReadOnlyCollection<FieldMetadata> Fields => fields;
+
+    public IReadOnlyCollection<ConstructorMetadata> Constructors => constructors;
 
     public IReadOnlyCollection<MethodMetadata> Methods => methods;
 }

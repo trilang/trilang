@@ -31,10 +31,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         return this;
     }
 
-    public ISyntaxTreeBuilder DefineType(string name, Action<ITypeBuilder> action)
+    public ISyntaxTreeBuilder DefineType(string name, Action<ITypeBuilder>? action = null)
     {
         var builder = new TypeBuilder(symbolTable, name);
-        action(builder);
+        action?.Invoke(builder);
 
         var type = builder.Build();
         declaration.Add(type);
@@ -47,13 +47,16 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         return this;
     }
 
-    public ISyntaxTreeBuilder DefineAliasType(string name, string aliasType)
+    public ISyntaxTreeBuilder DefineAliasType(string name, TypeNode aliasType)
     {
-        var type = new TypeAliasDeclarationNode(AccessModifier.Public, name, TypeNode.Create(aliasType));
+        var type = new TypeAliasDeclarationNode(AccessModifier.Public, name, aliasType);
 
         declaration.Add(type);
 
         if (!symbolTable.TryAddType(TypeSymbol.Alias(name, type)))
+            throw new Exception();
+
+        if (aliasType.IsArray && !symbolTable.TryAddType(TypeSymbol.Array(aliasType.Name)))
             throw new Exception();
 
         type.SymbolTable = symbolTable;
@@ -94,11 +97,11 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             this.symbolTable = symbolTable;
             this.functionName = functionName;
             parameters = [];
-            returnType = TypeNode.Create("void");
+            returnType = new TypeNode("void");
         }
 
         public IFunctionBuilder DefineParameter(string name, string type)
-            => DefineParameter(name, TypeNode.Create(type));
+            => DefineParameter(name, new TypeNode(type));
 
         public IFunctionBuilder DefineParameter(string name, TypeNode type)
         {
@@ -108,6 +111,9 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             if (!symbolTable.TryAddVariable(new VariableSymbol(parameter)))
                 throw new Exception();
 
+            if (type.IsArray && !symbolTable.TryAddType(TypeSymbol.Array(type.Name)))
+                throw new Exception();
+
             parameter.SymbolTable = symbolTable;
 
             return this;
@@ -115,7 +121,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IFunctionBuilder ReturnType(string type)
         {
-            returnType = TypeNode.Create(type);
+            returnType = new TypeNode(type);
 
             return this;
         }
@@ -230,7 +236,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public FieldDeclarationNode Build()
-            => new FieldDeclarationNode(accessModifier, name, TypeNode.Create(type));
+            => new FieldDeclarationNode(accessModifier, name, new TypeNode(type));
     }
 
     private sealed class ConstructorBuilder : IConstructorBuilder
@@ -256,7 +262,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public IConstructorBuilder DefineParameter(string name, string type)
-            => DefineParameter(name, TypeNode.Create(type));
+            => DefineParameter(name, new TypeNode(type));
 
         public IConstructorBuilder DefineParameter(string name, TypeNode type)
         {
@@ -304,7 +310,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             this.functionName = functionName;
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
             parameters = [];
-            returnType = TypeNode.Create("void");
+            returnType = new TypeNode("void");
         }
 
         public IMethodBuilder AccessModifier(AccessModifier modifier)
@@ -315,7 +321,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public IMethodBuilder DefineParameter(string name, string type)
-            => DefineParameter(name, TypeNode.Create(type));
+            => DefineParameter(name, new TypeNode(type));
 
         public IMethodBuilder DefineParameter(string name, TypeNode type)
         {
@@ -332,7 +338,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IMethodBuilder ReturnType(string type)
         {
-            returnType = TypeNode.Create(type);
+            returnType = new TypeNode(type);
 
             return this;
         }
@@ -372,7 +378,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             var builder = new ExpressionBuilder(symbolTable);
             action(builder);
 
-            var variable = new VariableDeclarationStatementNode(name, TypeNode.Create(type), builder.Build())
+            var variable = new VariableDeclarationStatementNode(name, new TypeNode(type), builder.Build())
             {
                 SymbolTable = symbolTable
             };
@@ -646,7 +652,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             this.name = name;
             parameterTypes = [];
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
-            returnType = TypeNode.Create("void");
+            returnType = new TypeNode("void");
         }
 
         public IFunctionTypeBuilder AccessModifier(AccessModifier modifier)
@@ -658,14 +664,14 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IFunctionTypeBuilder DefineParameter(string type)
         {
-            parameterTypes.Add(TypeNode.Create(type));
+            parameterTypes.Add(new TypeNode(type));
 
             return this;
         }
 
         public IFunctionTypeBuilder ReturnType(string type)
         {
-            returnType = TypeNode.Create(type);
+            returnType = new TypeNode(type);
 
             return this;
         }

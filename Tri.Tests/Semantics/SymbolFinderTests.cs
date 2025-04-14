@@ -10,7 +10,7 @@ public class SymbolFinderTests
     public void FunctionInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var function = FunctionDeclarationNode.Create("main", [], TypeNode.Create("void"), new BlockStatementNode());
+        var function = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
         var tree = new SyntaxTree([function]);
 
         tree.Accept(builder, new SymbolFinderContext());
@@ -24,8 +24,8 @@ public class SymbolFinderTests
     public void TwoFunctionsInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var function1 = FunctionDeclarationNode.Create("main", [], TypeNode.Create("void"), new BlockStatementNode());
-        var function2 = FunctionDeclarationNode.Create("add", [], TypeNode.Create("void"), new BlockStatementNode());
+        var function1 = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
+        var function2 = FunctionDeclarationNode.Create("add", [], new TypeNode("void"), new BlockStatementNode());
         var tree = new SyntaxTree([function1, function2]);
 
         tree.Accept(builder, new SymbolFinderContext());
@@ -40,8 +40,8 @@ public class SymbolFinderTests
     public void SameFunctionInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var function1 = FunctionDeclarationNode.Create("main", [], TypeNode.Create("void"), new BlockStatementNode());
-        var function2 = FunctionDeclarationNode.Create("main", [], TypeNode.Create("void"), new BlockStatementNode());
+        var function1 = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
+        var function2 = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
         var tree = new SyntaxTree([function1, function2]);
 
         Assert.Throws<SymbolTableBuilderException>(() => tree.Accept(builder, new SymbolFinderContext()));
@@ -51,12 +51,12 @@ public class SymbolFinderTests
     public void FunctionWithParametersInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var a = new ParameterNode("a", TypeNode.Create("i32"));
-        var b = new ParameterNode("b", TypeNode.Create("i32"));
+        var a = new ParameterNode("a", new TypeNode("i32"));
+        var b = new ParameterNode("b", new TypeNode("i32"));
         var function = FunctionDeclarationNode.Create(
             "add",
             [a, b],
-            TypeNode.Create("void"),
+            new TypeNode("void"),
             new BlockStatementNode());
         var tree = new SyntaxTree([function]);
 
@@ -77,12 +77,12 @@ public class SymbolFinderTests
     public void FunctionWithSameParametersInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var a = new ParameterNode("a", TypeNode.Create("i32"));
-        var b = new ParameterNode("a", TypeNode.Create("i32"));
+        var a = new ParameterNode("a", new TypeNode("i32"));
+        var b = new ParameterNode("a", new TypeNode("i32"));
         var function = FunctionDeclarationNode.Create(
             "add",
             [a, b],
-            TypeNode.Create("void"),
+            new TypeNode("void"),
             new BlockStatementNode());
         var tree = new SyntaxTree([function]);
 
@@ -93,12 +93,12 @@ public class SymbolFinderTests
     public void FunctionWithVariablesInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var a = new VariableDeclarationStatementNode("a", TypeNode.Create("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1));
-        var b = new VariableDeclarationStatementNode("b", TypeNode.Create("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2));
+        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1));
+        var b = new VariableDeclarationStatementNode("b", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2));
         var function = FunctionDeclarationNode.Create(
             "main",
             [],
-            TypeNode.Create("void"),
+            new TypeNode("void"),
             new BlockStatementNode([a, b]));
         var tree = new SyntaxTree([function]);
 
@@ -119,12 +119,12 @@ public class SymbolFinderTests
     public void FunctionWithSameVariablesInRootScopeTest()
     {
         var builder = new SymbolFinder();
-        var a = new VariableDeclarationStatementNode("a", TypeNode.Create("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1));
-        var b = new VariableDeclarationStatementNode("a", TypeNode.Create("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2));
+        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1));
+        var b = new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2));
         var function = FunctionDeclarationNode.Create(
             "main",
             [],
-            TypeNode.Create("void"),
+            new TypeNode("void"),
             new BlockStatementNode([a, b]));
         var tree = new SyntaxTree([function]);
 
@@ -135,7 +135,7 @@ public class SymbolFinderTests
     public void IfScopeTest()
     {
         var builder = new SymbolFinder();
-        var a = new VariableDeclarationStatementNode("a", TypeNode.Create("i32"), LiteralExpressionNode.Number(1));
+        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
         var ifStatement = new IfStatementNode(
             LiteralExpressionNode.True(),
             new BlockStatementNode([
@@ -145,7 +145,7 @@ public class SymbolFinderTests
         var function = FunctionDeclarationNode.Create(
             "main",
             [],
-            TypeNode.Create("void"),
+            new TypeNode("void"),
             new BlockStatementNode([ifStatement])
         );
         var tree = new SyntaxTree([function]);
@@ -165,8 +165,8 @@ public class SymbolFinderTests
     public void IfElseScopeTest()
     {
         var builder = new SymbolFinder();
-        var a = new VariableDeclarationStatementNode("a", TypeNode.Create("i32"), LiteralExpressionNode.Number(1));
-        var b = new VariableDeclarationStatementNode("b", TypeNode.Create("i32"), LiteralExpressionNode.Number(1));
+        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
+        var b = new VariableDeclarationStatementNode("b", new TypeNode("i32"), LiteralExpressionNode.Number(1));
         var ifStatement = new IfStatementNode(
             LiteralExpressionNode.True(),
             new BlockStatementNode([a]),
@@ -175,7 +175,7 @@ public class SymbolFinderTests
         var function = FunctionDeclarationNode.Create(
             "main",
             [],
-            TypeNode.Create("void"),
+            new TypeNode("void"),
             new BlockStatementNode([ifStatement])
         );
         var tree = new SyntaxTree([function]);
@@ -200,9 +200,9 @@ public class SymbolFinderTests
     public void SameVariableInMultipleScopesTest()
     {
         var builder = new SymbolFinder();
-        var a1 = new VariableDeclarationStatementNode("a", TypeNode.Create("i32"), LiteralExpressionNode.Number(1));
-        var a2 = new VariableDeclarationStatementNode("a", TypeNode.Create("i32"), LiteralExpressionNode.Number(1));
-        var a3 = new VariableDeclarationStatementNode("a", TypeNode.Create("i32"), LiteralExpressionNode.Number(1));
+        var a1 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
+        var a2 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
+        var a3 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
         var ifStatement = new IfStatementNode(
             LiteralExpressionNode.True(),
             new BlockStatementNode([a2]),
@@ -211,7 +211,7 @@ public class SymbolFinderTests
         var function = FunctionDeclarationNode.Create(
             "main",
             [],
-            TypeNode.Create("void"),
+            new TypeNode("void"),
             new BlockStatementNode([a1, ifStatement])
         );
         var tree = new SyntaxTree([function]);
@@ -240,7 +240,7 @@ public class SymbolFinderTests
     [Test]
     public void ArrayTypeTest()
     {
-        var function = FunctionDeclarationNode.Create("main", [], TypeNode.Array("i32"), new BlockStatementNode());
+        var function = FunctionDeclarationNode.Create("main", [], new TypeNode("i32[]"), new BlockStatementNode());
         var tree = new SyntaxTree([function]);
 
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());
@@ -272,8 +272,8 @@ public class SymbolFinderTests
     [Test]
     public void FieldDeclarationTest()
     {
-        var field1 = new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32"));
-        var field2 = new FieldDeclarationNode(AccessModifier.Private, "y", TypeNode.Create("i32"));
+        var field1 = new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32"));
+        var field2 = new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32"));
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
             "Point",
@@ -293,16 +293,16 @@ public class SymbolFinderTests
     [Test]
     public void FieldDeclarationAndMethodVariableTest()
     {
-        var field1 = new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32"));
+        var field1 = new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32"));
         var field2 = new VariableDeclarationStatementNode(
             "x",
-            TypeNode.Create("i32"),
+            new TypeNode("i32"),
             LiteralExpressionNode.Number(1));
         var method = new MethodDeclarationNode(
             AccessModifier.Public,
             "test",
             [],
-            TypeNode.Create("void"),
+            new TypeNode("void"),
             new BlockStatementNode([field2]));
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
@@ -326,7 +326,7 @@ public class SymbolFinderTests
     [Test]
     public void CtorDeclarationVariableTest()
     {
-        var parameter = new ParameterNode("a", TypeNode.Create("i32"));
+        var parameter = new ParameterNode("a", new TypeNode("i32"));
         var ctor = new ConstructorDeclarationNode(AccessModifier.Public, [parameter], new BlockStatementNode());
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
@@ -346,7 +346,7 @@ public class SymbolFinderTests
     [Test]
     public void TypeAliasTest()
     {
-        var type = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", TypeNode.Create("i32"));
+        var type = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", new TypeNode("i32"));
         var tree = new SyntaxTree([type]);
 
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());
@@ -362,8 +362,8 @@ public class SymbolFinderTests
         var type = new FunctionTypeDeclarationNode(
             AccessModifier.Public,
             "F",
-            [TypeNode.Create("i32"), TypeNode.Create("i32")],
-            TypeNode.Create("i32"));
+            [new TypeNode("i32"), new TypeNode("i32")],
+            new TypeNode("i32"));
         var tree = new SyntaxTree([type]);
 
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());

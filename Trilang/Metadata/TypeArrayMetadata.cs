@@ -42,6 +42,9 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
     public override int GetHashCode()
         => HashCode.Combine(ItemMetadata);
 
+    public override string ToString()
+        => Name;
+
     public string Name { get; }
 
     public ITypeMetadata ItemMetadata { get; }

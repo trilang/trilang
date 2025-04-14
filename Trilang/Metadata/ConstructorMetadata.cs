@@ -1,26 +1,24 @@
 namespace Trilang.Metadata;
 
-public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
+public class ConstructorMetadata : IMetadata, IEquatable<ConstructorMetadata>
 {
-    public FieldMetadata(
+    public ConstructorMetadata(
         TypeMetadata declaringType,
         AccessModifierMetadata accessModifier,
-        string name,
-        ITypeMetadata type)
+        IReadOnlyCollection<ITypeMetadata> parameterTypes)
     {
         DeclaringType = declaringType;
         AccessModifier = accessModifier;
-        Name = name;
-        Type = type;
+        ParameterTypes = parameterTypes;
     }
 
-    public static bool operator ==(FieldMetadata? left, FieldMetadata? right)
+    public static bool operator ==(ConstructorMetadata? left, ConstructorMetadata? right)
         => Equals(left, right);
 
-    public static bool operator !=(FieldMetadata? left, FieldMetadata? right)
+    public static bool operator !=(ConstructorMetadata? left, ConstructorMetadata? right)
         => !Equals(left, right);
 
-    public bool Equals(FieldMetadata? other)
+    public bool Equals(ConstructorMetadata? other)
     {
         if (other is null)
             return false;
@@ -30,8 +28,7 @@ public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
 
         return DeclaringType.Equals(other.DeclaringType) &&
                AccessModifier == other.AccessModifier &&
-               Name == other.Name &&
-               Type.Equals(other.Type);
+               ParameterTypes.SequenceEqual(other.ParameterTypes);
     }
 
     public override bool Equals(object? obj)
@@ -45,20 +42,15 @@ public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((FieldMetadata)obj);
+        return Equals((ConstructorMetadata)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(AccessModifier, Name, Type);
-
-    public override string ToString()
-        => $"{Name}: {Type}";
+        => HashCode.Combine(AccessModifier, ParameterTypes);
 
     public TypeMetadata DeclaringType { get; }
 
     public AccessModifierMetadata AccessModifier { get; }
 
-    public string Name { get; }
-
-    public ITypeMetadata Type { get; }
+    public IReadOnlyCollection<ITypeMetadata> ParameterTypes { get; }
 }

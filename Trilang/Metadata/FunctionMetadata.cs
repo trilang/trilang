@@ -43,6 +43,9 @@ public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
     public override int GetHashCode()
         => HashCode.Combine(Name, TypeMetadata);
 
+    public override string ToString()
+        => $"{Name}: {TypeMetadata}";
+
     public string Name { get; }
 
     public FunctionTypeMetadata TypeMetadata { get; }

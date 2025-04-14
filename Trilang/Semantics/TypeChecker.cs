@@ -1,7 +1,6 @@
 using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
-using Trilang.Symbols;
 using static Trilang.Parsing.Ast.BinaryExpressionKind;
 using static Trilang.Parsing.Ast.UnaryExpressionKind;
 using static Trilang.Metadata.TypeMetadata;
@@ -18,177 +17,6 @@ public class TypeChecker : IVisitor
 
     public TypeChecker(TypeMetadataProvider typeProvider)
         => this.typeProvider = typeProvider;
-
-    private void BuildSymbolTableTypes(ISymbolTable? symbolTable)
-    {
-        // TODO: extract to a symbol table class or another visitor
-        if (symbolTable is null)
-            throw new ArgumentNullException(nameof(symbolTable));
-
-        BuildTypes(symbolTable.Types);
-        BuildFunctionTypes(symbolTable.FunctionsInScope);
-    }
-
-    private void BuildTypes(IReadOnlyDictionary<string, TypeSymbol> types)
-    {
-        foreach (var (_, symbol) in types)
-        {
-            if (!symbol.IsType)
-                continue;
-
-            var metadata = new TypeMetadata(symbol.Name);
-
-            typeProvider.DefineType(metadata);
-        }
-
-        foreach (var (_, symbol) in types)
-        {
-            if (!symbol.IsFunction)
-                continue;
-
-            if (symbol.Node is not FunctionTypeDeclarationNode function)
-                throw new TypeCheckerException($"Unknown function '{symbol.Name}'");
-
-            var parameterTypes = new ITypeMetadata[function.ParameterTypes.Count];
-            for (var i = 0; i < parameterTypes.Length; i++)
-            {
-                var parameterType = function.ParameterTypes[i];
-                var type = typeProvider.GetType(parameterType.Name) ??
-                           throw new TypeCheckerException($"Unknown type '{parameterType.Name}'");
-
-                parameterTypes[i] = type;
-            }
-
-            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
-                             throw new TypeCheckerException($"Unknown type '{function.ReturnType.Name}'");
-
-            var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
-            if (typeProvider.GetType(functionTypeMetadata.Name) is null)
-                typeProvider.DefineType(functionTypeMetadata);
-
-            var alias = new TypeAliasMetadata(symbol.Name, functionTypeMetadata);
-            typeProvider.DefineType(alias);
-        }
-
-        // all array and alias types are processed after all types are defined to support forward references
-        foreach (var (_, symbol) in types)
-        {
-            if (symbol.IsArray)
-            {
-                var type = typeProvider.GetType(symbol.Name[..^2]) ??
-                           throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
-
-                if (typeProvider.GetType(type.Name) is null)
-                    typeProvider.DefineType(type);
-            }
-            else if (symbol is { IsAlias: true, Node: TypeAliasDeclarationNode typeAliasNode })
-            {
-                var type = typeProvider.GetType(typeAliasNode.Type.Name) ??
-                           throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
-                var metadata = new TypeAliasMetadata(symbol.Name, type);
-
-                typeProvider.DefineType(metadata);
-            }
-        }
-
-        // populate type metadata
-        foreach (var (_, symbol) in types)
-        {
-            var node = symbol.Node;
-            if (node is null)
-                continue;
-
-            var metadata = typeProvider.GetType(symbol.Name) ??
-                           throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
-
-            if (node is TypeDeclarationNode typeDeclarationNode)
-            {
-                if (metadata is not TypeMetadata type)
-                    continue;
-
-                foreach (var field in typeDeclarationNode.Fields)
-                {
-                    var fieldType = typeProvider.GetType(field.Type.Name) ??
-                                    throw new TypeCheckerException($"Unknown type '{field.Type.Name}'");
-
-                    var fieldMetadata = new FieldMetadata(
-                        GetAccessModifierMetadata(field.AccessModifier),
-                        field.Name,
-                        fieldType);
-
-                    type.AddField(fieldMetadata);
-                    field.Metadata = fieldMetadata;
-                }
-
-                foreach (var method in typeDeclarationNode.Methods)
-                {
-                    var parameters = new ITypeMetadata[method.Parameters.Count];
-                    for (var i = 0; i < parameters.Length; i++)
-                    {
-                        var parameter = method.Parameters[i];
-                        var parameterType = typeProvider.GetType(parameter.Type.Name) ??
-                                            throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
-
-                        parameters[i] = parameterType;
-                    }
-
-                    var returnType = typeProvider.GetType(method.ReturnType.Name) ??
-                                     throw new TypeCheckerException($"Unknown type '{method.ReturnType.Name}'");
-
-                    var methodMetadata = new MethodMetadata(
-                        GetAccessModifierMetadata(method.AccessModifier),
-                        method.Name,
-                        new FunctionTypeMetadata(parameters, returnType));
-
-                    type.AddMethod(methodMetadata);
-                    method.Metadata = methodMetadata;
-                }
-
-                typeDeclarationNode.Metadata = type;
-            }
-            else if (node is TypeAliasDeclarationNode typeAliasNode)
-            {
-                typeAliasNode.Metadata = metadata;
-            }
-        }
-    }
-
-    private void BuildFunctionTypes(IReadOnlyDictionary<string, FunctionSymbol> functions)
-    {
-        foreach (var (_, symbol) in functions)
-        {
-            var function = symbol.Node;
-            if (function.Metadata is not null)
-                continue;
-
-            var parameters = new ITypeMetadata[function.Parameters.Count];
-            for (var i = 0; i < function.Parameters.Count; i++)
-            {
-                var parameter = function.Parameters[i];
-                var type = typeProvider.GetType(parameter.Type.Name);
-
-                parameters[i] = type ??
-                                throw new TypeCheckerException($"Unknown type '{parameter.Type}'");
-            }
-
-            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
-                             throw new TypeCheckerException($"Unknown type '{function.ReturnType}'");
-
-            var functionTypeMetadata = new FunctionTypeMetadata(parameters, returnType);
-            function.Metadata = new FunctionMetadata(function.Name, functionTypeMetadata);
-
-            typeProvider.DefineType(functionTypeMetadata);
-        }
-    }
-
-    private static AccessModifierMetadata GetAccessModifierMetadata(AccessModifier accessModifier)
-        => accessModifier switch
-        {
-            AccessModifier.Public => AccessModifierMetadata.Public,
-            AccessModifier.Private => AccessModifierMetadata.Private,
-
-            _ => throw new ArgumentOutOfRangeException(nameof(accessModifier), accessModifier, null)
-        };
 
     private static T? FindInParent<T>(ISyntaxNode node)
         where T : ISyntaxNode
@@ -318,11 +146,6 @@ public class TypeChecker : IVisitor
 
     public void Visit(CallExpressionNode node)
     {
-        node.Member.Accept(this);
-
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this);
-
         // TODO: overload support
         var symbol = node.SymbolTable?.GetFunction(node.Member.Name) ??
                      throw new TypeCheckerException();
@@ -331,6 +154,11 @@ public class TypeChecker : IVisitor
                        throw new TypeCheckerException();
 
         node.Metadata = function;
+
+        node.Member.Accept(this);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
 
         for (var i = 0; i < node.Parameters.Count; i++)
         {
@@ -363,6 +191,25 @@ public class TypeChecker : IVisitor
 
     public void Visit(FunctionDeclarationNode node)
     {
+        var parameters = new ITypeMetadata[node.Parameters.Count];
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var parameter = node.Parameters[i];
+            var type = typeProvider.GetType(parameter.Type.Name) ??
+                       throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
+
+            parameters[i] = type;
+        }
+
+        var returnType = typeProvider.GetType(node.ReturnType.Name) ??
+                         throw new TypeCheckerException($"Unknown type '{node.ReturnType.Name}'");
+
+        var functionTypeMetadata = new FunctionTypeMetadata(parameters, returnType);
+        functionTypeMetadata = typeProvider.GetType(functionTypeMetadata.Name) as FunctionTypeMetadata ??
+                               throw new TypeCheckerException($"Unknown type '{functionTypeMetadata.Name}'");
+
+        node.Metadata = new FunctionMetadata(node.Name, functionTypeMetadata);
+
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
@@ -372,6 +219,21 @@ public class TypeChecker : IVisitor
 
     public void Visit(FunctionTypeDeclarationNode node)
     {
+        var parameters = new ITypeMetadata[node.ParameterTypes.Count];
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            var parameter = node.ParameterTypes[i];
+            var type = typeProvider.GetType(parameter.Name) ??
+                       throw new TypeCheckerException($"Unknown type '{parameter.Name}'");
+
+            parameters[i] = type;
+        }
+
+        var returnType = typeProvider.GetType(node.ReturnType.Name) ??
+                         throw new TypeCheckerException($"Unknown type '{node.ReturnType.Name}'");
+
+        node.Metadata = new FunctionTypeMetadata(parameters, returnType);
+
         foreach (var parameterType in node.ParameterTypes)
             parameterType.Accept(this);
 
@@ -426,20 +288,29 @@ public class TypeChecker : IVisitor
         if (node.Expression is not null && FindInParent<ConstructorDeclarationNode>(node) is not null)
             throw new TypeCheckerException();
 
-        var function = FindInParent<MethodDeclarationNode>(node);
-        if (function is not null)
+        var method = FindInParent<MethodDeclarationNode>(node);
+        if (method is not null)
         {
-            if (!Equals(function.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
+            if (!Equals(method.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
                 throw new TypeCheckerException();
         }
         else
         {
-            var method = FindInParent<FunctionDeclarationNode>(node);
-            if (method is null)
-                throw new TypeCheckerException();
+            var constructor = FindInParent<ConstructorDeclarationNode>(node);
+            if (constructor is not null)
+            {
+                if (!Equals(constructor.Metadata?.DeclaringType, node.Expression?.ReturnTypeMetadata))
+                    throw new TypeCheckerException();
+            }
+            else
+            {
+                var function = FindInParent<FunctionDeclarationNode>(node);
+                if (function is null)
+                    throw new TypeCheckerException();
 
-            if (!Equals(method.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
-                throw new TypeCheckerException();
+                if (!Equals(function.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
+                    throw new TypeCheckerException();
+            }
         }
     }
 
@@ -457,8 +328,6 @@ public class TypeChecker : IVisitor
 
     public void Visit(SyntaxTree node)
     {
-        BuildSymbolTableTypes(node.SymbolTable);
-
         foreach (var statement in node.Declarations)
             statement.Accept(this);
     }
@@ -466,25 +335,52 @@ public class TypeChecker : IVisitor
     public void Visit(TypeAliasDeclarationNode node)
     {
         node.Type.Accept(this);
+
+        node.Metadata = typeProvider.GetType(node.Name) ??
+                        throw new TypeCheckerException($"Unknown type '{node.Name}'");
     }
 
     public void Visit(TypeDeclarationNode node)
     {
+        var metadata = typeProvider.GetType(node.Name);
+        if (metadata is not TypeMetadata type)
+            throw new TypeCheckerException($"Unknown type '{node.Name}'");
+
         foreach (var field in node.Fields)
+        {
+            field.Metadata = type.GetField(field.Name);
             field.Accept(this);
+        }
 
         foreach (var constructor in node.Constructors)
+        {
+            var parameters = new ITypeMetadata[constructor.Parameters.Count];
+            for (var i = 0; i < constructor.Parameters.Count; i++)
+            {
+                var parameter = constructor.Parameters[i];
+                var parameterType = typeProvider.GetType(parameter.Type.Name) ??
+                                    throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
+
+                parameters[i] = parameterType;
+            }
+
+            constructor.Metadata = type.GetConstructor(parameters);
             constructor.Accept(this);
+        }
 
         foreach (var method in node.Methods)
+        {
+            method.Metadata = type.GetMethod(method.Name);
             method.Accept(this);
+        }
+
+        node.Metadata = type;
     }
 
     public void Visit(TypeNode node)
     {
-        var type = typeProvider.GetType(node.Name);
-        if (type is null)
-            throw new TypeCheckerException($"Unknown type '{node.Name}'");
+        var type = typeProvider.GetType(node.Name) ??
+                   throw new TypeCheckerException($"Unknown type '{node.Name}'");
 
         node.Metadata = type;
     }
@@ -549,16 +445,15 @@ public class TypeChecker : IVisitor
 
     public void Visit(VariableDeclarationStatementNode node)
     {
-        node.Expression.Accept(this);
-
         if (node.Type.Metadata is null)
         {
-            var type = typeProvider.GetType(node.Type.Name);
-            if (type is null)
-                throw new TypeCheckerException($"Unknown type '{node.Type}'");
+            var type = typeProvider.GetType(node.Type.Name) ??
+                       throw new TypeCheckerException($"Unknown type '{node.Type}'");
 
             node.Type.Metadata = type;
         }
+
+        node.Expression.Accept(this);
 
         if (node.Expression.ReturnTypeMetadata is null)
             throw new TypeCheckerException();

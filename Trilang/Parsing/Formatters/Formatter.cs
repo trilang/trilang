@@ -326,9 +326,6 @@ public partial class Formatter : IFormatter
     public void Visit(TypeNode node)
     {
         writer.Write(node.Name);
-
-        if (node.IsArray)
-            writer.Write("[]");
     }
 
     public void Visit(UnaryExpressionNode node)

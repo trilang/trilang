@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
@@ -13,6 +14,11 @@ public class ConstructorDeclarationNode : ISyntaxNode, IEquatable<ConstructorDec
         AccessModifier = accessModifier;
         Parameters = parameters;
         Body = body;
+
+        foreach (var parameter in parameters)
+            parameter.Parent = this;
+
+        Body.Parent = this;
     }
 
     public static bool operator ==(ConstructorDeclarationNode? left, ConstructorDeclarationNode? right)
@@ -75,4 +81,6 @@ public class ConstructorDeclarationNode : ISyntaxNode, IEquatable<ConstructorDec
     public IReadOnlyList<ParameterNode> Parameters { get; }
 
     public BlockStatementNode Body { get; }
+
+    public ConstructorMetadata? Metadata { get; set; }
 }

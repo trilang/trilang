@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
@@ -80,4 +81,6 @@ public class FunctionTypeDeclarationNode : IDeclarationNode, IEquatable<Function
     public IReadOnlyList<TypeNode> ParameterTypes { get; }
 
     public TypeNode ReturnType { get; }
+
+    public FunctionTypeMetadata? Metadata { get; set; }
 }

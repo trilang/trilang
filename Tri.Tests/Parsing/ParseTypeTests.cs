@@ -88,8 +88,8 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "Point",
                 [
-                    new FieldDeclarationNode(AccessModifier.Private, "x", TypeNode.Create("i32")),
-                    new FieldDeclarationNode(AccessModifier.Private, "y", TypeNode.Create("i32")),
+                    new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
+                    new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
                 ],
                 [],
                 []
@@ -175,14 +175,14 @@ public class ParseTypeTests
                         AccessModifier.Public,
                         "toString",
                         [],
-                        TypeNode.Create("string"),
+                        new TypeNode("string"),
                         new BlockStatementNode([])
                     ),
                     new MethodDeclarationNode(
                         AccessModifier.Public,
                         "distance",
-                        [new ParameterNode("other", TypeNode.Create("Point"))],
-                        TypeNode.Create("f32"),
+                        [new ParameterNode("other", new TypeNode("Point"))],
+                        new TypeNode("f32"),
                         new BlockStatementNode([])
                     )
                 ]
@@ -342,8 +342,8 @@ public class ParseTypeTests
                     new ConstructorDeclarationNode(
                         AccessModifier.Public,
                         [
-                            new ParameterNode("x", TypeNode.Create("i32")),
-                            new ParameterNode("y", TypeNode.Create("i32")),
+                            new ParameterNode("x", new TypeNode("i32")),
+                            new ParameterNode("y", new TypeNode("i32")),
                         ],
                         new BlockStatementNode([])
                     )
@@ -365,7 +365,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "MyType",
-                TypeNode.Create("i32")
+                new TypeNode("i32")
             )
         ]);
 
@@ -407,7 +407,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "F",
                 [],
-                TypeNode.Create("void")
+                new TypeNode("void")
             )
         ]);
 
@@ -424,8 +424,8 @@ public class ParseTypeTests
             new FunctionTypeDeclarationNode(
                 AccessModifier.Public,
                 "F",
-                [TypeNode.Create("i32"), TypeNode.Create("i32")],
-                TypeNode.Create("i32")
+                [new TypeNode("i32"), new TypeNode("i32")],
+                new TypeNode("i32")
             )
         ]);
 

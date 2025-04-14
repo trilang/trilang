@@ -20,8 +20,8 @@ public class ParseLoopTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "test",
-                [new ParameterNode("x", TypeNode.Create("i32"))],
-                TypeNode.Create("void"),
+                [new ParameterNode("x", new TypeNode("i32"))],
+                new TypeNode("void"),
                 new BlockStatementNode([
                     new WhileNode(
                         new BinaryExpressionNode(
@@ -110,8 +110,8 @@ public class ParseLoopTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "test",
-                [new ParameterNode("x", TypeNode.Create("i32"))],
-                TypeNode.Create("void"),
+                [new ParameterNode("x", new TypeNode("i32"))],
+                new TypeNode("void"),
                 new BlockStatementNode([
                     new WhileNode(
                         new BinaryExpressionNode(
@@ -144,8 +144,8 @@ public class ParseLoopTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "test",
-                [new ParameterNode("x", TypeNode.Create("i32"))],
-                TypeNode.Create("void"),
+                [new ParameterNode("x", new TypeNode("i32"))],
+                new TypeNode("void"),
                 new BlockStatementNode([
                     new WhileNode(
                         new BinaryExpressionNode(

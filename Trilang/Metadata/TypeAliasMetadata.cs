@@ -2,7 +2,11 @@ namespace Trilang.Metadata;
 
 public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
 {
-    public TypeAliasMetadata(string name, ITypeMetadata type)
+    public TypeAliasMetadata(string name) : this(name, null)
+    {
+    }
+
+    public TypeAliasMetadata(string name, ITypeMetadata? type)
     {
         Name = name;
         Type = type;
@@ -22,7 +26,7 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name && Type.Equals(other.Type);
+        return Name == other.Name;
     }
 
     public override bool Equals(object? obj)
@@ -40,9 +44,12 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, Type);
+        => HashCode.Combine(Name);
+
+    public override string ToString()
+        => Name;
 
     public string Name { get; }
 
-    public ITypeMetadata Type { get; }
+    public ITypeMetadata? Type { get; set; }
 }

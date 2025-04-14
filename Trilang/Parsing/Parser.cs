@@ -681,12 +681,12 @@ public class Parser
             return null;
 
         if (!context.Reader.Check(TokenKind.OpenBracket))
-            return TypeNode.Create(token.Identifier);
+            return new TypeNode(token.Identifier);
 
         if (!context.Reader.Check(TokenKind.CloseBracket))
             throw new ParseException("Expected a close bracket.");
 
-        return TypeNode.Array(token.Identifier);
+        return new TypeNode($"{token.Identifier}[]");
     }
 
     private string? TryParseId(ParserContext context)

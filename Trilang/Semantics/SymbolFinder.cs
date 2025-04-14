@@ -213,7 +213,7 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable = context.SymbolTable;
 
         if (node.IsArray)
-            context.SymbolTable.TryAddType(TypeSymbol.Array($"{node.Name}[]"));
+            context.SymbolTable.TryAddType(TypeSymbol.Array(node.Name));
     }
 
     public void Visit(UnaryExpressionNode node, SymbolFinderContext context)

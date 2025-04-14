@@ -45,6 +45,9 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     public override int GetHashCode()
         => HashCode.Combine(ParameterTypes, ReturnType);
 
+    public override string ToString()
+        => Name;
+
     public string Name { get; }
 
     public IReadOnlyList<ITypeMetadata> ParameterTypes { get; }

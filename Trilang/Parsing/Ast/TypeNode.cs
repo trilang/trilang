@@ -6,17 +6,8 @@ namespace Trilang.Parsing.Ast;
 
 public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
 {
-    private TypeNode(string name, bool isArray)
-    {
-        Name = name;
-        IsArray = isArray;
-    }
-
-    public static TypeNode Create(string name)
-        => new TypeNode(name, false);
-
-    public static TypeNode Array(string name)
-        => new TypeNode(name, true);
+    public TypeNode(string name)
+        => Name = name;
 
     public static bool operator ==(TypeNode? left, TypeNode? right)
         => Equals(left, right);
@@ -33,7 +24,6 @@ public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
             return true;
 
         return Name == other.Name &&
-               IsArray == other.IsArray &&
                Equals(SymbolTable, other.SymbolTable);
     }
 
@@ -52,7 +42,7 @@ public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, IsArray);
+        => HashCode.Combine(Name);
 
     public override string ToString()
     {
@@ -74,7 +64,8 @@ public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
 
     public string Name { get; }
 
-    public bool IsArray { get; }
+    public bool IsArray
+        => Name.EndsWith("[]");
 
     public ITypeMetadata? Metadata { get; set; }
 }
