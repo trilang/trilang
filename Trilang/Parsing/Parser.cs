@@ -15,7 +15,6 @@ public class Parser
         while (!context.Reader.HasEnded)
         {
             var declaration = TryParseFunction(context) ??
-                              TryParseFunctionTypeDeclaration(context) ??
                               TryParseTypeAlias(context) ??
                               TryParseTypeDeclarationNode(context) as IDeclarationNode ??
                               throw new ParseException("Expected a type or a function.");
@@ -40,7 +39,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var returnType = TryParseTypeNode(context);
+        var returnType = TryParseInlineTypeNode(context);
         if (returnType is null)
             throw new ParseException("Expected a function return type.");
 
@@ -88,7 +87,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var type = TryParseTypeNode(context);
+        var type = TryParseInlineTypeNode(context);
         if (type is null)
             throw new ParseException("Expected a type.");
 
@@ -124,67 +123,6 @@ public class Parser
         return null;
     }
 
-    private FunctionTypeDeclarationNode? TryParseFunctionTypeDeclaration(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var accessModifier = c.Parser.TryParseAccessModifier(c);
-            if (accessModifier is null)
-                return null;
-
-            if (!c.Reader.Check(TokenKind.Type))
-                return null;
-
-            var name = c.Parser.TryParseId(c);
-            if (name is null)
-                throw new ParseException("Expected a function type name.");
-
-            if (!c.Reader.Check(TokenKind.Equal))
-                return null;
-
-            var parameters = c.Parser.TryParseFunctionTypeParameters(c);
-            if (parameters is null)
-                return null;
-
-            if (!c.Reader.Check(TokenKind.EqualGreater))
-                throw new ParseException("Expected an arrow function.");
-
-            var returnType = c.Parser.TryParseTypeNode(c);
-            if (returnType is null)
-                throw new ParseException("Expected a function return type.");
-
-            if (!c.Reader.Check(TokenKind.SemiColon))
-                throw new ParseException("Expected a semicolon.");
-
-            return new FunctionTypeDeclarationNode(accessModifier.Value, name, parameters, returnType);
-        });
-
-    private IReadOnlyList<TypeNode>? TryParseFunctionTypeParameters(ParserContext context)
-    {
-        if (!context.Reader.Check(TokenKind.OpenParenthesis))
-            return null;
-
-        var parameters = new List<TypeNode>();
-        var parameter = TryParseTypeNode(context);
-        if (parameter is not null)
-        {
-            parameters.Add(parameter);
-
-            while (context.Reader.Check(TokenKind.Comma))
-            {
-                parameter = TryParseTypeNode(context);
-                if (parameter is null)
-                    throw new ParseException("Expected a parameter.");
-
-                parameters.Add(parameter);
-            }
-        }
-
-        if (!context.Reader.Check(TokenKind.CloseParenthesis))
-            throw new ParseException("Expected a close parenthesis.");
-
-        return parameters;
-    }
-
     private TypeAliasDeclarationNode? TryParseTypeAlias(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
@@ -202,7 +140,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.Equal))
                 return null;
 
-            var type = c.Parser.TryParseTypeNode(c);
+            var type = c.Parser.TryParseInlineTypeNode(c);
             if (type is null)
                 throw new ParseException("Expected a type.");
 
@@ -299,7 +237,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.Colon))
                 return null;
 
-            var type = c.Parser.TryParseTypeNode(c);
+            var type = c.Parser.TryParseInlineTypeNode(c);
             if (type is null)
                 throw new ParseException("Expected a type.");
 
@@ -324,7 +262,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var returnType = TryParseTypeNode(context);
+        var returnType = TryParseInlineTypeNode(context);
         if (returnType is null)
             throw new ParseException("Expected a function return type.");
 
@@ -356,7 +294,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var type = TryParseTypeNode(context);
+        var type = TryParseInlineTypeNode(context);
         if (type is null)
             throw new ParseException("Expected a type.");
 
@@ -675,18 +613,67 @@ public class Parser
         return null;
     }
 
+    private IInlineTypeNode? TryParseInlineTypeNode(ParserContext context)
+        => TryParseTypeNode(context) ??
+           TryParseFunctionType(context) as IInlineTypeNode;
+
     private TypeNode? TryParseTypeNode(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.Identifier, out var token))
+                return null;
+
+            if (!c.Reader.Check(TokenKind.OpenBracket))
+                return new TypeNode(token.Identifier);
+
+            if (!c.Reader.Check(TokenKind.CloseBracket))
+                throw new ParseException("Expected a close bracket.");
+
+            return new TypeNode($"{token.Identifier}[]");
+        });
+
+    private FunctionTypeNode? TryParseFunctionType(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var parameters = c.Parser.TryParseFunctionTypeParameters(c);
+            if (parameters is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.EqualGreater))
+                throw new ParseException("Expected an arrow function.");
+
+            var returnType = c.Parser.TryParseInlineTypeNode(c);
+            if (returnType is null)
+                throw new ParseException("Expected a function return type.");
+
+            return new FunctionTypeNode(parameters, returnType);
+        });
+
+    private IReadOnlyList<IInlineTypeNode>? TryParseFunctionTypeParameters(ParserContext context)
     {
-        if (!context.Reader.Check(TokenKind.Identifier, out var token))
+        if (!context.Reader.Check(TokenKind.OpenParenthesis))
             return null;
 
-        if (!context.Reader.Check(TokenKind.OpenBracket))
-            return new TypeNode(token.Identifier);
+        var parameters = new List<IInlineTypeNode>();
+        var parameter = TryParseInlineTypeNode(context);
+        if (parameter is not null)
+        {
+            parameters.Add(parameter);
 
-        if (!context.Reader.Check(TokenKind.CloseBracket))
-            throw new ParseException("Expected a close bracket.");
+            while (context.Reader.Check(TokenKind.Comma))
+            {
+                parameter = TryParseInlineTypeNode(context);
+                if (parameter is null)
+                    throw new ParseException("Expected a parameter.");
 
-        return new TypeNode($"{token.Identifier}[]");
+                parameters.Add(parameter);
+            }
+        }
+
+        if (!context.Reader.Check(TokenKind.CloseParenthesis))
+            throw new ParseException("Expected a close parenthesis.");
+
+        return parameters;
     }
 
     private string? TryParseId(ParserContext context)

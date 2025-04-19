@@ -99,13 +99,9 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(FunctionTypeDeclarationNode node, SymbolFinderContext context)
+    public void Visit(FunctionTypeNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
-
-        var symbol = TypeSymbol.Function(node.Name, node);
-        if (!context.SymbolTable.TryAddType(symbol))
-            throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
 
         foreach (var parameterType in node.ParameterTypes)
             parameterType.Accept(this, context);
@@ -179,8 +175,10 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
     {
         node.SymbolTable = context.SymbolTable;
 
-        var symbol = TypeSymbol.Alias(node.Name, node);
-        if (!context.SymbolTable.TryAddType(symbol))
+        if (node.Type is FunctionTypeNode functionType)
+            context.SymbolTable.TryAddType(TypeSymbol.FunctionType(functionType));
+
+        if (!context.SymbolTable.TryAddType(TypeSymbol.Alias(node)))
             throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
 
         node.Type.Accept(this, context);
@@ -191,7 +189,7 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         // TODO: define in inner scope?
         node.SymbolTable = context.SymbolTable;
 
-        var symbol = TypeSymbol.Type(node.Name, node);
+        var symbol = TypeSymbol.Type(node);
         if (!context.SymbolTable.TryAddType(symbol))
             throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
 

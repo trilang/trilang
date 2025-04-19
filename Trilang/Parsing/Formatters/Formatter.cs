@@ -164,12 +164,9 @@ public partial class Formatter : IFormatter
         node.Body?.Accept(this);
     }
 
-    public void Visit(FunctionTypeDeclarationNode node)
+    public void Visit(FunctionTypeNode node)
     {
-        WriteAccessModifier(node.AccessModifier);
-        writer.Write(" type ");
-        writer.Write(node.Name);
-        writer.Write(" = (");
+        writer.Write('(');
 
         for (var i = 0; i < node.ParameterTypes.Count; i++)
         {
@@ -181,7 +178,6 @@ public partial class Formatter : IFormatter
 
         writer.Write(") => ");
         node.ReturnType.Accept(this);
-        writer.Write(';');
     }
 
     public void Visit(IfStatementNode node)

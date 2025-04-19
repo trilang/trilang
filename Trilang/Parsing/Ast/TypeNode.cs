@@ -4,7 +4,7 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeNode : ISyntaxNode, IEquatable<TypeNode>
+public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
 {
     public TypeNode(string name)
         => Name = name;

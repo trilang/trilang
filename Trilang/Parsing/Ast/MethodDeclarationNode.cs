@@ -10,7 +10,7 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
         AccessModifier accessModifier,
         string name,
         IReadOnlyList<ParameterNode> parameters,
-        TypeNode returnType,
+        IInlineTypeNode returnType,
         BlockStatementNode body)
     {
         AccessModifier = accessModifier;
@@ -90,7 +90,7 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
 
     public IReadOnlyList<ParameterNode> Parameters { get; }
 
-    public TypeNode ReturnType { get; }
+    public IInlineTypeNode ReturnType { get; }
 
     public BlockStatementNode Body { get; }
 

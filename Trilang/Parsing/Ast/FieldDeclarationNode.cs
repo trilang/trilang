@@ -5,7 +5,7 @@ namespace Trilang.Parsing.Ast;
 
 public class FieldDeclarationNode : VariableDeclarationNode, IEquatable<FieldDeclarationNode>
 {
-    public FieldDeclarationNode(AccessModifier accessModifier, string name, TypeNode type)
+    public FieldDeclarationNode(AccessModifier accessModifier, string name, IInlineTypeNode type)
         : base(name, type)
     {
         AccessModifier = accessModifier;

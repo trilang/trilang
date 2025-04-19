@@ -192,19 +192,22 @@ public class TypeCheckerTests
     public void SetMetadataForFunctionTypeTest()
     {
         var tree = new TreeBuilder()
-            .DefineFunctionType("MyF", builder => builder
-                .DefineParameter("i32")
-                .DefineParameter("bool")
-                .ReturnType("f64"))
+            .DefineAliasType("MyF", builder => builder
+                .DefineFunctionType(f => f
+                    .DefineParameter("i32")
+                    .DefineParameter("bool")
+                    .ReturnType("f64")))
             .Build();
 
         var provider = new TypeMetadataProvider();
         var functionType = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.F64);
         provider.DefineType(functionType);
+        var aliasMetadata = new TypeAliasMetadata("MyF", functionType);
+        provider.DefineType(aliasMetadata);
 
         tree.Accept(new TypeChecker(provider));
 
-        var type = tree.Find<FunctionTypeDeclarationNode>();
+        var type = tree.Find<FunctionTypeNode>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(functionType));
     }

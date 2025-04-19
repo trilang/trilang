@@ -45,6 +45,10 @@ type Color = Red | Green | Blue;
 // function type
 type F = (x: i32, y: i32) => i32;
 
+function test(callback: () => void): void {
+    callback();
+}
+
 function main(): i32 {
     var number: i32 = 2 + 2 * 2;
     if (number == 6) {

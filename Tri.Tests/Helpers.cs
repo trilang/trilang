@@ -51,7 +51,7 @@ internal static class Helpers
                        .FirstOrDefault(x => x is not null) ??
                    Find<T>(functionDeclarationNode.Body),
 
-            FunctionTypeDeclarationNode functionTypeDeclarationNode
+            FunctionTypeNode functionTypeDeclarationNode
                 => functionTypeDeclarationNode.ParameterTypes
                        .Select(Find<T>)
                        .FirstOrDefault(x => x is not null) ??

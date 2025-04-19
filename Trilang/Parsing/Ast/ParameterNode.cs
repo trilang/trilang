@@ -4,7 +4,7 @@ namespace Trilang.Parsing.Ast;
 
 public class ParameterNode : VariableDeclarationNode, IEquatable<ParameterNode>
 {
-    public ParameterNode(string name, TypeNode type)
+    public ParameterNode(string name, IInlineTypeNode type)
         : base(name, type)
     {
     }
@@ -24,7 +24,7 @@ public class ParameterNode : VariableDeclarationNode, IEquatable<ParameterNode>
             return true;
 
         return Name == other.Name &&
-               Type == other.Type &&
+               Type.Equals(other.Type) &&
                Equals(SymbolTable, other.SymbolTable);
     }
 

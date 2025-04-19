@@ -266,7 +266,7 @@ public class SymbolFinderTests
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type(type.Name, type)));
+        Assert.That(tree.SymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type(type)));
     }
 
     [Test]
@@ -353,23 +353,25 @@ public class SymbolFinderTests
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Alias(type.Name, type)));
+        Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Alias(type)));
     }
 
     [Test]
     public void FunctionTypeAliasTest()
     {
-        var type = new FunctionTypeDeclarationNode(
-            AccessModifier.Public,
-            "F",
-            [new TypeNode("i32"), new TypeNode("i32")],
-            new TypeNode("i32"));
-        var tree = new SyntaxTree([type]);
+        var type = new FunctionTypeNode([new TypeNode("i32"), new TypeNode("i32")], new TypeNode("i32"));
+        var aliasType = new TypeAliasDeclarationNode(AccessModifier.Public, "F", type);
+        var tree = new SyntaxTree([aliasType]);
 
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Function(type.Name, type)));
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key(type.Name).WithValue(TypeSymbol.FunctionType(type)));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key(aliasType.Name).WithValue(TypeSymbol.Alias(aliasType)));
     }
 }

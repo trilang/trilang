@@ -39,7 +39,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         var type = builder.Build();
         declaration.Add(type);
 
-        if (!symbolTable.TryAddType(TypeSymbol.Type(name, type)))
+        if (!symbolTable.TryAddType(TypeSymbol.Type(type)))
             throw new Exception();
 
         type.SymbolTable = symbolTable;
@@ -53,7 +53,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         declaration.Add(type);
 
-        if (!symbolTable.TryAddType(TypeSymbol.Alias(name, type)))
+        if (!symbolTable.TryAddType(TypeSymbol.Alias(type)))
             throw new Exception();
 
         if (aliasType.IsArray && !symbolTable.TryAddType(TypeSymbol.Array(aliasType.Name)))
@@ -64,18 +64,21 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         return this;
     }
 
-    public ISyntaxTreeBuilder DefineFunctionType(string name, Action<IFunctionTypeBuilder> action)
+    public ISyntaxTreeBuilder DefineAliasType(string name, Action<ITypeAliasBuilder> action)
     {
-        var builder = new FunctionTypeBuilder(symbolTable, name);
+        var builder = new TypeAliasBuilder(symbolTable, name);
         action(builder);
 
-        var functionType = builder.Build();
-        declaration.Add(functionType);
+        var aliasType = builder.Build();
+        declaration.Add(aliasType);
 
-        if (!symbolTable.TryAddType(TypeSymbol.Function(name, functionType)))
+        if (aliasType.Type is FunctionTypeNode functionType)
+            symbolTable.TryAddType(TypeSymbol.FunctionType(functionType));
+
+        if (!symbolTable.TryAddType(TypeSymbol.Alias(aliasType)))
             throw new Exception();
 
-        functionType.SymbolTable = symbolTable;
+        aliasType.SymbolTable = symbolTable;
 
         return this;
     }
@@ -638,28 +641,61 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
     }
 
-    private sealed class FunctionTypeBuilder : IFunctionTypeBuilder
+    private sealed class TypeAliasBuilder : ITypeAliasBuilder
     {
         private readonly ISymbolTable symbolTable;
-        private readonly string name;
-        private readonly List<TypeNode> parameterTypes;
+        private readonly string typeName;
         private AccessModifier accessModifier;
-        private TypeNode returnType;
+        private IInlineTypeNode? aliasedType;
 
-        public FunctionTypeBuilder(ISymbolTable symbolTable, string name)
+        public TypeAliasBuilder(ISymbolTable symbolTable, string typeName)
         {
             this.symbolTable = symbolTable;
-            this.name = name;
-            parameterTypes = [];
+            this.typeName = typeName;
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
-            returnType = new TypeNode("void");
         }
 
-        public IFunctionTypeBuilder AccessModifier(AccessModifier modifier)
+        public ITypeAliasBuilder AccessModifier(AccessModifier modifier)
         {
             accessModifier = modifier;
 
             return this;
+        }
+
+        public ITypeAliasBuilder DefineType(string name)
+        {
+            aliasedType = new TypeNode(name) { SymbolTable = symbolTable };
+
+            return this;
+        }
+
+        public ITypeAliasBuilder DefineFunctionType(Action<IFunctionTypeBuilder> action)
+        {
+            var builder = new FunctionTypeBuilder();
+            action(builder);
+
+            aliasedType = builder.Build();
+            aliasedType.SymbolTable = symbolTable;
+
+            return this;
+        }
+
+        public TypeAliasDeclarationNode Build()
+            => new TypeAliasDeclarationNode(
+                accessModifier,
+                typeName,
+                aliasedType ?? throw new Exception());
+    }
+
+    private sealed class FunctionTypeBuilder : IFunctionTypeBuilder
+    {
+        private readonly List<TypeNode> parameterTypes;
+        private TypeNode returnType;
+
+        public FunctionTypeBuilder()
+        {
+            parameterTypes = [];
+            returnType = new TypeNode("void");
         }
 
         public IFunctionTypeBuilder DefineParameter(string type)
@@ -676,7 +712,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public FunctionTypeDeclarationNode Build()
-            => new FunctionTypeDeclarationNode(accessModifier, name, parameterTypes, returnType);
+        public FunctionTypeNode Build()
+            => new FunctionTypeNode(parameterTypes, returnType);
     }
 }

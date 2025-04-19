@@ -217,7 +217,7 @@ public class TypeChecker : IVisitor
         node.Body?.Accept(this);
     }
 
-    public void Visit(FunctionTypeDeclarationNode node)
+    public void Visit(FunctionTypeNode node)
     {
         var parameters = new ITypeMetadata[node.ParameterTypes.Count];
         for (var i = 0; i < parameters.Length; i++)
@@ -316,14 +316,13 @@ public class TypeChecker : IVisitor
 
     public void Visit(ParameterNode node)
     {
-        if (node.Type.Metadata is null)
-        {
-            var type = typeProvider.GetType(node.Type.Name);
-            if (type is null)
-                throw new TypeCheckerException($"Unknown type '{node.Type}'");
+        if (node.Type.Metadata is not null)
+            return;
 
-            node.Type.Metadata = type;
-        }
+        var type = typeProvider.GetType(node.Type.Name) ??
+                   throw new TypeCheckerException($"Unknown type '{node.Type}'");
+
+        node.Type.Metadata = type;
     }
 
     public void Visit(SyntaxTree node)

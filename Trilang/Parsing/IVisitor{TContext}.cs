@@ -24,7 +24,7 @@ public interface IVisitor<in TContext>
 
     void Visit(FunctionDeclarationNode node, TContext context);
 
-    void Visit(FunctionTypeDeclarationNode node, TContext context);
+    void Visit(FunctionTypeNode node, TContext context);
 
     void Visit(IfStatementNode node, TContext context);
 

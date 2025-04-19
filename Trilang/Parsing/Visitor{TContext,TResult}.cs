@@ -205,7 +205,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void Visit(FunctionTypeDeclarationNode node, TContext context)
+    public void Visit(FunctionTypeNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -220,11 +220,11 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
         VisitExit(node, context);
     }
 
-    protected virtual void VisitEnter(FunctionTypeDeclarationNode node, TContext context)
+    protected virtual void VisitEnter(FunctionTypeNode node, TContext context)
     {
     }
 
-    protected virtual void VisitExit(FunctionTypeDeclarationNode node, TContext context)
+    protected virtual void VisitExit(FunctionTypeNode node, TContext context)
     {
     }
 

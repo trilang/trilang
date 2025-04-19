@@ -5,7 +5,7 @@ namespace Trilang.Parsing.Ast;
 
 public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<VariableDeclarationNode>
 {
-    protected VariableDeclarationNode(string name, TypeNode type)
+    protected VariableDeclarationNode(string name, IInlineTypeNode type)
     {
         Name = name;
         Type = type;
@@ -27,7 +27,7 @@ public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<Variable
             return true;
 
         return Name == other.Name &&
-               Type == other.Type &&
+               Type.Equals(other.Type) &&
                Equals(SymbolTable, other.SymbolTable);
     }
 
@@ -66,5 +66,5 @@ public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<Variable
 
     public string Name { get; }
 
-    public TypeNode Type { get; }
+    public IInlineTypeNode Type { get; }
 }

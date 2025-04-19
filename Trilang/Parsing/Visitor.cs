@@ -177,7 +177,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void Visit(FunctionTypeDeclarationNode node)
+    public void Visit(FunctionTypeNode node)
     {
         VisitEnter(node);
 
@@ -189,11 +189,11 @@ public abstract class Visitor : IVisitor
         VisitExit(node);
     }
 
-    protected virtual void VisitEnter(FunctionTypeDeclarationNode node)
+    protected virtual void VisitEnter(FunctionTypeNode node)
     {
     }
 
-    protected virtual void VisitExit(FunctionTypeDeclarationNode node)
+    protected virtual void VisitExit(FunctionTypeNode node)
     {
     }
 

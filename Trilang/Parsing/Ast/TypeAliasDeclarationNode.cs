@@ -5,11 +5,13 @@ namespace Trilang.Parsing.Ast;
 
 public class TypeAliasDeclarationNode : IDeclarationNode, IEquatable<TypeAliasDeclarationNode>
 {
-    public TypeAliasDeclarationNode(AccessModifier accessModifier, string name, TypeNode type)
+    public TypeAliasDeclarationNode(AccessModifier accessModifier, string name, IInlineTypeNode type)
     {
         AccessModifier = accessModifier;
         Name = name;
         Type = type;
+
+        Type.Parent = this;
     }
 
     public static bool operator ==(TypeAliasDeclarationNode? left, TypeAliasDeclarationNode? right)
@@ -63,7 +65,7 @@ public class TypeAliasDeclarationNode : IDeclarationNode, IEquatable<TypeAliasDe
 
     public string Name { get; }
 
-    public TypeNode Type { get; }
+    public IInlineTypeNode Type { get; }
 
     public ITypeMetadata? Metadata { get; set; }
 }

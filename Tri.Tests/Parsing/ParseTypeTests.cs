@@ -403,11 +403,13 @@ public class ParseTypeTests
         var tree = parser.Parse("public type F = () => void;");
 
         var expected = new SyntaxTree([
-            new FunctionTypeDeclarationNode(
+            new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "F",
-                [],
-                new TypeNode("void")
+                new FunctionTypeNode(
+                    [],
+                    new TypeNode("void")
+                )
             )
         ]);
 
@@ -421,11 +423,13 @@ public class ParseTypeTests
         var tree = parser.Parse("public type F = (i32, i32) => i32;");
 
         var expected = new SyntaxTree([
-            new FunctionTypeDeclarationNode(
+            new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "F",
-                [new TypeNode("i32"), new TypeNode("i32")],
-                new TypeNode("i32")
+                new FunctionTypeNode(
+                    [new TypeNode("i32"), new TypeNode("i32")],
+                    new TypeNode("i32")
+                )
             )
         ]);
 
@@ -494,5 +498,80 @@ public class ParseTypeTests
         var parser = new Parser();
 
         Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32) => i32"));
+    }
+
+    [Test]
+    public void ParseFunctionTypeInParameterTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            function test(callback: (i32, i32) => void): void { }
+            """);
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "test",
+                [
+                    new ParameterNode(
+                        "callback",
+                        new FunctionTypeNode(
+                            [new TypeNode("i32"), new TypeNode("i32")],
+                            new TypeNode("void")))
+                ],
+                new TypeNode("void"),
+                new BlockStatementNode([])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseFunctionTypeInReturnTypeTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("function test(): (i32, i32) => void { }");
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "test",
+                [],
+                new FunctionTypeNode(
+                    [new TypeNode("i32"), new TypeNode("i32")],
+                    new TypeNode("void")),
+                new BlockStatementNode([])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseFunctionTypeInVariableTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            function main(): void {
+                var x: (i32, i32) => void = 0;
+            }
+            """);
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "x",
+                        new FunctionTypeNode(
+                            [new TypeNode("i32"), new TypeNode("i32")],
+                            new TypeNode("void")),
+                        LiteralExpressionNode.Number(0)
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
     }
 }

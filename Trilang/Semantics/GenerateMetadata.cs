@@ -141,13 +141,13 @@ public class GenerateMetadata : Visitor
 
             var type = typeProvider.GetType(typeAliasNode.Name) ??
                        throw new TypeCheckerException($"Unknown type '{typeAliasNode.Name}'");
-            if (type is not TypeAliasMetadata typeAlias)
+            if (type is not TypeAliasMetadata aliasMetadata)
                 throw new TypeCheckerException($"Type '{typeAliasNode.Name}' is not an alias");
 
-            var aliasType = typeProvider.GetType(typeAliasNode.Type.Name) ??
-                            throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
+            var aliasedMetadata = typeProvider.GetType(typeAliasNode.Type.Name) ??
+                                  throw new TypeCheckerException($"Unknown type '{symbol.Name}'");
 
-            typeAlias.Type = aliasType;
+            aliasMetadata.Type = aliasedMetadata;
         }
     }
 
@@ -175,7 +175,7 @@ public class GenerateMetadata : Visitor
             if (!symbol.IsFunction)
                 continue;
 
-            if (symbol.Node is not FunctionTypeDeclarationNode function)
+            if (symbol.Node is not FunctionTypeNode function)
                 throw new TypeCheckerException($"Unknown function '{symbol.Name}'");
 
             var parameterTypes = new ITypeMetadata[function.ParameterTypes.Count];

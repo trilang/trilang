@@ -10,7 +10,7 @@ public interface ISyntaxTreeBuilder
 
     ISyntaxTreeBuilder DefineAliasType(string name, TypeNode aliasType);
 
-    ISyntaxTreeBuilder DefineFunctionType(string name, Action<IFunctionTypeBuilder> action);
+    ISyntaxTreeBuilder DefineAliasType(string name, Action<ITypeAliasBuilder> action);
 
     SyntaxTree Build();
 }

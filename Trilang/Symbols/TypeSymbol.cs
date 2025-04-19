@@ -8,20 +8,17 @@ public class TypeSymbol : Symbol<ISyntaxNode?>, IEquatable<TypeSymbol>
         : base(SymbolKind.Type, name, node)
         => TypeKind = typeKind;
 
-    public static TypeSymbol Type(string name, TypeDeclarationNode node)
-        => new TypeSymbol(TypeSymbolKind.Type, name, node);
+    public static TypeSymbol Type(TypeDeclarationNode node)
+        => new TypeSymbol(TypeSymbolKind.Type, node.Name, node);
 
     public static TypeSymbol Array(string name)
         => new TypeSymbol(TypeSymbolKind.Array, name, null);
 
-    public static TypeSymbol Alias(string name, TypeAliasDeclarationNode node)
-        => new TypeSymbol(TypeSymbolKind.Alias, name, node);
+    public static TypeSymbol Alias(TypeAliasDeclarationNode node)
+        => new TypeSymbol(TypeSymbolKind.Alias, node.Name, node);
 
-    public static TypeSymbol Alias(string name, FunctionTypeDeclarationNode node)
-        => new TypeSymbol(TypeSymbolKind.Alias, name, node);
-
-    public static TypeSymbol Function(string name, FunctionTypeDeclarationNode node)
-        => new TypeSymbol(TypeSymbolKind.Function, name, node);
+    public static TypeSymbol FunctionType(FunctionTypeNode node)
+        => new TypeSymbol(TypeSymbolKind.Function, node.Name, node);
 
     public static bool operator ==(TypeSymbol? left, TypeSymbol? right)
         => Equals(left, right);

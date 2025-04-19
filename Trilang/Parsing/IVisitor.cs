@@ -24,7 +24,7 @@ public interface IVisitor
 
     void Visit(FunctionDeclarationNode node);
 
-    void Visit(FunctionTypeDeclarationNode node);
+    void Visit(FunctionTypeNode node);
 
     void Visit(IfStatementNode node);
 

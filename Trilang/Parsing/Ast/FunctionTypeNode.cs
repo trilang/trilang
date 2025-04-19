@@ -4,27 +4,29 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class FunctionTypeDeclarationNode : IDeclarationNode, IEquatable<FunctionTypeDeclarationNode>
+public class FunctionTypeNode : IInlineTypeNode, IEquatable<FunctionTypeNode>
 {
-    public FunctionTypeDeclarationNode(
-        AccessModifier accessModifier,
-        string name,
-        IReadOnlyList<TypeNode> parameterTypes,
-        TypeNode returnType)
+    public FunctionTypeNode(IReadOnlyList<IInlineTypeNode> parameterTypes, IInlineTypeNode returnType)
     {
-        AccessModifier = accessModifier;
-        Name = name;
         ParameterTypes = parameterTypes;
         ReturnType = returnType;
+
+        foreach (var parameter in parameterTypes)
+            parameter.Parent = this;
+
+        returnType.Parent = this;
+
+        var parameters = string.Join(", ", parameterTypes.Select(p => p.Name));
+        Name = $"({parameters}) => {returnType.Name}";
     }
 
-    public static bool operator ==(FunctionTypeDeclarationNode? left, FunctionTypeDeclarationNode? right)
+    public static bool operator ==(FunctionTypeNode? left, FunctionTypeNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(FunctionTypeDeclarationNode? left, FunctionTypeDeclarationNode? right)
+    public static bool operator !=(FunctionTypeNode? left, FunctionTypeNode? right)
         => !Equals(left, right);
 
-    public bool Equals(FunctionTypeDeclarationNode? other)
+    public bool Equals(FunctionTypeNode? other)
     {
         if (other is null)
             return false;
@@ -32,9 +34,7 @@ public class FunctionTypeDeclarationNode : IDeclarationNode, IEquatable<Function
         if (ReferenceEquals(this, other))
             return true;
 
-        return AccessModifier == other.AccessModifier &&
-               Name == other.Name &&
-               ParameterTypes.SequenceEqual(other.ParameterTypes) &&
+        return ParameterTypes.SequenceEqual(other.ParameterTypes) &&
                ReturnType.Equals(other.ReturnType) &&
                Equals(SymbolTable, other.SymbolTable);
     }
@@ -50,11 +50,11 @@ public class FunctionTypeDeclarationNode : IDeclarationNode, IEquatable<Function
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((FunctionTypeDeclarationNode)obj);
+        return Equals((FunctionTypeNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, ParameterTypes, ReturnType);
+        => HashCode.Combine(ParameterTypes, ReturnType);
 
     public override string ToString()
     {
@@ -74,13 +74,11 @@ public class FunctionTypeDeclarationNode : IDeclarationNode, IEquatable<Function
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public AccessModifier AccessModifier { get; }
-
     public string Name { get; }
 
-    public IReadOnlyList<TypeNode> ParameterTypes { get; }
+    public IReadOnlyList<IInlineTypeNode> ParameterTypes { get; }
 
-    public TypeNode ReturnType { get; }
+    public IInlineTypeNode ReturnType { get; }
 
-    public FunctionTypeMetadata? Metadata { get; set; }
+    public ITypeMetadata? Metadata { get; set; }
 }

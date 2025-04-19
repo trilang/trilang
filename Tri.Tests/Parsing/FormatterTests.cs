@@ -947,7 +947,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void ArrayTypeTest()
+    public void FormatArrayTypeTest()
     {
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -973,7 +973,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void ArrayAccessTest()
+    public void FormatArrayAccessTest()
     {
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -1001,7 +1001,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void PrivateTypeTest()
+    public void FormatPrivateTypeTest()
     {
         var tree = new SyntaxTree([
             new TypeDeclarationNode(AccessModifier.Private, "MyType", [], [], [])
@@ -1017,7 +1017,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void PublicTypeTest()
+    public void FormatPublicTypeTest()
     {
         var tree = new SyntaxTree([
             new TypeDeclarationNode(AccessModifier.Public, "MyType", [], [], [])
@@ -1033,7 +1033,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void TwoTypesTest()
+    public void FormatTwoTypesTest()
     {
         var tree = new SyntaxTree([
             new TypeDeclarationNode(AccessModifier.Private, "MyType1", [], [], []),
@@ -1053,7 +1053,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void PointTypeWithFieldsTest()
+    public void FormatPointTypeWithFieldsTest()
     {
         var tree = new SyntaxTree([
             new TypeDeclarationNode(
@@ -1079,7 +1079,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void PointTypeWithEverythingTest()
+    public void FormatPointTypeWithEverythingTest()
     {
         var tree = new SyntaxTree([
             new TypeDeclarationNode(
@@ -1132,7 +1132,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void TypeAliasTest()
+    public void FormatTypeAliasTest()
     {
         var tree = new SyntaxTree([
             new TypeAliasDeclarationNode(AccessModifier.Public, "MyType", new TypeNode("i32"))
@@ -1144,18 +1144,104 @@ public class FormatterTests
     }
 
     [Test]
-    public void FunctionTypeTest()
+    public void FormatFunctionTypeTest()
     {
         var tree = new SyntaxTree([
-            new FunctionTypeDeclarationNode(
+            new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "MyType",
-                [new TypeNode("i32"), new TypeNode("i32")],
-                new TypeNode("i32")
+                new FunctionTypeNode(
+                    [new TypeNode("i32"), new TypeNode("i32")],
+                    new TypeNode("i32")
+                )
             )
         ]);
         var formatted = tree.ToString();
         const string expected = "public type MyType = (i32, i32) => i32;";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatVariableDeclarationTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "x",
+                        new TypeNode("i32"),
+                        LiteralExpressionNode.Number(0)
+                    )
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                var x: i32 = 0;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatVariableDeclarationWithInlineTypeTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "x",
+                        new FunctionTypeNode([], new TypeNode("void")),
+                        LiteralExpressionNode.Number(0)
+                    )
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                var x: () => void = 0;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatVariableDeclarationWithInlineTypeAndParametersTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "x",
+                        new FunctionTypeNode(
+                            [new TypeNode("i32"), new TypeNode("f64")],
+                            new TypeNode("void")
+                        ),
+                        LiteralExpressionNode.Number(0)
+                    )
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                var x: (i32, f64) => void = 0;
+            }
+            """;
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
