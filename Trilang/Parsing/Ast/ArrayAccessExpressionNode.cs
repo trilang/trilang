@@ -31,8 +31,7 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
 
         return Member.Equals(other.Member) &&
                Index.Equals(other.Index) &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
-               Equals(SymbolTable, other.SymbolTable);
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
     }
 
     public override bool Equals(object? obj)

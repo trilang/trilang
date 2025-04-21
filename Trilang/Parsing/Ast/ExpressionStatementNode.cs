@@ -25,8 +25,7 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
         if (ReferenceEquals(this, other))
             return true;
 
-        return Expression.Equals(other.Expression) &&
-               Equals(SymbolTable, other.SymbolTable);
+        return Expression.Equals(other.Expression);
     }
 
     public override bool Equals(object? obj)

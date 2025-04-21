@@ -60,6 +60,14 @@ public class GenerateMetadataTests
 
         var actual = provider.GetType("Point");
         Assert.That(actual, Is.EqualTo(expected));
+
+        var toStringType = provider.GetType("() => string");
+        var expectedToStringType = new FunctionTypeMetadata([], TypeMetadata.String);
+        Assert.That(toStringType, Is.EqualTo(expectedToStringType));
+
+        var distanceType = provider.GetType("(i32) => f64");
+        var expectedDistanceType = new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64);
+        Assert.That(distanceType, Is.EqualTo(expectedDistanceType));
     }
 
     [Test]
@@ -294,6 +302,33 @@ public class GenerateMetadataTests
 
         Assert.That(actualType, Is.EqualTo(expectedType));
         Assert.That(actualArrayType, Is.EqualTo(expectedArrayType));
+        Assert.That(actualAlias, Is.EqualTo(expectedAlias));
+    }
+
+    [Test]
+    public void GenerateMetadataForInterfaceType()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Point", builder => builder
+                .DefineInterface(i => i
+                    .DefineField("x", "i32")
+                    .DefineField("y", "i32")
+                    .DefineMethod("distance", m => m
+                        .DefineParameter("other", "Point")
+                        .ReturnType("f64"))))
+            .Build();
+
+        var provider = new TypeMetadataProvider();
+        var generator = new GenerateMetadata(provider);
+        tree.Accept(generator);
+
+        var expectedInterface = new InterfaceMetadata("{ x: i32; y: i32; distance(Point): f64; }");
+        var expectedAlias = new TypeAliasMetadata("Point", expectedInterface);
+
+        var actualInterface = provider.GetType(expectedInterface.Name);
+        Assert.That(actualInterface, Is.EqualTo(expectedInterface));
+
+        var actualAlias = provider.GetType("Point");
         Assert.That(actualAlias, Is.EqualTo(expectedAlias));
     }
 }

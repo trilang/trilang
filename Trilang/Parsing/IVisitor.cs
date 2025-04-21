@@ -28,6 +28,12 @@ public interface IVisitor
 
     void Visit(IfStatementNode node);
 
+    void Visit(InterfaceNode node);
+
+    void Visit(InterfaceFieldNode node);
+
+    void Visit(InterfaceMethodNode node);
+
     void Visit(LiteralExpressionNode node);
 
     void Visit(MemberAccessExpressionNode node);

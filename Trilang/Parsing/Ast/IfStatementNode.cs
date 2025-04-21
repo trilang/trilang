@@ -34,8 +34,7 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
 
         return Condition.Equals(other.Condition) &&
                Then.Equals(other.Then) &&
-               Equals(Else, other.Else) &&
-               Equals(SymbolTable, other.SymbolTable);
+               Equals(Else, other.Else);
     }
 
     public override bool Equals(object? obj)

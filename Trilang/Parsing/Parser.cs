@@ -144,7 +144,7 @@ public class Parser
             if (type is null)
                 throw new ParseException("Expected a type.");
 
-            if (!c.Reader.Check(TokenKind.SemiColon))
+            if (type is not InterfaceNode && !c.Reader.Check(TokenKind.SemiColon))
                 throw new ParseException("Expected a semicolon.");
 
             return new TypeAliasDeclarationNode(accessModifier.Value, name, type);
@@ -615,7 +615,8 @@ public class Parser
 
     private IInlineTypeNode? TryParseInlineTypeNode(ParserContext context)
         => TryParseTypeNode(context) ??
-           TryParseFunctionType(context) as IInlineTypeNode;
+           TryParseFunctionType(context) ??
+           TryParseInterface(context) as IInlineTypeNode;
 
     private TypeNode? TryParseTypeNode(ParserContext context)
         => context.Reader.Scoped(context, static c =>
@@ -675,6 +676,97 @@ public class Parser
 
         return parameters;
     }
+
+    private InterfaceNode? TryParseInterface(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.OpenBrace))
+                return null;
+
+            var fields = c.Parser.TryParseInterfaceFields(c);
+            var methods = c.Parser.TryParseInterfaceMethods(c);
+
+            if (!c.Reader.Check(TokenKind.CloseBrace))
+                throw new ParseException("Expected a close brace.");
+
+            return new InterfaceNode(fields, methods);
+        });
+
+    private List<InterfaceFieldNode> TryParseInterfaceFields(ParserContext context)
+    {
+        var fields = new List<InterfaceFieldNode>();
+
+        while (true)
+        {
+            var field = TryParseInterfaceField(context);
+
+            if (field is null)
+                break;
+
+            fields.Add(field);
+        }
+
+        return fields;
+    }
+
+    private InterfaceFieldNode? TryParseInterfaceField(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var name = c.Parser.TryParseId(c);
+            if (name is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.Colon))
+                return null;
+
+            var type = c.Parser.TryParseInlineTypeNode(c);
+            if (type is null)
+                throw new ParseException("Expected a type.");
+
+            if (!c.Reader.Check(TokenKind.SemiColon))
+                throw new ParseException("Expected a semi-colon.");
+
+            return new InterfaceFieldNode(name, type);
+        });
+
+    private List<InterfaceMethodNode> TryParseInterfaceMethods(ParserContext context)
+    {
+        var methods = new List<InterfaceMethodNode>();
+
+        while (true)
+        {
+            var method = TryParseInterfaceMethod(context);
+
+            if (method is null)
+                break;
+
+            methods.Add(method);
+        }
+
+        return methods;
+    }
+
+    private InterfaceMethodNode? TryParseInterfaceMethod(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var name = c.Parser.TryParseId(c);
+            if (name is null)
+                return null;
+
+            var parameters = c.Parser.ParseFunctionParameters(c);
+
+            if (!c.Reader.Check(TokenKind.Colon))
+                throw new ParseException("Expected a colon.");
+
+            var returnType = c.Parser.TryParseInlineTypeNode(c);
+            if (returnType is null)
+                throw new ParseException("Expected a type.");
+
+            if (!c.Reader.Check(TokenKind.SemiColon))
+                throw new ParseException("Expected a semi-colon.");
+
+            return new InterfaceMethodNode(name, parameters, returnType);
+        });
 
     private string? TryParseId(ParserContext context)
     {

@@ -60,9 +60,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
                Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
                ReturnType.Equals(other.ReturnType) &&
-               Equals(Body, other.Body) &&
-               Equals(SymbolTable, other.SymbolTable) &&
-               Equals(Metadata, other.Metadata);
+               Equals(Body, other.Body);
     }
 
     public override bool Equals(object? obj)

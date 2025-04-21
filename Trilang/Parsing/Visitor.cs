@@ -216,6 +216,64 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(InterfaceNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var field in node.Fields)
+            field.Accept(this);
+
+        foreach (var method in node.Methods)
+            method.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(InterfaceNode node)
+    {
+    }
+
+    protected virtual void VisitExit(InterfaceNode node)
+    {
+    }
+
+    public void Visit(InterfaceFieldNode node)
+    {
+        VisitEnter(node);
+
+        node.Type.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(InterfaceFieldNode node)
+    {
+    }
+
+    protected virtual void VisitExit(InterfaceFieldNode node)
+    {
+    }
+
+    public void Visit(InterfaceMethodNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        node.ReturnType.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(InterfaceMethodNode node)
+    {
+    }
+
+    protected virtual void VisitExit(InterfaceMethodNode node)
+    {
+    }
+
     public void Visit(LiteralExpressionNode node)
     {
         VisitEnter(node);

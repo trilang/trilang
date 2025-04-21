@@ -196,6 +196,78 @@ public partial class Formatter : IFormatter
         writer.WriteLine();
     }
 
+    public void Visit(InterfaceNode node)
+    {
+        if (node.Parent is TypeAliasDeclarationNode)
+        {
+            writer.WriteLine("{");
+
+            writer.Scoped(w =>
+            {
+                foreach (var field in node.Fields)
+                {
+                    field.Accept(this);
+                    writer.WriteLine();
+                }
+
+                if (node.Methods.Count > 0)
+                    w.WriteLine();
+
+                foreach (var method in node.Methods)
+                {
+                    method.Accept(this);
+                    writer.WriteLine();
+                }
+            });
+
+            writer.Write("}");
+        }
+        else
+        {
+            writer.Write("{ ");
+
+            foreach (var field in node.Fields)
+            {
+                field.Accept(this);
+                writer.Write(" ");
+            }
+
+            foreach (var method in node.Methods)
+            {
+                method.Accept(this);
+                writer.Write(" ");
+            }
+
+            writer.Write("}");
+        }
+    }
+
+    public void Visit(InterfaceFieldNode node)
+    {
+        writer.Write(node.Name);
+        writer.Write(": ");
+        node.Type.Accept(this);
+        writer.Write(";");
+    }
+
+    public void Visit(InterfaceMethodNode node)
+    {
+        writer.Write(node.Name);
+        writer.Write("(");
+
+        for (var i = 0; i < node.Parameters.Count; i++)
+        {
+            node.Parameters[i].Accept(this);
+
+            if (i < node.Parameters.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write("): ");
+        node.ReturnType.Accept(this);
+        writer.Write(";");
+    }
+
     public void Visit(LiteralExpressionNode node)
     {
         switch (node.Kind)
@@ -288,7 +360,9 @@ public partial class Formatter : IFormatter
         writer.Write(node.Name);
         writer.Write(" = ");
         node.Type.Accept(this);
-        writer.Write(';');
+
+        if (node.Type is not InterfaceNode)
+            writer.Write(';');
     }
 
     public void Visit(TypeDeclarationNode node)

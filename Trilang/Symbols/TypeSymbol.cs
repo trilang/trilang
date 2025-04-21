@@ -20,6 +20,9 @@ public class TypeSymbol : Symbol<ISyntaxNode?>, IEquatable<TypeSymbol>
     public static TypeSymbol FunctionType(FunctionTypeNode node)
         => new TypeSymbol(TypeSymbolKind.Function, node.Name, node);
 
+    public static TypeSymbol Interface(InterfaceNode node)
+        => new TypeSymbol(TypeSymbolKind.Interface, node.Name, node);
+
     public static bool operator ==(TypeSymbol? left, TypeSymbol? right)
         => Equals(left, right);
 
@@ -63,4 +66,6 @@ public class TypeSymbol : Symbol<ISyntaxNode?>, IEquatable<TypeSymbol>
     public bool IsAlias => TypeKind == TypeSymbolKind.Alias;
 
     public bool IsFunction => TypeKind == TypeSymbolKind.Function;
+
+    public bool IsInterface => TypeKind == TypeSymbolKind.Interface;
 }

@@ -27,8 +27,7 @@ public abstract class VariableDeclarationNode : ISyntaxNode, IEquatable<Variable
             return true;
 
         return Name == other.Name &&
-               Type.Equals(other.Type) &&
-               Equals(SymbolTable, other.SymbolTable);
+               Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)

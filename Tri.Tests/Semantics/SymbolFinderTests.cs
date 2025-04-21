@@ -270,60 +270,6 @@ public class SymbolFinderTests
     }
 
     [Test]
-    public void FieldDeclarationTest()
-    {
-        var field1 = new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32"));
-        var field2 = new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32"));
-        var type = new TypeDeclarationNode(
-            AccessModifier.Public,
-            "Point",
-            [field1, field2],
-            [],
-            []);
-        var tree = new SyntaxTree([type]);
-
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
-
-        Assert.That(field1.SymbolTable, Is.Not.Null);
-        Assert.That(field1.SymbolTable.VariablesInScope, Has.Count.EqualTo(2));
-        Assert.That(field1.SymbolTable.VariablesInScope, Contains.Key(field1.Name).WithValue(new VariableSymbol(field1)));
-        Assert.That(field1.SymbolTable.VariablesInScope, Contains.Key(field2.Name).WithValue(new VariableSymbol(field2)));
-    }
-
-    [Test]
-    public void FieldDeclarationAndMethodVariableTest()
-    {
-        var field1 = new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32"));
-        var field2 = new VariableDeclarationStatementNode(
-            "x",
-            new TypeNode("i32"),
-            LiteralExpressionNode.Number(1));
-        var method = new MethodDeclarationNode(
-            AccessModifier.Public,
-            "test",
-            [],
-            new TypeNode("void"),
-            new BlockStatementNode([field2]));
-        var type = new TypeDeclarationNode(
-            AccessModifier.Public,
-            "Point",
-            [field1],
-            [],
-            [method]);
-        var tree = new SyntaxTree([type]);
-
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
-
-        Assert.That(field1.SymbolTable, Is.Not.Null);
-        Assert.That(field1.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(field1.SymbolTable.VariablesInScope, Contains.Key(field1.Name).WithValue(new VariableSymbol(field1)));
-
-        Assert.That(field2.SymbolTable, Is.Not.Null);
-        Assert.That(field2.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(field2.SymbolTable.VariablesInScope, Contains.Key(field1.Name).WithValue(new VariableSymbol(field2)));
-    }
-
-    [Test]
     public void CtorDeclarationVariableTest()
     {
         var parameter = new ParameterNode("a", new TypeNode("i32"));
@@ -373,5 +319,20 @@ public class SymbolFinderTests
         Assert.That(
             tree.SymbolTable.Types,
             Contains.Key(aliasType.Name).WithValue(TypeSymbol.Alias(aliasType)));
+    }
+
+    [Test]
+    public void InterfaceTest()
+    {
+        var @interface = new InterfaceNode([], []);
+        var alias = new TypeAliasDeclarationNode(AccessModifier.Public, "Point", @interface);
+        var tree = new SyntaxTree([alias]);
+
+        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
+        Assert.That(tree.SymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
+        Assert.That(tree.SymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
     }
 }

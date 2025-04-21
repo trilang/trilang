@@ -1245,4 +1245,74 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatAliasInterfaceTypeTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                new InterfaceNode(
+                    [
+                        new InterfaceFieldNode("x", new TypeNode("i32")),
+                        new InterfaceFieldNode("y", new TypeNode("i32")),
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            "distance",
+                            [new ParameterNode("other", new TypeNode("Point"))],
+                            new TypeNode("f64")
+                        )
+                    ]
+                )
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+                
+                distance(other: Point): f64;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatInlineInterfaceTypeTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "p",
+                        new InterfaceNode(
+                            [
+                                new InterfaceFieldNode("x", new TypeNode("i32")),
+                                new InterfaceFieldNode("y", new TypeNode("i32")),
+                            ],
+                            []
+                        ),
+                        LiteralExpressionNode.Number(0)
+                    )
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                var p: { x: i32; y: i32; } = 0;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

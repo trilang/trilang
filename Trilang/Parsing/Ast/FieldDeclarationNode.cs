@@ -26,7 +26,6 @@ public class FieldDeclarationNode : VariableDeclarationNode, IEquatable<FieldDec
             return true;
 
         return AccessModifier == other.AccessModifier &&
-               Equals(Metadata, other.Metadata) &&
                base.Equals(other);
     }
 

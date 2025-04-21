@@ -44,9 +44,7 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
                Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
                ReturnType.Equals(other.ReturnType) &&
-               Body.Equals(other.Body) &&
-               Equals(SymbolTable, other.SymbolTable) &&
-               Equals(Metadata, other.Metadata);
+               Body.Equals(other.Body);
     }
 
     public override bool Equals(object? obj)

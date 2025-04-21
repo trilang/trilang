@@ -16,10 +16,7 @@ public class ContinueNode : IStatementNode, IEquatable<ContinueNode>
         if (other is null)
             return false;
 
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Equals(SymbolTable, other.SymbolTable);
+        return true;
     }
 
     public override bool Equals(object? obj)

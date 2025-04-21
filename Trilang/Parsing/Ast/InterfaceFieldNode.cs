@@ -1,25 +1,24 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
+public class InterfaceFieldNode : ISyntaxNode, IEquatable<InterfaceFieldNode>
 {
-    public SyntaxTree(IReadOnlyList<IDeclarationNode> declarations)
+    public InterfaceFieldNode(string name, IInlineTypeNode type)
     {
-        Declarations = declarations;
-
-        foreach (var function in declarations)
-            function.Parent = this;
+        Name = name;
+        Type = type;
     }
 
-    public static bool operator ==(SyntaxTree? left, SyntaxTree? right)
+    public static bool operator ==(InterfaceFieldNode? left, InterfaceFieldNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(SyntaxTree? left, SyntaxTree? right)
+    public static bool operator !=(InterfaceFieldNode? left, InterfaceFieldNode? right)
         => !Equals(left, right);
 
-    public bool Equals(SyntaxTree? other)
+    public bool Equals(InterfaceFieldNode? other)
     {
         if (other is null)
             return false;
@@ -27,7 +26,7 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Declarations.SequenceEqual(other.Declarations);
+        return Name == other.Name && Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)
@@ -41,11 +40,11 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((SyntaxTree)obj);
+        return Equals((InterfaceFieldNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Declarations);
+        => HashCode.Combine(Name, Type);
 
     public override string ToString()
     {
@@ -63,7 +62,11 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 
     public ISyntaxNode? Parent { get; set; }
 
-    public IReadOnlyList<IDeclarationNode> Declarations { get; }
-
     public ISymbolTable? SymbolTable { get; set; }
+
+    public string Name { get; }
+
+    public IInlineTypeNode Type { get; }
+
+    public InterfaceFieldMetadata? Metadata { get; set; }
 }

@@ -29,8 +29,7 @@ public class WhileNode : IStatementNode, IEquatable<WhileNode>
             return true;
 
         return Condition.Equals(other.Condition) &&
-               Body.Equals(other.Body) &&
-               Equals(SymbolTable, other.SymbolTable);
+               Body.Equals(other.Body);
     }
 
     public override bool Equals(object? obj)

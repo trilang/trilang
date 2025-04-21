@@ -10,5 +10,7 @@ public interface ITypeAliasBuilder
 
     ITypeAliasBuilder DefineFunctionType(Action<IFunctionTypeBuilder> action);
 
+    ITypeAliasBuilder DefineInterface(Action<IInterfaceBuilder> action);
+
     TypeAliasDeclarationNode Build();
 }

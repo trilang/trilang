@@ -250,6 +250,39 @@ public class TypeChecker : IVisitor
             throw new TypeCheckerException();
     }
 
+    public void Visit(InterfaceNode node)
+    {
+        var metadata = typeProvider.GetType(node.Name) as InterfaceMetadata ??
+                       throw new TypeCheckerException($"Unknown type '{node.Name}'");
+
+        node.Metadata = metadata;
+
+        foreach (var field in node.Fields)
+        {
+            field.Metadata = metadata.GetField(field.Name);
+
+            field.Accept(this);
+        }
+
+        foreach (var method in node.Methods)
+        {
+            method.Metadata = metadata.GetMethod(method.Name);
+
+            method.Accept(this);
+        }
+    }
+
+    public void Visit(InterfaceFieldNode node)
+        => node.Type.Accept(this);
+
+    public void Visit(InterfaceMethodNode node)
+    {
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        node.ReturnType.Accept(this);
+    }
+
     public void Visit(LiteralExpressionNode node)
     {
         node.ReturnTypeMetadata = node.Kind switch

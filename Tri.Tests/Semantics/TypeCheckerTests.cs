@@ -558,4 +558,35 @@ public class TypeCheckerTests
 
         Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
     }
+
+    [Test]
+    public void SetMetadataForInterfaceTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Point", builder => builder
+                .DefineInterface(i => i
+                    .DefineField("x", "i32")
+                    .DefineField("y", "i32")
+                    .DefineMethod("distance", m => m
+                        .DefineParameter("other", "Point")
+                        .ReturnType("f64"))))
+            .Build();
+
+        var provider = new TypeMetadataProvider();
+        var interfaceType = new InterfaceMetadata("{ x: i32; y: i32; distance(Point): f64; }");
+        interfaceType.AddField(new InterfaceFieldMetadata(interfaceType, "x", TypeMetadata.I32));
+        interfaceType.AddField(new InterfaceFieldMetadata(interfaceType, "y", TypeMetadata.I32));
+        var functionTypeMetadata = new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64);
+        interfaceType.AddMethod(new InterfaceMethodMetadata(interfaceType, "distance", functionTypeMetadata));
+        provider.DefineType(interfaceType);
+
+        var aliasMetadata = new TypeAliasMetadata("Point", interfaceType);
+        provider.DefineType(aliasMetadata);
+
+        tree.Accept(new TypeChecker(provider));
+
+        var type = tree.Find<TypeAliasDeclarationNode>();
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type.Metadata, Is.EqualTo(aliasMetadata));
+    }
 }

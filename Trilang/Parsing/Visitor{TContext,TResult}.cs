@@ -250,6 +250,73 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(InterfaceNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        foreach (var field in node.Fields)
+            field.Accept(this, context);
+
+        foreach (var method in node.Methods)
+            method.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(InterfaceNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(InterfaceNode node, TContext context)
+    {
+    }
+
+    public void Visit(InterfaceFieldNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        node.Type.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(InterfaceFieldNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(InterfaceFieldNode node, TContext context)
+    {
+    }
+
+    public void Visit(InterfaceMethodNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this, context);
+
+        node.ReturnType.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(InterfaceMethodNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(InterfaceMethodNode node, TContext context)
+    {
+    }
+
     public void Visit(LiteralExpressionNode node, TContext context)
     {
         if (context.IsFinished)

@@ -75,6 +75,9 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         if (aliasType.Type is FunctionTypeNode functionType)
             symbolTable.TryAddType(TypeSymbol.FunctionType(functionType));
 
+        if (aliasType.Type is InterfaceNode interfaceNode)
+            symbolTable.TryAddType(TypeSymbol.Interface(interfaceNode));
+
         if (!symbolTable.TryAddType(TypeSymbol.Alias(aliasType)))
             throw new Exception();
 
@@ -680,6 +683,17 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public ITypeAliasBuilder DefineInterface(Action<IInterfaceBuilder> action)
+        {
+            var builder = new InterfaceBuilder(symbolTable);
+            action(builder);
+
+            aliasedType = builder.Build();
+            aliasedType.SymbolTable = symbolTable;
+
+            return this;
+        }
+
         public TypeAliasDeclarationNode Build()
             => new TypeAliasDeclarationNode(
                 accessModifier,
@@ -714,5 +728,78 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public FunctionTypeNode Build()
             => new FunctionTypeNode(parameterTypes, returnType);
+    }
+
+    private sealed class InterfaceBuilder : IInterfaceBuilder
+    {
+        private readonly ISymbolTable symbolTable;
+        private readonly List<InterfaceFieldNode> fields;
+        private readonly List<InterfaceMethodNode> methods;
+
+        public InterfaceBuilder(ISymbolTable symbolTable)
+        {
+            this.symbolTable = symbolTable;
+            this.fields = [];
+            this.methods = [];
+        }
+
+        public IInterfaceBuilder DefineField(string name, string type)
+        {
+            var field = new InterfaceFieldNode(name, new TypeNode(type)) { SymbolTable = symbolTable };
+
+            fields.Add(field);
+
+            return this;
+        }
+
+        public IInterfaceBuilder DefineMethod(string name, Action<IInterfaceMethodBuilder> action)
+        {
+            var builder = new InterfaceMethodBuilder(symbolTable, name);
+            action(builder);
+
+            var method = builder.Build();
+            method.SymbolTable = symbolTable;
+            methods.Add(method);
+
+            return this;
+        }
+
+        public InterfaceNode Build()
+            => new InterfaceNode(fields, methods);
+    }
+
+    private sealed class InterfaceMethodBuilder : IInterfaceMethodBuilder
+    {
+        private readonly ISymbolTable symbolTable;
+        private readonly string methodName;
+        private readonly List<ParameterNode> parameters;
+        private IInlineTypeNode returnType;
+
+        public InterfaceMethodBuilder(ISymbolTable symbolTable, string methodName)
+        {
+            this.symbolTable = symbolTable;
+            this.methodName = methodName;
+            parameters = [];
+            returnType = new TypeNode("void");
+        }
+
+        public IInterfaceMethodBuilder DefineParameter(string name, string type)
+        {
+            var parameter = new ParameterNode(name, new TypeNode(type)) { SymbolTable = symbolTable };
+
+            parameters.Add(parameter);
+
+            return this;
+        }
+
+        public IInterfaceMethodBuilder ReturnType(string type)
+        {
+            returnType = new TypeNode(type);
+
+            return this;
+        }
+
+        public InterfaceMethodNode Build()
+            => new InterfaceMethodNode(methodName, parameters, returnType);
     }
 }

@@ -71,10 +71,6 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
     {
         node.SymbolTable = context.SymbolTable;
 
-        var symbol = new VariableSymbol(node);
-        if (!context.SymbolTable.TryAddVariable(symbol))
-            throw new SymbolTableBuilderException($"The '{node.Name}' variable is already defined.");
-
         node.Type.Accept(this, context);
     }
 
@@ -116,6 +112,41 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Condition.Accept(this, context);
         node.Then.Accept(this, context);
         node.Else?.Accept(this, context);
+    }
+
+    public void Visit(InterfaceNode node, SymbolFinderContext context)
+    {
+        // TODO: define in inner scope?
+        node.SymbolTable = context.SymbolTable;
+
+        var symbol = TypeSymbol.Interface(node);
+        context.SymbolTable.TryAddType(symbol);
+
+        context.Scoped(c =>
+        {
+            foreach (var field in node.Fields)
+                field.Accept(this, c);
+
+            foreach (var method in node.Methods)
+                method.Accept(this, c);
+        });
+    }
+
+    public void Visit(InterfaceFieldNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        node.Type.Accept(this, context);
+    }
+
+    public void Visit(InterfaceMethodNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this, context);
+
+        node.ReturnType.Accept(this, context);
     }
 
     public void Visit(LiteralExpressionNode node, SymbolFinderContext context)

@@ -28,6 +28,12 @@ public interface IVisitor<in TContext>
 
     void Visit(IfStatementNode node, TContext context);
 
+    void Visit(InterfaceNode node, TContext context);
+
+    void Visit(InterfaceFieldNode node, TContext context);
+
+    void Visit(InterfaceMethodNode node, TContext context);
+
     void Visit(LiteralExpressionNode node, TContext context);
 
     void Visit(MemberAccessExpressionNode node, TContext context);

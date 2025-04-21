@@ -6,4 +6,5 @@ public enum TypeSymbolKind
     Array,
     Alias,
     Function,
+    Interface,
 }

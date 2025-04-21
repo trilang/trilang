@@ -30,8 +30,7 @@ public class TypeAliasDeclarationNode : IDeclarationNode, IEquatable<TypeAliasDe
 
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
-               Type.Equals(other.Type) &&
-               Equals(SymbolTable, other.SymbolTable);
+               Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)

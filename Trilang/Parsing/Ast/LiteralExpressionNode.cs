@@ -43,8 +43,7 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
 
         return Kind == other.Kind &&
                Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
-               Value.Equals(other.Value) &&
-               Equals(SymbolTable, other.SymbolTable);
+               Value.Equals(other.Value);
     }
 
     public override bool Equals(object? obj)

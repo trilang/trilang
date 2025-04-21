@@ -4,18 +4,27 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
+public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
 {
-    public TypeNode(string name)
-        => Name = name;
+    public InterfaceNode(
+        IReadOnlyList<InterfaceFieldNode> fields,
+        IReadOnlyList<InterfaceMethodNode> methods)
+    {
+        Fields = fields;
+        Methods = methods;
 
-    public static bool operator ==(TypeNode? left, TypeNode? right)
+        var fieldNames = fields.Select(f => $"{f.Name}: {f.Type};");
+        var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.Parameters.Select(p => p.Type))}): {m.ReturnType};");
+        Name = $"{{ {string.Join(" ", fieldNames.Concat(methodNames))} }}";
+    }
+
+    public static bool operator ==(InterfaceNode? left, InterfaceNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(TypeNode? left, TypeNode? right)
+    public static bool operator !=(InterfaceNode? left, InterfaceNode? right)
         => !Equals(left, right);
 
-    public bool Equals(TypeNode? other)
+    public bool Equals(InterfaceNode? other)
     {
         if (other is null)
             return false;
@@ -23,7 +32,8 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return Fields.SequenceEqual(other.Fields) &&
+               Methods.SequenceEqual(other.Methods);
     }
 
     public override bool Equals(object? obj)
@@ -37,11 +47,11 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((TypeNode)obj);
+        return Equals((InterfaceNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
+        => HashCode.Combine(Fields, Methods);
 
     public override string ToString()
     {
@@ -63,8 +73,9 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
 
     public string Name { get; }
 
-    public bool IsArray
-        => Name.EndsWith("[]");
+    public IReadOnlyList<InterfaceFieldNode> Fields { get; }
+
+    public IReadOnlyList<InterfaceMethodNode> Methods { get; }
 
     public ITypeMetadata? Metadata { get; set; }
 }

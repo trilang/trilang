@@ -47,9 +47,7 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
                Name == other.Name &&
                Fields.SequenceEqual(other.Fields) &&
                Constructors.SequenceEqual(other.Constructors) &&
-               Methods.SequenceEqual(other.Methods) &&
-               Equals(SymbolTable, other.SymbolTable) &&
-               Equals(Metadata, other.Metadata);
+               Methods.SequenceEqual(other.Methods);
     }
 
     public override bool Equals(object? obj)

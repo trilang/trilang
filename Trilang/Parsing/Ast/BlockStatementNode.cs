@@ -32,8 +32,7 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Statements.SequenceEqual(other.Statements) &&
-               Equals(SymbolTable, other.SymbolTable);
+        return Statements.SequenceEqual(other.Statements);
     }
 
     public override bool Equals(object? obj)

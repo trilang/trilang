@@ -23,11 +23,13 @@ public class GenerateMetadata : Visitor
             throw new ArgumentNullException(nameof(symbolTable));
 
         CreateTypes(symbolTable.Types);
+        CreateInterfaces(symbolTable.Types);
         CreateAliases(symbolTable.Types);
         CreateArrays(symbolTable.Types);
         BuildFunctionTypes(symbolTable.Types);
 
         PopulateTypes(symbolTable.Types);
+        PopulateInterfaces(symbolTable.Types);
         PopulateAliases(symbolTable.Types);
         BuildFunctions(symbolTable.FunctionsInScope);
     }
@@ -109,11 +111,14 @@ public class GenerateMetadata : Visitor
                 var returnType = typeProvider.GetType(method.ReturnType.Name) ??
                                  throw new TypeCheckerException($"Unknown type '{method.ReturnType.Name}'");
 
+                var functionType = new FunctionTypeMetadata(parameters, returnType);
+                typeProvider.DefineType(functionType);
+
                 var methodMetadata = new MethodMetadata(
                     type,
                     GetAccessModifierMetadata(method.AccessModifier),
                     method.Name,
-                    new FunctionTypeMetadata(parameters, returnType));
+                    functionType);
 
                 type.AddMethod(methodMetadata);
             }
@@ -197,6 +202,65 @@ public class GenerateMetadata : Visitor
 
             var alias = new TypeAliasMetadata(symbol.Name, functionTypeMetadata);
             typeProvider.DefineType(alias);
+        }
+    }
+
+    private void CreateInterfaces(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsInterface)
+                continue;
+
+            var metadata = new InterfaceMetadata(symbol.Name);
+            typeProvider.DefineType(metadata);
+        }
+    }
+
+    private void PopulateInterfaces(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsInterface)
+                continue;
+
+            var node = symbol.Node;
+            if (node is not InterfaceNode interfaceNode)
+                continue;
+
+            if (typeProvider.GetType(symbol.Name) is not InterfaceMetadata metadata)
+                throw new TypeCheckerException($"Unknown interface '{symbol.Name}'");
+
+            foreach (var field in interfaceNode.Fields)
+            {
+                var fieldType = typeProvider.GetType(field.Type.Name) ??
+                                throw new TypeCheckerException($"Unknown type '{field.Type.Name}'");
+
+                var fieldMetadata = new InterfaceFieldMetadata(metadata, field.Name, fieldType);
+                metadata.AddField(fieldMetadata);
+            }
+
+            foreach (var method in interfaceNode.Methods)
+            {
+                var parameters = new ITypeMetadata[method.Parameters.Count];
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    var parameter = method.Parameters[i];
+                    var parameterType = typeProvider.GetType(parameter.Type.Name) ??
+                                        throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
+
+                    parameters[i] = parameterType;
+                }
+
+                var returnType = typeProvider.GetType(method.ReturnType.Name) ??
+                                 throw new TypeCheckerException($"Unknown type '{method.ReturnType.Name}'");
+
+                var functionType = new FunctionTypeMetadata(parameters, returnType);
+                typeProvider.DefineType(functionType);
+
+                var methodMetadata = new InterfaceMethodMetadata(metadata, method.Name, functionType);
+                metadata.AddMethod(methodMetadata);
+            }
         }
     }
 

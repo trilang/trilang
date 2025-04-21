@@ -1,25 +1,28 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
+public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
 {
-    public SyntaxTree(IReadOnlyList<IDeclarationNode> declarations)
+    public InterfaceMethodNode(
+        string name,
+        IReadOnlyList<ParameterNode> parameters,
+        IInlineTypeNode returnType)
     {
-        Declarations = declarations;
-
-        foreach (var function in declarations)
-            function.Parent = this;
+        Name = name;
+        Parameters = parameters;
+        ReturnType = returnType;
     }
 
-    public static bool operator ==(SyntaxTree? left, SyntaxTree? right)
+    public static bool operator ==(InterfaceMethodNode? left, InterfaceMethodNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(SyntaxTree? left, SyntaxTree? right)
+    public static bool operator !=(InterfaceMethodNode? left, InterfaceMethodNode? right)
         => !Equals(left, right);
 
-    public bool Equals(SyntaxTree? other)
+    public bool Equals(InterfaceMethodNode? other)
     {
         if (other is null)
             return false;
@@ -27,7 +30,9 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Declarations.SequenceEqual(other.Declarations);
+        return Name == other.Name &&
+               Parameters.SequenceEqual(other.Parameters) &&
+               ReturnType.Equals(other.ReturnType);
     }
 
     public override bool Equals(object? obj)
@@ -41,11 +46,11 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((SyntaxTree)obj);
+        return Equals((InterfaceMethodNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Declarations);
+        => HashCode.Combine(Name, Parameters, ReturnType);
 
     public override string ToString()
     {
@@ -63,7 +68,13 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 
     public ISyntaxNode? Parent { get; set; }
 
-    public IReadOnlyList<IDeclarationNode> Declarations { get; }
-
     public ISymbolTable? SymbolTable { get; set; }
+
+    public string Name { get; }
+
+    public IReadOnlyList<ParameterNode> Parameters { get; }
+
+    public IInlineTypeNode ReturnType { get; }
+
+    public InterfaceMethodMetadata? Metadata { get; set; }
 }

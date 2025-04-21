@@ -574,4 +574,141 @@ public class ParseTypeTests
 
         Assert.That(tree, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void ParseAliasInterfaceTypeTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+
+                distance(other: Point): f32;
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                new InterfaceNode(
+                    [
+                        new InterfaceFieldNode("x", new TypeNode("i32")),
+                        new InterfaceFieldNode("y", new TypeNode("i32"))
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            "distance",
+                            [new ParameterNode("other", new TypeNode("Point"))],
+                            new TypeNode("f32"))
+                    ]
+                )
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseAliasInterfaceTypeMissingCloseBraceTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+
+                distance(other: Point): f32;
+            """;
+
+        Assert.Throws<ParseException>(() => parser.Parse(code));
+    }
+
+    [Test]
+    public void ParseAliasInterfaceTypeMissingFieldTypeTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            public type Point = {
+                x: ;
+                y: i32;
+
+                distance(other: Point): f32;
+            }
+            """;
+
+        Assert.Throws<ParseException>(() => parser.Parse(code));
+    }
+
+    [Test]
+    public void ParseAliasInterfaceTypeMissingFieldSemiColonTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            public type Point = {
+                x: i32
+                y: i32;
+
+                distance(other: Point): f32;
+            }
+            """;
+
+        Assert.Throws<ParseException>(() => parser.Parse(code));
+    }
+
+    [Test]
+    public void ParseAliasInterfaceTypeMissingMethodReturnTypeTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+
+                distance(other: Point): ;
+            }
+            """;
+
+        Assert.Throws<ParseException>(() => parser.Parse(code));
+    }
+
+    [Test]
+    public void ParseAliasInterfaceTypeMissingMethodColonTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+
+                distance(other: Point) f64;
+            }
+            """;
+
+        Assert.Throws<ParseException>(() => parser.Parse(code));
+    }
+
+    [Test]
+    public void ParseAliasInterfaceTypeMissingMethodSemiColonTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+
+                distance(other: Point): f64
+            }
+            """;
+
+        Assert.Throws<ParseException>(() => parser.Parse(code));
+    }
 }

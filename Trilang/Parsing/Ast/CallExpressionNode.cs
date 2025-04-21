@@ -32,8 +32,7 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
 
         return Member.Equals(other.Member) &&
                Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
-               Parameters.SequenceEqual(other.Parameters) &&
-               Equals(SymbolTable, other.SymbolTable);
+               Parameters.SequenceEqual(other.Parameters);
     }
 
     public override bool Equals(object? obj)
