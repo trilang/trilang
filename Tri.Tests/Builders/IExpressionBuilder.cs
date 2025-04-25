@@ -34,6 +34,7 @@ public interface IExpressionBuilder
     IExpressionBuilder XorAssign();
 
     IExpressionBuilder Call(string name);
+    IExpressionBuilder New(string type);
 
     IExpressionNode Build();
 }

@@ -326,6 +326,23 @@ public partial class Formatter : IFormatter
         node.Body.Accept(this);
     }
 
+    public void Visit(NewExpressionNode node)
+    {
+        writer.Write("new ");
+        node.Type.Accept(this);
+        writer.Write('(');
+
+        for (var i = 0; i < node.Parameters.Count; i++)
+        {
+            node.Parameters[i].Accept(this);
+
+            if (i < node.Parameters.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write(')');
+    }
+
     public void Visit(ParameterNode node)
     {
         writer.Write(node.Name);

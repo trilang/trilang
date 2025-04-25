@@ -720,4 +720,81 @@ public class TypeCheckerTests
         Assert.That(xNode, Is.Not.Null);
         Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(functionType));
     }
+
+    [Test]
+    public void NewOperatorSetCtorTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .DefineConstructor(c => c
+                    .DefineParameter("x", "i32")
+                    .DefineParameter("y", "i32")))
+            .DefineFunction("test", builder => builder
+                .Body(body => body
+                    .DefineVariable("a", new TypeNode("Point"), exp => exp
+                        .Number(1)
+                        .Number(2)
+                        .New("Point"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var type = semantic.TypeProvider.GetType("Point") as TypeMetadata;
+        Assert.That(type, Is.Not.Null);
+
+        var ctor = type.GetConstructor([TypeMetadata.I32, TypeMetadata.I32]);
+        Assert.That(ctor, Is.Not.Null);
+
+        var newOp = tree.Find<NewExpressionNode>();
+        Assert.That(newOp, Is.Not.Null);
+        Assert.That(newOp.Metadata, Is.EqualTo(ctor));
+    }
+
+    [Test]
+    public void NewOperatorForInterfaceTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Point", builder => builder
+                .DefineInterface(i => i
+                    .DefineField("x", "i32")
+                    .DefineField("y", "i32")))
+            .DefineFunction("test", builder => builder
+                .Body(body => body
+                    .DefineVariable("a", new TypeNode("Point"), exp => exp
+                        .Number(1)
+                        .Number(2)
+                        .New("Point"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Cannot create an instance of type 'Point'"));
+    }
+
+    [Test]
+    public void NewOperatorMissingConstructorTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .DefineConstructor(c => c
+                    .DefineParameter("x", "i32")
+                    .DefineParameter("y", "i32")))
+            .DefineFunction("test", builder => builder
+                .Body(body => body
+                    .DefineVariable("a", new TypeNode("Point"), exp => exp
+                        .Number(2)
+                        .New("Point"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'Point' type doesn't have 'i32' constructor."));
+    }
 }

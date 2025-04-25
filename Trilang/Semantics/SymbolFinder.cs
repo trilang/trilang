@@ -200,6 +200,16 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
+    public void Visit(NewExpressionNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        node.Type.Accept(this, context);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this, context);
+    }
+
     public void Visit(ReturnStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;

@@ -375,6 +375,26 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(NewExpressionNode node, TContext context)
+    {
+        VisitEnter(node, context);
+
+        node.Type.Accept(this, context);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(NewExpressionNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(NewExpressionNode node, TContext context)
+    {
+    }
+
     public void Visit(ReturnStatementNode node, TContext context)
     {
         if (context.IsFinished)

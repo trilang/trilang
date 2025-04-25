@@ -40,6 +40,8 @@ public interface IVisitor<in TContext>
 
     void Visit(MethodDeclarationNode node, TContext context);
 
+    void Visit(NewExpressionNode node, TContext context);
+
     void Visit(ParameterNode node, TContext context);
 
     void Visit(ReturnStatementNode node, TContext context);

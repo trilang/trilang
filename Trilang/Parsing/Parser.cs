@@ -517,6 +517,7 @@ public class Parser
            TryParseCallExpression(context) ??
            TryParseArrayAccessExpression(context) ??
            TryParseMemberExpression(context) ??
+           TryParseNewExpression(context) ??
            TryParseLiteral(context) as IExpressionNode;
 
     private IExpressionNode? TryParseParenExpression(ParserContext context)
@@ -607,6 +608,39 @@ public class Parser
 
         return member;
     }
+
+    private NewExpressionNode? TryParseNewExpression(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.New))
+                return null;
+
+            var type = c.Parser.TryParseTypeNode(c) ??
+                       throw new ParseException("Expected a type.");
+
+            if (!c.Reader.Check(TokenKind.OpenParenthesis))
+                return null;
+
+            var arguments = new List<IExpressionNode>();
+            var argument = c.Parser.TryParseExpression(c);
+            if (argument is not null)
+            {
+                arguments.Add(argument);
+
+                while (c.Reader.Check(TokenKind.Comma))
+                {
+                    argument = c.Parser.TryParseExpression(c) ??
+                               throw new ParseException("Expected an argument.");
+
+                    arguments.Add(argument);
+                }
+            }
+
+            if (!c.Reader.Check(TokenKind.CloseParenthesis))
+                throw new ParseException("Expected a close parenthesis.");
+
+            return new NewExpressionNode(type, arguments);
+        });
 
     private LiteralExpressionNode? TryParseLiteral(ParserContext context)
     {

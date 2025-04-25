@@ -1397,4 +1397,35 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatNewOperatorTest()
+    {
+        var tree=new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "p",
+                        new TypeNode("Point"),
+                        new NewExpressionNode(
+                            new TypeNode("Point"),
+                            [LiteralExpressionNode.Number(1), LiteralExpressionNode.Number(2)]
+                        )
+                    )
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                var p: Point = new Point(1, 2);
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

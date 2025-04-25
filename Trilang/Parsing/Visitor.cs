@@ -323,6 +323,26 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(NewExpressionNode node)
+    {
+        VisitEnter(node);
+
+        node.Type.Accept(this);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(NewExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitExit(NewExpressionNode node)
+    {
+    }
+
     public void Visit(ReturnStatementNode node)
     {
         VisitEnter(node);

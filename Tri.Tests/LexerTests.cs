@@ -78,6 +78,7 @@ public class LexerTests
     [TestCase("type", TokenKind.Type)]
     [TestCase("this", TokenKind.This)]
     [TestCase("constructor", TokenKind.Constructor)]
+    [TestCase("new", TokenKind.New)]
     public void TokenizeKeywordTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();

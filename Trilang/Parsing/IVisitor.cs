@@ -40,6 +40,8 @@ public interface IVisitor
 
     void Visit(MethodDeclarationNode node);
 
+    void Visit(NewExpressionNode node);
+
     void Visit(ParameterNode node);
 
     void Visit(ReturnStatementNode node);

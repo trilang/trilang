@@ -337,6 +337,23 @@ internal class TypeChecker : IVisitor
         node.Body.Accept(this);
     }
 
+    public void Visit(NewExpressionNode node)
+    {
+        node.Type.Accept(this);
+
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        if (node.Type.Metadata is not TypeMetadata type)
+            throw new SemanticAnalysisException($"Cannot create an instance of type '{node.Type.Metadata}'");
+
+        var parameters = node.Parameters.Select(x => x.ReturnTypeMetadata!).ToList();
+        var ctor = type.GetConstructor(parameters) ??
+                   throw new SemanticAnalysisException($"The '{type.Name}' type doesn't have '{string.Join(", ", parameters)}' constructor.");
+
+        node.Metadata = ctor;
+    }
+
     public void Visit(ReturnStatementNode node)
     {
         node.Expression?.Accept(this);

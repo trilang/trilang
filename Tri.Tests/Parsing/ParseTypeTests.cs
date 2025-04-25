@@ -711,4 +711,117 @@ public class ParseTypeTests
 
         Assert.Throws<ParseException>(() => parser.Parse(code));
     }
+
+    [Test]
+    public void ParseNewOperatorTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            function main(): void {
+                var p: Point = new Point();
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "p",
+                        new TypeNode("Point"),
+                        new NewExpressionNode(new TypeNode("Point"), [])
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseNewOperatorWithParametersTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            function main(): void {
+                var p: Point = new Point(1, 2);
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "p",
+                        new TypeNode("Point"),
+                        new NewExpressionNode(
+                            new TypeNode("Point"),
+                            [LiteralExpressionNode.Number(1), LiteralExpressionNode.Number(2)]
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+
+    [Test]
+    public void ParseNewOperatorMissingTypeTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            function main(): void {
+                var p: Point = new ();
+            }
+            """;
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
+    }
+
+    [Test]
+    public void ParseNewOperatorMissingArgumentTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            function main(): void {
+                var p: Point = new Point(1, );
+            }
+            """;
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an argument."));
+    }
+
+    [Test]
+    public void ParseNewOperatorMissingCloseParenTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            function main(): void {
+                var p: Point = new Point(;
+            }
+            """;
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close parenthesis."));
+    }
 }

@@ -560,6 +560,18 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IExpressionBuilder New(string type)
+        {
+            var parameters = new IExpressionNode[stack.Count];
+            for (var i = stack.Count - 1; i >= 0; i--)
+                parameters[i] = stack.Pop();
+
+            var newOp = new NewExpressionNode(new TypeNode(type), parameters);
+            stack.Push(newOp);
+
+            return this;
+        }
+
         public IExpressionNode Build()
         {
             if (stack.Count != 1)
