@@ -9,48 +9,52 @@ public class SymbolFinderTests
     [Test]
     public void FunctionInRootScopeTest()
     {
-        var builder = new SymbolFinder();
         var function = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
         var tree = new SyntaxTree([function]);
 
-        tree.Accept(builder, new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
     }
 
     [Test]
     public void TwoFunctionsInRootScopeTest()
     {
-        var builder = new SymbolFinder();
         var function1 = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
         var function2 = FunctionDeclarationNode.Create("add", [], new TypeNode("void"), new BlockStatementNode());
         var tree = new SyntaxTree([function1, function2]);
 
-        tree.Accept(builder, new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(2));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function1.Name).WithValue(new FunctionSymbol(function1)));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function2.Name).WithValue(new FunctionSymbol(function2)));
+        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(tree.SymbolTable.Ids, Contains.Key(function1.Name).WithValue(new IdSymbol(function1)));
+        Assert.That(tree.SymbolTable.Ids, Contains.Key(function2.Name).WithValue(new IdSymbol(function2)));
     }
 
     [Test]
     public void SameFunctionInRootScopeTest()
     {
-        var builder = new SymbolFinder();
-        var function1 = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
-        var function2 = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
-        var tree = new SyntaxTree([function1, function2]);
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode()),
+            FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode())
+        ]);
 
-        Assert.Throws<SymbolTableBuilderException>(() => tree.Accept(builder, new SymbolFinderContext()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'main' function is already defined."));
     }
 
     [Test]
     public void FunctionWithParametersInRootScopeTest()
     {
-        var builder = new SymbolFinder();
         var a = new ParameterNode("a", new TypeNode("i32"));
         var b = new ParameterNode("b", new TypeNode("i32"));
         var function = FunctionDeclarationNode.Create(
@@ -60,39 +64,45 @@ public class SymbolFinderTests
             new BlockStatementNode());
         var tree = new SyntaxTree([function]);
 
-        tree.Accept(builder, new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key("add").WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Ids, Contains.Key("add").WithValue(new IdSymbol(function)));
 
         Assert.That(function.Body, Is.Not.Null);
         Assert.That(function.Body.SymbolTable, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable.VariablesInScope, Has.Count.EqualTo(2));
-        Assert.That(function.Body.SymbolTable.VariablesInScope, Contains.Key(a.Name).WithValue(new VariableSymbol(a)));
-        Assert.That(function.Body.SymbolTable.VariablesInScope, Contains.Key(b.Name).WithValue(new VariableSymbol(b)));
+        Assert.That(function.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
+        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
     }
 
     [Test]
     public void FunctionWithSameParametersInRootScopeTest()
     {
-        var builder = new SymbolFinder();
-        var a = new ParameterNode("a", new TypeNode("i32"));
-        var b = new ParameterNode("a", new TypeNode("i32"));
-        var function = FunctionDeclarationNode.Create(
-            "add",
-            [a, b],
-            new TypeNode("void"),
-            new BlockStatementNode());
-        var tree = new SyntaxTree([function]);
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "add",
+                [
+                    new ParameterNode("a", new TypeNode("i32")),
+                    new ParameterNode("a", new TypeNode("i32"))
+                ],
+                new TypeNode("void"),
+                new BlockStatementNode())
+        ]);
 
-        Assert.Throws<SymbolTableBuilderException>(() => tree.Accept(builder, new SymbolFinderContext()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'a' parameter is already defined."));
     }
 
     [Test]
     public void FunctionWithVariablesInRootScopeTest()
     {
-        var builder = new SymbolFinder();
         var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1));
         var b = new VariableDeclarationStatementNode("b", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2));
         var function = FunctionDeclarationNode.Create(
@@ -102,45 +112,49 @@ public class SymbolFinderTests
             new BlockStatementNode([a, b]));
         var tree = new SyntaxTree([function]);
 
-        tree.Accept(builder, new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
 
         Assert.That(function.Body, Is.Not.Null);
         Assert.That(function.Body.SymbolTable, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable.VariablesInScope, Has.Count.EqualTo(2));
-        Assert.That(function.Body.SymbolTable.VariablesInScope, Contains.Key(a.Name).WithValue(new VariableSymbol(a)));
-        Assert.That(function.Body.SymbolTable.VariablesInScope, Contains.Key(b.Name).WithValue(new VariableSymbol(b)));
+        Assert.That(function.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
+        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
     }
 
     [Test]
     public void FunctionWithSameVariablesInRootScopeTest()
     {
-        var builder = new SymbolFinder();
-        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1));
-        var b = new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2));
-        var function = FunctionDeclarationNode.Create(
-            "main",
-            [],
-            new TypeNode("void"),
-            new BlockStatementNode([a, b]));
-        var tree = new SyntaxTree([function]);
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1)),
+                    new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2))
+                ]))
+        ]);
 
-        Assert.Throws<SymbolTableBuilderException>(() => tree.Accept(builder, new SymbolFinderContext()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'a' variable is already defined."));
     }
 
     [Test]
     public void IfScopeTest()
     {
-        var builder = new SymbolFinder();
         var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
         var ifStatement = new IfStatementNode(
             LiteralExpressionNode.True(),
-            new BlockStatementNode([
-                a,
-            ])
+            new BlockStatementNode([a])
         );
         var function = FunctionDeclarationNode.Create(
             "main",
@@ -150,21 +164,21 @@ public class SymbolFinderTests
         );
         var tree = new SyntaxTree([function]);
 
-        tree.Accept(builder, new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
 
         Assert.That(ifStatement.Then.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Then.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Then.SymbolTable.VariablesInScope, Contains.Key(a.Name).WithValue(new VariableSymbol(a)));
+        Assert.That(ifStatement.Then.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(ifStatement.Then.SymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
     }
 
     [Test]
     public void IfElseScopeTest()
     {
-        var builder = new SymbolFinder();
         var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
         var b = new VariableDeclarationStatementNode("b", new TypeNode("i32"), LiteralExpressionNode.Number(1));
         var ifStatement = new IfStatementNode(
@@ -180,26 +194,26 @@ public class SymbolFinderTests
         );
         var tree = new SyntaxTree([function]);
 
-        tree.Accept(builder, new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
 
         Assert.That(ifStatement.Then.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Then.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Then.SymbolTable.VariablesInScope, Contains.Key(a.Name).WithValue(new VariableSymbol(a)));
+        Assert.That(ifStatement.Then.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(ifStatement.Then.SymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
 
         Assert.That(ifStatement.Else, Is.Not.Null);
         Assert.That(ifStatement.Else.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Else.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Else.SymbolTable.VariablesInScope, Contains.Key(b.Name).WithValue(new VariableSymbol(b)));
+        Assert.That(ifStatement.Else.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(ifStatement.Else.SymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
     }
 
     [Test]
     public void SameVariableInMultipleScopesTest()
     {
-        var builder = new SymbolFinder();
         var a1 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
         var a2 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
         var a3 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
@@ -216,34 +230,37 @@ public class SymbolFinderTests
         );
         var tree = new SyntaxTree([function]);
 
-        tree.Accept(builder, new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.FunctionsInScope, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.FunctionsInScope, Contains.Key(function.Name).WithValue(new FunctionSymbol(function)));
+        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
 
         Assert.That(function.Body, Is.Not.Null);
         Assert.That(function.Body.SymbolTable, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(function.Body.SymbolTable.VariablesInScope, Contains.Key(a1.Name).WithValue(new VariableSymbol(a1)));
+        Assert.That(function.Body.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(a1.Name).WithValue(new IdSymbol(a1)));
 
         Assert.That(ifStatement.Then.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Then.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Then.SymbolTable.VariablesInScope, Contains.Key(a2.Name).WithValue(new VariableSymbol(a2)));
+        Assert.That(ifStatement.Then.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(ifStatement.Then.SymbolTable.Ids, Contains.Key(a2.Name).WithValue(new IdSymbol(a2)));
 
         Assert.That(ifStatement.Else, Is.Not.Null);
         Assert.That(ifStatement.Else.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Else.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Else.SymbolTable.VariablesInScope, Contains.Key(a3.Name).WithValue(new VariableSymbol(a3)));
+        Assert.That(ifStatement.Else.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(ifStatement.Else.SymbolTable.Ids, Contains.Key(a3.Name).WithValue(new IdSymbol(a3)));
     }
 
     [Test]
     public void ArrayTypeTest()
     {
-        var function = FunctionDeclarationNode.Create("main", [], new TypeNode("i32[]"), new BlockStatementNode());
-        var tree = new SyntaxTree([function]);
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create("main", [], new TypeNode("i32[]"), new BlockStatementNode())
+        ]);
 
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var symbol = TypeSymbol.Array("i32[]");
         Assert.That(tree.SymbolTable, Is.Not.Null);
@@ -262,11 +279,27 @@ public class SymbolFinderTests
             []);
         var tree = new SyntaxTree([type]);
 
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
         Assert.That(tree.SymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type(type)));
+    }
+
+    [Test]
+    public void TypeDeclarationDuplicateTest()
+    {
+        var type1 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], []);
+        var type2 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], []);
+        var tree = new SyntaxTree([type1, type2]);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'Point' type is already defined."));
     }
 
     [Test]
@@ -282,11 +315,40 @@ public class SymbolFinderTests
             []);
         var tree = new SyntaxTree([type]);
 
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
-        Assert.That(parameter.SymbolTable, Is.Not.Null);
-        Assert.That(parameter.SymbolTable.VariablesInScope, Has.Count.EqualTo(1));
-        Assert.That(parameter.SymbolTable.VariablesInScope, Contains.Key(parameter.Name).WithValue(new VariableSymbol(parameter)));
+        Assert.That(ctor.Body.SymbolTable, Is.Not.Null);
+        Assert.That(ctor.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(ctor.Body.SymbolTable.Ids, Contains.Key("this").WithValue(new IdSymbol("this", type)));
+        Assert.That(ctor.Body.SymbolTable.Ids, Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter)));
+    }
+
+    [Test]
+    public void MethodDeclarationVariableTest()
+    {
+        var parameter = new ParameterNode("a", new TypeNode("i32"));
+        var method = new MethodDeclarationNode(
+            AccessModifier.Public,
+            "test",
+            [parameter],
+            new TypeNode("void"),
+            new BlockStatementNode());
+        var type = new TypeDeclarationNode(
+            AccessModifier.Public,
+            "Point",
+            [],
+            [],
+            [method]);
+        var tree = new SyntaxTree([type]);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        Assert.That(method.Body.SymbolTable, Is.Not.Null);
+        Assert.That(method.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(method.Body.SymbolTable.Ids, Contains.Key("this").WithValue(new IdSymbol("this", type)));
+        Assert.That(method.Body.SymbolTable.Ids, Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter)));
     }
 
     [Test]
@@ -295,11 +357,27 @@ public class SymbolFinderTests
         var type = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", new TypeNode("i32"));
         var tree = new SyntaxTree([type]);
 
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
         Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Alias(type)));
+    }
+
+    [Test]
+    public void TypeAliasDuplicateTest()
+    {
+        var type1 = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", new TypeNode("i32"));
+        var type2 = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", new TypeNode("i32"));
+        var tree = new SyntaxTree([type1, type2]);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'MyInt' type is already defined."));
     }
 
     [Test]
@@ -309,7 +387,8 @@ public class SymbolFinderTests
         var aliasType = new TypeAliasDeclarationNode(AccessModifier.Public, "F", type);
         var tree = new SyntaxTree([aliasType]);
 
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
@@ -322,17 +401,76 @@ public class SymbolFinderTests
     }
 
     [Test]
-    public void InterfaceTest()
+    public void TypeIdsInSymbolTableTest()
     {
-        var @interface = new InterfaceNode([], []);
+        var type = new TypeDeclarationNode(
+            AccessModifier.Public,
+            "Point",
+            [
+                new FieldDeclarationNode(AccessModifier.Public, "x", new TypeNode("i32")),
+                new FieldDeclarationNode(AccessModifier.Public, "y", new TypeNode("i32")),
+            ],
+            [],
+            [
+                new MethodDeclarationNode(
+                    AccessModifier.Public,
+                    "toString",
+                    [],
+                    new TypeNode("string"),
+                    new BlockStatementNode()),
+                new MethodDeclarationNode(
+                    AccessModifier.Public,
+                    "distance",
+                    [new ParameterNode("other", new TypeNode("Point"))],
+                    new TypeNode("f32"),
+                    new BlockStatementNode()),
+            ]);
+        var tree = new SyntaxTree([type]);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Type(type)));
+
+        Assert.That(type.SymbolTable, Is.Not.Null);
+        Assert.That(type.SymbolTable.Ids, Has.Count.EqualTo(4));
+        Assert.That(type.SymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(type.Fields[0])));
+        Assert.That(type.SymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(type.Fields[1])));
+        Assert.That(type.SymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(type.Methods[0])));
+        Assert.That(type.SymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(type.Methods[1])));
+    }
+
+    [Test]
+    public void InterfaceIdsInSymbolTableTest()
+    {
+        var @interface = new InterfaceNode(
+            [
+                new InterfaceFieldNode("x", new TypeNode("i32")),
+                new InterfaceFieldNode("y", new TypeNode("i32")),
+            ],
+            [
+                new InterfaceMethodNode("toString", [], new TypeNode("string")),
+                new InterfaceMethodNode("distance", [new ParameterNode("other", new TypeNode("Point"))], new TypeNode("f32")),
+            ]
+        );
         var alias = new TypeAliasDeclarationNode(AccessModifier.Public, "Point", @interface);
         var tree = new SyntaxTree([alias]);
 
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext());
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
         Assert.That(tree.SymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
         Assert.That(tree.SymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+
+        Assert.That(@interface.SymbolTable, Is.Not.Null);
+        Assert.That(@interface.SymbolTable.Ids, Has.Count.EqualTo(4));
+        Assert.That(@interface.SymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(@interface.Fields[0])));
+        Assert.That(@interface.SymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(@interface.Fields[1])));
+        Assert.That(@interface.SymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(@interface.Methods[0])));
+        Assert.That(@interface.SymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(@interface.Methods[1])));
     }
 }

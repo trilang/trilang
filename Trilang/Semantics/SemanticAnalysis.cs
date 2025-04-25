@@ -6,13 +6,17 @@ namespace Trilang.Semantics;
 
 public class SemanticAnalysis
 {
+    public SemanticAnalysis()
+        => TypeProvider = new TypeMetadataProvider();
+
     public void Analyze(SyntaxTree tree)
     {
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());
         tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>());
-
-        var typeMetadataProvider = new TypeMetadataProvider();
-        tree.Accept(new GenerateMetadata(typeMetadataProvider));
-        tree.Accept(new TypeChecker(typeMetadataProvider));
+        tree.Accept(new ThisOutsideOfClass());
+        tree.Accept(new GenerateMetadata(TypeProvider));
+        tree.Accept(new TypeChecker(TypeProvider));
     }
+
+    public TypeMetadataProvider TypeProvider { get; }
 }

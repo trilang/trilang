@@ -7,7 +7,7 @@ using static Trilang.Metadata.TypeMetadata;
 
 namespace Trilang.Semantics;
 
-public class TypeChecker : IVisitor
+internal class TypeChecker : IVisitor
 {
     private readonly TypeMetadataProvider typeProvider;
 
@@ -18,28 +18,13 @@ public class TypeChecker : IVisitor
     public TypeChecker(TypeMetadataProvider typeProvider)
         => this.typeProvider = typeProvider;
 
-    private static T? FindInParent<T>(ISyntaxNode node)
-        where T : ISyntaxNode
-    {
-        var parent = node.Parent;
-        while (parent is not null)
-        {
-            if (parent is T result)
-                return result;
-
-            parent = parent.Parent;
-        }
-
-        return default;
-    }
-
     public void Visit(ArrayAccessExpressionNode node)
     {
         node.Member.Accept(this);
         node.Index.Accept(this);
 
         if (!Equals(node.Index.ReturnTypeMetadata, I32))
-            throw new TypeCheckerException();
+            throw new SemanticAnalysisException("Array index must be of type i32");
     }
 
     public void Visit(BinaryExpressionNode node)
@@ -51,7 +36,7 @@ public class TypeChecker : IVisitor
         if (node.Kind == BinaryExpressionKind.Unknown ||
             node.Left.ReturnTypeMetadata is null ||
             node.Right.ReturnTypeMetadata is null)
-            throw new TypeCheckerException();
+            throw new SemanticAnalysisException("Invalid binary expression: unknown kind or operand types");
 
         if (node.Kind is Addition or Subtraction or Multiplication or Division or Modulus &&
             ((Equals(node.Left.ReturnTypeMetadata, I8) && Equals(node.Right.ReturnTypeMetadata, I8)) ||
@@ -130,7 +115,7 @@ public class TypeChecker : IVisitor
         }
         else
         {
-            throw new TypeCheckerException();
+            throw new SemanticAnalysisException($"Invalid binary expression: incompatible operand types '{node.Left.ReturnTypeMetadata}' and '{node.Right.ReturnTypeMetadata}' for operator '{node.Kind}'");
         }
     }
 
@@ -146,26 +131,20 @@ public class TypeChecker : IVisitor
 
     public void Visit(CallExpressionNode node)
     {
-        // TODO: overload support
-        var symbol = node.SymbolTable?.GetFunction(node.Member.Name) ??
-                     throw new TypeCheckerException();
-
-        var function = symbol.Node.Metadata ??
-                       throw new TypeCheckerException();
-
-        node.Metadata = function;
-
         node.Member.Accept(this);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
+        if (node.Member.ReturnTypeMetadata is not FunctionTypeMetadata function)
+            throw new SemanticAnalysisException("Cannot call a non-function member");
+
         for (var i = 0; i < node.Parameters.Count; i++)
         {
             var actual = node.Parameters[i].ReturnTypeMetadata;
-            var expected = function.TypeMetadata.ParameterTypes[i];
+            var expected = function.ParameterTypes[i];
             if (!expected.Equals(actual))
-                throw new TypeCheckerException($"Expected '{expected}' but got '{actual}'");
+                throw new SemanticAnalysisException($"Expected '{expected}' but got '{actual}'");
         }
     }
 
@@ -173,6 +152,9 @@ public class TypeChecker : IVisitor
     {
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
+
+        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetConstructor(node.Parameters.Select(x => x.Type.Metadata!));
 
         node.Body.Accept(this);
     }
@@ -187,57 +169,38 @@ public class TypeChecker : IVisitor
     public void Visit(FieldDeclarationNode node)
     {
         node.Type.Accept(this);
+
+        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetField(node.Name);
     }
 
     public void Visit(FunctionDeclarationNode node)
     {
-        var parameters = new ITypeMetadata[node.Parameters.Count];
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            var parameter = node.Parameters[i];
-            var type = typeProvider.GetType(parameter.Type.Name) ??
-                       throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
-
-            parameters[i] = type;
-        }
-
-        var returnType = typeProvider.GetType(node.ReturnType.Name) ??
-                         throw new TypeCheckerException($"Unknown type '{node.ReturnType.Name}'");
-
-        var functionTypeMetadata = new FunctionTypeMetadata(parameters, returnType);
-        functionTypeMetadata = typeProvider.GetType(functionTypeMetadata.Name) as FunctionTypeMetadata ??
-                               throw new TypeCheckerException($"Unknown type '{functionTypeMetadata.Name}'");
-
-        node.Metadata = new FunctionMetadata(node.Name, functionTypeMetadata);
-
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);
+
+        // we can be sure that node.Metadata is not null here
+        // because it is set as a part of TypeNode
+        var functionType = new FunctionTypeMetadata(
+            node.Parameters.Select(parameter => parameter.Type.Metadata!).ToList(),
+            node.ReturnType.Metadata!);
+        node.Metadata = new FunctionMetadata(node.Name, functionType);
+
         node.Body?.Accept(this);
     }
 
     public void Visit(FunctionTypeNode node)
     {
-        var parameters = new ITypeMetadata[node.ParameterTypes.Count];
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            var parameter = node.ParameterTypes[i];
-            var type = typeProvider.GetType(parameter.Name) ??
-                       throw new TypeCheckerException($"Unknown type '{parameter.Name}'");
-
-            parameters[i] = type;
-        }
-
-        var returnType = typeProvider.GetType(node.ReturnType.Name) ??
-                         throw new TypeCheckerException($"Unknown type '{node.ReturnType.Name}'");
-
-        node.Metadata = new FunctionTypeMetadata(parameters, returnType);
-
         foreach (var parameterType in node.ParameterTypes)
             parameterType.Accept(this);
 
         node.ReturnType.Accept(this);
+
+        node.Metadata = new FunctionTypeMetadata(
+            node.ParameterTypes.Select(parameter => parameter.Metadata!).ToList(),
+            node.ReturnType.Metadata!);
     }
 
     public void Visit(IfStatementNode node)
@@ -247,33 +210,30 @@ public class TypeChecker : IVisitor
         node.Else?.Accept(this);
 
         if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
-            throw new TypeCheckerException();
+            throw new SemanticAnalysisException("The condition returns non-boolean type.");
     }
 
     public void Visit(InterfaceNode node)
     {
         var metadata = typeProvider.GetType(node.Name) as InterfaceMetadata ??
-                       throw new TypeCheckerException($"Unknown type '{node.Name}'");
+                       throw new SemanticAnalysisException($"Unknown interface type '{node.Name}'");
 
         node.Metadata = metadata;
 
         foreach (var field in node.Fields)
-        {
-            field.Metadata = metadata.GetField(field.Name);
-
             field.Accept(this);
-        }
 
         foreach (var method in node.Methods)
-        {
-            method.Metadata = metadata.GetMethod(method.Name);
-
             method.Accept(this);
-        }
     }
 
     public void Visit(InterfaceFieldNode node)
-        => node.Type.Accept(this);
+    {
+        node.Type.Accept(this);
+
+        var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetField(node.Name);
+    }
 
     public void Visit(InterfaceMethodNode node)
     {
@@ -281,6 +241,9 @@ public class TypeChecker : IVisitor
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);
+
+        var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetMethod(node.Name);
     }
 
     public void Visit(LiteralExpressionNode node)
@@ -293,16 +256,72 @@ public class TypeChecker : IVisitor
             LiteralExpressionKind.String => TypeMetadata.String,
             LiteralExpressionKind.Char => TypeMetadata.Char,
 
-            _ => throw new ArgumentOutOfRangeException(),
+            _ => throw new ArgumentOutOfRangeException(nameof(node.Kind), $"Unsupported literal expression kind: {node.Kind}"),
         };
     }
 
     public void Visit(MemberAccessExpressionNode node)
     {
-        var symbol = node.SymbolTable?.GetVariable(node.Name) ??
-                     throw new TypeCheckerException();
+        if (node.Member is null)
+        {
+            var symbol = node.SymbolTable?.GetId(node.Name) ??
+                         throw new SemanticAnalysisException($"Symbol '{node.Name}' not found in current scope");
 
-        node.ReturnTypeMetadata = symbol.Node.Type.Metadata;
+            node.ReturnTypeMetadata = symbol.Node switch
+            {
+                FieldDeclarationNode fieldNode
+                    => fieldNode.Type.Metadata,
+
+                VariableDeclarationStatementNode variableStatementNode
+                    => variableStatementNode.Type.Metadata,
+
+                ParameterNode parameterNode
+                    => parameterNode.Type.Metadata,
+
+                FunctionDeclarationNode functionNode
+                    => functionNode.Metadata?.TypeMetadata,
+
+                MethodDeclarationNode methodNode
+                    => methodNode.Metadata?.TypeMetadata,
+
+                InterfaceFieldNode interfaceFieldNode
+                    => interfaceFieldNode.Type.Metadata,
+
+                InterfaceMethodNode interfaceMethodNode
+                    => interfaceMethodNode.Metadata?.TypeMetadata,
+
+                TypeDeclarationNode typeDeclarationNode
+                    => typeDeclarationNode.Metadata,
+
+                _ => throw new SemanticAnalysisException(),
+            };
+        }
+        else
+        {
+            node.Member.Accept(this);
+
+            var returnTypeMetadata = node.Member.ReturnTypeMetadata;
+            if (returnTypeMetadata is TypeAliasMetadata alias)
+                returnTypeMetadata = alias.Type;
+
+            node.ReturnTypeMetadata = returnTypeMetadata switch
+            {
+                TypeMetadata type
+                    => type.GetField(node.Name)?.Type ??
+                       type.GetMethod(node.Name)?.TypeMetadata ??
+                       throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in type '{node.Member.ReturnTypeMetadata!.Name}'"),
+
+                InterfaceMetadata @interface
+                    => @interface.GetField(node.Name)?.Type ??
+                       @interface.GetMethod(node.Name)?.TypeMetadata ??
+                       throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in interface '{node.Member.ReturnTypeMetadata!.Name}'"),
+
+                _ => node.ReturnTypeMetadata
+            };
+        }
+
+        if (node.ReturnTypeMetadata is null)
+            throw new SemanticAnalysisException($"Cannot determine return type for member '{node.Name}'");
     }
 
     public void Visit(MethodDeclarationNode node)
@@ -311,6 +330,10 @@ public class TypeChecker : IVisitor
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);
+
+        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetMethod(node.Name);
+
         node.Body.Accept(this);
     }
 
@@ -318,45 +341,34 @@ public class TypeChecker : IVisitor
     {
         node.Expression?.Accept(this);
 
-        if (node.Expression is not null && FindInParent<ConstructorDeclarationNode>(node) is not null)
-            throw new TypeCheckerException();
-
-        var method = FindInParent<MethodDeclarationNode>(node);
+        var method = node.FindInParent<MethodDeclarationNode>();
         if (method is not null)
         {
             if (!Equals(method.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
-                throw new TypeCheckerException();
+                throw new SemanticAnalysisException($"Method return type mismatch: expected '{method.Metadata?.TypeMetadata.ReturnType}', got '{node.Expression?.ReturnTypeMetadata}'");
         }
         else
         {
-            var constructor = FindInParent<ConstructorDeclarationNode>(node);
+            var constructor = node.FindInParent<ConstructorDeclarationNode>();
             if (constructor is not null)
             {
-                if (!Equals(constructor.Metadata?.DeclaringType, node.Expression?.ReturnTypeMetadata))
-                    throw new TypeCheckerException();
+                if (!Equals(TypeMetadata.Void, node.Expression?.ReturnTypeMetadata ?? TypeMetadata.Void))
+                    throw new SemanticAnalysisException($"Constructor return type mismatch: expected '{TypeMetadata.Void.Name}', got '{node.Expression?.ReturnTypeMetadata}'");
             }
             else
             {
-                var function = FindInParent<FunctionDeclarationNode>(node);
+                var function = node.FindInParent<FunctionDeclarationNode>();
                 if (function is null)
-                    throw new TypeCheckerException();
+                    throw new SemanticAnalysisException("Return statement must be inside a function, method, or constructor");
 
-                if (!Equals(function.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
-                    throw new TypeCheckerException();
+                if (!Equals(function.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata ?? TypeMetadata.Void))
+                    throw new SemanticAnalysisException($"Function return type mismatch: expected '{function.Metadata?.TypeMetadata.ReturnType}', got '{node.Expression?.ReturnTypeMetadata}'");
             }
         }
     }
 
     public void Visit(ParameterNode node)
-    {
-        if (node.Type.Metadata is not null)
-            return;
-
-        var type = typeProvider.GetType(node.Type.Name) ??
-                   throw new TypeCheckerException($"Unknown type '{node.Type}'");
-
-        node.Type.Metadata = type;
-    }
+        => node.Type.Accept(this);
 
     public void Visit(SyntaxTree node)
     {
@@ -369,50 +381,31 @@ public class TypeChecker : IVisitor
         node.Type.Accept(this);
 
         node.Metadata = typeProvider.GetType(node.Name) ??
-                        throw new TypeCheckerException($"Unknown type '{node.Name}'");
+                        throw new SemanticAnalysisException($"Unknown type '{node.Name}'");
     }
 
     public void Visit(TypeDeclarationNode node)
     {
         var metadata = typeProvider.GetType(node.Name);
         if (metadata is not TypeMetadata type)
-            throw new TypeCheckerException($"Unknown type '{node.Name}'");
-
-        foreach (var field in node.Fields)
-        {
-            field.Metadata = type.GetField(field.Name);
-            field.Accept(this);
-        }
-
-        foreach (var constructor in node.Constructors)
-        {
-            var parameters = new ITypeMetadata[constructor.Parameters.Count];
-            for (var i = 0; i < constructor.Parameters.Count; i++)
-            {
-                var parameter = constructor.Parameters[i];
-                var parameterType = typeProvider.GetType(parameter.Type.Name) ??
-                                    throw new TypeCheckerException($"Unknown type '{parameter.Type.Name}'");
-
-                parameters[i] = parameterType;
-            }
-
-            constructor.Metadata = type.GetConstructor(parameters);
-            constructor.Accept(this);
-        }
-
-        foreach (var method in node.Methods)
-        {
-            method.Metadata = type.GetMethod(method.Name);
-            method.Accept(this);
-        }
+            throw new SemanticAnalysisException($"The '{node.Name}' type is not a type.");
 
         node.Metadata = type;
+
+        foreach (var field in node.Fields)
+            field.Accept(this);
+
+        foreach (var constructor in node.Constructors)
+            constructor.Accept(this);
+
+        foreach (var method in node.Methods)
+            method.Accept(this);
     }
 
     public void Visit(TypeNode node)
     {
         var type = typeProvider.GetType(node.Name) ??
-                   throw new TypeCheckerException($"Unknown type '{node.Name}'");
+                   throw new SemanticAnalysisException($"Referenced unknown type '{node.Name}'");
 
         node.Metadata = type;
     }
@@ -423,7 +416,7 @@ public class TypeChecker : IVisitor
 
         // TODO: more complex logic
         if (node.Kind == UnaryExpressionKind.Unknown || node.Operand.ReturnTypeMetadata is null)
-            throw new TypeCheckerException();
+            throw new SemanticAnalysisException("Invalid unary expression: unknown kind or operand type");
 
         if (node.Kind == UnaryMinus &&
             (Equals(node.Operand.ReturnTypeMetadata, I8) ||
@@ -471,27 +464,20 @@ public class TypeChecker : IVisitor
         }
         else
         {
-            throw new TypeCheckerException();
+            throw new SemanticAnalysisException($"Invalid unary expression: incompatible operand type '{node.Operand.ReturnTypeMetadata}' for operator '{node.Kind}'");
         }
     }
 
     public void Visit(VariableDeclarationStatementNode node)
     {
-        if (node.Type.Metadata is null)
-        {
-            var type = typeProvider.GetType(node.Type.Name) ??
-                       throw new TypeCheckerException($"Unknown type '{node.Type}'");
-
-            node.Type.Metadata = type;
-        }
-
+        node.Type.Accept(this);
         node.Expression.Accept(this);
 
         if (node.Expression.ReturnTypeMetadata is null)
-            throw new TypeCheckerException();
+            throw new SemanticAnalysisException($"Cannot determine type of expression in variable declaration '{node.Name}'");
 
         if (!node.Expression.ReturnTypeMetadata.Equals(node.Type.Metadata))
-            throw new TypeCheckerException();
+            throw new SemanticAnalysisException($"Type mismatch in variable declaration '{node.Name}': expected '{node.Type.Metadata}', got '{node.Expression.ReturnTypeMetadata}'");
     }
 
     public void Visit(WhileNode node)
@@ -500,6 +486,6 @@ public class TypeChecker : IVisitor
         node.Body.Accept(this);
 
         if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
-            throw new TypeCheckerException("Condition must be a boolean");
+            throw new SemanticAnalysisException("Condition must be a boolean");
     }
 }

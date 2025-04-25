@@ -1,12 +1,14 @@
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class ParameterNode : VariableDeclarationNode, IEquatable<ParameterNode>
+public class ParameterNode : ISyntaxNode, IEquatable<ParameterNode>
 {
     public ParameterNode(string name, IInlineTypeNode type)
-        : base(name, type)
     {
+        Name = name;
+        Type = type;
     }
 
     public static bool operator ==(ParameterNode? left, ParameterNode? right)
@@ -52,9 +54,17 @@ public class ParameterNode : VariableDeclarationNode, IEquatable<ParameterNode>
         return formatter.ToString();
     }
 
-    public override void Accept(IVisitor visitor)
+    public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
-    public override void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
+    public ISymbolTable? SymbolTable { get; set; }
+
+    public string Name { get; }
+
+    public IInlineTypeNode Type { get; }
 }

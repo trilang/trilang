@@ -144,6 +144,7 @@ public class LexerTests
     [TestCase("^=", TokenKind.CaretEqual)]
     [TestCase("~", TokenKind.Tilde)]
     [TestCase("=>", TokenKind.EqualGreater)]
+    [TestCase(".", TokenKind.Dot)]
     public void TokenizeOperatorTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();

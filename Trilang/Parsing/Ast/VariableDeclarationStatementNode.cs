@@ -1,16 +1,17 @@
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class VariableDeclarationStatementNode :
-    VariableDeclarationNode,
-    IStatementNode,
-    IEquatable<VariableDeclarationStatementNode>
+public class VariableDeclarationStatementNode : IStatementNode, IEquatable<VariableDeclarationStatementNode>
 {
     public VariableDeclarationStatementNode(string name, IInlineTypeNode type, IExpressionNode expression)
-        : base(name, type)
     {
+        Name = name;
+        Type = type;
         Expression = expression;
+
+        Type.Parent = this;
         Expression.Parent = this;
     }
 
@@ -28,7 +29,8 @@ public class VariableDeclarationStatementNode :
         if (ReferenceEquals(this, other))
             return true;
 
-        return base.Equals(other) &&
+        return Name == other.Name &&
+               Type.Equals(other.Type) &&
                Expression.Equals(other.Expression);
     }
 
@@ -47,7 +49,7 @@ public class VariableDeclarationStatementNode :
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(base.GetHashCode(), Expression);
+        => HashCode.Combine(Name, Type, Expression);
 
     public override string ToString()
     {
@@ -57,11 +59,19 @@ public class VariableDeclarationStatementNode :
         return formatter.ToString();
     }
 
-    public override void Accept(IVisitor visitor)
+    public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
-    public override void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
+    public ISymbolTable? SymbolTable { get; set; }
+
+    public string Name { get; }
+
+    public IInlineTypeNode Type { get; }
 
     public IExpressionNode Expression { get; }
 }

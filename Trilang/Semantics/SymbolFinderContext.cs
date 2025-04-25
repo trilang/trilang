@@ -2,7 +2,7 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics;
 
-public class SymbolFinderContext
+internal class SymbolFinderContext
 {
     private bool noScope;
 

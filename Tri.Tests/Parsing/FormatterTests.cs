@@ -1269,15 +1269,7 @@ public class FormatterTests
             )
         ]);
         var formatted = tree.ToString();
-        const string expected =
-            """
-            public type Point = {
-                x: i32;
-                y: i32;
-                
-                distance(other: Point): f64;
-            }
-            """;
+        const string expected = "public type Point = {\n    x: i32;\n    y: i32;\n    \n    distance(other: Point): f64;\n}";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1310,6 +1302,96 @@ public class FormatterTests
             """
             function main(): void {
                 var p: { x: i32; y: i32; } = 0;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatMultipleMemberAccessTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new MemberAccessExpressionNode(
+                            new MemberAccessExpressionNode(
+                                new MemberAccessExpressionNode("a"),
+                                "b"
+                            ),
+                            "c"
+                        )
+                    )
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        var expected =
+            """
+            function main(): void {
+                return a.b.c;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatThisExpressionTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new MemberAccessExpressionNode("this")
+                    )
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                return this;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatThisExpressionWithMemberAccessTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new MemberAccessExpressionNode(
+                            new MemberAccessExpressionNode(
+                                new MemberAccessExpressionNode("this"),
+                                "a"
+                            ),
+                            "b"
+                        )
+                    )
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                return this.a.b;
             }
             """;
 

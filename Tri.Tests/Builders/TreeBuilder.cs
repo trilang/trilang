@@ -1,48 +1,33 @@
 using Trilang.Parsing.Ast;
-using Trilang.Symbols;
 
 namespace Tri.Tests.Builders;
 
 internal sealed class TreeBuilder : ISyntaxTreeBuilder
 {
     private readonly List<IDeclarationNode> declaration;
-    private readonly ISymbolTable symbolTable;
 
     public TreeBuilder()
-    {
-        declaration = [];
-        symbolTable = new RootSymbolTable();
-    }
+        => declaration = [];
 
     public ISyntaxTreeBuilder DefineFunction(string name, Action<IFunctionBuilder> action)
     {
-        var builder = new FunctionBuilder(symbolTable.CreateChild(), name);
+        var builder = new FunctionBuilder(name);
 
         action(builder);
 
         var function = builder.Build();
         declaration.Add(function);
 
-        if (!symbolTable.TryAddFunction(new FunctionSymbol(function)))
-            throw new Exception();
-
-        function.SymbolTable = symbolTable;
-
         return this;
     }
 
     public ISyntaxTreeBuilder DefineType(string name, Action<ITypeBuilder>? action = null)
     {
-        var builder = new TypeBuilder(symbolTable, name);
+        var builder = new TypeBuilder(name);
         action?.Invoke(builder);
 
         var type = builder.Build();
         declaration.Add(type);
-
-        if (!symbolTable.TryAddType(TypeSymbol.Type(type)))
-            throw new Exception();
-
-        type.SymbolTable = symbolTable;
 
         return this;
     }
@@ -53,57 +38,36 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         declaration.Add(type);
 
-        if (!symbolTable.TryAddType(TypeSymbol.Alias(type)))
-            throw new Exception();
-
-        if (aliasType.IsArray && !symbolTable.TryAddType(TypeSymbol.Array(aliasType.Name)))
-            throw new Exception();
-
-        type.SymbolTable = symbolTable;
-
         return this;
     }
 
     public ISyntaxTreeBuilder DefineAliasType(string name, Action<ITypeAliasBuilder> action)
     {
-        var builder = new TypeAliasBuilder(symbolTable, name);
+        var builder = new TypeAliasBuilder(name);
         action(builder);
 
         var aliasType = builder.Build();
         declaration.Add(aliasType);
 
-        if (aliasType.Type is FunctionTypeNode functionType)
-            symbolTable.TryAddType(TypeSymbol.FunctionType(functionType));
-
-        if (aliasType.Type is InterfaceNode interfaceNode)
-            symbolTable.TryAddType(TypeSymbol.Interface(interfaceNode));
-
-        if (!symbolTable.TryAddType(TypeSymbol.Alias(aliasType)))
-            throw new Exception();
-
-        aliasType.SymbolTable = symbolTable;
-
         return this;
     }
 
     public SyntaxTree Build()
-        => new SyntaxTree(declaration) { SymbolTable = symbolTable };
+        => new SyntaxTree(declaration);
 
     private sealed class FunctionBuilder : IFunctionBuilder
     {
-        private readonly ISymbolTable symbolTable;
-
         private readonly string functionName;
         private readonly List<ParameterNode> parameters;
         private TypeNode returnType;
-        private BlockStatementNode? body;
+        private BlockStatementNode body;
 
-        public FunctionBuilder(ISymbolTable symbolTable, string functionName)
+        public FunctionBuilder(string functionName)
         {
-            this.symbolTable = symbolTable;
             this.functionName = functionName;
             parameters = [];
             returnType = new TypeNode("void");
+            body = new BlockStatementNode();
         }
 
         public IFunctionBuilder DefineParameter(string name, string type)
@@ -111,16 +75,8 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IFunctionBuilder DefineParameter(string name, TypeNode type)
         {
-            var parameter = new ParameterNode(name, type) { SymbolTable = symbolTable };
+            var parameter = new ParameterNode(name, type);
             parameters.Add(parameter);
-
-            if (!symbolTable.TryAddVariable(new VariableSymbol(parameter)))
-                throw new Exception();
-
-            if (type.IsArray && !symbolTable.TryAddType(TypeSymbol.Array(type.Name)))
-                throw new Exception();
-
-            parameter.SymbolTable = symbolTable;
 
             return this;
         }
@@ -134,7 +90,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IFunctionBuilder Body(Action<IBlockBuilder> action)
         {
-            var builder = new BlockBuilder(symbolTable);
+            var builder = new BlockBuilder();
 
             action(builder);
             body = builder.Build();
@@ -143,25 +99,19 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public FunctionDeclarationNode Build()
-            => FunctionDeclarationNode.Create(
-                functionName,
-                parameters,
-                returnType,
-                body ?? throw new ArgumentNullException());
+            => FunctionDeclarationNode.Create(functionName, parameters, returnType, body);
     }
 
     private sealed class TypeBuilder : ITypeBuilder
     {
-        private readonly ISymbolTable symbolTable;
         private readonly string typeName;
         private readonly List<FieldDeclarationNode> fields;
         private readonly List<ConstructorDeclarationNode> constructors;
         private readonly List<MethodDeclarationNode> methods;
         private AccessModifier accessModifier;
 
-        public TypeBuilder(ISymbolTable symbolTable, string typeName)
+        public TypeBuilder(string typeName)
         {
-            this.symbolTable = symbolTable;
             this.typeName = typeName;
             fields = [];
             constructors = [];
@@ -177,6 +127,9 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public ITypeBuilder DefineField(string name, string type, Action<IFieldBuilder>? action = null)
+            => DefineField(name, new TypeNode(type), action);
+
+        public ITypeBuilder DefineField(string name, IInlineTypeNode type, Action<IFieldBuilder>? action = null)
         {
             var builder = new FieldBuilder(name, type);
             action?.Invoke(builder);
@@ -184,35 +137,29 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             var field = builder.Build();
             fields.Add(field);
 
-            field.SymbolTable = symbolTable;
-
             return this;
         }
 
         public ITypeBuilder DefineConstructor(Action<IConstructorBuilder> action)
         {
-            var builder = new ConstructorBuilder(symbolTable.CreateChild());
+            var builder = new ConstructorBuilder();
 
             action(builder);
 
             var constructor = builder.Build();
             constructors.Add(constructor);
 
-            constructor.SymbolTable = symbolTable;
-
             return this;
         }
 
         public ITypeBuilder DefineMethod(string name, Action<IMethodBuilder> action)
         {
-            var builder = new MethodBuilder(symbolTable.CreateChild(), name);
+            var builder = new MethodBuilder(name);
 
             action(builder);
 
             var method = builder.Build();
             methods.Add(method);
-
-            method.SymbolTable = symbolTable;
 
             return this;
         }
@@ -224,10 +171,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     private sealed class FieldBuilder : IFieldBuilder
     {
         private readonly string name;
-        private readonly string type;
+        private readonly IInlineTypeNode type;
         private AccessModifier accessModifier;
 
-        public FieldBuilder(string name, string type)
+        public FieldBuilder(string name, IInlineTypeNode type)
         {
             this.name = name;
             this.type = type;
@@ -242,22 +189,20 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public FieldDeclarationNode Build()
-            => new FieldDeclarationNode(accessModifier, name, new TypeNode(type));
+            => new FieldDeclarationNode(accessModifier, name, type);
     }
 
     private sealed class ConstructorBuilder : IConstructorBuilder
     {
-        private readonly ISymbolTable symbolTable;
-
         private readonly List<ParameterNode> parameters;
         private AccessModifier accessModifier;
-        private BlockStatementNode? body;
+        private BlockStatementNode body;
 
-        public ConstructorBuilder(ISymbolTable symbolTable)
+        public ConstructorBuilder()
         {
-            this.symbolTable = symbolTable;
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
             parameters = [];
+            body = new BlockStatementNode();
         }
 
         public IConstructorBuilder AccessModifier(AccessModifier modifier)
@@ -272,20 +217,15 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IConstructorBuilder DefineParameter(string name, TypeNode type)
         {
-            var parameter = new ParameterNode(name, type) { SymbolTable = symbolTable };
+            var parameter = new ParameterNode(name, type);
             parameters.Add(parameter);
-
-            if (!symbolTable.TryAddVariable(new VariableSymbol(parameter)))
-                throw new Exception();
-
-            parameter.SymbolTable = symbolTable;
 
             return this;
         }
 
         public IConstructorBuilder Body(Action<IBlockBuilder>? action = null)
         {
-            var builder = new BlockBuilder(symbolTable);
+            var builder = new BlockBuilder();
 
             action?.Invoke(builder);
             body = builder.Build();
@@ -294,29 +234,24 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public ConstructorDeclarationNode Build()
-            => new ConstructorDeclarationNode(
-                accessModifier,
-                parameters,
-                body ?? throw new ArgumentNullException());
+            => new ConstructorDeclarationNode(accessModifier, parameters, body);
     }
 
     private sealed class MethodBuilder : IMethodBuilder
     {
-        private readonly ISymbolTable symbolTable;
-
         private readonly string functionName;
         private readonly List<ParameterNode> parameters;
         private AccessModifier accessModifier;
         private TypeNode returnType;
-        private BlockStatementNode? body;
+        private BlockStatementNode body;
 
-        public MethodBuilder(ISymbolTable symbolTable, string functionName)
+        public MethodBuilder(string functionName)
         {
-            this.symbolTable = symbolTable;
             this.functionName = functionName;
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
             parameters = [];
             returnType = new TypeNode("void");
+            body = new BlockStatementNode();
         }
 
         public IMethodBuilder AccessModifier(AccessModifier modifier)
@@ -331,13 +266,8 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IMethodBuilder DefineParameter(string name, TypeNode type)
         {
-            var parameter = new ParameterNode(name, type) { SymbolTable = symbolTable };
+            var parameter = new ParameterNode(name, type);
             parameters.Add(parameter);
-
-            if (!symbolTable.TryAddVariable(new VariableSymbol(parameter)))
-                throw new Exception();
-
-            parameter.SymbolTable = symbolTable;
 
             return this;
         }
@@ -351,7 +281,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IMethodBuilder Body(Action<IBlockBuilder>? action = null)
         {
-            var builder = new BlockBuilder(symbolTable);
+            var builder = new BlockBuilder();
 
             action?.Invoke(builder);
             body = builder.Build();
@@ -360,38 +290,26 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public MethodDeclarationNode Build()
-            => new MethodDeclarationNode(
-                accessModifier,
-                functionName,
-                parameters,
-                returnType,
-                body ?? throw new ArgumentNullException());
+            => new MethodDeclarationNode(accessModifier, functionName, parameters, returnType, body);
     }
 
     private sealed class BlockBuilder : IBlockBuilder
     {
-        private readonly ISymbolTable symbolTable;
         private readonly List<IStatementNode> statements;
 
-        public BlockBuilder(ISymbolTable symbolTable)
-        {
-            this.symbolTable = symbolTable;
-            statements = [];
-        }
+        public BlockBuilder()
+            => statements = [];
 
         public IBlockBuilder DefineVariable(string name, string type, Action<IExpressionBuilder> action)
+            => DefineVariable(name, new TypeNode(type), action);
+
+        public IBlockBuilder DefineVariable(string name, IInlineTypeNode type, Action<IExpressionBuilder> action)
         {
-            var builder = new ExpressionBuilder(symbolTable);
+            var builder = new ExpressionBuilder();
             action(builder);
 
-            var variable = new VariableDeclarationStatementNode(name, new TypeNode(type), builder.Build())
-            {
-                SymbolTable = symbolTable
-            };
+            var variable = new VariableDeclarationStatementNode(name, type, builder.Build());
             statements.Add(variable);
-
-            if (!symbolTable.TryAddVariable(new VariableSymbol(variable)))
-                throw new Exception();
 
             return this;
         }
@@ -401,12 +319,12 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             var exp = default(IExpressionNode);
             if (action is not null)
             {
-                var builder = new ExpressionBuilder(symbolTable);
+                var builder = new ExpressionBuilder();
                 action(builder);
                 exp = builder.Build();
             }
 
-            var returnNode = new ReturnStatementNode(exp) { SymbolTable = symbolTable };
+            var returnNode = new ReturnStatementNode(exp);
             statements.Add(returnNode);
 
             return this;
@@ -414,10 +332,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IBlockBuilder Statement(Action<IExpressionBuilder> action)
         {
-            var builder = new ExpressionBuilder(symbolTable);
+            var builder = new ExpressionBuilder();
             action(builder);
 
-            var statement = new ExpressionStatementNode(builder.Build()) { SymbolTable = symbolTable };
+            var statement = new ExpressionStatementNode(builder.Build());
             statements.Add(statement);
 
             return this;
@@ -425,7 +343,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IBlockBuilder Block(Action<IBlockBuilder> action)
         {
-            var builder = new BlockBuilder(symbolTable.CreateChild());
+            var builder = new BlockBuilder();
             action(builder);
 
             var block = builder.Build();
@@ -439,26 +357,23 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             Action<IBlockBuilder> then,
             Action<IBlockBuilder>? @else = null)
         {
-            var conditionBuilder = new ExpressionBuilder(symbolTable);
+            var conditionBuilder = new ExpressionBuilder();
             condition(conditionBuilder);
 
-            var thenBuilder = new BlockBuilder(symbolTable.CreateChild());
+            var thenBuilder = new BlockBuilder();
             then(thenBuilder);
 
             BlockBuilder? elseBuilder = null;
             if (@else is not null)
             {
-                elseBuilder = new BlockBuilder(symbolTable.CreateChild());
+                elseBuilder = new BlockBuilder();
                 @else(elseBuilder);
             }
 
             var ifStatement = new IfStatementNode(
                 conditionBuilder.Build(),
                 thenBuilder.Build(),
-                elseBuilder?.Build())
-            {
-                SymbolTable = symbolTable
-            };
+                elseBuilder?.Build());
             statements.Add(ifStatement);
 
             return this;
@@ -466,40 +381,44 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IBlockBuilder While(Action<IExpressionBuilder> condition, Action<IBlockBuilder> body)
         {
-            var conditionBuilder = new ExpressionBuilder(symbolTable);
+            var conditionBuilder = new ExpressionBuilder();
             condition(conditionBuilder);
 
-            var bodyBuilder = new BlockBuilder(symbolTable.CreateChild());
+            var bodyBuilder = new BlockBuilder();
             body(bodyBuilder);
 
-            var whileStatement = new WhileNode(conditionBuilder.Build(), bodyBuilder.Build())
-            {
-                SymbolTable = symbolTable
-            };
+            var whileStatement = new WhileNode(conditionBuilder.Build(), bodyBuilder.Build());
             statements.Add(whileStatement);
 
             return this;
         }
 
+        public IBlockBuilder Expression(Action<IExpressionBuilder> action)
+        {
+            var builder = new ExpressionBuilder();
+            action(builder);
+
+            var expression = builder.Build();
+            var statement = new ExpressionStatementNode(expression);
+            statements.Add(statement);
+
+            return this;
+        }
+
         public BlockStatementNode Build()
-            => new BlockStatementNode(statements) { SymbolTable = symbolTable };
+            => new BlockStatementNode(statements);
     }
 
     private sealed class ExpressionBuilder : IExpressionBuilder
     {
-        private readonly ISymbolTable symbolTable;
         private readonly Stack<IExpressionNode> stack;
 
-        public ExpressionBuilder(ISymbolTable symbolTable)
-        {
-            this.symbolTable = symbolTable;
-            stack = [];
-        }
+        public ExpressionBuilder()
+            => stack = [];
 
         public IExpressionBuilder Number(int number)
         {
             var literal = LiteralExpressionNode.Number(number);
-            literal.SymbolTable = symbolTable;
 
             stack.Push(literal);
 
@@ -509,7 +428,6 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public IExpressionBuilder True()
         {
             var literal = LiteralExpressionNode.True();
-            literal.SymbolTable = symbolTable;
 
             stack.Push(literal);
 
@@ -519,7 +437,6 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public IExpressionBuilder False()
         {
             var literal = LiteralExpressionNode.False();
-            literal.SymbolTable = symbolTable;
 
             stack.Push(literal);
 
@@ -529,7 +446,6 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public IExpressionBuilder Char(char c)
         {
             var literal = LiteralExpressionNode.Char(c);
-            literal.SymbolTable = symbolTable;
 
             stack.Push(literal);
 
@@ -539,24 +455,35 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public IExpressionBuilder String(string str)
         {
             var literal = LiteralExpressionNode.String(str);
-            literal.SymbolTable = symbolTable;
 
             stack.Push(literal);
 
             return this;
         }
 
-        public IExpressionBuilder Variable(string name)
+        public IExpressionBuilder MemberAccess(string name)
         {
-            var variable = new MemberAccessExpressionNode(name) { SymbolTable = symbolTable };
-            stack.Push(variable);
+            if (stack.TryPeek(out var exp))
+            {
+                if (exp is not MemberAccessExpressionNode member)
+                    throw new Exception();
+
+                stack.Pop();
+                var memberAccess = new MemberAccessExpressionNode(member, name);
+                stack.Push(memberAccess);
+            }
+            else
+            {
+                var memberAccess = new MemberAccessExpressionNode(name);
+                stack.Push(memberAccess);
+            }
 
             return this;
         }
 
         public IExpressionBuilder Unary(UnaryExpressionKind kind)
         {
-            var plus = new UnaryExpressionNode(kind, stack.Pop()) { SymbolTable = symbolTable };
+            var plus = new UnaryExpressionNode(kind, stack.Pop());
             stack.Push(plus);
 
             return this;
@@ -575,7 +502,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         {
             var right = stack.Pop();
             var left = stack.Pop();
-            var exp = new BinaryExpressionNode(kind, left, right) { SymbolTable = symbolTable };
+            var exp = new BinaryExpressionNode(kind, left, right);
             stack.Push(exp);
 
             return this;
@@ -626,10 +553,8 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             for (var i = stack.Count - 1; i >= 0; i--)
                 parameters[i] = stack.Pop();
 
-            var call = new CallExpressionNode(new MemberAccessExpressionNode(name), parameters)
-            {
-                SymbolTable = symbolTable
-            };
+            var memberAccess = new MemberAccessExpressionNode(name);
+            var call = new CallExpressionNode(memberAccess, parameters);
             stack.Push(call);
 
             return this;
@@ -646,14 +571,12 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     private sealed class TypeAliasBuilder : ITypeAliasBuilder
     {
-        private readonly ISymbolTable symbolTable;
         private readonly string typeName;
         private AccessModifier accessModifier;
         private IInlineTypeNode? aliasedType;
 
-        public TypeAliasBuilder(ISymbolTable symbolTable, string typeName)
+        public TypeAliasBuilder(string typeName)
         {
-            this.symbolTable = symbolTable;
             this.typeName = typeName;
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
         }
@@ -667,7 +590,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public ITypeAliasBuilder DefineType(string name)
         {
-            aliasedType = new TypeNode(name) { SymbolTable = symbolTable };
+            aliasedType = new TypeNode(name);
 
             return this;
         }
@@ -678,18 +601,16 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             action(builder);
 
             aliasedType = builder.Build();
-            aliasedType.SymbolTable = symbolTable;
 
             return this;
         }
 
         public ITypeAliasBuilder DefineInterface(Action<IInterfaceBuilder> action)
         {
-            var builder = new InterfaceBuilder(symbolTable);
+            var builder = new InterfaceBuilder();
             action(builder);
 
             aliasedType = builder.Build();
-            aliasedType.SymbolTable = symbolTable;
 
             return this;
         }
@@ -732,20 +653,18 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     private sealed class InterfaceBuilder : IInterfaceBuilder
     {
-        private readonly ISymbolTable symbolTable;
         private readonly List<InterfaceFieldNode> fields;
         private readonly List<InterfaceMethodNode> methods;
 
-        public InterfaceBuilder(ISymbolTable symbolTable)
+        public InterfaceBuilder()
         {
-            this.symbolTable = symbolTable;
             this.fields = [];
             this.methods = [];
         }
 
         public IInterfaceBuilder DefineField(string name, string type)
         {
-            var field = new InterfaceFieldNode(name, new TypeNode(type)) { SymbolTable = symbolTable };
+            var field = new InterfaceFieldNode(name, new TypeNode(type));
 
             fields.Add(field);
 
@@ -754,11 +673,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IInterfaceBuilder DefineMethod(string name, Action<IInterfaceMethodBuilder> action)
         {
-            var builder = new InterfaceMethodBuilder(symbolTable, name);
+            var builder = new InterfaceMethodBuilder(name);
             action(builder);
 
             var method = builder.Build();
-            method.SymbolTable = symbolTable;
             methods.Add(method);
 
             return this;
@@ -770,14 +688,12 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     private sealed class InterfaceMethodBuilder : IInterfaceMethodBuilder
     {
-        private readonly ISymbolTable symbolTable;
         private readonly string methodName;
         private readonly List<ParameterNode> parameters;
         private IInlineTypeNode returnType;
 
-        public InterfaceMethodBuilder(ISymbolTable symbolTable, string methodName)
+        public InterfaceMethodBuilder(string methodName)
         {
-            this.symbolTable = symbolTable;
             this.methodName = methodName;
             parameters = [];
             returnType = new TypeNode("void");
@@ -785,7 +701,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IInterfaceMethodBuilder DefineParameter(string name, string type)
         {
-            var parameter = new ParameterNode(name, new TypeNode(type)) { SymbolTable = symbolTable };
+            var parameter = new ParameterNode(name, new TypeNode(type));
 
             parameters.Add(parameter);
 

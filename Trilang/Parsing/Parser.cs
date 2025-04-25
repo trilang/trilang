@@ -517,7 +517,7 @@ public class Parser
            TryParseCallExpression(context) ??
            TryParseArrayAccessExpression(context) ??
            TryParseMemberExpression(context) ??
-           TryParseLiteral(context);
+           TryParseLiteral(context) as IExpressionNode;
 
     private IExpressionNode? TryParseParenExpression(ParserContext context)
     {
@@ -537,8 +537,8 @@ public class Parser
     private IExpressionNode? TryParseCallExpression(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            var name = c.Parser.TryParseId(c);
-            if (name is null)
+            var memberExpression = c.Parser.TryParseMemberExpression(c);
+            if (memberExpression is null)
                 return null;
 
             if (!c.Reader.Check(TokenKind.OpenParenthesis))
@@ -562,14 +562,14 @@ public class Parser
             if (!c.Reader.Check(TokenKind.CloseParenthesis))
                 throw new ParseException("Expected a close parenthesis.");
 
-            return new CallExpressionNode(new MemberAccessExpressionNode(name), arguments);
+            return new CallExpressionNode(memberExpression, arguments);
         });
 
     private IExpressionNode? TryParseArrayAccessExpression(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            var name = c.Parser.TryParseId(c);
-            if (name is null)
+            var memberExpression = c.Parser.TryParseMemberExpression(c);
+            if (memberExpression is null)
                 return null;
 
             if (!c.Reader.Check(TokenKind.OpenBracket))
@@ -581,16 +581,31 @@ public class Parser
             if (!c.Reader.Check(TokenKind.CloseBracket))
                 throw new ParseException("Expected a close bracket.");
 
-            return new ArrayAccessExpressionNode(new MemberAccessExpressionNode(name), index);
+            return new ArrayAccessExpressionNode(memberExpression, index);
         });
 
-    private IExpressionNode? TryParseMemberExpression(ParserContext context)
+    private MemberAccessExpressionNode? TryParseMemberExpression(ParserContext context)
     {
         var name = TryParseId(context);
         if (name is null)
-            return null;
+        {
+            if (!context.Reader.Check(TokenKind.This))
+                return null;
 
-        return new MemberAccessExpressionNode(name);
+            name = MemberAccessExpressionNode.This;
+        }
+
+        var member = new MemberAccessExpressionNode(name);
+
+        while (context.Reader.Check(TokenKind.Dot))
+        {
+            name = TryParseId(context) ??
+                   throw new ParseException("Expected an identifier.");
+
+            member = new MemberAccessExpressionNode(member, name);
+        }
+
+        return member;
     }
 
     private LiteralExpressionNode? TryParseLiteral(ParserContext context)

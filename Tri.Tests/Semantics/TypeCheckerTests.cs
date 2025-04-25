@@ -1,4 +1,5 @@
 using Tri.Tests.Builders;
+using Trilang;
 using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -15,31 +16,13 @@ public class TypeCheckerTests
                 .Body(_ => { }))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var functionType = new FunctionTypeMetadata([], TypeMetadata.Void);
-        provider.DefineType(functionType);
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expected = new FunctionMetadata("main", new FunctionTypeMetadata([], TypeMetadata.Void));
         var function = tree.Find<FunctionDeclarationNode>();
         Assert.That(function, Is.Not.Null);
         Assert.That(function.Metadata, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void SetMetadataForIncorrectFunctionReturnTypeTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("xxx")
-                .Body(_ => { }))
-            .Build();
-
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Void));
-
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
     }
 
     [Test]
@@ -52,11 +35,8 @@ public class TypeCheckerTests
                 .Body(_ => { }))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var functionType = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void);
-        provider.DefineType(functionType);
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expected = new FunctionMetadata(
             "main",
@@ -70,22 +50,6 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void SetMetadataForIncorrectFunctionParameterTypesTest()
-    {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .DefineParameter("a", "i32")
-                .DefineParameter("b", "xxx")
-                .Body(_ => { }))
-            .Build();
-
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Void));
-
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
-    }
-
-    [Test]
     public void SetMetadataForVariableTypeTest()
     {
         var tree = new TreeBuilder()
@@ -94,12 +58,10 @@ public class TypeCheckerTests
                     .DefineVariable("a", "i32", exp => exp.Number(1))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
-        tree.Accept(new TypeChecker(provider));
-
-        var variable = tree.Find<VariableDeclarationNode>();
+        var variable = tree.Find<VariableDeclarationStatementNode>();
         Assert.That(variable, Is.Not.Null);
         Assert.That(variable.Type.Metadata, Is.EqualTo(TypeMetadata.I32));
     }
@@ -113,10 +75,12 @@ public class TypeCheckerTests
                     .DefineVariable("a", "xxx", exp => exp.Number(1))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Referenced unknown type 'xxx'"));
     }
 
     [Test]
@@ -133,42 +97,34 @@ public class TypeCheckerTests
                     .Body()))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var typeMetadata = new TypeMetadata(
-            "Point",
-            [
-            ],
-            [],
-            [
-            ]);
-        typeMetadata.AddField(new FieldMetadata(
-            typeMetadata,
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var expected = new TypeMetadata("Point", [], [], []);
+        expected.AddField(new FieldMetadata(
+            expected,
             AccessModifierMetadata.Public,
             "x",
             TypeMetadata.I32));
-        typeMetadata.AddField(new FieldMetadata(
-            typeMetadata,
+        expected.AddField(new FieldMetadata(
+            expected,
             AccessModifierMetadata.Public,
             "y",
             TypeMetadata.I32));
-        typeMetadata.AddMethod(new MethodMetadata(
-            typeMetadata,
+        expected.AddMethod(new MethodMetadata(
+            expected,
             AccessModifierMetadata.Public,
             "toString",
             new FunctionTypeMetadata([], TypeMetadata.Void)));
-        typeMetadata.AddMethod(new MethodMetadata(
-            typeMetadata,
+        expected.AddMethod(new MethodMetadata(
+            expected,
             AccessModifierMetadata.Public,
             "distance",
             new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
 
-        provider.DefineType(typeMetadata);
-
-        tree.Accept(new TypeChecker(provider));
-
         var type = tree.Find<TypeDeclarationNode>();
         Assert.That(type, Is.Not.Null);
-        Assert.That(type.Metadata, Is.EqualTo(typeMetadata));
+        Assert.That(type.Metadata, Is.EqualTo(expected));
     }
 
     [Test]
@@ -178,14 +134,13 @@ public class TypeCheckerTests
             .DefineAliasType("MyInt", new TypeNode("i32"))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var aliasMetadata = new TypeAliasMetadata("MyInt", TypeMetadata.I32);
-        provider.DefineType(aliasMetadata);
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
+        var expected = new TypeAliasMetadata("MyInt", TypeMetadata.I32);
         var node = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(node, Is.Not.Null);
-        Assert.That(node.Metadata, Is.EqualTo(aliasMetadata));
+        Assert.That(node.Metadata, Is.EqualTo(expected));
     }
 
     [Test]
@@ -199,17 +154,13 @@ public class TypeCheckerTests
                     .ReturnType("f64")))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var functionType = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.F64);
-        provider.DefineType(functionType);
-        var aliasMetadata = new TypeAliasMetadata("MyF", functionType);
-        provider.DefineType(aliasMetadata);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
-        tree.Accept(new TypeChecker(provider));
-
+        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.F64);
         var type = tree.Find<FunctionTypeNode>();
         Assert.That(type, Is.Not.Null);
-        Assert.That(type.Metadata, Is.EqualTo(functionType));
+        Assert.That(type.Metadata, Is.EqualTo(expected));
     }
 
     [Test]
@@ -223,15 +174,16 @@ public class TypeCheckerTests
                 .Body(body => body.Return(exp => exp.Number(0))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var functionType = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
-        provider.DefineType(functionType);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
-        tree.Accept(new TypeChecker(provider));
+        var expected = new FunctionMetadata(
+            "add",
+            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32));
 
         var node = tree.Find<FunctionDeclarationNode>();
         Assert.That(node, Is.Not.Null);
-        Assert.That(node.Metadata, Is.EqualTo(new FunctionMetadata("add", functionType)));
+        Assert.That(node.Metadata, Is.EqualTo(expected));
     }
 
     [Test]
@@ -244,10 +196,8 @@ public class TypeCheckerTests
                     .Return(exp => exp.Number(1))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.I32));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
@@ -265,10 +215,8 @@ public class TypeCheckerTests
                     .Return(exp => exp.True())))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Bool));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
@@ -286,10 +234,8 @@ public class TypeCheckerTests
                     .Return(exp => exp.Char('x'))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Char));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
@@ -307,10 +253,8 @@ public class TypeCheckerTests
                     .Return(exp => exp.String("xxx"))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.String));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
@@ -328,10 +272,12 @@ public class TypeCheckerTests
                     .Return(exp => exp.Number(1))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Bool));
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Function return type mismatch: expected 'bool', got 'i32'"));
     }
 
     [Test]
@@ -344,10 +290,8 @@ public class TypeCheckerTests
                     .Return(exp => exp.Number(1).UnaryMinus())))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.I32));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
@@ -365,10 +309,8 @@ public class TypeCheckerTests
                     .Return(exp => exp.Number(1).UnaryMinus())))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.I32));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
@@ -386,10 +328,8 @@ public class TypeCheckerTests
                     .Return(exp => exp.True().LogicalNot())))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Bool));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
@@ -407,10 +347,8 @@ public class TypeCheckerTests
                     .Return(exp => exp.Number(1).Number(2).Add())))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.I32));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var binaryNode = tree.Find<BinaryExpressionNode>();
         Assert.That(binaryNode, Is.Not.Null);
@@ -427,10 +365,12 @@ public class TypeCheckerTests
                     .Return(exp => exp.Number(1).LogicalNot())))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.I32));
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Invalid unary expression: incompatible operand type 'i32' for operator 'LogicalNot'"));
     }
 
     [Test]
@@ -441,13 +381,11 @@ public class TypeCheckerTests
                 .DefineParameter("a", "i32")
                 .ReturnType("i32")
                 .Body(body => body
-                    .Return(exp => exp.Variable("a"))))
+                    .Return(exp => exp.MemberAccess("a"))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([TypeMetadata.I32,], TypeMetadata.I32));
-
-        tree.Accept(new TypeChecker(provider));
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
@@ -464,10 +402,12 @@ public class TypeCheckerTests
                     .DefineVariable("a", "i32", exp => exp.True())))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Type mismatch in variable declaration 'a': expected 'i32', got 'bool'"));
     }
 
     [Test]
@@ -479,10 +419,12 @@ public class TypeCheckerTests
                     .If(exp => exp.Number(1), _ => { })))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The condition returns non-boolean type."));
     }
 
     [Test]
@@ -499,11 +441,12 @@ public class TypeCheckerTests
                     .Return(exp => exp.True().Call("add"))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32));
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.I32));
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Expected 'i32' but got 'bool'"));
     }
 
     [Test]
@@ -515,10 +458,12 @@ public class TypeCheckerTests
                     .While(exp => exp.Number(1), _ => { })))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        provider.DefineType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Condition must be a boolean"));
     }
 
     [Test]
@@ -531,13 +476,9 @@ public class TypeCheckerTests
                         .Return())))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var typeMetadata = new TypeMetadata("Point", [], [], []);
-        var constructorMetadata = new ConstructorMetadata(typeMetadata, AccessModifierMetadata.Public, []);
-        typeMetadata.AddConstructor(constructorMetadata);
-        provider.DefineType(typeMetadata);
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(() => semantic.Analyze(tree), Throws.Nothing);
     }
 
     [Test]
@@ -550,13 +491,12 @@ public class TypeCheckerTests
                         .Return(exp => exp.Number(0)))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var typeMetadata = new TypeMetadata("Point", [], [], []);
-        var constructorMetadata = new ConstructorMetadata(typeMetadata, AccessModifierMetadata.Public, []);
-        typeMetadata.AddConstructor(constructorMetadata);
-        provider.DefineType(typeMetadata);
+        var semantic = new SemanticAnalysis();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new TypeChecker(provider)));
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Constructor return type mismatch: expected 'void', got 'i32'"));
     }
 
     [Test]
@@ -572,21 +512,212 @@ public class TypeCheckerTests
                         .ReturnType("f64"))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
         var interfaceType = new InterfaceMetadata("{ x: i32; y: i32; distance(Point): f64; }");
         interfaceType.AddField(new InterfaceFieldMetadata(interfaceType, "x", TypeMetadata.I32));
         interfaceType.AddField(new InterfaceFieldMetadata(interfaceType, "y", TypeMetadata.I32));
-        var functionTypeMetadata = new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64);
-        interfaceType.AddMethod(new InterfaceMethodMetadata(interfaceType, "distance", functionTypeMetadata));
-        provider.DefineType(interfaceType);
-
-        var aliasMetadata = new TypeAliasMetadata("Point", interfaceType);
-        provider.DefineType(aliasMetadata);
-
-        tree.Accept(new TypeChecker(provider));
+        interfaceType.AddMethod(
+            new InterfaceMethodMetadata(
+                interfaceType,
+                "distance",
+                new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
+        var expected = new TypeAliasMetadata("Point", interfaceType);
 
         var type = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(type, Is.Not.Null);
-        Assert.That(type.Metadata, Is.EqualTo(aliasMetadata));
+        Assert.That(type.Metadata, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void SetReturnTypeForVariableWithFunctionTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("add", builder => builder
+                .DefineParameter("a", "i32")
+                .DefineParameter("b", "i32")
+                .ReturnType("i32"))
+            .DefineFunction("main", builder => builder
+                .Body(body => body
+                    .DefineVariable(
+                        "x",
+                        new FunctionTypeNode([new TypeNode("i32"), new TypeNode("i32")], new TypeNode("i32")),
+                        v => v.MemberAccess("add"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
+        var memberAccess = tree.Find<MemberAccessExpressionNode>();
+        Assert.That(memberAccess, Is.Not.Null);
+        Assert.That(memberAccess.ReturnTypeMetadata, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void CallNonFunctionTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .DefineParameter("a", "i32")
+                .Body(body => body
+                    .Expression(r => r
+                        .Call("a"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Cannot call a non-function member"));
+    }
+
+    [Test]
+    public void ThisReturnTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .DefineMethod("toString", b => b
+                    .Body(body => body
+                        .Expression(exp => exp
+                            .MemberAccess("this")))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var thisNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "this");
+        var pointType = semantic.TypeProvider.GetType("Point");
+        Assert.That(thisNode, Is.Not.Null);
+        Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(pointType));
+    }
+
+    [Test]
+    public void ThisWithMultipleMembersReturnTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .DefineField("a", "i32")
+                .DefineMethod("toString", b => b
+                    .Body(body => body
+                        .Expression(exp => exp
+                            .MemberAccess("this")
+                            .MemberAccess("a")))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var thisNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
+        Assert.That(thisNode, Is.Not.Null);
+        Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+    }
+
+    [Test]
+    public void ThisWithIncorrectFieldNameTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .DefineField("a", "i32")
+                .DefineMethod("toString", b => b
+                    .Body(body => body
+                        .Expression(exp => exp
+                            .MemberAccess("this")
+                            .MemberAccess("x")))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Cannot find member 'x' in type 'Point'"));
+    }
+
+    [Test]
+    public void InterfaceMemberAccessReturnTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Point", builder => builder
+                .DefineInterface(i => i
+                    .DefineField("x", "i32")))
+            .DefineFunction("test", builder => builder
+                .DefineParameter("a", new TypeNode("Point"))
+                .ReturnType("i32")
+                .Body(body => body
+                    .Return(r => r
+                        .MemberAccess("a")
+                        .MemberAccess("x"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
+        var pointType = semantic.TypeProvider.GetType("Point");
+        Assert.That(aNode, Is.Not.Null);
+        Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType));
+
+        var xNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "x");
+        Assert.That(xNode, Is.Not.Null);
+        Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+    }
+
+    [Test]
+    public void InterfaceMemberAccessIncorrectFieldTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Point", builder => builder
+                .DefineInterface(i => i
+                    .DefineField("x", "i32")))
+            .DefineFunction("test", builder => builder
+                .DefineParameter("a", new TypeNode("Point"))
+                .ReturnType("i32")
+                .Body(body => body
+                    .Return(r => r
+                        .MemberAccess("a")
+                        .MemberAccess("c"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Cannot find member 'c' in interface 'Point'"));
+    }
+
+    [Test]
+    public void AliasFunctionTypeMemberAccessReturnTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("F", builder => builder
+                .DefineFunctionType(f => f
+                    .ReturnType("void")))
+            .DefineType("Test", builder => builder
+                .DefineField("f", new TypeNode("F")))
+            .DefineFunction("test", builder => builder
+                .DefineParameter("a", new TypeNode("Test"))
+                .ReturnType("F")
+                .Body(body => body
+                    .Return(r => r
+                        .MemberAccess("a")
+                        .MemberAccess("f"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
+        var pointType = semantic.TypeProvider.GetType("Test");
+        Assert.That(aNode, Is.Not.Null);
+        Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType));
+
+        var xNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "f");
+        var functionType = semantic.TypeProvider.GetType("F");
+        Assert.That(xNode, Is.Not.Null);
+        Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(functionType));
     }
 }

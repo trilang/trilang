@@ -16,21 +16,19 @@ public class GenerateMetadataTests
                 .DefineField("y", "i32")
                 .DefineConstructor(b => b
                     .DefineParameter("x", "i32")
-                    .DefineParameter("y", "i32")
-                    .Body(body => body.Return()))
+                    .DefineParameter("y", "i32"))
                 .DefineMethod("toString", b => b
                     .ReturnType("string")
-                    .Body(body => body.Return()))
+                    .Body(body => body.Return(r => r.String("hello"))))
                 .DefineMethod("distance", b => b
                     .AccessModifier(AccessModifier.Private)
                     .DefineParameter("other", "i32")
-                    .ReturnType("f64")
-                    .Body(body => body.Return())))
+                    .ReturnType("i32")
+                    .Body(body => body.Return(r => r.Number(1)))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expected = new TypeMetadata("Point", [], [], []);
         expected.AddField(new FieldMetadata(
@@ -56,17 +54,17 @@ public class GenerateMetadataTests
             expected,
             AccessModifierMetadata.Private,
             "distance",
-            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
+            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)));
 
-        var actual = provider.GetType("Point");
+        var actual = semantic.TypeProvider.GetType("Point");
         Assert.That(actual, Is.EqualTo(expected));
 
-        var toStringType = provider.GetType("() => string");
+        var toStringType = semantic.TypeProvider.GetType("() => string");
         var expectedToStringType = new FunctionTypeMetadata([], TypeMetadata.String);
         Assert.That(toStringType, Is.EqualTo(expectedToStringType));
 
-        var distanceType = provider.GetType("(i32) => f64");
-        var expectedDistanceType = new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64);
+        var distanceType = semantic.TypeProvider.GetType("(i32) => i32");
+        var expectedDistanceType = new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32);
         Assert.That(distanceType, Is.EqualTo(expectedDistanceType));
     }
 
@@ -78,7 +76,12 @@ public class GenerateMetadataTests
                 .DefineField("x", "xxx"))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'x' field has unknown type: 'xxx'."));
     }
 
     [Test]
@@ -92,7 +95,12 @@ public class GenerateMetadataTests
                     .Body(body => body.Return())))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'other' parameter has unknown type: 'xxx'."));
     }
 
     [Test]
@@ -105,7 +113,12 @@ public class GenerateMetadataTests
                     .Body(body => body.Return())))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'toString' method has unknown return type: 'xxx'."));
     }
 
     [Test]
@@ -115,13 +128,12 @@ public class GenerateMetadataTests
             .DefineAliasType("MyInt", new TypeNode("i32"))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expected = new TypeAliasMetadata("MyInt", TypeMetadata.I32);
 
-        var actual = provider.GetType("MyInt");
+        var actual = semantic.TypeProvider.GetType("MyInt");
         Assert.That(actual, Is.EqualTo(expected));
     }
 
@@ -132,7 +144,12 @@ public class GenerateMetadataTests
             .DefineAliasType("MyInt", new TypeNode("xxx"))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'MyInt' aliased type is not defined."));
     }
 
     [Test]
@@ -144,13 +161,12 @@ public class GenerateMetadataTests
                 .Body(body => body.Return()))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expected = new TypeArrayMetadata(TypeMetadata.I32);
 
-        var actual = provider.GetType("i32[]");
+        var actual = semantic.TypeProvider.GetType("i32[]");
         Assert.That(actual, Is.EqualTo(expected));
     }
 
@@ -163,7 +179,12 @@ public class GenerateMetadataTests
                 .Body(body => body.Return()))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'arr' parameter has unknown type: 'xxx'."));
     }
 
     [Test]
@@ -173,17 +194,15 @@ public class GenerateMetadataTests
             .DefineFunction("test", builder => builder
                 .DefineParameter("a", "i32")
                 .DefineParameter("b", "i32")
-                .ReturnType("f64")
-                .Body(body => body.Return()))
+                .ReturnType("i32")
+                .Body(body => body.Return(r => r.Number(1))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
-        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.F64);
-
-        var actual = provider.GetType("(i32, i32) => f64");
+        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
+        var actual = semantic.TypeProvider.GetType("(i32, i32) => i32");
         Assert.That(actual, Is.EqualTo(expected));
     }
 
@@ -196,7 +215,12 @@ public class GenerateMetadataTests
                 .Body(body => body.Return()))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'a' parameter has unknown type: 'xxx'."));
     }
 
     [Test]
@@ -208,7 +232,12 @@ public class GenerateMetadataTests
                 .Body(body => body.Return()))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(() => tree.Accept(new GenerateMetadata()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The function has unknown return type: 'xxx'."));
     }
 
     [Test]
@@ -219,15 +248,14 @@ public class GenerateMetadataTests
             .DefineAliasType("MyPoint", new TypeNode("Point"))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expectedType = new TypeMetadata("Point");
         var expectedAlias = new TypeAliasMetadata("MyPoint", expectedType);
 
-        var actualType = provider.GetType("Point");
-        var actualAlias = provider.GetType("MyPoint");
+        var actualType = semantic.TypeProvider.GetType("Point");
+        var actualAlias = semantic.TypeProvider.GetType("MyPoint");
 
         Assert.That(actualType, Is.EqualTo(expectedType));
         Assert.That(actualAlias, Is.EqualTo(expectedAlias));
@@ -241,15 +269,14 @@ public class GenerateMetadataTests
             .DefineType("Point")
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expectedType = new TypeMetadata("Point");
         var expectedAlias = new TypeAliasMetadata("MyPoint", expectedType);
 
-        var actualType = provider.GetType("Point");
-        var actualAlias = provider.GetType("MyPoint");
+        var actualType = semantic.TypeProvider.GetType("Point");
+        var actualAlias = semantic.TypeProvider.GetType("MyPoint");
 
         Assert.That(actualType, Is.EqualTo(expectedType));
         Assert.That(actualAlias, Is.EqualTo(expectedAlias));
@@ -263,17 +290,16 @@ public class GenerateMetadataTests
             .DefineAliasType("MyPoint", new TypeNode("Point[]"))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expectedType = new TypeMetadata("Point");
         var expectedArrayType = new TypeArrayMetadata(expectedType);
         var expectedAlias = new TypeAliasMetadata("MyPoint", expectedArrayType);
 
-        var actualType = provider.GetType("Point");
-        var actualArrayType = provider.GetType("Point[]");
-        var actualAlias = provider.GetType("MyPoint");
+        var actualType = semantic.TypeProvider.GetType("Point");
+        var actualArrayType = semantic.TypeProvider.GetType("Point[]");
+        var actualAlias = semantic.TypeProvider.GetType("MyPoint");
 
         Assert.That(actualType, Is.EqualTo(expectedType));
         Assert.That(actualArrayType, Is.EqualTo(expectedArrayType));
@@ -288,17 +314,16 @@ public class GenerateMetadataTests
             .DefineType("Point")
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expectedType = new TypeMetadata("Point");
         var expectedArrayType = new TypeArrayMetadata(expectedType);
         var expectedAlias = new TypeAliasMetadata("MyPoint", expectedArrayType);
 
-        var actualType = provider.GetType("Point");
-        var actualArrayType = provider.GetType("Point[]");
-        var actualAlias = provider.GetType("MyPoint");
+        var actualType = semantic.TypeProvider.GetType("Point");
+        var actualArrayType = semantic.TypeProvider.GetType("Point[]");
+        var actualAlias = semantic.TypeProvider.GetType("MyPoint");
 
         Assert.That(actualType, Is.EqualTo(expectedType));
         Assert.That(actualArrayType, Is.EqualTo(expectedArrayType));
@@ -318,17 +343,16 @@ public class GenerateMetadataTests
                         .ReturnType("f64"))))
             .Build();
 
-        var provider = new TypeMetadataProvider();
-        var generator = new GenerateMetadata(provider);
-        tree.Accept(generator);
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
 
         var expectedInterface = new InterfaceMetadata("{ x: i32; y: i32; distance(Point): f64; }");
         var expectedAlias = new TypeAliasMetadata("Point", expectedInterface);
 
-        var actualInterface = provider.GetType(expectedInterface.Name);
+        var actualInterface = semantic.TypeProvider.GetType(expectedInterface.Name);
         Assert.That(actualInterface, Is.EqualTo(expectedInterface));
 
-        var actualAlias = provider.GetType("Point");
+        var actualAlias = semantic.TypeProvider.GetType("Point");
         Assert.That(actualAlias, Is.EqualTo(expectedAlias));
     }
 }

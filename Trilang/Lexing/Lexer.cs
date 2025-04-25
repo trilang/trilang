@@ -149,6 +149,8 @@ public class Lexer
                 ('%', '=') => (Token.Create(TokenKind.PercentEqual), 2),
                 ('%', _) => (Token.Create(TokenKind.Percent), 1),
 
+                ('.', _) => (Token.Create(TokenKind.Dot), 1),
+
                 _ => throw new Exception($"Unexpected character '{c}'")
             };
             tokens.Add(token);

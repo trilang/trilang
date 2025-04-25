@@ -1,14 +1,18 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
+using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class FieldDeclarationNode : VariableDeclarationNode, IEquatable<FieldDeclarationNode>
+public class FieldDeclarationNode : ISyntaxNode, IEquatable<FieldDeclarationNode>
 {
     public FieldDeclarationNode(AccessModifier accessModifier, string name, IInlineTypeNode type)
-        : base(name, type)
     {
         AccessModifier = accessModifier;
+        Name = name;
+        Type = type;
+
+        Type.Parent = this;
     }
 
     public static bool operator ==(FieldDeclarationNode? left, FieldDeclarationNode? right)
@@ -26,7 +30,8 @@ public class FieldDeclarationNode : VariableDeclarationNode, IEquatable<FieldDec
             return true;
 
         return AccessModifier == other.AccessModifier &&
-               base.Equals(other);
+               Name == other.Name &&
+               Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)
@@ -44,7 +49,7 @@ public class FieldDeclarationNode : VariableDeclarationNode, IEquatable<FieldDec
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(base.GetHashCode(), (int)AccessModifier);
+        => HashCode.Combine((int)AccessModifier, Name, Type);
 
     public override string ToString()
     {
@@ -54,13 +59,21 @@ public class FieldDeclarationNode : VariableDeclarationNode, IEquatable<FieldDec
         return formatter.ToString();
     }
 
-    public override void Accept(IVisitor visitor)
+    public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
-    public override void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.Visit(this, context);
 
+    public ISyntaxNode? Parent { get; set; }
+
+    public ISymbolTable? SymbolTable { get; set; }
+
     public AccessModifier AccessModifier { get; }
+
+    public string Name { get; }
+
+    public IInlineTypeNode Type { get; }
 
     public FieldMetadata? Metadata { get; set; }
 }

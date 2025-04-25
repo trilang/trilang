@@ -294,7 +294,15 @@ public partial class Formatter : IFormatter
     }
 
     public void Visit(MemberAccessExpressionNode node)
-        => writer.Write(node.Name);
+    {
+        if (node.Member is not null)
+        {
+            node.Member.Accept(this);
+            writer.Write('.');
+        }
+
+        writer.Write(node.Name);
+    }
 
     public void Visit(MethodDeclarationNode node)
     {

@@ -68,14 +68,11 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
 
     public ISyntaxNode? Parent { get; set; }
 
+    public ISymbolTable? SymbolTable { get; set; }
+
     public MemberAccessExpressionNode Member { get; }
 
     public IReadOnlyList<IExpressionNode> Parameters { get; }
 
-    public FunctionMetadata? Metadata { get; set; }
-
-    public ITypeMetadata? ReturnTypeMetadata
-        => Metadata?.TypeMetadata.ReturnType;
-
-    public ISymbolTable? SymbolTable { get; set; }
+    public ITypeMetadata? ReturnTypeMetadata { get; set; }
 }

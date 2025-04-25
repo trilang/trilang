@@ -2,11 +2,14 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Symbols;
 
-public class TypeSymbol : Symbol<ISyntaxNode?>, IEquatable<TypeSymbol>
+public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
 {
     public TypeSymbol(TypeSymbolKind typeKind, string name, ISyntaxNode? node)
-        : base(SymbolKind.Type, name, node)
-        => TypeKind = typeKind;
+    {
+        TypeKind = typeKind;
+        Name = name;
+        Node = node;
+    }
 
     public static TypeSymbol Type(TypeDeclarationNode node)
         => new TypeSymbol(TypeSymbolKind.Type, node.Name, node);
@@ -37,7 +40,9 @@ public class TypeSymbol : Symbol<ISyntaxNode?>, IEquatable<TypeSymbol>
         if (ReferenceEquals(this, other))
             return true;
 
-        return base.Equals(other) && TypeKind == other.TypeKind;
+        return TypeKind == other.TypeKind &&
+               Name == other.Name &&
+               Equals(Node, other.Node);
     }
 
     public override bool Equals(object? obj)
@@ -55,9 +60,13 @@ public class TypeSymbol : Symbol<ISyntaxNode?>, IEquatable<TypeSymbol>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(base.GetHashCode(), Kind);
+        => HashCode.Combine((int)TypeKind, Name, Node);
 
     public TypeSymbolKind TypeKind { get; }
+
+    public string Name { get; }
+
+    public ISyntaxNode? Node { get; }
 
     public bool IsType => TypeKind == TypeSymbolKind.Type;
 

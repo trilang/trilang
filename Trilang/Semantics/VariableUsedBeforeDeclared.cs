@@ -25,13 +25,16 @@ public class VariableUsedBeforeDeclared : Visitor<VisitorContext<object>, object
 
     protected override void VisitEnter(MemberAccessExpressionNode node, VisitorContext<object> context)
     {
-        var symbol = node.SymbolTable?.GetVariable(node.Name) ??
-                     throw new TypeCheckerException();
+        if (node.Member is not null || node.IsThis)
+            return;
 
-        if (symbol.Node is ParameterNode)
+        var symbol = node.SymbolTable?.GetId(node.Name) ??
+                     throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");
+
+        if (symbol.Node is ParameterNode or FunctionDeclarationNode)
             return;
 
         if (!scopes.TryPeek(out var scope) || !scope.Contains(node.Name))
-            throw new TypeCheckerException($"The '{node.Name}' variable used before declaration.");
+            throw new SemanticAnalysisException($"The '{node.Name}' variable used before declaration.");
     }
 }

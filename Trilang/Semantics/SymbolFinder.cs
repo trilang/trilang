@@ -4,7 +4,7 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics;
 
-public class SymbolFinder : IVisitor<SymbolFinderContext>
+internal class SymbolFinder : IVisitor<SymbolFinderContext>
 {
     public void Visit(ArrayAccessExpressionNode node, SymbolFinderContext context)
     {
@@ -50,6 +50,8 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         {
             c.DisableNextScope();
 
+            c.SymbolTable.TryAddId(new IdSymbol(MemberAccessExpressionNode.This, node.Parent));
+
             foreach (var parameter in node.Parameters)
                 parameter.Accept(this, c);
 
@@ -69,18 +71,22 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(FieldDeclarationNode node, SymbolFinderContext context)
     {
-        node.SymbolTable = context.SymbolTable;
-
         node.Type.Accept(this, context);
+
+        var symbol = new IdSymbol(node);
+        if (!context.SymbolTable.TryAddId(symbol))
+            throw new SemanticAnalysisException($"The '{node.Name}' field is already defined.");
+
+        node.SymbolTable = context.SymbolTable;
     }
 
     public void Visit(FunctionDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
-        var symbol = new FunctionSymbol(node);
-        if (!context.SymbolTable.TryAddFunction(symbol))
-            throw new SymbolTableBuilderException($"The '{node.Name}' function is already defined.");
+        var symbol = new IdSymbol(node);
+        if (!context.SymbolTable.TryAddId(symbol))
+            throw new SemanticAnalysisException($"The '{node.Name}' function is already defined.");
 
         node.ReturnType.Accept(this, context);
 
@@ -116,14 +122,13 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(InterfaceNode node, SymbolFinderContext context)
     {
-        // TODO: define in inner scope?
-        node.SymbolTable = context.SymbolTable;
-
         var symbol = TypeSymbol.Interface(node);
         context.SymbolTable.TryAddType(symbol);
 
         context.Scoped(c =>
         {
+            node.SymbolTable = c.SymbolTable;
+
             foreach (var field in node.Fields)
                 field.Accept(this, c);
 
@@ -137,16 +142,27 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable = context.SymbolTable;
 
         node.Type.Accept(this, context);
+
+        var symbol = new IdSymbol(node);
+        if (!context.SymbolTable.TryAddId(symbol))
+            throw new SemanticAnalysisException($"The '{node.Name}' field is already defined.");
     }
 
     public void Visit(InterfaceMethodNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+        var symbol = new IdSymbol(node);
+        if (!context.SymbolTable.TryAddId(symbol))
+            throw new SemanticAnalysisException($"The '{node.Name}' method is already defined.");
 
-        node.ReturnType.Accept(this, context);
+        context.Scoped(c =>
+        {
+            foreach (var parameter in node.Parameters)
+                parameter.Accept(this, c);
+
+            node.ReturnType.Accept(this, c);
+        });
     }
 
     public void Visit(LiteralExpressionNode node, SymbolFinderContext context)
@@ -156,11 +172,17 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(MemberAccessExpressionNode node, SymbolFinderContext context)
     {
+        node.Member?.Accept(this, context);
+
         node.SymbolTable = context.SymbolTable;
     }
 
     public void Visit(MethodDeclarationNode node, SymbolFinderContext context)
     {
+        var symbol = new IdSymbol(node);
+        if (!context.SymbolTable.TryAddId(symbol))
+            throw new SemanticAnalysisException($"The '{node.Name}' method is already defined.");
+
         node.SymbolTable = context.SymbolTable;
 
         node.ReturnType.Accept(this, context);
@@ -168,6 +190,8 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         context.Scoped(c =>
         {
             c.DisableNextScope();
+
+            c.SymbolTable.TryAddId(new IdSymbol(MemberAccessExpressionNode.This, node.Parent));
 
             foreach (var parameter in node.Parameters)
                 parameter.Accept(this, c);
@@ -187,9 +211,9 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
     {
         node.SymbolTable = context.SymbolTable;
 
-        var symbol = new VariableSymbol(node);
-        if (!context.SymbolTable.TryAddVariable(symbol))
-            throw new SymbolTableBuilderException($"The '{node.Name}' variable is already defined.");
+        var symbol = new IdSymbol(node);
+        if (!context.SymbolTable.TryAddId(symbol))
+            throw new SemanticAnalysisException($"The '{node.Name}' parameter is already defined.");
 
         node.Type.Accept(this, context);
     }
@@ -210,22 +234,21 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
             context.SymbolTable.TryAddType(TypeSymbol.FunctionType(functionType));
 
         if (!context.SymbolTable.TryAddType(TypeSymbol.Alias(node)))
-            throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
+            throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
 
         node.Type.Accept(this, context);
     }
 
     public void Visit(TypeDeclarationNode node, SymbolFinderContext context)
     {
-        // TODO: define in inner scope?
-        node.SymbolTable = context.SymbolTable;
-
         var symbol = TypeSymbol.Type(node);
         if (!context.SymbolTable.TryAddType(symbol))
-            throw new SymbolTableBuilderException($"The '{node.Name}' type is already defined.");
+            throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
 
         context.Scoped(c =>
         {
+            node.SymbolTable = c.SymbolTable;
+
             foreach (var field in node.Fields)
                 field.Accept(this, c);
 
@@ -257,9 +280,9 @@ public class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Type.Accept(this, context);
         node.Expression.Accept(this, context);
 
-        var symbol = new VariableSymbol(node);
-        if (!context.SymbolTable.TryAddVariable(symbol))
-            throw new SymbolTableBuilderException($"The '{node.Name}' variable is already defined.");
+        var symbol = new IdSymbol(node);
+        if (!context.SymbolTable.TryAddId(symbol))
+            throw new SemanticAnalysisException($"The '{node.Name}' variable is already defined.");
 
         node.SymbolTable = context.SymbolTable;
     }

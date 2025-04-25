@@ -13,10 +13,14 @@ public class VariableUsedBeforeDeclaredTests
             .DefineFunction("main", builder => builder
                 .Body(body => body
                     .DefineVariable("a", "i32", exp => exp.Number(1))
-                    .Statement(exp => exp.Variable("a"))))
+                    .Statement(exp => exp.MemberAccess("a"))))
             .Build();
 
-        Assert.DoesNotThrow(() => tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.Nothing);
     }
 
     [Test]
@@ -26,10 +30,14 @@ public class VariableUsedBeforeDeclaredTests
             .DefineFunction("main", builder => builder
                 .DefineParameter("a", "i32")
                 .Body(body => body
-                    .Statement(exp => exp.Variable("a"))))
+                    .Statement(exp => exp.MemberAccess("a"))))
             .Build();
 
-        Assert.DoesNotThrow(() => tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.Nothing);
     }
 
     [Test]
@@ -38,12 +46,16 @@ public class VariableUsedBeforeDeclaredTests
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
                 .Body(body => body
-                    .Statement(exp => exp.Variable("a"))
+                    .Statement(exp => exp.MemberAccess("a"))
                     .DefineVariable("a", "i32", exp => exp.Number(1))))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(
-            () => tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'a' variable used before declaration."));
     }
 
     [Test]
@@ -53,12 +65,16 @@ public class VariableUsedBeforeDeclaredTests
             .DefineFunction("main", builder => builder
                 .Body(body => body
                     .Block(block => block
-                        .Statement(exp => exp.Variable("a")))
+                        .Statement(exp => exp.MemberAccess("a")))
                     .DefineVariable("a", "i32", exp => exp.Number(1))))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(
-            () => tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'a' variable used before declaration."));
     }
 
     [Test]
@@ -68,11 +84,15 @@ public class VariableUsedBeforeDeclaredTests
             .DefineFunction("main", builder => builder
                 .Body(body => body
                     .Block(block => block.DefineVariable("a", "i32", exp => exp.Number(1)))
-                    .Block(block => block.Statement(exp => exp.Variable("a")))))
+                    .Block(block => block.Statement(exp => exp.MemberAccess("a")))))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(
-            () => tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Unknown symbol: a"));
     }
 
     [Test]
@@ -84,10 +104,15 @@ public class VariableUsedBeforeDeclaredTests
                     .DefineVariable("a", "i32", exp => exp.Number(1))))
             .DefineFunction("main", builder => builder
                 .Body(body => body
-                    .Statement(exp => exp.Variable("a"))))
+                    .Statement(exp => exp.MemberAccess("a"))))
             .Build();
 
-        Assert.Throws<TypeCheckerException>(
-            () => tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>()));
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Unknown symbol: a"));
+        ;
     }
 }

@@ -737,4 +737,54 @@ public class ParseExpressionTests
 
         Assert.Throws<ParseException>(() => parse.Parse(code));
     }
+
+    [Test]
+    public void ParseMultipleMemberAccessTest()
+    {
+        var parse = new Parser();
+        var tree = parse.Parse(
+            """
+            function main(): void {
+                return a.b.c;
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new MemberAccessExpressionNode(
+                            new MemberAccessExpressionNode(
+                                new MemberAccessExpressionNode("a"),
+                                "b"
+                            ),
+                            "c"
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseMultipleMemberAccessMissingExpressionTest()
+    {
+        var parse = new Parser();
+        const string code =
+            """
+            function main(): void {
+                return a.b.;
+            }
+            """;
+
+        Assert.That(
+            () => parse.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an identifier."));
+    }
 }

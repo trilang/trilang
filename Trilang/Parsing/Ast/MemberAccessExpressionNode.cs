@@ -6,8 +6,17 @@ namespace Trilang.Parsing.Ast;
 
 public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAccessExpressionNode>
 {
-    public MemberAccessExpressionNode(string name)
-        => Name = name;
+    public const string This = "this";
+
+    public MemberAccessExpressionNode(string name) : this(null, name)
+    {
+    }
+
+    public MemberAccessExpressionNode(MemberAccessExpressionNode? member, string name)
+    {
+        Member = member;
+        Name = name;
+    }
 
     public static bool operator ==(MemberAccessExpressionNode? left, MemberAccessExpressionNode? right)
         => Equals(left, right);
@@ -24,6 +33,7 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
             return true;
 
         return Name == other.Name &&
+               Equals(Member, other.Member) &&
                Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
     }
 
@@ -42,7 +52,7 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
+        => HashCode.Combine(Member, Name);
 
     public override string ToString()
     {
@@ -62,7 +72,12 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public ISymbolTable? SymbolTable { get; set; }
 
+    public MemberAccessExpressionNode? Member { get; }
+
     public string Name { get; }
 
     public ITypeMetadata? ReturnTypeMetadata { get; set; }
+
+    public bool IsThis
+        => Name == This;
 }

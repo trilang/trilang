@@ -3,14 +3,12 @@ namespace Trilang.Symbols;
 public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
 {
     private readonly ISymbolTable parent;
-    private readonly Dictionary<string, FunctionSymbol> functions;
-    private readonly Dictionary<string, VariableSymbol> variables;
+    private readonly Dictionary<string, IdSymbol> variables;
 
     public SymbolTable(ISymbolTable parent)
     {
         this.parent = parent;
-        functions = new Dictionary<string, FunctionSymbol>();
-        variables = new Dictionary<string, VariableSymbol>();
+        variables = new Dictionary<string, IdSymbol>();
     }
 
     public static bool operator ==(SymbolTable? left, SymbolTable? right)
@@ -27,8 +25,7 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
         if (ReferenceEquals(this, other))
             return true;
 
-        return functions.DictionaryEquals(other.functions) &&
-               variables.DictionaryEquals(other.variables);
+        return variables.DictionaryEquals(other.variables);
     }
 
     public override bool Equals(object? obj)
@@ -54,20 +51,12 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
     public bool TryAddType(TypeSymbol symbol)
         => parent.TryAddType(symbol);
 
-    public FunctionSymbol? GetFunction(string name)
-        => functions.TryGetValue(name, out var function)
-            ? function
-            : parent.GetFunction(name);
-
-    public bool TryAddFunction(FunctionSymbol symbol)
-        => functions.TryAdd(symbol.Name, symbol);
-
-    public VariableSymbol? GetVariable(string name)
+    public IdSymbol? GetId(string name)
         => variables.TryGetValue(name, out var symbol)
             ? symbol
-            : parent.GetVariable(name);
+            : parent.GetId(name);
 
-    public bool TryAddVariable(VariableSymbol symbol)
+    public bool TryAddId(IdSymbol symbol)
         => variables.TryAdd(symbol.Name, symbol);
 
     public ISymbolTable CreateChild()
@@ -76,9 +65,6 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
     public IReadOnlyDictionary<string, TypeSymbol> Types
         => parent.Types;
 
-    public IReadOnlyDictionary<string, FunctionSymbol> FunctionsInScope
-        => functions;
-
-    public IReadOnlyDictionary<string, VariableSymbol> VariablesInScope
+    public IReadOnlyDictionary<string, IdSymbol> Ids
         => variables;
 }

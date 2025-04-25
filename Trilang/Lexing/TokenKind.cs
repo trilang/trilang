@@ -52,6 +52,7 @@ public enum TokenKind
     CaretEqual,
 
     EqualGreater,
+    Dot,
 
     // Keywords
     Var,

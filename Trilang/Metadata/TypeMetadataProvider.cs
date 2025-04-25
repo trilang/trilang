@@ -31,9 +31,6 @@ public class TypeMetadataProvider
     public ITypeMetadata? GetType(string name)
         => types.GetValueOrDefault(name);
 
-    public void DefineType(ITypeMetadata type)
-    {
-        if (!types.TryAdd(type.Name, type))
-            throw new Exception($"The '{type.Name}' type is already defined.");
-    }
+    public bool DefineType(ITypeMetadata type)
+        => types.TryAdd(type.Name, type);
 }

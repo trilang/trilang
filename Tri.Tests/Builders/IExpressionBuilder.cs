@@ -10,7 +10,7 @@ public interface IExpressionBuilder
     IExpressionBuilder Char(char c);
     IExpressionBuilder String(string str);
 
-    IExpressionBuilder Variable(string name);
+    IExpressionBuilder MemberAccess(string name);
 
     IExpressionBuilder Unary(UnaryExpressionKind kind);
     IExpressionBuilder UnaryPlus();

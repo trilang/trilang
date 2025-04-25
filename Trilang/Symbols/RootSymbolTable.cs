@@ -3,14 +3,12 @@ namespace Trilang.Symbols;
 public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
 {
     private readonly Dictionary<string, TypeSymbol> types;
-    private readonly Dictionary<string, FunctionSymbol> functions;
-    private readonly Dictionary<string, VariableSymbol> variables;
+    private readonly Dictionary<string, IdSymbol> variables;
 
     public RootSymbolTable()
     {
         types = new Dictionary<string, TypeSymbol>();
-        functions = new Dictionary<string, FunctionSymbol>();
-        variables = new Dictionary<string, VariableSymbol>();
+        variables = new Dictionary<string, IdSymbol>();
     }
 
     public static bool operator ==(RootSymbolTable? left, RootSymbolTable? right)
@@ -28,7 +26,6 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
             return true;
 
         return types.DictionaryEquals(other.types) &&
-               functions.DictionaryEquals(other.functions) &&
                variables.DictionaryEquals(other.variables);
     }
 
@@ -47,7 +44,7 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(types, functions, variables);
+        => HashCode.Combine(types, variables);
 
     public TypeSymbol? GetType(string name)
         => types.GetValueOrDefault(name);
@@ -55,16 +52,10 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
     public bool TryAddType(TypeSymbol symbol)
         => types.TryAdd(symbol.Name, symbol);
 
-    public FunctionSymbol? GetFunction(string name)
-        => functions.GetValueOrDefault(name);
-
-    public bool TryAddFunction(FunctionSymbol symbol)
-        => functions.TryAdd(symbol.Name, symbol);
-
-    public VariableSymbol? GetVariable(string name)
+    public IdSymbol? GetId(string name)
         => variables.GetValueOrDefault(name);
 
-    public bool TryAddVariable(VariableSymbol symbol)
+    public bool TryAddId(IdSymbol symbol)
         => variables.TryAdd(symbol.Name, symbol);
 
     public ISymbolTable CreateChild()
@@ -73,9 +64,6 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
     public IReadOnlyDictionary<string, TypeSymbol> Types
         => types;
 
-    public IReadOnlyDictionary<string, FunctionSymbol> FunctionsInScope
-        => functions;
-
-    public IReadOnlyDictionary<string, VariableSymbol> VariablesInScope
+    public IReadOnlyDictionary<string, IdSymbol> Ids
         => variables;
 }

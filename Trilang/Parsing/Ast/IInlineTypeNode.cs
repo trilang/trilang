@@ -6,5 +6,5 @@ public interface IInlineTypeNode : ISyntaxNode
 {
     string Name { get; }
 
-    public ITypeMetadata? Metadata { get; set; }
+    public ITypeMetadata? Metadata { get; }
 }

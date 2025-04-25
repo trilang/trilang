@@ -13,6 +13,12 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
         Fields = fields;
         Methods = methods;
 
+        foreach (var field in fields)
+            field.Parent = this;
+
+        foreach (var method in methods)
+            method.Parent = this;
+
         var fieldNames = fields.Select(f => $"{f.Name}: {f.Type};");
         var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.Parameters.Select(p => p.Type))}): {m.ReturnType};");
         Name = $"{{ {string.Join(" ", fieldNames.Concat(methodNames))} }}";
