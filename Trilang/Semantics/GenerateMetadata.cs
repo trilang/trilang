@@ -24,12 +24,14 @@ internal class GenerateMetadata : Visitor
 
         CreateTypes(symbolTable.Types);
         CreateInterfaces(symbolTable.Types);
+        CreateDiscriminatedUnion(symbolTable.Types);
         CreateAliases(symbolTable.Types);
         CreateArrays(symbolTable.Types);
         BuildFunctionTypes(symbolTable.Types);
 
         PopulateTypes(symbolTable.Types);
         PopulateInterfaces(symbolTable.Types);
+        PopulateDiscriminatedUnion(symbolTable.Types);
         PopulateAliases(symbolTable.Types);
         BuildFunctions(symbolTable.Ids);
     }
@@ -125,84 +127,6 @@ internal class GenerateMetadata : Visitor
         }
     }
 
-    private void CreateAliases(IReadOnlyDictionary<string, TypeSymbol> types)
-    {
-        foreach (var (_, symbol) in types)
-        {
-            if (symbol is not { IsAlias: true, Node: TypeAliasDeclarationNode })
-                continue;
-
-            var alias = new TypeAliasMetadata(symbol.Name);
-            if (!typeProvider.DefineType(alias))
-                throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
-        }
-    }
-
-    private void PopulateAliases(IReadOnlyDictionary<string, TypeSymbol> types)
-    {
-        // all array and alias types are processed after all types are defined to support forward references
-        foreach (var (_, symbol) in types)
-        {
-            if (symbol is not { IsAlias: true, Node: TypeAliasDeclarationNode typeAliasNode })
-                continue;
-
-            var type = typeProvider.GetType(typeAliasNode.Name);
-            if (type is not TypeAliasMetadata aliasMetadata)
-                throw new SemanticAnalysisException($"The '{typeAliasNode.Name}' type is not an alias.");
-
-            var aliasedMetadata = typeProvider.GetType(typeAliasNode.Type.Name) ??
-                                  throw new SemanticAnalysisException($"The '{symbol.Name}' aliased type is not defined.");
-
-            aliasMetadata.Type = aliasedMetadata;
-        }
-    }
-
-    private void CreateArrays(IReadOnlyDictionary<string, TypeSymbol> types)
-    {
-        // all array and alias types are processed after all types are defined to support forward references
-        foreach (var (_, symbol) in types)
-        {
-            if (!symbol.IsArray)
-                continue;
-
-            var type = typeProvider.GetType(symbol.Name[..^2]) ??
-                       throw new SemanticAnalysisException($"The '{symbol.Name}' array item type is not defined.");
-
-            var metadata = new TypeArrayMetadata(type);
-            if (typeProvider.GetType(metadata.Name) is null)
-                typeProvider.DefineType(metadata);
-        }
-    }
-
-    private void BuildFunctionTypes(IReadOnlyDictionary<string, TypeSymbol> types)
-    {
-        foreach (var (_, symbol) in types)
-        {
-            if (!symbol.IsFunction)
-                continue;
-
-            if (symbol.Node is not FunctionTypeNode function)
-                throw new SemanticAnalysisException($"The '{symbol.Name}' symbol is not a function.");
-
-            var parameterTypes = new ITypeMetadata[function.ParameterTypes.Count];
-            for (var i = 0; i < parameterTypes.Length; i++)
-            {
-                var parameterType = function.ParameterTypes[i];
-                var type = typeProvider.GetType(parameterType.Name) ??
-                           throw new SemanticAnalysisException($"The function has unknown parameter type: '{parameterType.Name}'.");
-
-                parameterTypes[i] = type;
-            }
-
-            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
-                             throw new SemanticAnalysisException($"The function has unknown return type: '{function.ReturnType.Name}'.");
-
-            var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
-            if (typeProvider.GetType(functionTypeMetadata.Name) is null)
-                typeProvider.DefineType(functionTypeMetadata);
-        }
-    }
-
     private void CreateInterfaces(IReadOnlyDictionary<string, TypeSymbol> types)
     {
         foreach (var (_, symbol) in types)
@@ -260,6 +184,120 @@ internal class GenerateMetadata : Visitor
                 var methodMetadata = new InterfaceMethodMetadata(metadata, method.Name, functionType);
                 metadata.AddMethod(methodMetadata);
             }
+        }
+    }
+
+    private void CreateDiscriminatedUnion(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsDiscriminatedUnion)
+                continue;
+
+            var metadata = new DiscriminatedUnionType(symbol.Name);
+            typeProvider.DefineType(metadata);
+        }
+    }
+
+    private void PopulateDiscriminatedUnion(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsDiscriminatedUnion)
+                continue;
+
+            var node = symbol.Node;
+            if (node is not DiscriminatedUnionNode discriminatedUnionNode)
+                continue;
+
+            if (typeProvider.GetType(symbol.Name) is not DiscriminatedUnionType metadata)
+                throw new SemanticAnalysisException($"The '{symbol.Name}' type is not a discriminated union.");
+
+            foreach (var typeNode in discriminatedUnionNode.Types)
+            {
+                var type = typeProvider.GetType(typeNode.Name) ??
+                           throw new SemanticAnalysisException($"The '{typeNode.Name}' type is not defined.");
+
+                metadata.AddType(type);
+            }
+        }
+    }
+
+    private void CreateAliases(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        foreach (var (_, symbol) in types)
+        {
+            if (symbol is not { IsAlias: true, Node: TypeAliasDeclarationNode })
+                continue;
+
+            var alias = new TypeAliasMetadata(symbol.Name);
+            if (!typeProvider.DefineType(alias))
+                throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
+        }
+    }
+
+    private void PopulateAliases(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        // all array and alias types are processed after all types are defined to support forward references
+        foreach (var (_, symbol) in types)
+        {
+            if (symbol is not { IsAlias: true, Node: TypeAliasDeclarationNode typeAliasNode })
+                continue;
+
+            var type = typeProvider.GetType(typeAliasNode.Name);
+            if (type is not TypeAliasMetadata aliasMetadata)
+                throw new SemanticAnalysisException($"The '{typeAliasNode.Name}' type is not an alias.");
+
+            var aliasedMetadata = typeProvider.GetType(typeAliasNode.Type.Name) ??
+                                  throw new SemanticAnalysisException($"The '{typeAliasNode.Type.Name}' aliased type is not defined.");
+
+            aliasMetadata.Type = aliasedMetadata;
+        }
+    }
+
+    private void CreateArrays(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        // all array and alias types are processed after all types are defined to support forward references
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsArray)
+                continue;
+
+            var type = typeProvider.GetType(symbol.Name[..^2]) ??
+                       throw new SemanticAnalysisException($"The '{symbol.Name}' array item type is not defined.");
+
+            var metadata = new TypeArrayMetadata(type);
+            if (typeProvider.GetType(metadata.Name) is null)
+                typeProvider.DefineType(metadata);
+        }
+    }
+
+    private void BuildFunctionTypes(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsFunction)
+                continue;
+
+            if (symbol.Node is not FunctionTypeNode function)
+                throw new SemanticAnalysisException($"The '{symbol.Name}' symbol is not a function.");
+
+            var parameterTypes = new ITypeMetadata[function.ParameterTypes.Count];
+            for (var i = 0; i < parameterTypes.Length; i++)
+            {
+                var parameterType = function.ParameterTypes[i];
+                var type = typeProvider.GetType(parameterType.Name) ??
+                           throw new SemanticAnalysisException($"The function has unknown parameter type: '{parameterType.Name}'.");
+
+                parameterTypes[i] = type;
+            }
+
+            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
+                             throw new SemanticAnalysisException($"The function has unknown return type: '{function.ReturnType.Name}'.");
+
+            var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
+            if (typeProvider.GetType(functionTypeMetadata.Name) is null)
+                typeProvider.DefineType(functionTypeMetadata);
         }
     }
 

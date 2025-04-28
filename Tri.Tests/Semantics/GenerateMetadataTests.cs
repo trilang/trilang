@@ -149,7 +149,7 @@ public class GenerateMetadataTests
         Assert.That(
             () => semantic.Analyze(tree),
             Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'MyInt' aliased type is not defined."));
+                .And.Message.EqualTo("The 'xxx' aliased type is not defined."));
     }
 
     [Test]
@@ -354,5 +354,32 @@ public class GenerateMetadataTests
 
         var actualAlias = semantic.TypeProvider.GetType("Point");
         Assert.That(actualAlias, Is.EqualTo(expectedAlias));
+    }
+
+    [Test]
+    public void DiscriminatedUnionTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("DU", builder => builder
+                .DefineDiscriminatedUnion(du => du
+                    .AddInterface()
+                    .AddType("i32")
+                    .AddFunctionType(f => f.ReturnType("void"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var du = new DiscriminatedUnionType("{ } | i32 | () => void");
+        du.AddType(new InterfaceMetadata("{ }", [], []));
+        du.AddType(TypeMetadata.I32);
+        du.AddType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        var alias = new TypeAliasMetadata("DU", du);
+
+        var actualAlias = semantic.TypeProvider.GetType("DU");
+        Assert.That(actualAlias, Is.EqualTo(alias));
+
+        var actualDu = semantic.TypeProvider.GetType("{ } | i32 | () => void");
+        Assert.That(actualDu, Is.EqualTo(du));
     }
 }

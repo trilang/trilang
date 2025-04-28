@@ -122,6 +122,24 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(DiscriminatedUnionNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var type in node.Types)
+            type.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(DiscriminatedUnionNode node)
+    {
+    }
+
+    protected virtual void VisitExit(DiscriminatedUnionNode node)
+    {
+    }
+
     public void Visit(ExpressionStatementNode node)
     {
         VisitEnter(node);

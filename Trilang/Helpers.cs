@@ -28,7 +28,7 @@ public static class Helpers
                     .Select(x => Find(x, predicate))
                     .FirstOrDefault(x => x is not null),
 
-            BreakNode breakNode
+            BreakNode
                 => null,
 
             CallExpressionNode callExpressionNode

@@ -23,6 +23,7 @@ internal class TypeChecker : IVisitor
         node.Member.Accept(this);
         node.Index.Accept(this);
 
+        // TODO: check member returns array type
         if (!Equals(node.Index.ReturnTypeMetadata, I32))
             throw new SemanticAnalysisException("Array index must be of type i32");
     }
@@ -127,6 +128,7 @@ internal class TypeChecker : IVisitor
 
     public void Visit(BreakNode node)
     {
+        // TODO: check whether it is used within any loop
     }
 
     public void Visit(CallExpressionNode node)
@@ -161,10 +163,27 @@ internal class TypeChecker : IVisitor
 
     public void Visit(ContinueNode node)
     {
+        // TODO: check whether it is used within any loop
+    }
+
+    public void Visit(DiscriminatedUnionNode node)
+    {
+        // TODO: implement type checking
+        // TODO: eliminate duplicates
+        foreach (var type in node.Types)
+            type.Accept(this);
+
+        var metadata = typeProvider.GetType(node.Name) ??
+                       throw new SemanticAnalysisException($"Unknown discriminated union type '{node.Name}'");
+
+        node.Metadata = metadata;
     }
 
     public void Visit(ExpressionStatementNode node)
-        => node.Expression.Accept(this);
+    {
+        // TODO: check whether the result of expression is used
+        node.Expression.Accept(this);
+    }
 
     public void Visit(FieldDeclarationNode node)
     {
@@ -205,6 +224,7 @@ internal class TypeChecker : IVisitor
 
     public void Visit(IfStatementNode node)
     {
+        // TODO: data flow
         node.Condition.Accept(this);
         node.Then.Accept(this);
         node.Else?.Accept(this);
@@ -304,6 +324,7 @@ internal class TypeChecker : IVisitor
             if (returnTypeMetadata is TypeAliasMetadata alias)
                 returnTypeMetadata = alias.Type;
 
+            // TODO: check access
             node.ReturnTypeMetadata = returnTypeMetadata switch
             {
                 TypeMetadata type
@@ -347,6 +368,7 @@ internal class TypeChecker : IVisitor
         if (node.Type.Metadata is not TypeMetadata type)
             throw new SemanticAnalysisException($"Cannot create an instance of type '{node.Type.Metadata}'");
 
+        // TODO: check access
         var parameters = node.Parameters.Select(x => x.ReturnTypeMetadata!).ToList();
         var ctor = type.GetConstructor(parameters) ??
                    throw new SemanticAnalysisException($"The '{type.Name}' type doesn't have '{string.Join(", ", parameters)}' constructor.");
@@ -487,6 +509,7 @@ internal class TypeChecker : IVisitor
 
     public void Visit(VariableDeclarationStatementNode node)
     {
+        // TODO: infer type
         node.Type.Accept(this);
         node.Expression.Accept(this);
 

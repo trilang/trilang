@@ -797,4 +797,33 @@ public class TypeCheckerTests
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'Point' type doesn't have 'i32' constructor."));
     }
+
+    [Test]
+    public void SetMetadataForDiscriminatedUnionTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("DU", builder => builder
+                .DefineDiscriminatedUnion(du => du
+                    .AddInterface()
+                    .AddType("i32")
+                    .AddFunctionType(f => f.ReturnType("void"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var du = new DiscriminatedUnionType("{ } | i32 | () => void");
+        du.AddType(new InterfaceMetadata("{ }", [], []));
+        du.AddType(TypeMetadata.I32);
+        du.AddType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        var alias = new TypeAliasMetadata("DU", du);
+
+        var aliasNode = tree.Find<TypeAliasDeclarationNode>();
+        Assert.That(aliasNode, Is.Not.Null);
+        Assert.That(aliasNode.Metadata, Is.EqualTo(alias));
+
+        var duNode = tree.Find<DiscriminatedUnionNode>();
+        Assert.That(duNode, Is.Not.Null);
+        Assert.That(duNode.Metadata, Is.EqualTo(du));
+    }
 }

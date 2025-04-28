@@ -141,6 +141,27 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(DiscriminatedUnionNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        foreach (var type in node.Types)
+            type.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(DiscriminatedUnionNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(DiscriminatedUnionNode node, TContext context)
+    {
+    }
+
     public void Visit(ExpressionStatementNode node, TContext context)
     {
         if (context.IsFinished)

@@ -124,6 +124,17 @@ public partial class Formatter : IFormatter
     public void Visit(ContinueNode node)
         => writer.WriteLine("continue;");
 
+    public void Visit(DiscriminatedUnionNode node)
+    {
+        for (var i = 0; i < node.Types.Count; i++)
+        {
+            node.Types[i].Accept(this);
+
+            if (i < node.Types.Count - 1)
+                writer.Write(" | ");
+        }
+    }
+
     public void Visit(ExpressionStatementNode node)
     {
         node.Expression.Accept(this);

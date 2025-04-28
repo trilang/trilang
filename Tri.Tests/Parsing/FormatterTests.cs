@@ -1401,7 +1401,7 @@ public class FormatterTests
     [Test]
     public void FormatNewOperatorTest()
     {
-        var tree=new SyntaxTree([
+        var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "main",
                 [],
@@ -1425,6 +1425,87 @@ public class FormatterTests
                 var p: Point = new Point(1, 2);
             }
             """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatDiscriminatedUnionOfTypesTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "Numbers",
+                new DiscriminatedUnionNode([
+                    new TypeNode("i8"),
+                    new TypeNode("i16"),
+                    new TypeNode("i32"),
+                    new TypeNode("i64"),
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type Numbers = i8 | i16 | i32 | i64;";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatDiscriminatedUnionOfFunctionsTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "F",
+                new DiscriminatedUnionNode([
+                    new FunctionTypeNode([], new TypeNode("void")),
+                    new FunctionTypeNode([new TypeNode("i32"), new TypeNode("i32")], new TypeNode("i32"))
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type F = () => void | (i32, i32) => i32;";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatDiscriminatedUnionOfInterfacesTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "I",
+                new DiscriminatedUnionNode([
+                    new InterfaceNode([], []),
+                    new InterfaceNode(
+                        [
+                            new InterfaceFieldNode("x", new TypeNode("i32")),
+                            new InterfaceFieldNode("y", new TypeNode("i32")),
+                        ],
+                        []
+                    ),
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type I = { } | { x: i32; y: i32; };";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatDiscriminatedUnionTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new DiscriminatedUnionNode([
+                    new InterfaceNode([], []),
+                    new TypeNode("i32"),
+                    new FunctionTypeNode([], new TypeNode("void")),
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type T = { } | i32 | () => void;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }

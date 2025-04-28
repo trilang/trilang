@@ -39,7 +39,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var returnType = TryParseInlineTypeNode(context);
+        var returnType = TryParseDiscriminatedUnion(context);
         if (returnType is null)
             throw new ParseException("Expected a function return type.");
 
@@ -87,7 +87,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var type = TryParseInlineTypeNode(context);
+        var type = TryParseDiscriminatedUnion(context);
         if (type is null)
             throw new ParseException("Expected a type.");
 
@@ -140,7 +140,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.Equal))
                 return null;
 
-            var type = c.Parser.TryParseInlineTypeNode(c);
+            var type = c.Parser.TryParseDiscriminatedUnion(c);
             if (type is null)
                 throw new ParseException("Expected a type.");
 
@@ -237,7 +237,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.Colon))
                 return null;
 
-            var type = c.Parser.TryParseInlineTypeNode(c);
+            var type = c.Parser.TryParseDiscriminatedUnion(c);
             if (type is null)
                 throw new ParseException("Expected a type.");
 
@@ -262,7 +262,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var returnType = TryParseInlineTypeNode(context);
+        var returnType = TryParseDiscriminatedUnion(context);
         if (returnType is null)
             throw new ParseException("Expected a function return type.");
 
@@ -294,7 +294,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Colon))
             throw new ParseException("Expected a colon.");
 
-        var type = TryParseInlineTypeNode(context);
+        var type = TryParseDiscriminatedUnion(context);
         if (type is null)
             throw new ParseException("Expected a type.");
 
@@ -662,6 +662,27 @@ public class Parser
         return null;
     }
 
+    private IInlineTypeNode? TryParseDiscriminatedUnion(ParserContext context)
+    {
+        var type = TryParseInlineTypeNode(context);
+        if (type is null)
+            return null;
+
+        if (!context.Reader.Current.Is(TokenKind.Pipe))
+            return type;
+
+        var types = new List<IInlineTypeNode> { type };
+        while (context.Reader.Check(TokenKind.Pipe))
+        {
+            type = TryParseInlineTypeNode(context) ??
+                   throw new ParseException("Expected a type.");
+
+            types.Add(type);
+        }
+
+        return new DiscriminatedUnionNode(types);
+    }
+
     private IInlineTypeNode? TryParseInlineTypeNode(ParserContext context)
         => TryParseTypeNode(context) ??
            TryParseFunctionType(context) ??
@@ -692,7 +713,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.EqualGreater))
                 throw new ParseException("Expected an arrow function.");
 
-            var returnType = c.Parser.TryParseInlineTypeNode(c);
+            var returnType = c.Parser.TryParseDiscriminatedUnion(c);
             if (returnType is null)
                 throw new ParseException("Expected a function return type.");
 
@@ -705,14 +726,14 @@ public class Parser
             return null;
 
         var parameters = new List<IInlineTypeNode>();
-        var parameter = TryParseInlineTypeNode(context);
+        var parameter = TryParseDiscriminatedUnion(context);
         if (parameter is not null)
         {
             parameters.Add(parameter);
 
             while (context.Reader.Check(TokenKind.Comma))
             {
-                parameter = TryParseInlineTypeNode(context);
+                parameter = TryParseDiscriminatedUnion(context);
                 if (parameter is null)
                     throw new ParseException("Expected a parameter.");
 
@@ -768,7 +789,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.Colon))
                 return null;
 
-            var type = c.Parser.TryParseInlineTypeNode(c);
+            var type = c.Parser.TryParseDiscriminatedUnion(c);
             if (type is null)
                 throw new ParseException("Expected a type.");
 
@@ -807,7 +828,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.Colon))
                 throw new ParseException("Expected a colon.");
 
-            var returnType = c.Parser.TryParseInlineTypeNode(c);
+            var returnType = c.Parser.TryParseDiscriminatedUnion(c);
             if (returnType is null)
                 throw new ParseException("Expected a type.");
 

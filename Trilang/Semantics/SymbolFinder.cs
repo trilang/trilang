@@ -62,6 +62,20 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
     public void Visit(ContinueNode node, SymbolFinderContext context)
         => node.SymbolTable = context.SymbolTable;
 
+    public void Visit(DiscriminatedUnionNode node, SymbolFinderContext context)
+    {
+        var symbol = TypeSymbol.DiscriminatedUnion(node);
+        context.SymbolTable.TryAddType(symbol);
+
+        context.Scoped(c =>
+        {
+            node.SymbolTable = c.SymbolTable;
+
+            foreach (var type in node.Types)
+                type.Accept(this, c);
+        });
+    }
+
     public void Visit(ExpressionStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
@@ -103,6 +117,9 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(FunctionTypeNode node, SymbolFinderContext context)
     {
+        var symbol = TypeSymbol.FunctionType(node);
+        context.SymbolTable.TryAddType(symbol);
+
         node.SymbolTable = context.SymbolTable;
 
         foreach (var parameterType in node.ParameterTypes)
@@ -239,9 +256,6 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
     public void Visit(TypeAliasDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
-
-        if (node.Type is FunctionTypeNode functionType)
-            context.SymbolTable.TryAddType(TypeSymbol.FunctionType(functionType));
 
         if (!context.SymbolTable.TryAddType(TypeSymbol.Alias(node)))
             throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");

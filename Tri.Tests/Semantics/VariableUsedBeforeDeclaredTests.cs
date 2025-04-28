@@ -1,5 +1,4 @@
 using Tri.Tests.Builders;
-using Trilang.Parsing;
 using Trilang.Semantics;
 
 namespace Tri.Tests.Semantics;
@@ -113,6 +112,5 @@ public class VariableUsedBeforeDeclaredTests
             () => semantic.Analyze(tree),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("Unknown symbol: a"));
-        ;
     }
 }

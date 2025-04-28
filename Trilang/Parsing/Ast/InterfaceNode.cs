@@ -21,7 +21,11 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
 
         var fieldNames = fields.Select(f => $"{f.Name}: {f.Type};");
         var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.Parameters.Select(p => p.Type))}): {m.ReturnType};");
-        Name = $"{{ {string.Join(" ", fieldNames.Concat(methodNames))} }}";
+
+        var combinedSignatures = fieldNames.Concat(methodNames).ToList();
+        Name = combinedSignatures.Any()
+            ? $"{{ {string.Join(" ", combinedSignatures)} }}"
+            : "{ }";
     }
 
     public static bool operator ==(InterfaceNode? left, InterfaceNode? right)

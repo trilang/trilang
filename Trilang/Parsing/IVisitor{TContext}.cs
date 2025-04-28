@@ -18,6 +18,8 @@ public interface IVisitor<in TContext>
 
     void Visit(ContinueNode node, TContext context);
 
+    void Visit(DiscriminatedUnionNode node, TContext context);
+
     void Visit(ExpressionStatementNode node, TContext context);
 
     void Visit(FieldDeclarationNode node, TContext context);

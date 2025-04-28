@@ -473,4 +473,53 @@ public class SymbolFinderTests
         Assert.That(@interface.SymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(@interface.Methods[0])));
         Assert.That(@interface.SymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(@interface.Methods[1])));
     }
+
+    [Test]
+    public void InlineFunctionTypeInInterfaceTest()
+    {
+        var @interface = new InterfaceNode(
+            [
+                new InterfaceFieldNode("x", new FunctionTypeNode([], new TypeNode("void"))),
+            ],
+            []
+        );
+        var alias = new TypeAliasDeclarationNode(AccessModifier.Public, "Point", @interface);
+        var tree = new SyntaxTree([alias]);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(3));
+        Assert.That(tree.SymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
+        Assert.That(tree.SymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+    }
+
+    [Test]
+    public void DiscriminatedUnionTest()
+    {
+        var discriminatedUnionNode = new DiscriminatedUnionNode([
+            new InterfaceNode([], []),
+            new TypeNode("i32"),
+            new FunctionTypeNode([], new TypeNode("void")),
+        ]);
+        var alias = new TypeAliasDeclarationNode(
+            AccessModifier.Public,
+            "T",
+            discriminatedUnionNode);
+        var tree = new SyntaxTree([alias]);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(4));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key(discriminatedUnionNode.Name)
+                .WithValue(TypeSymbol.DiscriminatedUnion(discriminatedUnionNode)));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+    }
 }

@@ -26,6 +26,9 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
     public static TypeSymbol Interface(InterfaceNode node)
         => new TypeSymbol(TypeSymbolKind.Interface, node.Name, node);
 
+    public static TypeSymbol DiscriminatedUnion(DiscriminatedUnionNode node)
+        => new TypeSymbol(TypeSymbolKind.DiscriminatedUnion, node.Name, node);
+
     public static bool operator ==(TypeSymbol? left, TypeSymbol? right)
         => Equals(left, right);
 
@@ -77,4 +80,6 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
     public bool IsFunction => TypeKind == TypeSymbolKind.Function;
 
     public bool IsInterface => TypeKind == TypeSymbolKind.Interface;
+
+    public bool IsDiscriminatedUnion => TypeKind == TypeSymbolKind.DiscriminatedUnion;
 }

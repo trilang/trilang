@@ -7,4 +7,5 @@ public enum TypeSymbolKind
     Alias,
     Function,
     Interface,
+    DiscriminatedUnion,
 }

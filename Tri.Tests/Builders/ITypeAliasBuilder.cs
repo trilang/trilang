@@ -12,5 +12,7 @@ public interface ITypeAliasBuilder
 
     ITypeAliasBuilder DefineInterface(Action<IInterfaceBuilder> action);
 
+    ITypeAliasBuilder DefineDiscriminatedUnion(Action<IDiscriminatedUnionBuilder> action);
+
     TypeAliasDeclarationNode Build();
 }

@@ -32,6 +32,8 @@ type T4 = Point;
 // du
 type Numbers = i8 | i16 | i32 | i64;
 type NullableNumber = Numbers | null;
+
+// du of values???
 type Days = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
 
 type Result<T> =

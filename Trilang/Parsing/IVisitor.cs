@@ -18,6 +18,8 @@ public interface IVisitor
 
     void Visit(ContinueNode node);
 
+    void Visit(DiscriminatedUnionNode node);
+
     void Visit(ExpressionStatementNode node);
 
     void Visit(FieldDeclarationNode node);

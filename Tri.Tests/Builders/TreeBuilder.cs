@@ -627,6 +627,16 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public ITypeAliasBuilder DefineDiscriminatedUnion(Action<IDiscriminatedUnionBuilder> action)
+        {
+            var builder = new DiscriminatedUnionBuilder();
+            action(builder);
+
+            aliasedType = builder.Build();
+
+            return this;
+        }
+
         public TypeAliasDeclarationNode Build()
             => new TypeAliasDeclarationNode(
                 accessModifier,
@@ -729,5 +739,43 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public InterfaceMethodNode Build()
             => new InterfaceMethodNode(methodName, parameters, returnType);
+    }
+
+    private sealed class DiscriminatedUnionBuilder : IDiscriminatedUnionBuilder
+    {
+        private readonly List<IInlineTypeNode> types;
+
+        public DiscriminatedUnionBuilder()
+            => types = [];
+
+        public IDiscriminatedUnionBuilder AddType(string type)
+        {
+            types.Add(new TypeNode(type));
+
+            return this;
+        }
+
+        public IDiscriminatedUnionBuilder AddFunctionType(Action<IFunctionTypeBuilder>? action = null)
+        {
+            var builder = new FunctionTypeBuilder();
+            action?.Invoke(builder);
+
+            types.Add(builder.Build());
+
+            return this;
+        }
+
+        public IDiscriminatedUnionBuilder AddInterface(Action<IInterfaceBuilder>? action = null)
+        {
+            var builder = new InterfaceBuilder();
+            action?.Invoke(builder);
+
+            types.Add(builder.Build());
+
+            return this;
+        }
+
+        public DiscriminatedUnionNode Build()
+            => new DiscriminatedUnionNode(types);
     }
 }
