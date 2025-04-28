@@ -1509,4 +1509,28 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatNullTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create("main", [], new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "x",
+                        new DiscriminatedUnionNode([new TypeNode("i32"), new TypeNode("null")]),
+                        new NullExpressionNode()
+                    )
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                var x: i32 | null = null;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

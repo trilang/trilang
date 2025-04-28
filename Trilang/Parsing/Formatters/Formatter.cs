@@ -354,6 +354,9 @@ public partial class Formatter : IFormatter
         writer.Write(')');
     }
 
+    public void Visit(NullExpressionNode node)
+        => writer.Write("null");
+
     public void Visit(ParameterNode node)
     {
         writer.Write(node.Name);

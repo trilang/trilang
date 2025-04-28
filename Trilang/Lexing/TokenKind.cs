@@ -73,4 +73,5 @@ public enum TokenKind
     This,
     Constructor,
     New,
+    Null,
 }

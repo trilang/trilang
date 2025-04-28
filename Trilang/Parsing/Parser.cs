@@ -518,6 +518,7 @@ public class Parser
            TryParseArrayAccessExpression(context) ??
            TryParseMemberExpression(context) ??
            TryParseNewExpression(context) ??
+           TryParseNullExpression(context) ??
            TryParseLiteral(context) as IExpressionNode;
 
     private IExpressionNode? TryParseParenExpression(ParserContext context)
@@ -609,6 +610,14 @@ public class Parser
         return member;
     }
 
+    private NullExpressionNode? TryParseNullExpression(ParserContext context)
+    {
+        if (!context.Reader.Check(TokenKind.Null))
+            return null;
+
+        return new NullExpressionNode();
+    }
+
     private NewExpressionNode? TryParseNewExpression(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
@@ -691,6 +700,9 @@ public class Parser
     private TypeNode? TryParseTypeNode(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
+            if (c.Reader.Check(TokenKind.Null))
+                return new TypeNode("null");
+
             if (!c.Reader.Check(TokenKind.Identifier, out var token))
                 return null;
 

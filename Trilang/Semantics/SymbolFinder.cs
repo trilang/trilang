@@ -227,6 +227,9 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             parameter.Accept(this, context);
     }
 
+    public void Visit(NullExpressionNode node, SymbolFinderContext context)
+        => node.SymbolTable = context.SymbolTable;
+
     public void Visit(ReturnStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;

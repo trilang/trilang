@@ -361,6 +361,20 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(NullExpressionNode node)
+    {
+        VisitEnter(node);
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(NullExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitExit(NullExpressionNode node)
+    {
+    }
+
     public void Visit(ReturnStatementNode node)
     {
         VisitEnter(node);

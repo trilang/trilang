@@ -416,6 +416,20 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(NullExpressionNode node, TContext context)
+    {
+        VisitEnter(node, context);
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(NullExpressionNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(NullExpressionNode node, TContext context)
+    {
+    }
+
     public void Visit(ReturnStatementNode node, TContext context)
     {
         if (context.IsFinished)

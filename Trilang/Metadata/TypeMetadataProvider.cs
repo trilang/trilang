@@ -9,6 +9,7 @@ public class TypeMetadataProvider
         types = new Dictionary<string, ITypeMetadata>();
 
         DefineType(TypeMetadata.Void);
+        DefineType(TypeMetadata.Null);
 
         DefineType(TypeMetadata.I8);
         DefineType(TypeMetadata.I16);

@@ -376,6 +376,10 @@ internal class TypeChecker : IVisitor
         node.Metadata = ctor;
     }
 
+    public void Visit(NullExpressionNode node)
+    {
+    }
+
     public void Visit(ReturnStatementNode node)
     {
         node.Expression?.Accept(this);

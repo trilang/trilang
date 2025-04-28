@@ -824,4 +824,50 @@ public class ParseTypeTests
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a close parenthesis."));
     }
+
+    [Test]
+    public void ParseDiscriminatedUnionTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type T = { } | i32 | () => void;");
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new DiscriminatedUnionNode([
+                    new InterfaceNode([], []),
+                    new TypeNode("i32"),
+                    new FunctionTypeNode([], new TypeNode("void")),
+                ]))
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseNullTest()
+    {
+        const string code =
+            """
+            function main(): void {
+                var x: i32 | null = null;
+            }
+            """;
+
+        var parser = new Parser();
+        var tree = parser.Parse(code);
+
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create("main", [], new TypeNode("void"),
+                new BlockStatementNode([
+                    new VariableDeclarationStatementNode(
+                        "x",
+                        new DiscriminatedUnionNode([new TypeNode("i32"), new TypeNode("null")]),
+                        new NullExpressionNode()
+                    )
+                ]))
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
 }

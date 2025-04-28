@@ -44,6 +44,8 @@ public interface IVisitor
 
     void Visit(NewExpressionNode node);
 
+    void Visit(NullExpressionNode node);
+
     void Visit(ParameterNode node);
 
     void Visit(ReturnStatementNode node);
