@@ -23,6 +23,10 @@ public interface IBlockBuilder
         Action<IExpressionBuilder> condition,
         Action<IBlockBuilder> body);
 
+    IBlockBuilder Break();
+
+    IBlockBuilder Continue();
+
     IBlockBuilder Expression(Action<IExpressionBuilder> action);
 
     BlockStatementNode Build();

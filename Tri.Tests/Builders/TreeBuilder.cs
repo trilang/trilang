@@ -105,6 +105,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     private sealed class TypeBuilder : ITypeBuilder
     {
         private readonly string typeName;
+        private readonly List<TypeNode> interfaces;
         private readonly List<FieldDeclarationNode> fields;
         private readonly List<ConstructorDeclarationNode> constructors;
         private readonly List<MethodDeclarationNode> methods;
@@ -113,6 +114,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public TypeBuilder(string typeName)
         {
             this.typeName = typeName;
+            interfaces = [];
             fields = [];
             constructors = [];
             methods = [];
@@ -164,8 +166,16 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public ITypeBuilder AddInterface(string name)
+        {
+            var type = new TypeNode(name);
+            interfaces.Add(type);
+
+            return this;
+        }
+
         public TypeDeclarationNode Build()
-            => new TypeDeclarationNode(accessModifier, typeName, fields, constructors, methods);
+            => new TypeDeclarationNode(accessModifier, typeName, interfaces, fields, constructors, methods);
     }
 
     private sealed class FieldBuilder : IFieldBuilder
@@ -393,6 +403,20 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IBlockBuilder Break()
+        {
+            statements.Add(new BreakNode());
+
+            return this;
+        }
+
+        public IBlockBuilder Continue()
+        {
+            statements.Add(new ContinueNode());
+
+            return this;
+        }
+
         public IBlockBuilder Expression(Action<IExpressionBuilder> action)
         {
             var builder = new ExpressionBuilder();
@@ -477,6 +501,16 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
                 var memberAccess = new MemberAccessExpressionNode(name);
                 stack.Push(memberAccess);
             }
+
+            return this;
+        }
+
+        public IExpressionBuilder ArrayAccess()
+        {
+            var index = stack.Pop();
+            var array = (MemberAccessExpressionNode)stack.Pop();
+            var arrayAccess = new ArrayAccessExpressionNode(array, index);
+            stack.Push(arrayAccess);
 
             return this;
         }
@@ -617,10 +651,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public ITypeAliasBuilder DefineInterface(Action<IInterfaceBuilder> action)
+        public ITypeAliasBuilder DefineInterface(Action<IInterfaceBuilder>? action = null)
         {
             var builder = new InterfaceBuilder();
-            action(builder);
+            action?.Invoke(builder);
 
             aliasedType = builder.Build();
 

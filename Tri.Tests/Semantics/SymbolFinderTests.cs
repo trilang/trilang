@@ -276,6 +276,7 @@ public class SymbolFinderTests
             "Point",
             [],
             [],
+            [],
             []);
         var tree = new SyntaxTree([type]);
 
@@ -290,8 +291,8 @@ public class SymbolFinderTests
     [Test]
     public void TypeDeclarationDuplicateTest()
     {
-        var type1 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], []);
-        var type2 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], []);
+        var type1 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], [], []);
+        var type2 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], [], []);
         var tree = new SyntaxTree([type1, type2]);
 
         var semantic = new SemanticAnalysis();
@@ -310,6 +311,7 @@ public class SymbolFinderTests
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
             "Point",
+            [],
             [],
             [ctor],
             []);
@@ -337,6 +339,7 @@ public class SymbolFinderTests
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
             "Point",
+            [],
             [],
             [],
             [method]);
@@ -406,6 +409,7 @@ public class SymbolFinderTests
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
             "Point",
+            [],
             [
                 new FieldDeclarationNode(AccessModifier.Public, "x", new TypeNode("i32")),
                 new FieldDeclarationNode(AccessModifier.Public, "y", new TypeNode("i32")),

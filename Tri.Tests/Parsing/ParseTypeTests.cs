@@ -20,6 +20,7 @@ public class ParseTypeTests
                 "Point",
                 [],
                 [],
+                [],
                 []
             )
         ]);
@@ -87,6 +88,7 @@ public class ParseTypeTests
             new TypeDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 [
                     new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
                     new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
@@ -168,6 +170,7 @@ public class ParseTypeTests
             new TypeDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 [],
                 [],
                 [
@@ -338,6 +341,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "Point",
                 [],
+                [],
                 [
                     new ConstructorDeclarationNode(
                         AccessModifier.Public,
@@ -353,6 +357,47 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseTypeWithInterfaceTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Point : Interface1, Interface2 { }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [new TypeNode("Interface1"), new TypeNode("Interface2")],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseTypeWithMissingInterfaceTest()
+    {
+        var parser = new Parser();
+        const string code = "public type Point : { }";
+
+        Assert.Throws<ParseException>(() => parser.Parse(code));
+    }
+
+    [Test]
+    public void ParseTypeWithMissingSecondInterfaceTest()
+    {
+        var parser = new Parser();
+        const string code = "public type Point : Interface1, { }";
+
+        Assert.Throws<ParseException>(() => parser.Parse(code));
     }
 
     [Test]

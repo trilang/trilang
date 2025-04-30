@@ -11,6 +11,7 @@ public interface IExpressionBuilder
     IExpressionBuilder String(string str);
 
     IExpressionBuilder MemberAccess(string name);
+    IExpressionBuilder ArrayAccess();
 
     IExpressionBuilder Unary(UnaryExpressionKind kind);
     IExpressionBuilder UnaryPlus();

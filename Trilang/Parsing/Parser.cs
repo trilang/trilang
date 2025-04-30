@@ -159,9 +159,25 @@ public class Parser
         if (!context.Reader.Check(TokenKind.Type))
             throw new ParseException("Expected a type declaration.");
 
-        var name = TryParseId(context);
-        if (name is null)
-            throw new ParseException("Expected a type name.");
+        var name = TryParseId(context) ??
+                   throw new ParseException("Expected a type name.");
+
+        var interfaces = new List<TypeNode>();
+        if (context.Reader.Check(TokenKind.Colon))
+        {
+            var @interface = TryParseTypeNode(context) ??
+                             throw new ParseException("Expected an interface.");
+
+            interfaces.Add(@interface);
+
+            while (context.Reader.Check(TokenKind.Comma))
+            {
+                @interface = TryParseTypeNode(context) ??
+                             throw new ParseException("Expected an interface.");
+
+                interfaces.Add(@interface);
+            }
+        }
 
         if (!context.Reader.Check(TokenKind.OpenBrace))
             throw new ParseException("Expected an open brace.");
@@ -199,6 +215,7 @@ public class Parser
         return new TypeDeclarationNode(
             accessModifier.Value,
             name,
+            interfaces,
             fields,
             constructors,
             methods);

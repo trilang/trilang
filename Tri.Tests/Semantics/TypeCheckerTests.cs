@@ -100,7 +100,7 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new TypeMetadata("Point", [], [], []);
+        var expected = new TypeMetadata("Point", [], [], [], []);
         expected.AddField(new FieldMetadata(
             expected,
             AccessModifierMetadata.Public,
@@ -825,5 +825,47 @@ public class TypeCheckerTests
         var duNode = tree.Find<DiscriminatedUnionNode>();
         Assert.That(duNode, Is.Not.Null);
         Assert.That(duNode.Metadata, Is.EqualTo(du));
+    }
+
+    [Test]
+    public void UseArrayAccessorOnNotArrayTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .DefineParameter("a", "i32")
+                .Body(body => body
+                    .Return(r => r
+                        .MemberAccess("a")
+                        .Number(1)
+                        .ArrayAccess())))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Array access must be of type array"));
+    }
+
+    [Test]
+    public void UseArrayAccessorWithNonNumberTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .DefineParameter("a", "i32[]")
+                .Body(body => body
+                    .Return(r => r
+                        .MemberAccess("a")
+                        .String("xxx")
+                        .ArrayAccess())))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Array index must be of type i32"));
     }
 }

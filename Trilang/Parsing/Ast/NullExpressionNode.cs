@@ -55,6 +55,6 @@ public class NullExpressionNode : IExpressionNode, IEquatable<NullExpressionNode
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public ITypeMetadata? ReturnTypeMetadata
+    public ITypeMetadata ReturnTypeMetadata
         => TypeMetadata.Null;
 }

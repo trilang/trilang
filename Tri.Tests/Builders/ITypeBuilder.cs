@@ -14,5 +14,7 @@ public interface ITypeBuilder
 
     ITypeBuilder DefineMethod(string name, Action<IMethodBuilder> action);
 
+    ITypeBuilder AddInterface(string name);
+
     TypeDeclarationNode Build();
 }

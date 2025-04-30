@@ -30,7 +30,7 @@ public class GenerateMetadataTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new TypeMetadata("Point", [], [], []);
+        var expected = new TypeMetadata("Point", [], [], [], []);
         expected.AddField(new FieldMetadata(
             expected,
             AccessModifierMetadata.Public,
@@ -66,6 +66,35 @@ public class GenerateMetadataTests
         var distanceType = semantic.TypeProvider.GetType("(i32) => i32");
         var expectedDistanceType = new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32);
         Assert.That(distanceType, Is.EqualTo(expectedDistanceType));
+    }
+
+    [Test]
+    public void GenerateMetadataForTypeWithInterfaceTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Point", builder => builder
+                .AddInterface("Interface1")
+                .AddInterface("Interface2"))
+            .DefineAliasType("Interface1", builder => builder
+                .DefineInterface())
+            .DefineAliasType("Interface2", builder => builder
+                .DefineInterface())
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var interface1Metadata = new InterfaceMetadata("Interface1");
+        var interface2Metadata = new InterfaceMetadata("Interface2");
+        var expected = new TypeMetadata(
+            "Point",
+            [interface1Metadata, interface2Metadata],
+            [],
+            [],
+            []);
+
+        var actual = semantic.TypeProvider.GetType("Point");
+        Assert.That(actual, Is.EqualTo(expected));
     }
 
     [Test]

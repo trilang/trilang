@@ -14,8 +14,10 @@ public class SemanticAnalysis
         tree.Accept(new SymbolFinder(), new SymbolFinderContext());
         tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>());
         tree.Accept(new ThisOutsideOfClass());
+        tree.Accept(new BreakContinueWithinLoop());
         tree.Accept(new GenerateMetadata(TypeProvider));
         tree.Accept(new TypeChecker(TypeProvider));
+        tree.Accept(new NotImplementedInterface());
     }
 
     public TypeMetadataProvider TypeProvider { get; }

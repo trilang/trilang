@@ -23,7 +23,9 @@ internal class TypeChecker : IVisitor
         node.Member.Accept(this);
         node.Index.Accept(this);
 
-        // TODO: check member returns array type
+        if (node.Member.ReturnTypeMetadata is not TypeArrayMetadata)
+            throw new SemanticAnalysisException("Array access must be of type array");
+
         if (!Equals(node.Index.ReturnTypeMetadata, I32))
             throw new SemanticAnalysisException("Array index must be of type i32");
     }
@@ -128,7 +130,6 @@ internal class TypeChecker : IVisitor
 
     public void Visit(BreakNode node)
     {
-        // TODO: check whether it is used within any loop
     }
 
     public void Visit(CallExpressionNode node)
@@ -163,7 +164,6 @@ internal class TypeChecker : IVisitor
 
     public void Visit(ContinueNode node)
     {
-        // TODO: check whether it is used within any loop
     }
 
     public void Visit(DiscriminatedUnionNode node)
@@ -434,6 +434,9 @@ internal class TypeChecker : IVisitor
             throw new SemanticAnalysisException($"The '{node.Name}' type is not a type.");
 
         node.Metadata = type;
+
+        foreach (var @interface in node.Interfaces)
+            @interface.Accept(this);
 
         foreach (var field in node.Fields)
             field.Accept(this);

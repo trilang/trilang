@@ -1004,7 +1004,7 @@ public class FormatterTests
     public void FormatPrivateTypeTest()
     {
         var tree = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Private, "MyType", [], [], [])
+            new TypeDeclarationNode(AccessModifier.Private, "MyType", [], [], [], [])
         ]);
         var formatted = tree.ToString();
         const string expected =
@@ -1020,7 +1020,7 @@ public class FormatterTests
     public void FormatPublicTypeTest()
     {
         var tree = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Public, "MyType", [], [], [])
+            new TypeDeclarationNode(AccessModifier.Public, "MyType", [], [], [], [])
         ]);
         var formatted = tree.ToString();
         const string expected =
@@ -1036,8 +1036,8 @@ public class FormatterTests
     public void FormatTwoTypesTest()
     {
         var tree = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Private, "MyType1", [], [], []),
-            new TypeDeclarationNode(AccessModifier.Public, "MyType2", [], [], []),
+            new TypeDeclarationNode(AccessModifier.Private, "MyType1", [], [], [], []),
+            new TypeDeclarationNode(AccessModifier.Public, "MyType2", [], [], [], []),
         ]);
         var formatted = tree.ToString();
         const string expected =
@@ -1059,6 +1059,7 @@ public class FormatterTests
             new TypeDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 [
                     new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
                     new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
@@ -1085,6 +1086,7 @@ public class FormatterTests
             new TypeDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 [
                     new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
                     new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
@@ -1125,6 +1127,29 @@ public class FormatterTests
                 }
                 public distance(other: Point): string {
                 }
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatTypeWithInterfacesTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "MyType",
+                [new TypeNode("Interface1"), new TypeNode("Interface2")],
+                [],
+                [],
+                []
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type MyType : Interface1, Interface2 {
             }
             """;
 

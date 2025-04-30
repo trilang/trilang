@@ -29,10 +29,10 @@ internal class GenerateMetadata : Visitor
         CreateArrays(symbolTable.Types);
         BuildFunctionTypes(symbolTable.Types);
 
-        PopulateTypes(symbolTable.Types);
-        PopulateInterfaces(symbolTable.Types);
-        PopulateDiscriminatedUnion(symbolTable.Types);
         PopulateAliases(symbolTable.Types);
+        PopulateInterfaces(symbolTable.Types);
+        PopulateTypes(symbolTable.Types);
+        PopulateDiscriminatedUnion(symbolTable.Types);
         BuildFunctions(symbolTable.Ids);
     }
 
@@ -63,6 +63,17 @@ internal class GenerateMetadata : Visitor
 
             if (metadata is not TypeMetadata type)
                 continue;
+
+            foreach (var @interface in typeDeclarationNode.Interfaces)
+            {
+                var aliasMetadata = typeProvider.GetType(@interface.Name) as TypeAliasMetadata ??
+                                    throw new SemanticAnalysisException($"The '{@interface.Name}' interface is not defined.");
+
+                var interfaceMetadata = aliasMetadata.Type as InterfaceMetadata ??
+                                        throw new SemanticAnalysisException($"The '{@interface.Name}' interface is not an interface.");
+
+                type.AddInterface(interfaceMetadata);
+            }
 
             foreach (var field in typeDeclarationNode.Fields)
             {

@@ -276,6 +276,9 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         {
             node.SymbolTable = c.SymbolTable;
 
+            foreach (var @interface in node.Interfaces)
+                @interface.Accept(this, c);
+
             foreach (var field in node.Fields)
                 field.Accept(this, c);
 

@@ -409,6 +409,20 @@ public partial class Formatter : IFormatter
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" type ");
         writer.Write(node.Name);
+
+        if (node.Interfaces.Count > 0)
+        {
+            writer.Write(" : ");
+
+            for (var i = 0; i < node.Interfaces.Count; i++)
+            {
+                node.Interfaces[i].Accept(this);
+
+                if (i < node.Interfaces.Count - 1)
+                    writer.Write(", ");
+            }
+        }
+
         writer.WriteLine(" {");
 
         writer.Scoped(_ =>

@@ -18,21 +18,24 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public static readonly TypeMetadata Bool = new TypeMetadata("bool");
     public static readonly TypeMetadata String = new TypeMetadata("string");
 
+    private readonly HashSet<InterfaceMetadata> interfaces;
     private readonly HashSet<FieldMetadata> fields;
     private readonly HashSet<ConstructorMetadata> constructors;
     private readonly HashSet<MethodMetadata> methods;
 
-    public TypeMetadata(string name) : this(name, [], [], [])
+    public TypeMetadata(string name) : this(name, [], [], [], [])
     {
     }
 
     public TypeMetadata(
         string name,
+        IEnumerable<InterfaceMetadata> interfaces,
         IEnumerable<FieldMetadata> fields,
         IEnumerable<ConstructorMetadata> constructors,
         IEnumerable<MethodMetadata> methods)
     {
         Name = name;
+        this.interfaces = new HashSet<InterfaceMetadata>(interfaces);
         this.fields = new HashSet<FieldMetadata>(fields);
         this.constructors = new HashSet<ConstructorMetadata>(constructors);
         this.methods = new HashSet<MethodMetadata>(methods);
@@ -75,6 +78,12 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public override string ToString()
         => Name;
 
+    public void AddInterface(InterfaceMetadata interfaceMetadata)
+        => interfaces.Add(interfaceMetadata);
+
+    public InterfaceMetadata? GetInterface(string name)
+        => interfaces.FirstOrDefault(i => i.Name == name);
+
     public FieldMetadata? GetField(string name)
         => fields.FirstOrDefault(f => f.Name == name);
 
@@ -103,6 +112,8 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     }
 
     public string Name { get; }
+
+    public IReadOnlyCollection<InterfaceMetadata> Interfaces => interfaces;
 
     public IReadOnlyCollection<FieldMetadata> Fields => fields;
 
