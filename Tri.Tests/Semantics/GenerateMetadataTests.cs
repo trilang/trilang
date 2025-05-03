@@ -76,9 +76,9 @@ public class GenerateMetadataTests
                 .AddInterface("Interface1")
                 .AddInterface("Interface2"))
             .DefineAliasType("Interface1", builder => builder
-                .DefineInterface())
+                .Interface())
             .DefineAliasType("Interface2", builder => builder
-                .DefineInterface())
+                .Interface())
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -364,7 +364,7 @@ public class GenerateMetadataTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineField("y", "i32")
                     .DefineMethod("distance", m => m
@@ -386,14 +386,14 @@ public class GenerateMetadataTests
     }
 
     [Test]
-    public void DiscriminatedUnionTest()
+    public void GenerateMetadataForDiscriminatedUnionTest()
     {
         var tree = new TreeBuilder()
             .DefineAliasType("DU", builder => builder
-                .DefineDiscriminatedUnion(du => du
-                    .AddInterface()
-                    .AddType("i32")
-                    .AddFunctionType(f => f.ReturnType("void"))))
+                .DiscriminatedUnion(du => du
+                    .AddCase(c => c.Interface())
+                    .AddCase(c => c.Type("i32"))
+                    .AddCase(c => c.FunctionType(f => f.ReturnType("void")))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -409,6 +409,137 @@ public class GenerateMetadataTests
         Assert.That(actualAlias, Is.EqualTo(alias));
 
         var actualDu = semantic.TypeProvider.GetType("{ } | i32 | () => void");
+        Assert.That(actualDu, Is.EqualTo(du));
+    }
+
+    [Test]
+    public void GenerateMetadataForTupleTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Tuple", builder => builder
+                .Tuple(t => t
+                    .AddCase(c => c.Type("i32"))
+                    .AddCase(c => c.Type("f64"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var tuple = new TupleMetadata("(i32, f64)");
+        tuple.AddType(TypeMetadata.I32);
+        tuple.AddType(TypeMetadata.F64);
+
+        var alias = new TypeAliasMetadata("Tuple", tuple);
+
+        var actualAlias = semantic.TypeProvider.GetType("Tuple");
+        Assert.That(actualAlias, Is.EqualTo(alias));
+
+        var actualTuple = semantic.TypeProvider.GetType("(i32, f64)");
+        Assert.That(actualTuple, Is.EqualTo(tuple));
+    }
+
+    [Test]
+    public void GenerateMetadataForNestedTupleTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Tuple", builder => builder
+                .Tuple(t => t
+                    .AddCase(c => c.Type("i32"))
+                    .AddCase(c => c.Tuple(t2 => t2
+                        .AddCase(c2 => c2.Type("f64"))
+                        .AddCase(c2 => c2.Type("bool"))))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var nestedTuple = new TupleMetadata("(f64, bool)");
+        nestedTuple.AddType(TypeMetadata.F64);
+        nestedTuple.AddType(TypeMetadata.Bool);
+
+        var tuple = new TupleMetadata("(i32, (f64, bool))");
+        tuple.AddType(TypeMetadata.I32);
+        tuple.AddType(nestedTuple);
+
+        var alias = new TypeAliasMetadata("Tuple", tuple);
+
+        var actualAlias = semantic.TypeProvider.GetType("Tuple");
+        Assert.That(actualAlias, Is.EqualTo(alias));
+
+        var actualTuple = semantic.TypeProvider.GetType("(i32, (f64, bool))");
+        Assert.That(actualTuple, Is.EqualTo(tuple));
+
+        var actualNestedTuple = semantic.TypeProvider.GetType("(f64, bool)");
+        Assert.That(actualNestedTuple, Is.EqualTo(nestedTuple));
+    }
+
+    [Test]
+    public void GenerateMetadataForDuInTupleTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Tuple", builder => builder
+                .Tuple(t => t
+                    .AddCase(c => c.Type("i32"))
+                    .AddCase(c => c.DiscriminatedUnion(du => du
+                        .AddCase(c2 => c2.Type("bool"))
+                        .AddCase(c2 => c2.Type("i8"))))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var du = new DiscriminatedUnionType("bool | i8");
+        du.AddType(TypeMetadata.Bool);
+        du.AddType(TypeMetadata.I8);
+
+        var tuple = new TupleMetadata("(i32, bool | i8)");
+        tuple.AddType(TypeMetadata.I32);
+        tuple.AddType(du);
+
+        var alias = new TypeAliasMetadata("Tuple", tuple);
+
+        var actualAlias = semantic.TypeProvider.GetType("Tuple");
+        Assert.That(actualAlias, Is.EqualTo(alias));
+
+        var actualTuple = semantic.TypeProvider.GetType("(i32, bool | i8)");
+        Assert.That(actualTuple, Is.EqualTo(tuple));
+
+        var actualDu = semantic.TypeProvider.GetType("bool | i8");
+        Assert.That(actualDu, Is.EqualTo(du));
+    }
+
+    [Test]
+    public void GenerateMetadataForTupleInDuTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("Tuple", builder => builder
+                .DiscriminatedUnion(du => du
+                    .AddCase(c => c.Type("i32"))
+                    .AddCase(c => c.Tuple(t => t
+                        .AddCase(c2 => c2.Type("f64"))
+                        .AddCase(c2 => c2.Type("bool"))))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var tuple = new TupleMetadata("(f64, bool)");
+        tuple.AddType(TypeMetadata.F64);
+        tuple.AddType(TypeMetadata.Bool);
+
+        var du = new DiscriminatedUnionType("i32 | (f64, bool)");
+        du.AddType(TypeMetadata.I32);
+        du.AddType(tuple);
+
+        var alias = new TypeAliasMetadata("Tuple", du);
+
+        var actualAlias = semantic.TypeProvider.GetType("Tuple");
+        Assert.That(actualAlias, Is.EqualTo(alias));
+
+        var actualTuple = semantic.TypeProvider.GetType("(f64, bool)");
+        Assert.That(actualTuple, Is.EqualTo(tuple));
+
+        var actualDu = semantic.TypeProvider.GetType("i32 | (f64, bool)");
         Assert.That(actualDu, Is.EqualTo(du));
     }
 }

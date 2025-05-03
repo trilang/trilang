@@ -148,7 +148,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("MyF", builder => builder
-                .DefineFunctionType(f => f
+                .FunctionType(f => f
                     .DefineParameter("i32")
                     .DefineParameter("bool")
                     .ReturnType("f64")))
@@ -504,7 +504,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineField("y", "i32")
                     .DefineMethod("distance", m => m
@@ -641,7 +641,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")))
             .DefineFunction("test", builder => builder
                 .DefineParameter("a", new TypeNode("Point"))
@@ -670,7 +670,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")))
             .DefineFunction("test", builder => builder
                 .DefineParameter("a", new TypeNode("Point"))
@@ -694,7 +694,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("F", builder => builder
-                .DefineFunctionType(f => f
+                .FunctionType(f => f
                     .ReturnType("void")))
             .DefineType("Test", builder => builder
                 .DefineField("f", new TypeNode("F")))
@@ -756,7 +756,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineField("y", "i32")))
             .DefineFunction("test", builder => builder
@@ -803,10 +803,10 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("DU", builder => builder
-                .DefineDiscriminatedUnion(du => du
-                    .AddInterface()
-                    .AddType("i32")
-                    .AddFunctionType(f => f.ReturnType("void"))))
+                .DiscriminatedUnion(du => du
+                    .AddCase(c => c.Interface())
+                    .AddCase(c => c.Type("i32"))
+                    .AddCase(c => c.FunctionType(f => f.ReturnType("void")))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -867,5 +867,32 @@ public class TypeCheckerTests
             () => semantic.Analyze(tree),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("Array index must be of type i32"));
+    }
+
+    [Test]
+    public void GenerateMetadataForExpressionTupleTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .ReturnType(r => r
+                    .Tuple(t => t
+                        .AddCase(c => c.Type("i32"))
+                        .AddCase(c => c.Type("i32"))))
+                .Body(body => body
+                    .Return(r => r
+                        .Number(1)
+                        .Number(2)
+                        .Tuple())))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var expected = new TupleMetadata("(i32, i32)");
+        expected.AddType(TypeMetadata.I32);
+        expected.AddType(TypeMetadata.I32);
+
+        var actual = semantic.TypeProvider.GetType("(i32, i32)");
+        Assert.That(actual, Is.EqualTo(expected));
     }
 }

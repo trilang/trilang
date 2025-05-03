@@ -1,3 +1,5 @@
+using Tri.Tests.Builders;
+using Trilang;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Symbols;
@@ -525,5 +527,67 @@ public class SymbolFinderTests
         Assert.That(
             tree.SymbolTable.Types,
             Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+    }
+
+    [Test]
+    public void TupleTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("T", builder => builder
+                .Tuple(t => t
+                    .AddCase(c => c.Type("i32"))
+                    .AddCase(c => c.Type("bool"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var aliasNode = tree.Find<TypeAliasDeclarationNode>();
+        var tupleNode = tree.Find<TupleTypeNode>();
+        Assert.That(aliasNode, Is.Not.Null);
+        Assert.That(tupleNode, Is.Not.Null);
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key("(i32, bool)").WithValue(TypeSymbol.Tuple(tupleNode)));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key("T").WithValue(TypeSymbol.Alias(aliasNode)));
+    }
+
+    [Test]
+    public void NestedTupleTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("T", builder => builder
+                .Tuple(t => t
+                    .AddCase(c => c.Tuple(t2 => t2
+                        .AddCase(c2 => c2.Type("i32"))
+                        .AddCase(c2 => c2.Type("i32"))))
+                    .AddCase(c => c.Type("bool"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var aliasNode = tree.Find<TypeAliasDeclarationNode>();
+        var tupleNode = tree.Find<TupleTypeNode>(x => x.Name == "((i32, i32), bool)");
+        var nestedTupleNode = tree.Find<TupleTypeNode>(x => x.Name == "(i32, i32)");
+
+        Assert.That(aliasNode, Is.Not.Null);
+        Assert.That(tupleNode, Is.Not.Null);
+        Assert.That(nestedTupleNode, Is.Not.Null);
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(3));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key("(i32, i32)").WithValue(TypeSymbol.Tuple(nestedTupleNode)));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key("((i32, i32), bool)").WithValue(TypeSymbol.Tuple(tupleNode)));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key("T").WithValue(TypeSymbol.Alias(aliasNode)));
     }
 }

@@ -27,12 +27,14 @@ internal class GenerateMetadata : Visitor
         CreateDiscriminatedUnion(symbolTable.Types);
         CreateAliases(symbolTable.Types);
         CreateArrays(symbolTable.Types);
+        CreateTuples(symbolTable.Types);
         BuildFunctionTypes(symbolTable.Types);
 
         PopulateAliases(symbolTable.Types);
         PopulateInterfaces(symbolTable.Types);
         PopulateTypes(symbolTable.Types);
         PopulateDiscriminatedUnion(symbolTable.Types);
+        PopulateTuples(symbolTable.Types);
         BuildFunctions(symbolTable.Ids);
     }
 
@@ -280,6 +282,44 @@ internal class GenerateMetadata : Visitor
             var metadata = new TypeArrayMetadata(type);
             if (typeProvider.GetType(metadata.Name) is null)
                 typeProvider.DefineType(metadata);
+        }
+    }
+
+    private void CreateTuples(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsTuple)
+                continue;
+
+            var tuple = new TupleMetadata(symbol.Name);
+            typeProvider.DefineType(tuple);
+        }
+    }
+
+    private void PopulateTuples(IReadOnlyDictionary<string, TypeSymbol> types)
+    {
+        foreach (var (_, symbol) in types)
+        {
+            if (!symbol.IsTuple)
+                continue;
+
+            if (symbol.Node is not TupleTypeNode tupleNode)
+                throw new SemanticAnalysisException();
+
+            if (typeProvider.GetType(symbol.Name) is not TupleMetadata tuple)
+                throw new SemanticAnalysisException($"The '{symbol.Name}' type is not a tuple.");
+
+            if (tuple.Types.Count > 0)
+                continue;
+
+            foreach (var typeNode in tupleNode.Types)
+            {
+                var type = typeProvider.GetType(typeNode.Name) ??
+                           throw new SemanticAnalysisException($"The '{typeNode.Name}' type is not defined.");
+
+                tuple.AddType(type);
+            }
         }
     }
 

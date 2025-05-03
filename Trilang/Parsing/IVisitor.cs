@@ -52,6 +52,10 @@ public interface IVisitor
 
     void Visit(SyntaxTree node);
 
+    void Visit(TupleExpressionNode node);
+
+    void Visit(TupleTypeNode node);
+
     void Visit(TypeAliasDeclarationNode node);
 
     void Visit(TypeDeclarationNode node);

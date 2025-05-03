@@ -59,7 +59,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     {
         private readonly string functionName;
         private readonly List<ParameterNode> parameters;
-        private TypeNode returnType;
+        private IInlineTypeNode returnType;
         private BlockStatementNode body;
 
         public FunctionBuilder(string functionName)
@@ -82,8 +82,14 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public IFunctionBuilder ReturnType(string type)
+            => ReturnType(x => x.Type(type));
+
+        public IFunctionBuilder ReturnType(Func<IInlineTypeBuilder, IInlineTypeNode> action)
         {
-            returnType = new TypeNode(type);
+            var builder = new InlineTypeBuilder();
+            var type = action(builder);
+
+            returnType = type;
 
             return this;
         }
@@ -606,6 +612,18 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IExpressionBuilder Tuple()
+        {
+            var parameters = new IExpressionNode[stack.Count];
+            for (var i = stack.Count - 1; i >= 0; i--)
+                parameters[i] = stack.Pop();
+
+            var tuple = new TupleExpressionNode(parameters);
+            stack.Push(tuple);
+
+            return this;
+        }
+
         public IExpressionNode Build()
         {
             if (stack.Count != 1)
@@ -634,14 +652,14 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public ITypeAliasBuilder DefineType(string name)
+        public ITypeAliasBuilder Type(string name)
         {
             aliasedType = new TypeNode(name);
 
             return this;
         }
 
-        public ITypeAliasBuilder DefineFunctionType(Action<IFunctionTypeBuilder> action)
+        public ITypeAliasBuilder FunctionType(Action<IFunctionTypeBuilder> action)
         {
             var builder = new FunctionTypeBuilder();
             action(builder);
@@ -651,7 +669,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public ITypeAliasBuilder DefineInterface(Action<IInterfaceBuilder>? action = null)
+        public ITypeAliasBuilder Interface(Action<IInterfaceBuilder>? action = null)
         {
             var builder = new InterfaceBuilder();
             action?.Invoke(builder);
@@ -661,9 +679,19 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public ITypeAliasBuilder DefineDiscriminatedUnion(Action<IDiscriminatedUnionBuilder> action)
+        public ITypeAliasBuilder DiscriminatedUnion(Action<IDiscriminatedUnionBuilder> action)
         {
             var builder = new DiscriminatedUnionBuilder();
+            action(builder);
+
+            aliasedType = builder.Build();
+
+            return this;
+        }
+
+        public ITypeAliasBuilder Tuple(Action<ITupleBuilder> action)
+        {
+            var builder = new TupleBuilder();
             action(builder);
 
             aliasedType = builder.Build();
@@ -782,34 +810,76 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public DiscriminatedUnionBuilder()
             => types = [];
 
-        public IDiscriminatedUnionBuilder AddType(string type)
+        public IDiscriminatedUnionBuilder AddCase(Func<IInlineTypeBuilder, IInlineTypeNode> action)
         {
-            types.Add(new TypeNode(type));
+            var builder = new InlineTypeBuilder();
+            var type = action(builder);
 
-            return this;
-        }
-
-        public IDiscriminatedUnionBuilder AddFunctionType(Action<IFunctionTypeBuilder>? action = null)
-        {
-            var builder = new FunctionTypeBuilder();
-            action?.Invoke(builder);
-
-            types.Add(builder.Build());
-
-            return this;
-        }
-
-        public IDiscriminatedUnionBuilder AddInterface(Action<IInterfaceBuilder>? action = null)
-        {
-            var builder = new InterfaceBuilder();
-            action?.Invoke(builder);
-
-            types.Add(builder.Build());
+            types.Add(type);
 
             return this;
         }
 
         public DiscriminatedUnionNode Build()
             => new DiscriminatedUnionNode(types);
+    }
+
+    private sealed class TupleBuilder : ITupleBuilder
+    {
+        private readonly List<IInlineTypeNode> types;
+
+        public TupleBuilder()
+            => types = [];
+
+        public ITupleBuilder AddCase(Func<IInlineTypeBuilder, IInlineTypeNode> action)
+        {
+            var builder = new InlineTypeBuilder();
+            var type = action(builder);
+
+            types.Add(type);
+
+            return this;
+        }
+
+        public TupleTypeNode Build()
+            => new TupleTypeNode(types);
+    }
+
+    private sealed class InlineTypeBuilder : IInlineTypeBuilder
+    {
+        public IInlineTypeNode Type(string name)
+            => new TypeNode(name);
+
+        public IInlineTypeNode FunctionType(Action<IFunctionTypeBuilder> action)
+        {
+            var builder = new FunctionTypeBuilder();
+            action(builder);
+
+            return builder.Build();
+        }
+
+        public IInlineTypeNode Interface(Action<IInterfaceBuilder>? action = null)
+        {
+            var builder = new InterfaceBuilder();
+            action?.Invoke(builder);
+
+            return builder.Build();
+        }
+
+        public IInlineTypeNode DiscriminatedUnion(Action<IDiscriminatedUnionBuilder> action)
+        {
+            var builder = new DiscriminatedUnionBuilder();
+            action(builder);
+
+            return builder.Build();
+        }
+
+        public IInlineTypeNode Tuple(Action<ITupleBuilder> action)
+        {
+            var builder = new TupleBuilder();
+            action(builder);
+
+            return builder.Build();
+        }
     }
 }

@@ -36,6 +36,7 @@ public interface IExpressionBuilder
 
     IExpressionBuilder Call(string name);
     IExpressionBuilder New(string type);
+    IExpressionBuilder Tuple();
 
     IExpressionNode Build();
 }

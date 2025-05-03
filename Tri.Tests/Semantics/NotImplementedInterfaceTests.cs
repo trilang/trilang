@@ -10,7 +10,7 @@ public class NotImplementedInterfaceTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
@@ -35,7 +35,7 @@ public class NotImplementedInterfaceTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
@@ -60,7 +60,7 @@ public class NotImplementedInterfaceTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
@@ -86,7 +86,7 @@ public class NotImplementedInterfaceTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
@@ -108,7 +108,7 @@ public class NotImplementedInterfaceTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
@@ -134,7 +134,7 @@ public class NotImplementedInterfaceTests
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
-                .DefineInterface(i => i
+                .Interface(i => i
                     .DefineField("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))

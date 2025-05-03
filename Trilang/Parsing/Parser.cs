@@ -530,13 +530,42 @@ public class Parser
     }
 
     private IExpressionNode? TryParseOperand(ParserContext context)
-        => TryParseParenExpression(context) ??
+        => TryParseTupleExpression(context) ??
+           TryParseParenExpression(context) ??
            TryParseCallExpression(context) ??
            TryParseArrayAccessExpression(context) ??
            TryParseMemberExpression(context) ??
            TryParseNewExpression(context) ??
            TryParseNullExpression(context) ??
            TryParseLiteral(context) as IExpressionNode;
+
+    private IExpressionNode? TryParseTupleExpression(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.OpenParenthesis))
+                return null;
+
+            var expression = c.Parser.TryParseExpression(c);
+            if (expression is null)
+                return null;
+
+            var expressions = new List<IExpressionNode> { expression };
+            while (c.Reader.Check(TokenKind.Comma))
+            {
+                expression = c.Parser.TryParseExpression(c) ??
+                             throw new ParseException("Expected an expression.");
+
+                expressions.Add(expression);
+            }
+
+            if (expressions.Count <= 1)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.CloseParenthesis))
+                throw new ParseException("Expected a close parenthesis.");
+
+            return new TupleExpressionNode(expressions);
+        });
 
     private IExpressionNode? TryParseParenExpression(ParserContext context)
     {
@@ -712,6 +741,7 @@ public class Parser
     private IInlineTypeNode? TryParseInlineTypeNode(ParserContext context)
         => TryParseTypeNode(context) ??
            TryParseFunctionType(context) ??
+           TryParseTupleType(context) ??
            TryParseInterface(context) as IInlineTypeNode;
 
     private TypeNode? TryParseTypeNode(ParserContext context)
@@ -740,7 +770,7 @@ public class Parser
                 return null;
 
             if (!c.Reader.Check(TokenKind.EqualGreater))
-                throw new ParseException("Expected an arrow function.");
+                return null;
 
             var returnType = c.Parser.TryParseDiscriminatedUnion(c);
             if (returnType is null)
@@ -775,6 +805,34 @@ public class Parser
 
         return parameters;
     }
+
+    private TupleTypeNode? TryParseTupleType(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.OpenParenthesis))
+                return null;
+
+            var type = c.Parser.TryParseDiscriminatedUnion(c);
+            if (type is null)
+                return null;
+
+            var types = new List<IInlineTypeNode> { type };
+            while (c.Reader.Check(TokenKind.Comma))
+            {
+                type = c.Parser.TryParseDiscriminatedUnion(c) ??
+                       throw new ParseException("Expected a type.");
+
+                types.Add(type);
+            }
+
+            if (types.Count <= 1)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.CloseParenthesis))
+                throw new ParseException("Expected a close parenthesis.");
+
+            return new TupleTypeNode(types);
+        });
 
     private InterfaceNode? TryParseInterface(ParserContext context)
         => context.Reader.Scoped(context, static c =>

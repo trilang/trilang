@@ -256,6 +256,21 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             function.Accept(this, context);
     }
 
+    public void Visit(TupleExpressionNode node, SymbolFinderContext context)
+    {
+        foreach (var expression in node.Expressions)
+            expression.Accept(this, context);
+    }
+
+    public void Visit(TupleTypeNode node, SymbolFinderContext context)
+    {
+        foreach (var type in node.Types)
+            type.Accept(this, context);
+
+        var symbol = TypeSymbol.Tuple(node);
+        context.SymbolTable.TryAddType(symbol);
+    }
+
     public void Visit(TypeAliasDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;

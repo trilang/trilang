@@ -392,6 +392,36 @@ public partial class Formatter : IFormatter
         }
     }
 
+    public void Visit(TupleExpressionNode node)
+    {
+        writer.Write('(');
+
+        for (var i = 0; i < node.Expressions.Count; i++)
+        {
+            node.Expressions[i].Accept(this);
+
+            if (i < node.Expressions.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write(')');
+    }
+
+    public void Visit(TupleTypeNode node)
+    {
+        writer.Write('(');
+
+        for (var i = 0; i < node.Types.Count; i++)
+        {
+            node.Types[i].Accept(this);
+
+            if (i < node.Types.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write(')');
+    }
+
     public void Visit(TypeAliasDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);

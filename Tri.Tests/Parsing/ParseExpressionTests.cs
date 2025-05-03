@@ -787,4 +787,49 @@ public class ParseExpressionTests
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected an identifier."));
     }
+
+    [Test]
+    public void TupleExpressionTest()
+    {
+        var parse = new Parser();
+        var tree = parse.Parse(
+            """
+            function main(): void {
+                return (1, 2);
+            }
+            """);
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new TupleExpressionNode([
+                            LiteralExpressionNode.Number(1),
+                            LiteralExpressionNode.Number(2),
+                        ])
+                    )
+                ]))
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TupleExpressionMissingCloseParenTest()
+    {
+        var parse = new Parser();
+        const string code =
+            """
+            function main(): void {
+                return (1, 2;
+            }
+            """;
+
+        Assert.That(
+            () => parse.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close parenthesis."));
+    }
 }

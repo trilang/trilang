@@ -427,6 +427,42 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(TupleExpressionNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var element in node.Expressions)
+            element.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(TupleExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitExit(TupleExpressionNode node)
+    {
+    }
+
+    public void Visit(TupleTypeNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var type in node.Types)
+            type.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(TupleTypeNode node)
+    {
+    }
+
+    protected virtual void VisitExit(TupleTypeNode node)
+    {
+    }
+
     public void Visit(TypeAliasDeclarationNode node)
     {
         VisitEnter(node);

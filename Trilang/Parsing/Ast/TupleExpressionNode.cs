@@ -1,0 +1,63 @@
+using Trilang.Metadata;
+using Trilang.Symbols;
+
+namespace Trilang.Parsing.Ast;
+
+public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNode>
+{
+    public TupleExpressionNode(IReadOnlyList<IExpressionNode> expressions)
+    {
+        if (expressions.Count <= 1)
+            throw new ArgumentException("Tuple must have at least 2 elements", nameof(expressions));
+
+        Expressions = expressions;
+    }
+
+    public static bool operator ==(TupleExpressionNode? left, TupleExpressionNode? right)
+        => Equals(left, right);
+
+    public static bool operator !=(TupleExpressionNode? left, TupleExpressionNode? right)
+        => !Equals(left, right);
+
+    public bool Equals(TupleExpressionNode? other)
+    {
+        if (other is null)
+            return false;
+
+        if (ReferenceEquals(this, other))
+            return true;
+
+        return Expressions.SequenceEqual(other.Expressions);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null)
+            return false;
+
+        if (ReferenceEquals(this, obj))
+            return true;
+
+        if (obj.GetType() != GetType())
+            return false;
+
+        return Equals((TupleExpressionNode)obj);
+    }
+
+    public override int GetHashCode()
+        => HashCode.Combine(Expressions);
+
+    public void Accept(IVisitor visitor)
+        => visitor.Visit(this);
+
+    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
+        => visitor.Visit(this, context);
+
+    public ISyntaxNode? Parent { get; set; }
+
+    public ISymbolTable? SymbolTable { get; set; }
+
+    public IReadOnlyList<IExpressionNode> Expressions { get; }
+
+    public ITypeMetadata? ReturnTypeMetadata { get; set; }
+}

@@ -915,4 +915,137 @@ public class ParseTypeTests
 
         Assert.That(tree, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void TupleTypeTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type T = (i32, i32);");
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new TupleTypeNode([new TypeNode("i32"), new TypeNode("i32")])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void NestedTupleTypeTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type T = ((i32, i32), i32);");
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new TupleTypeNode([
+                    new TupleTypeNode([new TypeNode("i32"), new TypeNode("i32")]),
+                    new TypeNode("i32")
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TupleTypeWithDuTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type T = (bool | i32, () => void);");
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new TupleTypeNode([
+                    new DiscriminatedUnionNode([new TypeNode("bool"), new TypeNode("i32")]),
+                    new FunctionTypeNode([], new TypeNode("void"))
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TupleTypeWithSingleTypeTest()
+    {
+        var parser = new Parser();
+        const string code = "public type T = (i32);";
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
+    }
+
+    [Test]
+    public void TupleTypeMissingTest()
+    {
+        var parser = new Parser();
+        const string code = "public type T = (i32";
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close parenthesis."));
+    }
+
+    [Test]
+    public void FunctionWithTupleTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("function main(): (i32, i32) { }");
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TupleTypeNode([new TypeNode("i32"), new TypeNode("i32")]),
+                new BlockStatementNode([])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseTupleInDuTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type T = i32 | (bool, f64);");
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new DiscriminatedUnionNode([
+                    new TypeNode("i32"),
+                    new TupleTypeNode([new TypeNode("bool"), new TypeNode("f64")])
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseDuInTupleTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type T = (bool, i32 | f64);");
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new TupleTypeNode([
+                    new TypeNode("bool"),
+                    new DiscriminatedUnionNode([new TypeNode("i32"), new TypeNode("f64")])
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
 }

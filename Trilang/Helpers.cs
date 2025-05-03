@@ -36,8 +36,19 @@ public static class Helpers
                     .Select(x => Find(x, predicate))
                     .FirstOrDefault(x => x is not null),
 
+            ConstructorDeclarationNode constructorDeclarationNode
+                => constructorDeclarationNode.Parameters
+                       .Select(x => Find(x, predicate))
+                       .FirstOrDefault(x => x is not null) ??
+                   Find(constructorDeclarationNode.Body, predicate),
+
             ContinueNode
                 => null,
+
+            DiscriminatedUnionNode discriminatedUnionNode
+                => discriminatedUnionNode.Types
+                    .Select(x => Find(x, predicate))
+                    .FirstOrDefault(x => x is not null),
 
             ExpressionStatementNode expressionStatementNode
                 => Find(expressionStatementNode.Expression, predicate),
@@ -57,6 +68,11 @@ public static class Helpers
                        .FirstOrDefault(x => x is not null) ??
                    Find(functionTypeDeclarationNode.ReturnType, predicate),
 
+            IfStatementNode ifStatementNode
+                => Find(ifStatementNode.Condition, predicate) ??
+                   Find(ifStatementNode.Then, predicate) ??
+                   Find(ifStatementNode.Else, predicate),
+
             InterfaceNode interfaceNode
                 => interfaceNode.Fields
                        .Select(x => Find(x, predicate))
@@ -74,13 +90,11 @@ public static class Helpers
                        .FirstOrDefault(x => x is not null) ??
                    Find(interfaceMethodNode.ReturnType, predicate),
 
-            IfStatementNode ifStatementNode
-                => Find(ifStatementNode.Condition, predicate) ??
-                   Find(ifStatementNode.Then, predicate) ??
-                   Find(ifStatementNode.Else, predicate),
-
             LiteralExpressionNode
                 => null,
+
+            MemberAccessExpressionNode memberAccessExpressionNode
+                => Find(memberAccessExpressionNode.Member, predicate),
 
             MethodDeclarationNode methodDeclarationNode
                 => methodDeclarationNode.Parameters
@@ -89,8 +103,14 @@ public static class Helpers
                    Find(methodDeclarationNode.ReturnType, predicate) ??
                    Find(methodDeclarationNode.Body, predicate),
 
-            MemberAccessExpressionNode memberAccessExpressionNode
-                => Find(memberAccessExpressionNode.Member, predicate),
+            NewExpressionNode newExpressionNode
+                => Find(newExpressionNode.Type, predicate) ??
+                   newExpressionNode.Parameters
+                       .Select(x => Find(x, predicate))
+                       .FirstOrDefault(x => x is not null),
+
+            NullExpressionNode
+                => null,
 
             ParameterNode parameterNode
                 => Find(parameterNode.Type, predicate),
@@ -100,6 +120,16 @@ public static class Helpers
 
             SyntaxTree syntaxTree
                 => syntaxTree.Declarations
+                    .Select(x => Find(x, predicate))
+                    .FirstOrDefault(x => x is not null),
+
+            TupleExpressionNode tupleExpressionNode
+                => tupleExpressionNode.Expressions
+                    .Select(x => Find(x, predicate))
+                    .FirstOrDefault(x => x is not null),
+
+            TupleTypeNode tupleTypeNode
+                => tupleTypeNode.Types
                     .Select(x => Find(x, predicate))
                     .FirstOrDefault(x => x is not null),
 
@@ -117,11 +147,11 @@ public static class Helpers
             TypeNode
                 => null,
 
-            VariableDeclarationStatementNode variableDeclarationStatementNode
-                => Find(variableDeclarationStatementNode.Expression, predicate),
-
             UnaryExpressionNode unaryExpressionNode
                 => Find(unaryExpressionNode.Operand, predicate),
+
+            VariableDeclarationStatementNode variableDeclarationStatementNode
+                => Find(variableDeclarationStatementNode.Expression, predicate),
 
             WhileNode whileNode
                 => Find(whileNode.Condition, predicate) ??

@@ -419,6 +419,40 @@ internal class TypeChecker : IVisitor
             statement.Accept(this);
     }
 
+    public void Visit(TupleExpressionNode node)
+    {
+        foreach (var expression in node.Expressions)
+            expression.Accept(this);
+
+        // we can't generate metadata for this tuple in GenerateMetadata
+        // because we don't know the types of the expressions yet
+        var name = $"({string.Join(", ", node.Expressions.Select(x => x.ReturnTypeMetadata!.Name))})";
+        var metadata = typeProvider.GetType(name);
+        if (metadata is null)
+        {
+            var tuple = new TupleMetadata(name);
+            foreach (var expression in node.Expressions)
+                tuple.AddType(expression.ReturnTypeMetadata!);
+
+            typeProvider.DefineType(tuple);
+            metadata = tuple;
+        }
+
+        node.ReturnTypeMetadata = metadata;
+    }
+
+    public void Visit(TupleTypeNode node)
+    {
+        foreach (var type in node.Types)
+            type.Accept(this);
+
+        var name = $"({string.Join(", ", node.Types.Select(x => x.Metadata!.Name))})";
+        var metadata = typeProvider.GetType(name) ??
+                       throw new SemanticAnalysisException($"Unknown tuple type '{name}'");
+
+        node.Metadata = metadata;
+    }
+
     public void Visit(TypeAliasDeclarationNode node)
     {
         node.Type.Accept(this);

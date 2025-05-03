@@ -4,11 +4,7 @@ namespace Tri.Tests.Builders;
 
 public interface IDiscriminatedUnionBuilder
 {
-    IDiscriminatedUnionBuilder AddType(string type);
-
-    IDiscriminatedUnionBuilder AddFunctionType(Action<IFunctionTypeBuilder>? action = null);
-
-    IDiscriminatedUnionBuilder AddInterface(Action<IInterfaceBuilder>? action = null);
+    IDiscriminatedUnionBuilder AddCase(Func<IInlineTypeBuilder, IInlineTypeNode> action);
 
     DiscriminatedUnionNode Build();
 }

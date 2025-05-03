@@ -52,6 +52,10 @@ public interface IVisitor<in TContext>
 
     void Visit(SyntaxTree node, TContext context);
 
+    void Visit(TupleExpressionNode node, TContext context);
+
+    void Visit(TupleTypeNode node, TContext context);
+
     void Visit(TypeAliasDeclarationNode node, TContext context);
 
     void Visit(TypeDeclarationNode node, TContext context);

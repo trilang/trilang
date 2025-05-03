@@ -8,4 +8,5 @@ public enum TypeSymbolKind
     Function,
     Interface,
     DiscriminatedUnion,
+    Tuple,
 }

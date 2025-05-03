@@ -10,6 +10,8 @@ public interface IFunctionBuilder
 
     IFunctionBuilder ReturnType(string type);
 
+    IFunctionBuilder ReturnType(Func<IInlineTypeBuilder, IInlineTypeNode> action);
+
     IFunctionBuilder Body(Action<IBlockBuilder> action);
 
     FunctionDeclarationNode Build();

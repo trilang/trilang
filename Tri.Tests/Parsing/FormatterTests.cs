@@ -1558,4 +1558,68 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatTupleTypeTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new TupleTypeNode([
+                    new TypeNode("bool"),
+                    new TypeNode("i32"),
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type T = (bool, i32);";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatNestedTupleTypeTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                new TupleTypeNode([
+                    new TupleTypeNode([new TypeNode("bool"), new TypeNode("i8")]),
+                    new TypeNode("i32"),
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type T = ((bool, i8), i32);";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatTupleExpressionTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new TupleExpressionNode([
+                            LiteralExpressionNode.True(),
+                            LiteralExpressionNode.Number(1)
+                        ])
+                    )
+                ]))
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                return (true, 1);
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

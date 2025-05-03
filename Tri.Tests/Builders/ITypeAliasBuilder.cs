@@ -6,13 +6,15 @@ public interface ITypeAliasBuilder
 {
     ITypeAliasBuilder AccessModifier(AccessModifier modifier);
 
-    ITypeAliasBuilder DefineType(string name);
+    ITypeAliasBuilder Type(string name);
 
-    ITypeAliasBuilder DefineFunctionType(Action<IFunctionTypeBuilder> action);
+    ITypeAliasBuilder FunctionType(Action<IFunctionTypeBuilder> action);
 
-    ITypeAliasBuilder DefineInterface(Action<IInterfaceBuilder>? action = null);
+    ITypeAliasBuilder Interface(Action<IInterfaceBuilder>? action = null);
 
-    ITypeAliasBuilder DefineDiscriminatedUnion(Action<IDiscriminatedUnionBuilder> action);
+    ITypeAliasBuilder DiscriminatedUnion(Action<IDiscriminatedUnionBuilder> action);
+
+    ITypeAliasBuilder Tuple(Action<ITupleBuilder> action);
 
     TypeAliasDeclarationNode Build();
 }

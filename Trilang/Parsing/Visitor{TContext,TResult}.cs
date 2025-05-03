@@ -491,6 +491,49 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(TupleExpressionNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        foreach (var element in node.Expressions)
+            element.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(TupleExpressionNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(TupleExpressionNode node, TContext context)
+    {
+    }
+
+    public void Visit(TupleTypeNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        foreach (var type in node.Types)
+            type.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(TupleTypeNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(TupleTypeNode node, TContext context)
+    {
+    }
+
+
     public void Visit(TypeAliasDeclarationNode node, TContext context)
     {
         if (context.IsFinished)
