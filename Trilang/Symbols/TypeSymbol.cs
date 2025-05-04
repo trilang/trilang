@@ -14,8 +14,8 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
     public static TypeSymbol Type(TypeDeclarationNode node)
         => new TypeSymbol(TypeSymbolKind.Type, node.Name, node);
 
-    public static TypeSymbol Array(string name)
-        => new TypeSymbol(TypeSymbolKind.Array, name, null);
+    public static TypeSymbol Array(ArrayTypeNode node)
+        => new TypeSymbol(TypeSymbolKind.Array, node.Name, node);
 
     public static TypeSymbol Alias(TypeAliasDeclarationNode node)
         => new TypeSymbol(TypeSymbolKind.Alias, node.Name, node);

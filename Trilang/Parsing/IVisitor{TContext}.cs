@@ -6,6 +6,8 @@ public interface IVisitor<in TContext>
 {
     void Visit(ArrayAccessExpressionNode node, TContext context);
 
+    void Visit(ArrayTypeNode node, TContext context);
+
     void Visit(BinaryExpressionNode node, TContext context);
 
     void Visit(BlockStatementNode node, TContext context);
@@ -42,7 +44,9 @@ public interface IVisitor<in TContext>
 
     void Visit(MethodDeclarationNode node, TContext context);
 
-    void Visit(NewExpressionNode node, TContext context);
+    void Visit(NewArrayExpressionNode node, TContext context);
+
+    void Visit(NewObjectExpressionNode node, TContext context);
 
     void Visit(NullExpressionNode node, TContext context);
 

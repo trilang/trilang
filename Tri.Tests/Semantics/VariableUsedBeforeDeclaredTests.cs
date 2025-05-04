@@ -27,7 +27,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineParameter("a", "i32")
+                .DefineParameter("a", t => t.Type("i32"))
                 .Body(body => body
                     .Statement(exp => exp.MemberAccess("a"))))
             .Build();

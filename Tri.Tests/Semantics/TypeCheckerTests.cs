@@ -30,8 +30,8 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineParameter("a", "i32")
-                .DefineParameter("b", "bool")
+                .DefineParameter("a", t => t.Type("i32"))
+                .DefineParameter("b", t => t.Type("bool"))
                 .Body(_ => { }))
             .Build();
 
@@ -131,7 +131,7 @@ public class TypeCheckerTests
     public void SetMetadataForAliasType()
     {
         var tree = new TreeBuilder()
-            .DefineAliasType("MyInt", new TypeNode("i32"))
+            .DefineAliasType("MyInt", t => t.Type("i32"))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -168,8 +168,8 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("add", builder => builder
-                .DefineParameter("a", "i32")
-                .DefineParameter("b", "i32")
+                .DefineParameter("a", t => t.Type("i32"))
+                .DefineParameter("b", t => t.Type("i32"))
                 .ReturnType("i32")
                 .Body(body => body.Return(exp => exp.Number(0))))
             .Build();
@@ -378,7 +378,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", builder => builder
-                .DefineParameter("a", "i32")
+                .DefineParameter("a", t => t.Type("i32"))
                 .ReturnType("i32")
                 .Body(body => body
                     .Return(exp => exp.MemberAccess("a"))))
@@ -432,7 +432,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("add", builder => builder
-                .DefineParameter("a", "i32")
+                .DefineParameter("a", t => t.Type("i32"))
                 .ReturnType("i32")
                 .Body(_ => { }))
             .DefineFunction("main", builder => builder
@@ -535,8 +535,8 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("add", builder => builder
-                .DefineParameter("a", "i32")
-                .DefineParameter("b", "i32")
+                .DefineParameter("a", t => t.Type("i32"))
+                .DefineParameter("b", t => t.Type("i32"))
                 .ReturnType("i32"))
             .DefineFunction("main", builder => builder
                 .Body(body => body
@@ -560,7 +560,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("test", builder => builder
-                .DefineParameter("a", "i32")
+                .DefineParameter("a", t => t.Type("i32"))
                 .Body(body => body
                     .Expression(r => r
                         .Call("a"))))
@@ -644,7 +644,7 @@ public class TypeCheckerTests
                 .Interface(i => i
                     .DefineField("x", "i32")))
             .DefineFunction("test", builder => builder
-                .DefineParameter("a", new TypeNode("Point"))
+                .DefineParameter("a", t => t.Type("Point"))
                 .ReturnType("i32")
                 .Body(body => body
                     .Return(r => r
@@ -673,7 +673,7 @@ public class TypeCheckerTests
                 .Interface(i => i
                     .DefineField("x", "i32")))
             .DefineFunction("test", builder => builder
-                .DefineParameter("a", new TypeNode("Point"))
+                .DefineParameter("a", t => t.Type("Point"))
                 .ReturnType("i32")
                 .Body(body => body
                     .Return(r => r
@@ -699,7 +699,7 @@ public class TypeCheckerTests
             .DefineType("Test", builder => builder
                 .DefineField("f", new TypeNode("F")))
             .DefineFunction("test", builder => builder
-                .DefineParameter("a", new TypeNode("Test"))
+                .DefineParameter("a", t => t.Type("Test"))
                 .ReturnType("F")
                 .Body(body => body
                     .Return(r => r
@@ -734,7 +734,7 @@ public class TypeCheckerTests
                     .DefineVariable("a", new TypeNode("Point"), exp => exp
                         .Number(1)
                         .Number(2)
-                        .New("Point"))))
+                        .NewObject("Point"))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -746,7 +746,7 @@ public class TypeCheckerTests
         var ctor = type.GetConstructor([TypeMetadata.I32, TypeMetadata.I32]);
         Assert.That(ctor, Is.Not.Null);
 
-        var newOp = tree.Find<NewExpressionNode>();
+        var newOp = tree.Find<NewObjectExpressionNode>();
         Assert.That(newOp, Is.Not.Null);
         Assert.That(newOp.Metadata, Is.EqualTo(ctor));
     }
@@ -764,7 +764,7 @@ public class TypeCheckerTests
                     .DefineVariable("a", new TypeNode("Point"), exp => exp
                         .Number(1)
                         .Number(2)
-                        .New("Point"))))
+                        .NewObject("Point"))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -787,7 +787,7 @@ public class TypeCheckerTests
                 .Body(body => body
                     .DefineVariable("a", new TypeNode("Point"), exp => exp
                         .Number(2)
-                        .New("Point"))))
+                        .NewObject("Point"))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -832,7 +832,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("test", builder => builder
-                .DefineParameter("a", "i32")
+                .DefineParameter("a", t => t.Type("i32"))
                 .Body(body => body
                     .Return(r => r
                         .MemberAccess("a")
@@ -853,7 +853,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("test", builder => builder
-                .DefineParameter("a", "i32[]")
+                .DefineParameter("a", t => t.Array("i32"))
                 .Body(body => body
                     .Return(r => r
                         .MemberAccess("a")
@@ -894,5 +894,27 @@ public class TypeCheckerTests
 
         var actual = semantic.TypeProvider.GetType("(i32, i32)");
         Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void NewArrayReturnTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("main", f => f
+                .ReturnType(t=>t.Array("i32"))
+                .Body(body => body
+                    .Return(r => r
+                        .Number(10)
+                        .NewArray("i32"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var expected = new TypeArrayMetadata(TypeMetadata.I32);
+
+        var newArray = tree.Find<NewArrayExpressionNode>();
+        Assert.That(newArray, Is.Not.Null);
+        Assert.That(newArray.ReturnTypeMetadata, Is.EqualTo(expected));
     }
 }

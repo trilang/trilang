@@ -35,7 +35,8 @@ public interface IExpressionBuilder
     IExpressionBuilder XorAssign();
 
     IExpressionBuilder Call(string name);
-    IExpressionBuilder New(string type);
+    IExpressionBuilder NewObject(string type);
+    IExpressionBuilder NewArray(string type);
     IExpressionBuilder Tuple();
 
     IExpressionNode Build();

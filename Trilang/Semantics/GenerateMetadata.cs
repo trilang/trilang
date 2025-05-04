@@ -26,8 +26,8 @@ internal class GenerateMetadata : Visitor
         CreateInterfaces(symbolTable.Types);
         CreateDiscriminatedUnion(symbolTable.Types);
         CreateAliases(symbolTable.Types);
-        CreateArrays(symbolTable.Types);
         CreateTuples(symbolTable.Types);
+        CreateArrays(symbolTable.Types);
         BuildFunctionTypes(symbolTable.Types);
 
         PopulateAliases(symbolTable.Types);
@@ -270,14 +270,16 @@ internal class GenerateMetadata : Visitor
 
     private void CreateArrays(IReadOnlyDictionary<string, TypeSymbol> types)
     {
-        // all array and alias types are processed after all types are defined to support forward references
         foreach (var (_, symbol) in types)
         {
             if (!symbol.IsArray)
                 continue;
 
-            var type = typeProvider.GetType(symbol.Name[..^2]) ??
-                       throw new SemanticAnalysisException($"The '{symbol.Name}' array item type is not defined.");
+            if (symbol.Node is not ArrayTypeNode arrayTypeNode)
+                throw new SemanticAnalysisException();
+
+            var type = typeProvider.GetType(arrayTypeNode.ElementType.Name) ??
+                       throw new SemanticAnalysisException($"The '{arrayTypeNode.ElementType.Name}' array item type is not defined.");
 
             var metadata = new TypeArrayMetadata(type);
             if (typeProvider.GetType(metadata.Name) is null)

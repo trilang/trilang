@@ -4,18 +4,21 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
+public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
 {
-    public TypeNode(string name)
-        => Name = name;
+    public ArrayTypeNode(IInlineTypeNode elementType)
+    {
+        Name = $"{elementType.Name}[]";
+        ElementType = elementType;
+    }
 
-    public static bool operator ==(TypeNode? left, TypeNode? right)
+    public static bool operator ==(ArrayTypeNode? left, ArrayTypeNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(TypeNode? left, TypeNode? right)
+    public static bool operator !=(ArrayTypeNode? left, ArrayTypeNode? right)
         => !Equals(left, right);
 
-    public bool Equals(TypeNode? other)
+    public bool Equals(ArrayTypeNode? other)
     {
         if (other is null)
             return false;
@@ -23,25 +26,19 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return ElementType.Equals(other.ElementType);
     }
 
     public override bool Equals(object? obj)
     {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((TypeNode)obj);
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((ArrayTypeNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
+        => HashCode.Combine(ElementType);
 
     public override string ToString()
     {
@@ -62,6 +59,8 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
     public ISymbolTable? SymbolTable { get; set; }
 
     public string Name { get; }
+
+    public IInlineTypeNode ElementType { get; }
 
     public ITypeMetadata? Metadata { get; set; }
 }

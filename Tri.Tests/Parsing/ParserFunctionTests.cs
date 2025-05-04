@@ -136,7 +136,7 @@ public class ParserFunctionTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "test",
-                [new ParameterNode("x", new TypeNode("i32[]"))],
+                [new ParameterNode("x", new ArrayTypeNode(new TypeNode("i32")))],
                 new TypeNode("void"),
                 new BlockStatementNode())
         ]);

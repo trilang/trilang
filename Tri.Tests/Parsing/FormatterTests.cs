@@ -952,7 +952,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new ParameterNode("x", new TypeNode("i32[]"))],
+                [new ParameterNode("x", new ArrayTypeNode(new TypeNode("i32")))],
                 new TypeNode("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
@@ -978,7 +978,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "add",
-                [new ParameterNode("x", new TypeNode("i32[]"))],
+                [new ParameterNode("x", new ArrayTypeNode(new TypeNode("i32")))],
                 new TypeNode("void"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
@@ -1435,7 +1435,7 @@ public class FormatterTests
                     new VariableDeclarationStatementNode(
                         "p",
                         new TypeNode("Point"),
-                        new NewExpressionNode(
+                        new NewObjectExpressionNode(
                             new TypeNode("Point"),
                             [LiteralExpressionNode.Number(1), LiteralExpressionNode.Number(2)]
                         )
@@ -1617,6 +1617,35 @@ public class FormatterTests
             """
             function main(): void {
                 return (true, 1);
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatNewArrayTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new NewArrayExpressionNode(
+                            new ArrayTypeNode(new TypeNode("i32")),
+                            LiteralExpressionNode.Number(10)
+                        )
+                    )
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function main(): void {
+                return new i32[10];
             }
             """;
 

@@ -8,8 +8,6 @@ public interface ISyntaxTreeBuilder
 
     ISyntaxTreeBuilder DefineType(string name, Action<ITypeBuilder>? action = null);
 
-    ISyntaxTreeBuilder DefineAliasType(string name, TypeNode aliasType);
-
     ISyntaxTreeBuilder DefineAliasType(string name, Action<ITypeAliasBuilder> action);
 
     SyntaxTree Build();

@@ -4,18 +4,21 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
+public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpressionNode>
 {
-    public TypeNode(string name)
-        => Name = name;
+    public NewObjectExpressionNode(TypeNode type, IReadOnlyList<IExpressionNode> parameters)
+    {
+        Type = type;
+        Parameters = parameters;
+    }
 
-    public static bool operator ==(TypeNode? left, TypeNode? right)
+    public static bool operator ==(NewObjectExpressionNode? left, NewObjectExpressionNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(TypeNode? left, TypeNode? right)
+    public static bool operator !=(NewObjectExpressionNode? left, NewObjectExpressionNode? right)
         => !Equals(left, right);
 
-    public bool Equals(TypeNode? other)
+    public bool Equals(NewObjectExpressionNode? other)
     {
         if (other is null)
             return false;
@@ -23,7 +26,8 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return Type.Equals(other.Type) &&
+               Parameters.SequenceEqual(other.Parameters);
     }
 
     public override bool Equals(object? obj)
@@ -37,11 +41,11 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((TypeNode)obj);
+        return Equals((NewObjectExpressionNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
+        => HashCode.Combine(Type, Parameters);
 
     public override string ToString()
     {
@@ -61,7 +65,12 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public string Name { get; }
+    public TypeNode Type { get; }
 
-    public ITypeMetadata? Metadata { get; set; }
+    public IReadOnlyList<IExpressionNode> Parameters { get; }
+
+    public ConstructorMetadata? Metadata { get; set; }
+
+    public ITypeMetadata? ReturnTypeMetadata
+        => Metadata?.DeclaringType;
 }

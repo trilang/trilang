@@ -777,7 +777,7 @@ public class ParseTypeTests
                     new VariableDeclarationStatementNode(
                         "p",
                         new TypeNode("Point"),
-                        new NewExpressionNode(new TypeNode("Point"), [])
+                        new NewObjectExpressionNode(new TypeNode("Point"), [])
                     )
                 ])
             )
@@ -806,7 +806,7 @@ public class ParseTypeTests
                     new VariableDeclarationStatementNode(
                         "p",
                         new TypeNode("Point"),
-                        new NewExpressionNode(
+                        new NewObjectExpressionNode(
                             new TypeNode("Point"),
                             [LiteralExpressionNode.Number(1), LiteralExpressionNode.Number(2)]
                         )

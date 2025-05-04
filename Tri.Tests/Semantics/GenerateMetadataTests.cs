@@ -154,7 +154,7 @@ public class GenerateMetadataTests
     public void GenerateMetadataForTypeAliasTest()
     {
         var tree = new TreeBuilder()
-            .DefineAliasType("MyInt", new TypeNode("i32"))
+            .DefineAliasType("MyInt", t => t.Type("i32"))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -170,7 +170,7 @@ public class GenerateMetadataTests
     public void GenerateMetadataForTypeAliasMissingTypeTest()
     {
         var tree = new TreeBuilder()
-            .DefineAliasType("MyInt", new TypeNode("xxx"))
+            .DefineAliasType("MyInt", t => t.Type("xxx"))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -186,7 +186,7 @@ public class GenerateMetadataTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("test", builder => builder
-                .DefineParameter("arr", new TypeNode("i32[]"))
+                .DefineParameter("arr", t => t.Array("i32"))
                 .Body(body => body.Return()))
             .Build();
 
@@ -204,7 +204,7 @@ public class GenerateMetadataTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("test", builder => builder
-                .DefineParameter("arr", new TypeNode("xxx"))
+                .DefineParameter("arr", t => t.Type("xxx"))
                 .Body(body => body.Return()))
             .Build();
 
@@ -221,8 +221,8 @@ public class GenerateMetadataTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("test", builder => builder
-                .DefineParameter("a", "i32")
-                .DefineParameter("b", "i32")
+                .DefineParameter("a", t => t.Type("i32"))
+                .DefineParameter("b", t => t.Type("i32"))
                 .ReturnType("i32")
                 .Body(body => body.Return(r => r.Number(1))))
             .Build();
@@ -240,7 +240,7 @@ public class GenerateMetadataTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("test", builder => builder
-                .DefineParameter("a", "xxx")
+                .DefineParameter("a", t => t.Type("xxx"))
                 .Body(body => body.Return()))
             .Build();
 
@@ -274,7 +274,7 @@ public class GenerateMetadataTests
     {
         var tree = new TreeBuilder()
             .DefineType("Point")
-            .DefineAliasType("MyPoint", new TypeNode("Point"))
+            .DefineAliasType("MyPoint", t => t.Type("Point"))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -294,7 +294,7 @@ public class GenerateMetadataTests
     public void GenerateMetadataForForwardRefAliasAndTypeTest()
     {
         var tree = new TreeBuilder()
-            .DefineAliasType("MyPoint", new TypeNode("Point"))
+            .DefineAliasType("MyPoint", t => t.Type("Point"))
             .DefineType("Point")
             .Build();
 
@@ -316,7 +316,7 @@ public class GenerateMetadataTests
     {
         var tree = new TreeBuilder()
             .DefineType("Point")
-            .DefineAliasType("MyPoint", new TypeNode("Point[]"))
+            .DefineAliasType("MyPoint", t => t.Array("Point"))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -339,7 +339,7 @@ public class GenerateMetadataTests
     public void GenerateMetadataForForwardRefAliasAndArrayTest()
     {
         var tree = new TreeBuilder()
-            .DefineAliasType("MyPoint", new TypeNode("Point[]"))
+            .DefineAliasType("MyPoint", t => t.Array("Point"))
             .DefineType("Point")
             .Build();
 

@@ -38,6 +38,17 @@ internal sealed class TokenReader
         return result;
     }
 
+    public Token Peek()
+    {
+        if (HasEnded)
+            throw new InvalidOperationException("Cannot peek at end of file.");
+
+        if (index + 1 >= tokens.Count)
+            throw new InvalidOperationException("Cannot peek beyond end of file.");
+
+        return tokens[index + 1];
+    }
+
     public TResult Scoped<TResult>(ParserContext context, Func<ParserContext, TResult> action)
         where TResult : ISyntaxNode?
     {

@@ -30,6 +30,14 @@ internal class TypeChecker : IVisitor
             throw new SemanticAnalysisException("Array index must be of type i32");
     }
 
+    public void Visit(ArrayTypeNode node)
+    {
+        node.ElementType.Accept(this);
+
+        node.Metadata = typeProvider.GetType(node.Name) ??
+                        throw new SemanticAnalysisException($"Unknown array type '{node.Name}'");
+    }
+
     public void Visit(BinaryExpressionNode node)
     {
         node.Left.Accept(this);
@@ -358,7 +366,15 @@ internal class TypeChecker : IVisitor
         node.Body.Accept(this);
     }
 
-    public void Visit(NewExpressionNode node)
+    public void Visit(NewArrayExpressionNode node)
+    {
+        node.Type.Accept(this);
+        node.Size.Accept(this);
+
+        node.ReturnTypeMetadata = node.Type.Metadata;
+    }
+
+    public void Visit(NewObjectExpressionNode node)
     {
         node.Type.Accept(this);
 

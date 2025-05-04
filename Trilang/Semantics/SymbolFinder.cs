@@ -14,6 +14,11 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Index.Accept(this, context);
     }
 
+    public void Visit(ArrayTypeNode node, SymbolFinderContext context)
+    {
+        context.SymbolTable.TryAddType(TypeSymbol.Array(node));
+    }
+
     public void Visit(BinaryExpressionNode node, SymbolFinderContext context)
     {
         node.Left.Accept(this, context);
@@ -217,7 +222,13 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(NewExpressionNode node, SymbolFinderContext context)
+    public void Visit(NewArrayExpressionNode node, SymbolFinderContext context)
+    {
+        node.Type.Accept(this, context);
+        node.Size.Accept(this, context);
+    }
+
+    public void Visit(NewObjectExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -308,9 +319,6 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
     public void Visit(TypeNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
-
-        if (node.IsArray)
-            context.SymbolTable.TryAddType(TypeSymbol.Array(node.Name));
     }
 
     public void Visit(UnaryExpressionNode node, SymbolFinderContext context)

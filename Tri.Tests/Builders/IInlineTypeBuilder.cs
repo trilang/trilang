@@ -6,6 +6,8 @@ public interface IInlineTypeBuilder
 {
     IInlineTypeNode Type(string name);
 
+    IInlineTypeNode Array(string name);
+
     IInlineTypeNode FunctionType(Action<IFunctionTypeBuilder> action);
 
     IInlineTypeNode Interface(Action<IInterfaceBuilder>? action = null);

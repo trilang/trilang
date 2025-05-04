@@ -18,6 +18,23 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(ArrayTypeNode node)
+    {
+        VisitEnter(node);
+
+        node.ElementType.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(ArrayTypeNode node)
+    {
+    }
+
+    protected virtual void VisitExit(ArrayTypeNode node)
+    {
+    }
+
     public void Visit(BinaryExpressionNode node)
     {
         VisitEnter(node);
@@ -341,7 +358,25 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void Visit(NewExpressionNode node)
+    public void Visit(NewArrayExpressionNode node)
+    {
+        VisitEnter(node);
+
+        node.Type.Accept(this);
+        node.Size.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(NewArrayExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitExit(NewArrayExpressionNode node)
+    {
+    }
+
+    public void Visit(NewObjectExpressionNode node)
     {
         VisitEnter(node);
 
@@ -353,11 +388,11 @@ public abstract class Visitor : IVisitor
         VisitExit(node);
     }
 
-    protected virtual void VisitEnter(NewExpressionNode node)
+    protected virtual void VisitEnter(NewObjectExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(NewExpressionNode node)
+    protected virtual void VisitExit(NewObjectExpressionNode node)
     {
     }
 

@@ -28,6 +28,12 @@ public partial class Formatter : IFormatter
         writer.Write(']');
     }
 
+    public void Visit(ArrayTypeNode node)
+    {
+        node.ElementType.Accept(this);
+        writer.Write("[]");
+    }
+
     public void Visit(BinaryExpressionNode node)
     {
         node.Left.Accept(this);
@@ -337,7 +343,16 @@ public partial class Formatter : IFormatter
         node.Body.Accept(this);
     }
 
-    public void Visit(NewExpressionNode node)
+    public void Visit(NewArrayExpressionNode node)
+    {
+        writer.Write("new ");
+        node.Type.ElementType.Accept(this);
+        writer.Write('[');
+        node.Size.Accept(this);
+        writer.Write(']');
+    }
+
+    public void Visit(NewObjectExpressionNode node)
     {
         writer.Write("new ");
         node.Type.Accept(this);

@@ -535,7 +535,8 @@ public class Parser
            TryParseCallExpression(context) ??
            TryParseArrayAccessExpression(context) ??
            TryParseMemberExpression(context) ??
-           TryParseNewExpression(context) ??
+           TryParseNewObjectExpression(context) ??
+           TryParseNewArrayExpression(context) ??
            TryParseNullExpression(context) ??
            TryParseLiteral(context) as IExpressionNode;
 
@@ -664,7 +665,7 @@ public class Parser
         return new NullExpressionNode();
     }
 
-    private NewExpressionNode? TryParseNewExpression(ParserContext context)
+    private NewObjectExpressionNode? TryParseNewObjectExpression(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
             if (!c.Reader.Check(TokenKind.New))
@@ -694,7 +695,28 @@ public class Parser
             if (!c.Reader.Check(TokenKind.CloseParenthesis))
                 throw new ParseException("Expected a close parenthesis.");
 
-            return new NewExpressionNode(type, arguments);
+            return new NewObjectExpressionNode(type, arguments);
+        });
+
+    private NewArrayExpressionNode? TryParseNewArrayExpression(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.New))
+                return null;
+
+            var type = c.Parser.TryParseTypeNode(c) ??
+                       throw new ParseException("Expected a type.");
+
+            if (!c.Reader.Check(TokenKind.OpenBracket))
+                return null;
+
+            var size = c.Parser.TryParseExpression(c) ??
+                       throw new ParseException("Expected a size.");
+
+            if (!c.Reader.Check(TokenKind.CloseBracket))
+                throw new ParseException("Expected a close bracket.");
+
+            return new NewArrayExpressionNode(new ArrayTypeNode(type), size);
         });
 
     private LiteralExpressionNode? TryParseLiteral(ParserContext context)
@@ -739,27 +761,50 @@ public class Parser
     }
 
     private IInlineTypeNode? TryParseInlineTypeNode(ParserContext context)
-        => TryParseTypeNode(context) ??
+        => TryParseNull(context) ??
+           TryParseArrayType(context) ??
+           TryParseTypeNode(context) ??
            TryParseFunctionType(context) ??
            TryParseTupleType(context) ??
            TryParseInterface(context) as IInlineTypeNode;
 
-    private TypeNode? TryParseTypeNode(ParserContext context)
+    private IInlineTypeNode? TryParseNull(ParserContext context)
+    {
+        if (!context.Reader.Check(TokenKind.Null))
+            return null;
+
+        return new TypeNode("null");
+    }
+
+    private IInlineTypeNode? TryParseArrayType(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (c.Reader.Check(TokenKind.Null))
-                return new TypeNode("null");
-
             if (!c.Reader.Check(TokenKind.Identifier, out var token))
                 return null;
 
-            if (!c.Reader.Check(TokenKind.OpenBracket))
-                return new TypeNode(token.Identifier);
+            if (c.Reader.Current.Is(TokenKind.OpenBracket))
+            {
+                var next = c.Reader.Peek();
+                if (next.Is(TokenKind.CloseBracket))
+                {
+                    c.Reader.Advance();
+                    c.Reader.Advance();
 
-            if (!c.Reader.Check(TokenKind.CloseBracket))
-                throw new ParseException("Expected a close bracket.");
+                    var typeNode = new TypeNode(token.Identifier);
+                    return new ArrayTypeNode(typeNode);
+                }
+            }
 
-            return new TypeNode($"{token.Identifier}[]");
+            return null;
+        });
+
+    private TypeNode? TryParseTypeNode(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.Identifier, out var token))
+                return null;
+
+            return new TypeNode(token.Identifier);
         });
 
     private FunctionTypeNode? TryParseFunctionType(ParserContext context)

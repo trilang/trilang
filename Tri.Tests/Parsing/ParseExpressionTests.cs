@@ -706,7 +706,7 @@ public class ParseExpressionTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "test",
-                [new ParameterNode("x", new TypeNode("i32[]"))],
+                [new ParameterNode("x", new ArrayTypeNode(new TypeNode("i32")))],
                 new TypeNode("void"),
                 new BlockStatementNode([
                     new VariableDeclarationStatementNode(
@@ -831,5 +831,34 @@ public class ParseExpressionTests
             () => parse.Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a close parenthesis."));
+    }
+
+    [Test]
+    public void ParseNewArrayTest()
+    {
+        var parse = new Parser();
+        var tree = parse.Parse(
+            """
+            function main(): void {
+                return new i32[10];
+            }
+            """);
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new NewArrayExpressionNode(
+                            new ArrayTypeNode(new TypeNode("i32")),
+                            LiteralExpressionNode.Number(10)
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
     }
 }

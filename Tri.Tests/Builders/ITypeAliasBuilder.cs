@@ -8,6 +8,8 @@ public interface ITypeAliasBuilder
 
     ITypeAliasBuilder Type(string name);
 
+    ITypeAliasBuilder Array(string name);
+
     ITypeAliasBuilder FunctionType(Action<IFunctionTypeBuilder> action);
 
     ITypeAliasBuilder Interface(Action<IInterfaceBuilder>? action = null);

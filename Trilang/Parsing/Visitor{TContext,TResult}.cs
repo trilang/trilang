@@ -19,6 +19,26 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(ArrayTypeNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        node.ElementType.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(ArrayTypeNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(ArrayTypeNode node, TContext context)
+    {
+    }
+
     public void Visit(BinaryExpressionNode node, TContext context)
     {
         if (context.IsFinished)
@@ -396,7 +416,28 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void Visit(NewExpressionNode node, TContext context)
+    public void Visit(NewArrayExpressionNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        node.Type.Accept(this, context);
+        node.Size.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(NewArrayExpressionNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(NewArrayExpressionNode node, TContext context)
+    {
+    }
+
+    public void Visit(NewObjectExpressionNode node, TContext context)
     {
         VisitEnter(node, context);
 
@@ -408,11 +449,11 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
         VisitExit(node, context);
     }
 
-    protected virtual void VisitEnter(NewExpressionNode node, TContext context)
+    protected virtual void VisitEnter(NewObjectExpressionNode node, TContext context)
     {
     }
 
-    protected virtual void VisitExit(NewExpressionNode node, TContext context)
+    protected virtual void VisitExit(NewObjectExpressionNode node, TContext context)
     {
     }
 

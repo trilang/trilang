@@ -15,6 +15,9 @@ public static class Helpers
 
         return node switch
         {
+            ArrayTypeNode arrayTypeNode
+                => Find(arrayTypeNode.ElementType, predicate),
+
             ArrayAccessExpressionNode arrayNode
                 => Find(arrayNode.Member, predicate) ??
                    Find(arrayNode.Index, predicate),
@@ -60,7 +63,8 @@ public static class Helpers
                 => functionDeclarationNode.Parameters
                        .Select(x => Find(x, predicate))
                        .FirstOrDefault(x => x is not null) ??
-                   Find(functionDeclarationNode.Body, predicate),
+                   Find(functionDeclarationNode.Body, predicate) ??
+                   Find(functionDeclarationNode.ReturnType, predicate),
 
             FunctionTypeNode functionTypeDeclarationNode
                 => functionTypeDeclarationNode.ParameterTypes
@@ -103,7 +107,11 @@ public static class Helpers
                    Find(methodDeclarationNode.ReturnType, predicate) ??
                    Find(methodDeclarationNode.Body, predicate),
 
-            NewExpressionNode newExpressionNode
+            NewArrayExpressionNode newArrayExpressionNode
+                => Find(newArrayExpressionNode.Type, predicate) ??
+                   Find(newArrayExpressionNode.Size, predicate),
+
+            NewObjectExpressionNode newExpressionNode
                 => Find(newExpressionNode.Type, predicate) ??
                    newExpressionNode.Parameters
                        .Select(x => Find(x, predicate))

@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
@@ -46,6 +47,14 @@ public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNo
 
     public override int GetHashCode()
         => HashCode.Combine(Expressions);
+
+    public override string ToString()
+    {
+        var formatter = new Formatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
 
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);

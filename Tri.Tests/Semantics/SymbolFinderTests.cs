@@ -258,13 +258,21 @@ public class SymbolFinderTests
     public void ArrayTypeTest()
     {
         var tree = new SyntaxTree([
-            FunctionDeclarationNode.Create("main", [], new TypeNode("i32[]"), new BlockStatementNode())
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new ArrayTypeNode(new TypeNode("i32")),
+                new BlockStatementNode()
+            )
         ]);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var symbol = TypeSymbol.Array("i32[]");
+        var arrayTypeNode = tree.Find<ArrayTypeNode>();
+        Assert.That(arrayTypeNode, Is.Not.Null);
+
+        var symbol = TypeSymbol.Array(arrayTypeNode);
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
         Assert.That(tree.SymbolTable.Types, Contains.Key("i32[]").WithValue(symbol));

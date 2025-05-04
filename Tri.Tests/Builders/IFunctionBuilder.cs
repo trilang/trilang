@@ -4,9 +4,7 @@ namespace Tri.Tests.Builders;
 
 public interface IFunctionBuilder
 {
-    IFunctionBuilder DefineParameter(string name, string type);
-
-    IFunctionBuilder DefineParameter(string name, TypeNode type);
+    IFunctionBuilder DefineParameter(string name, Func<IInlineTypeBuilder, IInlineTypeNode> action);
 
     IFunctionBuilder ReturnType(string type);
 

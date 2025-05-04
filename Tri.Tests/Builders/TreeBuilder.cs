@@ -32,15 +32,6 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         return this;
     }
 
-    public ISyntaxTreeBuilder DefineAliasType(string name, TypeNode aliasType)
-    {
-        var type = new TypeAliasDeclarationNode(AccessModifier.Public, name, aliasType);
-
-        declaration.Add(type);
-
-        return this;
-    }
-
     public ISyntaxTreeBuilder DefineAliasType(string name, Action<ITypeAliasBuilder> action)
     {
         var builder = new TypeAliasBuilder(name);
@@ -70,13 +61,11 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             body = new BlockStatementNode();
         }
 
-        public IFunctionBuilder DefineParameter(string name, string type)
-            => DefineParameter(name, new TypeNode(type));
-
-        public IFunctionBuilder DefineParameter(string name, TypeNode type)
+        public IFunctionBuilder DefineParameter(string name, Func<IInlineTypeBuilder, IInlineTypeNode> action)
         {
-            var parameter = new ParameterNode(name, type);
-            parameters.Add(parameter);
+            var builder = new InlineTypeBuilder();
+            var type = action(builder);
+            parameters.Add(new ParameterNode(name, type));
 
             return this;
         }
@@ -600,14 +589,22 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public IExpressionBuilder New(string type)
+        public IExpressionBuilder NewObject(string type)
         {
             var parameters = new IExpressionNode[stack.Count];
             for (var i = stack.Count - 1; i >= 0; i--)
                 parameters[i] = stack.Pop();
 
-            var newOp = new NewExpressionNode(new TypeNode(type), parameters);
+            var newOp = new NewObjectExpressionNode(new TypeNode(type), parameters);
             stack.Push(newOp);
+
+            return this;
+        }
+
+        public IExpressionBuilder NewArray(string type)
+        {
+            var newArray = new NewArrayExpressionNode(new ArrayTypeNode(new TypeNode(type)), stack.Pop());
+            stack.Push(newArray);
 
             return this;
         }
@@ -655,6 +652,13 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public ITypeAliasBuilder Type(string name)
         {
             aliasedType = new TypeNode(name);
+
+            return this;
+        }
+
+        public ITypeAliasBuilder Array(string name)
+        {
+            aliasedType = new ArrayTypeNode(new TypeNode(name));
 
             return this;
         }
@@ -849,6 +853,9 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     {
         public IInlineTypeNode Type(string name)
             => new TypeNode(name);
+
+        public IInlineTypeNode Array(string name)
+            => new ArrayTypeNode(new TypeNode(name));
 
         public IInlineTypeNode FunctionType(Action<IFunctionTypeBuilder> action)
         {

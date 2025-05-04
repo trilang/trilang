@@ -6,6 +6,8 @@ public interface IVisitor
 {
     void Visit(ArrayAccessExpressionNode node);
 
+    void Visit(ArrayTypeNode node);
+
     void Visit(BinaryExpressionNode node);
 
     void Visit(BlockStatementNode node);
@@ -42,7 +44,9 @@ public interface IVisitor
 
     void Visit(MethodDeclarationNode node);
 
-    void Visit(NewExpressionNode node);
+    void Visit(NewArrayExpressionNode node);
+
+    void Visit(NewObjectExpressionNode node);
 
     void Visit(NullExpressionNode node);
 
