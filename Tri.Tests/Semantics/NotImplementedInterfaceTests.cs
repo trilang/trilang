@@ -11,12 +11,12 @@ public class NotImplementedInterfaceTests
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
+                    .DefineProperty("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
             .DefineType("Test", builder => builder
                 .AddInterface("Interface1")
-                .DefineField("x", "i32")
+                .DefineProperty("x", "i32")
                 .DefineMethod("toString", m => m
                     .ReturnType("string")
                     .Body(body => body
@@ -31,12 +31,12 @@ public class NotImplementedInterfaceTests
     }
 
     [Test]
-    public void NotImplementedFieldTest()
+    public void NotImplementedPropertyTest()
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
+                    .DefineProperty("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
             .DefineType("Test", builder => builder
@@ -52,21 +52,21 @@ public class NotImplementedInterfaceTests
         Assert.That(
             () => semantic.Analyze(tree),
             Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' field is not implemented."));
+                .And.Message.EqualTo("The 'x' property is not implemented."));
     }
 
     [Test]
-    public void ImplementFieldWithIncorrectTypeTest()
+    public void ImplementPropertyWithIncorrectTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
+                    .DefineProperty("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
             .DefineType("Test", builder => builder
                 .AddInterface("Interface1")
-                .DefineField("x", "i8")
+                .DefineProperty("x", "i8")
                 .DefineMethod("toString", m => m
                     .ReturnType("string")
                     .Body(body => body
@@ -78,7 +78,7 @@ public class NotImplementedInterfaceTests
         Assert.That(
             () => semantic.Analyze(tree),
             Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' field is not of the correct type."));
+                .And.Message.EqualTo("The 'x' property is not of the correct type."));
     }
 
     [Test]
@@ -87,12 +87,12 @@ public class NotImplementedInterfaceTests
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
+                    .DefineProperty("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
             .DefineType("Test", builder => builder
                 .AddInterface("Interface1")
-                .DefineField("x", "i32"))
+                .DefineProperty("x", "i32"))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -109,12 +109,12 @@ public class NotImplementedInterfaceTests
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
+                    .DefineProperty("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
             .DefineType("Test", builder => builder
                 .AddInterface("Interface1")
-                .DefineField("x", "i32")
+                .DefineProperty("x", "i32")
                 .DefineMethod("toString", m => m
                     .ReturnType("i32")
                     .Body(body => body
@@ -135,12 +135,12 @@ public class NotImplementedInterfaceTests
         var tree = new TreeBuilder()
             .DefineAliasType("Interface1", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
+                    .DefineProperty("x", "i32")
                     .DefineMethod("toString", m => m
                         .ReturnType("string"))))
             .DefineType("Test", builder => builder
                 .AddInterface("Interface1")
-                .DefineField("x", "i32")
+                .DefineProperty("x", "i32")
                 .DefineMethod("toString", m => m
                     .DefineParameter("a", "i32")
                     .ReturnType("string")

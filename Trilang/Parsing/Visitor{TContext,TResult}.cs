@@ -202,26 +202,6 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void Visit(FieldDeclarationNode node, TContext context)
-    {
-        if (context.IsFinished)
-            return;
-
-        VisitEnter(node, context);
-
-        node.Type.Accept(this, context);
-
-        VisitExit(node, context);
-    }
-
-    protected virtual void VisitEnter(FieldDeclarationNode node, TContext context)
-    {
-    }
-
-    protected virtual void VisitExit(FieldDeclarationNode node, TContext context)
-    {
-    }
-
     public void Visit(FunctionDeclarationNode node, TContext context)
     {
         if (context.IsFinished)
@@ -298,8 +278,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitEnter(node, context);
 
-        foreach (var field in node.Fields)
-            field.Accept(this, context);
+        foreach (var property in node.Properties)
+            property.Accept(this, context);
 
         foreach (var method in node.Methods)
             method.Accept(this, context);
@@ -315,7 +295,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void Visit(InterfaceFieldNode node, TContext context)
+    public void Visit(InterfacePropertyNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -327,11 +307,11 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
         VisitExit(node, context);
     }
 
-    protected virtual void VisitEnter(InterfaceFieldNode node, TContext context)
+    protected virtual void VisitEnter(InterfacePropertyNode node, TContext context)
     {
     }
 
-    protected virtual void VisitExit(InterfaceFieldNode node, TContext context)
+    protected virtual void VisitExit(InterfacePropertyNode node, TContext context)
     {
     }
 
@@ -511,6 +491,26 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(PropertyDeclarationNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        node.Type.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(PropertyDeclarationNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(PropertyDeclarationNode node, TContext context)
+    {
+    }
+
     public void Visit(SyntaxTree node, TContext context)
     {
         if (context.IsFinished)
@@ -602,8 +602,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitEnter(node, context);
 
-        foreach (var field in node.Fields)
-            field.Accept(this, context);
+        foreach (var property in node.Properties)
+            property.Accept(this, context);
 
         foreach (var method in node.Methods)
             method.Accept(this, context);

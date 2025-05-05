@@ -88,17 +88,6 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Expression.Accept(this, context);
     }
 
-    public void Visit(FieldDeclarationNode node, SymbolFinderContext context)
-    {
-        node.Type.Accept(this, context);
-
-        var symbol = new IdSymbol(node);
-        if (!context.SymbolTable.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' field is already defined.");
-
-        node.SymbolTable = context.SymbolTable;
-    }
-
     public void Visit(FunctionDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
@@ -151,15 +140,15 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         {
             node.SymbolTable = c.SymbolTable;
 
-            foreach (var field in node.Fields)
-                field.Accept(this, c);
+            foreach (var property in node.Properties)
+                property.Accept(this, c);
 
             foreach (var method in node.Methods)
                 method.Accept(this, c);
         });
     }
 
-    public void Visit(InterfaceFieldNode node, SymbolFinderContext context)
+    public void Visit(InterfacePropertyNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -167,7 +156,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
         var symbol = new IdSymbol(node);
         if (!context.SymbolTable.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' field is already defined.");
+            throw new SemanticAnalysisException($"The '{node.Name}' property is already defined.");
     }
 
     public void Visit(InterfaceMethodNode node, SymbolFinderContext context)
@@ -259,6 +248,17 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Type.Accept(this, context);
     }
 
+    public void Visit(PropertyDeclarationNode node, SymbolFinderContext context)
+    {
+        node.Type.Accept(this, context);
+
+        var symbol = new IdSymbol(node);
+        if (!context.SymbolTable.TryAddId(symbol))
+            throw new SemanticAnalysisException($"The '{node.Name}' property is already defined.");
+
+        node.SymbolTable = context.SymbolTable;
+    }
+
     public void Visit(SyntaxTree node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
@@ -305,8 +305,8 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             foreach (var @interface in node.Interfaces)
                 @interface.Accept(this, c);
 
-            foreach (var field in node.Fields)
-                field.Accept(this, c);
+            foreach (var property in node.Properties)
+                property.Accept(this, c);
 
             foreach (var constructor in node.Constructors)
                 constructor.Accept(this, c);

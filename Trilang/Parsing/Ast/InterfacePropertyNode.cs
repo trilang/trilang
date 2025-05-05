@@ -4,21 +4,21 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class InterfaceFieldNode : ISyntaxNode, IEquatable<InterfaceFieldNode>
+public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNode>
 {
-    public InterfaceFieldNode(string name, IInlineTypeNode type)
+    public InterfacePropertyNode(string name, IInlineTypeNode type)
     {
         Name = name;
         Type = type;
     }
 
-    public static bool operator ==(InterfaceFieldNode? left, InterfaceFieldNode? right)
+    public static bool operator ==(InterfacePropertyNode? left, InterfacePropertyNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(InterfaceFieldNode? left, InterfaceFieldNode? right)
+    public static bool operator !=(InterfacePropertyNode? left, InterfacePropertyNode? right)
         => !Equals(left, right);
 
-    public bool Equals(InterfaceFieldNode? other)
+    public bool Equals(InterfacePropertyNode? other)
     {
         if (other is null)
             return false;
@@ -40,7 +40,7 @@ public class InterfaceFieldNode : ISyntaxNode, IEquatable<InterfaceFieldNode>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((InterfaceFieldNode)obj);
+        return Equals((InterfacePropertyNode)obj);
     }
 
     public override int GetHashCode()
@@ -68,5 +68,5 @@ public class InterfaceFieldNode : ISyntaxNode, IEquatable<InterfaceFieldNode>
 
     public IInlineTypeNode Type { get; }
 
-    public InterfaceFieldMetadata? Metadata { get; set; }
+    public InterfacePropertyMetadata? Metadata { get; set; }
 }

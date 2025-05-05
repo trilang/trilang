@@ -1,8 +1,8 @@
 namespace Trilang.Metadata;
 
-public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
+public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 {
-    public FieldMetadata(
+    public PropertyMetadata(
         TypeMetadata declaringType,
         AccessModifierMetadata accessModifier,
         string name,
@@ -14,13 +14,13 @@ public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
         Type = type;
     }
 
-    public static bool operator ==(FieldMetadata? left, FieldMetadata? right)
+    public static bool operator ==(PropertyMetadata? left, PropertyMetadata? right)
         => Equals(left, right);
 
-    public static bool operator !=(FieldMetadata? left, FieldMetadata? right)
+    public static bool operator !=(PropertyMetadata? left, PropertyMetadata? right)
         => !Equals(left, right);
 
-    public bool Equals(FieldMetadata? other)
+    public bool Equals(PropertyMetadata? other)
     {
         if (other is null)
             return false;
@@ -45,7 +45,7 @@ public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((FieldMetadata)obj);
+        return Equals((PropertyMetadata)obj);
     }
 
     public override int GetHashCode()

@@ -174,23 +174,6 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void Visit(FieldDeclarationNode node)
-    {
-        VisitEnter(node);
-
-        node.Type.Accept(this);
-
-        VisitExit(node);
-    }
-
-    protected virtual void VisitEnter(FieldDeclarationNode node)
-    {
-    }
-
-    protected virtual void VisitExit(FieldDeclarationNode node)
-    {
-    }
-
     public void Visit(FunctionDeclarationNode node)
     {
         VisitEnter(node);
@@ -255,8 +238,8 @@ public abstract class Visitor : IVisitor
     {
         VisitEnter(node);
 
-        foreach (var field in node.Fields)
-            field.Accept(this);
+        foreach (var property in node.Properties)
+            property.Accept(this);
 
         foreach (var method in node.Methods)
             method.Accept(this);
@@ -272,7 +255,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void Visit(InterfaceFieldNode node)
+    public void Visit(InterfacePropertyNode node)
     {
         VisitEnter(node);
 
@@ -281,11 +264,11 @@ public abstract class Visitor : IVisitor
         VisitExit(node);
     }
 
-    protected virtual void VisitEnter(InterfaceFieldNode node)
+    protected virtual void VisitEnter(InterfacePropertyNode node)
     {
     }
 
-    protected virtual void VisitExit(InterfaceFieldNode node)
+    protected virtual void VisitExit(InterfacePropertyNode node)
     {
     }
 
@@ -444,6 +427,23 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(PropertyDeclarationNode node)
+    {
+        VisitEnter(node);
+
+        node.Type.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(PropertyDeclarationNode node)
+    {
+    }
+
+    protected virtual void VisitExit(PropertyDeclarationNode node)
+    {
+    }
+
     public void Visit(SyntaxTree node)
     {
         VisitEnter(node);
@@ -519,8 +519,8 @@ public abstract class Visitor : IVisitor
     {
         VisitEnter(node);
 
-        foreach (var field in node.Fields)
-            field.Accept(this);
+        foreach (var property in node.Properties)
+            property.Accept(this);
 
         foreach (var method in node.Methods)
             method.Accept(this);

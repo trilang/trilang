@@ -19,7 +19,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public static readonly TypeMetadata String = new TypeMetadata("string");
 
     private readonly HashSet<InterfaceMetadata> interfaces;
-    private readonly HashSet<FieldMetadata> fields;
+    private readonly HashSet<PropertyMetadata> properties;
     private readonly HashSet<ConstructorMetadata> constructors;
     private readonly HashSet<MethodMetadata> methods;
 
@@ -30,13 +30,13 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public TypeMetadata(
         string name,
         IEnumerable<InterfaceMetadata> interfaces,
-        IEnumerable<FieldMetadata> fields,
+        IEnumerable<PropertyMetadata> properties,
         IEnumerable<ConstructorMetadata> constructors,
         IEnumerable<MethodMetadata> methods)
     {
         Name = name;
         this.interfaces = new HashSet<InterfaceMetadata>(interfaces);
-        this.fields = new HashSet<FieldMetadata>(fields);
+        this.properties = new HashSet<PropertyMetadata>(properties);
         this.constructors = new HashSet<ConstructorMetadata>(constructors);
         this.methods = new HashSet<MethodMetadata>(methods);
     }
@@ -84,13 +84,13 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public InterfaceMetadata? GetInterface(string name)
         => interfaces.FirstOrDefault(i => i.Name == name);
 
-    public FieldMetadata? GetField(string name)
-        => fields.FirstOrDefault(f => f.Name == name);
+    public PropertyMetadata? GetProperty(string name)
+        => properties.FirstOrDefault(f => f.Name == name);
 
-    public void AddField(FieldMetadata field)
+    public void AddProperty(PropertyMetadata property)
     {
-        if (!fields.Add(field))
-            throw new ArgumentException($"Field with name {field.Name} already exists in type {Name}");
+        if (!properties.Add(property))
+            throw new ArgumentException($"Property with name {property.Name} already exists in type {Name}");
     }
 
     public ConstructorMetadata? GetConstructor(IEnumerable<ITypeMetadata> parameters)
@@ -115,7 +115,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 
     public IReadOnlyCollection<InterfaceMetadata> Interfaces => interfaces;
 
-    public IReadOnlyCollection<FieldMetadata> Fields => fields;
+    public IReadOnlyCollection<PropertyMetadata> Properties => properties;
 
     public IReadOnlyCollection<ConstructorMetadata> Constructors => constructors;
 

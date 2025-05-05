@@ -88,8 +88,8 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineType("Point", builder => builder
-                .DefineField("x", "i32")
-                .DefineField("y", "i32")
+                .DefineProperty("x", "i32")
+                .DefineProperty("y", "i32")
                 .DefineMethod("toString", b => b.Body())
                 .DefineMethod("distance", b => b
                     .DefineParameter("other", "i32")
@@ -101,12 +101,12 @@ public class TypeCheckerTests
         semantic.Analyze(tree);
 
         var expected = new TypeMetadata("Point", [], [], [], []);
-        expected.AddField(new FieldMetadata(
+        expected.AddProperty(new PropertyMetadata(
             expected,
             AccessModifierMetadata.Public,
             "x",
             TypeMetadata.I32));
-        expected.AddField(new FieldMetadata(
+        expected.AddProperty(new PropertyMetadata(
             expected,
             AccessModifierMetadata.Public,
             "y",
@@ -505,8 +505,8 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
-                    .DefineField("y", "i32")
+                    .DefineProperty("x", "i32")
+                    .DefineProperty("y", "i32")
                     .DefineMethod("distance", m => m
                         .DefineParameter("other", "Point")
                         .ReturnType("f64"))))
@@ -516,8 +516,8 @@ public class TypeCheckerTests
         semantic.Analyze(tree);
 
         var interfaceType = new InterfaceMetadata("{ x: i32; y: i32; distance(Point): f64; }");
-        interfaceType.AddField(new InterfaceFieldMetadata(interfaceType, "x", TypeMetadata.I32));
-        interfaceType.AddField(new InterfaceFieldMetadata(interfaceType, "y", TypeMetadata.I32));
+        interfaceType.AddProperty(new InterfacePropertyMetadata(interfaceType, "x", TypeMetadata.I32));
+        interfaceType.AddProperty(new InterfacePropertyMetadata(interfaceType, "y", TypeMetadata.I32));
         interfaceType.AddMethod(
             new InterfaceMethodMetadata(
                 interfaceType,
@@ -599,7 +599,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineType("Point", builder => builder
-                .DefineField("a", "i32")
+                .DefineProperty("a", "i32")
                 .DefineMethod("toString", b => b
                     .Body(body => body
                         .Expression(exp => exp
@@ -616,11 +616,11 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void ThisWithIncorrectFieldNameTest()
+    public void ThisWithIncorrectPropertyNameTest()
     {
         var tree = new TreeBuilder()
             .DefineType("Point", builder => builder
-                .DefineField("a", "i32")
+                .DefineProperty("a", "i32")
                 .DefineMethod("toString", b => b
                     .Body(body => body
                         .Expression(exp => exp
@@ -642,7 +642,7 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")))
+                    .DefineProperty("x", "i32")))
             .DefineFunction("test", builder => builder
                 .DefineParameter("a", t => t.Type("Point"))
                 .ReturnType("i32")
@@ -666,12 +666,12 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void InterfaceMemberAccessIncorrectFieldTest()
+    public void InterfaceMemberAccessIncorrectPropertyTest()
     {
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")))
+                    .DefineProperty("x", "i32")))
             .DefineFunction("test", builder => builder
                 .DefineParameter("a", t => t.Type("Point"))
                 .ReturnType("i32")
@@ -697,7 +697,7 @@ public class TypeCheckerTests
                 .FunctionType(f => f
                     .ReturnType("void")))
             .DefineType("Test", builder => builder
-                .DefineField("f", new TypeNode("F")))
+                .DefineProperty("f", new TypeNode("F")))
             .DefineFunction("test", builder => builder
                 .DefineParameter("a", t => t.Type("Test"))
                 .ReturnType("F")
@@ -757,8 +757,8 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
-                    .DefineField("y", "i32")))
+                    .DefineProperty("x", "i32")
+                    .DefineProperty("y", "i32")))
             .DefineFunction("test", builder => builder
                 .Body(body => body
                     .DefineVariable("a", new TypeNode("Point"), exp => exp

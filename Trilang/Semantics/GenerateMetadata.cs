@@ -77,18 +77,18 @@ internal class GenerateMetadata : Visitor
                 type.AddInterface(interfaceMetadata);
             }
 
-            foreach (var field in typeDeclarationNode.Fields)
+            foreach (var property in typeDeclarationNode.Properties)
             {
-                var fieldType = typeProvider.GetType(field.Type.Name) ??
-                                throw new SemanticAnalysisException($"The '{field.Name}' field has unknown type: '{field.Type.Name}'.");
+                var propertyType = typeProvider.GetType(property.Type.Name) ??
+                                   throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
 
-                var fieldMetadata = new FieldMetadata(
+                var propertyMetadata = new PropertyMetadata(
                     type,
-                    GetAccessModifierMetadata(field.AccessModifier),
-                    field.Name,
-                    fieldType);
+                    GetAccessModifierMetadata(property.AccessModifier),
+                    property.Name,
+                    propertyType);
 
-                type.AddField(fieldMetadata);
+                type.AddProperty(propertyMetadata);
             }
 
             foreach (var constructor in typeDeclarationNode.Constructors)
@@ -167,13 +167,13 @@ internal class GenerateMetadata : Visitor
             if (typeProvider.GetType(symbol.Name) is not InterfaceMetadata metadata)
                 throw new SemanticAnalysisException($"The '{symbol.Name}' type is not an interface.");
 
-            foreach (var field in interfaceNode.Fields)
+            foreach (var property in interfaceNode.Properties)
             {
-                var fieldType = typeProvider.GetType(field.Type.Name) ??
-                                throw new SemanticAnalysisException($"The '{field.Name}' field has unknown type: '{field.Type.Name}'.");
+                var propertyType = typeProvider.GetType(property.Type.Name) ??
+                                   throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
 
-                var fieldMetadata = new InterfaceFieldMetadata(metadata, field.Name, fieldType);
-                metadata.AddField(fieldMetadata);
+                var propertyMetadata = new InterfacePropertyMetadata(metadata, property.Name, propertyType);
+                metadata.AddProperty(propertyMetadata);
             }
 
             foreach (var method in interfaceNode.Methods)

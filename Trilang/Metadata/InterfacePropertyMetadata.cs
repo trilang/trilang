@@ -1,21 +1,21 @@
 namespace Trilang.Metadata;
 
-public class InterfaceFieldMetadata : IMetadata, IEquatable<InterfaceFieldMetadata>
+public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfacePropertyMetadata>
 {
-    public InterfaceFieldMetadata(InterfaceMetadata declaringType, string name, ITypeMetadata type)
+    public InterfacePropertyMetadata(InterfaceMetadata declaringType, string name, ITypeMetadata type)
     {
         DeclaringType = declaringType;
         Name = name;
         Type = type;
     }
 
-    public static bool operator ==(InterfaceFieldMetadata? left, InterfaceFieldMetadata? right)
+    public static bool operator ==(InterfacePropertyMetadata? left, InterfacePropertyMetadata? right)
         => Equals(left, right);
 
-    public static bool operator !=(InterfaceFieldMetadata? left, InterfaceFieldMetadata? right)
+    public static bool operator !=(InterfacePropertyMetadata? left, InterfacePropertyMetadata? right)
         => !Equals(left, right);
 
-    public bool Equals(InterfaceFieldMetadata? other)
+    public bool Equals(InterfacePropertyMetadata? other)
     {
         if (other is null)
             return false;
@@ -39,7 +39,7 @@ public class InterfaceFieldMetadata : IMetadata, IEquatable<InterfaceFieldMetada
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((InterfaceFieldMetadata)obj);
+        return Equals((InterfacePropertyMetadata)obj);
     }
 
     public override int GetHashCode()

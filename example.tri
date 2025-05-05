@@ -47,6 +47,51 @@ type Color = Red | Green | Blue;
 // function type
 type F = (x: i32, y: i32) => i32;
 
+// generics? properties?
+public type List<T> {
+    private arr: T[];
+    // private arr: T[] { private get; private set; }
+    public size: i32 { private set; }
+    public count: i32 { private set; }
+
+    public constructor() {
+        size = 16;
+        count = 0;
+        arr = new T[size];
+    }
+
+    public get(index: i32): T {
+        return arr[index];
+    }
+
+    public set(index: i32, value: T): void {
+        array[index] = value;
+    }
+
+    private allocateArray(): void {
+        if (count < size) {
+            return;
+        }
+
+        size *= 2;
+        var newArr: T[] = new T[size];
+
+        var i: i32 = 0;
+        while (i < count) {
+            newArr[i] = arr[i];
+            i += 1;
+        }
+
+        arr = newArr;
+    }
+
+    public add(value: T): void {
+        allocateArray();
+
+        array[count] = value;
+    }
+}
+
 function test(callback: () => void): void {
     callback();
 }

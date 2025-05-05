@@ -101,7 +101,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     {
         private readonly string typeName;
         private readonly List<TypeNode> interfaces;
-        private readonly List<FieldDeclarationNode> fields;
+        private readonly List<PropertyDeclarationNode> properties;
         private readonly List<ConstructorDeclarationNode> constructors;
         private readonly List<MethodDeclarationNode> methods;
         private AccessModifier accessModifier;
@@ -110,7 +110,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         {
             this.typeName = typeName;
             interfaces = [];
-            fields = [];
+            properties = [];
             constructors = [];
             methods = [];
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
@@ -123,16 +123,19 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public ITypeBuilder DefineField(string name, string type, Action<IFieldBuilder>? action = null)
-            => DefineField(name, new TypeNode(type), action);
+        public ITypeBuilder DefineProperty(string name, string type, Action<IPropertyBuilder>? action = null)
+            => DefineProperty(name, new TypeNode(type), action);
 
-        public ITypeBuilder DefineField(string name, IInlineTypeNode type, Action<IFieldBuilder>? action = null)
+        public ITypeBuilder DefineProperty(
+            string name,
+            IInlineTypeNode type,
+            Action<IPropertyBuilder>? action = null)
         {
-            var builder = new FieldBuilder(name, type);
+            var builder = new PropertyBuilder(name, type);
             action?.Invoke(builder);
 
-            var field = builder.Build();
-            fields.Add(field);
+            var property = builder.Build();
+            properties.Add(property);
 
             return this;
         }
@@ -170,31 +173,31 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public TypeDeclarationNode Build()
-            => new TypeDeclarationNode(accessModifier, typeName, interfaces, fields, constructors, methods);
+            => new TypeDeclarationNode(accessModifier, typeName, interfaces, properties, constructors, methods);
     }
 
-    private sealed class FieldBuilder : IFieldBuilder
+    private sealed class PropertyBuilder : IPropertyBuilder
     {
         private readonly string name;
         private readonly IInlineTypeNode type;
         private AccessModifier accessModifier;
 
-        public FieldBuilder(string name, IInlineTypeNode type)
+        public PropertyBuilder(string name, IInlineTypeNode type)
         {
             this.name = name;
             this.type = type;
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
         }
 
-        public IFieldBuilder AccessModifier(AccessModifier modifier)
+        public IPropertyBuilder AccessModifier(AccessModifier modifier)
         {
             this.accessModifier = modifier;
 
             return this;
         }
 
-        public FieldDeclarationNode Build()
-            => new FieldDeclarationNode(accessModifier, name, type);
+        public PropertyDeclarationNode Build()
+            => new PropertyDeclarationNode(accessModifier, name, type);
     }
 
     private sealed class ConstructorBuilder : IConstructorBuilder
@@ -741,20 +744,20 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     private sealed class InterfaceBuilder : IInterfaceBuilder
     {
-        private readonly List<InterfaceFieldNode> fields;
+        private readonly List<InterfacePropertyNode> properties;
         private readonly List<InterfaceMethodNode> methods;
 
         public InterfaceBuilder()
         {
-            this.fields = [];
+            this.properties = [];
             this.methods = [];
         }
 
-        public IInterfaceBuilder DefineField(string name, string type)
+        public IInterfaceBuilder DefineProperty(string name, string type)
         {
-            var field = new InterfaceFieldNode(name, new TypeNode(type));
+            var property = new InterfacePropertyNode(name, new TypeNode(type));
 
-            fields.Add(field);
+            properties.Add(property);
 
             return this;
         }
@@ -771,7 +774,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public InterfaceNode Build()
-            => new InterfaceNode(fields, methods);
+            => new InterfaceNode(properties, methods);
     }
 
     private sealed class InterfaceMethodBuilder : IInterfaceMethodBuilder

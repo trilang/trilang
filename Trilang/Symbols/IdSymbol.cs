@@ -16,7 +16,7 @@ public class IdSymbol : ISymbol, IEquatable<IdSymbol>
     {
     }
 
-    public IdSymbol(FieldDeclarationNode node) : this(node.Name, node)
+    public IdSymbol(PropertyDeclarationNode node) : this(node.Name, node)
     {
     }
 
@@ -24,7 +24,7 @@ public class IdSymbol : ISymbol, IEquatable<IdSymbol>
     {
     }
 
-    public IdSymbol(InterfaceFieldNode node) : this(node.Name, node)
+    public IdSymbol(InterfacePropertyNode node) : this(node.Name, node)
     {
     }
 

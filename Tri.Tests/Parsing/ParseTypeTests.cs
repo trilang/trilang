@@ -73,7 +73,7 @@ public class ParseTypeTests
     }
 
     [Test]
-    public void ParseFieldsTest()
+    public void ParsePropertiesTest()
     {
         var parser = new Parser();
         var tree = parser.Parse(
@@ -90,8 +90,8 @@ public class ParseTypeTests
                 "Point",
                 [],
                 [
-                    new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
-                    new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
+                    new PropertyDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
+                    new PropertyDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
                 ],
                 [],
                 []
@@ -102,7 +102,7 @@ public class ParseTypeTests
     }
 
     [Test]
-    public void ParseFieldMissingNameTest()
+    public void ParsePropertyMissingNameTest()
     {
         var parser = new Parser();
         const string code = """
@@ -115,7 +115,7 @@ public class ParseTypeTests
     }
 
     [Test]
-    public void ParseFieldMissingColonTest()
+    public void ParsePropertyMissingColonTest()
     {
         var parser = new Parser();
         const string code = """
@@ -128,7 +128,7 @@ public class ParseTypeTests
     }
 
     [Test]
-    public void ParseFieldMissingTypeTest()
+    public void ParsePropertyMissingTypeTest()
     {
         var parser = new Parser();
         const string code = """
@@ -141,7 +141,7 @@ public class ParseTypeTests
     }
 
     [Test]
-    public void ParseFieldMissingSemiColonTest()
+    public void ParsePropertyMissingSemiColonTest()
     {
         var parser = new Parser();
         const string code = """
@@ -640,8 +640,8 @@ public class ParseTypeTests
                 "Point",
                 new InterfaceNode(
                     [
-                        new InterfaceFieldNode("x", new TypeNode("i32")),
-                        new InterfaceFieldNode("y", new TypeNode("i32"))
+                        new InterfacePropertyNode("x", new TypeNode("i32")),
+                        new InterfacePropertyNode("y", new TypeNode("i32"))
                     ],
                     [
                         new InterfaceMethodNode(
@@ -673,7 +673,7 @@ public class ParseTypeTests
     }
 
     [Test]
-    public void ParseAliasInterfaceTypeMissingFieldTypeTest()
+    public void ParseAliasInterfaceTypeMissingPropertyTypeTest()
     {
         var parser = new Parser();
         const string code =
@@ -690,7 +690,7 @@ public class ParseTypeTests
     }
 
     [Test]
-    public void ParseAliasInterfaceTypeMissingFieldSemiColonTest()
+    public void ParseAliasInterfaceTypeMissingPropertySemiColonTest()
     {
         var parser = new Parser();
         const string code =

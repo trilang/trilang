@@ -193,14 +193,6 @@ internal class TypeChecker : IVisitor
         node.Expression.Accept(this);
     }
 
-    public void Visit(FieldDeclarationNode node)
-    {
-        node.Type.Accept(this);
-
-        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
-        node.Metadata = type.GetField(node.Name);
-    }
-
     public void Visit(FunctionDeclarationNode node)
     {
         foreach (var parameter in node.Parameters)
@@ -248,19 +240,19 @@ internal class TypeChecker : IVisitor
 
         node.Metadata = metadata;
 
-        foreach (var field in node.Fields)
-            field.Accept(this);
+        foreach (var property in node.Properties)
+            property.Accept(this);
 
         foreach (var method in node.Methods)
             method.Accept(this);
     }
 
-    public void Visit(InterfaceFieldNode node)
+    public void Visit(InterfacePropertyNode node)
     {
         node.Type.Accept(this);
 
         var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
-        node.Metadata = type.GetField(node.Name);
+        node.Metadata = type.GetProperty(node.Name);
     }
 
     public void Visit(InterfaceMethodNode node)
@@ -297,8 +289,8 @@ internal class TypeChecker : IVisitor
 
             node.ReturnTypeMetadata = symbol.Node switch
             {
-                FieldDeclarationNode fieldNode
-                    => fieldNode.Type.Metadata,
+                PropertyDeclarationNode propertyDeclarationNode
+                    => propertyDeclarationNode.Type.Metadata,
 
                 VariableDeclarationStatementNode variableStatementNode
                     => variableStatementNode.Type.Metadata,
@@ -312,8 +304,8 @@ internal class TypeChecker : IVisitor
                 MethodDeclarationNode methodNode
                     => methodNode.Metadata?.TypeMetadata,
 
-                InterfaceFieldNode interfaceFieldNode
-                    => interfaceFieldNode.Type.Metadata,
+                InterfacePropertyNode interfacePropertyNode
+                    => interfacePropertyNode.Type.Metadata,
 
                 InterfaceMethodNode interfaceMethodNode
                     => interfaceMethodNode.Metadata?.TypeMetadata,
@@ -336,12 +328,12 @@ internal class TypeChecker : IVisitor
             node.ReturnTypeMetadata = returnTypeMetadata switch
             {
                 TypeMetadata type
-                    => type.GetField(node.Name)?.Type ??
+                    => type.GetProperty(node.Name)?.Type ??
                        type.GetMethod(node.Name)?.TypeMetadata ??
                        throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in type '{node.Member.ReturnTypeMetadata!.Name}'"),
 
                 InterfaceMetadata @interface
-                    => @interface.GetField(node.Name)?.Type ??
+                    => @interface.GetProperty(node.Name)?.Type ??
                        @interface.GetMethod(node.Name)?.TypeMetadata ??
                        throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in interface '{node.Member.ReturnTypeMetadata!.Name}'"),
 
@@ -429,6 +421,14 @@ internal class TypeChecker : IVisitor
     public void Visit(ParameterNode node)
         => node.Type.Accept(this);
 
+    public void Visit(PropertyDeclarationNode node)
+    {
+        node.Type.Accept(this);
+
+        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetProperty(node.Name);
+    }
+
     public void Visit(SyntaxTree node)
     {
         foreach (var statement in node.Declarations)
@@ -488,8 +488,8 @@ internal class TypeChecker : IVisitor
         foreach (var @interface in node.Interfaces)
             @interface.Accept(this);
 
-        foreach (var field in node.Fields)
-            field.Accept(this);
+        foreach (var property in node.Properties)
+            property.Accept(this);
 
         foreach (var constructor in node.Constructors)
             constructor.Accept(this);

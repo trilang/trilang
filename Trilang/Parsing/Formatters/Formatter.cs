@@ -147,7 +147,7 @@ public partial class Formatter : IFormatter
         writer.WriteLine(';');
     }
 
-    public void Visit(FieldDeclarationNode node)
+    public void Visit(PropertyDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);
         writer.Write(' ');
@@ -221,9 +221,9 @@ public partial class Formatter : IFormatter
 
             writer.Scoped(w =>
             {
-                foreach (var field in node.Fields)
+                foreach (var property in node.Properties)
                 {
-                    field.Accept(this);
+                    property.Accept(this);
                     writer.WriteLine();
                 }
 
@@ -243,9 +243,9 @@ public partial class Formatter : IFormatter
         {
             writer.Write("{ ");
 
-            foreach (var field in node.Fields)
+            foreach (var property in node.Properties)
             {
-                field.Accept(this);
+                property.Accept(this);
                 writer.Write(" ");
             }
 
@@ -259,7 +259,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(InterfaceFieldNode node)
+    public void Visit(InterfacePropertyNode node)
     {
         writer.Write(node.Name);
         writer.Write(": ");
@@ -472,8 +472,8 @@ public partial class Formatter : IFormatter
 
         writer.Scoped(_ =>
         {
-            foreach (var field in node.Fields)
-                field.Accept(this);
+            foreach (var property in node.Properties)
+                property.Accept(this);
 
             foreach (var constructor in node.Constructors)
             {

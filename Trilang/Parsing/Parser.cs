@@ -182,7 +182,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.OpenBrace))
             throw new ParseException("Expected an open brace.");
 
-        var fields = new List<FieldDeclarationNode>();
+        var properties = new List<PropertyDeclarationNode>();
         var constructors = new List<ConstructorDeclarationNode>();
         var methods = new List<MethodDeclarationNode>();
 
@@ -195,10 +195,10 @@ public class Parser
                 continue;
             }
 
-            var field = TryParseField(context);
-            if (field is not null)
+            var property = TryParseProperty(context);
+            if (property is not null)
             {
-                fields.Add(field);
+                properties.Add(property);
                 continue;
             }
 
@@ -209,14 +209,14 @@ public class Parser
                 continue;
             }
 
-            throw new ParseException("Expected a field or a method.");
+            throw new ParseException("Expected a property or a method.");
         }
 
         return new TypeDeclarationNode(
             accessModifier.Value,
             name,
             interfaces,
-            fields,
+            properties,
             constructors,
             methods);
     }
@@ -240,7 +240,7 @@ public class Parser
             return new ConstructorDeclarationNode(accessModifier.Value, parameters, block);
         });
 
-    private FieldDeclarationNode? TryParseField(ParserContext context)
+    private PropertyDeclarationNode? TryParseProperty(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
             var accessModifier = c.Parser.TryParseAccessModifier(c);
@@ -249,7 +249,7 @@ public class Parser
 
             var name = c.Parser.TryParseId(c);
             if (name is null)
-                throw new ParseException("Expected a field name.");
+                throw new ParseException("Expected a property name.");
 
             if (!c.Reader.Check(TokenKind.Colon))
                 return null;
@@ -261,7 +261,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.SemiColon))
                 throw new ParseException("Expected a semi-colon.");
 
-            return new FieldDeclarationNode(accessModifier.Value, name, type);
+            return new PropertyDeclarationNode(accessModifier.Value, name, type);
         });
 
     private MethodDeclarationNode? TryParseMethod(ParserContext context)
@@ -885,33 +885,32 @@ public class Parser
             if (!c.Reader.Check(TokenKind.OpenBrace))
                 return null;
 
-            var fields = c.Parser.TryParseInterfaceFields(c);
+            var properties = c.Parser.TryParseInterfaceProperties(c);
             var methods = c.Parser.TryParseInterfaceMethods(c);
 
             if (!c.Reader.Check(TokenKind.CloseBrace))
                 throw new ParseException("Expected a close brace.");
 
-            return new InterfaceNode(fields, methods);
+            return new InterfaceNode(properties, methods);
         });
 
-    private List<InterfaceFieldNode> TryParseInterfaceFields(ParserContext context)
+    private List<InterfacePropertyNode> TryParseInterfaceProperties(ParserContext context)
     {
-        var fields = new List<InterfaceFieldNode>();
+        var properties = new List<InterfacePropertyNode>();
 
         while (true)
         {
-            var field = TryParseInterfaceField(context);
-
-            if (field is null)
+            var property = TryParseInterfaceProperty(context);
+            if (property is null)
                 break;
 
-            fields.Add(field);
+            properties.Add(property);
         }
 
-        return fields;
+        return properties;
     }
 
-    private InterfaceFieldNode? TryParseInterfaceField(ParserContext context)
+    private InterfacePropertyNode? TryParseInterfaceProperty(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
             var name = c.Parser.TryParseId(c);
@@ -928,7 +927,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.SemiColon))
                 throw new ParseException("Expected a semi-colon.");
 
-            return new InterfaceFieldNode(name, type);
+            return new InterfacePropertyNode(name, type);
         });
 
     private List<InterfaceMethodNode> TryParseInterfaceMethods(ParserContext context)

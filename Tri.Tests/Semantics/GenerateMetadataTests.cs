@@ -12,8 +12,8 @@ public class GenerateMetadataTests
     {
         var tree = new TreeBuilder()
             .DefineType("Point", builder => builder
-                .DefineField("x", "i32")
-                .DefineField("y", "i32")
+                .DefineProperty("x", "i32")
+                .DefineProperty("y", "i32")
                 .DefineConstructor(b => b
                     .DefineParameter("x", "i32")
                     .DefineParameter("y", "i32"))
@@ -31,12 +31,12 @@ public class GenerateMetadataTests
         semantic.Analyze(tree);
 
         var expected = new TypeMetadata("Point", [], [], [], []);
-        expected.AddField(new FieldMetadata(
+        expected.AddProperty(new PropertyMetadata(
             expected,
             AccessModifierMetadata.Public,
             "x",
             TypeMetadata.I32));
-        expected.AddField(new FieldMetadata(
+        expected.AddProperty(new PropertyMetadata(
             expected,
             AccessModifierMetadata.Public,
             "y",
@@ -98,11 +98,11 @@ public class GenerateMetadataTests
     }
 
     [Test]
-    public void GenerateMetadataForTypeMissingFieldTypeTest()
+    public void GenerateMetadataForTypeMissingPropertyTypeTest()
     {
         var tree = new TreeBuilder()
             .DefineType("Point", builder => builder
-                .DefineField("x", "xxx"))
+                .DefineProperty("x", "xxx"))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -110,7 +110,7 @@ public class GenerateMetadataTests
         Assert.That(
             () => semantic.Analyze(tree),
             Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' field has unknown type: 'xxx'."));
+                .And.Message.EqualTo("The 'x' property has unknown type: 'xxx'."));
     }
 
     [Test]
@@ -365,8 +365,8 @@ public class GenerateMetadataTests
         var tree = new TreeBuilder()
             .DefineAliasType("Point", builder => builder
                 .Interface(i => i
-                    .DefineField("x", "i32")
-                    .DefineField("y", "i32")
+                    .DefineProperty("x", "i32")
+                    .DefineProperty("y", "i32")
                     .DefineMethod("distance", m => m
                         .DefineParameter("other", "Point")
                         .ReturnType("f64"))))

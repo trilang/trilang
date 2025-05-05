@@ -6,9 +6,9 @@ public interface ITypeBuilder
 {
     ITypeBuilder AccessModifier(AccessModifier modifier);
 
-    ITypeBuilder DefineField(string name, string type, Action<IFieldBuilder>? action = null);
+    ITypeBuilder DefineProperty(string name, string type, Action<IPropertyBuilder>? action = null);
 
-    ITypeBuilder DefineField(string name, IInlineTypeNode type, Action<IFieldBuilder>? action = null);
+    ITypeBuilder DefineProperty(string name, IInlineTypeNode type, Action<IPropertyBuilder>? action = null);
 
     ITypeBuilder DefineConstructor(Action<IConstructorBuilder> action);
 

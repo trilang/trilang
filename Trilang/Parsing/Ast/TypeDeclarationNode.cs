@@ -10,22 +10,22 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
         AccessModifier accessModifier,
         string name,
         IReadOnlyList<TypeNode> interfaces,
-        IReadOnlyList<FieldDeclarationNode> fields,
+        IReadOnlyList<PropertyDeclarationNode> properties,
         IReadOnlyList<ConstructorDeclarationNode> constructors,
         IReadOnlyList<MethodDeclarationNode> methods)
     {
         AccessModifier = accessModifier;
         Name = name;
         Interfaces = interfaces;
-        Fields = fields;
+        Properties = properties;
         Constructors = constructors;
         Methods = methods;
 
         foreach (var interfaceNode in interfaces)
             interfaceNode.Parent = this;
 
-        foreach (var field in fields)
-            field.Parent = this;
+        foreach (var property in properties)
+            property.Parent = this;
 
         foreach (var constructor in constructors)
             constructor.Parent = this;
@@ -51,7 +51,7 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
                Interfaces.SequenceEqual(other.Interfaces) &&
-               Fields.SequenceEqual(other.Fields) &&
+               Properties.SequenceEqual(other.Properties) &&
                Constructors.SequenceEqual(other.Constructors) &&
                Methods.SequenceEqual(other.Methods);
     }
@@ -71,7 +71,7 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
     }
 
     public override int GetHashCode()
-        => HashCode.Combine((int)AccessModifier, Name, Interfaces, Fields, Constructors, Methods);
+        => HashCode.Combine((int)AccessModifier, Name, Interfaces, Properties, Constructors, Methods);
 
     public override string ToString()
     {
@@ -97,7 +97,7 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
 
     public IReadOnlyList<TypeNode> Interfaces { get; }
 
-    public IReadOnlyList<FieldDeclarationNode> Fields { get; }
+    public IReadOnlyList<PropertyDeclarationNode> Properties { get; }
 
     public IReadOnlyList<ConstructorDeclarationNode> Constructors { get; }
 

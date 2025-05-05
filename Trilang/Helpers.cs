@@ -56,9 +56,6 @@ public static class Helpers
             ExpressionStatementNode expressionStatementNode
                 => Find(expressionStatementNode.Expression, predicate),
 
-            FieldDeclarationNode fieldDeclarationNode
-                => Find(fieldDeclarationNode.Type, predicate),
-
             FunctionDeclarationNode functionDeclarationNode
                 => functionDeclarationNode.Parameters
                        .Select(x => Find(x, predicate))
@@ -78,15 +75,15 @@ public static class Helpers
                    Find(ifStatementNode.Else, predicate),
 
             InterfaceNode interfaceNode
-                => interfaceNode.Fields
+                => interfaceNode.Properties
                        .Select(x => Find(x, predicate))
                        .FirstOrDefault(x => x is not null) ??
                    interfaceNode.Methods
                        .Select(x => Find(x, predicate))
                        .FirstOrDefault(x => x is not null),
 
-            InterfaceFieldNode interfaceFieldNode
-                => Find(interfaceFieldNode.Type, predicate),
+            InterfacePropertyNode interfacePropertyNode
+                => Find(interfacePropertyNode.Type, predicate),
 
             InterfaceMethodNode interfaceMethodNode
                 => interfaceMethodNode.Parameters
@@ -123,6 +120,9 @@ public static class Helpers
             ParameterNode parameterNode
                 => Find(parameterNode.Type, predicate),
 
+            PropertyDeclarationNode propertyDeclarationNode
+                => Find(propertyDeclarationNode.Type, predicate),
+
             ReturnStatementNode returnStatementNode
                 => Find(returnStatementNode.Expression, predicate),
 
@@ -145,7 +145,7 @@ public static class Helpers
                 => Find(typeAliasNode.Type, predicate),
 
             TypeDeclarationNode typeDeclarationNode
-                => typeDeclarationNode.Fields
+                => typeDeclarationNode.Properties
                        .Select(x => Find(x, predicate))
                        .FirstOrDefault(x => x is not null) ??
                    typeDeclarationNode.Methods

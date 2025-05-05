@@ -7,22 +7,22 @@ namespace Trilang.Parsing.Ast;
 public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
 {
     public InterfaceNode(
-        IReadOnlyList<InterfaceFieldNode> fields,
+        IReadOnlyList<InterfacePropertyNode> properties,
         IReadOnlyList<InterfaceMethodNode> methods)
     {
-        Fields = fields;
+        Properties = properties;
         Methods = methods;
 
-        foreach (var field in fields)
-            field.Parent = this;
+        foreach (var property in properties)
+            property.Parent = this;
 
         foreach (var method in methods)
             method.Parent = this;
 
-        var fieldNames = fields.Select(f => $"{f.Name}: {f.Type};");
+        var propertyNames = properties.Select(f => $"{f.Name}: {f.Type};");
         var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.Parameters.Select(p => p.Type))}): {m.ReturnType};");
 
-        var combinedSignatures = fieldNames.Concat(methodNames).ToList();
+        var combinedSignatures = propertyNames.Concat(methodNames).ToList();
         Name = combinedSignatures.Any()
             ? $"{{ {string.Join(" ", combinedSignatures)} }}"
             : "{ }";
@@ -42,7 +42,7 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Fields.SequenceEqual(other.Fields) &&
+        return Properties.SequenceEqual(other.Properties) &&
                Methods.SequenceEqual(other.Methods);
     }
 
@@ -61,7 +61,7 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Fields, Methods);
+        => HashCode.Combine(Properties, Methods);
 
     public override string ToString()
     {
@@ -83,7 +83,7 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
 
     public string Name { get; }
 
-    public IReadOnlyList<InterfaceFieldNode> Fields { get; }
+    public IReadOnlyList<InterfacePropertyNode> Properties { get; }
 
     public IReadOnlyList<InterfaceMethodNode> Methods { get; }
 

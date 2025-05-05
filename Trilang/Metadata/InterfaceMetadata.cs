@@ -2,7 +2,7 @@ namespace Trilang.Metadata;
 
 public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
 {
-    private readonly HashSet<InterfaceFieldMetadata> fields;
+    private readonly HashSet<InterfacePropertyMetadata> properties;
     private readonly HashSet<InterfaceMethodMetadata> methods;
 
     public InterfaceMetadata(string name) : this(name, [], [])
@@ -11,11 +11,11 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
 
     public InterfaceMetadata(
         string name,
-        IEnumerable<InterfaceFieldMetadata> fields,
+        IEnumerable<InterfacePropertyMetadata> properties,
         IEnumerable<InterfaceMethodMetadata> methods)
     {
         Name = name;
-        this.fields = new HashSet<InterfaceFieldMetadata>(fields);
+        this.properties = new HashSet<InterfacePropertyMetadata>(properties);
         this.methods = new HashSet<InterfaceMethodMetadata>(methods);
     }
 
@@ -56,14 +56,14 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     public override string ToString()
         => Name;
 
-    public void AddField(InterfaceFieldMetadata field)
+    public void AddProperty(InterfacePropertyMetadata property)
     {
-        if (!fields.Add(field))
-            throw new ArgumentException($"Field with name {field.Name} already exists in type {Name}");
+        if (!properties.Add(property))
+            throw new ArgumentException($"Property with name {property.Name} already exists in type {Name}");
     }
 
-    public InterfaceFieldMetadata? GetField(string name)
-        => fields.FirstOrDefault(f => f.Name == name);
+    public InterfacePropertyMetadata? GetProperty(string name)
+        => properties.FirstOrDefault(f => f.Name == name);
 
     public void AddMethod(InterfaceMethodMetadata method)
     {
@@ -76,7 +76,7 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
 
     public string Name { get; }
 
-    public IReadOnlyCollection<InterfaceFieldMetadata> Fields => fields;
+    public IReadOnlyCollection<InterfacePropertyMetadata> Properties => properties;
 
     public IReadOnlyCollection<InterfaceMethodMetadata> Methods => methods;
 }

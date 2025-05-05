@@ -421,8 +421,8 @@ public class SymbolFinderTests
             "Point",
             [],
             [
-                new FieldDeclarationNode(AccessModifier.Public, "x", new TypeNode("i32")),
-                new FieldDeclarationNode(AccessModifier.Public, "y", new TypeNode("i32")),
+                new PropertyDeclarationNode(AccessModifier.Public, "x", new TypeNode("i32")),
+                new PropertyDeclarationNode(AccessModifier.Public, "y", new TypeNode("i32")),
             ],
             [],
             [
@@ -450,8 +450,8 @@ public class SymbolFinderTests
 
         Assert.That(type.SymbolTable, Is.Not.Null);
         Assert.That(type.SymbolTable.Ids, Has.Count.EqualTo(4));
-        Assert.That(type.SymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(type.Fields[0])));
-        Assert.That(type.SymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(type.Fields[1])));
+        Assert.That(type.SymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(type.Properties[0])));
+        Assert.That(type.SymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(type.Properties[1])));
         Assert.That(type.SymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(type.Methods[0])));
         Assert.That(type.SymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(type.Methods[1])));
     }
@@ -461,8 +461,8 @@ public class SymbolFinderTests
     {
         var @interface = new InterfaceNode(
             [
-                new InterfaceFieldNode("x", new TypeNode("i32")),
-                new InterfaceFieldNode("y", new TypeNode("i32")),
+                new InterfacePropertyNode("x", new TypeNode("i32")),
+                new InterfacePropertyNode("y", new TypeNode("i32")),
             ],
             [
                 new InterfaceMethodNode("toString", [], new TypeNode("string")),
@@ -482,8 +482,8 @@ public class SymbolFinderTests
 
         Assert.That(@interface.SymbolTable, Is.Not.Null);
         Assert.That(@interface.SymbolTable.Ids, Has.Count.EqualTo(4));
-        Assert.That(@interface.SymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(@interface.Fields[0])));
-        Assert.That(@interface.SymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(@interface.Fields[1])));
+        Assert.That(@interface.SymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(@interface.Properties[0])));
+        Assert.That(@interface.SymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(@interface.Properties[1])));
         Assert.That(@interface.SymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(@interface.Methods[0])));
         Assert.That(@interface.SymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(@interface.Methods[1])));
     }
@@ -493,7 +493,7 @@ public class SymbolFinderTests
     {
         var @interface = new InterfaceNode(
             [
-                new InterfaceFieldNode("x", new FunctionTypeNode([], new TypeNode("void"))),
+                new InterfacePropertyNode("x", new FunctionTypeNode([], new TypeNode("void"))),
             ],
             []
         );

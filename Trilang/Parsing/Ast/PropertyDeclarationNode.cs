@@ -4,9 +4,9 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class FieldDeclarationNode : ISyntaxNode, IEquatable<FieldDeclarationNode>
+public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarationNode>
 {
-    public FieldDeclarationNode(AccessModifier accessModifier, string name, IInlineTypeNode type)
+    public PropertyDeclarationNode(AccessModifier accessModifier, string name, IInlineTypeNode type)
     {
         AccessModifier = accessModifier;
         Name = name;
@@ -15,13 +15,13 @@ public class FieldDeclarationNode : ISyntaxNode, IEquatable<FieldDeclarationNode
         Type.Parent = this;
     }
 
-    public static bool operator ==(FieldDeclarationNode? left, FieldDeclarationNode? right)
+    public static bool operator ==(PropertyDeclarationNode? left, PropertyDeclarationNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(FieldDeclarationNode? left, FieldDeclarationNode? right)
+    public static bool operator !=(PropertyDeclarationNode? left, PropertyDeclarationNode? right)
         => !Equals(left, right);
 
-    public bool Equals(FieldDeclarationNode? other)
+    public bool Equals(PropertyDeclarationNode? other)
     {
         if (other is null)
             return false;
@@ -45,7 +45,7 @@ public class FieldDeclarationNode : ISyntaxNode, IEquatable<FieldDeclarationNode
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((FieldDeclarationNode)obj);
+        return Equals((PropertyDeclarationNode)obj);
     }
 
     public override int GetHashCode()
@@ -75,5 +75,5 @@ public class FieldDeclarationNode : ISyntaxNode, IEquatable<FieldDeclarationNode
 
     public IInlineTypeNode Type { get; }
 
-    public FieldMetadata? Metadata { get; set; }
+    public PropertyMetadata? Metadata { get; set; }
 }

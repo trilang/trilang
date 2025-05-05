@@ -13,13 +13,13 @@ public class NotImplementedInterface : Visitor
 
         foreach (var @interface in type.Interfaces)
         {
-            foreach (var interfaceField in @interface.Fields)
+            foreach (var interfaceProperty in @interface.Properties)
             {
-                var typeField = type.GetField(interfaceField.Name) ??
-                                throw new SemanticAnalysisException($"The '{interfaceField.Name}' field is not implemented.");
+                var propertyType = type.GetProperty(interfaceProperty.Name) ??
+                                   throw new SemanticAnalysisException($"The '{interfaceProperty.Name}' property is not implemented.");
 
-                if (!interfaceField.Type.Equals(typeField.Type))
-                    throw new SemanticAnalysisException($"The '{interfaceField.Name}' field is not of the correct type.");
+                if (!interfaceProperty.Type.Equals(propertyType.Type))
+                    throw new SemanticAnalysisException($"The '{interfaceProperty.Name}' property is not of the correct type.");
             }
 
             foreach (var interfaceMethod in @interface.Methods)

@@ -1053,7 +1053,7 @@ public class FormatterTests
     }
 
     [Test]
-    public void FormatPointTypeWithFieldsTest()
+    public void FormatPointTypeWithPropertiesTest()
     {
         var tree = new SyntaxTree([
             new TypeDeclarationNode(
@@ -1061,8 +1061,8 @@ public class FormatterTests
                 "Point",
                 [],
                 [
-                    new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
-                    new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
+                    new PropertyDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
+                    new PropertyDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
                 ],
                 [],
                 [])
@@ -1088,8 +1088,8 @@ public class FormatterTests
                 "Point",
                 [],
                 [
-                    new FieldDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
-                    new FieldDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
+                    new PropertyDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
+                    new PropertyDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
                 ],
                 [
                     new ConstructorDeclarationNode(
@@ -1280,8 +1280,8 @@ public class FormatterTests
                 "Point",
                 new InterfaceNode(
                     [
-                        new InterfaceFieldNode("x", new TypeNode("i32")),
-                        new InterfaceFieldNode("y", new TypeNode("i32")),
+                        new InterfacePropertyNode("x", new TypeNode("i32")),
+                        new InterfacePropertyNode("y", new TypeNode("i32")),
                     ],
                     [
                         new InterfaceMethodNode(
@@ -1312,8 +1312,8 @@ public class FormatterTests
                         "p",
                         new InterfaceNode(
                             [
-                                new InterfaceFieldNode("x", new TypeNode("i32")),
-                                new InterfaceFieldNode("y", new TypeNode("i32")),
+                                new InterfacePropertyNode("x", new TypeNode("i32")),
+                                new InterfacePropertyNode("y", new TypeNode("i32")),
                             ],
                             []
                         ),
@@ -1503,8 +1503,8 @@ public class FormatterTests
                     new InterfaceNode([], []),
                     new InterfaceNode(
                         [
-                            new InterfaceFieldNode("x", new TypeNode("i32")),
-                            new InterfaceFieldNode("y", new TypeNode("i32")),
+                            new InterfacePropertyNode("x", new TypeNode("i32")),
+                            new InterfacePropertyNode("y", new TypeNode("i32")),
                         ],
                         []
                     ),
