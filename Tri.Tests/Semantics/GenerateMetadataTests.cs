@@ -69,6 +69,41 @@ public class GenerateMetadataTests
     }
 
     [Test]
+    public void GenerateMetadataForPropertyTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", builder => builder
+                .DefineProperty("x", "i32", p => p
+                    .Getter(AccessModifier.Public)
+                    .Setter(AccessModifier.Public)))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeMetadata = new TypeMetadata("Test", [], [], [], []);
+        var propertyMetadata = new PropertyMetadata(
+            typeMetadata,
+            AccessModifierMetadata.Public,
+            "x",
+            TypeMetadata.I32);
+        propertyMetadata.Getter = new PropertyGetterMetadata(propertyMetadata, AccessModifierMetadata.Public);
+        propertyMetadata.Setter = new PropertySetterMetadata(propertyMetadata, AccessModifierMetadata.Public);
+        typeMetadata.AddProperty(propertyMetadata);
+
+        var actual = semantic.TypeProvider.GetType("Test") as TypeMetadata;
+        Assert.That(actual, Is.EqualTo(typeMetadata));
+
+        var actualProperty = actual.GetProperty("x");
+        Assert.That(actualProperty, Is.Not.Null);
+        Assert.That(propertyMetadata, Is.EqualTo(actualProperty));
+        Assert.That(actualProperty.Getter, Is.Not.Null);
+        Assert.That(propertyMetadata.Getter, Is.EqualTo(actualProperty.Getter));
+        Assert.That(actualProperty.Setter, Is.Not.Null);
+        Assert.That(propertyMetadata.Setter, Is.EqualTo(actualProperty.Setter));
+    }
+
+    [Test]
     public void GenerateMetadataForTypeWithInterfaceTest()
     {
         var tree = new TreeBuilder()

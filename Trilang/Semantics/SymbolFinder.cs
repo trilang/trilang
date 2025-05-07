@@ -250,13 +250,51 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(PropertyDeclarationNode node, SymbolFinderContext context)
     {
-        node.Type.Accept(this, context);
+        node.SymbolTable = context.SymbolTable;
 
         var symbol = new IdSymbol(node);
         if (!context.SymbolTable.TryAddId(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' property is already defined.");
 
+        node.Type.Accept(this, context);
+        node.Getter?.Accept(this, context);
+        node.Setter?.Accept(this, context);
+    }
+
+    public void Visit(PropertyGetterNode node, SymbolFinderContext context)
+    {
         node.SymbolTable = context.SymbolTable;
+
+        context.Scoped(c =>
+        {
+            c.DisableNextScope();
+
+            var fieldSymbol = new IdSymbol(MemberAccessExpressionNode.Field, node.Parent);
+            if (!c.SymbolTable.TryAddId(fieldSymbol))
+                throw new SemanticAnalysisException();
+
+            node.Body?.Accept(this, c);
+        });
+    }
+
+    public void Visit(PropertySetterNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        context.Scoped(c =>
+        {
+            c.DisableNextScope();
+
+            var fieldSymbol = new IdSymbol(MemberAccessExpressionNode.Field, node.Parent);
+            if (!c.SymbolTable.TryAddId(fieldSymbol))
+                throw new SemanticAnalysisException();
+
+            var valueSymbol = new IdSymbol(MemberAccessExpressionNode.Value, node.Parent);
+            if (!c.SymbolTable.TryAddId(valueSymbol))
+                throw new SemanticAnalysisException();
+
+            node.Body?.Accept(this, c);
+        });
     }
 
     public void Visit(SyntaxTree node, SymbolFinderContext context)

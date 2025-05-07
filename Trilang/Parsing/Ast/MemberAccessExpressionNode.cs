@@ -7,6 +7,8 @@ namespace Trilang.Parsing.Ast;
 public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAccessExpressionNode>
 {
     public const string This = "this";
+    public const string Field = "field";
+    public const string Value = "value";
 
     public MemberAccessExpressionNode(string name) : this(null, name)
     {

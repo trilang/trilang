@@ -392,29 +392,54 @@ internal class TypeChecker : IVisitor
     {
         node.Expression?.Accept(this);
 
+        var expressionType = node.Expression?.ReturnTypeMetadata ?? TypeMetadata.Void;
         var method = node.FindInParent<MethodDeclarationNode>();
         if (method is not null)
         {
-            if (!Equals(method.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata))
-                throw new SemanticAnalysisException($"Method return type mismatch: expected '{method.Metadata?.TypeMetadata.ReturnType}', got '{node.Expression?.ReturnTypeMetadata}'");
-        }
-        else
-        {
-            var constructor = node.FindInParent<ConstructorDeclarationNode>();
-            if (constructor is not null)
-            {
-                if (!Equals(TypeMetadata.Void, node.Expression?.ReturnTypeMetadata ?? TypeMetadata.Void))
-                    throw new SemanticAnalysisException($"Constructor return type mismatch: expected '{TypeMetadata.Void.Name}', got '{node.Expression?.ReturnTypeMetadata}'");
-            }
-            else
-            {
-                var function = node.FindInParent<FunctionDeclarationNode>();
-                if (function is null)
-                    throw new SemanticAnalysisException("Return statement must be inside a function, method, or constructor");
+            var methodReturnType = method.Metadata?.TypeMetadata.ReturnType;
+            if (!Equals(methodReturnType, expressionType))
+                throw new SemanticAnalysisException($"Method return type mismatch: expected '{methodReturnType}', got '{expressionType}'");
 
-                if (!Equals(function.Metadata?.TypeMetadata.ReturnType, node.Expression?.ReturnTypeMetadata ?? TypeMetadata.Void))
-                    throw new SemanticAnalysisException($"Function return type mismatch: expected '{function.Metadata?.TypeMetadata.ReturnType}', got '{node.Expression?.ReturnTypeMetadata}'");
-            }
+            return;
+        }
+
+        var constructor = node.FindInParent<ConstructorDeclarationNode>();
+        if (constructor is not null)
+        {
+            if (!Equals(TypeMetadata.Void, expressionType))
+                throw new SemanticAnalysisException($"Constructor return type mismatch: expected '{TypeMetadata.Void.Name}', got '{expressionType}'");
+
+            return;
+        }
+
+        var function = node.FindInParent<FunctionDeclarationNode>();
+        if (function is not null)
+        {
+            var functionReturnType = function.Metadata?.TypeMetadata.ReturnType;
+            if (!Equals(functionReturnType, expressionType))
+                throw new SemanticAnalysisException($"Function return type mismatch: expected '{functionReturnType}', got '{expressionType}'");
+
+            return;
+        }
+
+        var getter = node.FindInParent<PropertyGetterNode>();
+        if (getter is not null)
+        {
+            var getterReturnType = getter.Metadata?.DeclaringProperty.Type;
+            if (!Equals(getterReturnType, expressionType))
+                throw new SemanticAnalysisException($"Property getter return type mismatch: expected '{getterReturnType}', got '{expressionType}'");
+
+            return;
+        }
+
+        var setter = node.FindInParent<PropertySetterNode>();
+        if (setter is not null)
+        {
+            var setterReturnType = setter.Metadata?.DeclaringProperty.Type;
+            if (!Equals(setterReturnType, expressionType))
+                throw new SemanticAnalysisException($"Property setter return type mismatch: expected '{setterReturnType}', got '{expressionType}'");
+
+            return;
         }
     }
 
@@ -423,10 +448,31 @@ internal class TypeChecker : IVisitor
 
     public void Visit(PropertyDeclarationNode node)
     {
-        node.Type.Accept(this);
-
         var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
         node.Metadata = type.GetProperty(node.Name);
+
+        node.Type.Accept(this);
+        node.Getter?.Accept(this);
+        node.Setter?.Accept(this);
+
+        // TODO: check access modifiers
+    }
+
+    public void Visit(PropertyGetterNode node)
+    {
+        var property = (PropertyDeclarationNode)node.Parent!;
+        node.Metadata = property.Metadata?.Getter;
+
+        node.Body?.Accept(this);
+    }
+
+    public void Visit(PropertySetterNode node)
+    {
+        // TODO: check the backing field is set
+        var property = (PropertyDeclarationNode)node.Parent!;
+        node.Metadata = property.Metadata?.Setter;
+
+        node.Body?.Accept(this);
     }
 
     public void Visit(SyntaxTree node)
@@ -567,6 +613,7 @@ internal class TypeChecker : IVisitor
     public void Visit(VariableDeclarationStatementNode node)
     {
         // TODO: infer type
+        // TODO: unused variable
         node.Type.Accept(this);
         node.Expression.Accept(this);
 

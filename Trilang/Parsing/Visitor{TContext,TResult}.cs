@@ -511,6 +511,46 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(PropertyGetterNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        node.Body?.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(PropertyGetterNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(PropertyGetterNode node, TContext context)
+    {
+    }
+
+    public void Visit(PropertySetterNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        node.Body?.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(PropertySetterNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(PropertySetterNode node, TContext context)
+    {
+    }
+
     public void Visit(SyntaxTree node, TContext context)
     {
         if (context.IsFinished)

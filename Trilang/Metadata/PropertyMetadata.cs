@@ -60,5 +60,9 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 
     public string Name { get; }
 
+    public PropertyGetterMetadata? Getter { get; set; }
+
+    public PropertySetterMetadata? Setter { get; set; }
+
     public ITypeMetadata Type { get; }
 }

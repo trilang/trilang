@@ -88,6 +88,16 @@ internal class GenerateMetadata : Visitor
                     property.Name,
                     propertyType);
 
+                if (property.Getter is not null)
+                    propertyMetadata.Getter = new PropertyGetterMetadata(
+                        propertyMetadata,
+                        GetAccessModifierMetadata(property.Getter.AccessModifier));
+
+                if (property.Setter is not null)
+                    propertyMetadata.Setter = new PropertySetterMetadata(
+                        propertyMetadata,
+                        GetAccessModifierMetadata(property.Setter.AccessModifier));
+
                 type.AddProperty(propertyMetadata);
             }
 

@@ -52,6 +52,10 @@ public interface IVisitor<in TContext>
 
     void Visit(PropertyDeclarationNode node, TContext context);
 
+    void Visit(PropertyGetterNode node, TContext context);
+
+    void Visit(PropertySetterNode node, TContext context);
+
     void Visit(ReturnStatementNode node, TContext context);
 
     void Visit(SyntaxTree node, TContext context);

@@ -6,13 +6,34 @@ namespace Trilang.Parsing.Ast;
 
 public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarationNode>
 {
-    public PropertyDeclarationNode(AccessModifier accessModifier, string name, IInlineTypeNode type)
+    public PropertyDeclarationNode(
+        AccessModifier accessModifier,
+        string name,
+        IInlineTypeNode type)
+        : this(accessModifier, name, type, null, null)
+    {
+    }
+
+    public PropertyDeclarationNode(
+        AccessModifier accessModifier,
+        string name,
+        IInlineTypeNode type,
+        PropertyGetterNode? getter,
+        PropertySetterNode? setter)
     {
         AccessModifier = accessModifier;
         Name = name;
         Type = type;
+        Getter = getter;
+        Setter = setter;
 
         Type.Parent = this;
+
+        if (Getter != null)
+            Getter.Parent = this;
+
+        if (Setter != null)
+            Setter.Parent = this;
     }
 
     public static bool operator ==(PropertyDeclarationNode? left, PropertyDeclarationNode? right)
@@ -31,7 +52,9 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
 
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
-               Type.Equals(other.Type);
+               Type.Equals(other.Type) &&
+               Equals(Getter, other.Getter) &&
+               Equals(Setter, other.Setter);
     }
 
     public override bool Equals(object? obj)
@@ -74,6 +97,10 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
     public string Name { get; }
 
     public IInlineTypeNode Type { get; }
+
+    public PropertyGetterNode? Getter { get; }
+
+    public PropertySetterNode? Setter { get; }
 
     public PropertyMetadata? Metadata { get; set; }
 }

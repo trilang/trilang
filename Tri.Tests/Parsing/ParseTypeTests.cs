@@ -102,6 +102,191 @@ public class ParseTypeTests
     }
 
     [Test]
+    public void ParsePropertiesWithBlocksTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Point {
+                private x: i32 {
+                    private get {
+                        return field;
+                    }
+                    private set {
+                        field = value;
+                    }
+                }
+                private y: i32 {
+                    private get{
+                        return field;
+                    }
+                    private set {
+                        field = value;
+                    }
+                }
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        AccessModifier.Private,
+                        "x",
+                        new TypeNode("i32"),
+                        new PropertyGetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ReturnStatementNode(
+                                    new MemberAccessExpressionNode("field")
+                                )
+                            ])
+                        ),
+                        new PropertySetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ExpressionStatementNode(
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Assignment,
+                                        new MemberAccessExpressionNode("field"),
+                                        new MemberAccessExpressionNode("value")
+                                    )
+                                )
+                            ])
+                        )
+                    ),
+                    new PropertyDeclarationNode(
+                        AccessModifier.Private,
+                        "y",
+                        new TypeNode("i32"),
+                        new PropertyGetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ReturnStatementNode(
+                                    new MemberAccessExpressionNode("field")
+                                )
+                            ])
+                        ),
+                        new PropertySetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ExpressionStatementNode(
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Assignment,
+                                        new MemberAccessExpressionNode("field"),
+                                        new MemberAccessExpressionNode("value")
+                                    )
+                                )
+                            ])
+                        )
+                    ),
+                ],
+                [],
+                []
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseEmptyGetterTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Point {
+                private x: i32 {
+                    private get;
+                    private set {
+                        field = value;
+                    }
+                }
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        AccessModifier.Private,
+                        "x",
+                        new TypeNode("i32"),
+                        new PropertyGetterNode(AccessModifier.Private, null),
+                        new PropertySetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ExpressionStatementNode(
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Assignment,
+                                        new MemberAccessExpressionNode("field"),
+                                        new MemberAccessExpressionNode("value")
+                                    )
+                                )
+                            ])
+                        )
+                    ),
+                ],
+                [],
+                []
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseEmptySetterTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Point {
+                private x: i32 {
+                    private get {
+                        return field;
+                    }
+                    private set;
+                }
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        AccessModifier.Private,
+                        "x",
+                        new TypeNode("i32"),
+                        new PropertyGetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ReturnStatementNode(
+                                    new MemberAccessExpressionNode("field")
+                                )
+                            ])
+                        ),
+                        new PropertySetterNode(AccessModifier.Private, null)
+                    ),
+                ],
+                [],
+                []
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void ParsePropertyMissingNameTest()
     {
         var parser = new Parser();

@@ -444,6 +444,40 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(PropertyGetterNode node)
+    {
+        VisitEnter(node);
+
+        node.Body?.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(PropertyGetterNode node)
+    {
+    }
+
+    protected virtual void VisitExit(PropertyGetterNode node)
+    {
+    }
+
+    public void Visit(PropertySetterNode node)
+    {
+        VisitEnter(node);
+
+        node.Body?.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(PropertySetterNode node)
+    {
+    }
+
+    protected virtual void VisitExit(PropertySetterNode node)
+    {
+    }
+
     public void Visit(SyntaxTree node)
     {
         VisitEnter(node);

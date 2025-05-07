@@ -598,4 +598,40 @@ public class SymbolFinderTests
             tree.SymbolTable.Types,
             Contains.Key("T").WithValue(TypeSymbol.Alias(aliasNode)));
     }
+
+    [Test]
+    public void FieldInGetterTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", t => t
+                .DefineProperty("x", "i32", p => p
+                    .Getter(AccessModifier.Private, body => body
+                        .Return(r => r
+                            .MemberAccess("field")))
+                    .Setter(AccessModifier.Private, body => body
+                        .Expression(e => e
+                            .MemberAccess("field")
+                            .MemberAccess("value")
+                            .Assign()))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var property = tree.Find<PropertyDeclarationNode>();
+        var getter = tree.Find<PropertyGetterNode>();
+        Assert.That(getter, Is.Not.Null);
+        Assert.That(getter.Body, Is.Not.Null);
+        Assert.That(getter.Body.SymbolTable, Is.Not.Null);
+        Assert.That(getter.Body.SymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(getter.Body.SymbolTable.Ids, Contains.Key("field").WithValue(new IdSymbol("field", property)));
+
+        var setter = tree.Find<PropertySetterNode>();
+        Assert.That(setter, Is.Not.Null);
+        Assert.That(setter.Body, Is.Not.Null);
+        Assert.That(setter.Body.SymbolTable, Is.Not.Null);
+        Assert.That(setter.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(setter.Body.SymbolTable.Ids, Contains.Key("field").WithValue(new IdSymbol("field", property)));
+        Assert.That(setter.Body.SymbolTable.Ids, Contains.Key("value").WithValue(new IdSymbol("value", property)));
+    }
 }

@@ -258,10 +258,55 @@ public class Parser
             if (type is null)
                 throw new ParseException("Expected a type.");
 
-            if (!c.Reader.Check(TokenKind.SemiColon))
-                throw new ParseException("Expected a semi-colon.");
+            if (c.Reader.Check(TokenKind.SemiColon))
+                return new PropertyDeclarationNode(accessModifier.Value, name, type, null, null);
 
-            return new PropertyDeclarationNode(accessModifier.Value, name, type);
+            if (!c.Reader.Check(TokenKind.OpenBrace))
+                throw new ParseException("Expected an open brace.");
+
+            var getter = c.Parser.TryParsePropertyGetter(c);
+            var setter = c.Parser.TryParsePropertySetter(c);
+
+            if (!c.Reader.Check(TokenKind.CloseBrace))
+                throw new ParseException("Expected a close brace.");
+
+            return new PropertyDeclarationNode(accessModifier.Value, name, type, getter, setter);
+        });
+
+    private PropertyGetterNode? TryParsePropertyGetter(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var accessModifier = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.Get))
+                return null;
+
+            if (c.Reader.Check(TokenKind.SemiColon))
+                return new PropertyGetterNode(accessModifier.Value, null);
+
+            var body = c.Parser.TryParseBlock(c);
+
+            return new PropertyGetterNode(accessModifier.Value, body);
+        });
+
+    private PropertySetterNode? TryParsePropertySetter(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var accessModifier = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.Set))
+                return null;
+
+            if (c.Reader.Check(TokenKind.SemiColon))
+                return new PropertySetterNode(accessModifier.Value, null);
+
+            var body = c.Parser.TryParseBlock(c);
+
+            return new PropertySetterNode(accessModifier.Value, body);
         });
 
     private MethodDeclarationNode? TryParseMethod(ParserContext context)

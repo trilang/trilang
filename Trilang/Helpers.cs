@@ -121,7 +121,15 @@ public static class Helpers
                 => Find(parameterNode.Type, predicate),
 
             PropertyDeclarationNode propertyDeclarationNode
-                => Find(propertyDeclarationNode.Type, predicate),
+                => Find(propertyDeclarationNode.Type, predicate) ??
+                   Find(propertyDeclarationNode.Getter, predicate) ??
+                   Find(propertyDeclarationNode.Setter, predicate),
+
+            PropertyGetterNode propertyGetterNode
+                => Find(propertyGetterNode.Body, predicate),
+
+            PropertySetterNode propertySetterNode
+                => Find(propertySetterNode.Body, predicate),
 
             ReturnStatementNode returnStatementNode
                 => Find(returnStatementNode.Expression, predicate),

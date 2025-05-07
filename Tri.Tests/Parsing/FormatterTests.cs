@@ -1080,6 +1080,148 @@ public class FormatterTests
     }
 
     [Test]
+    public void FormatPropertyWithGetterSetterTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        AccessModifier.Private,
+                        "x",
+                        new TypeNode("i32"),
+                        new PropertyGetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ReturnStatementNode(LiteralExpressionNode.Number(0))
+                            ])
+                        ),
+                        new PropertySetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ExpressionStatementNode(
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Assignment,
+                                        new MemberAccessExpressionNode("field"),
+                                        new MemberAccessExpressionNode("value")
+                                    )
+                                )
+                            ])
+                        )),
+                ],
+                [],
+                []
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Point {
+                private x: i32 {
+                    private get {
+                        return 0;
+                    }
+                    private set {
+                        field = value;
+                    }
+                }
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatPropertyWithEmptyGetterTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        AccessModifier.Private,
+                        "x",
+                        new TypeNode("i32"),
+                        new PropertyGetterNode(AccessModifier.Private, null),
+                        new PropertySetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ExpressionStatementNode(
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Assignment,
+                                        new MemberAccessExpressionNode("field"),
+                                        new MemberAccessExpressionNode("value")
+                                    )
+                                )
+                            ])
+                        )),
+                ],
+                [],
+                []
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Point {
+                private x: i32 {
+                    private get;
+                    private set {
+                        field = value;
+                    }
+                }
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatPropertyWithEmptySetterTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        AccessModifier.Private,
+                        "x",
+                        new TypeNode("i32"),
+                        new PropertyGetterNode(
+                            AccessModifier.Private,
+                            new BlockStatementNode([
+                                new ReturnStatementNode(LiteralExpressionNode.Number(0))
+                            ])
+                        ),
+                        new PropertySetterNode(AccessModifier.Private, null)),
+                ],
+                [],
+                []
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Point {
+                private x: i32 {
+                    private get {
+                        return 0;
+                    }
+                    private set;
+                }
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void FormatPointTypeWithEverythingTest()
     {
         var tree = new SyntaxTree([

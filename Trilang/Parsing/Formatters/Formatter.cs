@@ -81,7 +81,7 @@ public partial class Formatter : IFormatter
     public void Visit(BlockStatementNode node)
     {
         writer.WriteLine('{');
-        writer.Scoped(_ =>
+        writer.Scoped(() =>
         {
             foreach (var statement in node.Statements)
                 statement.Accept(this);
@@ -154,7 +154,63 @@ public partial class Formatter : IFormatter
         writer.Write(node.Name);
         writer.Write(": ");
         node.Type.Accept(this);
-        writer.WriteLine(';');
+
+        var hasGetter = node.Getter is not null;
+        var hasSetter = node.Setter is not null;
+        if (hasGetter || hasSetter)
+        {
+            writer.WriteLine(" {");
+
+            writer.Scoped(() =>
+            {
+                node.Getter?.Accept(this);
+
+                if (hasGetter && hasSetter)
+                    writer.WriteLine();
+
+                node.Setter?.Accept(this);
+
+                writer.WriteLine();
+            });
+
+            writer.Write('}');
+        }
+        else
+        {
+            writer.Write(';');
+        }
+    }
+
+    public void Visit(PropertyGetterNode node)
+    {
+        WriteAccessModifier(node.AccessModifier);
+        writer.Write(" get");
+
+        if (node.Body is null)
+        {
+            writer.Write(';');
+        }
+        else
+        {
+            writer.Write(' ');
+            node.Body.Accept(this);
+        }
+    }
+
+    public void Visit(PropertySetterNode node)
+    {
+        WriteAccessModifier(node.AccessModifier);
+        writer.Write(" set");
+
+        if (node.Body is null)
+        {
+            writer.Write(';');
+        }
+        else
+        {
+            writer.Write(' ');
+            node.Body.Accept(this);
+        }
     }
 
     public void Visit(FunctionDeclarationNode node)
@@ -219,7 +275,7 @@ public partial class Formatter : IFormatter
         {
             writer.WriteLine("{");
 
-            writer.Scoped(w =>
+            writer.Scoped(() =>
             {
                 foreach (var property in node.Properties)
                 {
@@ -228,7 +284,7 @@ public partial class Formatter : IFormatter
                 }
 
                 if (node.Methods.Count > 0)
-                    w.WriteLine();
+                    writer.WriteLine();
 
                 foreach (var method in node.Methods)
                 {
@@ -470,10 +526,13 @@ public partial class Formatter : IFormatter
 
         writer.WriteLine(" {");
 
-        writer.Scoped(_ =>
+        writer.Scoped(() =>
         {
             foreach (var property in node.Properties)
+            {
                 property.Accept(this);
+                writer.WriteLine();
+            }
 
             foreach (var constructor in node.Constructors)
             {

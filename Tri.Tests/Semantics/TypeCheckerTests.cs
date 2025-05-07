@@ -604,7 +604,8 @@ public class TypeCheckerTests
                     .Body(body => body
                         .Expression(exp => exp
                             .MemberAccess("this")
-                            .MemberAccess("a")))))
+                            .MemberAccess("a")
+                            .MemberAccess()))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -625,7 +626,8 @@ public class TypeCheckerTests
                     .Body(body => body
                         .Expression(exp => exp
                             .MemberAccess("this")
-                            .MemberAccess("x")))))
+                            .MemberAccess("x")
+                            .MemberAccess()))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -649,7 +651,8 @@ public class TypeCheckerTests
                 .Body(body => body
                     .Return(r => r
                         .MemberAccess("a")
-                        .MemberAccess("x"))))
+                        .MemberAccess("x")
+                        .MemberAccess())))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -678,7 +681,8 @@ public class TypeCheckerTests
                 .Body(body => body
                     .Return(r => r
                         .MemberAccess("a")
-                        .MemberAccess("c"))))
+                        .MemberAccess("c")
+                        .MemberAccess())))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -704,7 +708,8 @@ public class TypeCheckerTests
                 .Body(body => body
                     .Return(r => r
                         .MemberAccess("a")
-                        .MemberAccess("f"))))
+                        .MemberAccess("f")
+                        .MemberAccess())))
             .Build();
 
         var semantic = new SemanticAnalysis();

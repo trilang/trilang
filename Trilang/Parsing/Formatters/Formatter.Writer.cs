@@ -37,11 +37,11 @@ public partial class Formatter
             isIndented = true;
         }
 
-        public void Scoped(Action<Writer> action)
+        public void Scoped(Action action)
         {
             Increase();
 
-            action(this);
+            action();
 
             Decrease();
         }

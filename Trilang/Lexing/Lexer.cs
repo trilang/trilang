@@ -57,6 +57,8 @@ public class Lexer
                     "constructor" => Token.Create(TokenKind.Constructor),
                     "new" => Token.Create(TokenKind.New),
                     "null" => Token.Create(TokenKind.Null),
+                    "get" => Token.Create(TokenKind.Get),
+                    "set" => Token.Create(TokenKind.Set),
 
                     _ => Token.CreateId(id.ToString()),
                 });

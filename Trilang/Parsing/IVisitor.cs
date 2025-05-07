@@ -52,6 +52,10 @@ public interface IVisitor
 
     void Visit(PropertyDeclarationNode node);
 
+    void Visit(PropertyGetterNode node);
+
+    void Visit(PropertySetterNode node);
+
     void Visit(ReturnStatementNode node);
 
     void Visit(SyntaxTree node);

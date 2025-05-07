@@ -181,6 +181,8 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         private readonly string name;
         private readonly IInlineTypeNode type;
         private AccessModifier accessModifier;
+        private PropertyGetterNode? getter;
+        private PropertySetterNode? setter;
 
         public PropertyBuilder(string name, IInlineTypeNode type)
         {
@@ -196,8 +198,28 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IPropertyBuilder Getter(AccessModifier modifier, Action<IBlockBuilder>? action = null)
+        {
+            var builder = new BlockBuilder();
+            action?.Invoke(builder);
+
+            getter = new PropertyGetterNode(modifier, builder.Build());
+
+            return this;
+        }
+
+        public IPropertyBuilder Setter(AccessModifier modifier, Action<IBlockBuilder>? action = null)
+        {
+            var builder = new BlockBuilder();
+            action?.Invoke(builder);
+
+            setter = new PropertySetterNode(modifier, builder.Build());
+
+            return this;
+        }
+
         public PropertyDeclarationNode Build()
-            => new PropertyDeclarationNode(accessModifier, name, type);
+            => new PropertyDeclarationNode(accessModifier, name, type, getter, setter);
     }
 
     private sealed class ConstructorBuilder : IConstructorBuilder
@@ -485,20 +507,29 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IExpressionBuilder MemberAccess(string name)
         {
-            if (stack.TryPeek(out var exp))
+            var memberAccess = new MemberAccessExpressionNode(name);
+            stack.Push(memberAccess);
+
+            return this;
+        }
+
+        public IExpressionBuilder MemberAccess()
+        {
+            var member = default(MemberAccessExpressionNode);
+            while (true)
             {
-                if (exp is not MemberAccessExpressionNode member)
-                    throw new Exception();
+                if (!stack.TryPeek(out var exp) || exp is not MemberAccessExpressionNode memberAccess)
+                    break;
 
                 stack.Pop();
-                var memberAccess = new MemberAccessExpressionNode(member, name);
-                stack.Push(memberAccess);
+
+                member = member is not null
+                    ? new MemberAccessExpressionNode(memberAccess, member.Name)
+                    : memberAccess;
             }
-            else
-            {
-                var memberAccess = new MemberAccessExpressionNode(name);
-                stack.Push(memberAccess);
-            }
+
+            if (member is not null)
+                stack.Push(member);
 
             return this;
         }
