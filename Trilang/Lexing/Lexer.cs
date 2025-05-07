@@ -10,6 +10,17 @@ public class Lexer
         while (span.Length > 0)
         {
             var c = span[0];
+            var next = span.Length > 1 ? span[1] : '\0';
+            if (c == '/' && next == '/')
+            {
+                var length = span.IndexOf('\n');
+                if (length == -1)
+                    throw new Exception("Unterminated comment");
+
+                span = span[length..];
+                continue;
+            }
+
             if (char.IsWhiteSpace(c) || c is '\n' or '\r')
             {
                 span = span[1..];
@@ -107,7 +118,6 @@ public class Lexer
                 continue;
             }
 
-            var next = span.Length > 1 ? span[1] : '\0';
             var (token, size) = (c, next) switch
             {
                 ('(', _) => (Token.Create(TokenKind.OpenParenthesis), 1),
