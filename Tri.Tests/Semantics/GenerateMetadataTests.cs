@@ -33,12 +33,10 @@ public class GenerateMetadataTests
         var expected = new TypeMetadata("Point", [], [], [], []);
         expected.AddProperty(new PropertyMetadata(
             expected,
-            AccessModifierMetadata.Public,
             "x",
             TypeMetadata.I32));
         expected.AddProperty(new PropertyMetadata(
             expected,
-            AccessModifierMetadata.Public,
             "y",
             TypeMetadata.I32));
         expected.AddConstructor(new ConstructorMetadata(
@@ -82,11 +80,7 @@ public class GenerateMetadataTests
         semantic.Analyze(tree);
 
         var typeMetadata = new TypeMetadata("Test", [], [], [], []);
-        var propertyMetadata = new PropertyMetadata(
-            typeMetadata,
-            AccessModifierMetadata.Public,
-            "x",
-            TypeMetadata.I32);
+        var propertyMetadata = new PropertyMetadata(typeMetadata, "x", TypeMetadata.I32);
         propertyMetadata.Getter = new PropertyGetterMetadata(propertyMetadata, AccessModifierMetadata.Public);
         propertyMetadata.Setter = new PropertySetterMetadata(propertyMetadata, AccessModifierMetadata.Public);
         typeMetadata.AddProperty(propertyMetadata);

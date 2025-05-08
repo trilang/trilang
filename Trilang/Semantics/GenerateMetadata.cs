@@ -82,11 +82,7 @@ internal class GenerateMetadata : Visitor
                 var propertyType = typeProvider.GetType(property.Type.Name) ??
                                    throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
 
-                var propertyMetadata = new PropertyMetadata(
-                    type,
-                    GetAccessModifierMetadata(property.AccessModifier),
-                    property.Name,
-                    propertyType);
+                var propertyMetadata = new PropertyMetadata(type, property.Name, propertyType);
 
                 if (property.Getter is not null)
                     propertyMetadata.Getter = new PropertyGetterMetadata(

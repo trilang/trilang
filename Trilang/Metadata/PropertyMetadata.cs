@@ -4,12 +4,10 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 {
     public PropertyMetadata(
         TypeMetadata declaringType,
-        AccessModifierMetadata accessModifier,
         string name,
         ITypeMetadata type)
     {
         DeclaringType = declaringType;
-        AccessModifier = accessModifier;
         Name = name;
         Type = type;
     }
@@ -29,7 +27,6 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
             return true;
 
         return DeclaringType.Equals(other.DeclaringType) &&
-               AccessModifier == other.AccessModifier &&
                Name == other.Name &&
                Type.Equals(other.Type);
     }
@@ -49,14 +46,12 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(AccessModifier, Name, Type);
+        => HashCode.Combine(Name, Type);
 
     public override string ToString()
         => $"{Name}: {Type}";
 
     public TypeMetadata DeclaringType { get; }
-
-    public AccessModifierMetadata AccessModifier { get; }
 
     public string Name { get; }
 

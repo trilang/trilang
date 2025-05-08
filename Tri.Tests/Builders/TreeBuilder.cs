@@ -180,7 +180,6 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     {
         private readonly string name;
         private readonly IInlineTypeNode type;
-        private AccessModifier accessModifier;
         private PropertyGetterNode? getter;
         private PropertySetterNode? setter;
 
@@ -188,14 +187,6 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         {
             this.name = name;
             this.type = type;
-            accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
-        }
-
-        public IPropertyBuilder AccessModifier(AccessModifier modifier)
-        {
-            this.accessModifier = modifier;
-
-            return this;
         }
 
         public IPropertyBuilder Getter(AccessModifier modifier, Action<IBlockBuilder>? action = null)
@@ -219,7 +210,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public PropertyDeclarationNode Build()
-            => new PropertyDeclarationNode(accessModifier, name, type, getter, setter);
+            => new PropertyDeclarationNode(name, type, getter, setter);
     }
 
     private sealed class ConstructorBuilder : IConstructorBuilder

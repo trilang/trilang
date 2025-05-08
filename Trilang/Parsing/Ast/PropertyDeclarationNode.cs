@@ -6,22 +6,17 @@ namespace Trilang.Parsing.Ast;
 
 public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarationNode>
 {
-    public PropertyDeclarationNode(
-        AccessModifier accessModifier,
-        string name,
-        IInlineTypeNode type)
-        : this(accessModifier, name, type, null, null)
+    public PropertyDeclarationNode(string name, IInlineTypeNode type)
+        : this(name, type, null, null)
     {
     }
 
     public PropertyDeclarationNode(
-        AccessModifier accessModifier,
         string name,
         IInlineTypeNode type,
         PropertyGetterNode? getter,
         PropertySetterNode? setter)
     {
-        AccessModifier = accessModifier;
         Name = name;
         Type = type;
         Getter = getter;
@@ -50,8 +45,7 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
         if (ReferenceEquals(this, other))
             return true;
 
-        return AccessModifier == other.AccessModifier &&
-               Name == other.Name &&
+        return Name == other.Name &&
                Type.Equals(other.Type) &&
                Equals(Getter, other.Getter) &&
                Equals(Setter, other.Setter);
@@ -72,7 +66,7 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
     }
 
     public override int GetHashCode()
-        => HashCode.Combine((int)AccessModifier, Name, Type);
+        => HashCode.Combine(Name, Type);
 
     public override string ToString()
     {
@@ -91,8 +85,6 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }
-
-    public AccessModifier AccessModifier { get; }
 
     public string Name { get; }
 

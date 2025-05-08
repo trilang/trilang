@@ -243,13 +243,9 @@ public class Parser
     private PropertyDeclarationNode? TryParseProperty(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            var accessModifier = c.Parser.TryParseAccessModifier(c);
-            if (accessModifier is null)
-                return null;
-
             var name = c.Parser.TryParseId(c);
             if (name is null)
-                throw new ParseException("Expected a property name.");
+                return null;
 
             if (!c.Reader.Check(TokenKind.Colon))
                 return null;
@@ -259,7 +255,7 @@ public class Parser
                 throw new ParseException("Expected a type.");
 
             if (c.Reader.Check(TokenKind.SemiColon))
-                return new PropertyDeclarationNode(accessModifier.Value, name, type, null, null);
+                return new PropertyDeclarationNode(name, type, null, null);
 
             if (!c.Reader.Check(TokenKind.OpenBrace))
                 throw new ParseException("Expected an open brace.");
@@ -270,7 +266,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.CloseBrace))
                 throw new ParseException("Expected a close brace.");
 
-            return new PropertyDeclarationNode(accessModifier.Value, name, type, getter, setter);
+            return new PropertyDeclarationNode(name, type, getter, setter);
         });
 
     private PropertyGetterNode? TryParsePropertyGetter(ParserContext context)

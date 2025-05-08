@@ -45,14 +45,13 @@ type Color = { Red, Green, Blue };
 type Color = Red | Green | Blue;
 
 // function type
-type F = (x: i32, y: i32) => i32;
+type F = (i32, i32) => i32;
 
 // generics? properties?
 public type List<T> {
-    private arr: T[];
-    // private arr: T[] { private get; private set; }
-    public size: i32 { private set; }
-    public count: i32 { private set; }
+    arr: T[] { private get; }
+    size: i32;
+    count: i32;
 
     public constructor() {
         size = 16;
@@ -89,6 +88,7 @@ public type List<T> {
         allocateArray();
 
         array[count] = value;
+        count += 1;
     }
 }
 

@@ -103,12 +103,10 @@ public class TypeCheckerTests
         var expected = new TypeMetadata("Point", [], [], [], []);
         expected.AddProperty(new PropertyMetadata(
             expected,
-            AccessModifierMetadata.Public,
             "x",
             TypeMetadata.I32));
         expected.AddProperty(new PropertyMetadata(
             expected,
-            AccessModifierMetadata.Public,
             "y",
             TypeMetadata.I32));
         expected.AddMethod(new MethodMetadata(
@@ -906,7 +904,7 @@ public class TypeCheckerTests
     {
         var tree = new TreeBuilder()
             .DefineFunction("main", f => f
-                .ReturnType(t=>t.Array("i32"))
+                .ReturnType(t => t.Array("i32"))
                 .Body(body => body
                     .Return(r => r
                         .Number(10)

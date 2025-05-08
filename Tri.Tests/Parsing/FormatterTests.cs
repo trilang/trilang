@@ -1061,8 +1061,8 @@ public class FormatterTests
                 "Point",
                 [],
                 [
-                    new PropertyDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
-                    new PropertyDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
+                    new PropertyDeclarationNode("x", new TypeNode("i32")),
+                    new PropertyDeclarationNode("y", new TypeNode("i32")),
                 ],
                 [],
                 [])
@@ -1071,8 +1071,8 @@ public class FormatterTests
         const string expected =
             """
             public type Point {
-                private x: i32;
-                private y: i32;
+                x: i32;
+                y: i32;
             }
             """;
 
@@ -1089,7 +1089,6 @@ public class FormatterTests
                 [],
                 [
                     new PropertyDeclarationNode(
-                        AccessModifier.Private,
                         "x",
                         new TypeNode("i32"),
                         new PropertyGetterNode(
@@ -1119,7 +1118,7 @@ public class FormatterTests
         const string expected =
             """
             public type Point {
-                private x: i32 {
+                x: i32 {
                     private get {
                         return 0;
                     }
@@ -1143,7 +1142,6 @@ public class FormatterTests
                 [],
                 [
                     new PropertyDeclarationNode(
-                        AccessModifier.Private,
                         "x",
                         new TypeNode("i32"),
                         new PropertyGetterNode(AccessModifier.Private, null),
@@ -1168,7 +1166,7 @@ public class FormatterTests
         const string expected =
             """
             public type Point {
-                private x: i32 {
+                x: i32 {
                     private get;
                     private set {
                         field = value;
@@ -1190,7 +1188,6 @@ public class FormatterTests
                 [],
                 [
                     new PropertyDeclarationNode(
-                        AccessModifier.Private,
                         "x",
                         new TypeNode("i32"),
                         new PropertyGetterNode(
@@ -1209,7 +1206,7 @@ public class FormatterTests
         const string expected =
             """
             public type Point {
-                private x: i32 {
+                x: i32 {
                     private get {
                         return 0;
                     }
@@ -1230,8 +1227,8 @@ public class FormatterTests
                 "Point",
                 [],
                 [
-                    new PropertyDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
-                    new PropertyDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
+                    new PropertyDeclarationNode("x", new TypeNode("i32")),
+                    new PropertyDeclarationNode("y", new TypeNode("i32")),
                 ],
                 [
                     new ConstructorDeclarationNode(
@@ -1261,8 +1258,8 @@ public class FormatterTests
         const string expected =
             """
             public type Point {
-                private x: i32;
-                private y: i32;
+                x: i32;
+                y: i32;
                 public constructor(x: i32, y: i32) {
                 }
                 public toString(): string {

@@ -149,8 +149,6 @@ public partial class Formatter : IFormatter
 
     public void Visit(PropertyDeclarationNode node)
     {
-        WriteAccessModifier(node.AccessModifier);
-        writer.Write(' ');
         writer.Write(node.Name);
         writer.Write(": ");
         node.Type.Accept(this);

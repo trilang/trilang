@@ -79,8 +79,8 @@ public class ParseTypeTests
         var tree = parser.Parse(
             """
             public type Point {
-                private x: i32;
-                private y: i32;
+                x: i32;
+                y: i32;
             }
             """);
 
@@ -90,8 +90,8 @@ public class ParseTypeTests
                 "Point",
                 [],
                 [
-                    new PropertyDeclarationNode(AccessModifier.Private, "x", new TypeNode("i32")),
-                    new PropertyDeclarationNode(AccessModifier.Private, "y", new TypeNode("i32")),
+                    new PropertyDeclarationNode("x", new TypeNode("i32")),
+                    new PropertyDeclarationNode("y", new TypeNode("i32")),
                 ],
                 [],
                 []
@@ -108,7 +108,7 @@ public class ParseTypeTests
         var tree = parser.Parse(
             """
             public type Point {
-                private x: i32 {
+                x: i32 {
                     private get {
                         return field;
                     }
@@ -116,7 +116,7 @@ public class ParseTypeTests
                         field = value;
                     }
                 }
-                private y: i32 {
+                y: i32 {
                     private get{
                         return field;
                     }
@@ -134,7 +134,6 @@ public class ParseTypeTests
                 [],
                 [
                     new PropertyDeclarationNode(
-                        AccessModifier.Private,
                         "x",
                         new TypeNode("i32"),
                         new PropertyGetterNode(
@@ -159,7 +158,6 @@ public class ParseTypeTests
                         )
                     ),
                     new PropertyDeclarationNode(
-                        AccessModifier.Private,
                         "y",
                         new TypeNode("i32"),
                         new PropertyGetterNode(
@@ -199,7 +197,7 @@ public class ParseTypeTests
         var tree = parser.Parse(
             """
             public type Point {
-                private x: i32 {
+                x: i32 {
                     private get;
                     private set {
                         field = value;
@@ -215,7 +213,6 @@ public class ParseTypeTests
                 [],
                 [
                     new PropertyDeclarationNode(
-                        AccessModifier.Private,
                         "x",
                         new TypeNode("i32"),
                         new PropertyGetterNode(AccessModifier.Private, null),
@@ -248,7 +245,7 @@ public class ParseTypeTests
         var tree = parser.Parse(
             """
             public type Point {
-                private x: i32 {
+                x: i32 {
                     private get {
                         return field;
                     }
@@ -264,7 +261,6 @@ public class ParseTypeTests
                 [],
                 [
                     new PropertyDeclarationNode(
-                        AccessModifier.Private,
                         "x",
                         new TypeNode("i32"),
                         new PropertyGetterNode(

@@ -421,8 +421,8 @@ public class SymbolFinderTests
             "Point",
             [],
             [
-                new PropertyDeclarationNode(AccessModifier.Public, "x", new TypeNode("i32")),
-                new PropertyDeclarationNode(AccessModifier.Public, "y", new TypeNode("i32")),
+                new PropertyDeclarationNode("x", new TypeNode("i32")),
+                new PropertyDeclarationNode("y", new TypeNode("i32")),
             ],
             [],
             [
