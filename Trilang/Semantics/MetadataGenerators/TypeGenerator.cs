@@ -49,6 +49,7 @@ internal class TypeGenerator
 
             foreach (var @interface in typeDeclarationNode.Interfaces)
             {
+                // TODO: support generic interfaces
                 var aliasMetadata = typeProvider.GetType(@interface.Name) as TypeAliasMetadata ??
                                     throw new SemanticAnalysisException($"The '{@interface.Name}' interface is not defined.");
 
@@ -78,15 +79,22 @@ internal class TypeGenerator
                 type.AddProperty(propertyMetadata);
             }
 
-            foreach (var constructor in typeDeclarationNode.Constructors)
+            if (typeDeclarationNode.Constructors.Count > 0)
             {
-                var parameters = GetParameterTypes(typeProvider, constructor.Parameters);
-                var constructorMetadata = new ConstructorMetadata(
-                    type,
-                    GetAccessModifierMetadata(constructor.AccessModifier),
-                    parameters);
+                foreach (var constructor in typeDeclarationNode.Constructors)
+                {
+                    var parameters = GetParameterTypes(typeProvider, constructor.Parameters);
+                    var constructorMetadata = new ConstructorMetadata(
+                        type,
+                        GetAccessModifierMetadata(constructor.AccessModifier),
+                        parameters);
 
-                type.AddConstructor(constructorMetadata);
+                    type.AddConstructor(constructorMetadata);
+                }
+            }
+            else
+            {
+                type.AddConstructor(new ConstructorMetadata(type, AccessModifierMetadata.Public, []));
             }
 
             foreach (var method in typeDeclarationNode.Methods)
@@ -109,7 +117,9 @@ internal class TypeGenerator
         }
     }
 
-    private ITypeMetadata[] GetParameterTypes(ITypeMetadataProvider typeProvider, IReadOnlyList<ParameterNode> parameters)
+    private ITypeMetadata[] GetParameterTypes(
+        ITypeMetadataProvider typeProvider,
+        IReadOnlyList<ParameterNode> parameters)
     {
         var result = new ITypeMetadata[parameters.Count];
         for (var i = 0; i < parameters.Count; i++)

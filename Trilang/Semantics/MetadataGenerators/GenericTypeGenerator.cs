@@ -49,7 +49,7 @@ internal class GenericTypeGenerator
                 type.AddGenericArgument(typeArgument);
             }
 
-            var typeArgumentsMap = GetTypeArgumentsMap(type, openGenericType);
+            var typeArgumentsMap = TypeArgumentMap.Create(type.GenericArguments, openGenericType.GenericArguments);
 
             foreach (var @interface in openGenericType.Interfaces)
             {
@@ -97,11 +97,13 @@ internal class GenericTypeGenerator
 
             foreach (var method in openGenericType.Methods)
             {
-                var parameters = new ITypeMetadata[method.TypeMetadata.ParameterTypes.Count];
+                // TODO: support generic methods
+                var methodType = method.TypeMetadata;
+                var parameters = new ITypeMetadata[methodType.ParameterTypes.Count];
                 for (var i = 0; i < parameters.Length; i++)
-                    parameters[i] = typeArgumentsMap.Map(method.TypeMetadata.ParameterTypes[i]);
+                    parameters[i] = typeArgumentsMap.Map(methodType.ParameterTypes[i]);
 
-                var returnType = typeArgumentsMap.Map(method.TypeMetadata.ReturnType);
+                var returnType = typeArgumentsMap.Map(methodType.ReturnType);
                 var functionType = new FunctionTypeMetadata(parameters, returnType);
                 typeProvider.DefineType(functionType);
 
@@ -129,39 +131,5 @@ internal class GenericTypeGenerator
         }
 
         return isOpenGeneric;
-    }
-
-    private TypeMap GetTypeArgumentsMap(TypeMetadata type, TypeMetadata openGenericType)
-    {
-        var result = new TypeMap();
-
-        foreach (var (specific, open) in type.GenericArguments.Zip(openGenericType.GenericArguments))
-        {
-            if (specific is TypeArgumentMetadata)
-                continue;
-
-            if (specific.Equals(open))
-                continue;
-
-            result.Add(open.Name, specific);
-        }
-
-        return result;
-    }
-
-    private sealed class TypeMap
-    {
-        private readonly IDictionary<string, ITypeMetadata> map;
-
-        public TypeMap()
-            => map = new Dictionary<string, ITypeMetadata>();
-
-        public void Add(string name, ITypeMetadata type)
-            => map.Add(name, type);
-
-        public ITypeMetadata Map(ITypeMetadata type)
-            => type is TypeArgumentMetadata && map.TryGetValue(type.Name, out var mappedType)
-                ? mappedType
-                : type;
     }
 }

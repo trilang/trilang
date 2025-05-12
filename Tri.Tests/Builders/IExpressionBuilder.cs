@@ -37,6 +37,7 @@ public interface IExpressionBuilder
 
     IExpressionBuilder Call(string name);
     IExpressionBuilder NewObject(string type);
+    IExpressionBuilder NewObject(string type, params string[] args);
     IExpressionBuilder NewArray(string type);
     IExpressionBuilder Tuple();
 

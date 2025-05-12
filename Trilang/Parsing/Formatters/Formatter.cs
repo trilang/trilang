@@ -20,6 +20,24 @@ public partial class Formatter : IFormatter
         });
     }
 
+    private void WriteGenericArguments(IHasGenericArguments node)
+    {
+        if (node.GenericArguments.Count <= 0)
+            return;
+
+        writer.Write('<');
+
+        for (var i = 0; i < node.GenericArguments.Count; i++)
+        {
+            node.GenericArguments[i].Accept(this);
+
+            if (i < node.GenericArguments.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write('>');
+    }
+
     public void Visit(ArrayAccessExpressionNode node)
     {
         node.Member.Accept(this);
@@ -524,21 +542,7 @@ public partial class Formatter : IFormatter
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" type ");
         writer.Write(node.Name);
-
-        if (node.GenericArguments.Count > 0)
-        {
-            writer.Write('<');
-
-            for (var i = 0; i < node.GenericArguments.Count; i++)
-            {
-                node.GenericArguments[i].Accept(this);
-
-                if (i < node.GenericArguments.Count - 1)
-                    writer.Write(", ");
-            }
-
-            writer.Write('>');
-        }
+        WriteGenericArguments(node);
 
         if (node.Interfaces.Count > 0)
         {

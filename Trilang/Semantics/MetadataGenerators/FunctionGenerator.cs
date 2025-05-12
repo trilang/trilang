@@ -21,6 +21,7 @@ internal class FunctionGenerator
             var returnType = typeProvider.GetType(function.ReturnType.Name) ??
                              throw new SemanticAnalysisException($"The function has unknown return type: '{function.ReturnType.Name}'.");
 
+            // TODO: generic?
             var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
             if (typeProvider.GetType(functionTypeMetadata.Name) is null)
                 typeProvider.DefineType(functionTypeMetadata);
@@ -39,6 +40,7 @@ internal class FunctionGenerator
             var returnType = typeProvider.GetType(function.ReturnType.Name) ??
                              throw new SemanticAnalysisException($"The function has unknown return type: '{function.ReturnType.Name}'.");
 
+            // TODO: generic?
             var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
             typeProvider.DefineType(functionTypeMetadata);
         }

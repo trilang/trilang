@@ -718,7 +718,8 @@ public class Parser
             if (!c.Reader.Check(TokenKind.New))
                 return null;
 
-            var type = c.Parser.TryParseTypeNode(c) ??
+            var type = c.Parser.TryParseGenericTypeNode(c) ??
+                       c.Parser.TryParseTypeNode(c) as IInlineTypeNode ??
                        throw new ParseException("Expected a type.");
 
             if (!c.Reader.Check(TokenKind.OpenParenthesis))

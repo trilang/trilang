@@ -988,4 +988,62 @@ public class TypeCheckerTests
         Assert.That(genericTypeNode, Is.Not.Null);
         Assert.That(genericTypeNode.Metadata, Is.EqualTo(closedType));
     }
+
+    [Test]
+    public void FindCtorInGenericTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("a", "T"))
+            .DefineFunction("main", f => f
+                .Body(body => body
+                    .DefineVariable(
+                        "x",
+                        new GenericTypeNode("Test", [new TypeNode("i32")]),
+                        exp => exp
+                            .NewObject("Test", "i32"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var closedType = typeProvider.GetType("Test<i32>") as TypeMetadata;
+        var ctor = closedType!.GetConstructor([]);
+
+        var newObj = tree.Find<NewObjectExpressionNode>();
+        Assert.That(newObj, Is.Not.Null);
+        Assert.That(newObj.Metadata, Is.EqualTo(ctor));
+    }
+
+    [Test]
+    public void SetMetadataForClosedGenericTypeFieldTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("a", "T"))
+            .DefineFunction("main", f => f
+                .ReturnType("i32")
+                .Body(body => body
+                    .DefineVariable(
+                        "x",
+                        new GenericTypeNode("Test", [new TypeNode("i32")]),
+                        exp => exp
+                            .NewObject("Test", "i32"))
+                    .Return(r => r
+                        .MemberAccess("x")
+                        .MemberAccess("a")
+                        .MemberAccess())))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var returnStmt = tree.Find<ReturnStatementNode>();
+        Assert.That(returnStmt, Is.Not.Null);
+        Assert.That(returnStmt.Expression, Is.Not.Null);
+        Assert.That(returnStmt.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+    }
 }

@@ -4,7 +4,10 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationNode>
+public class TypeDeclarationNode :
+    IDeclarationNode,
+    IHasGenericArguments,
+    IEquatable<TypeDeclarationNode>
 {
     public TypeDeclarationNode(
         AccessModifier accessModifier,

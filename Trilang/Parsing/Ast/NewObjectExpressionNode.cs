@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
@@ -6,8 +7,10 @@ namespace Trilang.Parsing.Ast;
 
 public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpressionNode>
 {
-    public NewObjectExpressionNode(TypeNode type, IReadOnlyList<IExpressionNode> parameters)
+    public NewObjectExpressionNode(IInlineTypeNode type, IReadOnlyList<IExpressionNode> parameters)
     {
+        Debug.Assert(type is TypeNode or GenericTypeNode);
+
         Type = type;
         Parameters = parameters;
     }
@@ -65,7 +68,7 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public TypeNode Type { get; }
+    public IInlineTypeNode Type { get; }
 
     public IReadOnlyList<IExpressionNode> Parameters { get; }
 

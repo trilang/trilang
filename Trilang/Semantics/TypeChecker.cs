@@ -195,10 +195,14 @@ internal class TypeChecker : IVisitor
 
         // we can be sure that node.Metadata is not null here
         // because it is set as a part of TypeNode
-        var functionType = new FunctionTypeMetadata(
+        var typeProvider = node.SymbolTable!.TypeProvider;
+        var metadata = new FunctionTypeMetadata(
             node.Parameters.Select(parameter => parameter.Type.Metadata!).ToList(),
             node.ReturnType.Metadata!);
-        node.Metadata = new FunctionMetadata(node.Name, functionType);
+        metadata = typeProvider.GetType(metadata.Name) as FunctionTypeMetadata ??
+                   throw new SemanticAnalysisException($"Unknown function type '{metadata.Name}'");
+
+        node.Metadata = new FunctionMetadata(node.Name, metadata);
 
         node.Body?.Accept(this);
     }
@@ -210,9 +214,14 @@ internal class TypeChecker : IVisitor
 
         node.ReturnType.Accept(this);
 
-        node.Metadata = new FunctionTypeMetadata(
+        var typeProvider = node.SymbolTable!.TypeProvider;
+        var metadata = new FunctionTypeMetadata(
             node.ParameterTypes.Select(parameter => parameter.Metadata!).ToList(),
             node.ReturnType.Metadata!);
+        metadata = typeProvider.GetType(metadata.Name) as FunctionTypeMetadata ??
+                   throw new SemanticAnalysisException($"Unknown function type '{metadata.Name}'");
+
+        node.Metadata = metadata;
     }
 
     public void Visit(GenericTypeNode node)

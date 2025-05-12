@@ -643,6 +643,19 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IExpressionBuilder NewObject(string type, params string[] args)
+        {
+            var parameters = new IExpressionNode[stack.Count];
+            for (var i = stack.Count - 1; i >= 0; i--)
+                parameters[i] = stack.Pop();
+
+            var genericTypeNode = new GenericTypeNode(type, args.Select(x => new TypeNode(x)).ToList());
+            var newOp = new NewObjectExpressionNode(genericTypeNode, parameters);
+            stack.Push(newOp);
+
+            return this;
+        }
+
         public IExpressionBuilder NewArray(string type)
         {
             var newArray = new NewArrayExpressionNode(new ArrayTypeNode(new TypeNode(type)), stack.Pop());

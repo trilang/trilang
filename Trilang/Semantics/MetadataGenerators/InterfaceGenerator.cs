@@ -59,6 +59,7 @@ internal class InterfaceGenerator
                 var returnType = typeProvider.GetType(method.ReturnType.Name) ??
                                  throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
 
+                // TODO: generic?
                 var functionType = new FunctionTypeMetadata(parameters, returnType);
                 typeProvider.DefineType(functionType);
 

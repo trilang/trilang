@@ -728,4 +728,24 @@ public class MetadataGeneratorTests
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(TypeMetadata.I32));
     }
+
+    [Test]
+    public void GenerateDefaultCtorTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test")
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("Test") as TypeMetadata;
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type.Constructors, Has.Count.EqualTo(1));
+
+        var ctor = type.GetConstructor([]);
+        Assert.That(ctor, Is.Not.Null);
+        Assert.That(ctor.AccessModifier, Is.EqualTo(AccessModifierMetadata.Public));
+    }
 }

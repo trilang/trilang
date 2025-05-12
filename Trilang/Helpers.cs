@@ -69,6 +69,11 @@ public static class Helpers
                        .FirstOrDefault(x => x is not null) ??
                    Find(functionTypeDeclarationNode.ReturnType, predicate),
 
+            GenericTypeNode genericTypeNode
+                => genericTypeNode.TypeArguments
+                    .Select(x => Find(x, predicate))
+                    .FirstOrDefault(x => x is not null),
+
             IfStatementNode ifStatementNode
                 => Find(ifStatementNode.Condition, predicate) ??
                    Find(ifStatementNode.Then, predicate) ??
@@ -153,7 +158,10 @@ public static class Helpers
                 => Find(typeAliasNode.Type, predicate),
 
             TypeDeclarationNode typeDeclarationNode
-                => typeDeclarationNode.Properties
+                => typeDeclarationNode.GenericArguments
+                       .Select(x => Find(x, predicate))
+                       .FirstOrDefault(x => x is not null) ??
+                   typeDeclarationNode.Properties
                        .Select(x => Find(x, predicate))
                        .FirstOrDefault(x => x is not null) ??
                    typeDeclarationNode.Methods
