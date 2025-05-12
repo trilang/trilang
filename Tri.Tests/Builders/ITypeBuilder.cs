@@ -16,5 +16,7 @@ public interface ITypeBuilder
 
     ITypeBuilder AddInterface(string name);
 
+    ITypeBuilder DefineGenericArgument(string name);
+
     TypeDeclarationNode Build();
 }

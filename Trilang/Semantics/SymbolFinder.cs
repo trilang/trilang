@@ -16,11 +16,17 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(ArrayTypeNode node, SymbolFinderContext context)
     {
+        node.SymbolTable = context.SymbolTable;
+
         context.SymbolTable.TryAddType(TypeSymbol.Array(node));
+
+        node.ElementType.Accept(this, context);
     }
 
     public void Visit(BinaryExpressionNode node, SymbolFinderContext context)
     {
+        node.SymbolTable = context.SymbolTable;
+
         node.Left.Accept(this, context);
         node.Right.Accept(this, context);
     }
@@ -122,6 +128,17 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.ReturnType.Accept(this, context);
     }
 
+    public void Visit(GenericTypeNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        foreach (var typeArgument in node.TypeArguments)
+            typeArgument.Accept(this, context);
+
+        var symbol = TypeSymbol.GenericType(node);
+        node.SymbolTable.TryAddType(symbol);
+    }
+
     public void Visit(IfStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
@@ -213,6 +230,8 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(NewArrayExpressionNode node, SymbolFinderContext context)
     {
+        node.SymbolTable = context.SymbolTable;
+
         node.Type.Accept(this, context);
         node.Size.Accept(this, context);
     }
@@ -307,12 +326,16 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(TupleExpressionNode node, SymbolFinderContext context)
     {
+        node.SymbolTable = context.SymbolTable;
+
         foreach (var expression in node.Expressions)
             expression.Accept(this, context);
     }
 
     public void Visit(TupleTypeNode node, SymbolFinderContext context)
     {
+        node.SymbolTable = context.SymbolTable;
+
         foreach (var type in node.Types)
             type.Accept(this, context);
 
@@ -332,13 +355,18 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(TypeDeclarationNode node, SymbolFinderContext context)
     {
-        var symbol = TypeSymbol.Type(node);
+        var symbol = node.GenericArguments.Count > 0
+            ? TypeSymbol.OpenGenericType(node)
+            : TypeSymbol.Type(node);
         if (!context.SymbolTable.TryAddType(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
 
         context.Scoped(c =>
         {
             node.SymbolTable = c.SymbolTable;
+
+            foreach (var genericArgument in node.GenericArguments)
+                genericArgument.Accept(this, c);
 
             foreach (var @interface in node.Interfaces)
                 @interface.Accept(this, c);

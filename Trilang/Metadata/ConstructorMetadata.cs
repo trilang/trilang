@@ -5,7 +5,7 @@ public class ConstructorMetadata : IMetadata, IEquatable<ConstructorMetadata>
     public ConstructorMetadata(
         TypeMetadata declaringType,
         AccessModifierMetadata accessModifier,
-        IReadOnlyCollection<ITypeMetadata> parameterTypes)
+        IReadOnlyList<ITypeMetadata> parameterTypes)
     {
         DeclaringType = declaringType;
         AccessModifier = accessModifier;
@@ -52,5 +52,5 @@ public class ConstructorMetadata : IMetadata, IEquatable<ConstructorMetadata>
 
     public AccessModifierMetadata AccessModifier { get; }
 
-    public IReadOnlyCollection<ITypeMetadata> ParameterTypes { get; }
+    public IReadOnlyList<ITypeMetadata> ParameterTypes { get; }
 }

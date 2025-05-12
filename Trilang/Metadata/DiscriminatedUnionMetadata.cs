@@ -1,22 +1,22 @@
 namespace Trilang.Metadata;
 
-public class DiscriminatedUnionType : ITypeMetadata, IEquatable<DiscriminatedUnionType>
+public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<DiscriminatedUnionMetadata>
 {
     private readonly List<ITypeMetadata> types;
 
-    public DiscriminatedUnionType(string name)
+    public DiscriminatedUnionMetadata(string name)
     {
         Name = name;
         types = [];
     }
 
-    public static bool operator ==(DiscriminatedUnionType? left, DiscriminatedUnionType? right)
+    public static bool operator ==(DiscriminatedUnionMetadata? left, DiscriminatedUnionMetadata? right)
         => Equals(left, right);
 
-    public static bool operator !=(DiscriminatedUnionType? left, DiscriminatedUnionType? right)
+    public static bool operator !=(DiscriminatedUnionMetadata? left, DiscriminatedUnionMetadata? right)
         => !Equals(left, right);
 
-    public bool Equals(DiscriminatedUnionType? other)
+    public bool Equals(DiscriminatedUnionMetadata? other)
     {
         if (other is null)
             return false;
@@ -39,7 +39,7 @@ public class DiscriminatedUnionType : ITypeMetadata, IEquatable<DiscriminatedUni
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((DiscriminatedUnionType)obj);
+        return Equals((DiscriminatedUnionMetadata)obj);
     }
 
     public override int GetHashCode()

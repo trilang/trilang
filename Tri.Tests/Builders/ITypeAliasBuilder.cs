@@ -18,5 +18,7 @@ public interface ITypeAliasBuilder
 
     ITypeAliasBuilder Tuple(Action<ITupleBuilder> action);
 
+    ITypeAliasBuilder Generic(string name, Action<IGenericTypeBuilder> action);
+
     TypeAliasDeclarationNode Build();
 }

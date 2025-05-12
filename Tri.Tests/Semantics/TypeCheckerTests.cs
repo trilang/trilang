@@ -100,7 +100,7 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new TypeMetadata("Point", [], [], [], []);
+        var expected = new TypeMetadata("Point");
         expected.AddProperty(new PropertyMetadata(
             expected,
             "x",
@@ -587,7 +587,8 @@ public class TypeCheckerTests
         semantic.Analyze(tree);
 
         var thisNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "this");
-        var pointType = semantic.TypeProvider.GetType("Point");
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var pointType = typeProvider.GetType("Point");
         Assert.That(thisNode, Is.Not.Null);
         Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(pointType));
     }
@@ -657,7 +658,8 @@ public class TypeCheckerTests
         semantic.Analyze(tree);
 
         var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
-        var pointType = semantic.TypeProvider.GetType("Point");
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var pointType = typeProvider.GetType("Point");
         Assert.That(aNode, Is.Not.Null);
         Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType));
 
@@ -713,13 +715,14 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
+        var typeProvider = tree.SymbolTable!.TypeProvider;
         var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
-        var pointType = semantic.TypeProvider.GetType("Test");
+        var pointType = typeProvider.GetType("Test");
         Assert.That(aNode, Is.Not.Null);
         Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType));
 
         var xNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "f");
-        var functionType = semantic.TypeProvider.GetType("F");
+        var functionType = typeProvider.GetType("F");
         Assert.That(xNode, Is.Not.Null);
         Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(functionType));
     }
@@ -743,7 +746,8 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var type = semantic.TypeProvider.GetType("Point") as TypeMetadata;
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("Point") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
         var ctor = type.GetConstructor([TypeMetadata.I32, TypeMetadata.I32]);
@@ -815,7 +819,7 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var du = new DiscriminatedUnionType("{ } | i32 | () => void");
+        var du = new DiscriminatedUnionMetadata("{ } | i32 | () => void");
         du.AddType(new InterfaceMetadata("{ }", [], []));
         du.AddType(TypeMetadata.I32);
         du.AddType(new FunctionTypeMetadata([], TypeMetadata.Void));
@@ -895,7 +899,8 @@ public class TypeCheckerTests
         expected.AddType(TypeMetadata.I32);
         expected.AddType(TypeMetadata.I32);
 
-        var actual = semantic.TypeProvider.GetType("(i32, i32)");
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var actual = typeProvider.GetType("(i32, i32)");
         Assert.That(actual, Is.EqualTo(expected));
     }
 
@@ -914,10 +919,73 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new TypeArrayMetadata(TypeMetadata.I32);
+        var expected = new TypeArrayMetadata("i32[]") { ItemMetadata = TypeMetadata.I32 };
 
         var newArray = tree.Find<NewArrayExpressionNode>();
         Assert.That(newArray, Is.Not.Null);
         Assert.That(newArray.ReturnTypeMetadata, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void GenericPropertyTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("x", "T"))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var property = tree.Find<PropertyDeclarationNode>();
+        Assert.That(property, Is.Not.Null);
+        Assert.That(property.Metadata, Is.Not.Null);
+        Assert.That(property.Metadata.Type, Is.EqualTo(new TypeArgumentMetadata("T")));
+    }
+
+    [Test]
+    public void GenericArrayPropertyTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("x", new ArrayTypeNode(new TypeNode("T"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var property = tree.Find<PropertyDeclarationNode>();
+        Assert.That(property, Is.Not.Null);
+        Assert.That(property.Metadata, Is.Not.Null);
+
+        var typeArrayMetadata = new TypeArrayMetadata("T[]")
+        {
+            ItemMetadata = new TypeArgumentMetadata("T")
+        };
+        Assert.That(property.Metadata.Type, Is.EqualTo(typeArrayMetadata));
+    }
+
+    [Test]
+    public void SetMetadataForClosedGenericTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("List", t => t
+                .DefineGenericArgument("T"))
+            .DefineAliasType("Test", t => t
+                .Generic("List", g => g
+                    .DefineGenericArgument("i32")))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var closedType = typeProvider.GetType("List<i32>");
+        var genericTypeNode = tree.Find<GenericTypeNode>();
+        Assert.That(closedType, Is.Not.Null);
+        Assert.That(genericTypeNode, Is.Not.Null);
+        Assert.That(genericTypeNode.Metadata, Is.EqualTo(closedType));
     }
 }

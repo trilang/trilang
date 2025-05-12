@@ -1,3 +1,5 @@
+using Trilang.Metadata;
+
 namespace Trilang.Symbols;
 
 public interface ISymbolTable
@@ -12,4 +14,5 @@ public interface ISymbolTable
 
     IReadOnlyDictionary<string, TypeSymbol> Types { get; }
     IReadOnlyDictionary<string, IdSymbol> Ids { get; }
+    ITypeMetadataProvider TypeProvider { get; }
 }

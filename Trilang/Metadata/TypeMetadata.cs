@@ -18,23 +18,26 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public static readonly TypeMetadata Bool = new TypeMetadata("bool");
     public static readonly TypeMetadata String = new TypeMetadata("string");
 
+    private readonly HashSet<ITypeMetadata> genericArguments;
     private readonly HashSet<InterfaceMetadata> interfaces;
     private readonly HashSet<PropertyMetadata> properties;
     private readonly HashSet<ConstructorMetadata> constructors;
     private readonly HashSet<MethodMetadata> methods;
 
-    public TypeMetadata(string name) : this(name, [], [], [], [])
+    public TypeMetadata(string name) : this(name, [], [], [], [], [])
     {
     }
 
     public TypeMetadata(
         string name,
+        IEnumerable<ITypeMetadata> genericArguments,
         IEnumerable<InterfaceMetadata> interfaces,
         IEnumerable<PropertyMetadata> properties,
         IEnumerable<ConstructorMetadata> constructors,
         IEnumerable<MethodMetadata> methods)
     {
         Name = name;
+        this.genericArguments = new HashSet<ITypeMetadata>(genericArguments);
         this.interfaces = new HashSet<InterfaceMetadata>(interfaces);
         this.properties = new HashSet<PropertyMetadata>(properties);
         this.constructors = new HashSet<ConstructorMetadata>(constructors);
@@ -78,6 +81,12 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public override string ToString()
         => Name;
 
+    public void AddGenericArgument(ITypeMetadata typeArgumentMetadata)
+        => genericArguments.Add(typeArgumentMetadata);
+
+    public ITypeMetadata? GetGenericArgument(string name)
+        => genericArguments.FirstOrDefault(f => f.Name == name);
+
     public void AddInterface(InterfaceMetadata interfaceMetadata)
         => interfaces.Add(interfaceMetadata);
 
@@ -112,6 +121,8 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     }
 
     public string Name { get; }
+
+    public IReadOnlyCollection<ITypeMetadata> GenericArguments => genericArguments;
 
     public IReadOnlyCollection<InterfaceMetadata> Interfaces => interfaces;
 

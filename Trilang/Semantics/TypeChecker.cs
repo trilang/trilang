@@ -9,15 +9,6 @@ namespace Trilang.Semantics;
 
 internal class TypeChecker : IVisitor
 {
-    private readonly TypeMetadataProvider typeProvider;
-
-    public TypeChecker() : this(new TypeMetadataProvider())
-    {
-    }
-
-    public TypeChecker(TypeMetadataProvider typeProvider)
-        => this.typeProvider = typeProvider;
-
     public void Visit(ArrayAccessExpressionNode node)
     {
         node.Member.Accept(this);
@@ -34,6 +25,7 @@ internal class TypeChecker : IVisitor
     {
         node.ElementType.Accept(this);
 
+        var typeProvider = node.SymbolTable!.TypeProvider;
         node.Metadata = typeProvider.GetType(node.Name) ??
                         throw new SemanticAnalysisException($"Unknown array type '{node.Name}'");
     }
@@ -181,6 +173,7 @@ internal class TypeChecker : IVisitor
         foreach (var type in node.Types)
             type.Accept(this);
 
+        var typeProvider = node.SymbolTable!.TypeProvider;
         var metadata = typeProvider.GetType(node.Name) ??
                        throw new SemanticAnalysisException($"Unknown discriminated union type '{node.Name}'");
 
@@ -222,6 +215,16 @@ internal class TypeChecker : IVisitor
             node.ReturnType.Metadata!);
     }
 
+    public void Visit(GenericTypeNode node)
+    {
+        foreach (var typeArgument in node.TypeArguments)
+            typeArgument.Accept(this);
+
+        var typeProvider = node.SymbolTable!.TypeProvider;
+        node.Metadata = typeProvider.GetType(node.Name) ??
+                        throw new SemanticAnalysisException($"Unknown generic type '{node.Name}'");
+    }
+
     public void Visit(IfStatementNode node)
     {
         // TODO: data flow
@@ -235,6 +238,7 @@ internal class TypeChecker : IVisitor
 
     public void Visit(InterfaceNode node)
     {
+        var typeProvider = node.SymbolTable!.TypeProvider;
         var metadata = typeProvider.GetType(node.Name) as InterfaceMetadata ??
                        throw new SemanticAnalysisException($"Unknown interface type '{node.Name}'");
 
@@ -486,6 +490,8 @@ internal class TypeChecker : IVisitor
         foreach (var expression in node.Expressions)
             expression.Accept(this);
 
+        var typeProvider = node.SymbolTable!.TypeProvider;
+
         // we can't generate metadata for this tuple in GenerateMetadata
         // because we don't know the types of the expressions yet
         var name = $"({string.Join(", ", node.Expressions.Select(x => x.ReturnTypeMetadata!.Name))})";
@@ -508,6 +514,7 @@ internal class TypeChecker : IVisitor
         foreach (var type in node.Types)
             type.Accept(this);
 
+        var typeProvider = node.SymbolTable!.TypeProvider;
         var name = $"({string.Join(", ", node.Types.Select(x => x.Metadata!.Name))})";
         var metadata = typeProvider.GetType(name) ??
                        throw new SemanticAnalysisException($"Unknown tuple type '{name}'");
@@ -519,13 +526,15 @@ internal class TypeChecker : IVisitor
     {
         node.Type.Accept(this);
 
+        var typeProvider = node.SymbolTable!.TypeProvider;
         node.Metadata = typeProvider.GetType(node.Name) ??
                         throw new SemanticAnalysisException($"Unknown type '{node.Name}'");
     }
 
     public void Visit(TypeDeclarationNode node)
     {
-        var metadata = typeProvider.GetType(node.Name);
+        var typeProvider = node.SymbolTable!.TypeProvider;
+        var metadata = typeProvider.GetType(node.FullName);
         if (metadata is not TypeMetadata type)
             throw new SemanticAnalysisException($"The '{node.Name}' type is not a type.");
 
@@ -546,6 +555,7 @@ internal class TypeChecker : IVisitor
 
     public void Visit(TypeNode node)
     {
+        var typeProvider = node.SymbolTable!.TypeProvider;
         var type = typeProvider.GetType(node.Name) ??
                    throw new SemanticAnalysisException($"Referenced unknown type '{node.Name}'");
 

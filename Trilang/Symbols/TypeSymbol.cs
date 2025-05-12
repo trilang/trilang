@@ -4,7 +4,7 @@ namespace Trilang.Symbols;
 
 public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
 {
-    public TypeSymbol(TypeSymbolKind typeKind, string name, ISyntaxNode? node)
+    private TypeSymbol(TypeSymbolKind typeKind, string name, ISyntaxNode node)
     {
         TypeKind = typeKind;
         Name = name;
@@ -31,6 +31,12 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
 
     public static TypeSymbol Tuple(TupleTypeNode node)
         => new TypeSymbol(TypeSymbolKind.Tuple, node.Name, node);
+
+    public static TypeSymbol OpenGenericType(TypeDeclarationNode node)
+        => new TypeSymbol(TypeSymbolKind.OpenGenericType, node.FullName, node);
+
+    public static TypeSymbol GenericType(GenericTypeNode node)
+        => new TypeSymbol(TypeSymbolKind.GenericType, node.Name, node);
 
     public static bool operator ==(TypeSymbol? left, TypeSymbol? right)
         => Equals(left, right);
@@ -68,11 +74,14 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
     public override int GetHashCode()
         => HashCode.Combine((int)TypeKind, Name, Node);
 
+    public override string ToString()
+        => $"{TypeKind}: {Name}";
+
     public TypeSymbolKind TypeKind { get; }
 
     public string Name { get; }
 
-    public ISyntaxNode? Node { get; }
+    public ISyntaxNode Node { get; }
 
     public bool IsType => TypeKind == TypeSymbolKind.Type;
 
@@ -87,4 +96,8 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
     public bool IsDiscriminatedUnion => TypeKind == TypeSymbolKind.DiscriminatedUnion;
 
     public bool IsTuple => TypeKind == TypeSymbolKind.Tuple;
+
+    public bool IsGenericType => TypeKind == TypeSymbolKind.OpenGenericType;
+
+    public bool IsClosedGenericType => TypeKind == TypeSymbolKind.GenericType;
 }

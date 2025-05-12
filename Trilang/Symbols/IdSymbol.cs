@@ -73,6 +73,9 @@ public class IdSymbol : ISymbol, IEquatable<IdSymbol>
     public override int GetHashCode()
         => HashCode.Combine(Name, Node);
 
+    public override string ToString()
+        => $"Id: {Name}";
+
     public string Name { get; }
 
     public ISyntaxNode? Node { get; }

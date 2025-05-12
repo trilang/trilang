@@ -249,6 +249,27 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(GenericTypeNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        foreach (var type in node.TypeArguments)
+            type.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(GenericTypeNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(GenericTypeNode node, TContext context)
+    {
+    }
+
     public void Visit(IfStatementNode node, TContext context)
     {
         if (context.IsFinished)

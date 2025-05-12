@@ -10,6 +10,7 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
     {
         Name = $"{elementType.Name}[]";
         ElementType = elementType;
+        ElementType.Parent = this;
     }
 
     public static bool operator ==(ArrayTypeNode? left, ArrayTypeNode? right)

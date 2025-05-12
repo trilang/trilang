@@ -1,17 +1,17 @@
 namespace Trilang.Metadata;
 
-public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
+public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetadata>
 {
-    public TypeArrayMetadata(string name)
+    public TypeArgumentMetadata(string name)
         => Name = name;
 
-    public static bool operator ==(TypeArrayMetadata? left, TypeArrayMetadata? right)
+    public static bool operator ==(TypeArgumentMetadata? left, TypeArgumentMetadata? right)
         => Equals(left, right);
 
-    public static bool operator !=(TypeArrayMetadata? left, TypeArrayMetadata? right)
+    public static bool operator !=(TypeArgumentMetadata? left, TypeArgumentMetadata? right)
         => !Equals(left, right);
 
-    public bool Equals(TypeArrayMetadata? other)
+    public bool Equals(TypeArgumentMetadata? other)
     {
         if (other is null)
             return false;
@@ -19,8 +19,7 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name &&
-               Equals(ItemMetadata, other.ItemMetadata);
+        return Name == other.Name;
     }
 
     public override bool Equals(object? obj)
@@ -34,7 +33,7 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((TypeArrayMetadata)obj);
+        return Equals((TypeArgumentMetadata)obj);
     }
 
     public override int GetHashCode()
@@ -44,6 +43,4 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         => Name;
 
     public string Name { get; }
-
-    public ITypeMetadata? ItemMetadata { get; set; }
 }

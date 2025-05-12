@@ -251,6 +251,22 @@ public partial class Formatter : IFormatter
         node.ReturnType.Accept(this);
     }
 
+    public void Visit(GenericTypeNode node)
+    {
+        writer.Write(node.PrefixName);
+        writer.Write('<');
+
+        for (var i = 0; i < node.TypeArguments.Count; i++)
+        {
+            node.TypeArguments[i].Accept(this);
+
+            if (i < node.TypeArguments.Count - 1)
+                writer.Write(", ");
+        }
+
+        writer.Write('>');
+    }
+
     public void Visit(IfStatementNode node)
     {
         writer.Write("if (");
@@ -508,6 +524,21 @@ public partial class Formatter : IFormatter
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" type ");
         writer.Write(node.Name);
+
+        if (node.GenericArguments.Count > 0)
+        {
+            writer.Write('<');
+
+            for (var i = 0; i < node.GenericArguments.Count; i++)
+            {
+                node.GenericArguments[i].Accept(this);
+
+                if (i < node.GenericArguments.Count - 1)
+                    writer.Write(", ");
+            }
+
+            writer.Write('>');
+        }
 
         if (node.Interfaces.Count > 0)
         {

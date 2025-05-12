@@ -100,6 +100,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     private sealed class TypeBuilder : ITypeBuilder
     {
         private readonly string typeName;
+        private readonly List<TypeNode> genericArguments;
         private readonly List<TypeNode> interfaces;
         private readonly List<PropertyDeclarationNode> properties;
         private readonly List<ConstructorDeclarationNode> constructors;
@@ -109,6 +110,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public TypeBuilder(string typeName)
         {
             this.typeName = typeName;
+            genericArguments = [];
             interfaces = [];
             properties = [];
             constructors = [];
@@ -172,8 +174,23 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public ITypeBuilder DefineGenericArgument(string name)
+        {
+            var type = new TypeNode(name);
+            genericArguments.Add(type);
+
+            return this;
+        }
+
         public TypeDeclarationNode Build()
-            => new TypeDeclarationNode(accessModifier, typeName, interfaces, properties, constructors, methods);
+            => new TypeDeclarationNode(
+                accessModifier,
+                typeName,
+                genericArguments,
+                interfaces,
+                properties,
+                constructors,
+                methods);
     }
 
     private sealed class PropertyBuilder : IPropertyBuilder
@@ -728,6 +745,16 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public ITypeAliasBuilder Generic(string name, Action<IGenericTypeBuilder> action)
+        {
+            var builder = new GenericTypeBuilder(name);
+            action(builder);
+
+            aliasedType = builder.Build();
+
+            return this;
+        }
+
         public TypeAliasDeclarationNode Build()
             => new TypeAliasDeclarationNode(
                 accessModifier,
@@ -913,5 +940,37 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
             return builder.Build();
         }
+    }
+
+    private sealed class GenericTypeBuilder : IGenericTypeBuilder
+    {
+        private readonly string typeName;
+        private readonly List<IInlineTypeNode> genericArguments;
+
+        public GenericTypeBuilder(string typeName)
+        {
+            this.typeName = typeName;
+            genericArguments = [];
+        }
+
+        public IGenericTypeBuilder DefineGenericArgument(string name)
+        {
+            var type = new TypeNode(name);
+            genericArguments.Add(type);
+
+            return this;
+        }
+
+        public IGenericTypeBuilder DefineGenericArgument(Func<IInlineTypeBuilder, IInlineTypeNode> action)
+        {
+            var builder = new InlineTypeBuilder();
+            var type = action(builder);
+            genericArguments.Add(type);
+
+            return this;
+        }
+
+        public GenericTypeNode Build()
+            => new GenericTypeNode(typeName, genericArguments);
     }
 }

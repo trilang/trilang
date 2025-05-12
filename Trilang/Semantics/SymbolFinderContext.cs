@@ -6,12 +6,7 @@ internal class SymbolFinderContext
 {
     private bool noScope;
 
-    public SymbolFinderContext()
-        : this(new RootSymbolTable())
-    {
-    }
-
-    private SymbolFinderContext(ISymbolTable symbolTable)
+    public SymbolFinderContext(ISymbolTable symbolTable)
     {
         SymbolTable = symbolTable;
         noScope = false;

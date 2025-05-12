@@ -28,6 +28,8 @@ public interface IVisitor
 
     void Visit(FunctionTypeNode node);
 
+    void Visit(GenericTypeNode node);
+
     void Visit(IfStatementNode node);
 
     void Visit(InterfaceNode node);

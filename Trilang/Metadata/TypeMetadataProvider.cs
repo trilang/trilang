@@ -1,37 +1,25 @@
 namespace Trilang.Metadata;
 
-public class TypeMetadataProvider
+public class TypeMetadataProvider : ITypeMetadataProvider
 {
+    private readonly ITypeMetadataProvider parent;
     private readonly Dictionary<string, ITypeMetadata> types;
 
-    public TypeMetadataProvider()
+    public TypeMetadataProvider(ITypeMetadataProvider parent)
     {
+        this.parent = parent;
         types = new Dictionary<string, ITypeMetadata>();
-
-        DefineType(TypeMetadata.Void);
-        DefineType(TypeMetadata.Null);
-
-        DefineType(TypeMetadata.I8);
-        DefineType(TypeMetadata.I16);
-        DefineType(TypeMetadata.I32);
-        DefineType(TypeMetadata.I64);
-
-        DefineType(TypeMetadata.U8);
-        DefineType(TypeMetadata.U16);
-        DefineType(TypeMetadata.U32);
-        DefineType(TypeMetadata.U64);
-
-        DefineType(TypeMetadata.F32);
-        DefineType(TypeMetadata.F64);
-
-        DefineType(TypeMetadata.Bool);
-        DefineType(TypeMetadata.Char);
-        DefineType(TypeMetadata.String);
     }
 
     public ITypeMetadata? GetType(string name)
-        => types.GetValueOrDefault(name);
+        => types.GetValueOrDefault(name) ??
+           parent.GetType(name);
 
     public bool DefineType(ITypeMetadata type)
-        => types.TryAdd(type.Name, type);
+        => type is TypeArgumentMetadata
+            ? types.TryAdd(type.Name, type)
+            : parent.DefineType(type);
+
+    public ITypeMetadataProvider CreateChild()
+        => new TypeMetadataProvider(this);
 }

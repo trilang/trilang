@@ -9,4 +9,6 @@ public enum TypeSymbolKind
     Interface,
     DiscriminatedUnion,
     Tuple,
+    OpenGenericType,
+    GenericType,
 }

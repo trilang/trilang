@@ -287,6 +287,7 @@ public class SymbolFinderTests
             [],
             [],
             [],
+            [],
             []);
         var tree = new SyntaxTree([type]);
 
@@ -301,8 +302,8 @@ public class SymbolFinderTests
     [Test]
     public void TypeDeclarationDuplicateTest()
     {
-        var type1 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], [], []);
-        var type2 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], [], []);
+        var type1 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], [], [], []);
+        var type2 = new TypeDeclarationNode(AccessModifier.Public, "Point", [], [], [], [], []);
         var tree = new SyntaxTree([type1, type2]);
 
         var semantic = new SemanticAnalysis();
@@ -321,6 +322,7 @@ public class SymbolFinderTests
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
             "Point",
+            [],
             [],
             [],
             [ctor],
@@ -349,6 +351,7 @@ public class SymbolFinderTests
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
             "Point",
+            [],
             [],
             [],
             [],
@@ -419,6 +422,7 @@ public class SymbolFinderTests
         var type = new TypeDeclarationNode(
             AccessModifier.Public,
             "Point",
+            [],
             [],
             [
                 new PropertyDeclarationNode("x", new TypeNode("i32")),
@@ -633,5 +637,72 @@ public class SymbolFinderTests
         Assert.That(setter.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(setter.Body.SymbolTable.Ids, Contains.Key("field").WithValue(new IdSymbol("field", property)));
         Assert.That(setter.Body.SymbolTable.Ids, Contains.Key("value").WithValue(new IdSymbol("value", property)));
+    }
+
+    [Test]
+    public void GenericTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("List", t => t
+                .DefineGenericArgument("T"))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var type = tree.Find<TypeDeclarationNode>();
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type.SymbolTable, Is.Not.Null);
+        Assert.That(type.SymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(type.SymbolTable.Types, Contains.Key("List<>").WithValue(TypeSymbol.OpenGenericType(type)));
+    }
+
+    [Test]
+    public void GenericTypeWithMultipleTypeArgumentsTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", t => t
+                .DefineGenericArgument("T1")
+                .DefineGenericArgument("T2"))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var type = tree.Find<TypeDeclarationNode>();
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type.SymbolTable, Is.Not.Null);
+        Assert.That(type.SymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(type.SymbolTable.Types, Contains.Key("Test<,>").WithValue(TypeSymbol.OpenGenericType(type)));
+    }
+
+    [Test]
+    public void SymbolForClosedGenericTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("List", t => t
+                .DefineGenericArgument("T"))
+            .DefineAliasType("Test", t => t
+                .Generic("List", g => g
+                    .DefineGenericArgument("i32")))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var alias = tree.Find<TypeAliasDeclarationNode>();
+        Assert.That(alias, Is.Not.Null);
+
+        var closedGeneric = tree.Find<GenericTypeNode>();
+        Assert.That(closedGeneric, Is.Not.Null);
+
+        Assert.That(tree.SymbolTable, Is.Not.Null);
+        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(3));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key("Test").WithValue(TypeSymbol.Alias(alias)));
+        Assert.That(
+            tree.SymbolTable.Types,
+            Contains.Key("List<i32>").WithValue(TypeSymbol.GenericType(closedGeneric)));
     }
 }

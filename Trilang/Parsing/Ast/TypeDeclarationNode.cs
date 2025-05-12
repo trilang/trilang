@@ -9,6 +9,7 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
     public TypeDeclarationNode(
         AccessModifier accessModifier,
         string name,
+        IReadOnlyList<TypeNode> genericArguments,
         IReadOnlyList<TypeNode> interfaces,
         IReadOnlyList<PropertyDeclarationNode> properties,
         IReadOnlyList<ConstructorDeclarationNode> constructors,
@@ -16,10 +17,14 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
     {
         AccessModifier = accessModifier;
         Name = name;
+        GenericArguments = genericArguments;
         Interfaces = interfaces;
         Properties = properties;
         Constructors = constructors;
         Methods = methods;
+
+        foreach (var genericArgument in genericArguments)
+            genericArgument.Parent = this;
 
         foreach (var interfaceNode in interfaces)
             interfaceNode.Parent = this;
@@ -32,6 +37,10 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
 
         foreach (var method in methods)
             method.Parent = this;
+
+        FullName = genericArguments.Count > 0
+            ? $"{Name}<{new string(',', genericArguments.Count - 1)}>"
+            : Name;
     }
 
     public static bool operator ==(TypeDeclarationNode? left, TypeDeclarationNode? right)
@@ -50,6 +59,7 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
 
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
+               GenericArguments.SequenceEqual(other.GenericArguments) &&
                Interfaces.SequenceEqual(other.Interfaces) &&
                Properties.SequenceEqual(other.Properties) &&
                Constructors.SequenceEqual(other.Constructors) &&
@@ -71,7 +81,14 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
     }
 
     public override int GetHashCode()
-        => HashCode.Combine((int)AccessModifier, Name, Interfaces, Properties, Constructors, Methods);
+        => HashCode.Combine(
+            (int)AccessModifier,
+            Name,
+            GenericArguments,
+            Interfaces,
+            Properties,
+            Constructors,
+            Methods);
 
     public override string ToString()
     {
@@ -94,6 +111,10 @@ public class TypeDeclarationNode : IDeclarationNode, IEquatable<TypeDeclarationN
     public AccessModifier AccessModifier { get; }
 
     public string Name { get; }
+
+    public string FullName { get; }
+
+    public IReadOnlyList<TypeNode> GenericArguments { get; }
 
     public IReadOnlyList<TypeNode> Interfaces { get; }
 

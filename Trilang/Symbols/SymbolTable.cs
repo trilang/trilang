@@ -1,13 +1,17 @@
+using Trilang.Metadata;
+
 namespace Trilang.Symbols;
 
 public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
 {
     private readonly ISymbolTable parent;
+    private readonly ITypeMetadataProvider typeMetadataProvider;
     private readonly Dictionary<string, IdSymbol> variables;
 
-    public SymbolTable(ISymbolTable parent)
+    public SymbolTable(ISymbolTable parent, ITypeMetadataProvider typeMetadataProvider)
     {
         this.parent = parent;
+        this.typeMetadataProvider = typeMetadataProvider;
         variables = new Dictionary<string, IdSymbol>();
     }
 
@@ -60,11 +64,14 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
         => variables.TryAdd(symbol.Name, symbol);
 
     public ISymbolTable CreateChild()
-        => new SymbolTable(this);
+        => new SymbolTable(this, typeMetadataProvider.CreateChild());
 
     public IReadOnlyDictionary<string, TypeSymbol> Types
         => parent.Types;
 
     public IReadOnlyDictionary<string, IdSymbol> Ids
         => variables;
+
+    public ITypeMetadataProvider TypeProvider
+        => typeMetadataProvider;
 }

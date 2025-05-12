@@ -215,6 +215,24 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(GenericTypeNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var type in node.TypeArguments)
+            type.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(GenericTypeNode node)
+    {
+    }
+
+    protected virtual void VisitExit(GenericTypeNode node)
+    {
+    }
+
     public void Visit(IfStatementNode node)
     {
         VisitEnter(node);
