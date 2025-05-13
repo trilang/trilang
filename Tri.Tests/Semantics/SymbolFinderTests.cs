@@ -615,7 +615,7 @@ public class SymbolFinderTests
                     .Setter(AccessModifier.Private, body => body
                         .Expression(e => e
                             .MemberAccess("field")
-                            .MemberAccess("value")
+                            .MemberAccess("value", true)
                             .Assign()))))
             .Build();
 

@@ -513,31 +513,14 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public IExpressionBuilder MemberAccess(string name)
+        public IExpressionBuilder MemberAccess(string name, bool @new = false)
         {
-            var memberAccess = new MemberAccessExpressionNode(name);
+            var parent = default(IExpressionNode);
+            if (!@new)
+                stack.TryPop(out parent);
+
+            var memberAccess = new MemberAccessExpressionNode(parent, name);
             stack.Push(memberAccess);
-
-            return this;
-        }
-
-        public IExpressionBuilder MemberAccess()
-        {
-            var member = default(MemberAccessExpressionNode);
-            while (true)
-            {
-                if (!stack.TryPeek(out var exp) || exp is not MemberAccessExpressionNode memberAccess)
-                    break;
-
-                stack.Pop();
-
-                member = member is not null
-                    ? new MemberAccessExpressionNode(memberAccess, member.Name)
-                    : memberAccess;
-            }
-
-            if (member is not null)
-                stack.Push(member);
 
             return this;
         }
@@ -618,13 +601,13 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public IExpressionBuilder XorAssign()
             => BinaryExpression(BinaryExpressionKind.BitwiseXorAssignment);
 
-        public IExpressionBuilder Call(string name)
+        public IExpressionBuilder Call()
         {
+            var memberAccess = stack.Pop();
             var parameters = new IExpressionNode[stack.Count];
             for (var i = stack.Count - 1; i >= 0; i--)
                 parameters[i] = stack.Pop();
 
-            var memberAccess = new MemberAccessExpressionNode(name);
             var call = new CallExpressionNode(memberAccess, parameters);
             stack.Push(call);
 

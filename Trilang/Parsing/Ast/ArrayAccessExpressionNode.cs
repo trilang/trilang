@@ -6,7 +6,7 @@ namespace Trilang.Parsing.Ast;
 
 public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccessExpressionNode>
 {
-    public ArrayAccessExpressionNode(MemberAccessExpressionNode member, IExpressionNode index)
+    public ArrayAccessExpressionNode(IExpressionNode member, IExpressionNode index)
     {
         Member = member;
         Index = index;
@@ -69,7 +69,7 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public MemberAccessExpressionNode Member { get; }
+    public IExpressionNode Member { get; }
 
     public IExpressionNode Index { get; }
 

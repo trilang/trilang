@@ -168,7 +168,6 @@ internal class TypeChecker : IVisitor
 
     public void Visit(DiscriminatedUnionNode node)
     {
-        // TODO: implement type checking
         // TODO: eliminate duplicates
         foreach (var type in node.Types)
             type.Accept(this);
@@ -337,7 +336,6 @@ internal class TypeChecker : IVisitor
             if (returnTypeMetadata is TypeAliasMetadata alias)
                 returnTypeMetadata = alias.Type;
 
-            // TODO: check access
             node.ReturnTypeMetadata = returnTypeMetadata switch
             {
                 TypeMetadata type
@@ -389,7 +387,6 @@ internal class TypeChecker : IVisitor
         if (node.Type.Metadata is not TypeMetadata type)
             throw new SemanticAnalysisException($"Cannot create an instance of type '{node.Type.Metadata}'");
 
-        // TODO: check access
         var parameters = node.Parameters.Select(x => x.ReturnTypeMetadata!).ToList();
         var ctor = type.GetConstructor(parameters) ??
                    throw new SemanticAnalysisException($"The '{type.Name}' type doesn't have '{string.Join(", ", parameters)}' constructor.");
@@ -468,7 +465,7 @@ internal class TypeChecker : IVisitor
         node.Getter?.Accept(this);
         node.Setter?.Accept(this);
 
-        // TODO: check access modifiers
+        // TODO: generate getter/setter?
     }
 
     public void Visit(PropertyGetterNode node)
@@ -481,7 +478,7 @@ internal class TypeChecker : IVisitor
 
     public void Visit(PropertySetterNode node)
     {
-        // TODO: check the backing field is set
+        // TODO: check the backing field is set?
         var property = (PropertyDeclarationNode)node.Parent!;
         node.Metadata = property.Metadata?.Setter;
 

@@ -56,6 +56,6 @@ public class ThisOutsideOfClassTests
         Assert.That(
             () => semantic.Analyze(tree),
             Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'this' keyword is only allowed inside a class."));
+                .And.Message.EqualTo("The 'this' keyword is only allowed inside a type."));
     }
 }

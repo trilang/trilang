@@ -10,14 +10,10 @@ internal class ThisOutsideOfClass : Visitor
         if (!node.IsThis)
             return;
 
-        var ctor = node.FindInParent<ConstructorDeclarationNode>();
-        if (ctor is not null)
+        var type = node.FindInParent<TypeDeclarationNode>();
+        if (type is not null)
             return;
 
-        var method = node.FindInParent<MethodDeclarationNode>();
-        if (method is not null)
-            return;
-
-        throw new SemanticAnalysisException("The 'this' keyword is only allowed inside a class.");
+        throw new SemanticAnalysisException("The 'this' keyword is only allowed inside a type.");
     }
 }

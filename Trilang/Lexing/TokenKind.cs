@@ -70,7 +70,6 @@ public enum TokenKind
     Public,
     Private,
     Type,
-    This,
     Constructor,
     New,
     Null,

@@ -436,7 +436,10 @@ public class TypeCheckerTests
             .DefineFunction("main", builder => builder
                 .ReturnType("i32")
                 .Body(body => body
-                    .Return(exp => exp.True().Call("add"))))
+                    .Return(exp => exp
+                        .True()
+                        .MemberAccess("add", true)
+                        .Call())))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -561,7 +564,8 @@ public class TypeCheckerTests
                 .DefineParameter("a", t => t.Type("i32"))
                 .Body(body => body
                     .Expression(r => r
-                        .Call("a"))))
+                        .MemberAccess("a")
+                        .Call())))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -603,8 +607,7 @@ public class TypeCheckerTests
                     .Body(body => body
                         .Expression(exp => exp
                             .MemberAccess("this")
-                            .MemberAccess("a")
-                            .MemberAccess()))))
+                            .MemberAccess("a")))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -625,8 +628,7 @@ public class TypeCheckerTests
                     .Body(body => body
                         .Expression(exp => exp
                             .MemberAccess("this")
-                            .MemberAccess("x")
-                            .MemberAccess()))))
+                            .MemberAccess("x")))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -650,8 +652,7 @@ public class TypeCheckerTests
                 .Body(body => body
                     .Return(r => r
                         .MemberAccess("a")
-                        .MemberAccess("x")
-                        .MemberAccess())))
+                        .MemberAccess("x"))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -681,8 +682,7 @@ public class TypeCheckerTests
                 .Body(body => body
                     .Return(r => r
                         .MemberAccess("a")
-                        .MemberAccess("c")
-                        .MemberAccess())))
+                        .MemberAccess("c"))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -708,8 +708,7 @@ public class TypeCheckerTests
                 .Body(body => body
                     .Return(r => r
                         .MemberAccess("a")
-                        .MemberAccess("f")
-                        .MemberAccess())))
+                        .MemberAccess("f"))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -1034,8 +1033,7 @@ public class TypeCheckerTests
                             .NewObject("Test", "i32"))
                     .Return(r => r
                         .MemberAccess("x")
-                        .MemberAccess("a")
-                        .MemberAccess())))
+                        .MemberAccess("a"))))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -1045,5 +1043,35 @@ public class TypeCheckerTests
         Assert.That(returnStmt, Is.Not.Null);
         Assert.That(returnStmt.Expression, Is.Not.Null);
         Assert.That(returnStmt.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+    }
+
+    [Test]
+    public void MemberAccessNestedCallTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test1", t => t
+                .DefineMethod("b", m => m
+                    .ReturnType("Test2")
+                    .Body(body => body
+                        .Return(r => r
+                            .NewObject("Test2")))))
+            .DefineType("Test2", t => t
+                .DefineProperty("c", "i32"))
+            .DefineFunction("test", f => f
+                .DefineParameter("a", t => t.Type("Test1"))
+                .ReturnType("i32")
+                .Body(body => body
+                    .Return(r => r
+                        .MemberAccess("a")
+                        .MemberAccess("b")
+                        .Call()
+                        .MemberAccess("c"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree),
+            Throws.Nothing);
     }
 }

@@ -14,10 +14,13 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
     {
     }
 
-    public MemberAccessExpressionNode(MemberAccessExpressionNode? member, string name)
+    public MemberAccessExpressionNode(IExpressionNode? member, string name)
     {
         Member = member;
         Name = name;
+
+        if (Member is not null)
+            Member.Parent = this;
     }
 
     public static bool operator ==(MemberAccessExpressionNode? left, MemberAccessExpressionNode? right)
@@ -74,7 +77,7 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public MemberAccessExpressionNode? Member { get; }
+    public IExpressionNode? Member { get; }
 
     public string Name { get; }
 
@@ -82,4 +85,10 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public bool IsThis
         => Name == This;
+
+    public bool IsField
+        => Name == Field;
+
+    public bool IsValue
+        => Name == Value;
 }

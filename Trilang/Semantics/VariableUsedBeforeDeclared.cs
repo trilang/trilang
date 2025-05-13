@@ -3,29 +3,28 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Semantics;
 
-// TODO: change result
-public class VariableUsedBeforeDeclared : Visitor<VisitorContext<object>, object>
+public class VariableUsedBeforeDeclared : Visitor
 {
     private readonly Stack<HashSet<string>> scopes;
 
     public VariableUsedBeforeDeclared()
         => scopes = [];
 
-    protected override void VisitEnter(BlockStatementNode node, VisitorContext<object> context)
+    protected override void VisitEnter(BlockStatementNode node)
         => scopes.Push([]);
 
-    protected override void VisitExit(BlockStatementNode node, VisitorContext<object> context)
+    protected override void VisitExit(BlockStatementNode node)
         => scopes.Pop();
 
-    protected override void VisitEnter(VariableDeclarationStatementNode node, VisitorContext<object> context)
+    protected override void VisitEnter(VariableDeclarationStatementNode node)
     {
         if (scopes.TryPeek(out var scope))
             scope.Add(node.Name);
     }
 
-    protected override void VisitEnter(MemberAccessExpressionNode node, VisitorContext<object> context)
+    protected override void VisitEnter(MemberAccessExpressionNode node)
     {
-        if (node.Member is not null || node.IsThis)
+        if (node.Member is not null || node.IsThis || node.IsField || node.IsValue)
             return;
 
         var symbol = node.SymbolTable?.GetId(node.Name) ??

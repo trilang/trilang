@@ -6,7 +6,7 @@ namespace Trilang.Parsing.Ast;
 
 public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode>
 {
-    public CallExpressionNode(MemberAccessExpressionNode member, IReadOnlyList<IExpressionNode> parameters)
+    public CallExpressionNode(IExpressionNode member, IReadOnlyList<IExpressionNode> parameters)
     {
         Member = member;
         Parameters = parameters;
@@ -70,9 +70,10 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public MemberAccessExpressionNode Member { get; }
+    public IExpressionNode Member { get; }
 
     public IReadOnlyList<IExpressionNode> Parameters { get; }
 
-    public ITypeMetadata? ReturnTypeMetadata { get; set; }
+    public ITypeMetadata? ReturnTypeMetadata
+        => (Member.ReturnTypeMetadata as FunctionTypeMetadata)?.ReturnType;
 }

@@ -10,8 +10,7 @@ public interface IExpressionBuilder
     IExpressionBuilder Char(char c);
     IExpressionBuilder String(string str);
 
-    IExpressionBuilder MemberAccess(string name);
-    IExpressionBuilder MemberAccess();
+    IExpressionBuilder MemberAccess(string name, bool @new = false);
     IExpressionBuilder ArrayAccess();
 
     IExpressionBuilder Unary(UnaryExpressionKind kind);
@@ -35,7 +34,7 @@ public interface IExpressionBuilder
     IExpressionBuilder OrAssign();
     IExpressionBuilder XorAssign();
 
-    IExpressionBuilder Call(string name);
+    IExpressionBuilder Call();
     IExpressionBuilder NewObject(string type);
     IExpressionBuilder NewObject(string type, params string[] args);
     IExpressionBuilder NewArray(string type);

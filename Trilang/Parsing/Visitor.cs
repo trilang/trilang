@@ -7,6 +7,9 @@ public abstract class Visitor : IVisitor
     public void Visit(ArrayAccessExpressionNode node)
     {
         VisitEnter(node);
+
+        node.Member.Accept(this);
+
         VisitExit(node);
     }
 
@@ -327,6 +330,9 @@ public abstract class Visitor : IVisitor
     public void Visit(MemberAccessExpressionNode node)
     {
         VisitEnter(node);
+
+        node.Member?.Accept(this);
+
         VisitExit(node);
     }
 
@@ -450,6 +456,8 @@ public abstract class Visitor : IVisitor
         VisitEnter(node);
 
         node.Type.Accept(this);
+        node.Getter?.Accept(this);
+        node.Setter?.Accept(this);
 
         VisitExit(node);
     }

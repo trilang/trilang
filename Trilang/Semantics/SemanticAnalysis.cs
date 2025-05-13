@@ -1,5 +1,4 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics.MetadataGenerators;
 using Trilang.Symbols;
@@ -14,11 +13,12 @@ public class SemanticAnalysis
         var rootSymbolTable = new RootSymbolTable(rootTypeProvider);
 
         tree.Accept(new SymbolFinder(), new SymbolFinderContext(rootSymbolTable));
-        tree.Accept(new VariableUsedBeforeDeclared(), new VisitorContext<object>());
+        tree.Accept(new VariableUsedBeforeDeclared());
         tree.Accept(new ThisOutsideOfClass());
         tree.Accept(new BreakContinueWithinLoop());
         tree.Accept(new MetadataGenerator());
         tree.Accept(new TypeChecker());
         tree.Accept(new NotImplementedInterface());
+        tree.Accept(new CheckAccessModifiers());
     }
 }

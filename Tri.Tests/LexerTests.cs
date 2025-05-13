@@ -76,7 +76,6 @@ public class LexerTests
     [TestCase("public", TokenKind.Public)]
     [TestCase("private", TokenKind.Private)]
     [TestCase("type", TokenKind.Type)]
-    [TestCase("this", TokenKind.This)]
     [TestCase("constructor", TokenKind.Constructor)]
     [TestCase("new", TokenKind.New)]
     [TestCase("null", TokenKind.Null)]

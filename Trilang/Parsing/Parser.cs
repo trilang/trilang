@@ -574,15 +574,76 @@ public class Parser
             return new UnaryExpressionNode(kind, operand);
         }
 
-        return TryParseOperand(context);
+        return TryParseMemberExpression(context);
+    }
+
+    private IExpressionNode? TryParseMemberExpression(ParserContext context)
+    {
+        var member = TryParseOperand(context);
+        if (member is null)
+            return null;
+
+        while (true)
+        {
+            if (context.Reader.Check(TokenKind.Dot))
+            {
+                if (!context.Reader.Check(TokenKind.Identifier, out var token))
+                    throw new ParseException("Expected an identifier.");
+
+                member = new MemberAccessExpressionNode(member, token.Identifier);
+            }
+            else if (context.Reader.Check(TokenKind.OpenBracket))
+            {
+                var index = TryParseExpression(context) ??
+                            throw new ParseException("Expected an index.");
+
+                if (!context.Reader.Check(TokenKind.CloseBracket))
+                    throw new ParseException("Expected a close bracket.");
+
+                member = new ArrayAccessExpressionNode(member, index);
+            }
+            else if (context.Reader.Check(TokenKind.OpenParenthesis))
+            {
+                var arguments = TryParseCallArguments(context);
+
+                if (!context.Reader.Check(TokenKind.CloseParenthesis))
+                    throw new ParseException("Expected a close parenthesis.");
+
+                member = new CallExpressionNode(member, arguments);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return member;
+    }
+
+    private List<IExpressionNode> TryParseCallArguments(ParserContext context)
+    {
+        var arguments = new List<IExpressionNode>();
+        var argument = TryParseExpression(context);
+        if (argument is not null)
+        {
+            arguments.Add(argument);
+
+            while (context.Reader.Check(TokenKind.Comma))
+            {
+                argument = TryParseExpression(context) ??
+                           throw new ParseException("Expected an argument.");
+
+                arguments.Add(argument);
+            }
+        }
+
+        return arguments;
     }
 
     private IExpressionNode? TryParseOperand(ParserContext context)
         => TryParseTupleExpression(context) ??
            TryParseParenExpression(context) ??
-           TryParseCallExpression(context) ??
-           TryParseArrayAccessExpression(context) ??
-           TryParseMemberExpression(context) ??
+           TryParseVariable(context) ??
            TryParseNewObjectExpression(context) ??
            TryParseNewArrayExpression(context) ??
            TryParseNullExpression(context) ??
@@ -630,78 +691,13 @@ public class Parser
         return expression;
     }
 
-    private IExpressionNode? TryParseCallExpression(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var memberExpression = c.Parser.TryParseMemberExpression(c);
-            if (memberExpression is null)
-                return null;
-
-            if (!c.Reader.Check(TokenKind.OpenParenthesis))
-                return null;
-
-            var arguments = new List<IExpressionNode>();
-            var argument = c.Parser.TryParseExpression(c);
-            if (argument is not null)
-            {
-                arguments.Add(argument);
-
-                while (c.Reader.Check(TokenKind.Comma))
-                {
-                    argument = c.Parser.TryParseExpression(c) ??
-                               throw new ParseException("Expected an argument.");
-
-                    arguments.Add(argument);
-                }
-            }
-
-            if (!c.Reader.Check(TokenKind.CloseParenthesis))
-                throw new ParseException("Expected a close parenthesis.");
-
-            return new CallExpressionNode(memberExpression, arguments);
-        });
-
-    private IExpressionNode? TryParseArrayAccessExpression(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var memberExpression = c.Parser.TryParseMemberExpression(c);
-            if (memberExpression is null)
-                return null;
-
-            if (!c.Reader.Check(TokenKind.OpenBracket))
-                return null;
-
-            var index = c.Parser.TryParseExpression(c) ??
-                        throw new ParseException("Expected an index.");
-
-            if (!c.Reader.Check(TokenKind.CloseBracket))
-                throw new ParseException("Expected a close bracket.");
-
-            return new ArrayAccessExpressionNode(memberExpression, index);
-        });
-
-    private MemberAccessExpressionNode? TryParseMemberExpression(ParserContext context)
+    private IExpressionNode? TryParseVariable(ParserContext context)
     {
         var name = TryParseId(context);
         if (name is null)
-        {
-            if (!context.Reader.Check(TokenKind.This))
-                return null;
+            return null;
 
-            name = MemberAccessExpressionNode.This;
-        }
-
-        var member = new MemberAccessExpressionNode(name);
-
-        while (context.Reader.Check(TokenKind.Dot))
-        {
-            name = TryParseId(context) ??
-                   throw new ParseException("Expected an identifier.");
-
-            member = new MemberAccessExpressionNode(member, name);
-        }
-
-        return member;
+        return new MemberAccessExpressionNode(name);
     }
 
     private NullExpressionNode? TryParseNullExpression(ParserContext context)
@@ -725,20 +721,7 @@ public class Parser
             if (!c.Reader.Check(TokenKind.OpenParenthesis))
                 return null;
 
-            var arguments = new List<IExpressionNode>();
-            var argument = c.Parser.TryParseExpression(c);
-            if (argument is not null)
-            {
-                arguments.Add(argument);
-
-                while (c.Reader.Check(TokenKind.Comma))
-                {
-                    argument = c.Parser.TryParseExpression(c) ??
-                               throw new ParseException("Expected an argument.");
-
-                    arguments.Add(argument);
-                }
-            }
+            var arguments = c.Parser.TryParseCallArguments(c);
 
             if (!c.Reader.Check(TokenKind.CloseParenthesis))
                 throw new ParseException("Expected a close parenthesis.");

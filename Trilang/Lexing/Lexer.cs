@@ -64,7 +64,6 @@ public class Lexer
                     "public" => Token.Create(TokenKind.Public),
                     "private" => Token.Create(TokenKind.Private),
                     "type" => Token.Create(TokenKind.Type),
-                    "this" => Token.Create(TokenKind.This),
                     "constructor" => Token.Create(TokenKind.Constructor),
                     "new" => Token.Create(TokenKind.New),
                     "null" => Token.Create(TokenKind.Null),

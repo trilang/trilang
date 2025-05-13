@@ -8,6 +8,9 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     public void Visit(ArrayAccessExpressionNode node, TContext context)
     {
         VisitEnter(node, context);
+
+        node.Member.Accept(this, context);
+
         VisitExit(node, context);
     }
 
@@ -382,6 +385,9 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
             return;
 
         VisitEnter(node, context);
+
+        node.Member?.Accept(this, context);
+
         VisitExit(node, context);
     }
 
@@ -520,6 +526,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
         VisitEnter(node, context);
 
         node.Type.Accept(this, context);
+        node.Getter?.Accept(this, context);
+        node.Setter?.Accept(this, context);
 
         VisitExit(node, context);
     }
