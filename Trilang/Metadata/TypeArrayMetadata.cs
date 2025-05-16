@@ -19,8 +19,7 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name &&
-               Equals(ItemMetadata, other.ItemMetadata);
+        return Name == other.Name;
     }
 
     public override bool Equals(object? obj)

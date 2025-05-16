@@ -15,8 +15,7 @@ internal class InterfaceGenerator
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
             var metadata = new InterfaceMetadata(symbol.Name);
-            if (!typeProvider.DefineType(metadata))
-                throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
+            typeProvider.DefineType(metadata);
         }
     }
 

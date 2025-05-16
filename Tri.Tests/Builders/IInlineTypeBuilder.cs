@@ -15,4 +15,6 @@ public interface IInlineTypeBuilder
     IInlineTypeNode DiscriminatedUnion(Action<IDiscriminatedUnionBuilder> action);
 
     IInlineTypeNode Tuple(Action<ITupleBuilder> action);
+
+    IInlineTypeNode Generic(string name, Action<IGenericTypeBuilder> action);
 }

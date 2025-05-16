@@ -13,8 +13,21 @@ internal class TypeGenerator
             if (!symbol.IsType && !symbol.IsGenericType)
                 continue;
 
+            if (symbol.Node is not TypeDeclarationNode typeDeclarationNode)
+                continue;
+
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
             var metadata = new TypeMetadata(symbol.Name);
+
+            foreach (var genericArgument in typeDeclarationNode.GenericArguments)
+            {
+                var argumentMetadata = new TypeArgumentMetadata(genericArgument.Name);
+                if (!typeProvider.DefineType(argumentMetadata))
+                    throw new SemanticAnalysisException($"The '{genericArgument.Name}' type argument is already defined.");
+
+                metadata.AddGenericArgument(argumentMetadata);
+            }
+
             if (!typeProvider.DefineType(metadata))
                 throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
         }
@@ -37,15 +50,6 @@ internal class TypeGenerator
 
             if (metadata is not TypeMetadata type)
                 continue;
-
-            foreach (var genericArgument in typeDeclarationNode.GenericArguments)
-            {
-                var argumentMetadata = new TypeArgumentMetadata(genericArgument.Name);
-                if (!typeProvider.DefineType(argumentMetadata))
-                    throw new SemanticAnalysisException($"The '{genericArgument.Name}' type argument is already defined.");
-
-                type.AddGenericArgument(argumentMetadata);
-            }
 
             foreach (var @interface in typeDeclarationNode.Interfaces)
             {

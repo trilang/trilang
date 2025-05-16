@@ -701,7 +701,7 @@ public class TypeCheckerTests
                 .FunctionType(f => f
                     .ReturnType("void")))
             .DefineType("Test", builder => builder
-                .DefineProperty("f", new TypeNode("F")))
+                .DefineProperty("f", pt => pt.Type("F")))
             .DefineFunction("test", builder => builder
                 .DefineParameter("a", t => t.Type("Test"))
                 .ReturnType("F")
@@ -949,7 +949,8 @@ public class TypeCheckerTests
         var tree = new TreeBuilder()
             .DefineType("Test", t => t
                 .DefineGenericArgument("T")
-                .DefineProperty("x", new ArrayTypeNode(new TypeNode("T"))))
+                .DefineProperty("x", pt => pt
+                    .Array("T")))
             .Build();
 
         var semantic = new SemanticAnalysis();

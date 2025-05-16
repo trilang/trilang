@@ -8,6 +8,7 @@ internal class MetadataGenerator : Visitor
 {
     private void BuildSymbolTableTypes(ISymbolTable? symbolTable)
     {
+        // TODO: remove name, use list, track added/processed types
         if (symbolTable is null)
             throw new ArgumentNullException(nameof(symbolTable));
 

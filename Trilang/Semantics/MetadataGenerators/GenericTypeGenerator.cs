@@ -49,7 +49,10 @@ internal class GenericTypeGenerator
                 type.AddGenericArgument(typeArgument);
             }
 
-            var typeArgumentsMap = TypeArgumentMap.Create(type.GenericArguments, openGenericType.GenericArguments);
+            var typeArgumentsMap = TypeArgumentMap.Create(
+                typeProvider,
+                type.GenericArguments,
+                openGenericType.GenericArguments);
 
             foreach (var @interface in openGenericType.Interfaces)
             {

@@ -1,5 +1,6 @@
 namespace Trilang.Metadata;
 
+// TODO: interface getters/setters
 public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfacePropertyMetadata>
 {
     public InterfacePropertyMetadata(InterfaceMetadata declaringType, string name, ITypeMetadata type)

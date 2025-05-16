@@ -126,14 +126,17 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         }
 
         public ITypeBuilder DefineProperty(string name, string type, Action<IPropertyBuilder>? action = null)
-            => DefineProperty(name, new TypeNode(type), action);
+            => DefineProperty(name, t => t.Type(type), action);
 
         public ITypeBuilder DefineProperty(
             string name,
-            IInlineTypeNode type,
+            Func<IInlineTypeBuilder, IInlineTypeNode> type,
             Action<IPropertyBuilder>? action = null)
         {
-            var builder = new PropertyBuilder(name, type);
+            var typeBuilder = new InlineTypeBuilder();
+            var typeNode = type(typeBuilder);
+
+            var builder = new PropertyBuilder(name, typeNode);
             action?.Invoke(builder);
 
             var property = builder.Build();
@@ -932,6 +935,14 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public IInlineTypeNode Tuple(Action<ITupleBuilder> action)
         {
             var builder = new TupleBuilder();
+            action(builder);
+
+            return builder.Build();
+        }
+
+        public IInlineTypeNode Generic(string name, Action<IGenericTypeBuilder> action)
+        {
+            var builder = new GenericTypeBuilder(name);
             action(builder);
 
             return builder.Build();

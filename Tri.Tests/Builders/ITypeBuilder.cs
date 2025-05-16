@@ -8,7 +8,10 @@ public interface ITypeBuilder
 
     ITypeBuilder DefineProperty(string name, string type, Action<IPropertyBuilder>? action = null);
 
-    ITypeBuilder DefineProperty(string name, IInlineTypeNode type, Action<IPropertyBuilder>? action = null);
+    ITypeBuilder DefineProperty(
+        string name,
+        Func<IInlineTypeBuilder, IInlineTypeNode> type,
+        Action<IPropertyBuilder>? action = null);
 
     ITypeBuilder DefineConstructor(Action<IConstructorBuilder> action);
 

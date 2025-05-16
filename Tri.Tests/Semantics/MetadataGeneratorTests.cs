@@ -663,7 +663,7 @@ public class MetadataGeneratorTests
         var tree = new TreeBuilder()
             .DefineType("Test", t => t
                 .DefineGenericArgument("T")
-                .DefineProperty("x", new ArrayTypeNode(new TypeNode("T"))))
+                .DefineProperty("x", pt => pt.Array("T")))
             .Build();
 
         var semantic = new SemanticAnalysis();
@@ -747,5 +747,129 @@ public class MetadataGeneratorTests
         var ctor = type.GetConstructor([]);
         Assert.That(ctor, Is.Not.Null);
         Assert.That(ctor.AccessModifier, Is.EqualTo(AccessModifierMetadata.Public));
+    }
+
+    [Test]
+    public void GenerateInlineClosedGenericArrayTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("List", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("prop", pt => pt
+                    .Array("T")))
+            .DefineFunction("test", f => f
+                .DefineParameter("a", p => p
+                    .Generic("List", g => g
+                        .DefineGenericArgument("i32"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
+        var property = type!.GetProperty("prop");
+        Assert.That(property, Is.Not.Null);
+        Assert.That(property.Type, Is.EqualTo(new TypeArrayMetadata("i32[]")));
+    }
+
+    [Test]
+    public void GenerateInlineClosedGenericTupleTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("List", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("prop", pt => pt
+                    .Tuple(tuple => tuple
+                        .AddCase(c => c.Type("T"))
+                        .AddCase(c => c.Type("i32")))))
+            .DefineFunction("test", f => f
+                .DefineParameter("a", p => p
+                    .Generic("List", g => g
+                        .DefineGenericArgument("i32"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
+        var property = type!.GetProperty("prop");
+        Assert.That(property, Is.Not.Null);
+        Assert.That(property.Type, Is.EqualTo(new TupleMetadata("(i32, i32)")));
+    }
+
+    [Test]
+    public void GenerateInlineClosedGenericDuTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("List", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("prop", pt => pt
+                    .DiscriminatedUnion(du => du
+                        .AddCase(c => c.Type("T"))
+                        .AddCase(c => c.Type("i32")))))
+            .DefineFunction("test", f => f
+                .DefineParameter("a", p => p
+                    .Generic("List", g => g
+                        .DefineGenericArgument("i32"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
+        var property = type!.GetProperty("prop");
+        Assert.That(property, Is.Not.Null);
+        Assert.That(property.Type, Is.EqualTo(new DiscriminatedUnionMetadata("i32 | i32")));
+    }
+
+    [Test]
+    public void GenerateInlineClosedGenericFunctionTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("List", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("prop", pt => pt
+                    .FunctionType(f => f.ReturnType("T"))))
+            .DefineFunction("test", f => f
+                .DefineParameter("a", p => p
+                    .Generic("List", g => g
+                        .DefineGenericArgument("i32"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
+        var property = type!.GetProperty("prop");
+        Assert.That(property, Is.Not.Null);
+        Assert.That(property.Type, Is.EqualTo(new FunctionTypeMetadata([], TypeMetadata.I32)));
+    }
+
+    [Test]
+    public void GenerateInlineClosedGenericInterfaceTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("List", t => t
+                .DefineGenericArgument("T")
+                .DefineProperty("prop", pt => pt
+                    .Interface(i => i.DefineProperty("x", "T"))))
+            .DefineFunction("test", f => f
+                .DefineParameter("a", p => p
+                    .Generic("List", g => g
+                        .DefineGenericArgument("i32"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
+        var property = type!.GetProperty("prop");
+        Assert.That(property, Is.Not.Null);
+        Assert.That(property.Type, Is.EqualTo(new InterfaceMetadata("{ x: i32; }")));
     }
 }

@@ -4,10 +4,14 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
 {
     private readonly List<ITypeMetadata> types;
 
-    public TupleMetadata(string name)
+    public TupleMetadata(string name) : this(name, [])
+    {
+    }
+
+    public TupleMetadata(string name, IEnumerable<ITypeMetadata> types)
     {
         Name = name;
-        types = [];
+        this.types = new List<ITypeMetadata>(types);
     }
 
     public static bool operator ==(TupleMetadata? left, TupleMetadata? right)

@@ -4,10 +4,14 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
 {
     private readonly List<ITypeMetadata> types;
 
-    public DiscriminatedUnionMetadata(string name)
+    public DiscriminatedUnionMetadata(string name) : this(name, [])
+    {
+    }
+
+    public DiscriminatedUnionMetadata(string name, IEnumerable<ITypeMetadata> types)
     {
         Name = name;
-        types = [];
+        this.types = new List<ITypeMetadata>(types);
     }
 
     public static bool operator ==(DiscriminatedUnionMetadata? left, DiscriminatedUnionMetadata? right)
@@ -24,8 +28,7 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name &&
-               types.SequenceEqual(other.types);
+        return Name == other.Name;
     }
 
     public override bool Equals(object? obj)
@@ -46,7 +49,7 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
         => HashCode.Combine(types);
 
     public override string ToString()
-        => $"{Name} = {string.Join(" | ", types)}";
+        => Name;
 
     public void AddType(ITypeMetadata type)
         => types.Add(type);
