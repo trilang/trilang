@@ -145,7 +145,7 @@ internal class TypeChecker : IVisitor
         for (var i = 0; i < node.Parameters.Count; i++)
         {
             var actual = node.Parameters[i].ReturnTypeMetadata;
-            var expected = function.ParameterTypes[i];
+            var expected = function.ParameterTypes.ElementAt(i);
             if (!expected.Equals(actual))
                 throw new SemanticAnalysisException($"Expected '{expected}' but got '{actual}'");
         }
@@ -195,11 +195,10 @@ internal class TypeChecker : IVisitor
         // we can be sure that node.Metadata is not null here
         // because it is set as a part of TypeNode
         var typeProvider = node.SymbolTable!.TypeProvider;
-        var metadata = new FunctionTypeMetadata(
-            node.Parameters.Select(parameter => parameter.Type.Metadata!).ToList(),
-            node.ReturnType.Metadata!);
-        metadata = typeProvider.GetType(metadata.Name) as FunctionTypeMetadata ??
-                   throw new SemanticAnalysisException($"Unknown function type '{metadata.Name}'");
+        var parameterNames = string.Join(", ", node.Parameters.Select(p => p.Type.Name));
+        var functionTypeName = $"({parameterNames}) => {node.ReturnType.Name}";
+        var metadata = typeProvider.GetType(functionTypeName) as FunctionTypeMetadata ??
+                       throw new SemanticAnalysisException($"Unknown function type '{functionTypeName}'");
 
         node.Metadata = new FunctionMetadata(node.Name, metadata);
 
@@ -214,11 +213,10 @@ internal class TypeChecker : IVisitor
         node.ReturnType.Accept(this);
 
         var typeProvider = node.SymbolTable!.TypeProvider;
-        var metadata = new FunctionTypeMetadata(
-            node.ParameterTypes.Select(parameter => parameter.Metadata!).ToList(),
-            node.ReturnType.Metadata!);
-        metadata = typeProvider.GetType(metadata.Name) as FunctionTypeMetadata ??
-                   throw new SemanticAnalysisException($"Unknown function type '{metadata.Name}'");
+        var parameterNames = string.Join(", ", node.ParameterTypes.Select(p => p.Name));
+        var functionTypeName = $"({parameterNames}) => {node.ReturnType.Name}";
+        var metadata = typeProvider.GetType(functionTypeName) as FunctionTypeMetadata ??
+                       throw new SemanticAnalysisException($"Unknown function type '{functionTypeName}'");
 
         node.Metadata = metadata;
     }

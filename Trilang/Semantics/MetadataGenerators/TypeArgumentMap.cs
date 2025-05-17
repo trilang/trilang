@@ -87,13 +87,19 @@ public class TypeArgumentMap
 
     private FunctionTypeMetadata Map(FunctionTypeMetadata functionType)
     {
-        var parameterTypes = new ITypeMetadata[functionType.ParameterTypes.Count];
-        for (var i = 0; i < parameterTypes.Length; i++)
-            parameterTypes[i] = Map(functionType.ParameterTypes[i]);
-
+        var parameterTypes = functionType.ParameterTypes.Select(Map).ToList();
         var returnType = Map(functionType.ReturnType);
 
-        return new FunctionTypeMetadata(parameterTypes, returnType);
+        var parameterNames = string.Join(", ", parameterTypes.Select(p => p.Name));
+        var functionTypeName = $"({parameterNames}) => {returnType.Name}";
+        var functionTypeMetadata = new FunctionTypeMetadata(functionTypeName);
+
+        foreach (var parameterType in parameterTypes)
+            functionTypeMetadata.AddParameter(parameterType);
+
+        functionTypeMetadata.ReturnType = returnType;
+
+        return functionTypeMetadata;
     }
 
     private InterfaceMetadata Map(InterfaceMetadata interfaceMetadata)

@@ -47,23 +47,23 @@ public class MetadataGeneratorTests
             expected,
             AccessModifierMetadata.Public,
             "toString",
-            new FunctionTypeMetadata([], TypeMetadata.String)));
+            new FunctionTypeMetadata("() => string")));
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Private,
             "distance",
-            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)));
+            new FunctionTypeMetadata("(i32) => i32")));
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var actual = typeProvider.GetType("Point");
         Assert.That(actual, Is.EqualTo(expected));
 
         var toStringType = typeProvider.GetType("() => string");
-        var expectedToStringType = new FunctionTypeMetadata([], TypeMetadata.String);
+        var expectedToStringType = new FunctionTypeMetadata("() => string");
         Assert.That(toStringType, Is.EqualTo(expectedToStringType));
 
         var distanceType = typeProvider.GetType("(i32) => i32");
-        var expectedDistanceType = new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32);
+        var expectedDistanceType = new FunctionTypeMetadata("(i32) => i32");
         Assert.That(distanceType, Is.EqualTo(expectedDistanceType));
     }
 
@@ -265,7 +265,7 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
+        var expected = new FunctionTypeMetadata("(i32, i32) => i32");
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var actual = typeProvider.GetType("(i32, i32) => i32");
@@ -424,7 +424,7 @@ public class MetadataGeneratorTests
         expectedInterface.AddMethod(new InterfaceMethodMetadata(
             expectedInterface,
             "distance",
-            new FunctionTypeMetadata([expectedAlias], TypeMetadata.F64)));
+            new FunctionTypeMetadata("(Point) => f64")));
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var actualInterface = typeProvider.GetType(expectedInterface.Name);
@@ -451,7 +451,7 @@ public class MetadataGeneratorTests
         var du = new DiscriminatedUnionMetadata("{ } | i32 | () => void");
         du.AddType(new InterfaceMetadata("{ }", [], []));
         du.AddType(TypeMetadata.I32);
-        du.AddType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        du.AddType(new FunctionTypeMetadata("() => void"));
         var alias = new TypeAliasMetadata("DU", du);
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
@@ -846,7 +846,7 @@ public class MetadataGeneratorTests
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
         Assert.That(property, Is.Not.Null);
-        Assert.That(property.Type, Is.EqualTo(new FunctionTypeMetadata([], TypeMetadata.I32)));
+        Assert.That(property.Type, Is.EqualTo(new FunctionTypeMetadata("() => i32")));
     }
 
     [Test]
@@ -871,5 +871,28 @@ public class MetadataGeneratorTests
         var property = type!.GetProperty("prop");
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(new InterfaceMetadata("{ x: i32; }")));
+    }
+
+    [Test]
+    public void GenerateHighOrderFunctionTypeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", f => f
+                .DefineParameter("a", t => t
+                    .FunctionType(ft => ft
+                        .DefineParameter(p => p
+                            .FunctionType(ft2 => ft2
+                                .DefineParameter("i32"))))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("((i32) => void) => void");
+        var expected = new FunctionTypeMetadata("((i32) => void) => void");
+
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type, Is.EqualTo(expected));
     }
 }

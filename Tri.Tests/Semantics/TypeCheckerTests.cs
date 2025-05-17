@@ -19,7 +19,7 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new FunctionMetadata("main", new FunctionTypeMetadata([], TypeMetadata.Void));
+        var expected = new FunctionMetadata("main", new FunctionTypeMetadata("() => void"));
         var function = tree.Find<FunctionDeclarationNode>();
         Assert.That(function, Is.Not.Null);
         Assert.That(function.Metadata, Is.EqualTo(expected));
@@ -40,7 +40,7 @@ public class TypeCheckerTests
 
         var expected = new FunctionMetadata(
             "main",
-            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void));
+            new FunctionTypeMetadata("(i32, bool) => void"));
 
         var function = tree.Find<FunctionDeclarationNode>();
         Assert.That(function, Is.Not.Null);
@@ -113,12 +113,12 @@ public class TypeCheckerTests
             expected,
             AccessModifierMetadata.Public,
             "toString",
-            new FunctionTypeMetadata([], TypeMetadata.Void)));
+            new FunctionTypeMetadata("() => void")));
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Public,
             "distance",
-            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
+            new FunctionTypeMetadata("(i32) => f64")));
 
         var type = tree.Find<TypeDeclarationNode>();
         Assert.That(type, Is.Not.Null);
@@ -155,7 +155,7 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.F64);
+        var expected = new FunctionTypeMetadata("(i32, bool) => f64");
         var type = tree.Find<FunctionTypeNode>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(expected));
@@ -177,7 +177,7 @@ public class TypeCheckerTests
 
         var expected = new FunctionMetadata(
             "add",
-            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32));
+            new FunctionTypeMetadata("(i32, i32) => i32"));
 
         var node = tree.Find<FunctionDeclarationNode>();
         Assert.That(node, Is.Not.Null);
@@ -523,7 +523,7 @@ public class TypeCheckerTests
             new InterfaceMethodMetadata(
                 interfaceType,
                 "distance",
-                new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
+                new FunctionTypeMetadata("(i32) => f64")));
         var expected = new TypeAliasMetadata("Point", interfaceType);
 
         var type = tree.Find<TypeAliasDeclarationNode>();
@@ -550,7 +550,7 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
+        var expected = new FunctionTypeMetadata("(i32, i32) => i32");
         var memberAccess = tree.Find<MemberAccessExpressionNode>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.ReturnTypeMetadata, Is.EqualTo(expected));
@@ -821,7 +821,7 @@ public class TypeCheckerTests
         var du = new DiscriminatedUnionMetadata("{ } | i32 | () => void");
         du.AddType(new InterfaceMetadata("{ }", [], []));
         du.AddType(TypeMetadata.I32);
-        du.AddType(new FunctionTypeMetadata([], TypeMetadata.Void));
+        du.AddType(new FunctionTypeMetadata("() => void"));
         var alias = new TypeAliasMetadata("DU", du);
 
         var aliasNode = tree.Find<TypeAliasDeclarationNode>();

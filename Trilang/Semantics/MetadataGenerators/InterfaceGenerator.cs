@@ -6,6 +6,13 @@ namespace Trilang.Semantics.MetadataGenerators;
 
 internal class InterfaceGenerator
 {
+    private record Item(InterfaceMetadata Metadata, InterfaceNode Node);
+
+    private readonly HashSet<Item> typesToProcess;
+
+    public InterfaceGenerator()
+        => typesToProcess = [];
+
     public void CreateInterfaces(IReadOnlyDictionary<string, TypeSymbol> types)
     {
         foreach (var (_, symbol) in types)
@@ -13,26 +20,21 @@ internal class InterfaceGenerator
             if (!symbol.IsInterface)
                 continue;
 
+            if (symbol.Node is not InterfaceNode interfaceNode)
+                throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an InterfaceNode, but found '{symbol.Node.GetType().Name}' instead.");
+
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
             var metadata = new InterfaceMetadata(symbol.Name);
-            typeProvider.DefineType(metadata);
+            if (typeProvider.DefineType(metadata))
+                typesToProcess.Add(new Item(metadata, interfaceNode));
         }
     }
 
-    public void PopulateInterfaces(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void PopulateInterfaces()
     {
-        foreach (var (_, symbol) in types)
+        foreach (var (metadata, interfaceNode) in typesToProcess)
         {
-            if (!symbol.IsInterface)
-                continue;
-
-            var node = symbol.Node;
-            if (node is not InterfaceNode interfaceNode)
-                continue;
-
-            var typeProvider = node.SymbolTable!.TypeProvider;
-            if (typeProvider.GetType(symbol.Name) is not InterfaceMetadata metadata)
-                throw new SemanticAnalysisException($"The '{symbol.Name}' type is not an interface.");
+            var typeProvider = interfaceNode.SymbolTable!.TypeProvider;
 
             foreach (var property in interfaceNode.Properties)
             {
@@ -45,23 +47,27 @@ internal class InterfaceGenerator
 
             foreach (var method in interfaceNode.Methods)
             {
-                var parameters = new ITypeMetadata[method.Parameters.Count];
-                for (var i = 0; i < parameters.Length; i++)
+                var parameterNames = string.Join(", ", method.Parameters.Select(p => p.Type.Name));
+                var functionTypeName = $"({parameterNames}) => {method.ReturnType.Name}";
+                if (typeProvider.GetType(functionTypeName) is not FunctionTypeMetadata functionType)
                 {
-                    var parameter = method.Parameters[i];
-                    var parameterType = typeProvider.GetType(parameter.Type.Name) ??
-                                        throw new SemanticAnalysisException($"The '{parameter.Name}' parameter has unknown type: '{parameter.Type.Name}'.");
+                    functionType = new FunctionTypeMetadata(functionTypeName);
 
-                    parameters[i] = parameterType;
+                    foreach (var parameter in method.Parameters)
+                    {
+                        var parameterType = typeProvider.GetType(parameter.Type.Name) ??
+                                            throw new SemanticAnalysisException($"The '{parameter.Name}' parameter has unknown type: '{parameter.Type.Name}'.");
+
+                        functionType.AddParameter(parameterType);
+                    }
+
+                    functionType.ReturnType = typeProvider.GetType(method.ReturnType.Name) ??
+                                              throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
+
+                    typeProvider.DefineType(functionType);
                 }
 
-                var returnType = typeProvider.GetType(method.ReturnType.Name) ??
-                                 throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
-
                 // TODO: generic?
-                var functionType = new FunctionTypeMetadata(parameters, returnType);
-                typeProvider.DefineType(functionType);
-
                 var methodMetadata = new InterfaceMethodMetadata(metadata, method.Name, functionType);
                 metadata.AddMethod(methodMetadata);
             }

@@ -6,29 +6,14 @@ namespace Trilang.Semantics.MetadataGenerators;
 
 internal class FunctionGenerator
 {
-    public void BuildFunctionTypes(IReadOnlyDictionary<string, TypeSymbol> types)
-    {
-        foreach (var (_, symbol) in types)
-        {
-            if (!symbol.IsFunction)
-                continue;
+    private record Item(FunctionTypeMetadata Metadata, FunctionDeclarationNode Node);
 
-            if (symbol.Node is not FunctionTypeNode function)
-                throw new SemanticAnalysisException($"The '{symbol.Name}' symbol is not a function.");
+    private readonly HashSet<Item> typesToProcess;
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var parameterTypes = GetParameterTypes(typeProvider, function.ParameterTypes);
-            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
-                             throw new SemanticAnalysisException($"The function has unknown return type: '{function.ReturnType.Name}'.");
+    public FunctionGenerator()
+        => typesToProcess = [];
 
-            // TODO: generic?
-            var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
-            if (typeProvider.GetType(functionTypeMetadata.Name) is null)
-                typeProvider.DefineType(functionTypeMetadata);
-        }
-    }
-
-    public void BuildFunctions(IReadOnlyDictionary<string, IdSymbol> functions)
+    public void CreateFunctions(IReadOnlyDictionary<string, IdSymbol> functions)
     {
         foreach (var (_, symbol) in functions)
         {
@@ -36,29 +21,34 @@ internal class FunctionGenerator
                 continue;
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var parameterTypes = GetParameterTypes(typeProvider, function.Parameters.Select(x => x.Type).ToList());
-            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
-                             throw new SemanticAnalysisException($"The function has unknown return type: '{function.ReturnType.Name}'.");
 
-            // TODO: generic?
-            var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
-            typeProvider.DefineType(functionTypeMetadata);
+            var parameters = string.Join(", ", function.Parameters.Select(p => p.Type.Name));
+            var name = $"({parameters}) => {function.ReturnType.Name}";
+
+            var functionTypeMetadata = new FunctionTypeMetadata(name);
+            if (typeProvider.DefineType(functionTypeMetadata))
+                typesToProcess.Add(new Item(functionTypeMetadata, function));
         }
     }
 
-    private ITypeMetadata[] GetParameterTypes(
-        ITypeMetadataProvider typeProvider,
-        IReadOnlyList<IInlineTypeNode> parameters)
+    public void PopulateFunctions()
     {
-        var parameterTypes = new ITypeMetadata[parameters.Count];
-        for (var i = 0; i < parameterTypes.Length; i++)
+        foreach (var (functionTypeMetadata, function) in typesToProcess)
         {
-            var parameterType = parameters[i];
+            var typeProvider = function.SymbolTable!.TypeProvider;
 
-            parameterTypes[i] = typeProvider.GetType(parameterType.Name) ??
-                                throw new SemanticAnalysisException($"The function has unknown parameter type: '{parameterType.Name}'.");
+            foreach (var functionParameter in function.Parameters)
+            {
+                var parameter = typeProvider.GetType(functionParameter.Type.Name) ??
+                                throw new SemanticAnalysisException($"The function has unknown parameter type: '{functionParameter.Type.Name}'.");
+
+                functionTypeMetadata.AddParameter(parameter);
+            }
+
+            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
+                             throw new SemanticAnalysisException($"The function has unknown return type: '{function.ReturnType.Name}'.");
+
+            functionTypeMetadata.ReturnType = returnType;
         }
-
-        return parameterTypes;
     }
 }

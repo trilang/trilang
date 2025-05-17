@@ -6,6 +6,13 @@ namespace Trilang.Semantics.MetadataGenerators;
 
 internal class ArrayGenerator
 {
+    private record Item(TypeArrayMetadata Metadata, ArrayTypeNode Node);
+
+    private readonly HashSet<Item> typesToProcess;
+
+    public ArrayGenerator()
+        => typesToProcess = [];
+
     public void CreateArrays(IReadOnlyDictionary<string, TypeSymbol> types)
     {
         foreach (var (_, symbol) in types)
@@ -14,31 +21,26 @@ internal class ArrayGenerator
                 continue;
 
             if (symbol.Node is not ArrayTypeNode arrayTypeNode)
-                throw new SemanticAnalysisException();
+                throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an ArrayTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var metadata = new TypeArrayMetadata(arrayTypeNode.Name);
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
             if (typeProvider.GetType(metadata.Name) is null)
                 typeProvider.DefineType(metadata);
+
+            typesToProcess.Add(new Item(metadata, arrayTypeNode));
         }
     }
 
-    public void PopulateArrays(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void PopulateArrays()
     {
-        foreach (var (_, symbol) in types)
+        foreach (var (arrayMetadata, arrayTypeNode) in typesToProcess)
         {
-            if (!symbol.IsArray)
-                continue;
+            var typeProvider = arrayTypeNode.SymbolTable!.TypeProvider;
+            var itemMetadata = typeProvider.GetType(arrayTypeNode.ElementType.Name) ??
+                               throw new SemanticAnalysisException($"The '{arrayTypeNode.ElementType.Name}' array item type is not defined.");
 
-            if (symbol.Node is not ArrayTypeNode arrayTypeNode)
-                throw new SemanticAnalysisException();
-
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var type = typeProvider.GetType(arrayTypeNode.Name) as TypeArrayMetadata ??
-                       throw new SemanticAnalysisException($"The '{arrayTypeNode.ElementType.Name}' array item type is not defined.");
-
-            type.ItemMetadata = typeProvider.GetType(arrayTypeNode.ElementType.Name) ??
-                                throw new SemanticAnalysisException($"The '{arrayTypeNode.ElementType.Name}' array item type is not defined.");
+            arrayMetadata.ItemMetadata = itemMetadata;
         }
     }
 }

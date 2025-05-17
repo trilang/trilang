@@ -763,7 +763,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
     private sealed class FunctionTypeBuilder : IFunctionTypeBuilder
     {
-        private readonly List<TypeNode> parameterTypes;
+        private readonly List<IInlineTypeNode> parameterTypes;
         private TypeNode returnType;
 
         public FunctionTypeBuilder()
@@ -775,6 +775,15 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         public IFunctionTypeBuilder DefineParameter(string type)
         {
             parameterTypes.Add(new TypeNode(type));
+
+            return this;
+        }
+
+        public IFunctionTypeBuilder DefineParameter(Func<IInlineTypeBuilder, IInlineTypeNode> action)
+        {
+            var builder = new InlineTypeBuilder();
+            var type = action(builder);
+            parameterTypes.Add(type);
 
             return this;
         }

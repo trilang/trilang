@@ -19,6 +19,7 @@ internal class MetadataGenerator : Visitor
         var tupleGenerator = new TupleGenerator();
         var arrayGenerator = new ArrayGenerator();
         var genericTypeGenerator = new GenericTypeGenerator();
+        var functionTypeGenerator = new FunctionTypeGenerator();
         var functionGenerator = new FunctionGenerator();
 
         typeGenerator.CreateTypes(symbolTable.Types);
@@ -27,17 +28,19 @@ internal class MetadataGenerator : Visitor
         aliasGenerator.CreateAliases(symbolTable.Types);
         tupleGenerator.CreateTuples(symbolTable.Types);
         arrayGenerator.CreateArrays(symbolTable.Types);
+        functionTypeGenerator.CreateFunctionTypes(symbolTable.Types);
+        functionGenerator.CreateFunctions(symbolTable.Ids);
         genericTypeGenerator.CreateGenericTypes(symbolTable.Types);
-        functionGenerator.BuildFunctionTypes(symbolTable.Types);
 
-        aliasGenerator.PopulateAliases(symbolTable.Types);
-        interfaceGenerator.PopulateInterfaces(symbolTable.Types);
-        typeGenerator.PopulateTypes(symbolTable.Types);
-        discriminatedUnionGenerator.PopulateDiscriminatedUnion(symbolTable.Types);
-        tupleGenerator.PopulateTuples(symbolTable.Types);
-        arrayGenerator.PopulateArrays(symbolTable.Types);
-        genericTypeGenerator.PopulateGenericTypes(symbolTable.Types);
-        functionGenerator.BuildFunctions(symbolTable.Ids);
+        aliasGenerator.PopulateAliases();
+        interfaceGenerator.PopulateInterfaces();
+        typeGenerator.PopulateTypes();
+        discriminatedUnionGenerator.PopulateDiscriminatedUnion();
+        tupleGenerator.PopulateTuples();
+        arrayGenerator.PopulateArrays();
+        functionTypeGenerator.PopulateFunctionTypes();
+        functionGenerator.PopulateFunctions();
+        genericTypeGenerator.PopulateGenericTypes();
     }
 
     protected override void VisitEnter(SyntaxTree node)

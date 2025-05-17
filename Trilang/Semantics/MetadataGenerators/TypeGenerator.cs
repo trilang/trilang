@@ -6,15 +6,22 @@ namespace Trilang.Semantics.MetadataGenerators;
 
 internal class TypeGenerator
 {
+    private record Item(TypeMetadata Metadata, TypeDeclarationNode Node);
+
+    private readonly HashSet<Item> typesToProcess;
+
+    public TypeGenerator()
+        => typesToProcess = [];
+
     public void CreateTypes(IReadOnlyDictionary<string, TypeSymbol> types)
     {
         foreach (var (_, symbol) in types)
         {
-            if (!symbol.IsType && !symbol.IsGenericType)
+            if (symbol is { IsType: false, IsGenericType: false })
                 continue;
 
             if (symbol.Node is not TypeDeclarationNode typeDeclarationNode)
-                continue;
+                throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a TypeDeclarationNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
             var metadata = new TypeMetadata(symbol.Name);
@@ -30,26 +37,16 @@ internal class TypeGenerator
 
             if (!typeProvider.DefineType(metadata))
                 throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
+
+            typesToProcess.Add(new Item(metadata, typeDeclarationNode));
         }
     }
 
-    public void PopulateTypes(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void PopulateTypes()
     {
-        foreach (var (_, symbol) in types)
+        foreach (var (type, typeDeclarationNode) in typesToProcess)
         {
-            if (!symbol.IsType && !symbol.IsGenericType)
-                continue;
-
-            var node = symbol.Node;
-            if (node is not TypeDeclarationNode typeDeclarationNode)
-                continue;
-
-            var typeProvider = node.SymbolTable!.TypeProvider;
-            var metadata = typeProvider.GetType(symbol.Name) ??
-                           throw new SemanticAnalysisException($"The '{symbol.Name}' type is not defined.");
-
-            if (metadata is not TypeMetadata type)
-                continue;
+            var typeProvider = typeDeclarationNode.SymbolTable!.TypeProvider;
 
             foreach (var @interface in typeDeclarationNode.Interfaces)
             {
@@ -103,12 +100,25 @@ internal class TypeGenerator
 
             foreach (var method in typeDeclarationNode.Methods)
             {
-                var parameters = GetParameterTypes(typeProvider, method.Parameters);
-                var returnType = typeProvider.GetType(method.ReturnType.Name) ??
-                                 throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
+                var parameterNames = string.Join(", ", method.Parameters.Select(p => p.Type.Name));
+                var functionTypeName = $"({parameterNames}) => {method.ReturnType.Name}";
+                if (typeProvider.GetType(functionTypeName) is not FunctionTypeMetadata functionType)
+                {
+                    functionType = new FunctionTypeMetadata(functionTypeName);
 
-                var functionType = new FunctionTypeMetadata(parameters, returnType);
-                typeProvider.DefineType(functionType);
+                    foreach (var parameterNode in method.Parameters)
+                    {
+                        var parameterType = typeProvider.GetType(parameterNode.Type.Name) ??
+                                            throw new SemanticAnalysisException($"The '{parameterNode.Name}' parameter has unknown type: '{parameterNode.Type.Name}'.");
+
+                        functionType.AddParameter(parameterType);
+                    }
+
+                    functionType.ReturnType = typeProvider.GetType(method.ReturnType.Name) ??
+                                              throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
+
+                    typeProvider.DefineType(functionType);
+                }
 
                 var methodMetadata = new MethodMetadata(
                     type,

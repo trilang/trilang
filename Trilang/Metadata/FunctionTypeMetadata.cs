@@ -2,12 +2,13 @@ namespace Trilang.Metadata;
 
 public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetadata>
 {
-    public FunctionTypeMetadata(IReadOnlyList<ITypeMetadata> parameterTypes, ITypeMetadata returnType)
+    private readonly HashSet<ITypeMetadata> parameterTypes;
+
+    public FunctionTypeMetadata(string name)
     {
-        var parameters = string.Join(", ", parameterTypes.Select(p => p.Name));
-        Name = $"({parameters}) => {returnType.Name}";
-        ParameterTypes = parameterTypes;
-        ReturnType = returnType;
+        Name = name;
+        parameterTypes = [];
+        ReturnType = null!;
     }
 
     public static bool operator ==(FunctionTypeMetadata? left, FunctionTypeMetadata? right)
@@ -24,8 +25,7 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
         if (ReferenceEquals(this, other))
             return true;
 
-        return ReturnType.Equals(other.ReturnType) &&
-               ParameterTypes.SequenceEqual(other.ParameterTypes);
+        return Name == other.Name;
     }
 
     public override bool Equals(object? obj)
@@ -43,14 +43,17 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(ParameterTypes, ReturnType);
+        => HashCode.Combine(Name);
 
     public override string ToString()
         => Name;
 
+    public void AddParameter(ITypeMetadata parameter)
+        => parameterTypes.Add(parameter);
+
     public string Name { get; }
 
-    public IReadOnlyList<ITypeMetadata> ParameterTypes { get; }
+    public IReadOnlyCollection<ITypeMetadata> ParameterTypes => parameterTypes;
 
-    public ITypeMetadata ReturnType { get; }
+    public ITypeMetadata ReturnType { get; set; }
 }

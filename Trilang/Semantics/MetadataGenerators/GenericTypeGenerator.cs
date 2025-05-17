@@ -6,6 +6,13 @@ namespace Trilang.Semantics.MetadataGenerators;
 
 internal class GenericTypeGenerator
 {
+    private record Item(TypeMetadata Metadata, GenericTypeNode Node);
+
+    private readonly HashSet<Item> typesToProcess;
+
+    public GenericTypeGenerator()
+        => typesToProcess = [];
+
     public void CreateGenericTypes(IReadOnlyDictionary<string, TypeSymbol> types)
     {
         foreach (var (_, symbol) in types)
@@ -13,30 +20,26 @@ internal class GenericTypeGenerator
             if (!symbol.IsClosedGenericType)
                 continue;
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var metadata = new TypeMetadata(symbol.Name);
-            typeProvider.DefineType(metadata);
-        }
-    }
-
-    public void PopulateGenericTypes(IReadOnlyDictionary<string, TypeSymbol> types)
-    {
-        foreach (var (_, symbol) in types)
-        {
-            if (!symbol.IsClosedGenericType)
-                continue;
-
             if (symbol.Node is not GenericTypeNode genericTypeNode)
-                continue;
+                throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a GenericTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var type = typeProvider.GetType(symbol.Name) as TypeMetadata ??
-                       throw new SemanticAnalysisException($"The '{symbol.Name}' type is not defined.");
+            var typeProvider = genericTypeNode.SymbolTable!.TypeProvider;
 
             // ignore open generic types
             if (IsOpenGeneric(typeProvider, genericTypeNode))
                 continue;
 
+            var metadata = new TypeMetadata(symbol.Name);
+            if (typeProvider.DefineType(metadata))
+                typesToProcess.Add(new Item(metadata, genericTypeNode));
+        }
+    }
+
+    public void PopulateGenericTypes()
+    {
+        foreach (var (type, genericTypeNode) in typesToProcess)
+        {
+            var typeProvider = genericTypeNode.SymbolTable!.TypeProvider;
             var openName = genericTypeNode.GetOpenGenericName();
             var openGenericType = typeProvider.GetType(openName) as TypeMetadata ??
                                   throw new SemanticAnalysisException($"The '{openName}' generic type is not defined.");
@@ -102,13 +105,19 @@ internal class GenericTypeGenerator
             {
                 // TODO: support generic methods
                 var methodType = method.TypeMetadata;
-                var parameters = new ITypeMetadata[methodType.ParameterTypes.Count];
-                for (var i = 0; i < parameters.Length; i++)
-                    parameters[i] = typeArgumentsMap.Map(methodType.ParameterTypes[i]);
+                var parameterNames = string.Join(", ", methodType.ParameterTypes.Select(p => p.Name));
+                var functionTypeName = $"({parameterNames}) => {methodType.ReturnType.Name}";
+                if (typeProvider.GetType(functionTypeName) is not FunctionTypeMetadata functionType)
+                {
+                    functionType = new FunctionTypeMetadata(functionTypeName);
 
-                var returnType = typeArgumentsMap.Map(methodType.ReturnType);
-                var functionType = new FunctionTypeMetadata(parameters, returnType);
-                typeProvider.DefineType(functionType);
+                    foreach (var parameter in methodType.ParameterTypes)
+                        functionType.AddParameter(typeArgumentsMap.Map(parameter));
+
+                    functionType.ReturnType = typeArgumentsMap.Map(methodType.ReturnType);
+
+                    typeProvider.DefineType(functionType);
+                }
 
                 var methodMetadata = new MethodMetadata(
                     type,

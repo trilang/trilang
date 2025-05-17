@@ -6,20 +6,14 @@ namespace Trilang.Semantics.MetadataGenerators;
 
 internal class TupleGenerator
 {
+    private record Item(TupleMetadata Metadata, TupleTypeNode Node);
+
+    private readonly HashSet<Item> typesToProcess;
+
+    public TupleGenerator()
+        => typesToProcess = [];
+
     public void CreateTuples(IReadOnlyDictionary<string, TypeSymbol> types)
-    {
-        foreach (var (_, symbol) in types)
-        {
-            if (!symbol.IsTuple)
-                continue;
-
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var tuple = new TupleMetadata(symbol.Name);
-            typeProvider.DefineType(tuple);
-        }
-    }
-
-    public void PopulateTuples(IReadOnlyDictionary<string, TypeSymbol> types)
     {
         foreach (var (_, symbol) in types)
         {
@@ -30,11 +24,17 @@ internal class TupleGenerator
                 throw new SemanticAnalysisException();
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            if (typeProvider.GetType(symbol.Name) is not TupleMetadata tuple)
-                throw new SemanticAnalysisException($"The '{symbol.Name}' type is not a tuple.");
+            var tuple = new TupleMetadata(symbol.Name);
+            if (typeProvider.DefineType(tuple))
+                typesToProcess.Add(new Item(tuple, tupleNode));
+        }
+    }
 
-            if (tuple.Types.Count > 0)
-                continue;
+    public void PopulateTuples()
+    {
+        foreach (var (tuple, tupleNode) in typesToProcess)
+        {
+            var typeProvider = tupleNode.SymbolTable!.TypeProvider;
 
             foreach (var typeNode in tupleNode.Types)
             {
