@@ -20,7 +20,7 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
             method.Parent = this;
 
         var propertyNames = properties.Select(f => $"{f.Name}: {f.Type};");
-        var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.Parameters.Select(p => p.Type))}): {m.ReturnType};");
+        var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.ParameterTypes)}): {m.ReturnType};");
 
         var combinedSignatures = propertyNames.Concat(methodNames).ToList();
         Name = combinedSignatures.Any()

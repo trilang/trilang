@@ -534,7 +534,7 @@ public class TypeCheckerTests
                     .DefineProperty("x", "i32")
                     .DefineProperty("y", "i32")
                     .DefineMethod("distance", m => m
-                        .DefineParameter("other", "Point")
+                        .DefineParameter("Point")
                         .ReturnType("f64"))))
             .Build();
 

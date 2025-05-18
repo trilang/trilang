@@ -1432,7 +1432,7 @@ public class FormatterTests
                     [
                         new InterfaceMethodNode(
                             "distance",
-                            [new ParameterNode("other", new TypeNode("Point"))],
+                            [new TypeNode("Point")],
                             new TypeNode("f64")
                         )
                     ]
@@ -1440,7 +1440,7 @@ public class FormatterTests
             )
         ]);
         var formatted = tree.ToString();
-        const string expected = "public type Point = {\n    x: i32;\n    y: i32;\n    \n    distance(other: Point): f64;\n}";
+        const string expected = "public type Point = {\n    x: i32;\n    y: i32;\n    \n    distance(Point): f64;\n}";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }

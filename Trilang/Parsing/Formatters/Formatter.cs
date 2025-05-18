@@ -360,11 +360,11 @@ public partial class Formatter : IFormatter
         writer.Write(node.Name);
         writer.Write("(");
 
-        for (var i = 0; i < node.Parameters.Count; i++)
+        for (var i = 0; i < node.ParameterTypes.Count; i++)
         {
-            node.Parameters[i].Accept(this);
+            node.ParameterTypes[i].Accept(this);
 
-            if (i < node.Parameters.Count - 1)
+            if (i < node.ParameterTypes.Count - 1)
                 writer.Write(", ");
         }
 

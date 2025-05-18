@@ -346,7 +346,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitEnter(node, context);
 
-        foreach (var parameter in node.Parameters)
+        foreach (var parameter in node.ParameterTypes)
             parameter.Accept(this, context);
 
         node.ReturnType.Accept(this, context);

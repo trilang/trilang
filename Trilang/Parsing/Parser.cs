@@ -1011,7 +1011,8 @@ public class Parser
             if (name is null)
                 return null;
 
-            var parameters = c.Parser.ParseFunctionParameters(c);
+            var parameters = c.Parser.TryParseFunctionTypeParameters(c) ??
+                             throw new ParseException("Expected a function parameter list.");
 
             if (!c.Reader.Check(TokenKind.Colon))
                 throw new ParseException("Expected a colon.");

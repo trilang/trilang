@@ -269,7 +269,7 @@ internal class TypeChecker : IVisitor
 
     public void Visit(InterfaceMethodNode node)
     {
-        foreach (var parameter in node.Parameters)
+        foreach (var parameter in node.ParameterTypes)
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);

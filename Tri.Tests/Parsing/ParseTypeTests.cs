@@ -819,7 +819,7 @@ public class ParseTypeTests
                 x: i32;
                 y: i32;
 
-                distance(other: Point): f32;
+                distance(Point): f32;
             }
             """);
 
@@ -835,7 +835,7 @@ public class ParseTypeTests
                     [
                         new InterfaceMethodNode(
                             "distance",
-                            [new ParameterNode("other", new TypeNode("Point"))],
+                            [new TypeNode("Point")],
                             new TypeNode("f32"))
                     ]
                 )

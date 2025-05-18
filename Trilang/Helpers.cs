@@ -91,7 +91,7 @@ public static class Helpers
                 => Find(interfacePropertyNode.Type, predicate),
 
             InterfaceMethodNode interfaceMethodNode
-                => interfaceMethodNode.Parameters
+                => interfaceMethodNode.ParameterTypes
                        .Select(x => Find(x, predicate))
                        .FirstOrDefault(x => x is not null) ??
                    Find(interfaceMethodNode.ReturnType, predicate),

@@ -297,7 +297,7 @@ public abstract class Visitor : IVisitor
     {
         VisitEnter(node);
 
-        foreach (var parameter in node.Parameters)
+        foreach (var parameter in node.ParameterTypes)
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);

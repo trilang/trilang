@@ -470,7 +470,7 @@ public class SymbolFinderTests
             ],
             [
                 new InterfaceMethodNode("toString", [], new TypeNode("string")),
-                new InterfaceMethodNode("distance", [new ParameterNode("other", new TypeNode("Point"))], new TypeNode("f32")),
+                new InterfaceMethodNode("distance", [new TypeNode("Point")], new TypeNode("f32")),
             ]
         );
         var alias = new TypeAliasDeclarationNode(AccessModifier.Public, "Point", @interface);

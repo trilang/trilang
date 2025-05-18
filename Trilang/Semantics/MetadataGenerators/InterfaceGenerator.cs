@@ -47,9 +47,9 @@ internal class InterfaceGenerator
 
             foreach (var method in interfaceNode.Methods)
             {
-                var parameters = method.Parameters
-                    .Select(x => typeProvider.GetType(x.Type.Name) ??
-                                 throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
+                var parameters = method.ParameterTypes
+                    .Select(x => typeProvider.GetType(x.Name) ??
+                                 throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Name}'."));
 
                 var returnType = typeProvider.GetType(method.ReturnType.Name) ??
                                  throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");

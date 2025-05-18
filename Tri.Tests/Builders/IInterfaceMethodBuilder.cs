@@ -4,7 +4,7 @@ namespace Tri.Tests.Builders;
 
 public interface IInterfaceMethodBuilder
 {
-    IInterfaceMethodBuilder DefineParameter(string name, string type);
+    IInterfaceMethodBuilder DefineParameter(string type);
 
     IInterfaceMethodBuilder ReturnType(string type);
 

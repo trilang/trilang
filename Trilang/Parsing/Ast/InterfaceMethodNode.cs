@@ -4,16 +4,15 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-// TODO: remove parameter names
 public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
 {
     public InterfaceMethodNode(
         string name,
-        IReadOnlyList<ParameterNode> parameters,
+        IReadOnlyList<IInlineTypeNode> parameterTypes,
         IInlineTypeNode returnType)
     {
         Name = name;
-        Parameters = parameters;
+        ParameterTypes = parameterTypes;
         ReturnType = returnType;
     }
 
@@ -32,7 +31,7 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
             return true;
 
         return Name == other.Name &&
-               Parameters.SequenceEqual(other.Parameters) &&
+               ParameterTypes.SequenceEqual(other.ParameterTypes) &&
                ReturnType.Equals(other.ReturnType);
     }
 
@@ -51,7 +50,7 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, Parameters, ReturnType);
+        => HashCode.Combine(Name, ParameterTypes, ReturnType);
 
     public override string ToString()
     {
@@ -73,7 +72,7 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
 
     public string Name { get; }
 
-    public IReadOnlyList<ParameterNode> Parameters { get; }
+    public IReadOnlyList<IInlineTypeNode> ParameterTypes { get; }
 
     public IInlineTypeNode ReturnType { get; }
 

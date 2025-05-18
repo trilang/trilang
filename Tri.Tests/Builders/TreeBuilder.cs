@@ -837,7 +837,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     private sealed class InterfaceMethodBuilder : IInterfaceMethodBuilder
     {
         private readonly string methodName;
-        private readonly List<ParameterNode> parameters;
+        private readonly List<IInlineTypeNode> parameters;
         private IInlineTypeNode returnType;
 
         public InterfaceMethodBuilder(string methodName)
@@ -847,9 +847,9 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             returnType = new TypeNode("void");
         }
 
-        public IInterfaceMethodBuilder DefineParameter(string name, string type)
+        public IInterfaceMethodBuilder DefineParameter(string type)
         {
-            var parameter = new ParameterNode(name, new TypeNode(type));
+            var parameter = new TypeNode(type);
 
             parameters.Add(parameter);
 

@@ -186,7 +186,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
         context.Scoped(c =>
         {
-            foreach (var parameter in node.Parameters)
+            foreach (var parameter in node.ParameterTypes)
                 parameter.Accept(this, c);
 
             node.ReturnType.Accept(this, c);
