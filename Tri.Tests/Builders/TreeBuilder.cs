@@ -810,13 +810,17 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             this.methods = [];
         }
 
-        public IInterfaceBuilder DefineProperty(string name, string type)
+        public IInterfaceBuilder DefineProperty(
+            string name,
+            string type,
+            AccessModifier getterModifier = AccessModifier.Public,
+            AccessModifier setterModifier = AccessModifier.Private)
         {
             var property = new InterfacePropertyNode(
                 name,
                 new TypeNode(type),
-                AccessModifier.Public,
-                AccessModifier.Private);
+                getterModifier,
+                setterModifier);
 
             properties.Add(property);
 

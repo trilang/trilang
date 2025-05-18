@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -20,15 +21,26 @@ public class NotImplementedInterface : Visitor
 
                 if (!interfaceProperty.Type.Equals(propertyType.Type))
                     throw new SemanticAnalysisException($"The '{interfaceProperty.Name}' property is not of the correct type.");
+
+                if (interfaceProperty.GetterModifier == AccessModifierMetadata.Public &&
+                    propertyType.GetterModifier != AccessModifierMetadata.Public)
+                    throw new SemanticAnalysisException($"The implementation of an interface property getter '{interfaceProperty.Name}' cannot be private.");
+
+                if (interfaceProperty.SetterModifier == AccessModifierMetadata.Public &&
+                    propertyType.SetterModifier != AccessModifierMetadata.Public)
+                    throw new SemanticAnalysisException($"The implementation of an interface property setter '{interfaceProperty.Name}' cannot be private.");
             }
 
             foreach (var interfaceMethod in @interface.Methods)
             {
-                var typeMethod = type.GetMethod(interfaceMethod.Name) ??
-                                 throw new SemanticAnalysisException($"The '{interfaceMethod.Name}' method is not implemented.");
+                var method = type.GetMethod(interfaceMethod.Name) ??
+                             throw new SemanticAnalysisException($"The '{interfaceMethod.Name}' method is not implemented.");
 
-                if (!interfaceMethod.TypeMetadata.Equals(typeMethod.TypeMetadata))
+                if (!interfaceMethod.TypeMetadata.Equals(method.TypeMetadata))
                     throw new SemanticAnalysisException($"The '{interfaceMethod.Name}' method is not of the correct type.");
+
+                if (method.AccessModifier == AccessModifierMetadata.Private)
+                    throw new SemanticAnalysisException($"The implementation of an interface method '{interfaceMethod.Name}' cannot be private.");
             }
         }
     }

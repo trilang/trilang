@@ -435,7 +435,7 @@ internal class TypeChecker : IVisitor
         var getter = node.FindInParent<PropertyGetterNode>();
         if (getter is not null)
         {
-            var getterReturnType = getter.Metadata?.DeclaringProperty.Type;
+            var getterReturnType = ((PropertyDeclarationNode)getter.Parent!).Metadata!.Type;
             if (!Equals(getterReturnType, expressionType))
                 throw new SemanticAnalysisException($"Property getter return type mismatch: expected '{getterReturnType}', got '{expressionType}'");
 
@@ -445,7 +445,7 @@ internal class TypeChecker : IVisitor
         var setter = node.FindInParent<PropertySetterNode>();
         if (setter is not null)
         {
-            var setterReturnType = setter.Metadata?.DeclaringProperty.Type;
+            var setterReturnType = ((PropertyDeclarationNode)setter.Parent!).Metadata!.Type;
             if (!Equals(setterReturnType, expressionType))
                 throw new SemanticAnalysisException($"Property setter return type mismatch: expected '{setterReturnType}', got '{expressionType}'");
 
@@ -470,18 +470,12 @@ internal class TypeChecker : IVisitor
 
     public void Visit(PropertyGetterNode node)
     {
-        var property = (PropertyDeclarationNode)node.Parent!;
-        node.Metadata = property.Metadata?.Getter;
-
         node.Body?.Accept(this);
     }
 
     public void Visit(PropertySetterNode node)
     {
         // TODO: check the backing field is set?
-        var property = (PropertyDeclarationNode)node.Parent!;
-        node.Metadata = property.Metadata?.Setter;
-
         node.Body?.Accept(this);
     }
 

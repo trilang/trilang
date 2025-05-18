@@ -57,8 +57,8 @@ internal class MetadataComparer : IEqualityComparer<ITypeMetadata>
         {
             if (p1.Name != p2.Name &&
                 !Equals(p1.Type, p2.Type) &&
-                p1.Getter?.AccessModifier != p2.Getter?.AccessModifier &&
-                p1.Setter?.AccessModifier != p2.Setter?.AccessModifier)
+                p1.GetterModifier != p2.GetterModifier &&
+                p1.SetterModifier != p2.SetterModifier)
                 return false;
         }
 

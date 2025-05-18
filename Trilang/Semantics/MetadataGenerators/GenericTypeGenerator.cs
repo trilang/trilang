@@ -72,17 +72,12 @@ internal class GenericTypeGenerator
             foreach (var property in openGenericType.Properties)
             {
                 var propertyType = typeArgumentsMap.Map(property.Type);
-                var propertyMetadata = new PropertyMetadata(type, property.Name, propertyType);
-
-                if (property.Getter is not null)
-                    propertyMetadata.Getter = new PropertyGetterMetadata(
-                        propertyMetadata,
-                        property.Getter.AccessModifier);
-
-                if (property.Setter is not null)
-                    propertyMetadata.Setter = new PropertySetterMetadata(
-                        propertyMetadata,
-                        property.Setter.AccessModifier);
+                var propertyMetadata = new PropertyMetadata(
+                    type,
+                    property.Name,
+                    propertyType,
+                    property.GetterModifier,
+                    property.SetterModifier);
 
                 type.AddProperty(propertyMetadata);
             }

@@ -1,4 +1,3 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
@@ -71,6 +70,4 @@ public class PropertySetterNode : ISyntaxNode, IEquatable<PropertySetterNode>
     public AccessModifier AccessModifier { get; }
 
     public BlockStatementNode? Body { get; }
-
-    public PropertySetterMetadata? Metadata { get; set; }
 }

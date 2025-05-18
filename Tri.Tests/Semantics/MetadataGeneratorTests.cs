@@ -81,9 +81,12 @@ public class MetadataGeneratorTests
         semantic.Analyze(tree);
 
         var typeMetadata = new TypeMetadata("Test");
-        var propertyMetadata = new PropertyMetadata(typeMetadata, "x", TypeMetadata.I32);
-        propertyMetadata.Getter = new PropertyGetterMetadata(propertyMetadata, AccessModifierMetadata.Public);
-        propertyMetadata.Setter = new PropertySetterMetadata(propertyMetadata, AccessModifierMetadata.Public);
+        var propertyMetadata = new PropertyMetadata(
+            typeMetadata,
+            "x",
+            TypeMetadata.I32,
+            AccessModifierMetadata.Public,
+            AccessModifierMetadata.Public);
         typeMetadata.AddProperty(propertyMetadata);
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
@@ -93,10 +96,6 @@ public class MetadataGeneratorTests
         var actualProperty = actual.GetProperty("x");
         Assert.That(actualProperty, Is.Not.Null);
         Assert.That(propertyMetadata, Is.EqualTo(actualProperty));
-        Assert.That(actualProperty.Getter, Is.Not.Null);
-        Assert.That(propertyMetadata.Getter, Is.EqualTo(actualProperty.Getter));
-        Assert.That(actualProperty.Setter, Is.Not.Null);
-        Assert.That(propertyMetadata.Setter, Is.EqualTo(actualProperty.Setter));
     }
 
     [Test]

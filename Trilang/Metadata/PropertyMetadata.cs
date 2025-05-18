@@ -5,11 +5,15 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
     public PropertyMetadata(
         TypeMetadata declaringType,
         string name,
-        ITypeMetadata type)
+        ITypeMetadata type,
+        AccessModifierMetadata getterModifier = AccessModifierMetadata.Public,
+        AccessModifierMetadata setterModifier = AccessModifierMetadata.Private)
     {
         DeclaringType = declaringType;
         Name = name;
         Type = type;
+        GetterModifier = getterModifier;
+        SetterModifier = setterModifier;
     }
 
     public static bool operator ==(PropertyMetadata? left, PropertyMetadata? right)
@@ -28,7 +32,9 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 
         return DeclaringType.Equals(other.DeclaringType) &&
                Name == other.Name &&
-               Type.Equals(other.Type);
+               Type.Equals(other.Type) &&
+               GetterModifier == other.GetterModifier &&
+               SetterModifier == other.SetterModifier;
     }
 
     public override bool Equals(object? obj)
@@ -55,9 +61,9 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 
     public string Name { get; }
 
-    public PropertyGetterMetadata? Getter { get; set; }
+    public AccessModifierMetadata GetterModifier { get; }
 
-    public PropertySetterMetadata? Setter { get; set; }
+    public AccessModifierMetadata SetterModifier { get; }
 
     public ITypeMetadata Type { get; }
 }

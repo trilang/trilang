@@ -65,17 +65,12 @@ internal class TypeGenerator
                 var propertyType = typeProvider.GetType(property.Type.Name) ??
                                    throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
 
-                var propertyMetadata = new PropertyMetadata(type, property.Name, propertyType);
-
-                if (property.Getter is not null)
-                    propertyMetadata.Getter = new PropertyGetterMetadata(
-                        propertyMetadata,
-                        GetAccessModifierMetadata(property.Getter.AccessModifier));
-
-                if (property.Setter is not null)
-                    propertyMetadata.Setter = new PropertySetterMetadata(
-                        propertyMetadata,
-                        GetAccessModifierMetadata(property.Setter.AccessModifier));
+                var propertyMetadata = new PropertyMetadata(
+                    type,
+                    property.Name,
+                    propertyType,
+                    GetAccessModifierMetadata(property.Getter?.AccessModifier ?? AccessModifier.Public),
+                    GetAccessModifierMetadata(property.Setter?.AccessModifier ?? AccessModifier.Private));
 
                 type.AddProperty(propertyMetadata);
             }
