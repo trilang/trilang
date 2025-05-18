@@ -1426,8 +1426,8 @@ public class FormatterTests
                 "Point",
                 new InterfaceNode(
                     [
-                        new InterfacePropertyNode("x", new TypeNode("i32")),
-                        new InterfacePropertyNode("y", new TypeNode("i32")),
+                        new InterfacePropertyNode("x", new TypeNode("i32"), null, null),
+                        new InterfacePropertyNode("y", new TypeNode("i32"), null, null),
                     ],
                     [
                         new InterfaceMethodNode(
@@ -1446,6 +1446,34 @@ public class FormatterTests
     }
 
     [Test]
+    public void FormatAliasInterfaceTypeWithGettersSettersTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                new InterfaceNode(
+                    [
+                        new InterfacePropertyNode("x", new TypeNode("i32"), AccessModifier.Public, AccessModifier.Public),
+                        new InterfacePropertyNode("y", new TypeNode("i32"), AccessModifier.Private, AccessModifier.Private),
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            "distance",
+                            [new TypeNode("Point")],
+                            new TypeNode("f64")
+                        )
+                    ]
+                )
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected = "public type Point = {\n    x: i32 { public get; public set; }\n    y: i32 { private get; private set; }\n    \n    distance(Point): f64;\n}";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void FormatInlineInterfaceTypeTest()
     {
         var tree = new SyntaxTree([
@@ -1458,8 +1486,8 @@ public class FormatterTests
                         "p",
                         new InterfaceNode(
                             [
-                                new InterfacePropertyNode("x", new TypeNode("i32")),
-                                new InterfacePropertyNode("y", new TypeNode("i32")),
+                                new InterfacePropertyNode("x", new TypeNode("i32"), null, null),
+                                new InterfacePropertyNode("y", new TypeNode("i32"), null, null),
                             ],
                             []
                         ),
@@ -1649,8 +1677,8 @@ public class FormatterTests
                     new InterfaceNode([], []),
                     new InterfaceNode(
                         [
-                            new InterfacePropertyNode("x", new TypeNode("i32")),
-                            new InterfacePropertyNode("y", new TypeNode("i32")),
+                            new InterfacePropertyNode("x", new TypeNode("i32"), null, null),
+                            new InterfacePropertyNode("y", new TypeNode("i32"), null, null),
                         ],
                         []
                     ),

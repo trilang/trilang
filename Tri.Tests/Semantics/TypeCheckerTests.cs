@@ -544,8 +544,20 @@ public class TypeCheckerTests
         var interfaceType = new InterfaceMetadata();
         var expected = new TypeAliasMetadata("Point", interfaceType);
 
-        interfaceType.AddProperty(new InterfacePropertyMetadata(interfaceType, "x", TypeMetadata.I32));
-        interfaceType.AddProperty(new InterfacePropertyMetadata(interfaceType, "y", TypeMetadata.I32));
+        interfaceType.AddProperty(
+            new InterfacePropertyMetadata(
+                interfaceType,
+                "x",
+                TypeMetadata.I32,
+                AccessModifierMetadata.Public,
+                AccessModifierMetadata.Private));
+        interfaceType.AddProperty(
+            new InterfacePropertyMetadata(
+                interfaceType,
+                "y",
+                TypeMetadata.I32,
+                AccessModifierMetadata.Public,
+                AccessModifierMetadata.Private));
         interfaceType.AddMethod(
             new InterfaceMethodMetadata(
                 interfaceType,

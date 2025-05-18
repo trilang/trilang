@@ -1,13 +1,19 @@
 namespace Trilang.Metadata;
 
-// TODO: interface getters/setters
 public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfacePropertyMetadata>
 {
-    public InterfacePropertyMetadata(InterfaceMetadata declaringType, string name, ITypeMetadata type)
+    public InterfacePropertyMetadata(
+        InterfaceMetadata declaringType,
+        string name,
+        ITypeMetadata type,
+        AccessModifierMetadata getterModifier,
+        AccessModifierMetadata setterModifier)
     {
         DeclaringType = declaringType;
         Name = name;
         Type = type;
+        GetterModifier = getterModifier;
+        SetterModifier = setterModifier;
     }
 
     public static bool operator ==(InterfacePropertyMetadata? left, InterfacePropertyMetadata? right)
@@ -26,7 +32,9 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
 
         return DeclaringType.Equals(other.DeclaringType) &&
                Name == other.Name &&
-               Type.Equals(other.Type);
+               Type.Equals(other.Type) &&
+               GetterModifier == other.GetterModifier &&
+               SetterModifier == other.SetterModifier;
     }
 
     public override bool Equals(object? obj)
@@ -44,7 +52,7 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(DeclaringType, Name, Type);
+        => HashCode.Combine(DeclaringType, Name, Type, GetterModifier, SetterModifier);
 
     public override string ToString()
         => $"{Name}: {Type}";
@@ -54,4 +62,8 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
     public string Name { get; }
 
     public ITypeMetadata Type { get; }
+
+    public AccessModifierMetadata GetterModifier { get; }
+
+    public AccessModifierMetadata SetterModifier { get; }
 }

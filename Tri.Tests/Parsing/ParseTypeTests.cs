@@ -829,8 +829,44 @@ public class ParseTypeTests
                 "Point",
                 new InterfaceNode(
                     [
-                        new InterfacePropertyNode("x", new TypeNode("i32")),
-                        new InterfacePropertyNode("y", new TypeNode("i32"))
+                        new InterfacePropertyNode("x", new TypeNode("i32"), null, null),
+                        new InterfacePropertyNode("y", new TypeNode("i32"), null, null)
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            "distance",
+                            [new TypeNode("Point")],
+                            new TypeNode("f32"))
+                    ]
+                )
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseAliasInterfaceTypeWithGettersSettersTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Point = {
+                x: i32 { public get; public set; }
+                y: i32 { private get; private set; }
+
+                distance(Point): f32;
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "Point",
+                new InterfaceNode(
+                    [
+                        new InterfacePropertyNode("x", new TypeNode("i32"), AccessModifier.Public, AccessModifier.Public),
+                        new InterfacePropertyNode("y", new TypeNode("i32"), AccessModifier.Private, AccessModifier.Private)
                     ],
                     [
                         new InterfaceMethodNode(

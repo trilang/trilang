@@ -41,7 +41,17 @@ internal class InterfaceGenerator
                 var propertyType = typeProvider.GetType(property.Type.Name) ??
                                    throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
 
-                var propertyMetadata = new InterfacePropertyMetadata(metadata, property.Name, propertyType);
+                var propertyMetadata = new InterfacePropertyMetadata(
+                    metadata,
+                    property.Name,
+                    propertyType,
+                    property.GetterModifier.HasValue
+                        ? GetAccessModifierMetadata(property.GetterModifier.Value)
+                        : AccessModifierMetadata.Public,
+                    property.SetterModifier.HasValue
+                        ? GetAccessModifierMetadata(property.SetterModifier.Value)
+                        : AccessModifierMetadata.Private);
+
                 metadata.AddProperty(propertyMetadata);
             }
 
@@ -68,4 +78,13 @@ internal class InterfaceGenerator
             }
         }
     }
+
+    private static AccessModifierMetadata GetAccessModifierMetadata(AccessModifier accessModifier)
+        => accessModifier switch
+        {
+            AccessModifier.Public => AccessModifierMetadata.Public,
+            AccessModifier.Private => AccessModifierMetadata.Private,
+
+            _ => throw new ArgumentOutOfRangeException(nameof(accessModifier), accessModifier, null)
+        };
 }

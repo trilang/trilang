@@ -982,10 +982,51 @@ public class Parser
             var type = c.Parser.TryParseDiscriminatedUnion(c) ??
                        throw new ParseException("Expected a type.");
 
-            if (!c.Reader.Check(TokenKind.SemiColon))
-                throw new ParseException("Expected a semi-colon.");
+            if (c.Reader.Check(TokenKind.SemiColon))
+                return new InterfacePropertyNode(name, type, null, null);
 
-            return new InterfacePropertyNode(name, type);
+            if (!c.Reader.Check(TokenKind.OpenBrace))
+                throw new ParseException("Expected an open brace.");
+
+            var getter = c.Parser.TryParseInterfacePropertyGetter(c);
+            var setter = c.Parser.TryParseInterfacePropertySetter(c);
+
+            if (!c.Reader.Check(TokenKind.CloseBrace))
+                throw new ParseException("Expected a close brace.");
+
+            return new InterfacePropertyNode(name, type, getter, setter);
+        });
+
+    private AccessModifier? TryParseInterfacePropertyGetter(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var accessModifier = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.Get))
+                throw new ParseException("Expected a get keyword.");
+
+            if (!c.Reader.Check(TokenKind.SemiColon))
+                throw new ParseException("Expected a semi colon.");
+
+            return accessModifier;
+        });
+
+    private AccessModifier? TryParseInterfacePropertySetter(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var accessModifier = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.Set))
+                throw new ParseException("Expected a get keyword.");
+
+            if (!c.Reader.Check(TokenKind.SemiColon))
+                throw new ParseException("Expected a semi colon.");
+
+            return accessModifier;
         });
 
     private List<InterfaceMethodNode> TryParseInterfaceMethods(ParserContext context)

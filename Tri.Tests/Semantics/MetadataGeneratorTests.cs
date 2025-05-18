@@ -417,8 +417,20 @@ public class MetadataGeneratorTests
         semantic.Analyze(tree);
 
         var expectedInterface = new InterfaceMetadata();
-        expectedInterface.AddProperty(new InterfacePropertyMetadata(expectedInterface, "x", TypeMetadata.I32));
-        expectedInterface.AddProperty(new InterfacePropertyMetadata(expectedInterface, "y", TypeMetadata.I32));
+        expectedInterface.AddProperty(
+            new InterfacePropertyMetadata(
+                expectedInterface,
+                "x",
+                TypeMetadata.I32,
+                AccessModifierMetadata.Public,
+                AccessModifierMetadata.Private));
+        expectedInterface.AddProperty(
+            new InterfacePropertyMetadata(
+                expectedInterface,
+                "y",
+                TypeMetadata.I32,
+                AccessModifierMetadata.Public,
+                AccessModifierMetadata.Private));
 
         var expectedAlias = new TypeAliasMetadata("Point", expectedInterface);
         expectedInterface.AddMethod(new InterfaceMethodMetadata(

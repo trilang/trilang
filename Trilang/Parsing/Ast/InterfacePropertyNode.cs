@@ -6,10 +6,16 @@ namespace Trilang.Parsing.Ast;
 
 public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNode>
 {
-    public InterfacePropertyNode(string name, IInlineTypeNode type)
+    public InterfacePropertyNode(
+        string name,
+        IInlineTypeNode type,
+        AccessModifier? getterModifier,
+        AccessModifier? setterModifier)
     {
         Name = name;
         Type = type;
+        GetterModifier = getterModifier;
+        SetterModifier = setterModifier;
     }
 
     public static bool operator ==(InterfacePropertyNode? left, InterfacePropertyNode? right)
@@ -26,7 +32,10 @@ public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNo
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name && Type.Equals(other.Type);
+        return Name == other.Name &&
+               Type.Equals(other.Type) &&
+               GetterModifier == other.GetterModifier &&
+               SetterModifier == other.SetterModifier;
     }
 
     public override bool Equals(object? obj)
@@ -44,7 +53,7 @@ public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNo
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, Type);
+        => HashCode.Combine(Name, Type, GetterModifier, SetterModifier);
 
     public override string ToString()
     {
@@ -67,6 +76,10 @@ public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNo
     public string Name { get; }
 
     public IInlineTypeNode Type { get; }
+
+    public AccessModifier? GetterModifier { get; }
+
+    public AccessModifier? SetterModifier { get; }
 
     public InterfacePropertyMetadata? Metadata { get; set; }
 }

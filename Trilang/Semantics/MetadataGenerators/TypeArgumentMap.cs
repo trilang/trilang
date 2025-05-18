@@ -97,7 +97,12 @@ public class TypeArgumentMap
     private InterfaceMetadata Map(InterfaceMetadata interfaceMetadata)
     {
         var properties = interfaceMetadata.Properties
-            .Select(x => new InterfacePropertyMetadata(interfaceMetadata, x.Name, Map(x.Type)));
+            .Select(x => new InterfacePropertyMetadata(
+                interfaceMetadata,
+                x.Name,
+                Map(x.Type),
+                x.GetterModifier,
+                x.SetterModifier));
 
         var methods = interfaceMetadata.Methods
             .Select(x => new InterfaceMethodMetadata(interfaceMetadata, x.Name, Map(x.TypeMetadata)));

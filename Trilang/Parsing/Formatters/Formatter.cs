@@ -352,7 +352,33 @@ public partial class Formatter : IFormatter
         writer.Write(node.Name);
         writer.Write(": ");
         node.Type.Accept(this);
-        writer.Write(";");
+
+        var hasGetter = node.GetterModifier is not null;
+        var hasSetter = node.SetterModifier is not null;
+        if (hasGetter || hasSetter)
+        {
+            writer.Write(" {");
+
+            if (hasGetter)
+            {
+                writer.Write(' ');
+                WriteAccessModifier(node.GetterModifier!.Value);
+                writer.Write(" get;");
+            }
+
+            if (hasSetter)
+            {
+                writer.Write(' ');
+                WriteAccessModifier(node.SetterModifier!.Value);
+                writer.Write(" set;");
+            }
+
+            writer.Write(" }");
+        }
+        else
+        {
+            writer.Write(';');
+        }
     }
 
     public void Visit(InterfaceMethodNode node)

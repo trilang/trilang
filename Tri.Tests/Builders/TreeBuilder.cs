@@ -812,7 +812,11 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
 
         public IInterfaceBuilder DefineProperty(string name, string type)
         {
-            var property = new InterfacePropertyNode(name, new TypeNode(type));
+            var property = new InterfacePropertyNode(
+                name,
+                new TypeNode(type),
+                AccessModifier.Public,
+                AccessModifier.Private);
 
             properties.Add(property);
 

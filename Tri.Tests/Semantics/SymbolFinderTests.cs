@@ -465,8 +465,8 @@ public class SymbolFinderTests
     {
         var @interface = new InterfaceNode(
             [
-                new InterfacePropertyNode("x", new TypeNode("i32")),
-                new InterfacePropertyNode("y", new TypeNode("i32")),
+                new InterfacePropertyNode("x", new TypeNode("i32"), null, null),
+                new InterfacePropertyNode("y", new TypeNode("i32"), null, null),
             ],
             [
                 new InterfaceMethodNode("toString", [], new TypeNode("string")),
@@ -497,7 +497,7 @@ public class SymbolFinderTests
     {
         var @interface = new InterfaceNode(
             [
-                new InterfacePropertyNode("x", new FunctionTypeNode([], new TypeNode("void"))),
+                new InterfacePropertyNode("x", new FunctionTypeNode([], new TypeNode("void")), null, null),
             ],
             []
         );
