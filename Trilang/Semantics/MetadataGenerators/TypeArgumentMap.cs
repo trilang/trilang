@@ -25,7 +25,7 @@ public class TypeArgumentMap
             if (specific is TypeArgumentMetadata || specific.Equals(open))
                 continue;
 
-            result.map.Add(open.Name, specific);
+            result.map.Add(open.ToString()!, specific);
         }
 
         return result;
@@ -66,8 +66,6 @@ public class TypeArgumentMap
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 
-            typeProvider.DefineType(mappedType);
-
             return mappedType;
         }
 
@@ -80,60 +78,44 @@ public class TypeArgumentMap
         for (var i = 0; i < discriminatedUnion.Types.Count; i++)
             types[i] = Map(discriminatedUnion.Types[i]);
 
-        var name = string.Join(" | ", types.Select(x => x.Name));
+        var metadata = new DiscriminatedUnionMetadata(types);
+        typeProvider.DefineType(metadata.ToString(), metadata);
 
-        return new DiscriminatedUnionMetadata(name, types);
+        return metadata;
     }
 
     private FunctionTypeMetadata Map(FunctionTypeMetadata functionType)
     {
         var parameterTypes = functionType.ParameterTypes.Select(Map).ToList();
         var returnType = Map(functionType.ReturnType);
-
-        var parameterNames = string.Join(", ", parameterTypes.Select(p => p.Name));
-        var functionTypeName = $"({parameterNames}) => {returnType.Name}";
-        var functionTypeMetadata = new FunctionTypeMetadata(functionTypeName);
-
-        foreach (var parameterType in parameterTypes)
-            functionTypeMetadata.AddParameter(parameterType);
-
-        functionTypeMetadata.ReturnType = returnType;
+        var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
+        typeProvider.DefineType(functionTypeMetadata.ToString(), functionTypeMetadata);
 
         return functionTypeMetadata;
     }
 
     private InterfaceMetadata Map(InterfaceMetadata interfaceMetadata)
     {
-        // TODO: remove?
-        var propertyNames = interfaceMetadata.Properties.Select(f => $"{f.Name}: {Map(f.Type)};");
-        var methodNames = interfaceMetadata.Methods
-            .Select(m => $"{m.Name}({string.Join(", ", m.TypeMetadata.ParameterTypes.Select(Map))}): {Map(m.TypeMetadata.ReturnType)};");
+        var properties = interfaceMetadata.Properties
+            .Select(x => new InterfacePropertyMetadata(interfaceMetadata, x.Name, Map(x.Type)));
 
-        var combinedSignatures = propertyNames.Concat(methodNames).ToList();
-        var name = combinedSignatures.Any()
-            ? $"{{ {string.Join(" ", combinedSignatures)} }}"
-            : "{ }";
+        var methods = interfaceMetadata.Methods
+            .Select(x => new InterfaceMethodMetadata(interfaceMetadata, x.Name, Map(x.TypeMetadata)));
 
-        var result = new InterfaceMetadata(name);
+        var metadata = new InterfaceMetadata(properties, methods);
 
-        foreach (var property in interfaceMetadata.Properties)
-            result.AddProperty(new InterfacePropertyMetadata(result, property.Name, Map(property.Type)));
+        typeProvider.DefineType(metadata.ToString(), metadata);
 
-        foreach (var method in interfaceMetadata.Methods)
-            result.AddMethod(new InterfaceMethodMetadata(result, method.Name, Map(method.TypeMetadata)));
-
-        return result;
+        return metadata;
     }
 
     private TupleMetadata Map(TupleMetadata tuple)
     {
-        var types = new ITypeMetadata[tuple.Types.Count];
-        for (var i = 0; i < tuple.Types.Count; i++)
-            types[i] = Map(tuple.Types[i]);
+        var types = tuple.Types.Select(Map);
+        var tupleMetadata = new TupleMetadata(types);
+        typeProvider.DefineType(tupleMetadata.ToString(), tupleMetadata);
 
-        var name = $"({string.Join(", ", types.Select(x => x.Name))})";
-
-        return new TupleMetadata(name, types);
+        return tupleMetadata;
     }
 
     private ITypeMetadata Map(TypeArgumentMetadata type)
@@ -142,11 +124,10 @@ public class TypeArgumentMap
     private TypeArrayMetadata Map(TypeArrayMetadata type)
     {
         var itemType = Map(type.ItemMetadata!);
+        var typeArrayMetadata = new TypeArrayMetadata(itemType);
+        typeProvider.DefineType(typeArrayMetadata.ToString(), typeArrayMetadata);
 
-        return new TypeArrayMetadata($"{itemType.Name}[]")
-        {
-            ItemMetadata = itemType
-        };
+        return typeArrayMetadata;
     }
 
     private bool HasTypeArgument(ITypeMetadata type)

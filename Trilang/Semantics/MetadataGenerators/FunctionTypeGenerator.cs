@@ -24,8 +24,8 @@ public class FunctionTypeGenerator
                 throw new SemanticAnalysisException($"The '{symbol.Name}' symbol is not a function.");
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var functionTypeMetadata = new FunctionTypeMetadata(symbol.Name);
-            if (typeProvider.DefineType(functionTypeMetadata))
+            var functionTypeMetadata = new FunctionTypeMetadata();
+            if (typeProvider.DefineType(symbol.Name, functionTypeMetadata))
                 typesToProcess.Add(new Item(functionTypeMetadata, function));
         }
     }
@@ -47,7 +47,6 @@ public class FunctionTypeGenerator
 
             var returnType = typeProvider.GetType(functionTypeNode.ReturnType.Name) ??
                              throw new SemanticAnalysisException($"The function has unknown return type: '{functionTypeNode.ReturnType.Name}'.");
-
 
             functionTypeMetadata.ReturnType = returnType;
         }

@@ -5,16 +5,14 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     private readonly HashSet<InterfacePropertyMetadata> properties;
     private readonly HashSet<InterfaceMethodMetadata> methods;
 
-    public InterfaceMetadata(string name) : this(name, [], [])
+    public InterfaceMetadata() : this([], [])
     {
     }
 
     public InterfaceMetadata(
-        string name,
         IEnumerable<InterfacePropertyMetadata> properties,
         IEnumerable<InterfaceMethodMetadata> methods)
     {
-        Name = name;
         this.properties = new HashSet<InterfacePropertyMetadata>(properties);
         this.methods = new HashSet<InterfaceMethodMetadata>(methods);
     }
@@ -33,7 +31,19 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        foreach (var (p1, p2) in properties.Zip(other.properties))
+        {
+            if (p1.Name != p2.Name || !p1.Type.Equals(p2.Type))
+                return false;
+        }
+
+        foreach (var (m1, m2) in methods.Zip(other.methods))
+        {
+            if (m1.Name != m2.Name || !m1.TypeMetadata.Equals(m2.TypeMetadata))
+                return false;
+        }
+
+        return true;
     }
 
     public override bool Equals(object? obj)
@@ -51,15 +61,24 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
+        => HashCode.Combine(properties, methods);
 
     public override string ToString()
-        => Name;
+    {
+        var propertyNames = properties.Select(f => $"{f.Name}: {f.Type};");
+        var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.TypeMetadata.ParameterTypes)}): {m.TypeMetadata.ReturnType};");
+
+        var combinedSignatures = propertyNames.Concat(methodNames).ToList();
+
+        return combinedSignatures.Any()
+            ? $"{{ {string.Join(" ", combinedSignatures)} }}"
+            : "{ }";
+    }
 
     public void AddProperty(InterfacePropertyMetadata property)
     {
         if (!properties.Add(property))
-            throw new ArgumentException($"Property with name {property.Name} already exists in type {Name}");
+            throw new ArgumentException($"Property with name {property.Name} already exists in interface.");
     }
 
     public InterfacePropertyMetadata? GetProperty(string name)
@@ -68,13 +87,11 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     public void AddMethod(InterfaceMethodMetadata method)
     {
         if (!methods.Add(method))
-            throw new ArgumentException($"Method with name {method.Name} already exists in type {Name}");
+            throw new ArgumentException($"Method with name {method.Name} already exists in interface.");
     }
 
     public InterfaceMethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(m => m.Name == name);
-
-    public string Name { get; }
 
     public IReadOnlyCollection<InterfacePropertyMetadata> Properties => properties;
 

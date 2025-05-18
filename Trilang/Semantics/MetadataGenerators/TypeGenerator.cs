@@ -29,13 +29,13 @@ internal class TypeGenerator
             foreach (var genericArgument in typeDeclarationNode.GenericArguments)
             {
                 var argumentMetadata = new TypeArgumentMetadata(genericArgument.Name);
-                if (!typeProvider.DefineType(argumentMetadata))
+                if (!typeProvider.DefineType(genericArgument.Name, argumentMetadata))
                     throw new SemanticAnalysisException($"The '{genericArgument.Name}' type argument is already defined.");
 
                 metadata.AddGenericArgument(argumentMetadata);
             }
 
-            if (!typeProvider.DefineType(metadata))
+            if (!typeProvider.DefineType(symbol.Name, metadata))
                 throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
 
             typesToProcess.Add(new Item(metadata, typeDeclarationNode));
@@ -100,31 +100,26 @@ internal class TypeGenerator
 
             foreach (var method in typeDeclarationNode.Methods)
             {
-                var parameterNames = string.Join(", ", method.Parameters.Select(p => p.Type.Name));
-                var functionTypeName = $"({parameterNames}) => {method.ReturnType.Name}";
-                if (typeProvider.GetType(functionTypeName) is not FunctionTypeMetadata functionType)
+                var parameters = method.Parameters
+                    .Select(x => typeProvider.GetType(x.Type.Name) ??
+                                 throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
+
+                var returnType = typeProvider.GetType(method.ReturnType.Name) ??
+                                 throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
+
+                var functionType = new FunctionTypeMetadata(parameters, returnType);
+
+                if (typeProvider.GetType(functionType.ToString()) is not FunctionTypeMetadata existingFunctionType)
                 {
-                    functionType = new FunctionTypeMetadata(functionTypeName);
-
-                    foreach (var parameterNode in method.Parameters)
-                    {
-                        var parameterType = typeProvider.GetType(parameterNode.Type.Name) ??
-                                            throw new SemanticAnalysisException($"The '{parameterNode.Name}' parameter has unknown type: '{parameterNode.Type.Name}'.");
-
-                        functionType.AddParameter(parameterType);
-                    }
-
-                    functionType.ReturnType = typeProvider.GetType(method.ReturnType.Name) ??
-                                              throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
-
-                    typeProvider.DefineType(functionType);
+                    typeProvider.DefineType(functionType.ToString(), functionType);
+                    existingFunctionType = functionType;
                 }
 
                 var methodMetadata = new MethodMetadata(
                     type,
                     GetAccessModifierMetadata(method.AccessModifier),
                     method.Name,
-                    functionType);
+                    existingFunctionType);
 
                 type.AddMethod(methodMetadata);
             }

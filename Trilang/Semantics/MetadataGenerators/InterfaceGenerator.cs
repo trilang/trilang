@@ -24,8 +24,8 @@ internal class InterfaceGenerator
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an InterfaceNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var metadata = new InterfaceMetadata(symbol.Name);
-            if (typeProvider.DefineType(metadata))
+            var metadata = new InterfaceMetadata();
+            if (typeProvider.DefineType(symbol.Name, metadata))
                 typesToProcess.Add(new Item(metadata, interfaceNode));
         }
     }
@@ -47,28 +47,23 @@ internal class InterfaceGenerator
 
             foreach (var method in interfaceNode.Methods)
             {
-                var parameterNames = string.Join(", ", method.Parameters.Select(p => p.Type.Name));
-                var functionTypeName = $"({parameterNames}) => {method.ReturnType.Name}";
-                if (typeProvider.GetType(functionTypeName) is not FunctionTypeMetadata functionType)
+                var parameters = method.Parameters
+                    .Select(x => typeProvider.GetType(x.Type.Name) ??
+                                 throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
+
+                var returnType = typeProvider.GetType(method.ReturnType.Name) ??
+                                 throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
+
+                var functionType = new FunctionTypeMetadata(parameters, returnType);
+
+                if (typeProvider.GetType(functionType.ToString()) is not FunctionTypeMetadata existingFunctionType)
                 {
-                    functionType = new FunctionTypeMetadata(functionTypeName);
-
-                    foreach (var parameter in method.Parameters)
-                    {
-                        var parameterType = typeProvider.GetType(parameter.Type.Name) ??
-                                            throw new SemanticAnalysisException($"The '{parameter.Name}' parameter has unknown type: '{parameter.Type.Name}'.");
-
-                        functionType.AddParameter(parameterType);
-                    }
-
-                    functionType.ReturnType = typeProvider.GetType(method.ReturnType.Name) ??
-                                              throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
-
-                    typeProvider.DefineType(functionType);
+                    typeProvider.DefineType(functionType.ToString(), functionType);
+                    existingFunctionType = functionType;
                 }
 
                 // TODO: generic?
-                var methodMetadata = new InterfaceMethodMetadata(metadata, method.Name, functionType);
+                var methodMetadata = new InterfaceMethodMetadata(metadata, method.Name, existingFunctionType);
                 metadata.AddMethod(methodMetadata);
             }
         }

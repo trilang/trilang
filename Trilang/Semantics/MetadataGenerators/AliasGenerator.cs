@@ -25,7 +25,7 @@ internal class AliasGenerator
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
             var alias = new TypeAliasMetadata(symbol.Name);
-            if (!typeProvider.DefineType(alias))
+            if (!typeProvider.DefineType(symbol.Name, alias))
                 throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
 
             typesToProcess.Add(new Item(alias, typeAliasNode));

@@ -30,7 +30,7 @@ internal class GenericTypeGenerator
                 continue;
 
             var metadata = new TypeMetadata(symbol.Name);
-            if (typeProvider.DefineType(metadata))
+            if (typeProvider.DefineType(symbol.Name, metadata))
                 typesToProcess.Add(new Item(metadata, genericTypeNode));
         }
     }
@@ -60,11 +60,11 @@ internal class GenericTypeGenerator
             foreach (var @interface in openGenericType.Interfaces)
             {
                 // TODO: support generic interfaces
-                var aliasMetadata = typeProvider.GetType(@interface.Name) as TypeAliasMetadata ??
-                                    throw new SemanticAnalysisException($"The '{@interface.Name}' interface is not defined.");
+                var aliasMetadata = typeProvider.GetType(@interface.ToString()) as TypeAliasMetadata ??
+                                    throw new SemanticAnalysisException($"The '{@interface}' interface is not defined.");
 
                 var interfaceMetadata = aliasMetadata.Type as InterfaceMetadata ??
-                                        throw new SemanticAnalysisException($"The '{@interface.Name}' interface is not an interface.");
+                                        throw new SemanticAnalysisException($"The '{@interface}' interface is not an interface.");
 
                 type.AddInterface(interfaceMetadata);
             }
@@ -105,25 +105,20 @@ internal class GenericTypeGenerator
             {
                 // TODO: support generic methods
                 var methodType = method.TypeMetadata;
-                var parameterNames = string.Join(", ", methodType.ParameterTypes.Select(p => p.Name));
-                var functionTypeName = $"({parameterNames}) => {methodType.ReturnType.Name}";
-                if (typeProvider.GetType(functionTypeName) is not FunctionTypeMetadata functionType)
+                var parameters = methodType.ParameterTypes.Select(x => typeArgumentsMap.Map(x));
+                var returnType = typeArgumentsMap.Map(methodType.ReturnType);
+                var functionType = new FunctionTypeMetadata(parameters, returnType);
+                if (typeProvider.GetType(functionType.ToString()) is not FunctionTypeMetadata existingFunctionType)
                 {
-                    functionType = new FunctionTypeMetadata(functionTypeName);
-
-                    foreach (var parameter in methodType.ParameterTypes)
-                        functionType.AddParameter(typeArgumentsMap.Map(parameter));
-
-                    functionType.ReturnType = typeArgumentsMap.Map(methodType.ReturnType);
-
-                    typeProvider.DefineType(functionType);
+                    typeProvider.DefineType(functionType.ToString(), functionType);
+                    existingFunctionType = functionType;
                 }
 
                 var methodMetadata = new MethodMetadata(
                     type,
                     method.AccessModifier,
                     method.Name,
-                    functionType);
+                    existingFunctionType);
 
                 type.AddMethod(methodMetadata);
             }

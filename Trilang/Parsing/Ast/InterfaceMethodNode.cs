@@ -4,6 +4,7 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
+// TODO: remove parameter names
 public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
 {
     public InterfaceMethodNode(

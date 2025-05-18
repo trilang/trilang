@@ -4,15 +4,12 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
 {
     private readonly List<ITypeMetadata> types;
 
-    public TupleMetadata(string name) : this(name, [])
+    public TupleMetadata() : this([])
     {
     }
 
-    public TupleMetadata(string name, IEnumerable<ITypeMetadata> types)
-    {
-        Name = name;
-        this.types = new List<ITypeMetadata>(types);
-    }
+    public TupleMetadata(IEnumerable<ITypeMetadata> types)
+        => this.types = [..types];
 
     public static bool operator ==(TupleMetadata? left, TupleMetadata? right)
         => Equals(left, right);
@@ -28,7 +25,7 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name.Equals(other.Name);
+        return types.SequenceEqual(other.types);
     }
 
     public override bool Equals(object? obj)
@@ -46,15 +43,13 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
+        => HashCode.Combine(types);
 
     public override string ToString()
-        => Name;
+        => $"({string.Join(", ", types)})";
 
     public void AddType(ITypeMetadata type)
         => types.Add(type);
-
-    public string Name { get; }
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;

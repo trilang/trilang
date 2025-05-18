@@ -24,8 +24,8 @@ internal class DiscriminatedUnionGenerator
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a DiscriminatedUnionNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var metadata = new DiscriminatedUnionMetadata(symbol.Name);
-            if (typeProvider.DefineType(metadata))
+            var metadata = new DiscriminatedUnionMetadata();
+            if (typeProvider.DefineType(symbol.Name, metadata))
                 typesToProcess.Add(new Item(metadata, discriminatedUnionNode));
         }
     }

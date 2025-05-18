@@ -24,9 +24,8 @@ internal class FunctionGenerator
 
             var parameters = string.Join(", ", function.Parameters.Select(p => p.Type.Name));
             var name = $"({parameters}) => {function.ReturnType.Name}";
-
-            var functionTypeMetadata = new FunctionTypeMetadata(name);
-            if (typeProvider.DefineType(functionTypeMetadata))
+            var functionTypeMetadata = new FunctionTypeMetadata();
+            if (typeProvider.DefineType(name, functionTypeMetadata))
                 typesToProcess.Add(new Item(functionTypeMetadata, function));
         }
     }

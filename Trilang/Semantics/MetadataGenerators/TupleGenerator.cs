@@ -24,8 +24,8 @@ internal class TupleGenerator
                 throw new SemanticAnalysisException();
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var tuple = new TupleMetadata(symbol.Name);
-            if (typeProvider.DefineType(tuple))
+            var tuple = new TupleMetadata();
+            if (typeProvider.DefineType(symbol.Name, tuple))
                 typesToProcess.Add(new Item(tuple, tupleNode));
         }
     }

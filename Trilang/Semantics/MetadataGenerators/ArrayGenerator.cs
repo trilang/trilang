@@ -23,12 +23,10 @@ internal class ArrayGenerator
             if (symbol.Node is not ArrayTypeNode arrayTypeNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an ArrayTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
 
-            var metadata = new TypeArrayMetadata(arrayTypeNode.Name);
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            if (typeProvider.GetType(metadata.Name) is null)
-                typeProvider.DefineType(metadata);
-
-            typesToProcess.Add(new Item(metadata, arrayTypeNode));
+            var metadata = new TypeArrayMetadata();
+            if (typeProvider.DefineType(symbol.Name, metadata))
+                typesToProcess.Add(new Item(metadata, arrayTypeNode));
         }
     }
 

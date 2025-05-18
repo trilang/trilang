@@ -195,12 +195,13 @@ internal class TypeChecker : IVisitor
         // we can be sure that node.Metadata is not null here
         // because it is set as a part of TypeNode
         var typeProvider = node.SymbolTable!.TypeProvider;
-        var parameterNames = string.Join(", ", node.Parameters.Select(p => p.Type.Name));
-        var functionTypeName = $"({parameterNames}) => {node.ReturnType.Name}";
-        var metadata = typeProvider.GetType(functionTypeName) as FunctionTypeMetadata ??
-                       throw new SemanticAnalysisException($"Unknown function type '{functionTypeName}'");
+        var parameters = node.Parameters.Select(x => x.Type.Metadata!);
+        var returnType = node.ReturnType.Metadata!;
+        var functionType = new FunctionTypeMetadata(parameters, returnType);
+        functionType = typeProvider.GetType(functionType.ToString()) as FunctionTypeMetadata ??
+                       throw new SemanticAnalysisException($"Unknown function type '{functionType}'");
 
-        node.Metadata = new FunctionMetadata(node.Name, metadata);
+        node.Metadata = new FunctionMetadata(node.Name, functionType);
 
         node.Body?.Accept(this);
     }
@@ -213,12 +214,13 @@ internal class TypeChecker : IVisitor
         node.ReturnType.Accept(this);
 
         var typeProvider = node.SymbolTable!.TypeProvider;
-        var parameterNames = string.Join(", ", node.ParameterTypes.Select(p => p.Name));
-        var functionTypeName = $"({parameterNames}) => {node.ReturnType.Name}";
-        var metadata = typeProvider.GetType(functionTypeName) as FunctionTypeMetadata ??
-                       throw new SemanticAnalysisException($"Unknown function type '{functionTypeName}'");
+        var parameters = node.ParameterTypes.Select(x => x.Metadata!);
+        var returnType = node.ReturnType.Metadata!;
+        var functionType = new FunctionTypeMetadata(parameters, returnType);
+        functionType = typeProvider.GetType(functionType.ToString()) as FunctionTypeMetadata ??
+                       throw new SemanticAnalysisException($"Unknown function type '{functionType}'");
 
-        node.Metadata = metadata;
+        node.Metadata = functionType;
     }
 
     public void Visit(GenericTypeNode node)
@@ -339,12 +341,12 @@ internal class TypeChecker : IVisitor
                 TypeMetadata type
                     => type.GetProperty(node.Name)?.Type ??
                        type.GetMethod(node.Name)?.TypeMetadata ??
-                       throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in type '{node.Member.ReturnTypeMetadata!.Name}'"),
+                       throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in type '{node.Member.ReturnTypeMetadata}'"),
 
                 InterfaceMetadata @interface
                     => @interface.GetProperty(node.Name)?.Type ??
                        @interface.GetMethod(node.Name)?.TypeMetadata ??
-                       throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in interface '{node.Member.ReturnTypeMetadata!.Name}'"),
+                       throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in interface '{node.Member.ReturnTypeMetadata}'"),
 
                 _ => node.ReturnTypeMetadata
             };
@@ -498,19 +500,16 @@ internal class TypeChecker : IVisitor
 
         // we can't generate metadata for this tuple in GenerateMetadata
         // because we don't know the types of the expressions yet
-        var name = $"({string.Join(", ", node.Expressions.Select(x => x.ReturnTypeMetadata!.Name))})";
-        var metadata = typeProvider.GetType(name);
-        if (metadata is null)
+        var types = node.Expressions.Select(x => x.ReturnTypeMetadata!);
+        var tuple = new TupleMetadata(types);
+        var existingTuple = typeProvider.GetType(tuple.ToString());
+        if (existingTuple is null)
         {
-            var tuple = new TupleMetadata(name);
-            foreach (var expression in node.Expressions)
-                tuple.AddType(expression.ReturnTypeMetadata!);
-
-            typeProvider.DefineType(tuple);
-            metadata = tuple;
+            typeProvider.DefineType(tuple.ToString(), tuple);
+            existingTuple = tuple;
         }
 
-        node.ReturnTypeMetadata = metadata;
+        node.ReturnTypeMetadata = existingTuple;
     }
 
     public void Visit(TupleTypeNode node)
@@ -519,11 +518,12 @@ internal class TypeChecker : IVisitor
             type.Accept(this);
 
         var typeProvider = node.SymbolTable!.TypeProvider;
-        var name = $"({string.Join(", ", node.Types.Select(x => x.Metadata!.Name))})";
-        var metadata = typeProvider.GetType(name) ??
-                       throw new SemanticAnalysisException($"Unknown tuple type '{name}'");
+        var types = node.Types.Select(x => x.Metadata!);
+        var tuple = new TupleMetadata(types);
+        tuple = typeProvider.GetType(tuple.ToString()) as TupleMetadata ??
+                throw new SemanticAnalysisException($"Unknown tuple type '{tuple}'");
 
-        node.Metadata = metadata;
+        node.Metadata = tuple;
     }
 
     public void Visit(TypeAliasDeclarationNode node)

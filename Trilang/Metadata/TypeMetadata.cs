@@ -84,14 +84,8 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public void AddGenericArgument(ITypeMetadata typeArgumentMetadata)
         => genericArguments.Add(typeArgumentMetadata);
 
-    public ITypeMetadata? GetGenericArgument(string name)
-        => genericArguments.FirstOrDefault(f => f.Name == name);
-
     public void AddInterface(InterfaceMetadata interfaceMetadata)
         => interfaces.Add(interfaceMetadata);
-
-    public InterfaceMetadata? GetInterface(string name)
-        => interfaces.FirstOrDefault(i => i.Name == name);
 
     public PropertyMetadata? GetProperty(string name)
         => properties.FirstOrDefault(f => f.Name == name);

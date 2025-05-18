@@ -2,8 +2,12 @@ namespace Trilang.Metadata;
 
 public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
 {
-    public TypeArrayMetadata(string name)
-        => Name = name;
+    public TypeArrayMetadata() : this(null)
+    {
+    }
+
+    public TypeArrayMetadata(ITypeMetadata? itemMetadata)
+        => ItemMetadata = itemMetadata;
 
     public static bool operator ==(TypeArrayMetadata? left, TypeArrayMetadata? right)
         => Equals(left, right);
@@ -19,7 +23,7 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return Equals(ItemMetadata, other.ItemMetadata);
     }
 
     public override bool Equals(object? obj)
@@ -37,12 +41,10 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name);
+        => HashCode.Combine(ItemMetadata);
 
     public override string ToString()
-        => Name;
-
-    public string Name { get; }
+        => $"{ItemMetadata}[]";
 
     public ITypeMetadata? ItemMetadata { get; set; }
 }

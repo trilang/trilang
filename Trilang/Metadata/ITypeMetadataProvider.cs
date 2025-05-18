@@ -3,6 +3,6 @@ namespace Trilang.Metadata;
 public interface ITypeMetadataProvider
 {
     ITypeMetadata? GetType(string name);
-    bool DefineType(ITypeMetadata type);
+    bool DefineType(string name, ITypeMetadata type);
     ITypeMetadataProvider CreateChild();
 }

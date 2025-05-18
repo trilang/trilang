@@ -19,10 +19,13 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new FunctionMetadata("main", new FunctionTypeMetadata("() => void"));
+        var expected = new FunctionMetadata(
+            "main",
+            new FunctionTypeMetadata([], TypeMetadata.Void));
+
         var function = tree.Find<FunctionDeclarationNode>();
         Assert.That(function, Is.Not.Null);
-        Assert.That(function.Metadata, Is.EqualTo(expected));
+        Assert.That(function.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -40,13 +43,17 @@ public class TypeCheckerTests
 
         var expected = new FunctionMetadata(
             "main",
-            new FunctionTypeMetadata("(i32, bool) => void"));
+            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void));
 
         var function = tree.Find<FunctionDeclarationNode>();
         Assert.That(function, Is.Not.Null);
         Assert.That(function.Metadata, Is.EqualTo(expected));
-        Assert.That(function.Parameters[0].Type.Metadata, Is.EqualTo(TypeMetadata.I32));
-        Assert.That(function.Parameters[1].Type.Metadata, Is.EqualTo(TypeMetadata.Bool));
+        Assert.That(
+            function.Parameters[0].Type.Metadata,
+            Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
+        Assert.That(
+            function.Parameters[1].Type.Metadata,
+            Is.EqualTo(TypeMetadata.Bool).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -63,7 +70,7 @@ public class TypeCheckerTests
 
         var variable = tree.Find<VariableDeclarationStatementNode>();
         Assert.That(variable, Is.Not.Null);
-        Assert.That(variable.Type.Metadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(variable.Type.Metadata, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -113,16 +120,16 @@ public class TypeCheckerTests
             expected,
             AccessModifierMetadata.Public,
             "toString",
-            new FunctionTypeMetadata("() => void")));
+            new FunctionTypeMetadata([], TypeMetadata.Void)));
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Public,
             "distance",
-            new FunctionTypeMetadata("(i32) => f64")));
+            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
 
         var type = tree.Find<TypeDeclarationNode>();
         Assert.That(type, Is.Not.Null);
-        Assert.That(type.Metadata, Is.EqualTo(expected));
+        Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -138,7 +145,7 @@ public class TypeCheckerTests
         var expected = new TypeAliasMetadata("MyInt", TypeMetadata.I32);
         var node = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(node, Is.Not.Null);
-        Assert.That(node.Metadata, Is.EqualTo(expected));
+        Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -155,10 +162,10 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new FunctionTypeMetadata("(i32, bool) => f64");
+        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.F64);
         var type = tree.Find<FunctionTypeNode>();
         Assert.That(type, Is.Not.Null);
-        Assert.That(type.Metadata, Is.EqualTo(expected));
+        Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -177,11 +184,11 @@ public class TypeCheckerTests
 
         var expected = new FunctionMetadata(
             "add",
-            new FunctionTypeMetadata("(i32, i32) => i32"));
+            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32));
 
         var node = tree.Find<FunctionDeclarationNode>();
         Assert.That(node, Is.Not.Null);
-        Assert.That(node.Metadata, Is.EqualTo(expected));
+        Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -200,7 +207,9 @@ public class TypeCheckerTests
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
-        Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -219,7 +228,9 @@ public class TypeCheckerTests
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
-        Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.Bool));
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.Bool).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -238,7 +249,9 @@ public class TypeCheckerTests
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
-        Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.Char));
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.Char).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -257,7 +270,9 @@ public class TypeCheckerTests
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
-        Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.String));
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.String).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -294,7 +309,9 @@ public class TypeCheckerTests
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
-        Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -313,7 +330,9 @@ public class TypeCheckerTests
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
-        Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -332,7 +351,9 @@ public class TypeCheckerTests
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
-        Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.Bool));
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.Bool).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -350,7 +371,9 @@ public class TypeCheckerTests
 
         var binaryNode = tree.Find<BinaryExpressionNode>();
         Assert.That(binaryNode, Is.Not.Null);
-        Assert.That(binaryNode.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(
+            binaryNode.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -388,7 +411,9 @@ public class TypeCheckerTests
         var returnNode = tree.Find<ReturnStatementNode>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
-        Assert.That(returnNode.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -516,19 +541,20 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var interfaceType = new InterfaceMetadata("{ x: i32; y: i32; distance(Point): f64; }");
+        var interfaceType = new InterfaceMetadata();
+        var expected = new TypeAliasMetadata("Point", interfaceType);
+
         interfaceType.AddProperty(new InterfacePropertyMetadata(interfaceType, "x", TypeMetadata.I32));
         interfaceType.AddProperty(new InterfacePropertyMetadata(interfaceType, "y", TypeMetadata.I32));
         interfaceType.AddMethod(
             new InterfaceMethodMetadata(
                 interfaceType,
                 "distance",
-                new FunctionTypeMetadata("(i32) => f64")));
-        var expected = new TypeAliasMetadata("Point", interfaceType);
+                new FunctionTypeMetadata([expected], TypeMetadata.F64)));
 
         var type = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(type, Is.Not.Null);
-        Assert.That(type.Metadata, Is.EqualTo(expected));
+        Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -550,10 +576,10 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new FunctionTypeMetadata("(i32, i32) => i32");
+        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
         var memberAccess = tree.Find<MemberAccessExpressionNode>();
         Assert.That(memberAccess, Is.Not.Null);
-        Assert.That(memberAccess.ReturnTypeMetadata, Is.EqualTo(expected));
+        Assert.That(memberAccess.ReturnTypeMetadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -594,7 +620,7 @@ public class TypeCheckerTests
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = typeProvider.GetType("Point");
         Assert.That(thisNode, Is.Not.Null);
-        Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(pointType));
+        Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -615,7 +641,7 @@ public class TypeCheckerTests
 
         var thisNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
         Assert.That(thisNode, Is.Not.Null);
-        Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -662,11 +688,11 @@ public class TypeCheckerTests
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = typeProvider.GetType("Point");
         Assert.That(aNode, Is.Not.Null);
-        Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType));
+        Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
 
         var xNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "x");
         Assert.That(xNode, Is.Not.Null);
-        Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -718,12 +744,12 @@ public class TypeCheckerTests
         var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
         var pointType = typeProvider.GetType("Test");
         Assert.That(aNode, Is.Not.Null);
-        Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType));
+        Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
 
         var xNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "f");
         var functionType = typeProvider.GetType("F");
         Assert.That(xNode, Is.Not.Null);
-        Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(functionType));
+        Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(functionType).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -818,19 +844,20 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var du = new DiscriminatedUnionMetadata("{ } | i32 | () => void");
-        du.AddType(new InterfaceMetadata("{ }", [], []));
-        du.AddType(TypeMetadata.I32);
-        du.AddType(new FunctionTypeMetadata("() => void"));
+        var du = new DiscriminatedUnionMetadata([
+            new InterfaceMetadata(),
+            TypeMetadata.I32,
+            new FunctionTypeMetadata([], TypeMetadata.Void)
+        ]);
         var alias = new TypeAliasMetadata("DU", du);
 
         var aliasNode = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(aliasNode, Is.Not.Null);
-        Assert.That(aliasNode.Metadata, Is.EqualTo(alias));
+        Assert.That(aliasNode.Metadata, Is.EqualTo(alias).Using(new MetadataComparer()));
 
         var duNode = tree.Find<DiscriminatedUnionNode>();
         Assert.That(duNode, Is.Not.Null);
-        Assert.That(duNode.Metadata, Is.EqualTo(du));
+        Assert.That(duNode.Metadata, Is.EqualTo(du).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -894,13 +921,11 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new TupleMetadata("(i32, i32)");
-        expected.AddType(TypeMetadata.I32);
-        expected.AddType(TypeMetadata.I32);
+        var expected = new TupleMetadata([TypeMetadata.I32, TypeMetadata.I32]);
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var actual = typeProvider.GetType("(i32, i32)");
-        Assert.That(actual, Is.EqualTo(expected));
+        Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -918,11 +943,11 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new TypeArrayMetadata("i32[]") { ItemMetadata = TypeMetadata.I32 };
+        var expected = new TypeArrayMetadata(TypeMetadata.I32);
 
         var newArray = tree.Find<NewArrayExpressionNode>();
         Assert.That(newArray, Is.Not.Null);
-        Assert.That(newArray.ReturnTypeMetadata, Is.EqualTo(expected));
+        Assert.That(newArray.ReturnTypeMetadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -940,7 +965,9 @@ public class TypeCheckerTests
         var property = tree.Find<PropertyDeclarationNode>();
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Metadata, Is.Not.Null);
-        Assert.That(property.Metadata.Type, Is.EqualTo(new TypeArgumentMetadata("T")));
+        Assert.That(
+            property.Metadata.Type,
+            Is.EqualTo(new TypeArgumentMetadata("T")).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -960,11 +987,8 @@ public class TypeCheckerTests
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Metadata, Is.Not.Null);
 
-        var typeArrayMetadata = new TypeArrayMetadata("T[]")
-        {
-            ItemMetadata = new TypeArgumentMetadata("T")
-        };
-        Assert.That(property.Metadata.Type, Is.EqualTo(typeArrayMetadata));
+        var typeArrayMetadata = new TypeArrayMetadata(new TypeArgumentMetadata("T"));
+        Assert.That(property.Metadata.Type, Is.EqualTo(typeArrayMetadata).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -986,7 +1010,7 @@ public class TypeCheckerTests
         var genericTypeNode = tree.Find<GenericTypeNode>();
         Assert.That(closedType, Is.Not.Null);
         Assert.That(genericTypeNode, Is.Not.Null);
-        Assert.That(genericTypeNode.Metadata, Is.EqualTo(closedType));
+        Assert.That(genericTypeNode.Metadata, Is.EqualTo(closedType).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -1043,7 +1067,9 @@ public class TypeCheckerTests
         var returnStmt = tree.Find<ReturnStatementNode>();
         Assert.That(returnStmt, Is.Not.Null);
         Assert.That(returnStmt.Expression, Is.Not.Null);
-        Assert.That(returnStmt.Expression.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32));
+        Assert.That(
+            returnStmt.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
 
     [Test]
