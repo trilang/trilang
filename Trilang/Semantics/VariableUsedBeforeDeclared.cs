@@ -3,7 +3,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Semantics;
 
-public class VariableUsedBeforeDeclared : Visitor
+internal class VariableUsedBeforeDeclared : Visitor
 {
     private readonly Stack<HashSet<string>> scopes;
 

@@ -4,7 +4,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Semantics;
 
-public class NotImplementedInterface : Visitor
+internal class NotImplementedInterface : Visitor
 {
     protected override void VisitEnter(TypeDeclarationNode node)
     {

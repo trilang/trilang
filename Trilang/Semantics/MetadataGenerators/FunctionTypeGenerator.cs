@@ -4,7 +4,7 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics.MetadataGenerators;
 
-public class FunctionTypeGenerator
+internal class FunctionTypeGenerator
 {
     private record Item(FunctionTypeMetadata Metadata, FunctionTypeNode Node);
 

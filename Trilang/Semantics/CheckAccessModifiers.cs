@@ -4,7 +4,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Semantics;
 
-public class CheckAccessModifiers : Visitor
+internal class CheckAccessModifiers : Visitor
 {
     protected override void VisitEnter(NewObjectExpressionNode node)
     {

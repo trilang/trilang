@@ -2,7 +2,7 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.MetadataGenerators;
 
-public class TypeArgumentMap
+internal class TypeArgumentMap
 {
     private readonly ITypeMetadataProvider typeProvider;
     private readonly Dictionary<string, ITypeMetadata> map;

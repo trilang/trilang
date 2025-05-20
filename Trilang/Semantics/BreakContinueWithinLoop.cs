@@ -3,7 +3,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Semantics;
 
-public class BreakContinueWithinLoop : Visitor
+internal class BreakContinueWithinLoop : Visitor
 {
     protected override void VisitEnter(BreakNode node)
     {
