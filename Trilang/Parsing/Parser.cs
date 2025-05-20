@@ -15,6 +15,7 @@ public class Parser
         while (!context.Reader.HasEnded)
         {
             var declaration = TryParseFunction(context) ??
+                              TryParseExternalFunction(context) ??
                               TryParseTypeAlias(context) ??
                               TryParseTypeDeclarationNode(context) as IDeclarationNode ??
                               throw new ParseException("Expected a type or a function.");
@@ -45,6 +46,31 @@ public class Parser
                     throw new ParseException("Expected a function block.");
 
         return FunctionDeclarationNode.Create(name, parameters, returnType, block);
+    }
+
+    private FunctionDeclarationNode? TryParseExternalFunction(ParserContext context)
+    {
+        if (!context.Reader.Check(TokenKind.External))
+            return null;
+
+        if (!context.Reader.Check(TokenKind.Function))
+            throw new ParseException("Expected a function.");
+
+        var name = TryParseId(context) ??
+                   throw new ParseException("Expected a function name.");
+
+        var parameters = ParseFunctionParameters(context);
+
+        if (!context.Reader.Check(TokenKind.Colon))
+            throw new ParseException("Expected a colon.");
+
+        var returnType = TryParseDiscriminatedUnion(context) ??
+                         throw new ParseException("Expected a function return type.");
+
+        if (!context.Reader.Check(TokenKind.SemiColon))
+            throw new ParseException("Expected a semicolon.");
+
+        return FunctionDeclarationNode.CreateExternal(name, parameters, returnType);
     }
 
     private List<ParameterNode> ParseFunctionParameters(ParserContext context)

@@ -3,7 +3,7 @@ using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Parsing;
 
-public class ParserFunctionTests
+public class ParseFunctionTests
 {
     [Test]
     public void ParseMissingIdFunctionTest()
@@ -139,6 +139,22 @@ public class ParserFunctionTests
                 [new ParameterNode("x", new ArrayTypeNode(new TypeNode("i32")))],
                 new TypeNode("void"),
                 new BlockStatementNode())
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseExternalFunctionTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("external function test(x: i32): void;");
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.CreateExternal(
+                "test",
+                [new ParameterNode("x", new TypeNode("i32"))],
+                new TypeNode("void")
+            )
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
