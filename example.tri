@@ -13,8 +13,8 @@ type T2 = {
 
 // class
 public type Point {
-    public x: i32;
-    public y: i32;
+    x: i32 { private set; }
+    y: i32 { private set; }
 
     public constructor(x: i32, y: i32) {
         this.x = x;
