@@ -1,14 +1,19 @@
+using System.Text;
+
 namespace Trilang.Metadata;
 
 public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
 {
-    public TypeAliasMetadata(string name) : this(name, null)
+    private readonly List<ITypeMetadata> genericArguments;
+
+    public TypeAliasMetadata(string name) : this(name, [], null)
     {
     }
 
-    public TypeAliasMetadata(string name, ITypeMetadata? type)
+    public TypeAliasMetadata(string name, IEnumerable<ITypeMetadata> genericArguments, ITypeMetadata? type)
     {
         Name = name;
+        this.genericArguments = [..genericArguments];
         Type = type;
     }
 
@@ -26,7 +31,8 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return Name == other.Name &&
+               genericArguments.SequenceEqual(genericArguments);
     }
 
     public override bool Equals(object? obj)
@@ -47,9 +53,35 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
         => HashCode.Combine(Name);
 
     public override string ToString()
-        => Name;
+    {
+        if (genericArguments.Count == 0)
+            return Name;
+
+        var sb = new StringBuilder();
+        sb.Append(Name);
+        sb.Append('<');
+
+        for (var i = 0; i < genericArguments.Count; i++)
+        {
+            var genericArgument = genericArguments[i];
+            if (genericArgument is not TypeArgumentMetadata)
+                sb.Append(genericArgument);
+
+            if (i < genericArguments.Count - 1)
+                sb.Append(',');
+        }
+
+        sb.Append('>');
+
+        return sb.ToString();
+    }
+
+    public void AddGenericArgument(ITypeMetadata genericArgument)
+        => genericArguments.Add(genericArgument);
 
     public string Name { get; }
+
+    public IReadOnlyCollection<ITypeMetadata> GenericArguments => genericArguments;
 
     public ITypeMetadata? Type { get; set; }
 }

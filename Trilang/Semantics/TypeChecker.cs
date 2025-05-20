@@ -229,8 +229,11 @@ internal class TypeChecker : IVisitor
             typeArgument.Accept(this);
 
         var typeProvider = node.SymbolTable!.TypeProvider;
-        node.Metadata = typeProvider.GetType(node.Name) ??
-                        throw new SemanticAnalysisException($"Unknown generic type '{node.Name}'");
+        var metadata = typeProvider.GetType(node.Name) ??
+                       typeProvider.GetType(node.GetOpenGenericName()) ??
+                       throw new SemanticAnalysisException($"Unknown generic type '{node.Name}'");
+
+        node.Metadata = metadata;
     }
 
     public void Visit(IfStatementNode node)
@@ -525,7 +528,7 @@ internal class TypeChecker : IVisitor
         node.Type.Accept(this);
 
         var typeProvider = node.SymbolTable!.TypeProvider;
-        node.Metadata = typeProvider.GetType(node.Name) ??
+        node.Metadata = typeProvider.GetType(node.FullName) ??
                         throw new SemanticAnalysisException($"Unknown type '{node.Name}'");
     }
 

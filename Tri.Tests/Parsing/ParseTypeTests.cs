@@ -599,6 +599,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "MyType",
+                [],
                 new TypeNode("i32")
             )
         ]);
@@ -640,6 +641,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "F",
+                [],
                 new FunctionTypeNode(
                     [],
                     new TypeNode("void")
@@ -660,6 +662,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "F",
+                [],
                 new FunctionTypeNode(
                     [new TypeNode("i32"), new TypeNode("i32")],
                     new TypeNode("i32")
@@ -827,6 +830,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 new InterfaceNode(
                     [
                         new InterfacePropertyNode("x", new TypeNode("i32"), null, null),
@@ -863,6 +867,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 new InterfaceNode(
                     [
                         new InterfacePropertyNode("x", new TypeNode("i32"), AccessModifier.Public, AccessModifier.Public),
@@ -1104,6 +1109,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new DiscriminatedUnionNode([
                     new InterfaceNode([], []),
                     new TypeNode("i32"),
@@ -1150,6 +1156,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new TupleTypeNode([new TypeNode("i32"), new TypeNode("i32")])
             )
         ]);
@@ -1166,6 +1173,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new TupleTypeNode([
                     new TupleTypeNode([new TypeNode("i32"), new TypeNode("i32")]),
                     new TypeNode("i32")
@@ -1185,6 +1193,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new TupleTypeNode([
                     new DiscriminatedUnionNode([new TypeNode("bool"), new TypeNode("i32")]),
                     new FunctionTypeNode([], new TypeNode("void"))
@@ -1245,6 +1254,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new DiscriminatedUnionNode([
                     new TypeNode("i32"),
                     new TupleTypeNode([new TypeNode("bool"), new TypeNode("f64")])
@@ -1264,6 +1274,7 @@ public class ParseTypeTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new TupleTypeNode([
                     new TypeNode("bool"),
                     new DiscriminatedUnionNode([new TypeNode("i32"), new TypeNode("f64")])

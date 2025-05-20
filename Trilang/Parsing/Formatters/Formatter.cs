@@ -556,6 +556,7 @@ public partial class Formatter : IFormatter
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" type ");
         writer.Write(node.Name);
+        WriteGenericArguments(node);
         writer.Write(" = ");
         node.Type.Accept(this);
 

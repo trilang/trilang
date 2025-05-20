@@ -370,7 +370,7 @@ public class SymbolFinderTests
     [Test]
     public void TypeAliasTest()
     {
-        var type = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", new TypeNode("i32"));
+        var type = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", [], new TypeNode("i32"));
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
@@ -384,8 +384,8 @@ public class SymbolFinderTests
     [Test]
     public void TypeAliasDuplicateTest()
     {
-        var type1 = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", new TypeNode("i32"));
-        var type2 = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", new TypeNode("i32"));
+        var type1 = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", [], new TypeNode("i32"));
+        var type2 = new TypeAliasDeclarationNode(AccessModifier.Public, "MyInt", [], new TypeNode("i32"));
         var tree = new SyntaxTree([type1, type2]);
 
         var semantic = new SemanticAnalysis();
@@ -400,7 +400,7 @@ public class SymbolFinderTests
     public void FunctionTypeAliasTest()
     {
         var type = new FunctionTypeNode([new TypeNode("i32"), new TypeNode("i32")], new TypeNode("i32"));
-        var aliasType = new TypeAliasDeclarationNode(AccessModifier.Public, "F", type);
+        var aliasType = new TypeAliasDeclarationNode(AccessModifier.Public, "F", [], type);
         var tree = new SyntaxTree([aliasType]);
 
         var semantic = new SemanticAnalysis();
@@ -473,7 +473,7 @@ public class SymbolFinderTests
                 new InterfaceMethodNode("distance", [new TypeNode("Point")], new TypeNode("f32")),
             ]
         );
-        var alias = new TypeAliasDeclarationNode(AccessModifier.Public, "Point", @interface);
+        var alias = new TypeAliasDeclarationNode(AccessModifier.Public, "Point", [], @interface);
         var tree = new SyntaxTree([alias]);
 
         var semantic = new SemanticAnalysis();
@@ -501,7 +501,7 @@ public class SymbolFinderTests
             ],
             []
         );
-        var alias = new TypeAliasDeclarationNode(AccessModifier.Public, "Point", @interface);
+        var alias = new TypeAliasDeclarationNode(AccessModifier.Public, "Point", [], @interface);
         var tree = new SyntaxTree([alias]);
 
         var semantic = new SemanticAnalysis();
@@ -524,6 +524,7 @@ public class SymbolFinderTests
         var alias = new TypeAliasDeclarationNode(
             AccessModifier.Public,
             "T",
+            [],
             discriminatedUnionNode);
         var tree = new SyntaxTree([alias]);
 

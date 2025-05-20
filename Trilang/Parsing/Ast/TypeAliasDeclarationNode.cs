@@ -1,17 +1,33 @@
 using Trilang.Metadata;
+using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeAliasDeclarationNode : IDeclarationNode, IEquatable<TypeAliasDeclarationNode>
+public class TypeAliasDeclarationNode :
+    IDeclarationNode,
+    IHasGenericArguments,
+    IEquatable<TypeAliasDeclarationNode>
 {
-    public TypeAliasDeclarationNode(AccessModifier accessModifier, string name, IInlineTypeNode type)
+    public TypeAliasDeclarationNode(
+        AccessModifier accessModifier,
+        string name,
+        IReadOnlyList<TypeNode> genericArguments,
+        IInlineTypeNode type)
     {
         AccessModifier = accessModifier;
         Name = name;
+        GenericArguments = genericArguments;
         Type = type;
 
+        foreach (var genericArgument in genericArguments)
+            genericArgument.Parent = this;
+
         Type.Parent = this;
+
+        FullName = genericArguments.Count > 0
+            ? $"{Name}<{new string(',', genericArguments.Count - 1)}>"
+            : Name;
     }
 
     public static bool operator ==(TypeAliasDeclarationNode? left, TypeAliasDeclarationNode? right)
@@ -30,6 +46,7 @@ public class TypeAliasDeclarationNode : IDeclarationNode, IEquatable<TypeAliasDe
 
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
+               GenericArguments.SequenceEqual(other.GenericArguments) &&
                Type.Equals(other.Type);
     }
 
@@ -50,6 +67,14 @@ public class TypeAliasDeclarationNode : IDeclarationNode, IEquatable<TypeAliasDe
     public override int GetHashCode()
         => HashCode.Combine((int)AccessModifier, Name, Type);
 
+    public override string ToString()
+    {
+        var formatter = new Formatter();
+        Accept(formatter);
+
+        return formatter.ToString();
+    }
+
     public void Accept(IVisitor visitor)
         => visitor.Visit(this);
 
@@ -63,6 +88,10 @@ public class TypeAliasDeclarationNode : IDeclarationNode, IEquatable<TypeAliasDe
     public AccessModifier AccessModifier { get; }
 
     public string Name { get; }
+
+    public string FullName { get; }
+
+    public IReadOnlyList<TypeNode> GenericArguments { get; }
 
     public IInlineTypeNode Type { get; }
 

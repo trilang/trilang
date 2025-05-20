@@ -6,6 +6,8 @@ public interface ITypeAliasBuilder
 {
     ITypeAliasBuilder AccessModifier(AccessModifier modifier);
 
+    ITypeAliasBuilder DefineGenericArgument(string name);
+
     ITypeAliasBuilder Type(string name);
 
     ITypeAliasBuilder Array(string name);

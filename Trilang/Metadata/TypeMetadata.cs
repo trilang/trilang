@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Trilang.Metadata;
 
 public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
@@ -18,7 +20,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public static readonly TypeMetadata Bool = new TypeMetadata("bool");
     public static readonly TypeMetadata String = new TypeMetadata("string");
 
-    private readonly HashSet<ITypeMetadata> genericArguments;
+    private readonly List<ITypeMetadata> genericArguments;
     private readonly HashSet<InterfaceMetadata> interfaces;
     private readonly HashSet<PropertyMetadata> properties;
     private readonly HashSet<ConstructorMetadata> constructors;
@@ -37,11 +39,11 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         IEnumerable<MethodMetadata> methods)
     {
         Name = name;
-        this.genericArguments = new HashSet<ITypeMetadata>(genericArguments);
-        this.interfaces = new HashSet<InterfaceMetadata>(interfaces);
-        this.properties = new HashSet<PropertyMetadata>(properties);
-        this.constructors = new HashSet<ConstructorMetadata>(constructors);
-        this.methods = new HashSet<MethodMetadata>(methods);
+        this.genericArguments = [..genericArguments];
+        this.interfaces = [..interfaces];
+        this.properties = [..properties];
+        this.constructors = [..constructors];
+        this.methods = [..methods];
     }
 
     public static bool operator ==(TypeMetadata? left, TypeMetadata? right)
@@ -58,7 +60,8 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return Name == other.Name &&
+               genericArguments.SequenceEqual(other.genericArguments);
     }
 
     public override bool Equals(object? obj)
@@ -79,7 +82,28 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         => HashCode.Combine(Name);
 
     public override string ToString()
-        => Name;
+    {
+        if (genericArguments.Count == 0)
+            return Name;
+
+        var sb = new StringBuilder();
+        sb.Append(Name);
+        sb.Append('<');
+
+        for (var i = 0; i < genericArguments.Count; i++)
+        {
+            var genericArgument = genericArguments[i];
+            if (genericArgument is not TypeArgumentMetadata)
+                sb.Append(genericArgument);
+
+            if (i < genericArguments.Count - 1)
+                sb.Append(',');
+        }
+
+        sb.Append('>');
+
+        return sb.ToString();
+    }
 
     public void AddGenericArgument(ITypeMetadata typeArgumentMetadata)
         => genericArguments.Add(typeArgumentMetadata);

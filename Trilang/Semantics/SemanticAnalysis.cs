@@ -20,5 +20,6 @@ public class SemanticAnalysis
         tree.Accept(new TypeChecker());
         tree.Accept(new NotImplementedInterface());
         tree.Accept(new CheckAccessModifiers());
+        tree.Accept(new RecursiveTypeAlias());
     }
 }

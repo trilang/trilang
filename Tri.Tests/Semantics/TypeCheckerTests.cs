@@ -142,7 +142,7 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree);
 
-        var expected = new TypeAliasMetadata("MyInt", TypeMetadata.I32);
+        var expected = new TypeAliasMetadata("MyInt", [], TypeMetadata.I32);
         var node = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(node, Is.Not.Null);
         Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -542,7 +542,7 @@ public class TypeCheckerTests
         semantic.Analyze(tree);
 
         var interfaceType = new InterfaceMetadata();
-        var expected = new TypeAliasMetadata("Point", interfaceType);
+        var expected = new TypeAliasMetadata("Point", [], interfaceType);
 
         interfaceType.AddProperty(
             new InterfacePropertyMetadata(
@@ -861,7 +861,7 @@ public class TypeCheckerTests
             TypeMetadata.I32,
             new FunctionTypeMetadata([], TypeMetadata.Void)
         ]);
-        var alias = new TypeAliasMetadata("DU", du);
+        var alias = new TypeAliasMetadata("DU", [], du);
 
         var aliasNode = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(aliasNode, Is.Not.Null);

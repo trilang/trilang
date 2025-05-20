@@ -33,43 +33,37 @@ public class TypeArgumentMap
 
     public ITypeMetadata Map(ITypeMetadata type)
     {
-        if (HasTypeArgument(type))
+        if (!HasTypeArgument(type))
+            return type;
+
+        return type switch
         {
-            var mappedType = type switch
-            {
-                DiscriminatedUnionMetadata discriminatedUnionMetadata
-                    => Map(discriminatedUnionMetadata),
+            DiscriminatedUnionMetadata discriminatedUnionMetadata
+                => Map(discriminatedUnionMetadata),
 
-                FunctionTypeMetadata functionTypeMetadata
-                    => Map(functionTypeMetadata),
+            FunctionTypeMetadata functionTypeMetadata
+                => Map(functionTypeMetadata),
 
-                InterfaceMetadata interfaceMetadata
-                    => Map(interfaceMetadata),
+            InterfaceMetadata interfaceMetadata
+                => Map(interfaceMetadata),
 
-                TupleMetadata tupleMetadata
-                    => Map(tupleMetadata),
+            TupleMetadata tupleMetadata
+                => Map(tupleMetadata),
 
-                // TODO: implement when generic aliases are supported
-                TypeAliasMetadata typeAliasMetadata
-                    => throw new NotImplementedException(),
+            TypeAliasMetadata typeAliasMetadata
+                => Map(typeAliasMetadata),
 
-                TypeArgumentMetadata typeArgumentMetadata
-                    => Map(typeArgumentMetadata),
+            TypeArgumentMetadata typeArgumentMetadata
+                => Map(typeArgumentMetadata),
 
-                TypeArrayMetadata typeArrayMetadata
-                    => Map(typeArrayMetadata),
+            TypeArrayMetadata typeArrayMetadata
+                => Map(typeArrayMetadata),
 
-                // TODO: implement when generic methods are supported
-                TypeMetadata typeMetadata
-                    => throw new NotImplementedException(),
+            TypeMetadata typeMetadata
+                => Map(typeMetadata),
 
-                _ => throw new ArgumentOutOfRangeException(nameof(type))
-            };
-
-            return mappedType;
-        }
-
-        return type;
+            _ => throw new ArgumentOutOfRangeException(nameof(type))
+        };
     }
 
     private DiscriminatedUnionMetadata Map(DiscriminatedUnionMetadata discriminatedUnion)
@@ -123,6 +117,9 @@ public class TypeArgumentMap
         return tupleMetadata;
     }
 
+    private ITypeMetadata Map(TypeAliasMetadata type)
+        => new TypeAliasMetadata(type.Name, type.GenericArguments.Select(Map), Map(type.Type!));
+
     private ITypeMetadata Map(TypeArgumentMetadata type)
         => map.GetValueOrDefault(type.Name, type);
 
@@ -133,6 +130,45 @@ public class TypeArgumentMap
         typeProvider.DefineType(typeArrayMetadata.ToString(), typeArrayMetadata);
 
         return typeArrayMetadata;
+    }
+
+    private TypeMetadata Map(TypeMetadata type)
+    {
+        var closed = new TypeMetadata(
+            type.Name,
+            type.GenericArguments.Select(Map).ToList(),
+            type.Interfaces.Select(Map).ToList(),
+            [],
+            [],
+            []);
+
+        foreach (var property in type.Properties)
+            closed.AddProperty(
+                new PropertyMetadata(
+                    closed,
+                    property.Name,
+                    Map(property.Type),
+                    property.GetterModifier,
+                    property.SetterModifier));
+
+        foreach (var constructor in type.Constructors)
+            closed.AddConstructor(
+                new ConstructorMetadata(
+                    closed,
+                    constructor.AccessModifier,
+                    constructor.ParameterTypes.Select(Map).ToList()));
+
+        foreach (var method in type.Methods)
+            closed.AddMethod(
+                new MethodMetadata(
+                    closed,
+                    method.AccessModifier,
+                    method.Name,
+                    Map(method.TypeMetadata)));
+
+        typeProvider.DefineType(closed.ToString(), closed);
+
+        return closed;
     }
 
     private bool HasTypeArgument(ITypeMetadata type)
@@ -162,7 +198,8 @@ public class TypeArgumentMap
                 => HasTypeArgument(typeArrayMetadata.ItemMetadata!),
 
             TypeMetadata typeMetadata
-                => typeMetadata.Interfaces.Any(HasTypeArgument) ||
+                => typeMetadata.GenericArguments.Any(HasTypeArgument) ||
+                   typeMetadata.Interfaces.Any(HasTypeArgument) ||
                    typeMetadata.Properties.Select(x => x.Type).Any(HasTypeArgument) ||
                    typeMetadata.Constructors.SelectMany(x => x.ParameterTypes).Any(HasTypeArgument) ||
                    typeMetadata.Methods.Select(x => x.TypeMetadata).Any(HasTypeArgument),

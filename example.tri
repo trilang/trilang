@@ -8,7 +8,7 @@ type T2 = {
     x: i32;
     y: i32;
 
-    distance(other: T2): f64;
+    distance(T2): f64;
 }
 
 // class

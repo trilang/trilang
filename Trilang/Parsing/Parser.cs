@@ -130,6 +130,8 @@ public class Parser
             var name = c.Parser.TryParseId(c) ??
                        throw new ParseException("Expected a type alias name.");
 
+            var genericArguments = c.Parser.TryParseGenericTypeArguments(c);
+
             if (!c.Reader.Check(TokenKind.Equal))
                 return null;
 
@@ -139,7 +141,7 @@ public class Parser
             if (type is not InterfaceNode && !c.Reader.Check(TokenKind.SemiColon))
                 throw new ParseException("Expected a semicolon.");
 
-            return new TypeAliasDeclarationNode(accessModifier.Value, name, type);
+            return new TypeAliasDeclarationNode(accessModifier.Value, name, genericArguments, type);
         });
 
     private TypeDeclarationNode? TryParseTypeDeclarationNode(ParserContext context)

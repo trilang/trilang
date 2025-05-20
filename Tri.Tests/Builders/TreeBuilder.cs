@@ -674,18 +674,27 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
     private sealed class TypeAliasBuilder : ITypeAliasBuilder
     {
         private readonly string typeName;
+        private readonly List<TypeNode> genericArguments;
         private AccessModifier accessModifier;
         private IInlineTypeNode? aliasedType;
 
         public TypeAliasBuilder(string typeName)
         {
             this.typeName = typeName;
+            this.genericArguments = [];
             accessModifier = Trilang.Parsing.Ast.AccessModifier.Public;
         }
 
         public ITypeAliasBuilder AccessModifier(AccessModifier modifier)
         {
             accessModifier = modifier;
+
+            return this;
+        }
+
+        public ITypeAliasBuilder DefineGenericArgument(string name)
+        {
+            genericArguments.Add(new TypeNode(name));
 
             return this;
         }
@@ -758,6 +767,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             => new TypeAliasDeclarationNode(
                 accessModifier,
                 typeName,
+                genericArguments,
                 aliasedType ?? throw new Exception());
     }
 

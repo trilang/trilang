@@ -1306,7 +1306,7 @@ public class FormatterTests
     public void FormatTypeAliasTest()
     {
         var tree = new SyntaxTree([
-            new TypeAliasDeclarationNode(AccessModifier.Public, "MyType", new TypeNode("i32"))
+            new TypeAliasDeclarationNode(AccessModifier.Public, "MyType", [], new TypeNode("i32"))
         ]);
         var formatted = tree.ToString();
         const string expected = "public type MyType = i32;";
@@ -1321,6 +1321,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "MyType",
+                [],
                 new FunctionTypeNode(
                     [new TypeNode("i32"), new TypeNode("i32")],
                     new TypeNode("i32")
@@ -1424,6 +1425,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 new InterfaceNode(
                     [
                         new InterfacePropertyNode("x", new TypeNode("i32"), null, null),
@@ -1452,6 +1454,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "Point",
+                [],
                 new InterfaceNode(
                     [
                         new InterfacePropertyNode("x", new TypeNode("i32"), AccessModifier.Public, AccessModifier.Public),
@@ -1635,6 +1638,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "Numbers",
+                [],
                 new DiscriminatedUnionNode([
                     new TypeNode("i8"),
                     new TypeNode("i16"),
@@ -1655,6 +1659,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "F",
+                [],
                 new DiscriminatedUnionNode([
                     new FunctionTypeNode([], new TypeNode("void")),
                     new FunctionTypeNode([new TypeNode("i32"), new TypeNode("i32")], new TypeNode("i32"))
@@ -1673,6 +1678,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "I",
+                [],
                 new DiscriminatedUnionNode([
                     new InterfaceNode([], []),
                     new InterfaceNode(
@@ -1697,6 +1703,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new DiscriminatedUnionNode([
                     new InterfaceNode([], []),
                     new TypeNode("i32"),
@@ -1740,6 +1747,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new TupleTypeNode([
                     new TypeNode("bool"),
                     new TypeNode("i32"),
@@ -1758,6 +1766,7 @@ public class FormatterTests
             new TypeAliasDeclarationNode(
                 AccessModifier.Public,
                 "T",
+                [],
                 new TupleTypeNode([
                     new TupleTypeNode([new TypeNode("bool"), new TypeNode("i8")]),
                     new TypeNode("i32"),
@@ -1861,6 +1870,23 @@ public class FormatterTests
             .Build();
         var formatted = tree.ToString();
         const string expected = "public type Test = List<T1, T2>;";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatGenericTypeAliasTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineAliasType("T", a => a
+                .DefineGenericArgument("T1")
+                .DefineGenericArgument("T2")
+                .DiscriminatedUnion(du => du
+                    .AddCase(c => c.Type("T1"))
+                    .AddCase(c => c.Type("T2"))))
+            .Build();
+        var formatted = tree.ToString();
+        const string expected = "public type T<T1, T2> = T1 | T2;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }

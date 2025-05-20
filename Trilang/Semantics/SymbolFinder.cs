@@ -345,12 +345,18 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void Visit(TypeAliasDeclarationNode node, SymbolFinderContext context)
     {
-        node.SymbolTable = context.SymbolTable;
-
         if (!context.SymbolTable.TryAddType(TypeSymbol.Alias(node)))
             throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
 
-        node.Type.Accept(this, context);
+        context.Scoped(c =>
+        {
+            node.SymbolTable = c.SymbolTable;
+
+            foreach (var genericArgument in node.GenericArguments)
+                genericArgument.Accept(this, c);
+
+            node.Type.Accept(this, c);
+        });
     }
 
     public void Visit(TypeDeclarationNode node, SymbolFinderContext context)

@@ -24,7 +24,7 @@ internal class TypeGenerator
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a TypeDeclarationNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
-            var metadata = new TypeMetadata(symbol.Name);
+            var metadata = new TypeMetadata(typeDeclarationNode.Name);
 
             foreach (var genericArgument in typeDeclarationNode.GenericArguments)
             {
