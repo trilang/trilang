@@ -13,6 +13,14 @@ internal class ProgramHeader : ISegment
         ulong memorySize,
         ulong alignment)
     {
+        // TODO: support other page sizes
+        const ulong pageSize = 0x1000;
+        if (virtualAddress % pageSize != offset % pageSize)
+            throw new ArgumentException("Virtual address must be aligned to page size");
+
+        if (alignment != 0 && virtualAddress % alignment != offset % alignment)
+            throw new ArgumentException("Virtual address must be aligned to alignment");
+
         SegmentName = segmentName;
         FileOffset = 0;
         FileSize = ElfHeader.PhSize;
@@ -44,7 +52,8 @@ internal class ProgramHeader : ISegment
             memorySize: phFileSize,
             alignment: alignment);
 
-    public static ProgramHeader CreateProgramHeaderCode(string segmentName,
+    public static ProgramHeader CreateProgramHeaderCode(
+        string segmentName,
         ulong offset,
         ulong address,
         ulong phFileSize,
@@ -53,6 +62,23 @@ internal class ProgramHeader : ISegment
             segmentName: segmentName,
             type: ProgramHeaderType.Load,
             flags: ProgramHeaderFlags.Read | ProgramHeaderFlags.Execute,
+            offset: offset,
+            virtualAddress: address,
+            physicalAddress: address,
+            phFileSize: phFileSize,
+            memorySize: phFileSize,
+            alignment: alignment);
+
+    public static ProgramHeader CreateProgramHeaderData(
+        string segmentName,
+        ulong offset,
+        ulong address,
+        ulong phFileSize,
+        ulong alignment)
+        => new ProgramHeader(
+            segmentName: segmentName,
+            type: ProgramHeaderType.Load,
+            flags: ProgramHeaderFlags.Read | ProgramHeaderFlags.Write,
             offset: offset,
             virtualAddress: address,
             physicalAddress: address,

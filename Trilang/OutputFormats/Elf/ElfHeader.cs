@@ -27,7 +27,6 @@ internal class ElfHeader : ISegment
         IdentVersion = 0x01;
         OsAbi = 0x00;
         AbiVersion = 0x00;
-        Padding = new byte[7];
         FileType = ElfFileType.Executable;
         InstructionSet = instructionSet;
         Version = 0x01;
@@ -51,7 +50,7 @@ internal class ElfHeader : ISegment
         stream.Write(IdentVersion);
         stream.Write(OsAbi);
         stream.Write(AbiVersion);
-        stream.Write(Padding);
+        stream.Write(new byte[7]);
         stream.Write((ushort)FileType);
         stream.Write((ushort)InstructionSet);
         stream.Write(Version);
@@ -84,8 +83,6 @@ internal class ElfHeader : ISegment
     public byte OsAbi { get; }
 
     public byte AbiVersion { get; }
-
-    public byte[] Padding { get; }
 
     public ElfFileType FileType { get; }
 

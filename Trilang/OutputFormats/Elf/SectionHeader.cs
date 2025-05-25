@@ -15,6 +15,9 @@ internal class SectionHeader : ISegment
         ulong addressAlignment,
         ulong entrySize)
     {
+        if (addressAlignment != 0 && address % addressAlignment != 0)
+            throw new ArgumentException("Address must be aligned to address alignment");
+
         SegmentName = segmentName;
         FileOffset = 0;
         FileSize = ElfHeader.ShSize;
@@ -65,12 +68,31 @@ internal class SectionHeader : ISegment
             addressAlignment: alignment,
             entrySize: 0);
 
+    public static SectionHeader CreateData(
+        string segmentName,
+        uint nameOffset,
+        ulong address,
+        ulong offset,
+        ulong size,
+        ulong alignment)
+        => new SectionHeader(
+            segmentName: segmentName,
+            nameOffset: nameOffset,
+            type: SectionHeaderType.ProgramData,
+            flags: SectionHeaderFlags.Alloc | SectionHeaderFlags.Writable,
+            address: address,
+            offset: offset,
+            size: size,
+            link: 0,
+            info: 0,
+            addressAlignment: alignment,
+            entrySize: 0);
+
     public static SectionHeader CreateShStrTab(
         string segmentName,
         uint nameOffset,
         ulong offset,
-        ulong size,
-        ulong alignment)
+        ulong size)
         => new SectionHeader(
             segmentName,
             nameOffset,
@@ -81,7 +103,7 @@ internal class SectionHeader : ISegment
             size,
             0,
             0,
-            alignment,
+            1,
             0);
 
     public void WriteTo(BinaryStream stream)
