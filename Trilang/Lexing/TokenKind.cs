@@ -75,4 +75,5 @@ public enum TokenKind
     Null,
     Get,
     Set,
+    Static,
 }

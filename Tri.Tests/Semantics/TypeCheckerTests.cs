@@ -119,11 +119,13 @@ public class TypeCheckerTests
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Public,
+            false,
             "toString",
             new FunctionTypeMetadata([], TypeMetadata.Void)));
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Public,
+            false,
             "distance",
             new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
 
@@ -1112,5 +1114,38 @@ public class TypeCheckerTests
         Assert.That(
             () => semantic.Analyze(tree),
             Throws.Nothing);
+    }
+
+    [Test]
+    public void SetMetadataForStaticClassTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", t => t
+                .DefineMethod("test", m => m.Static()))
+            .DefineFunction("main", f => f
+                .Body(body => body
+                    .Expression(e => e
+                        .MemberAccess("Test")
+                        .MemberAccess("test")
+                        .Call())))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType("Test");
+        Assert.That(type, Is.Not.Null);
+
+        var functionType = typeProvider.GetType("() => void");
+        Assert.That(functionType, Is.Not.Null);
+
+        var staticTypeMember = tree.Find<MemberAccessExpressionNode>(x => x.Name == "Test");
+        Assert.That(staticTypeMember, Is.Not.Null);
+        Assert.That(staticTypeMember.ReturnTypeMetadata, Is.EqualTo(type));
+
+        var member = tree.Find<MemberAccessExpressionNode>(x => x.Name == "test");
+        Assert.That(member, Is.Not.Null);
+        Assert.That(member.ReturnTypeMetadata, Is.EqualTo(functionType));
     }
 }

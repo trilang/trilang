@@ -1,6 +1,7 @@
 using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
+using Trilang.Symbols;
 using static Trilang.Parsing.Ast.BinaryExpressionKind;
 using static Trilang.Parsing.Ast.UnaryExpressionKind;
 using static Trilang.Metadata.TypeMetadata;
@@ -299,10 +300,26 @@ internal class TypeChecker : IVisitor
     {
         if (node.Member is null)
         {
-            var symbol = node.SymbolTable?.GetId(node.Name) ??
-                         throw new SemanticAnalysisException($"Symbol '{node.Name}' not found in current scope");
+            VisitFirstMemberAccess(node);
+            return;
+        }
 
-            node.ReturnTypeMetadata = symbol.Node switch
+        VisitNestedMemberAccess(node);
+
+        if (node.ReturnTypeMetadata is null)
+            throw new SemanticAnalysisException($"Cannot determine return type for member '{node.Name}'");
+    }
+
+    private static void VisitFirstMemberAccess(MemberAccessExpressionNode node)
+    {
+        var typeProvider = node.SymbolTable!.TypeProvider;
+        node.Reference = node.SymbolTable!.GetId(node.Name) ??
+                         typeProvider.GetType(node.Name) as object ??
+                         throw new SemanticAnalysisException($"Unknown member '{node.Name}'");
+
+        node.ReturnTypeMetadata = node.Reference switch
+        {
+            IdSymbol id => id.Node switch
             {
                 PropertyDeclarationNode propertyDeclarationNode
                     => propertyDeclarationNode.Type.Metadata,
@@ -329,34 +346,69 @@ internal class TypeChecker : IVisitor
                     => typeDeclarationNode.Metadata,
 
                 _ => throw new SemanticAnalysisException(),
-            };
-        }
-        else
+            },
+
+            ITypeMetadata type =>
+                type,
+
+            null => null,
+            _ => throw new SemanticAnalysisException(),
+        };
+    }
+
+    private void VisitNestedMemberAccess(MemberAccessExpressionNode node)
+    {
+        node.Member!.Accept(this);
+
+        var returnTypeMetadata = node.Member.ReturnTypeMetadata;
+        while (returnTypeMetadata is TypeAliasMetadata alias)
+            returnTypeMetadata = alias.Type;
+
+        if (returnTypeMetadata is TypeMetadata type)
         {
-            node.Member.Accept(this);
-
-            var returnTypeMetadata = node.Member.ReturnTypeMetadata;
-            if (returnTypeMetadata is TypeAliasMetadata alias)
-                returnTypeMetadata = alias.Type;
-
-            node.ReturnTypeMetadata = returnTypeMetadata switch
+            var property = type.GetProperty(node.Name);
+            if (property is not null)
             {
-                TypeMetadata type
-                    => type.GetProperty(node.Name)?.Type ??
-                       type.GetMethod(node.Name)?.TypeMetadata ??
-                       throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in type '{node.Member.ReturnTypeMetadata}'"),
+                node.Reference = property;
+                node.ReturnTypeMetadata = property.Type;
 
-                InterfaceMetadata @interface
-                    => @interface.GetProperty(node.Name)?.Type ??
-                       @interface.GetMethod(node.Name)?.TypeMetadata ??
-                       throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in interface '{node.Member.ReturnTypeMetadata}'"),
+                return;
+            }
 
-                _ => node.ReturnTypeMetadata
-            };
+            var method = type.GetMethod(node.Name);
+            if (method is not null)
+            {
+                node.Reference = method;
+                node.ReturnTypeMetadata = method.TypeMetadata;
+
+                return;
+            }
+
+            throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in type '{node.Member.ReturnTypeMetadata}'");
         }
 
-        if (node.ReturnTypeMetadata is null)
-            throw new SemanticAnalysisException($"Cannot determine return type for member '{node.Name}'");
+        if (returnTypeMetadata is InterfaceMetadata @interface)
+        {
+            var property = @interface.GetProperty(node.Name);
+            if (property is not null)
+            {
+                node.Reference = property;
+                node.ReturnTypeMetadata = property.Type;
+
+                return;
+            }
+
+            var method = @interface.GetMethod(node.Name);
+            if (method is not null)
+            {
+                node.Reference = method;
+                node.ReturnTypeMetadata = method.TypeMetadata;
+
+                return;
+            }
+
+            throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in interface '{node.Member.ReturnTypeMetadata}'");
+        }
     }
 
     public void Visit(MethodDeclarationNode node)

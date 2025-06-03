@@ -113,6 +113,7 @@ internal class TypeGenerator
                 var methodMetadata = new MethodMetadata(
                     type,
                     GetAccessModifierMetadata(method.AccessModifier),
+                    method.IsStatic,
                     method.Name,
                     existingFunctionType);
 

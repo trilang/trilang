@@ -1248,12 +1248,14 @@ public class FormatterTests
                 [
                     new MethodDeclarationNode(
                         AccessModifier.Public,
+                        false,
                         "toString",
                         [],
                         new TypeNode("string"),
                         new BlockStatementNode()),
                     new MethodDeclarationNode(
                         AccessModifier.Public,
+                        false,
                         "distance",
                         [new ParameterNode("other", new TypeNode("Point"))],
                         new TypeNode("string"),
@@ -1887,6 +1889,25 @@ public class FormatterTests
             .Build();
         var formatted = tree.ToString();
         const string expected = "public type T<T1, T2> = T1 | T2;";
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatStaticMethodTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineType("Test", t => t
+                .DefineMethod("method", m => m.Static()))
+            .Build();
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Test {
+                public static method(): void {
+                }
+            }
+            """;
 
         Assert.That(formatted, Is.EqualTo(expected));
     }

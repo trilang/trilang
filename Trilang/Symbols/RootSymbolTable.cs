@@ -4,11 +4,11 @@ namespace Trilang.Symbols;
 
 public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
 {
-    private readonly RootTypeMetadataProvider typeMetadataProvider;
+    private readonly ITypeMetadataProvider typeMetadataProvider;
     private readonly Dictionary<string, TypeSymbol> types;
     private readonly Dictionary<string, IdSymbol> variables;
 
-    public RootSymbolTable(RootTypeMetadataProvider typeMetadataProvider)
+    public RootSymbolTable(ITypeMetadataProvider typeMetadataProvider)
     {
         this.typeMetadataProvider = typeMetadataProvider;
         types = new Dictionary<string, TypeSymbol>();

@@ -133,6 +133,7 @@ internal class GenericTypeGenerator
             var methodMetadata = new MethodMetadata(
                 closed,
                 method.AccessModifier,
+                method.IsStatic,
                 method.Name,
                 existingFunctionType);
 

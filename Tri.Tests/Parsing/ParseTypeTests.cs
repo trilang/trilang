@@ -363,6 +363,7 @@ public class ParseTypeTests
                 [
                     new MethodDeclarationNode(
                         AccessModifier.Public,
+                        false,
                         "toString",
                         [],
                         new TypeNode("string"),
@@ -370,6 +371,7 @@ public class ParseTypeTests
                     ),
                     new MethodDeclarationNode(
                         AccessModifier.Public,
+                        false,
                         "distance",
                         [new ParameterNode("other", new TypeNode("Point"))],
                         new TypeNode("f32"),
@@ -1278,6 +1280,95 @@ public class ParseTypeTests
                 new TupleTypeNode([
                     new TypeNode("bool"),
                     new DiscriminatedUnionNode([new TypeNode("i32"), new TypeNode("f64")])
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseStaticMethodTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Test {
+                public static test(): void { }
+            }
+            """);
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Test",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        AccessModifier.Public,
+                        true,
+                        "test",
+                        [],
+                        new TypeNode("void"),
+                        new BlockStatementNode()
+                    )
+                ]
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseCallStaticMethodTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            public type Test {
+                public static test(): void { }
+            }
+
+            function main(): void {
+                Test.test();
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Test",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        AccessModifier.Public,
+                        true,
+                        "test",
+                        [],
+                        new TypeNode("void"),
+                        new BlockStatementNode()
+                    )
+                ]
+            ),
+            FunctionDeclarationNode.Create(
+                "main",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new ExpressionStatementNode(
+                        new CallExpressionNode(
+                            new MemberAccessExpressionNode(
+                                new MemberAccessExpressionNode("Test"),
+                                "test"
+                            ),
+                            []
+                        )
+                    )
                 ])
             )
         ]);

@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
 using Trilang.Semantics;
@@ -9,7 +10,8 @@ public class Compiler
     public void Compile(CompilerOptions options)
     {
         var parser = new Parser();
-        var semantic = new SemanticAnalysis();
+        var rootTypeMetadataProvider = new RootTypeMetadataProvider();
+        var semantic = new SemanticAnalysis(rootTypeMetadataProvider);
 
         var project = Project.Load(options.Path);
         foreach (var sourceFile in project.SourceFiles)

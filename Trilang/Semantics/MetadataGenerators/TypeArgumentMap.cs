@@ -163,6 +163,7 @@ internal class TypeArgumentMap
                 new MethodMetadata(
                     closed,
                     method.AccessModifier,
+                    method.IsStatic,
                     method.Name,
                     Map(method.TypeMetadata)));
 

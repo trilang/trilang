@@ -438,6 +438,10 @@ public partial class Formatter : IFormatter
     public void Visit(MethodDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);
+
+        if (node.IsStatic)
+            writer.Write(" static");
+
         writer.Write(' ');
         writer.Write(node.Name);
         writer.Write('(');

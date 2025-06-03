@@ -81,6 +81,8 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public string Name { get; }
 
+    public object? Reference { get; set; }
+
     public ITypeMetadata? ReturnTypeMetadata { get; set; }
 
     public bool IsThis

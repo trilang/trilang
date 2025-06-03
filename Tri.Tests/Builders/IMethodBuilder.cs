@@ -14,5 +14,7 @@ public interface IMethodBuilder
 
     IMethodBuilder Body(Action<IBlockBuilder>? action = null);
 
+    IMethodBuilder Static();
+
     MethodDeclarationNode Build();
 }

@@ -46,11 +46,13 @@ public class MetadataGeneratorTests
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Public,
+            false,
             "toString",
             new FunctionTypeMetadata([], TypeMetadata.String)));
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Private,
+            false,
             "distance",
             new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)));
 

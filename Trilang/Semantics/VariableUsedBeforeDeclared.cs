@@ -27,13 +27,22 @@ internal class VariableUsedBeforeDeclared : Visitor
         if (node.Member is not null || node.IsThis || node.IsField || node.IsValue)
             return;
 
-        var symbol = node.SymbolTable?.GetId(node.Name) ??
-                     throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");
+        var symbol = node.SymbolTable?.GetId(node.Name);
+        if (symbol is not null)
+        {
+            if (symbol.Node is ParameterNode or FunctionDeclarationNode)
+                return;
 
-        if (symbol.Node is ParameterNode or FunctionDeclarationNode)
-            return;
-
-        if (!scopes.TryPeek(out var scope) || !scope.Contains(node.Name))
-            throw new SemanticAnalysisException($"The '{node.Name}' variable used before declaration.");
+            if (!scopes.TryPeek(out var scope) || !scope.Contains(node.Name))
+                throw new SemanticAnalysisException($"The '{node.Name}' variable used before declaration.");
+        }
+        else
+        {
+            // access static member
+            var typeProvider = node.SymbolTable!.TypeProvider;
+            var type = typeProvider.GetType(node.Name);
+            if (type is null)
+                throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");
+        }
     }
 }

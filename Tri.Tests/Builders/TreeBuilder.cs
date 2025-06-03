@@ -285,6 +285,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
         private AccessModifier accessModifier;
         private TypeNode returnType;
         private BlockStatementNode body;
+        private bool isStatic;
 
         public MethodBuilder(string functionName)
         {
@@ -293,6 +294,7 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             parameters = [];
             returnType = new TypeNode("void");
             body = new BlockStatementNode();
+            isStatic = false;
         }
 
         public IMethodBuilder AccessModifier(AccessModifier modifier)
@@ -330,8 +332,15 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IMethodBuilder Static()
+        {
+            isStatic = true;
+
+            return this;
+        }
+
         public MethodDeclarationNode Build()
-            => new MethodDeclarationNode(accessModifier, functionName, parameters, returnType, body);
+            => new MethodDeclarationNode(accessModifier, isStatic, functionName, parameters, returnType, body);
     }
 
     private sealed class BlockBuilder : IBlockBuilder
@@ -837,10 +846,10 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
-        public IInterfaceBuilder DefineMethod(string name, Action<IInterfaceMethodBuilder> action)
+        public IInterfaceBuilder DefineMethod(string name, Action<IInterfaceMethodBuilder>? action = null)
         {
             var builder = new InterfaceMethodBuilder(name);
-            action(builder);
+            action?.Invoke(builder);
 
             var method = builder.Build();
             methods.Add(method);

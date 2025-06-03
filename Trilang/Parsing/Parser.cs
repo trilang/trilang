@@ -358,6 +358,8 @@ public class Parser
         if (accessModifier is null)
             return null;
 
+        var isStatic = context.Reader.Check(TokenKind.Static);
+
         var name = TryParseId(context) ??
                    throw new ParseException("Expected a method name.");
 
@@ -372,7 +374,13 @@ public class Parser
         var block = TryParseBlock(context) ??
                     throw new ParseException("Expected a function block.");
 
-        return new MethodDeclarationNode(accessModifier.Value, name, parameters, returnType, block);
+        return new MethodDeclarationNode(
+            accessModifier.Value,
+            isStatic,
+            name,
+            parameters,
+            returnType,
+            block);
     }
 
     private IStatementNode? TryParseStatement(ParserContext context)

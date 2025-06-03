@@ -7,19 +7,30 @@ namespace Trilang.Semantics;
 
 public class SemanticAnalysis
 {
+    private readonly ITypeMetadataProvider typeMetadataProvider;
+
+    public SemanticAnalysis()
+        : this(new RootTypeMetadataProvider())
+    {
+    }
+
+    public SemanticAnalysis(ITypeMetadataProvider typeMetadataProvider)
+        => this.typeMetadataProvider = typeMetadataProvider;
+
     public void Analyze(SyntaxTree tree)
     {
-        var rootTypeProvider = new RootTypeMetadataProvider();
-        var rootSymbolTable = new RootSymbolTable(rootTypeProvider);
+        var rootSymbolTable = new RootSymbolTable(typeMetadataProvider);
 
         tree.Accept(new SymbolFinder(), new SymbolFinderContext(rootSymbolTable));
-        tree.Accept(new VariableUsedBeforeDeclared());
         tree.Accept(new ThisOutsideOfClass());
+        tree.Accept(new ThisInStaticMethods());
         tree.Accept(new BreakContinueWithinLoop());
         tree.Accept(new MetadataGenerator());
+        tree.Accept(new VariableUsedBeforeDeclared());
         tree.Accept(new TypeChecker());
         tree.Accept(new NotImplementedInterface());
         tree.Accept(new CheckAccessModifiers());
         tree.Accept(new RecursiveTypeAlias());
+        tree.Accept(new CheckStaticAndInstanceMembersAccess());
     }
 }

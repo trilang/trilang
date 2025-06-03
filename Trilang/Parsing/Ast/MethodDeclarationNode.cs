@@ -8,12 +8,14 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
 {
     public MethodDeclarationNode(
         AccessModifier accessModifier,
+        bool isStatic,
         string name,
         IReadOnlyList<ParameterNode> parameters,
         IInlineTypeNode returnType,
         BlockStatementNode body)
     {
         AccessModifier = accessModifier;
+        IsStatic = isStatic;
         Name = name;
         Parameters = parameters;
         ReturnType = returnType;
@@ -41,6 +43,7 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
             return true;
 
         return AccessModifier == other.AccessModifier &&
+               IsStatic == other.IsStatic &&
                Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
                ReturnType.Equals(other.ReturnType) &&
@@ -83,6 +86,8 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
     public ISymbolTable? SymbolTable { get; set; }
 
     public AccessModifier AccessModifier { get; }
+
+    public bool IsStatic { get; }
 
     public string Name { get; }
 

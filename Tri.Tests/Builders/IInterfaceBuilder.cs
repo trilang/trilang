@@ -10,7 +10,7 @@ public interface IInterfaceBuilder
         AccessModifier getterModifier = AccessModifier.Public,
         AccessModifier setterModifier = AccessModifier.Private);
 
-    IInterfaceBuilder DefineMethod(string name, Action<IInterfaceMethodBuilder> action);
+    IInterfaceBuilder DefineMethod(string name, Action<IInterfaceMethodBuilder>? action = null);
 
     InterfaceNode Build();
 }

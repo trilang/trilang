@@ -35,9 +35,10 @@ public static class Helpers
                 => null,
 
             CallExpressionNode callExpressionNode
-                => callExpressionNode.Parameters
-                    .Select(x => Find(x, predicate))
-                    .FirstOrDefault(x => x is not null),
+                => Find(callExpressionNode.Member, predicate) ??
+                   callExpressionNode.Parameters
+                       .Select(x => Find(x, predicate))
+                       .FirstOrDefault(x => x is not null),
 
             ConstructorDeclarationNode constructorDeclarationNode
                 => constructorDeclarationNode.Parameters

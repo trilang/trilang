@@ -344,6 +344,7 @@ public class SymbolFinderTests
         var parameter = new ParameterNode("a", new TypeNode("i32"));
         var method = new MethodDeclarationNode(
             AccessModifier.Public,
+            false,
             "test",
             [parameter],
             new TypeNode("void"),
@@ -432,12 +433,14 @@ public class SymbolFinderTests
             [
                 new MethodDeclarationNode(
                     AccessModifier.Public,
+                    false,
                     "toString",
                     [],
                     new TypeNode("string"),
                     new BlockStatementNode()),
                 new MethodDeclarationNode(
                     AccessModifier.Public,
+                    false,
                     "distance",
                     [new ParameterNode("other", new TypeNode("Point"))],
                     new TypeNode("f32"),

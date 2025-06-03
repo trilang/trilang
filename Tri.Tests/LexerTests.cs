@@ -81,6 +81,7 @@ public class LexerTests
     [TestCase("null", TokenKind.Null)]
     [TestCase("get", TokenKind.Get)]
     [TestCase("set", TokenKind.Set)]
+    [TestCase("static", TokenKind.Static)]
     public void TokenizeKeywordTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();
