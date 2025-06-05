@@ -30,6 +30,8 @@ public interface IVisitor
 
     void Visit(GenericTypeNode node);
 
+    void Visit(IfDirectiveNode node);
+
     void Visit(IfStatementNode node);
 
     void Visit(InterfaceNode node);

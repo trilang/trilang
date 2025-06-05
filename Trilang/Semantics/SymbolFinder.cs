@@ -139,6 +139,18 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable.TryAddType(symbol);
     }
 
+    public void Visit(IfDirectiveNode node, SymbolFinderContext context)
+    {
+        if (!context.SemanticAnalysisOptions.HasDirective(node.DirectiveName))
+            return;
+
+        foreach (var then in node.Then)
+            then.Accept(this, context);
+
+        foreach (var @else in node.Else)
+            @else.Accept(this, context);
+    }
+
     public void Visit(IfStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;

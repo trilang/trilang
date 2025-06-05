@@ -285,6 +285,35 @@ public partial class Formatter : IFormatter
         writer.Write('>');
     }
 
+    public void Visit(IfDirectiveNode node)
+    {
+        writer.Write("#if ");
+        writer.WriteLine(node.DirectiveName);
+        writer.WriteLine();
+
+        foreach (var then in node.Then)
+        {
+            then.Accept(this);
+            writer.WriteLine();
+            writer.WriteLine();
+        }
+
+        if (node.Else.Count > 0)
+        {
+            writer.WriteLine("#else");
+            writer.WriteLine();
+
+            foreach (var @else in node.Else)
+            {
+                @else.Accept(this);
+                writer.WriteLine();
+                writer.WriteLine();
+            }
+        }
+
+        writer.Write("#endif");
+    }
+
     public void Visit(IfStatementNode node)
     {
         writer.Write("if (");

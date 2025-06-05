@@ -1,25 +1,24 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
-public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
+public class IfDirectiveNode : IDeclarationNode, IStatementNode, IEquatable<IfDirectiveNode>
 {
-    public ArrayTypeNode(IInlineTypeNode elementType)
+    public IfDirectiveNode(string directiveName, IReadOnlyList<ISyntaxNode> then, IReadOnlyList<ISyntaxNode> @else)
     {
-        Name = $"{elementType.Name}[]";
-        ElementType = elementType;
-        ElementType.Parent = this;
+        DirectiveName = directiveName;
+        Then = then;
+        Else = @else;
     }
 
-    public static bool operator ==(ArrayTypeNode? left, ArrayTypeNode? right)
+    public static bool operator ==(IfDirectiveNode? left, IfDirectiveNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(ArrayTypeNode? left, ArrayTypeNode? right)
+    public static bool operator !=(IfDirectiveNode? left, IfDirectiveNode? right)
         => !Equals(left, right);
 
-    public bool Equals(ArrayTypeNode? other)
+    public bool Equals(IfDirectiveNode? other)
     {
         if (other is null)
             return false;
@@ -27,7 +26,9 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return ElementType.Equals(other.ElementType);
+        return DirectiveName == other.DirectiveName &&
+               Then.SequenceEqual(other.Then) &&
+               Else.SequenceEqual(other.Else);
     }
 
     public override bool Equals(object? obj)
@@ -41,11 +42,11 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((ArrayTypeNode)obj);
+        return Equals((IfDirectiveNode)obj);
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(ElementType);
+        => HashCode.Combine(DirectiveName, Then, Else);
 
     public override string ToString()
     {
@@ -65,9 +66,10 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public string Name { get; }
+    public string DirectiveName { get; }
 
-    public IInlineTypeNode ElementType { get; }
+    // IDeclarationNode | IStatementNode
+    public IReadOnlyList<ISyntaxNode> Then { get; }
 
-    public ITypeMetadata? Metadata { get; set; }
+    public IReadOnlyList<ISyntaxNode> Else { get; }
 }

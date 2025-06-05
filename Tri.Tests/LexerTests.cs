@@ -65,6 +65,7 @@ public class LexerTests
     [TestCase("var", TokenKind.Var)]
     [TestCase("if", TokenKind.If)]
     [TestCase("else", TokenKind.Else)]
+    [TestCase("endif", TokenKind.EndIf)]
     [TestCase("external", TokenKind.External)]
     [TestCase("return", TokenKind.Return)]
     [TestCase("true", TokenKind.True)]
@@ -149,6 +150,7 @@ public class LexerTests
     [TestCase("~", TokenKind.Tilde)]
     [TestCase("=>", TokenKind.EqualGreater)]
     [TestCase(".", TokenKind.Dot)]
+    [TestCase("#", TokenKind.Hash)]
     public void TokenizeOperatorTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();

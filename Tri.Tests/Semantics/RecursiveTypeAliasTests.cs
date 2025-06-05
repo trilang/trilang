@@ -15,7 +15,7 @@ public class RecursiveTypeAliasTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The recursive type alias detected: 'Test'."));
     }

@@ -12,13 +12,14 @@ public class Compiler
         var parser = new Parser();
         var rootTypeMetadataProvider = new RootTypeMetadataProvider();
         var semantic = new SemanticAnalysis(rootTypeMetadataProvider);
+        var semanticOptions = new SemanticAnalysisOptions(options.Directives);
 
         var project = Project.Load(options.Path);
         foreach (var sourceFile in project.SourceFiles)
         {
             var code = File.ReadAllText(sourceFile.FilePath);
             var tree = parser.Parse(code);
-            semantic.Analyze(tree);
+            semantic.Analyze(tree, semanticOptions);
         }
 
         if (options.OperatingSystem == CompilerOptionOs.Linux)

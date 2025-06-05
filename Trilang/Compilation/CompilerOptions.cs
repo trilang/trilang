@@ -4,6 +4,8 @@ namespace Trilang.Compilation;
 
 public class CompilerOptions
 {
+    private readonly HashSet<string> directives;
+
     public CompilerOptions(string outputPath)
     {
         OutputPath = outputPath;
@@ -25,7 +27,15 @@ public class CompilerOptions
 
             _ => throw new ArgumentOutOfRangeException(),
         };
+
+        directives = [];
     }
+
+    public bool HasDirective(string name)
+        => directives.Contains(name);
+
+    public void AddDirective(string name)
+        => directives.Add(name);
 
     public string OutputPath { get; }
 
@@ -34,4 +44,7 @@ public class CompilerOptions
     public CompilerOptionOs OperatingSystem { get; set; }
 
     public CompilerOptionPlatform Platform { get; set; }
+
+    public IEnumerable<string> Directives
+        => directives;
 }

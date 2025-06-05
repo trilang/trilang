@@ -21,7 +21,7 @@ public class ThisInStaticMethodsTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'this' keyword is not allowed in static methods."));
     }

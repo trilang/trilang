@@ -14,10 +14,7 @@ public class Parser
 
         while (!context.Reader.HasEnded)
         {
-            var declaration = TryParseFunction(context) ??
-                              TryParseExternalFunction(context) ??
-                              TryParseTypeAlias(context) ??
-                              TryParseTypeDeclarationNode(context) as IDeclarationNode ??
+            var declaration = TryParseDeclaration(context) ??
                               throw new ParseException("Expected a type or a function.");
 
             functions.Add(declaration);
@@ -25,6 +22,61 @@ public class Parser
 
         return new SyntaxTree(functions);
     }
+
+    private IDeclarationNode? TryParseDeclaration(ParserContext context)
+        => TryParseFunction(context) ??
+           TryParseExternalFunction(context) ??
+           TryParseTypeAlias(context) ??
+           TryParseTypeDeclarationNode(context) ??
+           TryParseTopLevelIfDirective(context) as IDeclarationNode;
+
+    private IfDirectiveNode? TryParseTopLevelIfDirective(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.Hash))
+                return null;
+
+            if (!c.Reader.Check(TokenKind.If))
+                return null;
+
+            var name = c.Parser.TryParseId(c) ??
+                       throw new ParseException("Expected a directive name.");
+
+            var then = new List<IDeclarationNode>();
+            var @else = new List<IDeclarationNode>();
+
+            while (true)
+            {
+                var declaration = c.Parser.TryParseDeclaration(c);
+                if (declaration is null)
+                    break;
+
+                then.Add(declaration);
+            }
+
+            if (!c.Reader.Check(TokenKind.Hash))
+                throw new ParseException("Expected a hash symbol.");
+
+            if (c.Reader.Check(TokenKind.Else))
+            {
+                while (true)
+                {
+                    var declaration = c.Parser.TryParseDeclaration(c);
+                    if (declaration is null)
+                        break;
+
+                    @else.Add(declaration);
+                }
+
+                if (!c.Reader.Check(TokenKind.Hash))
+                    throw new ParseException("Expected a hash symbol.");
+            }
+
+            if (!c.Reader.Check(TokenKind.EndIf))
+                throw new ParseException("Expected an 'endif' directive.");
+
+            return new IfDirectiveNode(name, then, @else);
+        });
 
     private FunctionDeclarationNode? TryParseFunction(ParserContext context)
     {
@@ -390,7 +442,56 @@ public class Parser
            TryParseExpressionStatement(context) ??
            TryParseWhileStatement(context) ??
            TryParseBreakStatement(context) ??
-           TryParseContinueStatement(context) as IStatementNode;
+           TryParseContinueStatement(context) ??
+           TryParseStatementLevelIfDirective(context) as IStatementNode;
+
+    private IfDirectiveNode? TryParseStatementLevelIfDirective(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.Hash))
+                return null;
+
+            if (!c.Reader.Check(TokenKind.If))
+                return null;
+
+            var name = c.Parser.TryParseId(c) ??
+                       throw new ParseException("Expected a directive name.");
+
+            var then = new List<IStatementNode>();
+            var @else = new List<IStatementNode>();
+
+            while (true)
+            {
+                var declaration = c.Parser.TryParseStatement(c);
+                if (declaration is null)
+                    break;
+
+                then.Add(declaration);
+            }
+
+            if (!c.Reader.Check(TokenKind.Hash))
+                throw new ParseException("Expected a hash symbol.");
+
+            if (c.Reader.Check(TokenKind.Else))
+            {
+                while (true)
+                {
+                    var declaration = c.Parser.TryParseStatement(c);
+                    if (declaration is null)
+                        break;
+
+                    @else.Add(declaration);
+                }
+
+                if (!c.Reader.Check(TokenKind.Hash))
+                    throw new ParseException("Expected a hash symbol.");
+            }
+
+            if (!c.Reader.Check(TokenKind.EndIf))
+                throw new ParseException("Expected an 'endif' directive.");
+
+            return new IfDirectiveNode(name, then, @else);
+        });
 
     private VariableDeclarationStatementNode? TryParseVariableStatement(ParserContext context)
     {

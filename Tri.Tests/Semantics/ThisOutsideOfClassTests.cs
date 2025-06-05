@@ -19,7 +19,7 @@ public class ThisOutsideOfClassTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.Nothing);
     }
 
@@ -37,7 +37,7 @@ public class ThisOutsideOfClassTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.Nothing);
     }
 
@@ -54,7 +54,7 @@ public class ThisOutsideOfClassTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'this' keyword is only allowed inside a type."));
     }

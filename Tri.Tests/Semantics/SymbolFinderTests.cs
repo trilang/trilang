@@ -15,7 +15,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
@@ -30,7 +30,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function1, function2]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(2));
@@ -49,7 +49,7 @@ public class SymbolFinderTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'main' function is already defined."));
     }
@@ -67,7 +67,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
@@ -97,7 +97,7 @@ public class SymbolFinderTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'a' parameter is already defined."));
     }
@@ -115,7 +115,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
@@ -145,7 +145,7 @@ public class SymbolFinderTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'a' variable is already defined."));
     }
@@ -167,7 +167,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
@@ -197,7 +197,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
@@ -233,7 +233,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
@@ -267,7 +267,7 @@ public class SymbolFinderTests
         ]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var arrayTypeNode = tree.Find<ArrayTypeNode>();
         Assert.That(arrayTypeNode, Is.Not.Null);
@@ -292,7 +292,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
@@ -309,7 +309,7 @@ public class SymbolFinderTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'Point' type is already defined."));
     }
@@ -330,7 +330,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(ctor.Body.SymbolTable, Is.Not.Null);
         Assert.That(ctor.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
@@ -360,7 +360,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(method.Body.SymbolTable, Is.Not.Null);
         Assert.That(method.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
@@ -375,7 +375,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
@@ -392,7 +392,7 @@ public class SymbolFinderTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'MyInt' type is already defined."));
     }
@@ -405,7 +405,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([aliasType]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
@@ -449,7 +449,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
@@ -480,7 +480,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([alias]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
@@ -508,7 +508,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([alias]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(3));
@@ -532,7 +532,7 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([alias]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         Assert.That(tree.SymbolTable, Is.Not.Null);
         Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(4));
@@ -556,7 +556,7 @@ public class SymbolFinderTests
             .Build();
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var aliasNode = tree.Find<TypeAliasDeclarationNode>();
         var tupleNode = tree.Find<TupleTypeNode>();
@@ -585,7 +585,7 @@ public class SymbolFinderTests
             .Build();
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var aliasNode = tree.Find<TypeAliasDeclarationNode>();
         var tupleNode = tree.Find<TupleTypeNode>(x => x.Name == "((i32, i32), bool)");
@@ -624,7 +624,7 @@ public class SymbolFinderTests
             .Build();
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var property = tree.Find<PropertyDeclarationNode>();
         var getter = tree.Find<PropertyGetterNode>();
@@ -652,7 +652,7 @@ public class SymbolFinderTests
             .Build();
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var type = tree.Find<TypeDeclarationNode>();
         Assert.That(type, Is.Not.Null);
@@ -671,7 +671,7 @@ public class SymbolFinderTests
             .Build();
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var type = tree.Find<TypeDeclarationNode>();
         Assert.That(type, Is.Not.Null);
@@ -692,7 +692,7 @@ public class SymbolFinderTests
             .Build();
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree);
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var alias = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(alias, Is.Not.Null);

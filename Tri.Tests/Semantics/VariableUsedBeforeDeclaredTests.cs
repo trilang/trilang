@@ -18,7 +18,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.Nothing);
     }
 
@@ -35,7 +35,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.Nothing);
     }
 
@@ -52,7 +52,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'a' variable used before declaration."));
     }
@@ -71,7 +71,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'a' variable used before declaration."));
     }
@@ -89,7 +89,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("Unknown symbol: a"));
     }
@@ -109,7 +109,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("Unknown symbol: a"));
     }

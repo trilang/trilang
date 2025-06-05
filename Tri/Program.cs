@@ -17,6 +17,10 @@ Parser.Default
         if (o.Platform is not null)
             options.Platform = o.Platform.Value;
 
+        if (o.Directives is not null)
+            foreach (var directive in o.Directives)
+                options.AddDirective(directive);
+
         var compiler = new Compiler();
         compiler.Compile(options);
     });

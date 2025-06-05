@@ -273,6 +273,30 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(IfDirectiveNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        foreach (var then in node.Then)
+            then.Accept(this, context);
+
+        foreach (var @else in node.Else)
+            @else.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(IfDirectiveNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(IfDirectiveNode node, TContext context)
+    {
+    }
+
     public void Visit(IfStatementNode node, TContext context)
     {
         if (context.IsFinished)

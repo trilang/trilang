@@ -30,6 +30,8 @@ public interface IVisitor<in TContext>
 
     void Visit(GenericTypeNode node, TContext context);
 
+    void Visit(IfDirectiveNode node, TContext context);
+
     void Visit(IfStatementNode node, TContext context);
 
     void Visit(InterfaceNode node, TContext context);

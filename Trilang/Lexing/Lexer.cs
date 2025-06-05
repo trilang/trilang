@@ -53,6 +53,7 @@ public class Lexer
                     "var" => Token.Create(TokenKind.Var),
                     "if" => Token.Create(TokenKind.If),
                     "else" => Token.Create(TokenKind.Else),
+                    "endif" => Token.Create(TokenKind.EndIf),
                     "external" => Token.Create(TokenKind.External),
                     "return" => Token.Create(TokenKind.Return),
                     "true" => Token.Create(TokenKind.True),
@@ -164,6 +165,7 @@ public class Lexer
                 ('%', _) => (Token.Create(TokenKind.Percent), 1),
 
                 ('.', _) => (Token.Create(TokenKind.Dot), 1),
+                ('#', _) => (Token.Create(TokenKind.Hash),1),
 
                 _ => throw new Exception($"Unexpected character '{c}'")
             };

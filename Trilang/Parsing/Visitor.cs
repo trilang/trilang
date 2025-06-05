@@ -236,6 +236,27 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(IfDirectiveNode node)
+    {
+        VisitEnter(node);
+
+        foreach (var then in node.Then)
+            then.Accept(this);
+
+        foreach (var @else in node.Else)
+            @else.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(IfDirectiveNode node)
+    {
+    }
+
+    protected virtual void VisitExit(IfDirectiveNode node)
+    {
+    }
+
     public void Visit(IfStatementNode node)
     {
         VisitEnter(node);

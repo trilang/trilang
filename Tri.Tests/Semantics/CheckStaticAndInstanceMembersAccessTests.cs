@@ -22,7 +22,7 @@ public class CheckStaticAndInstanceMembersAccessTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The instance method 's' cannot be called on a static one."));
     }
@@ -45,7 +45,7 @@ public class CheckStaticAndInstanceMembersAccessTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The static method 's' cannot be called on an instance one."));
     }
@@ -68,7 +68,7 @@ public class CheckStaticAndInstanceMembersAccessTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree),
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("'Test' can't be used to call static members."));
     }

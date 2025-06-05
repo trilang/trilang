@@ -1,3 +1,4 @@
+using Trilang.Compilation;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics;
@@ -6,10 +7,11 @@ internal class SymbolFinderContext
 {
     private bool noScope;
 
-    public SymbolFinderContext(ISymbolTable symbolTable)
+    public SymbolFinderContext(ISymbolTable symbolTable, SemanticAnalysisOptions semanticAnalysisOptions)
     {
-        SymbolTable = symbolTable;
         noScope = false;
+        SymbolTable = symbolTable;
+        SemanticAnalysisOptions = semanticAnalysisOptions;
     }
 
     public void Scoped(Action<SymbolFinderContext> action)
@@ -17,7 +19,7 @@ internal class SymbolFinderContext
         var child = noScope
             ? SymbolTable
             : SymbolTable.CreateChild();
-        var context = new SymbolFinderContext(child)
+        var context = new SymbolFinderContext(child, SemanticAnalysisOptions)
         {
             noScope = false
         };
@@ -29,4 +31,6 @@ internal class SymbolFinderContext
         => noScope = true;
 
     public ISymbolTable SymbolTable { get; }
+
+    public SemanticAnalysisOptions SemanticAnalysisOptions { get; }
 }

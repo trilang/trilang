@@ -1911,4 +1911,89 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatIfDirectiveTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(AccessModifier.Public, "Type1", [], [], [], [], []),
+            new IfDirectiveNode(
+                "DEBUG",
+                [
+                    new TypeDeclarationNode(AccessModifier.Public, "Type2", [], [], [], [], []),
+                    new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], []),
+                ],
+                []),
+            new TypeDeclarationNode(AccessModifier.Public, "Type4", [], [], [], [], []),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Type1 {
+            }
+
+            #if DEBUG
+
+            public type Type2 {
+            }
+
+            public type Type3 {
+            }
+
+            #endif
+
+            public type Type4 {
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatIfDirectiveWithElseTest()
+    {
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(AccessModifier.Public, "Type1", [], [], [], [], []),
+            new IfDirectiveNode(
+                "DEBUG",
+                [
+                    new TypeDeclarationNode(AccessModifier.Public, "Type2", [], [], [], [], []),
+                    new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], []),
+                ],
+                [
+                    new TypeDeclarationNode(AccessModifier.Public, "Type5", [], [], [], [], []),
+                    new TypeDeclarationNode(AccessModifier.Public, "Type6", [], [], [], [], []),
+                ]),
+            new TypeDeclarationNode(AccessModifier.Public, "Type4", [], [], [], [], []),
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            public type Type1 {
+            }
+
+            #if DEBUG
+
+            public type Type2 {
+            }
+
+            public type Type3 {
+            }
+
+            #else
+
+            public type Type5 {
+            }
+
+            public type Type6 {
+            }
+
+            #endif
+
+            public type Type4 {
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

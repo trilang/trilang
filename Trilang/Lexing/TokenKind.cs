@@ -53,11 +53,13 @@ public enum TokenKind
 
     EqualGreater,
     Dot,
+    Hash,
 
     // Keywords
     Var,
     If,
     Else,
+    EndIf,
     Function,
     External,
     Return,
