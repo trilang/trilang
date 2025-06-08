@@ -38,6 +38,24 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void Visit(AsExpressionNode node)
+    {
+        VisitEnter(node);
+
+        node.Expression.Accept(this);
+        node.Type.Accept(this);
+
+        VisitExit(node);
+    }
+
+    protected virtual void VisitEnter(AsExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitExit(AsExpressionNode node)
+    {
+    }
+
     public void Visit(BinaryExpressionNode node)
     {
         VisitEnter(node);

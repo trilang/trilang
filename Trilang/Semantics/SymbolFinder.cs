@@ -23,6 +23,14 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.ElementType.Accept(this, context);
     }
 
+    public void Visit(AsExpressionNode node, SymbolFinderContext context)
+    {
+        node.SymbolTable = context.SymbolTable;
+
+        node.Expression.Accept(this, context);
+        node.Type.Accept(this, context);
+    }
+
     public void Visit(BinaryExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;

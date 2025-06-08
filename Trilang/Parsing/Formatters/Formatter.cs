@@ -52,6 +52,13 @@ public partial class Formatter : IFormatter
         writer.Write("[]");
     }
 
+    public void Visit(AsExpressionNode node)
+    {
+        node.Expression.Accept(this);
+        writer.Write(" as ");
+        node.Type.Accept(this);
+    }
+
     public void Visit(BinaryExpressionNode node)
     {
         node.Left.Accept(this);

@@ -51,5 +51,8 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
     public void AddType(ITypeMetadata type)
         => types.Add(type);
 
+    public bool HasType(TypeMetadata type)
+        => types.Contains(type);
+
     public IReadOnlyList<ITypeMetadata> Types => types;
 }

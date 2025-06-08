@@ -31,6 +31,21 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
                         throw new SemanticAnalysisException($"Unknown array type '{node.Name}'");
     }
 
+    public void Visit(AsExpressionNode node, TypeCheckerContext context)
+    {
+        node.Expression.Accept(this, context);
+        node.Type.Accept(this, context);
+
+        if (node.Expression.ReturnTypeMetadata is null || node.Type.Metadata is null)
+            throw new SemanticAnalysisException("Cannot determine return type for expression");
+
+        var typeProvider = node.SymbolTable!.TypeProvider;
+
+        var metadata = new DiscriminatedUnionMetadata([node.Type.Metadata, Null]);
+        typeProvider.DefineType(metadata.ToString(), metadata);
+        node.ReturnTypeMetadata = metadata;
+    }
+
     public void Visit(BinaryExpressionNode node, TypeCheckerContext context)
     {
         node.Left.Accept(this, context);

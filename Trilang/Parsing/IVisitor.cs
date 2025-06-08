@@ -8,6 +8,8 @@ public interface IVisitor
 
     void Visit(ArrayTypeNode node);
 
+    void Visit(AsExpressionNode node);
+
     void Visit(BinaryExpressionNode node);
 
     void Visit(BlockStatementNode node);

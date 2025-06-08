@@ -1996,4 +1996,33 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatAsExpressionTest()
+    {
+        var tree = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "test",
+                [new ParameterNode("a", new TypeNode("i32"))],
+                new TypeNode("i8"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new AsExpressionNode(
+                            new MemberAccessExpressionNode("a"),
+                            new TypeNode("i8")
+                        )
+                    )
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function test(a: i32): i8 {
+                return a as i8;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

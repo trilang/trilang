@@ -1148,4 +1148,30 @@ public class TypeCheckerTests
         Assert.That(member, Is.Not.Null);
         Assert.That(member.ReturnTypeMetadata, Is.EqualTo(functionType));
     }
+
+    [Test]
+    public void SetReturnTypeForAsExpressionTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", f => f
+                .DefineParameter("a", t => t.Type("i32"))
+                .ReturnType(t => t
+                    .DiscriminatedUnion(du => du
+                        .AddCase(c => c.Type("i8"))
+                        .AddCase(c => c.Type("null"))))
+                .Body(body => body
+                    .Return(r => r
+                        .MemberAccess("a")
+                        .As("i8"))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var expectedType = new DiscriminatedUnionMetadata([TypeMetadata.I8, TypeMetadata.Null]);
+
+        var asExp = tree.Find<AsExpressionNode>();
+        Assert.That(asExp, Is.Not.Null);
+        Assert.That(asExp.ReturnTypeMetadata, Is.EqualTo(expectedType).Using(new MetadataComparer()));
+    }
 }

@@ -765,4 +765,50 @@ public class ParseExpressionTests
 
         Assert.That(tree, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void ParseAsExpressionTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            function test(a: i32): i8 {
+                return a as i8;
+            }
+            """);
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "test",
+                [new ParameterNode("a", new TypeNode("i32"))],
+                new TypeNode("i8"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new AsExpressionNode(
+                            new MemberAccessExpressionNode("a"),
+                            new TypeNode("i8")
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void ParseAsExpressionMissingTypeTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            function test(a: i32): i8 {
+                return a as;
+            }
+            """;
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
+    }
 }

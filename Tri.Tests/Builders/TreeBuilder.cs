@@ -671,6 +671,15 @@ internal sealed class TreeBuilder : ISyntaxTreeBuilder
             return this;
         }
 
+        public IExpressionBuilder As(string type)
+        {
+            var exp = stack.Pop();
+            var asNode = new AsExpressionNode(exp, new TypeNode(type));
+            stack.Push(asNode);
+
+            return this;
+        }
+
         public IExpressionNode Build()
         {
             if (stack.Count != 1)

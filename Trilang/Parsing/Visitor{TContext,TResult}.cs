@@ -42,6 +42,27 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void Visit(AsExpressionNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitEnter(node, context);
+
+        node.Expression.Accept(this, context);
+        node.Type.Accept(this, context);
+
+        VisitExit(node, context);
+    }
+
+    protected virtual void VisitEnter(AsExpressionNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExit(AsExpressionNode node, TContext context)
+    {
+    }
+
     public void Visit(BinaryExpressionNode node, TContext context)
     {
         if (context.IsFinished)
