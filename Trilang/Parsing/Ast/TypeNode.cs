@@ -52,10 +52,10 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitTypeNode(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitTypeNode(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

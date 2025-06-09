@@ -10,7 +10,7 @@ namespace Trilang.Semantics;
 
 internal class TypeChecker : IVisitor<TypeCheckerContext>
 {
-    public void Visit(ArrayAccessExpressionNode node, TypeCheckerContext context)
+    public void VisitArrayAccess(ArrayAccessExpressionNode node, TypeCheckerContext context)
     {
         node.Member.Accept(this, context);
         node.Index.Accept(this, context);
@@ -22,7 +22,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             throw new SemanticAnalysisException("Array index must be of type i32");
     }
 
-    public void Visit(ArrayTypeNode node, TypeCheckerContext context)
+    public void VisitArrayType(ArrayTypeNode node, TypeCheckerContext context)
     {
         node.ElementType.Accept(this, context);
 
@@ -31,7 +31,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
                         throw new SemanticAnalysisException($"Unknown array type '{node.Name}'");
     }
 
-    public void Visit(AsExpressionNode node, TypeCheckerContext context)
+    public void VisitAsExpression(AsExpressionNode node, TypeCheckerContext context)
     {
         node.Expression.Accept(this, context);
         node.Type.Accept(this, context);
@@ -46,7 +46,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.ReturnTypeMetadata = metadata;
     }
 
-    public void Visit(BinaryExpressionNode node, TypeCheckerContext context)
+    public void VisitBinaryExpression(BinaryExpressionNode node, TypeCheckerContext context)
     {
         node.Left.Accept(this, context);
         node.Right.Accept(this, context);
@@ -138,17 +138,17 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void Visit(BlockStatementNode node, TypeCheckerContext context)
+    public void VisitBlock(BlockStatementNode node, TypeCheckerContext context)
     {
         foreach (var statement in node.Statements)
             statement.Accept(this, context);
     }
 
-    public void Visit(BreakNode node, TypeCheckerContext context)
+    public void VisitBreak(BreakNode node, TypeCheckerContext context)
     {
     }
 
-    public void Visit(CallExpressionNode node, TypeCheckerContext context)
+    public void VisitCall(CallExpressionNode node, TypeCheckerContext context)
     {
         node.Member.Accept(this, context);
 
@@ -167,7 +167,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void Visit(ConstructorDeclarationNode node, TypeCheckerContext context)
+    public void VisitConstructor(ConstructorDeclarationNode node, TypeCheckerContext context)
     {
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, context);
@@ -178,11 +178,11 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Body.Accept(this, context);
     }
 
-    public void Visit(ContinueNode node, TypeCheckerContext context)
+    public void VisitContinue(ContinueNode node, TypeCheckerContext context)
     {
     }
 
-    public void Visit(DiscriminatedUnionNode node, TypeCheckerContext context)
+    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node, TypeCheckerContext context)
     {
         // TODO: eliminate duplicates
         foreach (var type in node.Types)
@@ -195,13 +195,13 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = metadata;
     }
 
-    public void Visit(ExpressionStatementNode node, TypeCheckerContext context)
+    public void VisitExpressionStatement(ExpressionStatementNode node, TypeCheckerContext context)
     {
         // TODO: check whether the result of expression is used
         node.Expression.Accept(this, context);
     }
 
-    public void Visit(FunctionDeclarationNode node, TypeCheckerContext context)
+    public void VisitFunction(FunctionDeclarationNode node, TypeCheckerContext context)
     {
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, context);
@@ -222,7 +222,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Body?.Accept(this, context);
     }
 
-    public void Visit(FunctionTypeNode node, TypeCheckerContext context)
+    public void VisitFunctionType(FunctionTypeNode node, TypeCheckerContext context)
     {
         foreach (var parameterType in node.ParameterTypes)
             parameterType.Accept(this, context);
@@ -239,7 +239,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = functionType;
     }
 
-    public void Visit(GenericTypeNode node, TypeCheckerContext context)
+    public void VisitGenericType(GenericTypeNode node, TypeCheckerContext context)
     {
         foreach (var typeArgument in node.TypeArguments)
             typeArgument.Accept(this, context);
@@ -252,7 +252,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = metadata;
     }
 
-    public void Visit(IfDirectiveNode node, TypeCheckerContext context)
+    public void VisitIfDirective(IfDirectiveNode node, TypeCheckerContext context)
     {
         if (!context.HasDirective(node.DirectiveName))
             return;
@@ -264,7 +264,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             @else.Accept(this, context);
     }
 
-    public void Visit(IfStatementNode node, TypeCheckerContext context)
+    public void VisitIf(IfStatementNode node, TypeCheckerContext context)
     {
         // TODO: data flow
         node.Condition.Accept(this, context);
@@ -275,7 +275,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             throw new SemanticAnalysisException("The condition returns non-boolean type.");
     }
 
-    public void Visit(InterfaceNode node, TypeCheckerContext context)
+    public void VisitInterface(InterfaceNode node, TypeCheckerContext context)
     {
         var typeProvider = node.SymbolTable!.TypeProvider;
         var metadata = typeProvider.GetType(node.Name) as InterfaceMetadata ??
@@ -290,7 +290,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             method.Accept(this, context);
     }
 
-    public void Visit(InterfacePropertyNode node, TypeCheckerContext context)
+    public void VisitInterfaceProperty(InterfacePropertyNode node, TypeCheckerContext context)
     {
         node.Type.Accept(this, context);
 
@@ -298,7 +298,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = type.GetProperty(node.Name);
     }
 
-    public void Visit(InterfaceMethodNode node, TypeCheckerContext context)
+    public void VisitInterfaceMethod(InterfaceMethodNode node, TypeCheckerContext context)
     {
         foreach (var parameter in node.ParameterTypes)
             parameter.Accept(this, context);
@@ -309,7 +309,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = type.GetMethod(node.Name);
     }
 
-    public void Visit(LiteralExpressionNode node, TypeCheckerContext context)
+    public void VisitLiteral(LiteralExpressionNode node, TypeCheckerContext context)
     {
         node.ReturnTypeMetadata = node.Kind switch
         {
@@ -323,7 +323,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         };
     }
 
-    public void Visit(MemberAccessExpressionNode node, TypeCheckerContext context)
+    public void VisitMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
     {
         if (node.Member is null)
         {
@@ -438,7 +438,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void Visit(MethodDeclarationNode node, TypeCheckerContext context)
+    public void VisitMethod(MethodDeclarationNode node, TypeCheckerContext context)
     {
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, context);
@@ -451,7 +451,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Body.Accept(this, context);
     }
 
-    public void Visit(NewArrayExpressionNode node, TypeCheckerContext context)
+    public void VisitNewArray(NewArrayExpressionNode node, TypeCheckerContext context)
     {
         node.Type.Accept(this, context);
         node.Size.Accept(this, context);
@@ -459,7 +459,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.ReturnTypeMetadata = node.Type.Metadata;
     }
 
-    public void Visit(NewObjectExpressionNode node, TypeCheckerContext context)
+    public void VisitNewObject(NewObjectExpressionNode node, TypeCheckerContext context)
     {
         node.Type.Accept(this, context);
 
@@ -476,11 +476,11 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = ctor;
     }
 
-    public void Visit(NullExpressionNode node, TypeCheckerContext context)
+    public void VisitNull(NullExpressionNode node, TypeCheckerContext context)
     {
     }
 
-    public void Visit(ReturnStatementNode node, TypeCheckerContext context)
+    public void VisitReturn(ReturnStatementNode node, TypeCheckerContext context)
     {
         node.Expression?.Accept(this, context);
 
@@ -535,10 +535,10 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void Visit(ParameterNode node, TypeCheckerContext context)
+    public void VisitParameter(ParameterNode node, TypeCheckerContext context)
         => node.Type.Accept(this, context);
 
-    public void Visit(PropertyDeclarationNode node, TypeCheckerContext context)
+    public void VisitProperty(PropertyDeclarationNode node, TypeCheckerContext context)
     {
         var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
         node.Metadata = type.GetProperty(node.Name);
@@ -550,24 +550,24 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         // TODO: generate getter/setter?
     }
 
-    public void Visit(PropertyGetterNode node, TypeCheckerContext context)
+    public void VisitGetter(PropertyGetterNode node, TypeCheckerContext context)
     {
         node.Body?.Accept(this, context);
     }
 
-    public void Visit(PropertySetterNode node, TypeCheckerContext context)
+    public void VisitSetter(PropertySetterNode node, TypeCheckerContext context)
     {
         // TODO: check the backing field is set?
         node.Body?.Accept(this, context);
     }
 
-    public void Visit(SyntaxTree node, TypeCheckerContext context)
+    public void VisitTree(SyntaxTree node, TypeCheckerContext context)
     {
         foreach (var statement in node.Declarations)
             statement.Accept(this, context);
     }
 
-    public void Visit(TupleExpressionNode node, TypeCheckerContext context)
+    public void VisitTuple(TupleExpressionNode node, TypeCheckerContext context)
     {
         foreach (var expression in node.Expressions)
             expression.Accept(this, context);
@@ -588,7 +588,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.ReturnTypeMetadata = existingTuple;
     }
 
-    public void Visit(TupleTypeNode node, TypeCheckerContext context)
+    public void VisitTupleType(TupleTypeNode node, TypeCheckerContext context)
     {
         foreach (var type in node.Types)
             type.Accept(this, context);
@@ -602,7 +602,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = tuple;
     }
 
-    public void Visit(TypeAliasDeclarationNode node, TypeCheckerContext context)
+    public void VisitTypeAlias(TypeAliasDeclarationNode node, TypeCheckerContext context)
     {
         node.Type.Accept(this, context);
 
@@ -611,7 +611,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
                         throw new SemanticAnalysisException($"Unknown type '{node.Name}'");
     }
 
-    public void Visit(TypeDeclarationNode node, TypeCheckerContext context)
+    public void VisitType(TypeDeclarationNode node, TypeCheckerContext context)
     {
         var typeProvider = node.SymbolTable!.TypeProvider;
         var metadata = typeProvider.GetType(node.FullName);
@@ -633,7 +633,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             method.Accept(this, context);
     }
 
-    public void Visit(TypeNode node, TypeCheckerContext context)
+    public void VisitTypeNode(TypeNode node, TypeCheckerContext context)
     {
         var typeProvider = node.SymbolTable!.TypeProvider;
         var type = typeProvider.GetType(node.Name) ??
@@ -642,7 +642,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = type;
     }
 
-    public void Visit(UnaryExpressionNode node, TypeCheckerContext context)
+    public void VisitUnaryExpression(UnaryExpressionNode node, TypeCheckerContext context)
     {
         node.Operand.Accept(this, context);
 
@@ -700,7 +700,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void Visit(VariableDeclarationStatementNode node, TypeCheckerContext context)
+    public void VisitVariable(VariableDeclarationStatementNode node, TypeCheckerContext context)
     {
         // TODO: infer type
         // TODO: unused variable
@@ -714,7 +714,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             throw new SemanticAnalysisException($"Type mismatch in variable declaration '{node.Name}': expected '{node.Type.Metadata}', got '{node.Expression.ReturnTypeMetadata}'");
     }
 
-    public void Visit(WhileNode node, TypeCheckerContext context)
+    public void VisitWhile(WhileNode node, TypeCheckerContext context)
     {
         node.Condition.Accept(this, context);
         node.Body.Accept(this, context);

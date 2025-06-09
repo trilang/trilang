@@ -56,10 +56,10 @@ public class NewArrayExpressionNode : IExpressionNode, IEquatable<NewArrayExpres
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitNewArray(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitNewArray(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

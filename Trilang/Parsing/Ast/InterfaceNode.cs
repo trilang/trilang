@@ -72,10 +72,10 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitInterface(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitInterface(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

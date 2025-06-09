@@ -7,7 +7,7 @@ namespace Trilang.Semantics;
 
 internal class CheckStaticAndInstanceMembersAccess : Visitor
 {
-    protected override void VisitExit(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessExit(MemberAccessExpressionNode node)
     {
         if (node.Member is not MemberAccessExpressionNode parent)
             return;

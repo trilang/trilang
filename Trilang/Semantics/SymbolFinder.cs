@@ -6,7 +6,7 @@ namespace Trilang.Semantics;
 
 internal class SymbolFinder : IVisitor<SymbolFinderContext>
 {
-    public void Visit(ArrayAccessExpressionNode node, SymbolFinderContext context)
+    public void VisitArrayAccess(ArrayAccessExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -14,7 +14,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Index.Accept(this, context);
     }
 
-    public void Visit(ArrayTypeNode node, SymbolFinderContext context)
+    public void VisitArrayType(ArrayTypeNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -23,7 +23,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.ElementType.Accept(this, context);
     }
 
-    public void Visit(AsExpressionNode node, SymbolFinderContext context)
+    public void VisitAsExpression(AsExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -31,7 +31,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Type.Accept(this, context);
     }
 
-    public void Visit(BinaryExpressionNode node, SymbolFinderContext context)
+    public void VisitBinaryExpression(BinaryExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -39,7 +39,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Right.Accept(this, context);
     }
 
-    public void Visit(BlockStatementNode node, SymbolFinderContext context)
+    public void VisitBlock(BlockStatementNode node, SymbolFinderContext context)
         => context.Scoped(c =>
         {
             node.SymbolTable = c.SymbolTable;
@@ -48,10 +48,10 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
                 statement.Accept(this, c);
         });
 
-    public void Visit(BreakNode node, SymbolFinderContext context)
+    public void VisitBreak(BreakNode node, SymbolFinderContext context)
         => node.SymbolTable = context.SymbolTable;
 
-    public void Visit(CallExpressionNode node, SymbolFinderContext context)
+    public void VisitCall(CallExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -61,7 +61,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             parameter.Accept(this, context);
     }
 
-    public void Visit(ConstructorDeclarationNode node, SymbolFinderContext context)
+    public void VisitConstructor(ConstructorDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -78,10 +78,10 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(ContinueNode node, SymbolFinderContext context)
+    public void VisitContinue(ContinueNode node, SymbolFinderContext context)
         => node.SymbolTable = context.SymbolTable;
 
-    public void Visit(DiscriminatedUnionNode node, SymbolFinderContext context)
+    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node, SymbolFinderContext context)
     {
         var symbol = TypeSymbol.DiscriminatedUnion(node);
         context.SymbolTable.TryAddType(symbol);
@@ -95,14 +95,14 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(ExpressionStatementNode node, SymbolFinderContext context)
+    public void VisitExpressionStatement(ExpressionStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
         node.Expression.Accept(this, context);
     }
 
-    public void Visit(FunctionDeclarationNode node, SymbolFinderContext context)
+    public void VisitFunction(FunctionDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -123,7 +123,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(FunctionTypeNode node, SymbolFinderContext context)
+    public void VisitFunctionType(FunctionTypeNode node, SymbolFinderContext context)
     {
         var symbol = TypeSymbol.FunctionType(node);
         context.SymbolTable.TryAddType(symbol);
@@ -136,7 +136,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.ReturnType.Accept(this, context);
     }
 
-    public void Visit(GenericTypeNode node, SymbolFinderContext context)
+    public void VisitGenericType(GenericTypeNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -147,7 +147,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable.TryAddType(symbol);
     }
 
-    public void Visit(IfDirectiveNode node, SymbolFinderContext context)
+    public void VisitIfDirective(IfDirectiveNode node, SymbolFinderContext context)
     {
         if (!context.SemanticAnalysisOptions.HasDirective(node.DirectiveName))
             return;
@@ -159,7 +159,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             @else.Accept(this, context);
     }
 
-    public void Visit(IfStatementNode node, SymbolFinderContext context)
+    public void VisitIf(IfStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -168,7 +168,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Else?.Accept(this, context);
     }
 
-    public void Visit(InterfaceNode node, SymbolFinderContext context)
+    public void VisitInterface(InterfaceNode node, SymbolFinderContext context)
     {
         var symbol = TypeSymbol.Interface(node);
         context.SymbolTable.TryAddType(symbol);
@@ -185,7 +185,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(InterfacePropertyNode node, SymbolFinderContext context)
+    public void VisitInterfaceProperty(InterfacePropertyNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -196,7 +196,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             throw new SemanticAnalysisException($"The '{node.Name}' property is already defined.");
     }
 
-    public void Visit(InterfaceMethodNode node, SymbolFinderContext context)
+    public void VisitInterfaceMethod(InterfaceMethodNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -213,19 +213,19 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(LiteralExpressionNode node, SymbolFinderContext context)
+    public void VisitLiteral(LiteralExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
     }
 
-    public void Visit(MemberAccessExpressionNode node, SymbolFinderContext context)
+    public void VisitMemberAccess(MemberAccessExpressionNode node, SymbolFinderContext context)
     {
         node.Member?.Accept(this, context);
 
         node.SymbolTable = context.SymbolTable;
     }
 
-    public void Visit(MethodDeclarationNode node, SymbolFinderContext context)
+    public void VisitMethod(MethodDeclarationNode node, SymbolFinderContext context)
     {
         var symbol = new IdSymbol(node);
         if (!context.SymbolTable.TryAddId(symbol))
@@ -248,7 +248,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(NewArrayExpressionNode node, SymbolFinderContext context)
+    public void VisitNewArray(NewArrayExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -256,7 +256,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Size.Accept(this, context);
     }
 
-    public void Visit(NewObjectExpressionNode node, SymbolFinderContext context)
+    public void VisitNewObject(NewObjectExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -266,17 +266,17 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             parameter.Accept(this, context);
     }
 
-    public void Visit(NullExpressionNode node, SymbolFinderContext context)
+    public void VisitNull(NullExpressionNode node, SymbolFinderContext context)
         => node.SymbolTable = context.SymbolTable;
 
-    public void Visit(ReturnStatementNode node, SymbolFinderContext context)
+    public void VisitReturn(ReturnStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
         node.Expression?.Accept(this, context);
     }
 
-    public void Visit(ParameterNode node, SymbolFinderContext context)
+    public void VisitParameter(ParameterNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -287,7 +287,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Type.Accept(this, context);
     }
 
-    public void Visit(PropertyDeclarationNode node, SymbolFinderContext context)
+    public void VisitProperty(PropertyDeclarationNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -300,7 +300,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Setter?.Accept(this, context);
     }
 
-    public void Visit(PropertyGetterNode node, SymbolFinderContext context)
+    public void VisitGetter(PropertyGetterNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -316,7 +316,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(PropertySetterNode node, SymbolFinderContext context)
+    public void VisitSetter(PropertySetterNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -336,7 +336,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(SyntaxTree node, SymbolFinderContext context)
+    public void VisitTree(SyntaxTree node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -344,7 +344,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             function.Accept(this, context);
     }
 
-    public void Visit(TupleExpressionNode node, SymbolFinderContext context)
+    public void VisitTuple(TupleExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -352,7 +352,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             expression.Accept(this, context);
     }
 
-    public void Visit(TupleTypeNode node, SymbolFinderContext context)
+    public void VisitTupleType(TupleTypeNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
@@ -363,7 +363,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         context.SymbolTable.TryAddType(symbol);
     }
 
-    public void Visit(TypeAliasDeclarationNode node, SymbolFinderContext context)
+    public void VisitTypeAlias(TypeAliasDeclarationNode node, SymbolFinderContext context)
     {
         if (!context.SymbolTable.TryAddType(TypeSymbol.Alias(node)))
             throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
@@ -379,7 +379,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(TypeDeclarationNode node, SymbolFinderContext context)
+    public void VisitType(TypeDeclarationNode node, SymbolFinderContext context)
     {
         var symbol = node.GenericArguments.Count > 0
             ? TypeSymbol.OpenGenericType(node)
@@ -408,19 +408,19 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
-    public void Visit(TypeNode node, SymbolFinderContext context)
+    public void VisitTypeNode(TypeNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
     }
 
-    public void Visit(UnaryExpressionNode node, SymbolFinderContext context)
+    public void VisitUnaryExpression(UnaryExpressionNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 
         node.Operand.Accept(this, context);
     }
 
-    public void Visit(VariableDeclarationStatementNode node, SymbolFinderContext context)
+    public void VisitVariable(VariableDeclarationStatementNode node, SymbolFinderContext context)
     {
         node.Type.Accept(this, context);
         node.Expression.Accept(this, context);
@@ -432,7 +432,7 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable = context.SymbolTable;
     }
 
-    public void Visit(WhileNode node, SymbolFinderContext context)
+    public void VisitWhile(WhileNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;
 

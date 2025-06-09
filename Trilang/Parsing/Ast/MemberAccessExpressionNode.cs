@@ -68,10 +68,10 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitMemberAccess(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitMemberAccess(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

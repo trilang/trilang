@@ -4,81 +4,81 @@ namespace Trilang.Parsing;
 
 public interface IVisitor
 {
-    void Visit(ArrayAccessExpressionNode node);
+    void VisitArrayAccess(ArrayAccessExpressionNode node);
 
-    void Visit(ArrayTypeNode node);
+    void VisitArrayType(ArrayTypeNode node);
 
-    void Visit(AsExpressionNode node);
+    void VisitAsExpression(AsExpressionNode node);
 
-    void Visit(BinaryExpressionNode node);
+    void VisitBinaryExpression(BinaryExpressionNode node);
 
-    void Visit(BlockStatementNode node);
+    void VisitBlock(BlockStatementNode node);
 
-    void Visit(BreakNode node);
+    void VisitBreak(BreakNode node);
 
-    void Visit(CallExpressionNode node);
+    void VisitCall(CallExpressionNode node);
 
-    void Visit(ConstructorDeclarationNode node);
+    void VisitConstructor(ConstructorDeclarationNode node);
 
-    void Visit(ContinueNode node);
+    void VisitContinue(ContinueNode node);
 
-    void Visit(DiscriminatedUnionNode node);
+    void VisitDiscriminatedUnion(DiscriminatedUnionNode node);
 
-    void Visit(ExpressionStatementNode node);
+    void VisitExpressionStatement(ExpressionStatementNode node);
 
-    void Visit(FunctionDeclarationNode node);
+    void VisitFunction(FunctionDeclarationNode node);
 
-    void Visit(FunctionTypeNode node);
+    void VisitFunctionType(FunctionTypeNode node);
 
-    void Visit(GenericTypeNode node);
+    void VisitGenericType(GenericTypeNode node);
 
-    void Visit(IfDirectiveNode node);
+    void VisitIfDirective(IfDirectiveNode node);
 
-    void Visit(IfStatementNode node);
+    void VisitIf(IfStatementNode node);
 
-    void Visit(InterfaceNode node);
+    void VisitInterface(InterfaceNode node);
 
-    void Visit(InterfacePropertyNode node);
+    void VisitInterfaceProperty(InterfacePropertyNode node);
 
-    void Visit(InterfaceMethodNode node);
+    void VisitInterfaceMethod(InterfaceMethodNode node);
 
-    void Visit(LiteralExpressionNode node);
+    void VisitLiteral(LiteralExpressionNode node);
 
-    void Visit(MemberAccessExpressionNode node);
+    void VisitMemberAccess(MemberAccessExpressionNode node);
 
-    void Visit(MethodDeclarationNode node);
+    void VisitMethod(MethodDeclarationNode node);
 
-    void Visit(NewArrayExpressionNode node);
+    void VisitNewArray(NewArrayExpressionNode node);
 
-    void Visit(NewObjectExpressionNode node);
+    void VisitNewObject(NewObjectExpressionNode node);
 
-    void Visit(NullExpressionNode node);
+    void VisitNull(NullExpressionNode node);
 
-    void Visit(ParameterNode node);
+    void VisitParameter(ParameterNode node);
 
-    void Visit(PropertyDeclarationNode node);
+    void VisitProperty(PropertyDeclarationNode node);
 
-    void Visit(PropertyGetterNode node);
+    void VisitGetter(PropertyGetterNode node);
 
-    void Visit(PropertySetterNode node);
+    void VisitSetter(PropertySetterNode node);
 
-    void Visit(ReturnStatementNode node);
+    void VisitReturn(ReturnStatementNode node);
 
-    void Visit(SyntaxTree node);
+    void VisitTree(SyntaxTree node);
 
-    void Visit(TupleExpressionNode node);
+    void VisitTuple(TupleExpressionNode node);
 
-    void Visit(TupleTypeNode node);
+    void VisitTupleType(TupleTypeNode node);
 
-    void Visit(TypeAliasDeclarationNode node);
+    void VisitTypeAlias(TypeAliasDeclarationNode node);
 
-    void Visit(TypeDeclarationNode node);
+    void VisitType(TypeDeclarationNode node);
 
-    void Visit(TypeNode node);
+    void VisitTypeNode(TypeNode node);
 
-    void Visit(UnaryExpressionNode node);
+    void VisitUnaryExpression(UnaryExpressionNode node);
 
-    void Visit(VariableDeclarationStatementNode node);
+    void VisitVariable(VariableDeclarationStatementNode node);
 
-    void Visit(WhileNode node);
+    void VisitWhile(WhileNode node);
 }

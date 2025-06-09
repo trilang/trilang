@@ -61,10 +61,10 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitBlock(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitBlock(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

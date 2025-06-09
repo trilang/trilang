@@ -49,10 +49,10 @@ public class TupleTypeNode : IInlineTypeNode, IEquatable<TupleTypeNode>
         => HashCode.Combine(Name, Types);
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitTupleType(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitTupleType(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

@@ -89,10 +89,10 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitFunction(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitFunction(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

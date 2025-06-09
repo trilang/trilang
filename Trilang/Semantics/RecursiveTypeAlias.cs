@@ -11,7 +11,7 @@ internal class RecursiveTypeAlias : Visitor
     public RecursiveTypeAlias()
         => visitedTypes = [];
 
-    protected override void VisitEnter(TypeAliasDeclarationNode node)
+    protected override void VisitTypeAliasEnter(TypeAliasDeclarationNode node)
     {
         var metadata = node.Metadata;
         if (metadata is null)

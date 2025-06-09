@@ -64,10 +64,10 @@ public class FunctionTypeNode : IInlineTypeNode, IEquatable<FunctionTypeNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitFunctionType(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitFunctionType(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

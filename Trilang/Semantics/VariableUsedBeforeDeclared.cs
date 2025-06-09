@@ -10,19 +10,19 @@ internal class VariableUsedBeforeDeclared : Visitor
     public VariableUsedBeforeDeclared()
         => scopes = [];
 
-    protected override void VisitEnter(BlockStatementNode node)
+    protected override void VisitBlockEnter(BlockStatementNode node)
         => scopes.Push([]);
 
-    protected override void VisitExit(BlockStatementNode node)
+    protected override void VisitBlockExit(BlockStatementNode node)
         => scopes.Pop();
 
-    protected override void VisitEnter(VariableDeclarationStatementNode node)
+    protected override void VisitVariableEnter(VariableDeclarationStatementNode node)
     {
         if (scopes.TryPeek(out var scope))
             scope.Add(node.Name);
     }
 
-    protected override void VisitEnter(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
     {
         if (node.Member is not null || node.IsThis || node.IsField || node.IsValue)
             return;

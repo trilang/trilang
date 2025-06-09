@@ -46,10 +46,10 @@ public class NullExpressionNode : IExpressionNode, IEquatable<NullExpressionNode
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitNull(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitNull(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

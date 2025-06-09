@@ -59,10 +59,10 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitNewObject(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitNewObject(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

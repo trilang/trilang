@@ -5,7 +5,7 @@ namespace Trilang.Semantics;
 
 internal class ThisOutsideOfClass : Visitor
 {
-    protected override void VisitEnter(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
     {
         if (!node.IsThis)
             return;

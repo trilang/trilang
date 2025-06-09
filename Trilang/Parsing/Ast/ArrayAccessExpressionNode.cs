@@ -60,10 +60,10 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitArrayAccess(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitArrayAccess(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

@@ -5,14 +5,14 @@ namespace Trilang.Semantics;
 
 internal class BreakContinueWithinLoop : Visitor
 {
-    protected override void VisitEnter(BreakNode node)
+    protected override void VisitBreakEnter(BreakNode node)
     {
         var whileLoop = node.FindInParent<WhileNode>();
         if (whileLoop is null)
             throw new SemanticAnalysisException("The 'break' keyword can only be used within a loop.");
     }
 
-    protected override void VisitEnter(ContinueNode node)
+    protected override void VisitContinueEnter(ContinueNode node)
     {
         var whileLoop = node.FindInParent<WhileNode>();
         if (whileLoop is null)

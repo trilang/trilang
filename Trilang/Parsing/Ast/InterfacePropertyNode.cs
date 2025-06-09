@@ -64,10 +64,10 @@ public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNo
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitInterfaceProperty(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitInterfaceProperty(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

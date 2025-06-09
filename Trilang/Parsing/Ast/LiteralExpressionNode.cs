@@ -72,10 +72,10 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitLiteral(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitLiteral(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

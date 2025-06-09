@@ -54,10 +54,10 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitExpressionStatement(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitExpressionStatement(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

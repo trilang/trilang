@@ -56,10 +56,10 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitArrayType(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitArrayType(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

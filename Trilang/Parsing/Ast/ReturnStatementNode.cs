@@ -55,10 +55,10 @@ public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNod
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitReturn(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitReturn(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

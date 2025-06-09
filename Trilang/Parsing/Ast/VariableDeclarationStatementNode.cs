@@ -60,10 +60,10 @@ public class VariableDeclarationStatementNode : IStatementNode, IEquatable<Varia
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitVariable(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitVariable(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

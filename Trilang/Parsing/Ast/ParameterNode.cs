@@ -55,10 +55,10 @@ public class ParameterNode : ISyntaxNode, IEquatable<ParameterNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitParameter(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitParameter(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

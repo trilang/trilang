@@ -38,7 +38,7 @@ public partial class Formatter : IFormatter
         writer.Write('>');
     }
 
-    public void Visit(ArrayAccessExpressionNode node)
+    public void VisitArrayAccess(ArrayAccessExpressionNode node)
     {
         node.Member.Accept(this);
         writer.Write('[');
@@ -46,20 +46,20 @@ public partial class Formatter : IFormatter
         writer.Write(']');
     }
 
-    public void Visit(ArrayTypeNode node)
+    public void VisitArrayType(ArrayTypeNode node)
     {
         node.ElementType.Accept(this);
         writer.Write("[]");
     }
 
-    public void Visit(AsExpressionNode node)
+    public void VisitAsExpression(AsExpressionNode node)
     {
         node.Expression.Accept(this);
         writer.Write(" as ");
         node.Type.Accept(this);
     }
 
-    public void Visit(BinaryExpressionNode node)
+    public void VisitBinaryExpression(BinaryExpressionNode node)
     {
         node.Left.Accept(this);
         writer.Write(' ');
@@ -103,7 +103,7 @@ public partial class Formatter : IFormatter
         node.Right.Accept(this);
     }
 
-    public void Visit(BlockStatementNode node)
+    public void VisitBlock(BlockStatementNode node)
     {
         writer.WriteLine('{');
         writer.Scoped(() =>
@@ -114,10 +114,10 @@ public partial class Formatter : IFormatter
         writer.Write('}');
     }
 
-    public void Visit(BreakNode node)
+    public void VisitBreak(BreakNode node)
         => writer.WriteLine("break;");
 
-    public void Visit(CallExpressionNode node)
+    public void VisitCall(CallExpressionNode node)
     {
         node.Member.Accept(this);
         writer.Write('(');
@@ -134,7 +134,7 @@ public partial class Formatter : IFormatter
         writer.Write(")");
     }
 
-    public void Visit(ConstructorDeclarationNode node)
+    public void VisitConstructor(ConstructorDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" constructor(");
@@ -152,10 +152,10 @@ public partial class Formatter : IFormatter
         node.Body.Accept(this);
     }
 
-    public void Visit(ContinueNode node)
+    public void VisitContinue(ContinueNode node)
         => writer.WriteLine("continue;");
 
-    public void Visit(DiscriminatedUnionNode node)
+    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node)
     {
         for (var i = 0; i < node.Types.Count; i++)
         {
@@ -166,13 +166,13 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(ExpressionStatementNode node)
+    public void VisitExpressionStatement(ExpressionStatementNode node)
     {
         node.Expression.Accept(this);
         writer.WriteLine(';');
     }
 
-    public void Visit(PropertyDeclarationNode node)
+    public void VisitProperty(PropertyDeclarationNode node)
     {
         writer.Write(node.Name);
         writer.Write(": ");
@@ -204,7 +204,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(PropertyGetterNode node)
+    public void VisitGetter(PropertyGetterNode node)
     {
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" get");
@@ -220,7 +220,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(PropertySetterNode node)
+    public void VisitSetter(PropertySetterNode node)
     {
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" set");
@@ -236,7 +236,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(FunctionDeclarationNode node)
+    public void VisitFunction(FunctionDeclarationNode node)
     {
         if (node.IsExternal)
             writer.Write("external ");
@@ -260,7 +260,7 @@ public partial class Formatter : IFormatter
         node.Body?.Accept(this);
     }
 
-    public void Visit(FunctionTypeNode node)
+    public void VisitFunctionType(FunctionTypeNode node)
     {
         writer.Write('(');
 
@@ -276,7 +276,7 @@ public partial class Formatter : IFormatter
         node.ReturnType.Accept(this);
     }
 
-    public void Visit(GenericTypeNode node)
+    public void VisitGenericType(GenericTypeNode node)
     {
         writer.Write(node.PrefixName);
         writer.Write('<');
@@ -292,7 +292,7 @@ public partial class Formatter : IFormatter
         writer.Write('>');
     }
 
-    public void Visit(IfDirectiveNode node)
+    public void VisitIfDirective(IfDirectiveNode node)
     {
         writer.Write("#if ");
         writer.WriteLine(node.DirectiveName);
@@ -321,7 +321,7 @@ public partial class Formatter : IFormatter
         writer.Write("#endif");
     }
 
-    public void Visit(IfStatementNode node)
+    public void VisitIf(IfStatementNode node)
     {
         writer.Write("if (");
         node.Condition.Accept(this);
@@ -337,7 +337,7 @@ public partial class Formatter : IFormatter
         writer.WriteLine();
     }
 
-    public void Visit(InterfaceNode node)
+    public void VisitInterface(InterfaceNode node)
     {
         if (node.Parent is TypeAliasDeclarationNode)
         {
@@ -383,7 +383,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(InterfacePropertyNode node)
+    public void VisitInterfaceProperty(InterfacePropertyNode node)
     {
         writer.Write(node.Name);
         writer.Write(": ");
@@ -417,7 +417,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(InterfaceMethodNode node)
+    public void VisitInterfaceMethod(InterfaceMethodNode node)
     {
         writer.Write(node.Name);
         writer.Write("(");
@@ -435,7 +435,7 @@ public partial class Formatter : IFormatter
         writer.Write(";");
     }
 
-    public void Visit(LiteralExpressionNode node)
+    public void VisitLiteral(LiteralExpressionNode node)
     {
         switch (node.Kind)
         {
@@ -460,7 +460,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(MemberAccessExpressionNode node)
+    public void VisitMemberAccess(MemberAccessExpressionNode node)
     {
         if (node.Member is not null)
         {
@@ -471,7 +471,7 @@ public partial class Formatter : IFormatter
         writer.Write(node.Name);
     }
 
-    public void Visit(MethodDeclarationNode node)
+    public void VisitMethod(MethodDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);
 
@@ -497,7 +497,7 @@ public partial class Formatter : IFormatter
         node.Body.Accept(this);
     }
 
-    public void Visit(NewArrayExpressionNode node)
+    public void VisitNewArray(NewArrayExpressionNode node)
     {
         writer.Write("new ");
         node.Type.ElementType.Accept(this);
@@ -506,7 +506,7 @@ public partial class Formatter : IFormatter
         writer.Write(']');
     }
 
-    public void Visit(NewObjectExpressionNode node)
+    public void VisitNewObject(NewObjectExpressionNode node)
     {
         writer.Write("new ");
         node.Type.Accept(this);
@@ -523,17 +523,17 @@ public partial class Formatter : IFormatter
         writer.Write(')');
     }
 
-    public void Visit(NullExpressionNode node)
+    public void VisitNull(NullExpressionNode node)
         => writer.Write("null");
 
-    public void Visit(ParameterNode node)
+    public void VisitParameter(ParameterNode node)
     {
         writer.Write(node.Name);
         writer.Write(": ");
         node.Type.Accept(this);
     }
 
-    public void Visit(ReturnStatementNode node)
+    public void VisitReturn(ReturnStatementNode node)
     {
         if (node.Expression is not null)
         {
@@ -547,7 +547,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(SyntaxTree node)
+    public void VisitTree(SyntaxTree node)
     {
         for (var i = 0; i < node.Declarations.Count; i++)
         {
@@ -561,7 +561,7 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void Visit(TupleExpressionNode node)
+    public void VisitTuple(TupleExpressionNode node)
     {
         writer.Write('(');
 
@@ -576,7 +576,7 @@ public partial class Formatter : IFormatter
         writer.Write(')');
     }
 
-    public void Visit(TupleTypeNode node)
+    public void VisitTupleType(TupleTypeNode node)
     {
         writer.Write('(');
 
@@ -591,7 +591,7 @@ public partial class Formatter : IFormatter
         writer.Write(')');
     }
 
-    public void Visit(TypeAliasDeclarationNode node)
+    public void VisitTypeAlias(TypeAliasDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" type ");
@@ -604,7 +604,7 @@ public partial class Formatter : IFormatter
             writer.Write(';');
     }
 
-    public void Visit(TypeDeclarationNode node)
+    public void VisitType(TypeDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" type ");
@@ -650,12 +650,12 @@ public partial class Formatter : IFormatter
         writer.Write('}');
     }
 
-    public void Visit(TypeNode node)
+    public void VisitTypeNode(TypeNode node)
     {
         writer.Write(node.Name);
     }
 
-    public void Visit(UnaryExpressionNode node)
+    public void VisitUnaryExpression(UnaryExpressionNode node)
     {
         writer.Write(node.Kind switch
         {
@@ -670,7 +670,7 @@ public partial class Formatter : IFormatter
         node.Operand.Accept(this);
     }
 
-    public void Visit(VariableDeclarationStatementNode node)
+    public void VisitVariable(VariableDeclarationStatementNode node)
     {
         writer.Write("var ");
         writer.Write(node.Name);
@@ -681,7 +681,7 @@ public partial class Formatter : IFormatter
         writer.WriteLine(';');
     }
 
-    public void Visit(WhileNode node)
+    public void VisitWhile(WhileNode node)
     {
         writer.Write("while (");
         node.Condition.Accept(this);

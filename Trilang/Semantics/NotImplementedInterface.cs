@@ -6,7 +6,7 @@ namespace Trilang.Semantics;
 
 internal class NotImplementedInterface : Visitor
 {
-    protected override void VisitEnter(TypeDeclarationNode node)
+    protected override void VisitTypeEnter(TypeDeclarationNode node)
     {
         var type = node.Metadata;
         if (node.Interfaces.Count == 0 || type is null)

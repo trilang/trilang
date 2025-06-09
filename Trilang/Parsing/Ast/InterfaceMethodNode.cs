@@ -61,10 +61,10 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitInterfaceMethod(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitInterfaceMethod(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

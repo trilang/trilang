@@ -61,10 +61,10 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitCall(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitCall(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

@@ -60,10 +60,10 @@ public class GenericTypeNode : IInlineTypeNode, IEquatable<GenericTypeNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitGenericType(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitGenericType(this, context);
 
     public string GetOpenGenericName()
         => $"{PrefixName}<{new string(',', TypeArguments.Count - 1)}>";

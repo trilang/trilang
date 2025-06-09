@@ -57,10 +57,10 @@ public class IfDirectiveNode : IDeclarationNode, IStatementNode, IEquatable<IfDi
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitIfDirective(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitIfDirective(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

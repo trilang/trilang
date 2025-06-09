@@ -76,10 +76,10 @@ public class TypeAliasDeclarationNode :
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitTypeAlias(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitTypeAlias(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

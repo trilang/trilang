@@ -42,6 +42,6 @@ internal class MetadataGenerator : Visitor
         genericTypeGenerator.PopulateGenericTypes();
     }
 
-    protected override void VisitEnter(SyntaxTree node)
+    protected override void VisitTreeEnter(SyntaxTree node)
         => BuildSymbolTableTypes(node.SymbolTable);
 }

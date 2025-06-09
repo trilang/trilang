@@ -56,10 +56,10 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitTree(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitTree(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

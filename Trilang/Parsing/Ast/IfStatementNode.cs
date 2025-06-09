@@ -63,10 +63,10 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitIf(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitIf(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

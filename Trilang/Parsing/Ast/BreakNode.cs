@@ -45,10 +45,10 @@ public class BreakNode : IStatementNode, IEquatable<BreakNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitBreak(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitBreak(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

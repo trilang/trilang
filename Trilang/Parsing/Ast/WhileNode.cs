@@ -58,10 +58,10 @@ public class WhileNode : IStatementNode, IEquatable<WhileNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitWhile(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitWhile(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

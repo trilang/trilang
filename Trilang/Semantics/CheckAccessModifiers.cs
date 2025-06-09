@@ -6,7 +6,7 @@ namespace Trilang.Semantics;
 
 internal class CheckAccessModifiers : Visitor
 {
-    protected override void VisitEnter(NewObjectExpressionNode node)
+    protected override void VisitNewObjectEnter(NewObjectExpressionNode node)
     {
         var ctor = node.Metadata!;
         var parentType = node.FindInParent<TypeDeclarationNode>()?.Metadata;
@@ -20,7 +20,7 @@ internal class CheckAccessModifiers : Visitor
             throw new SemanticAnalysisException($"The constructor of '{ctor.DeclaringType.Name}' is not accessible.");
     }
 
-    protected override void VisitEnter(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
     {
         // TODO: implement check access
     }

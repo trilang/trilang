@@ -57,10 +57,10 @@ public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNo
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitTuple(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitTuple(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

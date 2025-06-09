@@ -76,10 +76,10 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitMethod(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitMethod(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

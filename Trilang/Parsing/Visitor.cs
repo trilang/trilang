@@ -4,200 +4,200 @@ namespace Trilang.Parsing;
 
 public abstract class Visitor : IVisitor
 {
-    public void Visit(ArrayAccessExpressionNode node)
+    public void VisitArrayAccess(ArrayAccessExpressionNode node)
     {
-        VisitEnter(node);
+        VisitArrayAccessEnter(node);
 
         node.Member.Accept(this);
 
-        VisitExit(node);
+        VisitArrayAccessExit(node);
     }
 
-    protected virtual void VisitEnter(ArrayAccessExpressionNode node)
+    protected virtual void VisitArrayAccessEnter(ArrayAccessExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(ArrayAccessExpressionNode node)
+    protected virtual void VisitArrayAccessExit(ArrayAccessExpressionNode node)
     {
     }
 
-    public void Visit(ArrayTypeNode node)
+    public void VisitArrayType(ArrayTypeNode node)
     {
-        VisitEnter(node);
+        VisitArrayTypeEnter(node);
 
         node.ElementType.Accept(this);
 
-        VisitExit(node);
+        VisitArrayTypeExit(node);
     }
 
-    protected virtual void VisitEnter(ArrayTypeNode node)
+    protected virtual void VisitArrayTypeEnter(ArrayTypeNode node)
     {
     }
 
-    protected virtual void VisitExit(ArrayTypeNode node)
+    protected virtual void VisitArrayTypeExit(ArrayTypeNode node)
     {
     }
 
-    public void Visit(AsExpressionNode node)
+    public void VisitAsExpression(AsExpressionNode node)
     {
-        VisitEnter(node);
+        VisitAsExpressionEnter(node);
 
         node.Expression.Accept(this);
         node.Type.Accept(this);
 
-        VisitExit(node);
+        VisitAsExpressionExit(node);
     }
 
-    protected virtual void VisitEnter(AsExpressionNode node)
+    protected virtual void VisitAsExpressionEnter(AsExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(AsExpressionNode node)
+    protected virtual void VisitAsExpressionExit(AsExpressionNode node)
     {
     }
 
-    public void Visit(BinaryExpressionNode node)
+    public void VisitBinaryExpression(BinaryExpressionNode node)
     {
-        VisitEnter(node);
+        VisitBinaryExpressionEnter(node);
 
         node.Left.Accept(this);
         node.Right.Accept(this);
 
-        VisitExit(node);
+        VisitBinaryExpressionExit(node);
     }
 
-    protected virtual void VisitEnter(BinaryExpressionNode node)
+    protected virtual void VisitBinaryExpressionEnter(BinaryExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(BinaryExpressionNode node)
+    protected virtual void VisitBinaryExpressionExit(BinaryExpressionNode node)
     {
     }
 
-    public void Visit(BlockStatementNode node)
+    public void VisitBlock(BlockStatementNode node)
     {
-        VisitEnter(node);
+        VisitBlockEnter(node);
 
         foreach (var statement in node.Statements)
             statement.Accept(this);
 
-        VisitExit(node);
+        VisitBlockExit(node);
     }
 
-    protected virtual void VisitEnter(BlockStatementNode node)
+    protected virtual void VisitBlockEnter(BlockStatementNode node)
     {
     }
 
-    protected virtual void VisitExit(BlockStatementNode node)
+    protected virtual void VisitBlockExit(BlockStatementNode node)
     {
     }
 
-    public void Visit(BreakNode node)
+    public void VisitBreak(BreakNode node)
     {
-        VisitEnter(node);
-        VisitExit(node);
+        VisitBreakEnter(node);
+        VisitBreakExit(node);
     }
 
-    protected virtual void VisitEnter(BreakNode node)
-    {
-    }
-
-    protected virtual void VisitExit(BreakNode node)
+    protected virtual void VisitBreakEnter(BreakNode node)
     {
     }
 
-    public void Visit(CallExpressionNode node)
+    protected virtual void VisitBreakExit(BreakNode node)
     {
-        VisitEnter(node);
+    }
+
+    public void VisitCall(CallExpressionNode node)
+    {
+        VisitCallEnter(node);
 
         node.Member.Accept(this);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
-        VisitExit(node);
+        VisitCallExit(node);
     }
 
-    protected virtual void VisitEnter(CallExpressionNode node)
+    protected virtual void VisitCallEnter(CallExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(CallExpressionNode node)
+    protected virtual void VisitCallExit(CallExpressionNode node)
     {
     }
 
-    public void Visit(ConstructorDeclarationNode node)
+    public void VisitConstructor(ConstructorDeclarationNode node)
     {
-        VisitEnter(node);
+        VisitConstructorEnter(node);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
         node.Body.Accept(this);
 
-        VisitExit(node);
+        VisitConstructorExit(node);
     }
 
-    protected virtual void VisitEnter(ConstructorDeclarationNode node)
+    protected virtual void VisitConstructorEnter(ConstructorDeclarationNode node)
     {
     }
 
-    protected virtual void VisitExit(ConstructorDeclarationNode node)
+    protected virtual void VisitConstructorExit(ConstructorDeclarationNode node)
     {
     }
 
-    public void Visit(ContinueNode node)
+    public void VisitContinue(ContinueNode node)
     {
-        VisitEnter(node);
-        VisitExit(node);
+        VisitContinueEnter(node);
+        VisitContinueExit(node);
     }
 
-    protected virtual void VisitEnter(ContinueNode node)
-    {
-    }
-
-    protected virtual void VisitExit(ContinueNode node)
+    protected virtual void VisitContinueEnter(ContinueNode node)
     {
     }
 
-    public void Visit(DiscriminatedUnionNode node)
+    protected virtual void VisitContinueExit(ContinueNode node)
     {
-        VisitEnter(node);
+    }
+
+    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node)
+    {
+        VisitDiscriminatedUnionEnter(node);
 
         foreach (var type in node.Types)
             type.Accept(this);
 
-        VisitExit(node);
+        VisitDiscriminatedUnionExit(node);
     }
 
-    protected virtual void VisitEnter(DiscriminatedUnionNode node)
+    protected virtual void VisitDiscriminatedUnionEnter(DiscriminatedUnionNode node)
     {
     }
 
-    protected virtual void VisitExit(DiscriminatedUnionNode node)
+    protected virtual void VisitDiscriminatedUnionExit(DiscriminatedUnionNode node)
     {
     }
 
-    public void Visit(ExpressionStatementNode node)
+    public void VisitExpressionStatement(ExpressionStatementNode node)
     {
-        VisitEnter(node);
+        VisitExpressionStatementEnter(node);
 
         node.Expression.Accept(this);
 
-        VisitExit(node);
+        VisitExpressionStatementExit(node);
     }
 
-    protected virtual void VisitEnter(ExpressionStatementNode node)
+    protected virtual void VisitExpressionStatementEnter(ExpressionStatementNode node)
     {
     }
 
-    protected virtual void VisitExit(ExpressionStatementNode node)
+    protected virtual void VisitExpressionStatementExit(ExpressionStatementNode node)
     {
     }
 
-    public void Visit(FunctionDeclarationNode node)
+    public void VisitFunction(FunctionDeclarationNode node)
     {
-        VisitEnter(node);
+        VisitFunctionEnter(node);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
@@ -205,58 +205,58 @@ public abstract class Visitor : IVisitor
         node.ReturnType.Accept(this);
         node.Body?.Accept(this);
 
-        VisitExit(node);
+        VisitFunctionExit(node);
     }
 
-    protected virtual void VisitEnter(FunctionDeclarationNode node)
+    protected virtual void VisitFunctionEnter(FunctionDeclarationNode node)
     {
     }
 
-    protected virtual void VisitExit(FunctionDeclarationNode node)
+    protected virtual void VisitFunctionExit(FunctionDeclarationNode node)
     {
     }
 
-    public void Visit(FunctionTypeNode node)
+    public void VisitFunctionType(FunctionTypeNode node)
     {
-        VisitEnter(node);
+        VisitFunctionTypeEnter(node);
 
         foreach (var parameter in node.ParameterTypes)
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);
 
-        VisitExit(node);
+        VisitFunctionTypeExit(node);
     }
 
-    protected virtual void VisitEnter(FunctionTypeNode node)
+    protected virtual void VisitFunctionTypeEnter(FunctionTypeNode node)
     {
     }
 
-    protected virtual void VisitExit(FunctionTypeNode node)
+    protected virtual void VisitFunctionTypeExit(FunctionTypeNode node)
     {
     }
 
-    public void Visit(GenericTypeNode node)
+    public void VisitGenericType(GenericTypeNode node)
     {
-        VisitEnter(node);
+        VisitGenericTypeEnter(node);
 
         foreach (var type in node.TypeArguments)
             type.Accept(this);
 
-        VisitExit(node);
+        VisitGenericTypeExit(node);
     }
 
-    protected virtual void VisitEnter(GenericTypeNode node)
+    protected virtual void VisitGenericTypeEnter(GenericTypeNode node)
     {
     }
 
-    protected virtual void VisitExit(GenericTypeNode node)
+    protected virtual void VisitGenericTypeExit(GenericTypeNode node)
     {
     }
 
-    public void Visit(IfDirectiveNode node)
+    public void VisitIfDirective(IfDirectiveNode node)
     {
-        VisitEnter(node);
+        VisitIfDirectiveEnter(node);
 
         foreach (var then in node.Then)
             then.Accept(this);
@@ -264,39 +264,39 @@ public abstract class Visitor : IVisitor
         foreach (var @else in node.Else)
             @else.Accept(this);
 
-        VisitExit(node);
+        VisitIfDirectiveExit(node);
     }
 
-    protected virtual void VisitEnter(IfDirectiveNode node)
+    protected virtual void VisitIfDirectiveEnter(IfDirectiveNode node)
     {
     }
 
-    protected virtual void VisitExit(IfDirectiveNode node)
+    protected virtual void VisitIfDirectiveExit(IfDirectiveNode node)
     {
     }
 
-    public void Visit(IfStatementNode node)
+    public void VisitIf(IfStatementNode node)
     {
-        VisitEnter(node);
+        VisitIfEnter(node);
 
         node.Condition.Accept(this);
         node.Then.Accept(this);
         node.Else?.Accept(this);
 
-        VisitExit(node);
+        VisitIfExit(node);
     }
 
-    protected virtual void VisitEnter(IfStatementNode node)
+    protected virtual void VisitIfEnter(IfStatementNode node)
     {
     }
 
-    protected virtual void VisitExit(IfStatementNode node)
+    protected virtual void VisitIfExit(IfStatementNode node)
     {
     }
 
-    public void Visit(InterfaceNode node)
+    public void VisitInterface(InterfaceNode node)
     {
-        VisitEnter(node);
+        VisitInterfaceEnter(node);
 
         foreach (var property in node.Properties)
             property.Accept(this);
@@ -304,88 +304,88 @@ public abstract class Visitor : IVisitor
         foreach (var method in node.Methods)
             method.Accept(this);
 
-        VisitExit(node);
+        VisitInterfaceExit(node);
     }
 
-    protected virtual void VisitEnter(InterfaceNode node)
+    protected virtual void VisitInterfaceEnter(InterfaceNode node)
     {
     }
 
-    protected virtual void VisitExit(InterfaceNode node)
+    protected virtual void VisitInterfaceExit(InterfaceNode node)
     {
     }
 
-    public void Visit(InterfacePropertyNode node)
+    public void VisitInterfaceProperty(InterfacePropertyNode node)
     {
-        VisitEnter(node);
+        VisitInterfacePropertyEnter(node);
 
         node.Type.Accept(this);
 
-        VisitExit(node);
+        VisitInterfacePropertyExit(node);
     }
 
-    protected virtual void VisitEnter(InterfacePropertyNode node)
+    protected virtual void VisitInterfacePropertyEnter(InterfacePropertyNode node)
     {
     }
 
-    protected virtual void VisitExit(InterfacePropertyNode node)
+    protected virtual void VisitInterfacePropertyExit(InterfacePropertyNode node)
     {
     }
 
-    public void Visit(InterfaceMethodNode node)
+    public void VisitInterfaceMethod(InterfaceMethodNode node)
     {
-        VisitEnter(node);
+        VisitInterfaceMethodEnter(node);
 
         foreach (var parameter in node.ParameterTypes)
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);
 
-        VisitExit(node);
+        VisitInterfaceMethodExit(node);
     }
 
-    protected virtual void VisitEnter(InterfaceMethodNode node)
+    protected virtual void VisitInterfaceMethodEnter(InterfaceMethodNode node)
     {
     }
 
-    protected virtual void VisitExit(InterfaceMethodNode node)
+    protected virtual void VisitInterfaceMethodExit(InterfaceMethodNode node)
     {
     }
 
-    public void Visit(LiteralExpressionNode node)
+    public void VisitLiteral(LiteralExpressionNode node)
     {
-        VisitEnter(node);
-        VisitExit(node);
+        VisitLiteralEnter(node);
+        VisitLiteralExit(node);
     }
 
-    protected virtual void VisitEnter(LiteralExpressionNode node)
-    {
-    }
-
-    protected virtual void VisitExit(LiteralExpressionNode node)
+    protected virtual void VisitLiteralEnter(LiteralExpressionNode node)
     {
     }
 
-    public void Visit(MemberAccessExpressionNode node)
+    protected virtual void VisitLiteralExit(LiteralExpressionNode node)
     {
-        VisitEnter(node);
+    }
+
+    public void VisitMemberAccess(MemberAccessExpressionNode node)
+    {
+        VisitMemberAccessEnter(node);
 
         node.Member?.Accept(this);
 
-        VisitExit(node);
+        VisitMemberAccessExit(node);
     }
 
-    protected virtual void VisitEnter(MemberAccessExpressionNode node)
+    protected virtual void VisitMemberAccessEnter(MemberAccessExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(MemberAccessExpressionNode node)
+    protected virtual void VisitMemberAccessExit(MemberAccessExpressionNode node)
     {
     }
 
-    public void Visit(MethodDeclarationNode node)
+    public void VisitMethod(MethodDeclarationNode node)
     {
-        VisitEnter(node);
+        VisitMethodEnter(node);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
@@ -393,230 +393,230 @@ public abstract class Visitor : IVisitor
         node.ReturnType.Accept(this);
         node.Body.Accept(this);
 
-        VisitExit(node);
+        VisitMethodExit(node);
     }
 
-    protected virtual void VisitEnter(MethodDeclarationNode node)
+    protected virtual void VisitMethodEnter(MethodDeclarationNode node)
     {
     }
 
-    protected virtual void VisitExit(MethodDeclarationNode node)
+    protected virtual void VisitMethodExit(MethodDeclarationNode node)
     {
     }
 
-    public void Visit(NewArrayExpressionNode node)
+    public void VisitNewArray(NewArrayExpressionNode node)
     {
-        VisitEnter(node);
+        VisitNewArrayEnter(node);
 
         node.Type.Accept(this);
         node.Size.Accept(this);
 
-        VisitExit(node);
+        VisitNewArrayExit(node);
     }
 
-    protected virtual void VisitEnter(NewArrayExpressionNode node)
+    protected virtual void VisitNewArrayEnter(NewArrayExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(NewArrayExpressionNode node)
+    protected virtual void VisitNewArrayExit(NewArrayExpressionNode node)
     {
     }
 
-    public void Visit(NewObjectExpressionNode node)
+    public void VisitNewObject(NewObjectExpressionNode node)
     {
-        VisitEnter(node);
+        VisitNewObjectEnter(node);
 
         node.Type.Accept(this);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
-        VisitExit(node);
+        VisitNewObjectExit(node);
     }
 
-    protected virtual void VisitEnter(NewObjectExpressionNode node)
+    protected virtual void VisitNewObjectEnter(NewObjectExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(NewObjectExpressionNode node)
+    protected virtual void VisitNewObjectExit(NewObjectExpressionNode node)
     {
     }
 
-    public void Visit(NullExpressionNode node)
+    public void VisitNull(NullExpressionNode node)
     {
-        VisitEnter(node);
-        VisitExit(node);
+        VisitNullEnter(node);
+        VisitNullExit(node);
     }
 
-    protected virtual void VisitEnter(NullExpressionNode node)
-    {
-    }
-
-    protected virtual void VisitExit(NullExpressionNode node)
+    protected virtual void VisitNullEnter(NullExpressionNode node)
     {
     }
 
-    public void Visit(ReturnStatementNode node)
+    protected virtual void VisitNullExit(NullExpressionNode node)
     {
-        VisitEnter(node);
+    }
+
+    public void VisitReturn(ReturnStatementNode node)
+    {
+        VisitReturnEnter(node);
 
         node.Expression?.Accept(this);
 
-        VisitExit(node);
+        VisitReturnExit(node);
     }
 
-    protected virtual void VisitEnter(ReturnStatementNode node)
+    protected virtual void VisitReturnEnter(ReturnStatementNode node)
     {
     }
 
-    protected virtual void VisitExit(ReturnStatementNode node)
+    protected virtual void VisitReturnExit(ReturnStatementNode node)
     {
     }
 
-    public void Visit(ParameterNode node)
+    public void VisitParameter(ParameterNode node)
     {
-        VisitEnter(node);
+        VisitParameterEnter(node);
 
         node.Type.Accept(this);
 
-        VisitExit(node);
+        VisitParameterExit(node);
     }
 
-    protected virtual void VisitEnter(ParameterNode node)
+    protected virtual void VisitParameterEnter(ParameterNode node)
     {
     }
 
-    protected virtual void VisitExit(ParameterNode node)
+    protected virtual void VisitParameterExit(ParameterNode node)
     {
     }
 
-    public void Visit(PropertyDeclarationNode node)
+    public void VisitProperty(PropertyDeclarationNode node)
     {
-        VisitEnter(node);
+        VisitPropertyEnter(node);
 
         node.Type.Accept(this);
         node.Getter?.Accept(this);
         node.Setter?.Accept(this);
 
-        VisitExit(node);
+        VisitPropertyExit(node);
     }
 
-    protected virtual void VisitEnter(PropertyDeclarationNode node)
+    protected virtual void VisitPropertyEnter(PropertyDeclarationNode node)
     {
     }
 
-    protected virtual void VisitExit(PropertyDeclarationNode node)
+    protected virtual void VisitPropertyExit(PropertyDeclarationNode node)
     {
     }
 
-    public void Visit(PropertyGetterNode node)
+    public void VisitGetter(PropertyGetterNode node)
     {
-        VisitEnter(node);
+        VisitGetterEnter(node);
 
         node.Body?.Accept(this);
 
-        VisitExit(node);
+        VisitGetterExit(node);
     }
 
-    protected virtual void VisitEnter(PropertyGetterNode node)
+    protected virtual void VisitGetterEnter(PropertyGetterNode node)
     {
     }
 
-    protected virtual void VisitExit(PropertyGetterNode node)
+    protected virtual void VisitGetterExit(PropertyGetterNode node)
     {
     }
 
-    public void Visit(PropertySetterNode node)
+    public void VisitSetter(PropertySetterNode node)
     {
-        VisitEnter(node);
+        VisitSetterEnter(node);
 
         node.Body?.Accept(this);
 
-        VisitExit(node);
+        VisitSetterExit(node);
     }
 
-    protected virtual void VisitEnter(PropertySetterNode node)
+    protected virtual void VisitSetterEnter(PropertySetterNode node)
     {
     }
 
-    protected virtual void VisitExit(PropertySetterNode node)
+    protected virtual void VisitSetterExit(PropertySetterNode node)
     {
     }
 
-    public void Visit(SyntaxTree node)
+    public void VisitTree(SyntaxTree node)
     {
-        VisitEnter(node);
+        VisitTreeEnter(node);
 
         foreach (var function in node.Declarations)
             function.Accept(this);
 
-        VisitExit(node);
+        VisitTreeExit(node);
     }
 
-    protected virtual void VisitEnter(SyntaxTree node)
+    protected virtual void VisitTreeEnter(SyntaxTree node)
     {
     }
 
-    protected virtual void VisitExit(SyntaxTree node)
+    protected virtual void VisitTreeExit(SyntaxTree node)
     {
     }
 
-    public void Visit(TupleExpressionNode node)
+    public void VisitTuple(TupleExpressionNode node)
     {
-        VisitEnter(node);
+        VisitTupleEnter(node);
 
         foreach (var element in node.Expressions)
             element.Accept(this);
 
-        VisitExit(node);
+        VisitTupleExit(node);
     }
 
-    protected virtual void VisitEnter(TupleExpressionNode node)
+    protected virtual void VisitTupleEnter(TupleExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(TupleExpressionNode node)
+    protected virtual void VisitTupleExit(TupleExpressionNode node)
     {
     }
 
-    public void Visit(TupleTypeNode node)
+    public void VisitTupleType(TupleTypeNode node)
     {
-        VisitEnter(node);
+        VisitTupleTypeEnter(node);
 
         foreach (var type in node.Types)
             type.Accept(this);
 
-        VisitExit(node);
+        VisitTupleTypeExit(node);
     }
 
-    protected virtual void VisitEnter(TupleTypeNode node)
+    protected virtual void VisitTupleTypeEnter(TupleTypeNode node)
     {
     }
 
-    protected virtual void VisitExit(TupleTypeNode node)
+    protected virtual void VisitTupleTypeExit(TupleTypeNode node)
     {
     }
 
-    public void Visit(TypeAliasDeclarationNode node)
+    public void VisitTypeAlias(TypeAliasDeclarationNode node)
     {
-        VisitEnter(node);
+        VisitTypeAliasEnter(node);
 
         node.Type.Accept(this);
 
-        VisitExit(node);
+        VisitTypeAliasExit(node);
     }
 
-    protected virtual void VisitEnter(TypeAliasDeclarationNode node)
+    protected virtual void VisitTypeAliasEnter(TypeAliasDeclarationNode node)
     {
     }
 
-    protected virtual void VisitExit(TypeAliasDeclarationNode node)
+    protected virtual void VisitTypeAliasExit(TypeAliasDeclarationNode node)
     {
     }
 
-    public void Visit(TypeDeclarationNode node)
+    public void VisitType(TypeDeclarationNode node)
     {
-        VisitEnter(node);
+        VisitTypeEnter(node);
 
         foreach (var property in node.Properties)
             property.Accept(this);
@@ -624,81 +624,81 @@ public abstract class Visitor : IVisitor
         foreach (var method in node.Methods)
             method.Accept(this);
 
-        VisitExit(node);
+        VisitTypeExit(node);
     }
 
-    protected virtual void VisitEnter(TypeDeclarationNode node)
+    protected virtual void VisitTypeEnter(TypeDeclarationNode node)
     {
     }
 
-    protected virtual void VisitExit(TypeDeclarationNode node)
+    protected virtual void VisitTypeExit(TypeDeclarationNode node)
     {
     }
 
-    public void Visit(TypeNode node)
+    public void VisitTypeNode(TypeNode node)
     {
-        VisitEnter(node);
-        VisitExit(node);
+        VisitTypeNodeEnter(node);
+        VisitTypeNodeExit(node);
     }
 
-    protected virtual void VisitEnter(TypeNode node)
-    {
-    }
-
-    protected virtual void VisitExit(TypeNode node)
+    protected virtual void VisitTypeNodeEnter(TypeNode node)
     {
     }
 
-    public void Visit(UnaryExpressionNode node)
+    protected virtual void VisitTypeNodeExit(TypeNode node)
     {
-        VisitEnter(node);
+    }
+
+    public void VisitUnaryExpression(UnaryExpressionNode node)
+    {
+        VisitUnaryExpressionEnter(node);
 
         node.Operand.Accept(this);
 
-        VisitExit(node);
+        VisitUnaryExpressionExit(node);
     }
 
-    protected virtual void VisitEnter(UnaryExpressionNode node)
+    protected virtual void VisitUnaryExpressionEnter(UnaryExpressionNode node)
     {
     }
 
-    protected virtual void VisitExit(UnaryExpressionNode node)
+    protected virtual void VisitUnaryExpressionExit(UnaryExpressionNode node)
     {
     }
 
-    public void Visit(VariableDeclarationStatementNode node)
+    public void VisitVariable(VariableDeclarationStatementNode node)
     {
-        VisitEnter(node);
+        VisitVariableEnter(node);
 
         node.Type.Accept(this);
         node.Expression.Accept(this);
 
-        VisitExit(node);
+        VisitVariableExit(node);
     }
 
-    protected virtual void VisitEnter(VariableDeclarationStatementNode node)
+    protected virtual void VisitVariableEnter(VariableDeclarationStatementNode node)
     {
     }
 
-    protected virtual void VisitExit(VariableDeclarationStatementNode node)
+    protected virtual void VisitVariableExit(VariableDeclarationStatementNode node)
     {
     }
 
-    public void Visit(WhileNode node)
+    public void VisitWhile(WhileNode node)
     {
-        VisitEnter(node);
+        VisitWhileEnter(node);
 
         node.Condition.Accept(this);
         node.Body.Accept(this);
 
-        VisitExit(node);
+        VisitWhileExit(node);
     }
 
-    protected virtual void VisitEnter(WhileNode node)
+    protected virtual void VisitWhileEnter(WhileNode node)
     {
     }
 
-    protected virtual void VisitExit(WhileNode node)
+    protected virtual void VisitWhileExit(WhileNode node)
     {
     }
 }

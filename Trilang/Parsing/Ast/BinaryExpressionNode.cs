@@ -65,10 +65,10 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitBinaryExpression(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitBinaryExpression(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

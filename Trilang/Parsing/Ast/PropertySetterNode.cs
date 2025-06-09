@@ -58,10 +58,10 @@ public class PropertySetterNode : ISyntaxNode, IEquatable<PropertySetterNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitSetter(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitSetter(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

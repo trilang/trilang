@@ -57,10 +57,10 @@ public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitAsExpression(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitAsExpression(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 

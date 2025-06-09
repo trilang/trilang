@@ -56,10 +56,10 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.Visit(this);
+        => visitor.VisitUnaryExpression(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.Visit(this, context);
+        => visitor.VisitUnaryExpression(this, context);
 
     public ISyntaxNode? Parent { get; set; }
 
