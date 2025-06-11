@@ -238,9 +238,6 @@ public partial class Formatter : IFormatter
 
     public void VisitFunction(FunctionDeclarationNode node)
     {
-        if (node.IsExternal)
-            writer.Write("external ");
-
         writer.Write("function ");
         writer.Write(node.Name);
         writer.Write('(');

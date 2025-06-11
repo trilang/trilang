@@ -363,12 +363,6 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
                 MethodDeclarationNode methodNode
                     => methodNode.Metadata?.TypeMetadata,
 
-                InterfacePropertyNode interfacePropertyNode
-                    => interfacePropertyNode.Type.Metadata,
-
-                InterfaceMethodNode interfaceMethodNode
-                    => interfaceMethodNode.Metadata?.TypeMetadata,
-
                 TypeDeclarationNode typeDeclarationNode
                     => typeDeclarationNode.Metadata,
 

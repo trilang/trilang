@@ -5,13 +5,12 @@ namespace Trilang.Parsing.Ast;
 
 public class PropertyGetterNode : ISyntaxNode, IEquatable<PropertyGetterNode>
 {
+    private BlockStatementNode? body;
+
     public PropertyGetterNode(AccessModifier accessModifier, BlockStatementNode? body)
     {
         AccessModifier = accessModifier;
         Body = body;
-
-        if (Body is not null)
-            Body.Parent = this;
     }
 
     public static bool operator ==(PropertyGetterNode? left, PropertyGetterNode? right)
@@ -69,5 +68,18 @@ public class PropertyGetterNode : ISyntaxNode, IEquatable<PropertyGetterNode>
 
     public AccessModifier AccessModifier { get; }
 
-    public BlockStatementNode? Body { get; }
+
+    public BlockStatementNode? Body
+    {
+        get => body;
+        set
+        {
+            body = value;
+
+            if (body is not null)
+                body.Parent = this;
+        }
+    }
+
+    public IReadOnlyList<ParameterNode> Parameters { get; set; } = [];
 }

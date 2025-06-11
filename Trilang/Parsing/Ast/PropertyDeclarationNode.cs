@@ -6,6 +6,9 @@ namespace Trilang.Parsing.Ast;
 
 public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarationNode>
 {
+    private PropertyGetterNode? getter;
+    private PropertySetterNode? setter;
+
     public PropertyDeclarationNode(string name, IInlineTypeNode type)
         : this(name, type, null, null)
     {
@@ -23,12 +26,6 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
         Setter = setter;
 
         Type.Parent = this;
-
-        if (Getter != null)
-            Getter.Parent = this;
-
-        if (Setter != null)
-            Setter.Parent = this;
     }
 
     public static bool operator ==(PropertyDeclarationNode? left, PropertyDeclarationNode? right)
@@ -90,9 +87,29 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
 
     public IInlineTypeNode Type { get; }
 
-    public PropertyGetterNode? Getter { get; }
+    public PropertyGetterNode? Getter
+    {
+        get => getter;
+        set
+        {
+            getter = value;
 
-    public PropertySetterNode? Setter { get; }
+            if (getter is not null)
+                getter.Parent = this;
+        }
+    }
+
+    public PropertySetterNode? Setter
+    {
+        get => setter;
+        set
+        {
+            setter = value;
+
+            if (setter is not null)
+                setter.Parent = this;
+        }
+    }
 
     public PropertyMetadata? Metadata { get; set; }
 }

@@ -30,7 +30,7 @@ internal class VariableUsedBeforeDeclared : Visitor
         var symbol = node.SymbolTable?.GetId(node.Name);
         if (symbol is not null)
         {
-            if (symbol.Node is ParameterNode or FunctionDeclarationNode)
+            if (symbol.Node is ParameterNode or FunctionDeclarationNode or PropertyDeclarationNode or MethodDeclarationNode)
                 return;
 
             if (!scopes.TryPeek(out var scope) || !scope.Contains(node.Name))

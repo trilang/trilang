@@ -1,6 +1,8 @@
+using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
+using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 
 namespace Trilang.Compilation;
@@ -13,13 +15,18 @@ public class Compiler
         var rootTypeMetadataProvider = new RootTypeMetadataProvider();
         var semantic = new SemanticAnalysis(rootTypeMetadataProvider);
         var semanticOptions = new SemanticAnalysisOptions(options.Directives);
+        var lowering = new Lowering();
 
+        var syntaxTrees = new List<SyntaxTree>();
         var project = Project.Load(options.Path);
         foreach (var sourceFile in project.SourceFiles)
         {
             var code = File.ReadAllText(sourceFile.FilePath);
             var tree = parser.Parse(code);
             semantic.Analyze(tree, semanticOptions);
+            lowering.Lower(tree);
+
+            syntaxTrees.Add(tree);
         }
 
         if (options.OperatingSystem == CompilerOptionOs.Linux)

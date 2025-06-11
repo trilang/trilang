@@ -30,8 +30,7 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
             return true;
 
         return Member.Equals(other.Member) &&
-               Index.Equals(other.Index) &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
+               Index.Equals(other.Index);
     }
 
     public override bool Equals(object? obj)

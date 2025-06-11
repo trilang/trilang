@@ -1,4 +1,3 @@
-using Trilang.Compilation;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics;

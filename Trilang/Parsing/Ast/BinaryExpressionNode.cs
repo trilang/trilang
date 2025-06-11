@@ -34,7 +34,6 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
             return true;
 
         return Kind.Equals(other.Kind) &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
                Left.Equals(other.Left) &&
                Right.Equals(other.Right);
     }

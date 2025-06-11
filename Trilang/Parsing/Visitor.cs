@@ -624,6 +624,9 @@ public abstract class Visitor : IVisitor
         foreach (var method in node.Methods)
             method.Accept(this);
 
+        foreach (var constructor in node.Constructors)
+            constructor.Accept(this);
+
         VisitTypeExit(node);
     }
 

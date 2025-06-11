@@ -1,4 +1,3 @@
-using Trilang.Compilation;
 using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics.MetadataGenerators;

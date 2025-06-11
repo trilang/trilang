@@ -77,7 +77,7 @@ public class ConstructorDeclarationNode : ISyntaxNode, IEquatable<ConstructorDec
 
     public AccessModifier AccessModifier { get; }
 
-    public IReadOnlyList<ParameterNode> Parameters { get; }
+    public IReadOnlyList<ParameterNode> Parameters { get; set; }
 
     public BlockStatementNode Body { get; }
 

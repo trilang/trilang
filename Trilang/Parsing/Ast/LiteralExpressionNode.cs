@@ -42,7 +42,6 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
             return true;
 
         return Kind == other.Kind &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
                Value.Equals(other.Value);
     }
 

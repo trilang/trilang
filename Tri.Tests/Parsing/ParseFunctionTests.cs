@@ -143,20 +143,4 @@ public class ParseFunctionTests
 
         Assert.That(tree, Is.EqualTo(expected));
     }
-
-    [Test]
-    public void ParseExternalFunctionTest()
-    {
-        var parser = new Parser();
-        var tree = parser.Parse("external function test(x: i32): void;");
-        var expected = new SyntaxTree([
-            FunctionDeclarationNode.CreateExternal(
-                "test",
-                [new ParameterNode("x", new TypeNode("i32"))],
-                new TypeNode("void")
-            )
-        ]);
-
-        Assert.That(tree, Is.EqualTo(expected));
-    }
 }

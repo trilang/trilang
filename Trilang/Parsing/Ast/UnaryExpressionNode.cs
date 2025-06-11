@@ -27,7 +27,6 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
             return true;
 
         return Kind.Equals(other.Kind) &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
                Operand.Equals(other.Operand);
     }
 

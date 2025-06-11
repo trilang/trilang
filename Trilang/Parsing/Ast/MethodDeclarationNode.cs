@@ -91,7 +91,7 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
 
     public string Name { get; }
 
-    public IReadOnlyList<ParameterNode> Parameters { get; }
+    public IReadOnlyList<ParameterNode> Parameters { get; set; }
 
     public IInlineTypeNode ReturnType { get; }
 

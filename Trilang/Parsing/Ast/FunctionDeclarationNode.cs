@@ -7,14 +7,12 @@ namespace Trilang.Parsing.Ast;
 
 public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDeclarationNode>
 {
-    private FunctionDeclarationNode(
-        bool isExternal,
+    public FunctionDeclarationNode(
         string name,
         IReadOnlyList<ParameterNode> parameters,
         IInlineTypeNode returnType,
         BlockStatementNode? body)
     {
-        IsExternal = isExternal;
         Name = name;
         Parameters = parameters;
         ReturnType = returnType;
@@ -34,13 +32,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
         IReadOnlyList<ParameterNode> parameters,
         IInlineTypeNode returnType,
         BlockStatementNode body)
-        => new FunctionDeclarationNode(false, name, parameters, returnType, body);
-
-    public static FunctionDeclarationNode CreateExternal(
-        string name,
-        IReadOnlyList<ParameterNode> parameters,
-        IInlineTypeNode returnType)
-        => new FunctionDeclarationNode(true, name, parameters, returnType, null);
+        => new FunctionDeclarationNode(name, parameters, returnType, body);
 
     public static bool operator ==(FunctionDeclarationNode? left, FunctionDeclarationNode? right)
         => Equals(left, right);
@@ -56,8 +48,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
         if (ReferenceEquals(this, other))
             return true;
 
-        return IsExternal == other.IsExternal &&
-               Name == other.Name &&
+        return Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
                ReturnType.Equals(other.ReturnType) &&
                Equals(Body, other.Body);
@@ -78,7 +69,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(IsExternal, Name, Parameters, ReturnType, Body);
+        => HashCode.Combine(Name, Parameters, ReturnType, Body);
 
     public override string ToString()
     {
@@ -97,9 +88,6 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }
-
-    [MemberNotNullWhen(false, nameof(Body))]
-    public bool IsExternal { get; }
 
     public string Name { get; }
 

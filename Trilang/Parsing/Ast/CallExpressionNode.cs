@@ -31,7 +31,6 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
             return true;
 
         return Member.Equals(other.Member) &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata) &&
                Parameters.SequenceEqual(other.Parameters);
     }
 

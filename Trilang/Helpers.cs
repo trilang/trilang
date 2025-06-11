@@ -167,6 +167,9 @@ public static class Helpers
                        .FirstOrDefault(x => x is not null) ??
                    typeDeclarationNode.Methods
                        .Select(x => Find(x, predicate))
+                       .FirstOrDefault(x => x is not null) ??
+                   typeDeclarationNode.Constructors
+                       .Select(x => Find(x, predicate))
                        .FirstOrDefault(x => x is not null),
 
             TypeNode
