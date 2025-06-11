@@ -340,34 +340,33 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
     private static void VisitFirstMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
     {
         var typeProvider = node.SymbolTable!.TypeProvider;
+
         node.Reference = node.SymbolTable!.GetId(node.Name) ??
                          typeProvider.GetType(node.Name) as object ??
                          throw new SemanticAnalysisException($"Unknown member '{node.Name}'");
 
+        if (node.Reference is IdSymbol id)
+            node.Reference = id.Node;
+
         node.ReturnTypeMetadata = node.Reference switch
         {
-            IdSymbol id => id.Node switch
-            {
-                PropertyDeclarationNode propertyDeclarationNode
-                    => propertyDeclarationNode.Type.Metadata,
+            PropertyDeclarationNode propertyDeclarationNode
+                => propertyDeclarationNode.Type.Metadata,
 
-                VariableDeclarationStatementNode variableStatementNode
-                    => variableStatementNode.Type.Metadata,
+            VariableDeclarationStatementNode variableStatementNode
+                => variableStatementNode.Type.Metadata,
 
-                ParameterNode parameterNode
-                    => parameterNode.Type.Metadata,
+            ParameterNode parameterNode
+                => parameterNode.Type.Metadata,
 
-                FunctionDeclarationNode functionNode
-                    => functionNode.Metadata?.TypeMetadata,
+            FunctionDeclarationNode functionNode
+                => functionNode.Metadata?.TypeMetadata,
 
-                MethodDeclarationNode methodNode
-                    => methodNode.Metadata?.TypeMetadata,
+            MethodDeclarationNode methodNode
+                => methodNode.Metadata?.TypeMetadata,
 
-                TypeDeclarationNode typeDeclarationNode
-                    => typeDeclarationNode.Metadata,
-
-                _ => throw new SemanticAnalysisException(),
-            },
+            TypeDeclarationNode typeDeclarationNode
+                => typeDeclarationNode.Metadata,
 
             ITypeMetadata type =>
                 type,

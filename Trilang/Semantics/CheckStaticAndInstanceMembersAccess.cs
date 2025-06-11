@@ -19,7 +19,7 @@ internal class CheckStaticAndInstanceMembersAccess : Visitor
         if (parentRef is null)
             return;
 
-        if (parentRef is IdSymbol)
+        if (parentRef is ISyntaxNode)
         {
             if (node.Reference is MethodMetadata { IsStatic: true } method)
                 throw new SemanticAnalysisException($"The static method '{method.Name}' cannot be called on an instance one.");
