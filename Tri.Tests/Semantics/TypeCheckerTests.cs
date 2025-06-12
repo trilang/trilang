@@ -875,6 +875,28 @@ public class TypeCheckerTests
     }
 
     [Test]
+    public void AccessArrayElementTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .DefineParameter("a", t => t.Array("i32"))
+                .ReturnType("i32")
+                .Body(body => body
+                    .Return(r => r
+                        .MemberAccess("a")
+                        .Number(1)
+                        .ArrayAccess())))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var arrayAccess = tree.Find<ArrayAccessExpressionNode>();
+        Assert.That(arrayAccess, Is.Not.Null);
+        Assert.That(arrayAccess.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
+    }
+
+    [Test]
     public void UseArrayAccessorOnNotArrayTest()
     {
         var tree = new TreeBuilder()

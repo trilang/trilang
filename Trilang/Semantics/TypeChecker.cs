@@ -15,11 +15,13 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Member.Accept(this, context);
         node.Index.Accept(this, context);
 
-        if (node.Member.ReturnTypeMetadata is not TypeArrayMetadata)
+        if (node.Member.ReturnTypeMetadata is not TypeArrayMetadata typeArray)
             throw new SemanticAnalysisException("Array access must be of type array");
 
         if (!Equals(node.Index.ReturnTypeMetadata, I32))
             throw new SemanticAnalysisException("Array index must be of type i32");
+
+        node.ReturnTypeMetadata = typeArray.ItemMetadata;
     }
 
     public void VisitArrayType(ArrayTypeNode node, TypeCheckerContext context)
