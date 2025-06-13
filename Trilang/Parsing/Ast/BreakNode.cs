@@ -34,7 +34,7 @@ public class BreakNode : IStatementNode, IEquatable<BreakNode>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(this);
+        => 0;
 
     public override string ToString()
     {

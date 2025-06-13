@@ -1,3 +1,4 @@
+using Trilang.IntermediateRepresentation;
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
@@ -28,6 +29,9 @@ public class Compiler
 
             syntaxTrees.Add(tree);
         }
+
+        var ir = new Ir();
+        var functions = ir.Generate(syntaxTrees);
 
         if (options.OperatingSystem == CompilerOptionOs.Linux)
         {

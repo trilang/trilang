@@ -10,6 +10,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
         VisitArrayAccessEnter(node, context);
 
         node.Member.Accept(this, context);
+        node.Index.Accept(this, context);
 
         VisitArrayAccessExit(node, context);
     }

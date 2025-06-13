@@ -9,6 +9,7 @@ public abstract class Visitor : IVisitor
         VisitArrayAccessEnter(node);
 
         node.Member.Accept(this);
+        node.Index.Accept(this);
 
         VisitArrayAccessExit(node);
     }

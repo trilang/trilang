@@ -35,7 +35,7 @@ public class NullExpressionNode : IExpressionNode, IEquatable<NullExpressionNode
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(this);
+        => 0;
 
     public override string ToString()
     {

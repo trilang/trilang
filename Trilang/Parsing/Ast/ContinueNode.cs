@@ -34,7 +34,7 @@ public class ContinueNode : IStatementNode, IEquatable<ContinueNode>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(this);
+        => 0;
 
     public override string ToString()
     {
