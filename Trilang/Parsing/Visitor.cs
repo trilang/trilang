@@ -4,7 +4,7 @@ namespace Trilang.Parsing;
 
 public abstract class Visitor : IVisitor
 {
-    public void VisitArrayAccess(ArrayAccessExpressionNode node)
+    public virtual void VisitArrayAccess(ArrayAccessExpressionNode node)
     {
         VisitArrayAccessEnter(node);
 
@@ -22,7 +22,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitArrayType(ArrayTypeNode node)
+    public virtual void VisitArrayType(ArrayTypeNode node)
     {
         VisitArrayTypeEnter(node);
 
@@ -39,7 +39,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitAsExpression(AsExpressionNode node)
+    public virtual void VisitAsExpression(AsExpressionNode node)
     {
         VisitAsExpressionEnter(node);
 
@@ -57,7 +57,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitBinaryExpression(BinaryExpressionNode node)
+    public virtual void VisitBinaryExpression(BinaryExpressionNode node)
     {
         VisitBinaryExpressionEnter(node);
 
@@ -75,7 +75,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitBlock(BlockStatementNode node)
+    public virtual void VisitBlock(BlockStatementNode node)
     {
         VisitBlockEnter(node);
 
@@ -93,7 +93,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitBreak(BreakNode node)
+    public virtual void VisitBreak(BreakNode node)
     {
         VisitBreakEnter(node);
         VisitBreakExit(node);
@@ -107,7 +107,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitCall(CallExpressionNode node)
+    public virtual void VisitCall(CallExpressionNode node)
     {
         VisitCallEnter(node);
 
@@ -127,7 +127,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitConstructor(ConstructorDeclarationNode node)
+    public virtual void VisitConstructor(ConstructorDeclarationNode node)
     {
         VisitConstructorEnter(node);
 
@@ -147,7 +147,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitContinue(ContinueNode node)
+    public virtual void VisitContinue(ContinueNode node)
     {
         VisitContinueEnter(node);
         VisitContinueExit(node);
@@ -161,7 +161,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node)
+    public virtual void VisitDiscriminatedUnion(DiscriminatedUnionNode node)
     {
         VisitDiscriminatedUnionEnter(node);
 
@@ -179,7 +179,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitExpressionStatement(ExpressionStatementNode node)
+    public virtual void VisitExpressionStatement(ExpressionStatementNode node)
     {
         VisitExpressionStatementEnter(node);
 
@@ -196,7 +196,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitFunction(FunctionDeclarationNode node)
+    public virtual void VisitFunction(FunctionDeclarationNode node)
     {
         VisitFunctionEnter(node);
 
@@ -217,7 +217,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitFunctionType(FunctionTypeNode node)
+    public virtual void VisitFunctionType(FunctionTypeNode node)
     {
         VisitFunctionTypeEnter(node);
 
@@ -237,7 +237,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitGenericType(GenericTypeNode node)
+    public virtual void VisitGenericType(GenericTypeNode node)
     {
         VisitGenericTypeEnter(node);
 
@@ -255,7 +255,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitIfDirective(IfDirectiveNode node)
+    public virtual void VisitIfDirective(IfDirectiveNode node)
     {
         VisitIfDirectiveEnter(node);
 
@@ -276,7 +276,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitIf(IfStatementNode node)
+    public virtual void VisitIf(IfStatementNode node)
     {
         VisitIfEnter(node);
 
@@ -295,7 +295,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitInterface(InterfaceNode node)
+    public virtual void VisitInterface(InterfaceNode node)
     {
         VisitInterfaceEnter(node);
 
@@ -316,7 +316,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitInterfaceProperty(InterfacePropertyNode node)
+    public virtual void VisitInterfaceProperty(InterfacePropertyNode node)
     {
         VisitInterfacePropertyEnter(node);
 
@@ -333,7 +333,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitInterfaceMethod(InterfaceMethodNode node)
+    public virtual void VisitInterfaceMethod(InterfaceMethodNode node)
     {
         VisitInterfaceMethodEnter(node);
 
@@ -353,7 +353,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitLiteral(LiteralExpressionNode node)
+    public virtual void VisitLiteral(LiteralExpressionNode node)
     {
         VisitLiteralEnter(node);
         VisitLiteralExit(node);
@@ -367,7 +367,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitMemberAccess(MemberAccessExpressionNode node)
+    public virtual void VisitMemberAccess(MemberAccessExpressionNode node)
     {
         VisitMemberAccessEnter(node);
 
@@ -384,7 +384,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitMethod(MethodDeclarationNode node)
+    public virtual void VisitMethod(MethodDeclarationNode node)
     {
         VisitMethodEnter(node);
 
@@ -405,7 +405,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitNewArray(NewArrayExpressionNode node)
+    public virtual void VisitNewArray(NewArrayExpressionNode node)
     {
         VisitNewArrayEnter(node);
 
@@ -423,7 +423,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitNewObject(NewObjectExpressionNode node)
+    public virtual void VisitNewObject(NewObjectExpressionNode node)
     {
         VisitNewObjectEnter(node);
 
@@ -443,7 +443,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitNull(NullExpressionNode node)
+    public virtual void VisitNull(NullExpressionNode node)
     {
         VisitNullEnter(node);
         VisitNullExit(node);
@@ -457,7 +457,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitReturn(ReturnStatementNode node)
+    public virtual void VisitReturn(ReturnStatementNode node)
     {
         VisitReturnEnter(node);
 
@@ -474,7 +474,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitParameter(ParameterNode node)
+    public virtual void VisitParameter(ParameterNode node)
     {
         VisitParameterEnter(node);
 
@@ -491,7 +491,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitProperty(PropertyDeclarationNode node)
+    public virtual void VisitProperty(PropertyDeclarationNode node)
     {
         VisitPropertyEnter(node);
 
@@ -510,7 +510,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitGetter(PropertyGetterNode node)
+    public virtual void VisitGetter(PropertyGetterNode node)
     {
         VisitGetterEnter(node);
 
@@ -527,7 +527,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitSetter(PropertySetterNode node)
+    public virtual void VisitSetter(PropertySetterNode node)
     {
         VisitSetterEnter(node);
 
@@ -544,7 +544,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitTree(SyntaxTree node)
+    public virtual void VisitTree(SyntaxTree node)
     {
         VisitTreeEnter(node);
 
@@ -562,7 +562,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitTuple(TupleExpressionNode node)
+    public virtual void VisitTuple(TupleExpressionNode node)
     {
         VisitTupleEnter(node);
 
@@ -580,7 +580,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitTupleType(TupleTypeNode node)
+    public virtual void VisitTupleType(TupleTypeNode node)
     {
         VisitTupleTypeEnter(node);
 
@@ -598,7 +598,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitTypeAlias(TypeAliasDeclarationNode node)
+    public virtual void VisitTypeAlias(TypeAliasDeclarationNode node)
     {
         VisitTypeAliasEnter(node);
 
@@ -615,7 +615,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitType(TypeDeclarationNode node)
+    public virtual void VisitType(TypeDeclarationNode node)
     {
         VisitTypeEnter(node);
 
@@ -639,7 +639,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitTypeNode(TypeNode node)
+    public virtual void VisitTypeNode(TypeNode node)
     {
         VisitTypeNodeEnter(node);
         VisitTypeNodeExit(node);
@@ -653,7 +653,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitUnaryExpression(UnaryExpressionNode node)
+    public virtual void VisitUnaryExpression(UnaryExpressionNode node)
     {
         VisitUnaryExpressionEnter(node);
 
@@ -670,7 +670,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitVariable(VariableDeclarationStatementNode node)
+    public virtual void VisitVariable(VariableDeclarationStatementNode node)
     {
         VisitVariableEnter(node);
 
@@ -688,7 +688,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitWhile(WhileNode node)
+    public virtual void VisitWhile(WhileNode node)
     {
         VisitWhileEnter(node);
 

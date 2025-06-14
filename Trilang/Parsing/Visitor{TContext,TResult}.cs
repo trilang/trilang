@@ -5,7 +5,7 @@ namespace Trilang.Parsing;
 public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     where TContext : VisitorContext<TResult>
 {
-    public void VisitArrayAccess(ArrayAccessExpressionNode node, TContext context)
+    public virtual void VisitArrayAccess(ArrayAccessExpressionNode node, TContext context)
     {
         VisitArrayAccessEnter(node, context);
 
@@ -23,7 +23,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitArrayType(ArrayTypeNode node, TContext context)
+    public virtual void VisitArrayType(ArrayTypeNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -43,7 +43,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitAsExpression(AsExpressionNode node, TContext context)
+    public virtual void VisitAsExpression(AsExpressionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -64,7 +64,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitBinaryExpression(BinaryExpressionNode node, TContext context)
+    public virtual void VisitBinaryExpression(BinaryExpressionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -85,7 +85,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitBlock(BlockStatementNode node, TContext context)
+    public virtual void VisitBlock(BlockStatementNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -106,7 +106,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitBreak(BreakNode node, TContext context)
+    public virtual void VisitBreak(BreakNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -123,7 +123,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitCall(CallExpressionNode node, TContext context)
+    public virtual void VisitCall(CallExpressionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -146,7 +146,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitConstructor(ConstructorDeclarationNode node, TContext context)
+    public virtual void VisitConstructor(ConstructorDeclarationNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -169,7 +169,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitContinue(ContinueNode node, TContext context)
+    public virtual void VisitContinue(ContinueNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -186,7 +186,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node, TContext context)
+    public virtual void VisitDiscriminatedUnion(DiscriminatedUnionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -207,7 +207,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitExpressionStatement(ExpressionStatementNode node, TContext context)
+    public virtual void VisitExpressionStatement(ExpressionStatementNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -227,7 +227,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitFunction(FunctionDeclarationNode node, TContext context)
+    public virtual void VisitFunction(FunctionDeclarationNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -251,7 +251,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitFunctionType(FunctionTypeNode node, TContext context)
+    public virtual void VisitFunctionType(FunctionTypeNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -274,7 +274,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitGenericType(GenericTypeNode node, TContext context)
+    public virtual void VisitGenericType(GenericTypeNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -295,7 +295,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitIfDirective(IfDirectiveNode node, TContext context)
+    public virtual void VisitIfDirective(IfDirectiveNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -319,7 +319,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitIf(IfStatementNode node, TContext context)
+    public virtual void VisitIf(IfStatementNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -341,7 +341,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitInterface(InterfaceNode node, TContext context)
+    public virtual void VisitInterface(InterfaceNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -365,7 +365,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitInterfaceProperty(InterfacePropertyNode node, TContext context)
+    public virtual void VisitInterfaceProperty(InterfacePropertyNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -385,7 +385,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitInterfaceMethod(InterfaceMethodNode node, TContext context)
+    public virtual void VisitInterfaceMethod(InterfaceMethodNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -408,7 +408,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitLiteral(LiteralExpressionNode node, TContext context)
+    public virtual void VisitLiteral(LiteralExpressionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -425,7 +425,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitMemberAccess(MemberAccessExpressionNode node, TContext context)
+    public virtual void VisitMemberAccess(MemberAccessExpressionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -445,7 +445,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitMethod(MethodDeclarationNode node, TContext context)
+    public virtual void VisitMethod(MethodDeclarationNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -469,7 +469,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitNewArray(NewArrayExpressionNode node, TContext context)
+    public virtual void VisitNewArray(NewArrayExpressionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -490,7 +490,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitNewObject(NewObjectExpressionNode node, TContext context)
+    public virtual void VisitNewObject(NewObjectExpressionNode node, TContext context)
     {
         VisitNewObjectEnter(node, context);
 
@@ -510,7 +510,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitNull(NullExpressionNode node, TContext context)
+    public virtual void VisitNull(NullExpressionNode node, TContext context)
     {
         VisitNullEnter(node, context);
         VisitNullExit(node, context);
@@ -524,7 +524,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitReturn(ReturnStatementNode node, TContext context)
+    public virtual void VisitReturn(ReturnStatementNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -544,7 +544,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitParameter(ParameterNode node, TContext context)
+    public virtual void VisitParameter(ParameterNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -564,7 +564,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitProperty(PropertyDeclarationNode node, TContext context)
+    public virtual void VisitProperty(PropertyDeclarationNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -586,7 +586,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitGetter(PropertyGetterNode node, TContext context)
+    public virtual void VisitGetter(PropertyGetterNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -606,7 +606,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitSetter(PropertySetterNode node, TContext context)
+    public virtual void VisitSetter(PropertySetterNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -626,7 +626,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitTree(SyntaxTree node, TContext context)
+    public virtual void VisitTree(SyntaxTree node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -647,7 +647,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitTuple(TupleExpressionNode node, TContext context)
+    public virtual void VisitTuple(TupleExpressionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -668,7 +668,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitTupleType(TupleTypeNode node, TContext context)
+    public virtual void VisitTupleType(TupleTypeNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -690,7 +690,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     }
 
 
-    public void VisitTypeAlias(TypeAliasDeclarationNode node, TContext context)
+    public virtual void VisitTypeAlias(TypeAliasDeclarationNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -710,7 +710,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitType(TypeDeclarationNode node, TContext context)
+    public virtual void VisitType(TypeDeclarationNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -734,7 +734,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitTypeNode(TypeNode node, TContext context)
+    public virtual void VisitTypeNode(TypeNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -751,7 +751,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitUnaryExpression(UnaryExpressionNode node, TContext context)
+    public virtual void VisitUnaryExpression(UnaryExpressionNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -771,7 +771,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitVariable(VariableDeclarationStatementNode node, TContext context)
+    public virtual void VisitVariable(VariableDeclarationStatementNode node, TContext context)
     {
         if (context.IsFinished)
             return;
@@ -792,7 +792,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
-    public void VisitWhile(WhileNode node, TContext context)
+    public virtual void VisitWhile(WhileNode node, TContext context)
     {
         if (context.IsFinished)
             return;

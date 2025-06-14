@@ -11,4 +11,11 @@ public enum BinaryInstructionKind
     And,
     Or,
     Xor,
+
+    Eq,
+    Ne,
+    Lt,
+    Le,
+    Gt,
+    Ge,
 }

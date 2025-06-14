@@ -3,15 +3,28 @@ namespace Trilang.IntermediateRepresentation;
 public class Block : IEquatable<Block>
 {
     private readonly List<IInstruction> instructions;
+    private readonly List<Block> previous;
+    private readonly List<Block> next;
 
-    public Block(string label) : this(label, [])
+    public Block(string label)
+        : this(label, [])
     {
     }
 
     public Block(string label, IEnumerable<IInstruction> instructions)
+        : this(label, instructions, [])
+    {
+    }
+
+    public Block(string label, IEnumerable<IInstruction> instructions, IEnumerable<Block> next)
     {
         Label = label;
         this.instructions = [..instructions];
+        previous = [];
+        this.next = [];
+
+        foreach (var block in next)
+            AddNext(block);
     }
 
     public static bool operator ==(Block? left, Block? right)
@@ -30,8 +43,7 @@ public class Block : IEquatable<Block>
 
         return Label == other.Label &&
                instructions.SequenceEqual(other.instructions) &&
-               Equals(Previous, other.Previous) &&
-               Equals(Next, other.Next);
+               Next.SequenceEqual(other.Next);
     }
 
     public override bool Equals(object? obj)
@@ -54,13 +66,26 @@ public class Block : IEquatable<Block>
     public void AddInstruction(IInstruction instruction)
         => instructions.Add(instruction);
 
+    public void AddPrevious(Block block)
+    {
+        previous.Add(block);
+        block.next.Add(this);
+    }
+
+    public void AddNext(Block block)
+    {
+        next.Add(block);
+        block.previous.Add(this);
+    }
+
     public string Label { get; }
 
     public IReadOnlyList<IInstruction> Instructions
         => instructions;
 
-    // TODO: multiple prev/next blocks
-    public Block? Previous { get; set; }
+    public IReadOnlyList<Block> Previous
+        => previous;
 
-    public Block? Next { get; set; }
+    public IReadOnlyList<Block> Next
+        => next;
 }

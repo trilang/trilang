@@ -11,11 +11,15 @@ internal class IrGenerator : Visitor
     private readonly HashSet<IrFunction> functions;
     private IrBuilder builder;
 
+    private int ifCounter;
+
     public IrGenerator()
     {
         registers = [];
         functions = [];
         builder = new IrBuilder();
+
+        ifCounter = 0;
     }
 
     private void LoadParameters(IEnumerable<ParameterNode> parameters)
@@ -101,6 +105,47 @@ internal class IrGenerator : Visitor
 
     // -----
 
+    public override void VisitIf(IfStatementNode node)
+    {
+        var ifNumber = ifCounter++;
+
+        node.Condition.Accept(this);
+        if (!registers.TryGetValue(node.Condition, out var conditionRegister))
+            throw new Exception("Condition not found.");
+
+        var thenBlock = builder.CreateBlock($"then_{ifNumber}");
+        var elseBlock = builder.CreateBlock($"else_{ifNumber}");
+        var endBlock = builder.CreateBlock($"endif_{ifNumber}");
+
+        builder.AddBlock(thenBlock);
+
+        if (node.Else is not null)
+        {
+            builder.AddBlock(elseBlock);
+            builder.Branch(conditionRegister, thenBlock, elseBlock);
+        }
+        else
+        {
+            builder.AddBlock(endBlock);
+            builder.Branch(conditionRegister, thenBlock, null);
+        }
+
+        builder.UseBlock(thenBlock);
+        node.Then.Accept(this);
+        builder.AddBlock(endBlock);
+
+        if (node.Else is not null)
+        {
+            builder.UseBlock(elseBlock);
+            node.Else.Accept(this);
+            builder.AddBlock(endBlock);
+        }
+
+        builder.UseBlock(endBlock);
+    }
+
+    // -----
+
     protected override void VisitArrayAccessExit(ArrayAccessExpressionNode node)
     {
         if (!registers.TryGetValue(node.Member, out var arrayRegister))
@@ -132,6 +177,13 @@ internal class IrGenerator : Visitor
             BitwiseAnd => builder.And(left, right),
             BitwiseOr => builder.Or(left, right),
             BitwiseXor => builder.Xor(left, right),
+
+            Equality => builder.Eq(left, right),
+            Inequality => builder.Ne(left, right),
+            LessThan => builder.Lt(left, right),
+            LessThanOrEqual => builder.Le(left, right),
+            GreaterThan => builder.Gt(left, right),
+            GreaterThanOrEqual => builder.Ge(left, right),
 
             _ => throw new Exception("Unknown binary expression kind."),
         };

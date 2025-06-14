@@ -329,4 +329,179 @@ public class IrGeneratorTests
 
         Assert.That(functions, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void IfStatementTest()
+    {
+        const string code =
+            """
+            function max(a: i32, b: i32): i32 {
+                if (a >= b) {
+                    return a;
+                } else {
+                    return b;
+                }
+            }
+            """;
+        var tree = Parse(code);
+
+        var ir = new Ir();
+        var functions = ir.Generate([tree]);
+
+        var endBlock = new Block("endif_0");
+        var entryBlock = new Block(
+            "entry",
+            [
+                new LoadParameterInstruction(new Register(0), 0),
+                new LoadParameterInstruction(new Register(1), 1),
+                new BinaryInstruction(new Register(2), Ge, new Register(0), new Register(1)),
+                new BranchInstruction(new Register(2), "then_0", "else_0"),
+            ],
+            [
+                new Block(
+                    "then_0",
+                    [new ReturnInstruction(new Register(0))],
+                    [endBlock]
+                ),
+                new Block(
+                    "else_0",
+                    [new ReturnInstruction(new Register(1))],
+                    [endBlock]
+                ),
+            ]
+        );
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("max", entryBlock)
+        };
+
+        Assert.That(functions, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void IfStatementWithoutElseTest()
+    {
+        const string code =
+            """
+            function max(a: i32, b: i32): i32 {
+                if (a >= b) {
+                    return a;
+                }
+
+                return 0;
+            }
+            """;
+        var tree = Parse(code);
+
+        var ir = new Ir();
+        var functions = ir.Generate([tree]);
+
+        var endBlock = new Block("endif_0", [
+            new LoadInstruction(new Register(3), 0),
+            new ReturnInstruction(new Register(3)),
+        ]);
+        var entryBlock = new Block(
+            "entry",
+            [
+                new LoadParameterInstruction(new Register(0), 0),
+                new LoadParameterInstruction(new Register(1), 1),
+                new BinaryInstruction(new Register(2), Ge, new Register(0), new Register(1)),
+                new BranchInstruction(new Register(2), "then_0", null),
+            ],
+            [
+                new Block(
+                    "then_0",
+                    [new ReturnInstruction(new Register(0))],
+                    [endBlock]
+                ),
+                endBlock
+            ]
+        );
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("max", entryBlock)
+        };
+
+        Assert.That(functions, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void NestedIfStatementsTest()
+    {
+        const string code =
+            """
+            function max(a: i32): i32 {
+                if (a > 0) {
+                    if (a > 10) {
+                        return 1;
+                    } else {
+                        return 2;
+                    }
+                } else {
+                    return 0;
+                }
+            }
+            """;
+        var tree = Parse(code);
+
+        var ir = new Ir();
+        var functions = ir.Generate([tree]);
+
+        var endBlock0 = new Block("endif_0");
+        var endBlock1 = new Block("endif_1", [], [endBlock0]);
+        var entryBlock = new Block(
+            "entry",
+            [
+                new LoadParameterInstruction(new Register(0), 0),
+                new LoadInstruction(new Register(1), 0),
+                new BinaryInstruction(new Register(2), Gt, new Register(0), new Register(1)),
+                new BranchInstruction(new Register(2), "then_0", "else_0"),
+            ],
+            [
+                new Block(
+                    "then_0",
+                    [
+                        new LoadInstruction(new Register(3), 10),
+                        new BinaryInstruction(new Register(4), Gt, new Register(0), new Register(3)),
+                        new BranchInstruction(new Register(4), "then_1", "else_1"),
+                    ],
+                    [
+                        new Block(
+                            "then_1",
+                            [
+                                new LoadInstruction(new Register(5), 1),
+                                new ReturnInstruction(new Register(5)),
+                            ],
+                            [endBlock1]
+                        ),
+                        new Block(
+                            "else_1",
+                            [
+                                new LoadInstruction(new Register(6), 2),
+                                new ReturnInstruction(new Register(6)),
+                            ],
+                            [endBlock1]
+                        ),
+                    ]
+                ),
+                new Block(
+                    "else_0",
+                    [
+                        new LoadInstruction(new Register(7), 0),
+                        new ReturnInstruction(new Register(7)),
+                    ],
+                    [endBlock0]
+                ),
+            ]
+        );
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("max", entryBlock)
+        };
+
+        Assert.That(functions, Is.EqualTo(expected));
+    }
 }

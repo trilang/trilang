@@ -36,15 +36,19 @@ internal class IrBuilder
         return register;
     }
 
-    public void Block(string label)
-    {
-        var block = new Block(label)
-        {
-            Previous = currentBlock,
-        };
+    public Block CreateBlock(string name)
+        => new Block(name);
 
-        currentBlock.Next = block;
-        currentBlock = block;
+    public void AddBlock(Block block)
+        => currentBlock.AddNext(block);
+
+    public void UseBlock(Block block)
+        => currentBlock = block;
+
+    public void Branch(Register conditionRegister, Block thenBlock, Block? elseBlock)
+    {
+        var branch = new BranchInstruction(conditionRegister, thenBlock.Label, elseBlock?.Label);
+        currentBlock.AddInstruction(branch);
     }
 
     public Register Load(object? value)
@@ -130,6 +134,24 @@ internal class IrBuilder
 
     public Register Xor(Register left, Register right)
         => BinaryInstruction(BinaryInstructionKind.Xor, left, right);
+
+    public Register Eq(Register left, Register right)
+        => BinaryInstruction(BinaryInstructionKind.Eq, left, right);
+
+    public Register Ne(Register left, Register right)
+        => BinaryInstruction(BinaryInstructionKind.Ne, left, right);
+
+    public Register Lt(Register left, Register right)
+        => BinaryInstruction(BinaryInstructionKind.Lt, left, right);
+
+    public Register Le(Register left, Register right)
+        => BinaryInstruction(BinaryInstructionKind.Le, left, right);
+
+    public Register Gt(Register left, Register right)
+        => BinaryInstruction(BinaryInstructionKind.Gt, left, right);
+
+    public Register Ge(Register left, Register right)
+        => BinaryInstruction(BinaryInstructionKind.Ge, left, right);
 
     public Register Neg(Register operand)
         => UnaryInstruction(UnaryInstructionKind.Neg, operand);
