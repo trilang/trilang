@@ -5,21 +5,22 @@ namespace Trilang.Semantics;
 
 internal class VariableUsedBeforeDeclared : Visitor
 {
-    private readonly Stack<HashSet<string>> scopes;
+    private readonly List<HashSet<string>> scopes;
 
     public VariableUsedBeforeDeclared()
         => scopes = [];
 
     protected override void VisitBlockEnter(BlockStatementNode node)
-        => scopes.Push([]);
+        => scopes.Add([]);
 
     protected override void VisitBlockExit(BlockStatementNode node)
-        => scopes.Pop();
+        => scopes.RemoveAt(scopes.Count - 1);
 
     protected override void VisitVariableEnter(VariableDeclarationStatementNode node)
     {
-        if (scopes.TryPeek(out var scope))
-            scope.Add(node.Name);
+        var scope = scopes.LastOrDefault();
+
+        scope?.Add(node.Name);
     }
 
     protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
@@ -30,19 +31,23 @@ internal class VariableUsedBeforeDeclared : Visitor
         var symbol = node.SymbolTable?.GetId(node.Name);
         if (symbol is not null)
         {
-            if (symbol.Node is ParameterNode or FunctionDeclarationNode or PropertyDeclarationNode or MethodDeclarationNode)
+            if (symbol.Node is ParameterNode
+                or FunctionDeclarationNode
+                or PropertyDeclarationNode
+                or MethodDeclarationNode)
                 return;
 
-            if (!scopes.TryPeek(out var scope) || !scope.Contains(node.Name))
-                throw new SemanticAnalysisException($"The '{node.Name}' variable used before declaration.");
+            for (var i = scopes.Count - 1; i >= 0; i--)
+                if (scopes[i].Contains(node.Name))
+                    return;
+
+            throw new SemanticAnalysisException($"The '{node.Name}' variable used before declaration.");
         }
-        else
-        {
-            // access static member
-            var typeProvider = node.SymbolTable!.TypeProvider;
-            var type = typeProvider.GetType(node.Name);
-            if (type is null)
-                throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");
-        }
+
+        // access static member
+        var typeProvider = node.SymbolTable!.TypeProvider;
+        var type = typeProvider.GetType(node.Name);
+        if (type is null)
+            throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");
     }
 }

@@ -113,4 +113,23 @@ public class VariableUsedBeforeDeclaredTests
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("Unknown symbol: a"));
     }
+
+    [Test]
+    public void VariableInParentScopeTest()
+    {
+        var tree = new TreeBuilder()
+            .DefineFunction("test", builder => builder
+                .ReturnType("i32")
+                .Body(body => body
+                    .DefineVariable("a", "i32", exp => exp.Number(1))
+                    .Block(block => block
+                        .Return(exp => exp.MemberAccess("a")))))
+            .Build();
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.Nothing);
+    }
 }
