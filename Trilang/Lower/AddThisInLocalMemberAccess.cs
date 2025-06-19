@@ -1,6 +1,5 @@
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
-using Trilang.Symbols;
 
 namespace Trilang.Lower;
 

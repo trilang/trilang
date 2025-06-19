@@ -149,14 +149,12 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
     public void VisitIfDirective(IfDirectiveNode node, SymbolFinderContext context)
     {
-        if (!context.SemanticAnalysisOptions.HasDirective(node.DirectiveName))
-            return;
-
-        foreach (var then in node.Then)
-            then.Accept(this, context);
-
-        foreach (var @else in node.Else)
-            @else.Accept(this, context);
+        if (context.SemanticAnalysisOptions.HasDirective(node.DirectiveName))
+            foreach (var then in node.Then)
+                then.Accept(this, context);
+        else
+            foreach (var @else in node.Else)
+                @else.Accept(this, context);
     }
 
     public void VisitIf(IfStatementNode node, SymbolFinderContext context)

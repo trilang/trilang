@@ -31,7 +31,7 @@ public class AddThisAsParameterToInstanceMethodsTests
         var tree = Parse(code);
 
         var lowering = new Lowering();
-        lowering.Lower(tree);
+        lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new MethodDeclarationNode(
             AccessModifier.Public,
@@ -61,7 +61,7 @@ public class AddThisAsParameterToInstanceMethodsTests
         var tree = Parse(code);
 
         var lowering = new Lowering();
-        lowering.Lower(tree);
+        lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new ConstructorDeclarationNode(
             AccessModifier.Public,
@@ -88,7 +88,7 @@ public class AddThisAsParameterToInstanceMethodsTests
         var tree = Parse(code);
 
         var lowering = new Lowering();
-        lowering.Lower(tree);
+        lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new ParameterNode(MemberAccessExpressionNode.This, new TypeNode("Test"));
 

@@ -723,6 +723,9 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
         foreach (var method in node.Methods)
             method.Accept(this, context);
 
+        foreach (var constructor in node.Constructors)
+            constructor.Accept(this, context);
+
         VisitTypeExit(node, context);
     }
 

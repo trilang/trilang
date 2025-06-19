@@ -75,6 +75,14 @@ public static class Helpers
                     .Select(x => Find(x, predicate))
                     .FirstOrDefault(x => x is not null),
 
+            IfDirectiveNode ifDirectiveNode
+                => ifDirectiveNode.Then
+                       .Select(x => Find(x, predicate))
+                       .FirstOrDefault(x => x is not null) ??
+                   ifDirectiveNode.Else
+                       .Select(x => Find(x, predicate))
+                       .FirstOrDefault(x => x is not null),
+
             IfStatementNode ifStatementNode
                 => Find(ifStatementNode.Condition, predicate) ??
                    Find(ifStatementNode.Then, predicate) ??

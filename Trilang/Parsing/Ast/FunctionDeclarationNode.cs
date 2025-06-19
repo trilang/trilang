@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;

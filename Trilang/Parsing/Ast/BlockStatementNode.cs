@@ -5,6 +5,8 @@ namespace Trilang.Parsing.Ast;
 
 public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
 {
+    private readonly List<IStatementNode> statements;
+
     public BlockStatementNode()
         : this([])
     {
@@ -12,7 +14,7 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
 
     public BlockStatementNode(IReadOnlyList<IStatementNode> statements)
     {
-        Statements = statements;
+        this.statements = [..statements];
 
         foreach (var statement in statements)
             statement.Parent = this;
@@ -66,9 +68,19 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitBlock(this, context);
 
+    public void Insert(int i, IStatementNode declaration)
+    {
+        declaration.Parent = this;
+        statements.Insert(i, declaration);
+    }
+
+    public void Remove(IStatementNode declaration)
+        => statements.Remove(declaration);
+
     public ISyntaxNode? Parent { get; set; }
 
-    public IReadOnlyList<IStatementNode> Statements { get; }
+    public IReadOnlyList<IStatementNode> Statements
+        => statements;
 
     public ISymbolTable? SymbolTable { get; set; }
 }

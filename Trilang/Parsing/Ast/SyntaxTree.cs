@@ -5,9 +5,11 @@ namespace Trilang.Parsing.Ast;
 
 public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 {
+    private readonly List<IDeclarationNode> declarations;
+
     public SyntaxTree(IReadOnlyList<IDeclarationNode> declarations)
     {
-        Declarations = declarations;
+        this.declarations = [..declarations];
 
         foreach (var function in declarations)
             function.Parent = this;
@@ -61,9 +63,19 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitTree(this, context);
 
+    public void Insert(int i, IDeclarationNode declaration)
+    {
+        declaration.Parent = this;
+        declarations.Insert(i, declaration);
+    }
+
+    public void Remove(IDeclarationNode declaration)
+        => declarations.Remove(declaration);
+
     public ISyntaxNode? Parent { get; set; }
 
-    public IReadOnlyList<IDeclarationNode> Declarations { get; }
+    public IReadOnlyList<IDeclarationNode> Declarations
+        => declarations;
 
     public ISymbolTable? SymbolTable { get; set; }
 }

@@ -31,7 +31,7 @@ public class GenerateGettersAndSettersTests
         var tree = Parse(code);
 
         var lowering = new Lowering();
-        lowering.Lower(tree);
+        lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new PropertyDeclarationNode(
             "count",
@@ -69,7 +69,7 @@ public class GenerateGettersAndSettersTests
         var tree = Parse(code);
 
         var lowering = new Lowering();
-        lowering.Lower(tree);
+        lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new PropertyDeclarationNode(
             "count",
@@ -114,7 +114,7 @@ public class GenerateGettersAndSettersTests
         var tree = Parse(code);
 
         var lowering = new Lowering();
-        lowering.Lower(tree);
+        lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new PropertyDeclarationNode(
             "count",

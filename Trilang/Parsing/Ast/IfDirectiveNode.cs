@@ -10,6 +10,12 @@ public class IfDirectiveNode : IDeclarationNode, IStatementNode, IEquatable<IfDi
         DirectiveName = directiveName;
         Then = then;
         Else = @else;
+
+        foreach (var node in Then)
+            node.Parent = this;
+
+        foreach (var node in Else)
+            node.Parent = this;
     }
 
     public static bool operator ==(IfDirectiveNode? left, IfDirectiveNode? right)

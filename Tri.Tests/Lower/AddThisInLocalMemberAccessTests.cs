@@ -35,7 +35,7 @@ public class AddThisInLocalMemberAccessTests
         var tree = Parse(code);
 
         var lowering = new Lowering();
-        lowering.Lower(tree);
+        lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new MemberAccessExpressionNode(
             new MemberAccessExpressionNode("this"),
@@ -63,7 +63,7 @@ public class AddThisInLocalMemberAccessTests
         var tree = Parse(code);
 
         var lowering = new Lowering();
-        lowering.Lower(tree);
+        lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new MemberAccessExpressionNode(
             new MemberAccessExpressionNode("this"),
