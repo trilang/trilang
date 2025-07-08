@@ -1,39 +1,68 @@
+using System.Text;
 using Trilang.Parsing.Ast;
 
 namespace Trilang.IntermediateRepresentation;
 
-public record IrFunction(string Name, Block Block)
+public record IrFunction(string Name, IrCode Code)
 {
-    public static IrFunction FromFunction(FunctionDeclarationNode node, Block block)
-        => new IrFunction(node.Name, block);
+    public IrFunction(string name, Block block) : this(name, new IrCode(block))
+    {
+    }
 
-    public static IrFunction FromMethod(MethodDeclarationNode node, Block block)
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"function {Name}:");
+
+        var queue = new Queue<Block>();
+        var visited = new HashSet<Block>();
+        queue.Enqueue(Code.Entry);
+
+        while (queue.TryDequeue(out var block))
+        {
+            if (!visited.Add(block))
+                continue;
+
+            sb.Append(block);
+
+            foreach (var next in block.Next)
+                if (!visited.Contains(next))
+                    queue.Enqueue(next);
+        }
+
+        return sb.ToString();
+    }
+
+    public static IrFunction FromFunction(FunctionDeclarationNode node, IrCode code)
+        => new IrFunction(node.Name, code);
+
+    public static IrFunction FromMethod(MethodDeclarationNode node, IrCode code)
     {
         var type = (TypeDeclarationNode)node.Parent!;
 
-        return new IrFunction($"{type.Name}_{node.Name}", block);
+        return new IrFunction($"{type.Name}_{node.Name}", code);
     }
 
-    public static IrFunction FromConstructor(ConstructorDeclarationNode node, Block block)
+    public static IrFunction FromConstructor(ConstructorDeclarationNode node, IrCode code)
     {
         var type = (TypeDeclarationNode)node.Parent!;
 
-        return new IrFunction($"{type.Name}_ctor", block);
+        return new IrFunction($"{type.Name}_ctor", code);
     }
 
-    public static IrFunction FromSetter(PropertySetterNode node, Block block)
+    public static IrFunction FromSetter(PropertySetterNode node, IrCode code)
     {
         var property = (PropertyDeclarationNode)node.Parent!;
         var type = (TypeDeclarationNode)property.Parent!;
 
-        return new IrFunction($"{type.Name}_{property.Name}_Setter", block);
+        return new IrFunction($"{type.Name}_{property.Name}_Setter", code);
     }
 
-    public static IrFunction FromGetter(PropertyGetterNode node, Block block)
+    public static IrFunction FromGetter(PropertyGetterNode node, IrCode code)
     {
         var property = (PropertyDeclarationNode)node.Parent!;
         var type = (TypeDeclarationNode)property.Parent!;
 
-        return new IrFunction($"{type.Name}_{property.Name}_Getter", block);
+        return new IrFunction($"{type.Name}_{property.Name}_Getter", code);
     }
 }

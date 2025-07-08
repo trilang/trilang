@@ -1,9 +1,10 @@
 using Trilang.IntermediateRepresentation;
+using Trilang.IntermediateRepresentation.Instructions;
 using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
-using static Trilang.IntermediateRepresentation.BinaryInstructionKind;
+using static Trilang.IntermediateRepresentation.Instructions.BinaryInstructionKind;
 
 namespace Tri.Tests.IntermediateRepresentation;
 
@@ -21,17 +22,25 @@ public class IrGeneratorTests
     }
 
     [Test]
-    public void AddTwoConstantsTest()
+    [TestCase("+", Add)]
+    [TestCase("-", Sub)]
+    [TestCase("*", Mul)]
+    [TestCase("/", Div)]
+    [TestCase("%", Mod)]
+    [TestCase("&", And)]
+    [TestCase("|", Or)]
+    [TestCase("^", Xor)]
+    public void TwoConstantsNumericOperatorsTest(string op, BinaryInstructionKind @operator)
     {
-        const string code =
-            """
-            function test(): i32 {
-                return 1 + 2;
-            }
-            """;
+        var code =
+            $$"""
+              function test(): i32 {
+                  return 1 {{op}} 2;
+              }
+              """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -39,12 +48,139 @@ public class IrGeneratorTests
             new IrFunction("test", new Block("entry", [
                 new LoadInstruction(new Register(0), 1),
                 new LoadInstruction(new Register(1), 2),
-                new BinaryInstruction(new Register(2), Add, new Register(0), new Register(1)),
+                new BinaryInstruction(new Register(2), @operator, new Register(0), new Register(1)),
                 new ReturnInstruction(new Register(2)),
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    [TestCase("==", Eq)]
+    [TestCase("!=", Ne)]
+    [TestCase("<", Lt)]
+    [TestCase("<=", Le)]
+    [TestCase(">", Gt)]
+    [TestCase(">=", Ge)]
+    public void TwoConstantsEqualityOperatorsTest(string op, BinaryInstructionKind @operator)
+    {
+        var code =
+            $$"""
+              function test(): bool {
+                  return 1 {{op}} 2;
+              }
+              """;
+        var tree = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate([tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("test", new Block("entry", [
+                new LoadInstruction(new Register(0), 1),
+                new LoadInstruction(new Register(1), 2),
+                new BinaryInstruction(new Register(2), @operator, new Register(0), new Register(1)),
+                new ReturnInstruction(new Register(2)),
+            ]))
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void AssigmentOperatorTests()
+    {
+        const string code =
+            """
+            function test(x: i32): void {
+                x = 1;
+            }
+            """;
+        var tree = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate([tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("test", new Block("entry", [
+                new LoadParameterInstruction(new Register(0), 0),
+                new LoadInstruction(new Register(1), 1),
+                new MoveInstruction(new Register(2), new Register(1)),
+            ]))
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    [TestCase("+=", Add)]
+    [TestCase("-=", Sub)]
+    [TestCase("*=", Mul)]
+    [TestCase("/=", Div)]
+    [TestCase("%=", Mod)]
+    [TestCase("&=", And)]
+    [TestCase("|=", Or)]
+    [TestCase("^=", Xor)]
+    public void NumericAssigmentOperatorTests(string op, BinaryInstructionKind @operator)
+    {
+        var code =
+            $$"""
+              function test(x: i32): void {
+                  x {{op}} 1;
+              }
+              """;
+        var tree = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate([tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("test", new Block("entry", [
+                new LoadParameterInstruction(new Register(0), 0),
+                new LoadInstruction(new Register(1), 1),
+                new BinaryInstruction(new Register(2), @operator, new Register(0), new Register(1)),
+                new MoveInstruction(new Register(3), new Register(2)),
+            ]))
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void AssignmentSsaFormTest()
+    {
+        const string code =
+            """
+            function test(x: i32): i32 {
+                x += 1;
+                x = 10;
+
+                return x;
+            }
+            """;
+        var tree = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate([tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("test", new Block("entry", [
+                new LoadParameterInstruction(new Register(0), 0),
+                new LoadInstruction(new Register(1), 1),
+                new BinaryInstruction(new Register(2), Add, new Register(0), new Register(1)),
+                new MoveInstruction(new Register(4), new Register(2)),
+                new LoadInstruction(new Register(3), 10),
+                new MoveInstruction(new Register(5), new Register(3)),
+                new ReturnInstruction(new Register(5)),
+            ]))
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -58,7 +194,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -71,7 +207,7 @@ public class IrGeneratorTests
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -88,20 +224,22 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
                 new LoadInstruction(new Register(0), 1),
-                new LoadInstruction(new Register(1), 2),
-                new BinaryInstruction(new Register(2), Add, new Register(0), new Register(1)),
-                new ReturnInstruction(new Register(2)),
+                new MoveInstruction(new Register(1), new Register(0)),
+                new LoadInstruction(new Register(2), 2),
+                new MoveInstruction(new Register(3), new Register(2)),
+                new BinaryInstruction(new Register(4), Add, new Register(1), new Register(3)),
+                new ReturnInstruction(new Register(4)),
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -115,7 +253,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -126,7 +264,7 @@ public class IrGeneratorTests
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -140,7 +278,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -152,7 +290,7 @@ public class IrGeneratorTests
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -166,7 +304,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -178,7 +316,7 @@ public class IrGeneratorTests
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -192,7 +330,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -204,7 +342,7 @@ public class IrGeneratorTests
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -218,7 +356,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -231,7 +369,7 @@ public class IrGeneratorTests
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -245,7 +383,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -260,7 +398,7 @@ public class IrGeneratorTests
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -276,7 +414,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var expected = new List<IrFunction>
@@ -284,11 +422,12 @@ public class IrGeneratorTests
             new IrFunction("test", new Block("entry", [
                 new LoadInstruction(new Register(0), 10),
                 new NewArrayInstruction(new Register(1), new TypeArrayMetadata(TypeMetadata.I32), new Register(0)),
-                new ReturnInstruction(new Register(1)),
+                new MoveInstruction(new Register(2), new Register(1)),
+                new ReturnInstruction(new Register(2)),
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -306,7 +445,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
@@ -327,7 +466,7 @@ public class IrGeneratorTests
             ]))
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -345,7 +484,7 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var endBlock = new Block("endif_0");
@@ -360,12 +499,18 @@ public class IrGeneratorTests
             [
                 new Block(
                     "then_0",
-                    [new ReturnInstruction(new Register(0))],
+                    [
+                        new ReturnInstruction(new Register(0)),
+                        new JumpInstruction("endif_0"),
+                    ],
                     [endBlock]
                 ),
                 new Block(
                     "else_0",
-                    [new ReturnInstruction(new Register(1))],
+                    [
+                        new ReturnInstruction(new Register(1)),
+                        new JumpInstruction("endif_0"),
+                    ],
                     [endBlock]
                 ),
             ]
@@ -376,7 +521,7 @@ public class IrGeneratorTests
             new IrFunction("max", entryBlock)
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -384,35 +529,42 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function max(a: i32, b: i32): i32 {
-                if (a >= b) {
-                    return a;
+            function max(a: i32): i32 {
+                var b: i32 = 0;
+                if (a > 0) {
+                    b = 10;
                 }
 
-                return 0;
+                return b;
             }
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var endBlock = new Block("endif_0", [
-            new LoadInstruction(new Register(3), 0),
-            new ReturnInstruction(new Register(3)),
+            new PhiInstruction(new Register(7), [new Register(2), new Register(6)]),
+            new ReturnInstruction(new Register(7)),
         ]);
         var entryBlock = new Block(
             "entry",
             [
                 new LoadParameterInstruction(new Register(0), 0),
-                new LoadParameterInstruction(new Register(1), 1),
-                new BinaryInstruction(new Register(2), Ge, new Register(0), new Register(1)),
-                new BranchInstruction(new Register(2), "then_0", null),
+                new LoadInstruction(new Register(1), 0),
+                new MoveInstruction(new Register(2), new Register(1)),
+                new LoadInstruction(new Register(3), 0),
+                new BinaryInstruction(new Register(4), Gt, new Register(0), new Register(3)),
+                new BranchInstruction(new Register(4), "then_0", null),
             ],
             [
                 new Block(
                     "then_0",
-                    [new ReturnInstruction(new Register(0))],
+                    [
+                        new LoadInstruction(new Register(5), 10),
+                        new MoveInstruction(new Register(6), new Register(5)),
+                        new JumpInstruction("endif_0"),
+                    ],
                     [endBlock]
                 ),
                 endBlock
@@ -424,7 +576,7 @@ public class IrGeneratorTests
             new IrFunction("max", entryBlock)
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 
     [Test]
@@ -446,11 +598,11 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
         var endBlock0 = new Block("endif_0");
-        var endBlock1 = new Block("endif_1", [], [endBlock0]);
+        var endBlock1 = new Block("endif_1", [new JumpInstruction("endif_0")], [endBlock0]);
         var entryBlock = new Block(
             "entry",
             [
@@ -473,6 +625,7 @@ public class IrGeneratorTests
                             [
                                 new LoadInstruction(new Register(5), 1),
                                 new ReturnInstruction(new Register(5)),
+                                new JumpInstruction("endif_1"),
                             ],
                             [endBlock1]
                         ),
@@ -481,6 +634,7 @@ public class IrGeneratorTests
                             [
                                 new LoadInstruction(new Register(6), 2),
                                 new ReturnInstruction(new Register(6)),
+                                new JumpInstruction("endif_1"),
                             ],
                             [endBlock1]
                         ),
@@ -491,6 +645,7 @@ public class IrGeneratorTests
                     [
                         new LoadInstruction(new Register(7), 0),
                         new ReturnInstruction(new Register(7)),
+                        new JumpInstruction("endif_0"),
                     ],
                     [endBlock0]
                 ),
@@ -502,6 +657,129 @@ public class IrGeneratorTests
             new IrFunction("max", entryBlock)
         };
 
-        Assert.That(functions, Is.EqualTo(expected));
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void IfStatementPhiFunctionTest()
+    {
+        const string code =
+            """
+            function test(a: i32): i32 {
+                var b: i32 = 0;
+                if (a > 0) {
+                    b = 1;
+                } else {
+                    b = -1;
+                }
+
+                return b;
+            }
+            """;
+        var tree = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate([tree]);
+
+        var endBlock = new Block("endif_0", [
+            new PhiInstruction(new Register(10), [new Register(8), new Register(9)]),
+            new ReturnInstruction(new Register(10))
+        ]);
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("test", new Block(
+                "entry",
+                [
+                    new LoadParameterInstruction(new Register(0), 0),
+                    new LoadInstruction(new Register(1), 0),
+                    new MoveInstruction(new Register(2), new Register(1)),
+                    new LoadInstruction(new Register(3), 0),
+                    new BinaryInstruction(new Register(4), Gt, new Register(0), new Register(3)),
+                    new BranchInstruction(new Register(4), "then_0", "else_0"),
+                ],
+                [
+                    new Block(
+                        "then_0",
+                        [
+                            new LoadInstruction(new Register(5), 1),
+                            new MoveInstruction(new Register(9), new Register(5)),
+                            new JumpInstruction("endif_0"),
+                        ],
+                        [endBlock]
+                    ),
+                    new Block(
+                        "else_0",
+                        [
+                            new LoadInstruction(new Register(6), 1),
+                            new UnaryInstruction(new Register(7), UnaryInstructionKind.Neg, new Register(6)),
+                            new MoveInstruction(new Register(8), new Register(7)),
+                            new JumpInstruction("endif_0"),
+                        ],
+                        [endBlock]
+                    ),
+                ]
+            ))
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void WhileStatementTest()
+    {
+        const string code =
+            """
+            function test(): i32 {
+                var i: i32 = 0;
+                while (i < 10) {
+                    i += 1;
+                }
+
+                return i;
+            }
+            """;
+        var tree = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate([tree]);
+
+        var loopEnd = new Block(
+            "loop_end_0",
+            [new ReturnInstruction(new Register(6))]
+        );
+        var loopBody = new Block(
+            "loop_body_0",
+            [
+                new LoadInstruction(new Register(4), 1),
+                new BinaryInstruction(new Register(5), Add, new Register(6), new Register(4)),
+                new MoveInstruction(new Register(7), new Register(5)),
+                new JumpInstruction("loop_condition_0"),
+            ]
+        );
+        var loopCondition = new Block(
+            "loop_condition_0",
+            [
+                new PhiInstruction(new Register(6), [new Register(1), new Register(7)]),
+                new LoadInstruction(new Register(2), 10),
+                new BinaryInstruction(new Register(3), Lt, new Register(6), new Register(2)),
+                new BranchInstruction(new Register(3), "loop_body_0", "loop_end_0"),
+            ],
+            [loopBody, loopEnd]
+        );
+        loopBody.AddNext(loopCondition);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("test", new Block(
+                "entry",
+                [
+                    new LoadInstruction(new Register(0), 0),
+                    new MoveInstruction(new Register(1), new Register(0)),
+                ],
+                [loopCondition]
+            ))
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
 }

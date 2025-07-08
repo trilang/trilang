@@ -1,118 +1,172 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using static Trilang.Parsing.Ast.BinaryExpressionKind;
 
 namespace Trilang.IntermediateRepresentation;
 
-internal class IrGenerator : Visitor
+public class IrGenerator
 {
-    private readonly Dictionary<ISyntaxNode, Register> registers;
-    private readonly HashSet<IrFunction> functions;
-    private IrBuilder builder;
-
+    private readonly SsaTransformer ssaTransformer;
     private int ifCounter;
+    private int loopCounter;
 
     public IrGenerator()
     {
-        registers = [];
-        functions = [];
-        builder = new IrBuilder();
-
+        ssaTransformer = new SsaTransformer();
         ifCounter = 0;
+        loopCounter = 0;
     }
 
-    private void LoadParameters(IEnumerable<ParameterNode> parameters)
+    public IReadOnlyList<IrFunction> Generate(IReadOnlyList<SyntaxTree> syntaxTrees)
     {
-        foreach (var (index, parameter) in parameters.Index())
+        var functions = new List<IrFunction>();
+        foreach (var syntaxTree in syntaxTrees)
+            functions.AddRange(Generate(syntaxTree));
+
+        return functions;
+    }
+
+    private IReadOnlyList<IrFunction> Generate(SyntaxTree tree)
+    {
+        ifCounter = 0;
+        loopCounter = 0;
+
+        var functions = new List<IrFunction>();
+
+        foreach (var declaration in tree.Declarations)
+            functions.AddRange(GenerateDeclaration(declaration));
+
+        return functions;
+    }
+
+    private IReadOnlyList<IrFunction> GenerateDeclaration(IDeclarationNode declaration)
+        => declaration switch
         {
-            var register = builder.LoadParameter(index);
-            registers[parameter] = register;
+            FunctionDeclarationNode functionDeclarationNode
+                => [GenerateFunction(functionDeclarationNode)],
+
+            TypeAliasDeclarationNode typeAliasDeclarationNode
+                => throw new NotImplementedException(),
+
+            TypeDeclarationNode typeDeclarationNode
+                => GenerateFunctionFromType(typeDeclarationNode),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(declaration)),
+        };
+
+    private IrFunction GenerateFunction(FunctionDeclarationNode node)
+    {
+        var builder = new IrBuilder();
+        builder.LoadParameters(node.Parameters);
+        GenerateBlock(builder, node.Body);
+
+        var code = builder.Build();
+        ssaTransformer.Transform(code);
+
+        return IrFunction.FromFunction(node, code);
+    }
+
+    private IReadOnlyList<IrFunction> GenerateFunctionFromType(TypeDeclarationNode typeDeclarationNode)
+    {
+        var functions = new List<IrFunction>();
+
+        foreach (var method in typeDeclarationNode.Methods)
+            functions.Add(GenerateMethod(method));
+
+        foreach (var constructor in typeDeclarationNode.Constructors)
+            functions.Add(GenerateConstructor(constructor));
+
+        foreach (var property in typeDeclarationNode.Properties)
+        {
+            // getter/setter aren't null because they are generated on the lowering stage
+            functions.Add(GenerateGetter(property.Getter!));
+            functions.Add(GenerateSetter(property.Setter!));
         }
+
+        return functions;
     }
 
-    protected override void VisitFunctionEnter(FunctionDeclarationNode node)
+    private IrFunction GenerateMethod(MethodDeclarationNode node)
     {
-        builder = new IrBuilder();
-        LoadParameters(node.Parameters);
+        var builder = new IrBuilder();
+        builder.LoadParameters(node.Parameters);
+        GenerateBlock(builder, node.Body);
+
+        var code = builder.Build();
+        ssaTransformer.Transform(code);
+
+        return IrFunction.FromMethod(node, code);
     }
 
-    protected override void VisitFunctionExit(FunctionDeclarationNode node)
+    private IrFunction GenerateConstructor(ConstructorDeclarationNode node)
     {
-        registers.Clear();
+        var builder = new IrBuilder();
+        builder.LoadParameters(node.Parameters);
+        GenerateBlock(builder, node.Body);
 
-        var function = IrFunction.FromFunction(node, builder.Build());
-        functions.Add(function);
+        var code = builder.Build();
+        ssaTransformer.Transform(code);
+
+        return IrFunction.FromConstructor(node, code);
     }
 
-    protected override void VisitMethodEnter(MethodDeclarationNode node)
+    private IrFunction GenerateGetter(PropertyGetterNode node)
     {
-        builder = new IrBuilder();
-        LoadParameters(node.Parameters);
+        var builder = new IrBuilder();
+        builder.LoadParameters(node.Parameters);
+        GenerateBlock(builder, node.Body!);
+
+        var code = builder.Build();
+        ssaTransformer.Transform(code);
+
+        return IrFunction.FromGetter(node, code);
     }
 
-    protected override void VisitMethodExit(MethodDeclarationNode node)
+    private IrFunction GenerateSetter(PropertySetterNode node)
     {
-        registers.Clear();
+        var builder = new IrBuilder();
+        builder.LoadParameters(node.Parameters);
+        GenerateBlock(builder, node.Body!);
 
-        var function = IrFunction.FromMethod(node, builder.Build());
-        functions.Add(function);
+        var code = builder.Build();
+        ssaTransformer.Transform(code);
+
+        return IrFunction.FromSetter(node, code);
     }
 
-    protected override void VisitConstructorEnter(ConstructorDeclarationNode node)
+    private void GenerateStatement(IrBuilder builder, IStatementNode statementNode)
     {
-        builder = new IrBuilder();
-        LoadParameters(node.Parameters);
+        if (statementNode is BlockStatementNode blockStatementNode)
+            GenerateBlock(builder, blockStatementNode);
+        else if (statementNode is BreakNode breakNode)
+            throw new NotImplementedException();
+        else if (statementNode is ContinueNode continueNode)
+            throw new NotImplementedException();
+        else if (statementNode is ExpressionStatementNode expressionStatementNode)
+            GenerateExpression(builder, expressionStatementNode.Expression);
+        else if (statementNode is IfStatementNode ifStatementNode)
+            GenerateIf(builder, ifStatementNode);
+        else if (statementNode is ReturnStatementNode returnStatementNode)
+            GenerateReturn(builder, returnStatementNode);
+        else if (statementNode is VariableDeclarationStatementNode variableDeclarationStatementNode)
+            GenerateVariableDeclaration(builder, variableDeclarationStatementNode);
+        else if (statementNode is WhileNode whileNode)
+            GenerateWhile(builder, whileNode);
+        else
+            throw new ArgumentOutOfRangeException(nameof(statementNode));
     }
 
-    protected override void VisitConstructorExit(ConstructorDeclarationNode node)
+    private void GenerateBlock(IrBuilder builder, BlockStatementNode node)
     {
-        registers.Clear();
-
-        var function = IrFunction.FromConstructor(node, builder.Build());
-        functions.Add(function);
+        foreach (var statement in node.Statements)
+            GenerateStatement(builder, statement);
     }
 
-    protected override void VisitSetterEnter(PropertySetterNode node)
-    {
-        builder = new IrBuilder();
-        LoadParameters(node.Parameters);
-        // TODO: add field/value
-    }
-
-    protected override void VisitSetterExit(PropertySetterNode node)
-    {
-        registers.Clear();
-
-        var function = IrFunction.FromSetter(node, builder.Build());
-        functions.Add(function);
-    }
-
-    protected override void VisitGetterEnter(PropertyGetterNode node)
-    {
-        builder = new IrBuilder();
-        LoadParameters(node.Parameters);
-        // TODO: add field/value
-    }
-
-    protected override void VisitGetterExit(PropertyGetterNode node)
-    {
-        registers.Clear();
-
-        var function = IrFunction.FromGetter(node, builder.Build());
-        functions.Add(function);
-    }
-
-    // -----
-
-    public override void VisitIf(IfStatementNode node)
+    private void GenerateIf(IrBuilder builder, IfStatementNode node)
     {
         var ifNumber = ifCounter++;
 
-        node.Condition.Accept(this);
-        if (!registers.TryGetValue(node.Condition, out var conditionRegister))
-            throw new Exception("Condition not found.");
-
+        var conditionRegister = GenerateExpression(builder, node.Condition);
         var thenBlock = builder.CreateBlock($"then_{ifNumber}");
         var elseBlock = builder.CreateBlock($"else_{ifNumber}");
         var endBlock = builder.CreateBlock($"endif_{ifNumber}");
@@ -131,170 +185,355 @@ internal class IrGenerator : Visitor
         }
 
         builder.UseBlock(thenBlock);
-        node.Then.Accept(this);
+        GenerateBlock(builder, node.Then);
+        builder.Jump(endBlock);
         builder.AddBlock(endBlock);
 
         if (node.Else is not null)
         {
             builder.UseBlock(elseBlock);
-            node.Else.Accept(this);
+            GenerateBlock(builder, node.Else);
+            builder.Jump(endBlock);
             builder.AddBlock(endBlock);
         }
 
         builder.UseBlock(endBlock);
     }
 
-    // -----
-
-    protected override void VisitArrayAccessExit(ArrayAccessExpressionNode node)
+    private void GenerateReturn(IrBuilder builder, ReturnStatementNode node)
     {
-        if (!registers.TryGetValue(node.Member, out var arrayRegister))
-            throw new Exception("Array not found.");
+        var expression = node.Expression is not null
+            ? GenerateExpression(builder, node.Expression)
+            : (Register?)null;
 
-        if (!registers.TryGetValue(node.Index, out var indexRegister))
-            throw new Exception("Index not found.");
-
-        var register = builder.ArrayElement(arrayRegister, indexRegister);
-        registers[node] = register;
+        builder.Return(expression);
     }
 
-    protected override void VisitBinaryExpressionExit(BinaryExpressionNode node)
+    private void GenerateVariableDeclaration(IrBuilder builder, VariableDeclarationStatementNode node)
     {
-        if (!registers.TryGetValue(node.Left, out var left))
-            throw new Exception("Left operand not found.");
+        var expression = GenerateExpression(builder, node.Expression);
+        var register = builder.Move(expression);
+        builder.AddDefinition(node.Name, register);
+    }
 
-        if (!registers.TryGetValue(node.Right, out var right))
-            throw new Exception("Right operand not found.");
+    private void GenerateWhile(IrBuilder builder, WhileNode node)
+    {
+        var loopNumber = loopCounter++;
 
-        var register = node.Kind switch
+        var loopCondition = builder.CreateBlock($"loop_condition_{loopNumber}");
+        var loopBody = builder.CreateBlock($"loop_body_{loopNumber}");
+        var loopEnd = builder.CreateBlock($"loop_end_{loopNumber}");
+
+        builder.AddBlock(loopCondition);
+        builder.UseBlock(loopCondition);
+        var conditionRegister = GenerateExpression(builder, node.Condition);
+
+        builder.AddBlock(loopBody);
+        builder.AddBlock(loopEnd);
+        builder.Branch(conditionRegister, loopBody, loopEnd);
+
+        builder.UseBlock(loopBody);
+        builder.AddBlock(loopCondition);
+        GenerateBlock(builder, node.Body);
+        builder.Jump(loopCondition);
+
+        if (node.Find<BreakNode>(x => x.LoopNode == node) is not null)
+            builder.AddBlock(loopEnd);
+
+        builder.UseBlock(loopEnd);
+    }
+
+    private Register GenerateExpression(IrBuilder builder, IExpressionNode node)
+        => node switch
         {
-            Addition => builder.Add(left, right),
-            Subtraction => builder.Sub(left, right),
-            Multiplication => builder.Mul(left, right),
-            Division => builder.Div(left, right),
-            Modulus => builder.Mod(left, right),
+            ArrayAccessExpressionNode arrayAccessExpressionNode
+                => GenerateArrayAccess(builder, arrayAccessExpressionNode),
 
-            BitwiseAnd => builder.And(left, right),
-            BitwiseOr => builder.Or(left, right),
-            BitwiseXor => builder.Xor(left, right),
+            AsExpressionNode asExpressionNode
+                => throw new NotImplementedException(),
 
-            Equality => builder.Eq(left, right),
-            Inequality => builder.Ne(left, right),
-            LessThan => builder.Lt(left, right),
-            LessThanOrEqual => builder.Le(left, right),
-            GreaterThan => builder.Gt(left, right),
-            GreaterThanOrEqual => builder.Ge(left, right),
+            BinaryExpressionNode binaryExpressionNode
+                => GenerateBinaryExpression(builder, binaryExpressionNode),
 
-            _ => throw new Exception("Unknown binary expression kind."),
+            CallExpressionNode callExpressionNode
+                => throw new NotImplementedException(),
+
+            LiteralExpressionNode literalExpressionNode
+                => GenerateLiteral(builder, literalExpressionNode),
+
+            MemberAccessExpressionNode memberAccessExpressionNode
+                => GenerateMemberAccess(builder, memberAccessExpressionNode),
+
+            NewArrayExpressionNode newArrayExpressionNode
+                => GenerateNewArray(builder, newArrayExpressionNode),
+
+            NewObjectExpressionNode newObjectExpressionNode
+                => GenerateNewObject(builder, newObjectExpressionNode),
+
+            NullExpressionNode nullExpressionNode
+                => GenerateNull(builder, nullExpressionNode),
+
+            TupleExpressionNode tupleExpressionNode
+                => throw new NotImplementedException(),
+
+            UnaryExpressionNode unaryExpressionNode
+                => GenerateUnaryExpression(builder, unaryExpressionNode),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(node)),
         };
 
-        registers[node] = register;
+    private Register GenerateArrayAccess(IrBuilder builder, ArrayAccessExpressionNode node)
+    {
+        var array = GenerateExpression(builder, node.Member);
+        var index = GenerateExpression(builder, node.Index);
+
+        return builder.ArrayElement(array, index);
     }
 
-    protected override void VisitCallExit(CallExpressionNode node)
+    private Register GenerateBinaryExpression(IrBuilder builder, BinaryExpressionNode node)
     {
-        throw new NotImplementedException();
-    }
+        var left = GenerateExpression(builder, node.Left);
+        var right = GenerateExpression(builder, node.Right);
 
-    protected override void VisitLiteralExit(LiteralExpressionNode node)
-    {
-        var register = builder.Load(node.Value);
-        registers[node] = register;
-    }
-
-    protected override void VisitNewArrayExit(NewArrayExpressionNode node)
-    {
-        if (!registers.TryGetValue(node.Size, out var sizeRegister))
-            throw new Exception("Size not found.");
-
-        var register = builder.NewArray((TypeArrayMetadata)node.Type.Metadata!, sizeRegister);
-        registers[node] = register;
-    }
-
-    protected override void VisitNewObjectExit(NewObjectExpressionNode node)
-    {
-        var parameters = node.Parameters
-            .Select(p => registers[p])
-            .ToArray();
-
-        var register = builder.NewObject(node.Metadata!, parameters);
-        registers[node] = register;
-    }
-
-    protected override void VisitNullExit(NullExpressionNode node)
-    {
-        var register = builder.Load(null);
-        registers[node] = register;
-    }
-
-    protected override void VisitMemberAccessExit(MemberAccessExpressionNode node)
-    {
-        // TODO:
-        if (node.Member is null)
+        if (node.Kind == Addition)
         {
-            var register = node.Reference switch
-            {
-                VariableDeclarationStatementNode variableStatementNode
-                    => registers[variableStatementNode],
-
-                ParameterNode parameterNode
-                    => registers[parameterNode],
-
-                FunctionDeclarationNode functionNode
-                    => throw new NotImplementedException(),
-
-                TypeDeclarationNode typeDeclarationNode
-                    => throw new NotImplementedException(),
-
-                ITypeMetadata type
-                    => throw new NotImplementedException(),
-
-                _ => throw new Exception(),
-            };
-
-            registers[node] = register;
+            return builder.Add(left, right);
         }
-        else
+
+        if (node.Kind == Subtraction)
+        {
+            return builder.Sub(left, right);
+        }
+
+        if (node.Kind == Multiplication)
+        {
+            return builder.Mul(left, right);
+        }
+
+        if (node.Kind == Division)
+        {
+            return builder.Div(left, right);
+        }
+
+        if (node.Kind == Modulus)
+        {
+            return builder.Mod(left, right);
+        }
+
+        if (node.Kind == BitwiseAnd)
+        {
+            return builder.And(left, right);
+        }
+
+        if (node.Kind == BitwiseOr)
+        {
+            return builder.Or(left, right);
+        }
+
+        if (node.Kind == BitwiseXor)
+        {
+            return builder.Xor(left, right);
+        }
+
+        if (node.Kind == ConditionalAnd)
         {
             throw new NotImplementedException();
         }
+
+        if (node.Kind == ConditionalOr)
+        {
+            throw new NotImplementedException();
+        }
+
+        if (node.Kind == Equality)
+        {
+            return builder.Eq(left, right);
+        }
+
+        if (node.Kind == Inequality)
+        {
+            return builder.Ne(left, right);
+        }
+
+        if (node.Kind == LessThan)
+        {
+            return builder.Lt(left, right);
+        }
+
+        if (node.Kind == LessThanOrEqual)
+        {
+            return builder.Le(left, right);
+        }
+
+        if (node.Kind == GreaterThan)
+        {
+            return builder.Gt(left, right);
+        }
+
+        if (node.Kind == GreaterThanOrEqual)
+        {
+            return builder.Ge(left, right);
+        }
+
+        if (node.Kind == Assignment)
+        {
+            var register = builder.Move(left, right);
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        if (node.Kind == AdditionAssignment)
+        {
+            var source = builder.Add(left, right);
+            var register = builder.Move(left, source);
+
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        if (node.Kind == SubtractionAssignment)
+        {
+            var source = builder.Sub(left, right);
+            var register = builder.Move(left, source);
+
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        if (node.Kind == MultiplicationAssignment)
+        {
+            var source = builder.Mul(left, right);
+            var register = builder.Move(left, source);
+
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        if (node.Kind == DivisionAssignment)
+        {
+            var source = builder.Div(left, right);
+            var register = builder.Move(left, source);
+
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        if (node.Kind == ModulusAssignment)
+        {
+            var source = builder.Mod(left, right);
+            var register = builder.Move(left, source);
+
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        if (node.Kind == BitwiseAndAssignment)
+        {
+            var source = builder.And(left, right);
+            var register = builder.Move(left, source);
+
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        if (node.Kind == BitwiseOrAssignment)
+        {
+            var source = builder.Or(left, right);
+            var register = builder.Move(left, source);
+
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        if (node.Kind == BitwiseXorAssignment)
+        {
+            var source = builder.Xor(left, right);
+            var register = builder.Move(left, source);
+
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        throw new Exception("Unknown binary expression kind.");
     }
 
-    protected override void VisitReturnExit(ReturnStatementNode node)
-    {
-        var register = default(Register);
-        if (node.Expression is not null && !registers.TryGetValue(node.Expression, out register))
-            throw new Exception("Expression not found.");
+    private Register GenerateLiteral(IrBuilder builder, LiteralExpressionNode node)
+        => builder.Load(node.Value);
 
-        builder.Return(register);
+    private Register GenerateMemberAccess(IrBuilder builder, MemberAccessExpressionNode node)
+    {
+        if (node.Member is null)
+        {
+            var assignment = builder.CurrentBlock.FindAssignment(node.Name);
+            if (assignment is not null)
+                return assignment.Value;
+        }
+
+        throw new NotImplementedException();
     }
 
-    protected override void VisitVariableExit(VariableDeclarationStatementNode node)
+    private Register GenerateNewArray(IrBuilder builder, NewArrayExpressionNode node)
     {
-        if (!registers.TryGetValue(node.Expression, out var expRegister))
-            throw new Exception("Expression not found.");
+        var size = GenerateExpression(builder, node.Size);
 
-        registers[node] = expRegister;
+        return builder.NewArray((TypeArrayMetadata)node.Type.Metadata!, size);
     }
 
-    protected override void VisitUnaryExpressionExit(UnaryExpressionNode node)
+    private Register GenerateNewObject(IrBuilder builder, NewObjectExpressionNode node)
     {
-        if (!registers.TryGetValue(node.Operand, out var operand))
-            throw new Exception("Operand not found.");
+        var parameters = new Register[node.Parameters.Count];
+        for (var i = 0; i < node.Parameters.Count; i++)
+            parameters[i] = GenerateExpression(builder, node.Parameters[i]);
 
-        var register = node.Kind switch
+        return builder.NewObject(node.Metadata!, parameters);
+    }
+
+    private Register GenerateNull(IrBuilder builder, NullExpressionNode node)
+        => builder.Load(null);
+
+    private Register GenerateUnaryExpression(IrBuilder builder, UnaryExpressionNode node)
+    {
+        var operand = GenerateExpression(builder, node.Operand);
+
+        return node.Kind switch
         {
             UnaryExpressionKind.UnaryMinus
                 => builder.Neg(operand),
+
+            UnaryExpressionKind.UnaryPlus
+                => operand,
 
             UnaryExpressionKind.LogicalNot or UnaryExpressionKind.BitwiseNot
                 => builder.Not(operand),
 
             _ => throw new NotImplementedException(),
         };
-        registers[node] = register;
     }
-
-    public IReadOnlyCollection<IrFunction> Functions
-        => functions;
 }

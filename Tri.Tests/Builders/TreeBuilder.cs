@@ -2,6 +2,7 @@ using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Builders;
 
+// TODO: remove? use parser?
 internal sealed class TreeBuilder : ISyntaxTreeBuilder
 {
     private readonly List<IDeclarationNode> declaration;

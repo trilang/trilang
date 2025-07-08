@@ -1,18 +1,20 @@
+using Trilang.IntermediateRepresentation.Instructions;
 using Trilang.Metadata;
+using Trilang.Parsing.Ast;
 
 namespace Trilang.IntermediateRepresentation;
 
 internal class IrBuilder
 {
+    private readonly Block entryBlock;
     private int registerCounter;
-    private readonly Block firstBlock;
     private Block currentBlock;
 
     public IrBuilder()
     {
+        entryBlock = new Block("entry");
         registerCounter = 0;
-        firstBlock = new Block("entry");
-        currentBlock = firstBlock;
+        currentBlock = entryBlock;
     }
 
     private Register CreateRegister()
@@ -51,6 +53,12 @@ internal class IrBuilder
         currentBlock.AddInstruction(branch);
     }
 
+    public void Jump(Block block)
+    {
+        var jump = new JumpInstruction(block.Label);
+        currentBlock.AddInstruction(jump);
+    }
+
     public Register Load(object? value)
     {
         var register = CreateRegister();
@@ -60,13 +68,18 @@ internal class IrBuilder
         return register;
     }
 
-    public Register LoadParameter(int index)
+    private void LoadParameter(string name, int index)
     {
         var register = CreateRegister();
         var loadInstruction = new LoadParameterInstruction(register, index);
         currentBlock.AddInstruction(loadInstruction);
+        AddDefinition(name, register);
+    }
 
-        return register;
+    public void LoadParameters(IReadOnlyList<ParameterNode> parameters)
+    {
+        foreach (var (i, parameter) in parameters.Index())
+            LoadParameter(parameter.Name, i);
     }
 
     public Register Move(Register source)
@@ -76,6 +89,14 @@ internal class IrBuilder
         currentBlock.AddInstruction(move);
 
         return register;
+    }
+
+    public Register Move(Register destination, Register source)
+    {
+        var move = new MoveInstruction(destination, source);
+        currentBlock.AddInstruction(move);
+
+        return destination;
     }
 
     public Register NewArray(TypeArrayMetadata type, Register size)
@@ -159,6 +180,23 @@ internal class IrBuilder
     public Register Not(Register operand)
         => UnaryInstruction(UnaryInstructionKind.Not, operand);
 
-    public Block Build()
-        => firstBlock;
+    public Register AddAssignment(string name, Register register)
+    {
+        currentBlock.AddAssignment(name, register, false);
+
+        return register;
+    }
+
+    public Register AddDefinition(string name, Register register)
+    {
+        currentBlock.AddAssignment(name, register, true);
+
+        return register;
+    }
+
+    public IrCode Build()
+        => new IrCode(entryBlock) { RegisterCounter = registerCounter };
+
+    public Block CurrentBlock
+        => currentBlock;
 }

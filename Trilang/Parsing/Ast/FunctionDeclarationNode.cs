@@ -10,7 +10,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
         string name,
         IReadOnlyList<ParameterNode> parameters,
         IInlineTypeNode returnType,
-        BlockStatementNode? body)
+        BlockStatementNode body)
     {
         Name = name;
         Parameters = parameters;
@@ -21,9 +21,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
             parameter.Parent = this;
 
         ReturnType.Parent = this;
-
-        if (Body is not null)
-            Body.Parent = this;
+        Body.Parent = this;
     }
 
     public static FunctionDeclarationNode Create(
@@ -50,7 +48,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
         return Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
                ReturnType.Equals(other.ReturnType) &&
-               Equals(Body, other.Body);
+               Body.Equals(other.Body);
     }
 
     public override bool Equals(object? obj)
@@ -96,5 +94,5 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
 
     public FunctionMetadata? Metadata { get; set; }
 
-    public BlockStatementNode? Body { get; }
+    public BlockStatementNode Body { get; }
 }

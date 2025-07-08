@@ -53,4 +53,6 @@ public class ContinueNode : IStatementNode, IEquatable<ContinueNode>
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }
+
+    public WhileNode? LoopNode { get; set; }
 }

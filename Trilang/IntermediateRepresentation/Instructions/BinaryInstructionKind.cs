@@ -1,4 +1,4 @@
-namespace Trilang.IntermediateRepresentation;
+namespace Trilang.IntermediateRepresentation.Instructions;
 
 public enum BinaryInstructionKind
 {

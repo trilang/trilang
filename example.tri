@@ -1,5 +1,3 @@
-external function print(text: string): void;
-
 // empty type?
 type T1;
 

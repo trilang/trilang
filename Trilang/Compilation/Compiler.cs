@@ -31,7 +31,7 @@ public class Compiler
             syntaxTrees.Add(tree);
         }
 
-        var ir = new Ir();
+        var ir = new IrGenerator();
         var functions = ir.Generate(syntaxTrees);
 
         if (options.OperatingSystem == CompilerOptionOs.Linux)

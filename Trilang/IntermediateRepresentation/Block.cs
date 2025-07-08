@@ -1,8 +1,14 @@
+using System.Diagnostics;
+using System.Text;
+using Trilang.IntermediateRepresentation.Instructions;
+
 namespace Trilang.IntermediateRepresentation;
 
+[DebuggerDisplay("{Label}")]
 public class Block : IEquatable<Block>
 {
     private readonly List<IInstruction> instructions;
+    private readonly Dictionary<string, (Register Register, bool IsDefinition)> assignments;
     private readonly List<Block> previous;
     private readonly List<Block> next;
 
@@ -20,6 +26,7 @@ public class Block : IEquatable<Block>
     {
         Label = label;
         this.instructions = [..instructions];
+        assignments = [];
         previous = [];
         this.next = [];
 
@@ -42,8 +49,7 @@ public class Block : IEquatable<Block>
             return true;
 
         return Label == other.Label &&
-               instructions.SequenceEqual(other.instructions) &&
-               Next.SequenceEqual(other.Next);
+               instructions.SequenceEqual(other.instructions);
     }
 
     public override bool Equals(object? obj)
@@ -63,8 +69,90 @@ public class Block : IEquatable<Block>
     public override int GetHashCode()
         => HashCode.Combine(instructions, Label);
 
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append($"{Label}");
+        sb.Append(':');
+
+        if (previous.Count > 0)
+        {
+            sb.Append(" <- ");
+
+            foreach (var block in previous)
+                sb.Append(block.Label).Append(", ");
+
+            sb.Remove(sb.Length - 2, 2);
+        }
+
+        sb.AppendLine();
+
+        foreach (var instruction in instructions)
+            sb.Append('\t').AppendLine(instruction.ToString());
+
+        return sb.ToString();
+    }
+
     public void AddInstruction(IInstruction instruction)
         => instructions.Add(instruction);
+
+    public void InsertInstruction(int index, IInstruction instruction)
+        => instructions.Insert(index, instruction);
+
+    public void ReplaceInstruction(int index, IInstruction instruction)
+        => instructions[index] = instruction;
+
+    public void AddAssignment(string variable, Register value, bool isDefinition)
+        => assignments[variable] = (value, isDefinition);
+
+    public Register? GetAssignment(string variable)
+        => assignments.TryGetValue(variable, out var value) ? value.Register : null;
+
+    public Register? FindAssignment(string name)
+    {
+        var q = new Queue<Block>();
+        var visited = new HashSet<Block>();
+        q.Enqueue(this);
+
+        while (q.TryDequeue(out var block))
+        {
+            if (!visited.Add(block))
+                continue;
+
+            var assignment = block.GetAssignment(name);
+            if (assignment is not null)
+                return assignment.Value;
+
+            foreach (var previousBlock in block.Previous)
+                if (!visited.Contains(previousBlock))
+                    q.Enqueue(previousBlock);
+        }
+
+        return null;
+    }
+
+    public string? FindVariable(Register register)
+    {
+        var q = new Queue<Block>();
+        var visited = new HashSet<Block>();
+        q.Enqueue(this);
+
+        while (q.TryDequeue(out var block))
+        {
+            if (!visited.Add(block))
+                continue;
+
+            var assignment = block.assignments.FirstOrDefault(a => a.Value.Register == register).Key;
+            if (assignment is not null)
+                return assignment;
+
+            foreach (var previousBlock in block.Previous)
+                if (!visited.Contains(previousBlock))
+                    q.Enqueue(previousBlock);
+        }
+
+        return null;
+    }
 
     public void AddPrevious(Block block)
     {
@@ -88,4 +176,9 @@ public class Block : IEquatable<Block>
 
     public IReadOnlyList<Block> Next
         => next;
+
+    public IReadOnlyDictionary<string, (Register Register, bool IsDefinition)> Assignments
+        => assignments;
+
+    public int Order { get; set; }
 }

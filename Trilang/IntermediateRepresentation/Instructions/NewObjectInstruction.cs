@@ -1,8 +1,8 @@
 using Trilang.Metadata;
 
-namespace Trilang.IntermediateRepresentation;
+namespace Trilang.IntermediateRepresentation.Instructions;
 
-public class NewObjectInstruction : IInstruction, IEquatable<NewObjectInstruction>
+public class NewObjectInstruction : IEquatable<NewObjectInstruction>, IInstruction
 {
     public NewObjectInstruction(
         Register result,
@@ -49,6 +49,9 @@ public class NewObjectInstruction : IInstruction, IEquatable<NewObjectInstructio
 
     public override int GetHashCode()
         => HashCode.Combine(Result, Constructor, Arguments);
+
+    public override string ToString()
+        => $"new {Constructor.DeclaringType}, {string.Join(", ", Arguments)})";
 
     public Register Result { get; }
 
