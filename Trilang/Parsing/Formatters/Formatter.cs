@@ -111,7 +111,7 @@ public partial class Formatter : IFormatter
             foreach (var statement in node.Statements)
                 statement.Accept(this);
         });
-        writer.Write('}');
+        writer.WriteLine('}');
     }
 
     public void VisitBreak(BreakNode node)
@@ -187,13 +187,7 @@ public partial class Formatter : IFormatter
             writer.Scoped(() =>
             {
                 node.Getter?.Accept(this);
-
-                if (hasGetter && hasSetter)
-                    writer.WriteLine();
-
                 node.Setter?.Accept(this);
-
-                writer.WriteLine();
             });
 
             writer.Write('}');
@@ -211,7 +205,7 @@ public partial class Formatter : IFormatter
 
         if (node.Body is null)
         {
-            writer.Write(';');
+            writer.WriteLine(';');
         }
         else
         {
@@ -227,7 +221,7 @@ public partial class Formatter : IFormatter
 
         if (node.Body is null)
         {
-            writer.Write(';');
+            writer.WriteLine(';');
         }
         else
         {
@@ -306,7 +300,6 @@ public partial class Formatter : IFormatter
         {
             then.Accept(this);
             writer.WriteLine();
-            writer.WriteLine();
         }
 
         if (node.Else.Count > 0)
@@ -318,11 +311,10 @@ public partial class Formatter : IFormatter
             {
                 @else.Accept(this);
                 writer.WriteLine();
-                writer.WriteLine();
             }
         }
 
-        writer.Write("#endif");
+        writer.WriteLine("#endif");
     }
 
     public void VisitIf(IfStatementNode node)
@@ -334,11 +326,11 @@ public partial class Formatter : IFormatter
 
         if (node.Else is not null)
         {
+            writer.RemoveLastNewLine();
+
             writer.Write(" else ");
             node.Else.Accept(this);
         }
-
-        writer.WriteLine();
     }
 
     public void VisitInterface(InterfaceNode node)
@@ -560,16 +552,16 @@ public partial class Formatter : IFormatter
 
     public void VisitTree(SyntaxTree node)
     {
-        for (var i = 0; i < node.Declarations.Count; i++)
+        var count = node.Declarations.Count;
+        for (var i = 0; i < count; i++)
         {
             node.Declarations[i].Accept(this);
 
-            if (i < node.Declarations.Count - 1)
-            {
+            if (i < count - 1)
                 writer.WriteLine();
-                writer.WriteLine();
-            }
         }
+
+        writer.RemoveLastNewLine();
     }
 
     public void VisitTuple(TupleExpressionNode node)
@@ -651,14 +643,16 @@ public partial class Formatter : IFormatter
                 writer.WriteLine();
             }
 
-            foreach (var method in node.Methods)
+            for (var i = 0; i < node.Methods.Count; i++)
             {
-                method.Accept(this);
-                writer.WriteLine();
+                node.Methods[i].Accept(this);
+
+                if (i < node.Methods.Count - 1)
+                    writer.WriteLine();
             }
         });
 
-        writer.Write('}');
+        writer.WriteLine('}');
     }
 
     public void VisitTypeNode(TypeNode node)
@@ -698,7 +692,6 @@ public partial class Formatter : IFormatter
         node.Condition.Accept(this);
         writer.Write(") ");
         node.Body.Accept(this);
-        writer.WriteLine();
     }
 
     public override string ToString()

@@ -77,6 +77,22 @@ public partial class Formatter
             isIndented = false;
         }
 
+
+        public void RemoveLastNewLine()
+        {
+            var newLine = Environment.NewLine;
+            var newLineLength = newLine.Length;
+            if (sb.Length < newLineLength)
+                return;
+
+            var lastChars = sb.ToString(sb.Length - newLineLength, newLineLength);
+            if (lastChars == newLine)
+            {
+                sb.Length -= newLineLength;
+                CancelIndent();
+            }
+        }
+
         public void CancelIndent()
             => isIndented = true;
 

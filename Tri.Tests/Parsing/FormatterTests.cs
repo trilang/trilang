@@ -1264,18 +1264,7 @@ public class FormatterTests
         ]);
         var formatted = tree.ToString();
         const string expected =
-            """
-            public type Point {
-                x: i32;
-                y: i32;
-                public constructor(x: i32, y: i32) {
-                }
-                public toString(): string {
-                }
-                public distance(other: Point): string {
-                }
-            }
-            """;
+            "public type Point {\n    x: i32;\n    y: i32;\n    public constructor(x: i32, y: i32) {\n    }\n    \n    public toString(): string {\n    }\n    \n    public distance(other: Point): string {\n    }\n}";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
