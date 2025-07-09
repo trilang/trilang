@@ -68,10 +68,31 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitBlock(this, context);
 
+    public void Add(IStatementNode declaration)
+    {
+        declaration.Parent = this;
+        statements.Add(declaration);
+    }
+
     public void Insert(int i, IStatementNode declaration)
     {
         declaration.Parent = this;
         statements.Insert(i, declaration);
+    }
+
+    public void InsertAfter(IStatementNode declaration, IStatementNode after)
+    {
+        var index = statements.IndexOf(declaration);
+        statements.Insert(index + 1, after);
+    }
+
+    public void Replace(IStatementNode oldDeclaration, IStatementNode newDeclaration)
+    {
+        var index = statements.IndexOf(oldDeclaration);
+        statements[index] = newDeclaration;
+
+        oldDeclaration.Parent = null;
+        newDeclaration.Parent = this;
     }
 
     public void Remove(IStatementNode declaration)

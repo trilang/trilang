@@ -254,6 +254,10 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = metadata;
     }
 
+    public void VisitGoTo(GoToNode node, TypeCheckerContext context)
+    {
+    }
+
     public void VisitIfDirective(IfDirectiveNode node, TypeCheckerContext context)
     {
         if (context.HasDirective(node.DirectiveName))
@@ -307,6 +311,10 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
         var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
         node.Metadata = type.GetMethod(node.Name);
+    }
+
+    public void VisitLabel(LabelNode node, TypeCheckerContext context)
+    {
     }
 
     public void VisitLiteral(LiteralExpressionNode node, TypeCheckerContext context)

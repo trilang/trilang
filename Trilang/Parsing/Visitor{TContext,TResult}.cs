@@ -92,8 +92,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitBlockEnter(node, context);
 
-        foreach (var statement in node.Statements)
-            statement.Accept(this, context);
+        for (var i = 0; i < node.Statements.Count; i++)
+            node.Statements[i].Accept(this, context);
 
         VisitBlockExit(node, context);
     }
@@ -132,8 +132,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         node.Member.Accept(this, context);
 
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+        for (var i = 0; i < node.Parameters.Count; i++)
+            node.Parameters[i].Accept(this, context);
 
         VisitCallExit(node, context);
     }
@@ -153,8 +153,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitConstructorEnter(node, context);
 
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+        for (var i = 0; i < node.Parameters.Count; i++)
+            node.Parameters[i].Accept(this, context);
 
         node.Body.Accept(this, context);
 
@@ -193,8 +193,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitDiscriminatedUnionEnter(node, context);
 
-        foreach (var type in node.Types)
-            type.Accept(this, context);
+        for (var i = 0; i < node.Types.Count; i++)
+            node.Types[i].Accept(this, context);
 
         VisitDiscriminatedUnionExit(node, context);
     }
@@ -234,8 +234,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitFunctionEnter(node, context);
 
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+        for (var i = 0; i < node.Parameters.Count; i++)
+            node.Parameters[i].Accept(this, context);
 
         node.ReturnType.Accept(this, context);
         node.Body?.Accept(this, context);
@@ -258,8 +258,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitFunctionTypeEnter(node, context);
 
-        foreach (var parameter in node.ParameterTypes)
-            parameter.Accept(this, context);
+        for (var i = 0; i < node.ParameterTypes.Count; i++)
+            node.ParameterTypes[i].Accept(this, context);
 
         node.ReturnType.Accept(this, context);
 
@@ -281,8 +281,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitGenericTypeEnter(node, context);
 
-        foreach (var type in node.TypeArguments)
-            type.Accept(this, context);
+        for (var i = 0; i < node.TypeArguments.Count; i++)
+            node.TypeArguments[i].Accept(this, context);
 
         VisitGenericTypeExit(node, context);
     }
@@ -295,6 +295,23 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void VisitGoTo(GoToNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitGoToEnter(node, context);
+        VisitGoToExit(node, context);
+    }
+
+    protected virtual void VisitGoToEnter(GoToNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitGoToExit(GoToNode node, TContext context)
+    {
+    }
+
     public virtual void VisitIfDirective(IfDirectiveNode node, TContext context)
     {
         if (context.IsFinished)
@@ -302,11 +319,11 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitIfDirectiveEnter(node, context);
 
-        foreach (var then in node.Then)
-            then.Accept(this, context);
+        for (var i = 0; i < node.Then.Count; i++)
+            node.Then[i].Accept(this, context);
 
-        foreach (var @else in node.Else)
-            @else.Accept(this, context);
+        for (var i = 0; i < node.Else.Count; i++)
+            node.Else[i].Accept(this, context);
 
         VisitIfDirectiveExit(node, context);
     }
@@ -348,11 +365,11 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitInterfaceEnter(node, context);
 
-        foreach (var property in node.Properties)
-            property.Accept(this, context);
+        for (var i = 0; i < node.Properties.Count; i++)
+            node.Properties[i].Accept(this, context);
 
-        foreach (var method in node.Methods)
-            method.Accept(this, context);
+        for (var i = 0; i < node.Methods.Count; i++)
+            node.Methods[i].Accept(this, context);
 
         VisitInterfaceExit(node, context);
     }
@@ -392,8 +409,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitInterfaceMethodEnter(node, context);
 
-        foreach (var parameter in node.ParameterTypes)
-            parameter.Accept(this, context);
+        for (var i = 0; i < node.ParameterTypes.Count; i++)
+            node.ParameterTypes[i].Accept(this, context);
 
         node.ReturnType.Accept(this, context);
 
@@ -405,6 +422,23 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     }
 
     protected virtual void VisitInterfaceMethodExit(InterfaceMethodNode node, TContext context)
+    {
+    }
+
+    public void VisitLabel(LabelNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitLabelEnter(node, context);
+        VisitLabelExit(node, context);
+    }
+
+    protected virtual void VisitLabelEnter(LabelNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitLabelExit(LabelNode node, TContext context)
     {
     }
 
@@ -452,8 +486,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitMethodEnter(node, context);
 
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+        for (var i = 0; i < node.Parameters.Count; i++)
+            node.Parameters[i].Accept(this, context);
 
         node.ReturnType.Accept(this, context);
         node.Body.Accept(this, context);
@@ -496,8 +530,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         node.Type.Accept(this, context);
 
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+        for (var i = 0; i < node.Parameters.Count; i++)
+            node.Parameters[i].Accept(this, context);
 
         VisitNewObjectExit(node, context);
     }
@@ -633,8 +667,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitTreeEnter(node, context);
 
-        foreach (var function in node.Declarations)
-            function.Accept(this, context);
+        for (var i = 0; i < node.Declarations.Count; i++)
+            node.Declarations[i].Accept(this, context);
 
         VisitTreeExit(node, context);
     }
@@ -654,8 +688,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitTupleEnter(node, context);
 
-        foreach (var element in node.Expressions)
-            element.Accept(this, context);
+        for (var i = 0; i < node.Expressions.Count; i++)
+            node.Expressions[i].Accept(this, context);
 
         VisitTupleExit(node, context);
     }
@@ -675,8 +709,8 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitTupleTypeEnter(node, context);
 
-        foreach (var type in node.Types)
-            type.Accept(this, context);
+        for (var i = 0; i < node.Types.Count; i++)
+            node.Types[i].Accept(this, context);
 
         VisitTupleTypeExit(node, context);
     }
@@ -717,14 +751,14 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitTypeEnter(node, context);
 
-        foreach (var property in node.Properties)
-            property.Accept(this, context);
+        for (var i = 0; i < node.Properties.Count; i++)
+            node.Properties[i].Accept(this, context);
 
-        foreach (var method in node.Methods)
-            method.Accept(this, context);
+        for (var i = 0; i < node.Methods.Count; i++)
+            node.Methods[i].Accept(this, context);
 
-        foreach (var constructor in node.Constructors)
-            constructor.Accept(this, context);
+        for (var i = 0; i < node.Constructors.Count; i++)
+            node.Constructors[i].Accept(this, context);
 
         VisitTypeExit(node, context);
     }

@@ -32,6 +32,8 @@ public interface IVisitor<in TContext>
 
     void VisitGenericType(GenericTypeNode node, TContext context);
 
+    void VisitGoTo(GoToNode node, TContext context);
+
     void VisitIfDirective(IfDirectiveNode node, TContext context);
 
     void VisitIf(IfStatementNode node, TContext context);
@@ -41,6 +43,8 @@ public interface IVisitor<in TContext>
     void VisitInterfaceProperty(InterfacePropertyNode node, TContext context);
 
     void VisitInterfaceMethod(InterfaceMethodNode node, TContext context);
+
+    void VisitLabel(LabelNode node, TContext context);
 
     void VisitLiteral(LiteralExpressionNode node, TContext context);
 

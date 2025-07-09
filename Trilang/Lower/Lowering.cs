@@ -12,5 +12,8 @@ public class Lowering
         tree.Accept(new AddThisInLocalMemberAccess());
         tree.Accept(new AddThisAsParameterToInstanceMethods());
         tree.Accept(new AddValueParameterToSetters());
+
+        tree.Accept(new ReplaceWhileLoop());
+        tree.Accept(new RewriteIfStatement());
     }
 }

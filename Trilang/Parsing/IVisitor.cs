@@ -32,6 +32,8 @@ public interface IVisitor
 
     void VisitGenericType(GenericTypeNode node);
 
+    void VisitGoTo(GoToNode node);
+
     void VisitIfDirective(IfDirectiveNode node);
 
     void VisitIf(IfStatementNode node);
@@ -41,6 +43,8 @@ public interface IVisitor
     void VisitInterfaceProperty(InterfacePropertyNode node);
 
     void VisitInterfaceMethod(InterfaceMethodNode node);
+
+    void VisitLabel(LabelNode node);
 
     void VisitLiteral(LiteralExpressionNode node);
 

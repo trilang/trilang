@@ -77,6 +77,9 @@ public partial class Formatter
             isIndented = false;
         }
 
+        public void CancelIndent()
+            => isIndented = true;
+
         public override string ToString()
             => sb.ToString();
     }

@@ -9,8 +9,8 @@ public class Block : IEquatable<Block>
 {
     private readonly List<IInstruction> instructions;
     private readonly Dictionary<string, (Register Register, bool IsDefinition)> assignments;
-    private readonly List<Block> previous;
-    private readonly List<Block> next;
+    private readonly HashSet<Block> previous;
+    private readonly HashSet<Block> next;
 
     public Block(string label)
         : this(label, [])
@@ -156,13 +156,17 @@ public class Block : IEquatable<Block>
 
     public void AddPrevious(Block block)
     {
-        previous.Add(block);
+        if (!previous.Add(block))
+            return;
+
         block.next.Add(this);
     }
 
     public void AddNext(Block block)
     {
-        next.Add(block);
+        if (!next.Add(block))
+            return;
+
         block.previous.Add(this);
     }
 
@@ -171,10 +175,10 @@ public class Block : IEquatable<Block>
     public IReadOnlyList<IInstruction> Instructions
         => instructions;
 
-    public IReadOnlyList<Block> Previous
+    public IReadOnlyCollection<Block> Previous
         => previous;
 
-    public IReadOnlyList<Block> Next
+    public IReadOnlyCollection<Block> Next
         => next;
 
     public IReadOnlyDictionary<string, (Register Register, bool IsDefinition)> Assignments

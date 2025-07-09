@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using static Trilang.Parsing.Ast.BinaryExpressionKind;
@@ -7,15 +8,9 @@ namespace Trilang.IntermediateRepresentation;
 public class IrGenerator
 {
     private readonly SsaTransformer ssaTransformer;
-    private int ifCounter;
-    private int loopCounter;
 
     public IrGenerator()
-    {
-        ssaTransformer = new SsaTransformer();
-        ifCounter = 0;
-        loopCounter = 0;
-    }
+        => ssaTransformer = new SsaTransformer();
 
     public IReadOnlyList<IrFunction> Generate(IReadOnlyList<SyntaxTree> syntaxTrees)
     {
@@ -28,9 +23,6 @@ public class IrGenerator
 
     private IReadOnlyList<IrFunction> Generate(SyntaxTree tree)
     {
-        ifCounter = 0;
-        loopCounter = 0;
-
         var functions = new List<IrFunction>();
 
         foreach (var declaration in tree.Declarations)
@@ -138,20 +130,24 @@ public class IrGenerator
     {
         if (statementNode is BlockStatementNode blockStatementNode)
             GenerateBlock(builder, blockStatementNode);
-        else if (statementNode is BreakNode breakNode)
-            throw new NotImplementedException();
-        else if (statementNode is ContinueNode continueNode)
-            throw new NotImplementedException();
+        else if (statementNode is BreakNode)
+            Debug.Fail("The 'break' statement is not supported. It is replaced with 'goto' in lowering.");
+        else if (statementNode is ContinueNode)
+            Debug.Fail("The 'continue' statement is not supported. It is replaced with 'goto' in lowering.");
         else if (statementNode is ExpressionStatementNode expressionStatementNode)
             GenerateExpression(builder, expressionStatementNode.Expression);
+        else if (statementNode is GoToNode goToNode)
+            GenerateGoTo(builder, goToNode);
         else if (statementNode is IfStatementNode ifStatementNode)
             GenerateIf(builder, ifStatementNode);
+        else if (statementNode is LabelNode labelNode)
+            GenerateLabel(builder, labelNode);
         else if (statementNode is ReturnStatementNode returnStatementNode)
             GenerateReturn(builder, returnStatementNode);
         else if (statementNode is VariableDeclarationStatementNode variableDeclarationStatementNode)
             GenerateVariableDeclaration(builder, variableDeclarationStatementNode);
-        else if (statementNode is WhileNode whileNode)
-            GenerateWhile(builder, whileNode);
+        else if (statementNode is WhileNode)
+            Debug.Fail("The 'while' statement is not supported. It is replaced with 'if' in lowering.");
         else
             throw new ArgumentOutOfRangeException(nameof(statementNode));
     }
@@ -162,42 +158,39 @@ public class IrGenerator
             GenerateStatement(builder, statement);
     }
 
+    private void GenerateGoTo(IrBuilder builder, GoToNode node)
+    {
+        var label = node.Label;
+        var block = builder.FindBlock(label) ??
+                    builder.CreateBlock(label);
+
+        builder.Jump(block);
+    }
+
     private void GenerateIf(IrBuilder builder, IfStatementNode node)
     {
-        var ifNumber = ifCounter++;
+        if (node.Then.Statements is not [GoToNode thenGoTo])
+            throw new Exception("The 'if' statement must have a 'goto' statement as the 'then' branch.");
 
-        var conditionRegister = GenerateExpression(builder, node.Condition);
-        var thenBlock = builder.CreateBlock($"then_{ifNumber}");
-        var elseBlock = builder.CreateBlock($"else_{ifNumber}");
-        var endBlock = builder.CreateBlock($"endif_{ifNumber}");
+        if (node.Else!.Statements is not [GoToNode elseGoTo])
+            throw new Exception("The 'if' statement must have a 'goto' statement as the 'else' branch.");
 
-        builder.AddBlock(thenBlock);
+        var condition = GenerateExpression(builder, node.Condition);
+        var thenBlock = builder.FindBlock(thenGoTo.Label) ??
+                        builder.CreateBlock(thenGoTo.Label);
+        var elseBlock = builder.FindBlock(elseGoTo.Label) ??
+                        builder.CreateBlock(elseGoTo.Label);
 
-        if (node.Else is not null)
-        {
-            builder.AddBlock(elseBlock);
-            builder.Branch(conditionRegister, thenBlock, elseBlock);
-        }
-        else
-        {
-            builder.AddBlock(endBlock);
-            builder.Branch(conditionRegister, thenBlock, null);
-        }
+        builder.Branch(condition, thenBlock, elseBlock);
+    }
 
-        builder.UseBlock(thenBlock);
-        GenerateBlock(builder, node.Then);
-        builder.Jump(endBlock);
-        builder.AddBlock(endBlock);
+    private void GenerateLabel(IrBuilder builder, LabelNode node)
+    {
+        var label = node.Name;
+        var block = builder.FindBlock(label) ??
+                    builder.CreateBlock(node.Name);
 
-        if (node.Else is not null)
-        {
-            builder.UseBlock(elseBlock);
-            GenerateBlock(builder, node.Else);
-            builder.Jump(endBlock);
-            builder.AddBlock(endBlock);
-        }
-
-        builder.UseBlock(endBlock);
+        builder.UseBlock(block);
     }
 
     private void GenerateReturn(IrBuilder builder, ReturnStatementNode node)
@@ -214,33 +207,6 @@ public class IrGenerator
         var expression = GenerateExpression(builder, node.Expression);
         var register = builder.Move(expression);
         builder.AddDefinition(node.Name, register);
-    }
-
-    private void GenerateWhile(IrBuilder builder, WhileNode node)
-    {
-        var loopNumber = loopCounter++;
-
-        var loopCondition = builder.CreateBlock($"loop_condition_{loopNumber}");
-        var loopBody = builder.CreateBlock($"loop_body_{loopNumber}");
-        var loopEnd = builder.CreateBlock($"loop_end_{loopNumber}");
-
-        builder.AddBlock(loopCondition);
-        builder.UseBlock(loopCondition);
-        var conditionRegister = GenerateExpression(builder, node.Condition);
-
-        builder.AddBlock(loopBody);
-        builder.AddBlock(loopEnd);
-        builder.Branch(conditionRegister, loopBody, loopEnd);
-
-        builder.UseBlock(loopBody);
-        builder.AddBlock(loopCondition);
-        GenerateBlock(builder, node.Body);
-        builder.Jump(loopCondition);
-
-        if (node.Find<BreakNode>(x => x.LoopNode == node) is not null)
-            builder.AddBlock(loopEnd);
-
-        builder.UseBlock(loopEnd);
     }
 
     private Register GenerateExpression(IrBuilder builder, IExpressionNode node)
@@ -515,7 +481,7 @@ public class IrGenerator
         return builder.NewObject(node.Metadata!, parameters);
     }
 
-    private Register GenerateNull(IrBuilder builder, NullExpressionNode node)
+    private Register GenerateNull(IrBuilder builder, NullExpressionNode _)
         => builder.Load(null);
 
     private Register GenerateUnaryExpression(IrBuilder builder, UnaryExpressionNode node)

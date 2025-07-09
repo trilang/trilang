@@ -2025,4 +2025,39 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatGoToAndLabelTest()
+    {
+        var tree = new SyntaxTree([
+            new FunctionDeclarationNode(
+                "test",
+                [],
+                new TypeNode("void"),
+                new BlockStatementNode([
+                    new WhileNode(
+                        LiteralExpressionNode.True(),
+                        new BlockStatementNode([
+                            new GoToNode("end"),
+                        ])
+                    ),
+                    new LabelNode("end"),
+                    new ReturnStatementNode(),
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function test(): void {
+                while (true) {
+                    goto end;
+                }
+            end:
+                return;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

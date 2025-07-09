@@ -7,12 +7,14 @@ namespace Trilang.IntermediateRepresentation;
 internal class IrBuilder
 {
     private readonly Block entryBlock;
+    private readonly Dictionary<string, Block> blocks;
     private int registerCounter;
     private Block currentBlock;
 
     public IrBuilder()
     {
         entryBlock = new Block("entry");
+        blocks = [];
         registerCounter = 0;
         currentBlock = entryBlock;
     }
@@ -39,24 +41,32 @@ internal class IrBuilder
     }
 
     public Block CreateBlock(string name)
-        => new Block(name);
+    {
+        var block = new Block(name);
+        blocks.TryAdd(block.Label, block);
 
-    public void AddBlock(Block block)
-        => currentBlock.AddNext(block);
+        return block;
+    }
 
     public void UseBlock(Block block)
         => currentBlock = block;
 
-    public void Branch(Register conditionRegister, Block thenBlock, Block? elseBlock)
+    public Block? FindBlock(string name)
+        => blocks.GetValueOrDefault(name);
+
+    public void Branch(Register conditionRegister, Block thenBlock, Block elseBlock)
     {
-        var branch = new BranchInstruction(conditionRegister, thenBlock.Label, elseBlock?.Label);
+        var branch = new BranchInstruction(conditionRegister, thenBlock.Label, elseBlock.Label);
         currentBlock.AddInstruction(branch);
+        currentBlock.AddNext(thenBlock);
+        currentBlock.AddNext(elseBlock);
     }
 
     public void Jump(Block block)
     {
         var jump = new JumpInstruction(block.Label);
         currentBlock.AddInstruction(jump);
+        currentBlock.AddNext(block);
     }
 
     public Register Load(object? value)

@@ -254,7 +254,7 @@ public partial class Formatter : IFormatter
         node.ReturnType.Accept(this);
         writer.Write(' ');
 
-        node.Body?.Accept(this);
+        node.Body.Accept(this);
     }
 
     public void VisitFunctionType(FunctionTypeNode node)
@@ -287,6 +287,13 @@ public partial class Formatter : IFormatter
         }
 
         writer.Write('>');
+    }
+
+    public void VisitGoTo(GoToNode node)
+    {
+        writer.Write("goto ");
+        writer.Write(node.Label);
+        writer.WriteLine(';');
     }
 
     public void VisitIfDirective(IfDirectiveNode node)
@@ -430,6 +437,13 @@ public partial class Formatter : IFormatter
         writer.Write("): ");
         node.ReturnType.Accept(this);
         writer.Write(";");
+    }
+
+    public void VisitLabel(LabelNode node)
+    {
+        writer.CancelIndent();
+        writer.Write(node.Name);
+        writer.WriteLine(':');
     }
 
     public void VisitLiteral(LiteralExpressionNode node)

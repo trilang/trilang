@@ -147,6 +147,10 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.SymbolTable.TryAddType(symbol);
     }
 
+    public void VisitGoTo(GoToNode node, SymbolFinderContext context)
+    {
+    }
+
     public void VisitIfDirective(IfDirectiveNode node, SymbolFinderContext context)
     {
         if (context.SemanticAnalysisOptions.HasDirective(node.DirectiveName))
@@ -209,6 +213,10 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
 
             node.ReturnType.Accept(this, c);
         });
+    }
+
+    public void VisitLabel(LabelNode node, SymbolFinderContext context)
+    {
     }
 
     public void VisitLiteral(LiteralExpressionNode node, SymbolFinderContext context)
