@@ -410,7 +410,8 @@ public class Parser
     }
 
     private IStatementNode? TryParseStatement(ParserContext context)
-        => TryParseVariableStatement(context) ??
+        => TryParseBlock(context) ??
+           TryParseVariableStatement(context) ??
            TryParseIfStatement(context) ??
            TryParseReturnStatement(context) ??
            TryParseExpressionStatement(context) ??

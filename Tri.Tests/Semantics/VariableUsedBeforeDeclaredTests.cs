@@ -1,19 +1,30 @@
 using Tri.Tests.Builders;
+using Trilang.Parsing;
+using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 
 namespace Tri.Tests.Semantics;
 
 public class VariableUsedBeforeDeclaredTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(code);
+
+        return tree;
+    }
+
     [Test]
     public void VariableUsedAfterDeclarationTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", "i32", exp => exp.Number(1))
-                    .Statement(exp => exp.MemberAccess("a"))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                var a: i32 = 1;
+                a;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -25,12 +36,12 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void ParameterUsedAfterDeclarationTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .Body(body => body
-                    .Statement(exp => exp.MemberAccess("a"))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(a: i32): void {
+                a;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -42,12 +53,13 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableUsedBeforeDeclarationTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .Statement(exp => exp.MemberAccess("a"))
-                    .DefineVariable("a", "i32", exp => exp.Number(1))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                a;
+                var a: i32 = 1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -60,13 +72,15 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableInBlockUsedBeforeDeclarationTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .Block(block => block
-                        .Statement(exp => exp.MemberAccess("a")))
-                    .DefineVariable("a", "i32", exp => exp.Number(1))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                {
+                    a;
+                }
+                var a: i32 = 1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -79,12 +93,17 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableInDifferentBlocksTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .Block(block => block.DefineVariable("a", "i32", exp => exp.Number(1)))
-                    .Block(block => block.Statement(exp => exp.MemberAccess("a")))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                {
+                    var a: i32 = 1;
+                }
+                {
+                    a;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -97,14 +116,16 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableInDeclaredInDifferentFunctionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", "i32", exp => exp.Number(1))))
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .Statement(exp => exp.MemberAccess("a"))))
-            .Build();
+        var tree = Parse(
+            """
+            function test(): void {
+                var a: i32 = 1;
+            }
+
+            function main(): void {
+                a;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -117,14 +138,15 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableInParentScopeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .ReturnType("i32")
-                .Body(body => body
-                    .DefineVariable("a", "i32", exp => exp.Number(1))
-                    .Block(block => block
-                        .Return(exp => exp.MemberAccess("a")))))
-            .Build();
+        var tree = Parse(
+            """
+            function test(): i32 {
+                var a: i32 = 1;
+                {
+                    return a;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 

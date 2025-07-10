@@ -1,4 +1,5 @@
 using Tri.Tests.Builders;
+using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 
@@ -6,18 +7,27 @@ namespace Tri.Tests.Semantics;
 
 public class CheckAccessModifiersTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(code);
+
+        return tree;
+    }
+
     [Test]
     public void PrivateCtorTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineConstructor(ctor => ctor
-                    .AccessModifier(AccessModifier.Private)))
-            .DefineFunction("main", f => f
-                .Body(body => body
-                    .DefineVariable("x", "Test", exp => exp
-                        .NewObject("Test"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test {
+                private constructor() { }
+            }
+
+            function main(): void {
+                var x: Test = new Test();
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -30,16 +40,16 @@ public class CheckAccessModifiersTests
     [Test]
     public void IgnorePrivateCtorInTheSameTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineConstructor(ctor => ctor
-                    .AccessModifier(AccessModifier.Private))
-                .DefineMethod("create", m => m
-                    .ReturnType("Test")
-                    .Body(body => body
-                        .Return(r => r
-                            .NewObject("Test")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test {
+                private constructor() { }
+
+                public create(): Test {
+                    return new Test();
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 

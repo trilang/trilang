@@ -13,20 +13,18 @@ public class BreakContinueWithinLoopTests
         var parser = new Parser();
         var tree = parser.Parse(code);
 
-        var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
-
         return tree;
     }
 
     [Test]
     public void BreakIsNotInLoopTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .Body(body => body
-                    .Break()))
-            .Build();
+        var tree = Parse(
+            """
+            function test(): void {
+                break;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -39,11 +37,12 @@ public class BreakContinueWithinLoopTests
     [Test]
     public void ContinueIsNotInLoopTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .Body(body => body
-                    .Continue()))
-            .Build();
+        var tree = Parse(
+            """
+            function test(): void {
+                continue;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 

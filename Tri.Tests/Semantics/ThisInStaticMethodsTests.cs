@@ -1,4 +1,5 @@
 using Tri.Tests.Builders;
+using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 
@@ -6,17 +7,25 @@ namespace Tri.Tests.Semantics;
 
 public class ThisInStaticMethodsTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(code);
+
+        return tree;
+    }
+
     [Test]
     public void ThisInStaticMethodsTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineMethod("test", m => m
-                    .Static()
-                    .ReturnType("Test")
-                    .Body(body => body
-                        .Return(r => r.MemberAccess(MemberAccessExpressionNode.This)))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test {
+                public static test(): Test {
+                    return this;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 

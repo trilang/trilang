@@ -1853,12 +1853,14 @@ public class FormatterTests
     [Test]
     public void FormatGenericTypeNodeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Test", t => t
-                .Generic("List", g => g
-                    .DefineGenericArgument("T1")
-                    .DefineGenericArgument("T2")))
-            .Build();
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "Test",
+                [],
+                new GenericTypeNode("List", [new TypeNode("T1"), new TypeNode("T2")])
+            )
+        ]);
         var formatted = tree.ToString();
         const string expected = "public type Test = List<T1, T2>;";
 
@@ -1868,14 +1870,14 @@ public class FormatterTests
     [Test]
     public void FormatGenericTypeAliasTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("T", a => a
-                .DefineGenericArgument("T1")
-                .DefineGenericArgument("T2")
-                .DiscriminatedUnion(du => du
-                    .AddCase(c => c.Type("T1"))
-                    .AddCase(c => c.Type("T2"))))
-            .Build();
+        var tree = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                AccessModifier.Public,
+                "T",
+                [new TypeNode("T1"), new TypeNode("T2")],
+                new DiscriminatedUnionNode([new TypeNode("T1"), new TypeNode("T2")])
+            )
+        ]);
         var formatted = tree.ToString();
         const string expected = "public type T<T1, T2> = T1 | T2;";
 
@@ -1885,10 +1887,26 @@ public class FormatterTests
     [Test]
     public void FormatStaticMethodTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineMethod("method", m => m.Static()))
-            .Build();
+        var tree = new SyntaxTree([
+            new TypeDeclarationNode(
+                AccessModifier.Public,
+                "Test",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        AccessModifier.Public,
+                        true,
+                        "method",
+                        [],
+                        new TypeNode("void"),
+                        new BlockStatementNode()
+                    )
+                ]
+            )
+        ]);
         var formatted = tree.ToString();
         const string expected =
             """
