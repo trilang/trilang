@@ -68,6 +68,9 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitBlock(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformBlock(this);
+
     public void Add(IStatementNode declaration)
     {
         declaration.Parent = this;
@@ -86,13 +89,13 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
         statements.Insert(index + 1, after);
     }
 
-    public void Replace(IStatementNode oldDeclaration, IStatementNode newDeclaration)
+    public void Replace(IStatementNode oldStatement, IStatementNode newStatement)
     {
-        var index = statements.IndexOf(oldDeclaration);
-        statements[index] = newDeclaration;
+        var index = statements.IndexOf(oldStatement);
+        statements[index] = newStatement;
 
-        oldDeclaration.Parent = null;
-        newDeclaration.Parent = this;
+        oldStatement.Parent = null;
+        newStatement.Parent = this;
     }
 
     public void Remove(IStatementNode declaration)

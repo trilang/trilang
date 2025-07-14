@@ -62,6 +62,9 @@ public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNo
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitTuple(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformTuple(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

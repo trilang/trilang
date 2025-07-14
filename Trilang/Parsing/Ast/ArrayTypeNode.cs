@@ -61,6 +61,9 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitArrayType(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformArrayType(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

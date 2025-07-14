@@ -13,6 +13,7 @@ public class Lowering
         tree.Accept(new AddThisAsParameterToInstanceMethods());
         tree.Accept(new AddValueParameterToSetters());
 
+        tree.Transform(new ReplaceCompoundAssignments());
         tree.Accept(new ReplaceWhileLoop());
         tree.Accept(new RewriteIfStatement());
     }

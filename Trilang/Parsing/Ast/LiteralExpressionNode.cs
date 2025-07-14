@@ -76,6 +76,9 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitLiteral(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformLiteral(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public LiteralExpressionKind Kind { get; }

@@ -72,6 +72,9 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitMemberAccess(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformMemberAccess(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

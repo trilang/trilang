@@ -8,6 +8,8 @@ public interface ISyntaxNode
 
     void Accept<TContext>(IVisitor<TContext> visitor, TContext context);
 
+    ISyntaxNode Transform(ITransformer transformer);
+
     ISyntaxNode? Parent { get; set; }
 
     ISymbolTable? SymbolTable { get; set; }

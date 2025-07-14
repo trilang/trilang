@@ -66,6 +66,9 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitInterfaceMethod(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformInterfaceMethod(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

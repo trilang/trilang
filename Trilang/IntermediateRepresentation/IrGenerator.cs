@@ -351,101 +351,15 @@ public class IrGenerator
             return register;
         }
 
-        if (node.Kind == AdditionAssignment)
-        {
-            var source = builder.Add(left, right);
-            var register = builder.Move(left, source);
-
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
-
-        if (node.Kind == SubtractionAssignment)
-        {
-            var source = builder.Sub(left, right);
-            var register = builder.Move(left, source);
-
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
-
-        if (node.Kind == MultiplicationAssignment)
-        {
-            var source = builder.Mul(left, right);
-            var register = builder.Move(left, source);
-
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
-
-        if (node.Kind == DivisionAssignment)
-        {
-            var source = builder.Div(left, right);
-            var register = builder.Move(left, source);
-
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
-
-        if (node.Kind == ModulusAssignment)
-        {
-            var source = builder.Mod(left, right);
-            var register = builder.Move(left, source);
-
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
-
-        if (node.Kind == BitwiseAndAssignment)
-        {
-            var source = builder.And(left, right);
-            var register = builder.Move(left, source);
-
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
-
-        if (node.Kind == BitwiseOrAssignment)
-        {
-            var source = builder.Or(left, right);
-            var register = builder.Move(left, source);
-
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
-
-        if (node.Kind == BitwiseXorAssignment)
-        {
-            var source = builder.Xor(left, right);
-            var register = builder.Move(left, source);
-
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
+        if (node.Kind is AdditionAssignment
+            or SubtractionAssignment
+            or MultiplicationAssignment
+            or DivisionAssignment
+            or ModulusAssignment
+            or BitwiseAndAssignment
+            or BitwiseOrAssignment
+            or BitwiseXorAssignment)
+            Debug.Fail($"Compound assignment operators ({node.Kind}) should have been lowered to simple assignment on the previous stage.");
 
         throw new Exception("Unknown binary expression kind.");
     }

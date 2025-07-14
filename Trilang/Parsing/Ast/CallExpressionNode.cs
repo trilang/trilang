@@ -65,6 +65,9 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitCall(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformCall(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

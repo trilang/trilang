@@ -63,6 +63,9 @@ public class DiscriminatedUnionNode : IInlineTypeNode, IEquatable<DiscriminatedU
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitDiscriminatedUnion(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformDiscriminatedUnion(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

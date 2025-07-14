@@ -62,6 +62,9 @@ public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitAsExpression(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformAsExpression(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

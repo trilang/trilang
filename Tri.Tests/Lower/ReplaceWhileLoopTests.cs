@@ -66,9 +66,13 @@ public class ReplaceWhileLoopTests
                             new LabelNode("if_0_then"),
                             new ExpressionStatementNode(
                                 new BinaryExpressionNode(
-                                    BinaryExpressionKind.AdditionAssignment,
+                                    BinaryExpressionKind.Assignment,
                                     new MemberAccessExpressionNode("a"),
-                                    LiteralExpressionNode.Number(1)
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Addition,
+                                        new MemberAccessExpressionNode("a"),
+                                        LiteralExpressionNode.Number(1)
+                                    )
                                 )
                             ),
                             new GoToNode("loop_0_start"),
@@ -150,9 +154,13 @@ public class ReplaceWhileLoopTests
                             ]),
                             new ExpressionStatementNode(
                                 new BinaryExpressionNode(
-                                    BinaryExpressionKind.AdditionAssignment,
+                                    BinaryExpressionKind.Assignment,
                                     new MemberAccessExpressionNode("a"),
-                                    LiteralExpressionNode.Number(1)
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Addition,
+                                        new MemberAccessExpressionNode("a"),
+                                        LiteralExpressionNode.Number(1)
+                                    )
                                 )
                             ),
                             new GoToNode("loop_0_start"),
@@ -222,9 +230,13 @@ public class ReplaceWhileLoopTests
                             new LabelNode("if_0_then"),
                             new ExpressionStatementNode(
                                 new BinaryExpressionNode(
-                                    BinaryExpressionKind.AdditionAssignment,
+                                    BinaryExpressionKind.Assignment,
                                     new MemberAccessExpressionNode("a"),
-                                    LiteralExpressionNode.Number(1)
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Addition,
+                                        new MemberAccessExpressionNode("a"),
+                                        LiteralExpressionNode.Number(1)
+                                    )
                                 )
                             ),
                             new IfStatementNode(
@@ -308,9 +320,13 @@ public class ReplaceWhileLoopTests
                             new LabelNode("if_0_then"),
                             new ExpressionStatementNode(
                                 new BinaryExpressionNode(
-                                    BinaryExpressionKind.AdditionAssignment,
+                                    BinaryExpressionKind.Assignment,
                                     new MemberAccessExpressionNode("a"),
-                                    LiteralExpressionNode.Number(1)
+                                    new BinaryExpressionNode(
+                                        BinaryExpressionKind.Addition,
+                                        new MemberAccessExpressionNode("a"),
+                                        LiteralExpressionNode.Number(1)
+                                    )
                                 )
                             ),
                             new IfStatementNode(

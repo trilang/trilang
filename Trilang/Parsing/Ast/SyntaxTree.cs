@@ -63,6 +63,9 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitTree(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformTree(this);
+
     public void Insert(int i, IDeclarationNode declaration)
     {
         declaration.Parent = this;

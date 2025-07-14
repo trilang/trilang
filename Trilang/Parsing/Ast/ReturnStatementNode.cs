@@ -60,6 +60,9 @@ public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNod
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitReturn(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformReturn(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public IExpressionNode? Expression { get; }

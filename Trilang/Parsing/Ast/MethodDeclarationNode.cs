@@ -81,6 +81,9 @@ public class MethodDeclarationNode : ISyntaxNode, IEquatable<MethodDeclarationNo
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitMethod(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformMethod(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

@@ -64,6 +64,9 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitNewObject(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformNewObject(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

@@ -54,6 +54,9 @@ public class TupleTypeNode : IInlineTypeNode, IEquatable<TupleTypeNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitTupleType(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformTupleType(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

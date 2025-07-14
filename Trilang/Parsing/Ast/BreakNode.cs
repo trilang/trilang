@@ -50,6 +50,9 @@ public class BreakNode : IStatementNode, IEquatable<BreakNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitBreak(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformBreak(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

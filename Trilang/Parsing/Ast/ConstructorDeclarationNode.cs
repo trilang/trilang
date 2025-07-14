@@ -71,6 +71,9 @@ public class ConstructorDeclarationNode : ISyntaxNode, IEquatable<ConstructorDec
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitConstructor(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformConstructor(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

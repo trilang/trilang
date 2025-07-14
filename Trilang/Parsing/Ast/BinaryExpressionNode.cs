@@ -69,6 +69,9 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitBinaryExpression(this, context);
 
+    public ISyntaxNode Transform(ITransformer transformer)
+        => transformer.TransformBinaryExpression(this);
+
     public ISyntaxNode? Parent { get; set; }
 
     public BinaryExpressionKind Kind { get; }
