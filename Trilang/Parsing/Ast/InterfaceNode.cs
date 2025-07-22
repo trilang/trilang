@@ -43,7 +43,8 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
             return true;
 
         return Properties.SequenceEqual(other.Properties) &&
-               Methods.SequenceEqual(other.Methods);
+               Methods.SequenceEqual(other.Methods) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

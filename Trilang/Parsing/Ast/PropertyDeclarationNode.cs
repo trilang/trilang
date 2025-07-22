@@ -45,7 +45,8 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
         return Name == other.Name &&
                Type.Equals(other.Type) &&
                Equals(Getter, other.Getter) &&
-               Equals(Setter, other.Setter);
+               Equals(Setter, other.Setter) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

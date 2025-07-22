@@ -1,4 +1,5 @@
 using Trilang.Lower;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -38,22 +39,43 @@ public class ReplaceCompoundAssignmentsTests
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("x", new TypeNode("i32"))],
-                new TypeNode("void"),
+                [new ParameterNode("x", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                new TypeNode("void") { Metadata = TypeMetadata.Void },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
                         new BinaryExpressionNode(
                             Assignment,
-                            new MemberAccessExpressionNode("x"),
+                            new MemberAccessExpressionNode("x")
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32,
+                            },
                             new BinaryExpressionNode(
                                 kind,
-                                new MemberAccessExpressionNode("x"),
-                                LiteralExpressionNode.Number(1)
+                                new MemberAccessExpressionNode("x")
+                                {
+                                    ReturnTypeMetadata = TypeMetadata.I32,
+                                },
+                                new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                                {
+                                    ReturnTypeMetadata = TypeMetadata.I32,
+                                }
                             )
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32,
+                            }
                         )
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        }
                     )
                 ])
             )
+            {
+                Metadata = new FunctionMetadata(
+                    "test",
+                    new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.Void)
+                )
+            }
         ]);
 
         var lowering = new Lowering();

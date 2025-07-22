@@ -35,7 +35,8 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
 
         return Kind.Equals(other.Kind) &&
                Left.Equals(other.Left) &&
-               Right.Equals(other.Right);
+               Right.Equals(other.Right) &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
     }
 
     public override bool Equals(object? obj)
@@ -74,6 +75,8 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
 
     public ISyntaxNode? Parent { get; set; }
 
+    public ISymbolTable? SymbolTable { get; set; }
+
     public BinaryExpressionKind Kind { get; }
 
     public IExpressionNode Left { get; }
@@ -81,6 +84,4 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
     public IExpressionNode Right { get; }
 
     public ITypeMetadata? ReturnTypeMetadata { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 }

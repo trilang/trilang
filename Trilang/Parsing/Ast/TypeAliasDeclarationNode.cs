@@ -47,7 +47,8 @@ public class TypeAliasDeclarationNode :
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
                GenericArguments.SequenceEqual(other.GenericArguments) &&
-               Type.Equals(other.Type);
+               Type.Equals(other.Type) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

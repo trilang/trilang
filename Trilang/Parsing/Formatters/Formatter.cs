@@ -70,6 +70,7 @@ public partial class Formatter : IFormatter
             BinaryExpressionKind.Subtraction => "-",
             BinaryExpressionKind.Multiplication => "*",
             BinaryExpressionKind.Division => "/",
+            BinaryExpressionKind.Modulus => "%",
 
             BinaryExpressionKind.BitwiseAnd => "&",
             BinaryExpressionKind.BitwiseOr => "|",

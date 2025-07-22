@@ -73,11 +73,11 @@ public class IfStatementNode : IStatementNode, IEquatable<IfStatementNode>
 
     public ISyntaxNode? Parent { get; set; }
 
+    public ISymbolTable? SymbolTable { get; set; }
+
     public IExpressionNode Condition { get; }
 
     public BlockStatementNode Then { get; }
 
     public BlockStatementNode? Else { get; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 }

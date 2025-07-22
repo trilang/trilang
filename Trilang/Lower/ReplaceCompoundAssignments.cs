@@ -62,7 +62,10 @@ internal class ReplaceCompoundAssignments : ITransformer
                 BitwiseXorAssignment => BitwiseXor,
                 _ => throw new ArgumentOutOfRangeException(),
             };
-            right = new BinaryExpressionNode(kind, left, right);
+            right = new BinaryExpressionNode(kind, left, right)
+            {
+                ReturnTypeMetadata = node.ReturnTypeMetadata,
+            };
 
             return new BinaryExpressionNode(Assignment, left, right)
             {

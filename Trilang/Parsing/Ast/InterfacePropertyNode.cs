@@ -35,7 +35,8 @@ public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNo
         return Name == other.Name &&
                Type.Equals(other.Type) &&
                GetterModifier == other.GetterModifier &&
-               SetterModifier == other.SetterModifier;
+               SetterModifier == other.SetterModifier &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

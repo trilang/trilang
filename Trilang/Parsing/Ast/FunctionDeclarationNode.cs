@@ -48,7 +48,8 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
         return Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
                ReturnType.Equals(other.ReturnType) &&
-               Body.Equals(other.Body);
+               Body.Equals(other.Body) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)
@@ -95,7 +96,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
 
     public IInlineTypeNode ReturnType { get; }
 
-    public FunctionMetadata? Metadata { get; set; }
-
     public BlockStatementNode Body { get; }
+
+    public FunctionMetadata? Metadata { get; set; }
 }

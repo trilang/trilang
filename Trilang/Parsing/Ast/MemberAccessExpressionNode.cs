@@ -38,7 +38,8 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
             return true;
 
         return Name == other.Name &&
-               Equals(Member, other.Member);
+               Equals(Member, other.Member) &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
     }
 
     public override bool Equals(object? obj)

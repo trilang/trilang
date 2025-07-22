@@ -23,7 +23,8 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name;
+        return Name == other.Name &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

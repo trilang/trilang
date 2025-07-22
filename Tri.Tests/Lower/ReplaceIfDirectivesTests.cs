@@ -1,4 +1,5 @@
 using Trilang.Lower;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -7,13 +8,13 @@ namespace Tri.Tests.Lower;
 
 public class ReplaceIfDirectivesTests
 {
-    private static SyntaxTree Parse(string code)
+    private static SyntaxTree Parse(string code, IEnumerable<string> directives)
     {
         var parser = new Parser();
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        semantic.Analyze(tree, new SemanticAnalysisOptions(directives));
 
         return tree;
     }
@@ -35,14 +36,22 @@ public class ReplaceIfDirectivesTests
 
             public type Type3 { }
             """;
-        var tree = Parse(code);
+
+        var directives = new[] { "D1" };
+        var tree = Parse(code, directives);
 
         var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions(["D1"]));
+        lowering.Lower(tree, new LoweringOptions(directives));
 
         var expected = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Public, "Type1", [], [], [], [], []),
-            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], []),
+            new TypeDeclarationNode(AccessModifier.Public, "Type1", [], [], [], [], [])
+            {
+                Metadata = new TypeMetadata("Type1"),
+            },
+            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
+            {
+                Metadata = new TypeMetadata("Type3"),
+            },
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
@@ -65,14 +74,20 @@ public class ReplaceIfDirectivesTests
 
             public type Type3 { }
             """;
-        var tree = Parse(code);
+        var tree = Parse(code, []);
 
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Public, "Type2", [], [], [], [], []),
-            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], []),
+            new TypeDeclarationNode(AccessModifier.Public, "Type2", [], [], [], [], [])
+            {
+                Metadata = new TypeMetadata("Type2"),
+            },
+            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
+            {
+                Metadata = new TypeMetadata("Type3"),
+            },
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
@@ -91,13 +106,16 @@ public class ReplaceIfDirectivesTests
 
             public type Type3 { }
             """;
-        var tree = Parse(code);
+        var tree = Parse(code, []);
 
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], []),
+            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
+            {
+                Metadata = new TypeMetadata("Type3"),
+            },
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
@@ -118,23 +136,52 @@ public class ReplaceIfDirectivesTests
             #endif
             }
             """;
-        var tree = Parse(code);
+        var directives = new[] { "D1" };
+        var tree = Parse(code, directives);
 
         var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions(["D1"]));
+        lowering.Lower(tree, new LoweringOptions(directives));
 
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("callback", new FunctionTypeNode([], new TypeNode("void")))],
-                new TypeNode("i32"),
+                [
+                    new ParameterNode(
+                        "callback",
+                        new FunctionTypeNode([], new TypeNode("void") { Metadata = TypeMetadata.Void })
+                        {
+                            Metadata = new FunctionTypeMetadata([], TypeMetadata.Void),
+                        }
+                    )
+                ],
+                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
-                        new CallExpressionNode(new MemberAccessExpressionNode("callback"), [])
+                        new CallExpressionNode(
+                            new MemberAccessExpressionNode("callback")
+                            {
+                                ReturnTypeMetadata = new FunctionTypeMetadata([], TypeMetadata.Void),
+                            },
+                            []
+                        )
                     ),
-                    new ReturnStatementNode(LiteralExpressionNode.Number(1))
+                    new ReturnStatementNode(
+                        new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        }
+                    )
                 ])
             )
+            {
+                Metadata = new FunctionMetadata(
+                    "test",
+                    new FunctionTypeMetadata(
+                        [new FunctionTypeMetadata([], TypeMetadata.Void)],
+                        TypeMetadata.I32
+                    )
+                )
+            }
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
@@ -155,7 +202,7 @@ public class ReplaceIfDirectivesTests
             #endif
             }
             """;
-        var tree = Parse(code);
+        var tree = Parse(code, []);
 
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
@@ -163,15 +210,43 @@ public class ReplaceIfDirectivesTests
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("callback", new FunctionTypeNode([], new TypeNode("void")))],
-                new TypeNode("i32"),
+                [
+                    new ParameterNode(
+                        "callback",
+                        new FunctionTypeNode([], new TypeNode("void") { Metadata = TypeMetadata.Void })
+                        {
+                            Metadata = new FunctionTypeMetadata([], TypeMetadata.Void)
+                        }
+                    )
+                ],
+                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
-                        new CallExpressionNode(new MemberAccessExpressionNode("callback"), [])
+                        new CallExpressionNode(
+                            new MemberAccessExpressionNode("callback")
+                            {
+                                ReturnTypeMetadata = new FunctionTypeMetadata([], TypeMetadata.Void)
+                            },
+                            []
+                        )
                     ),
-                    new ReturnStatementNode(LiteralExpressionNode.Number(2))
+                    new ReturnStatementNode(
+                        new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32
+                        }
+                    )
                 ])
             )
+            {
+                Metadata = new FunctionMetadata(
+                    "test",
+                    new FunctionTypeMetadata(
+                        [new FunctionTypeMetadata([], TypeMetadata.Void)],
+                        TypeMetadata.I32
+                    )
+                )
+            }
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));
@@ -192,7 +267,7 @@ public class ReplaceIfDirectivesTests
                 return 2;
             }
             """;
-        var tree = Parse(code);
+        var tree = Parse(code, []);
 
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
@@ -200,15 +275,43 @@ public class ReplaceIfDirectivesTests
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("callback", new FunctionTypeNode([], new TypeNode("void")))],
-                new TypeNode("i32"),
+                [
+                    new ParameterNode(
+                        "callback",
+                        new FunctionTypeNode([], new TypeNode("void") { Metadata = TypeMetadata.Void })
+                        {
+                            Metadata = new FunctionTypeMetadata([], TypeMetadata.Void),
+                        }
+                    )
+                ],
+                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
-                        new CallExpressionNode(new MemberAccessExpressionNode("callback"), [])
+                        new CallExpressionNode(
+                            new MemberAccessExpressionNode("callback")
+                            {
+                                ReturnTypeMetadata = new FunctionTypeMetadata([], TypeMetadata.Void),
+                            },
+                            []
+                        )
                     ),
-                    new ReturnStatementNode(LiteralExpressionNode.Number(2))
+                    new ReturnStatementNode(
+                        new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        }
+                    )
                 ])
             )
+            {
+                Metadata = new FunctionMetadata(
+                    "test",
+                    new FunctionTypeMetadata(
+                        [new FunctionTypeMetadata([], TypeMetadata.Void)],
+                        TypeMetadata.I32
+                    )
+                )
+            }
         ]);
 
         Assert.That(tree, Is.EqualTo(expected));

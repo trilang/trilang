@@ -37,7 +37,8 @@ public class ConstructorDeclarationNode : ISyntaxNode, IEquatable<ConstructorDec
 
         return AccessModifier == other.AccessModifier &&
                Parameters.SequenceEqual(other.Parameters) &&
-               Body.Equals(other.Body);
+               Body.Equals(other.Body) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

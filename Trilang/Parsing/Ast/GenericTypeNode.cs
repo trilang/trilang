@@ -31,7 +31,8 @@ public class GenericTypeNode : IInlineTypeNode, IEquatable<GenericTypeNode>
             return true;
 
         return Name == other.Name &&
-               TypeArguments.SequenceEqual(other.TypeArguments);
+               TypeArguments.SequenceEqual(other.TypeArguments) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

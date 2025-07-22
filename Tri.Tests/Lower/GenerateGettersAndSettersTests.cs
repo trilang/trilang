@@ -1,5 +1,6 @@
 using Trilang;
 using Trilang.Lower;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -35,22 +36,41 @@ public class GenerateGettersAndSettersTests
 
         var expected = new PropertyDeclarationNode(
             "count",
-            new TypeNode("i32"),
+            new TypeNode("i32") { Metadata = TypeMetadata.I32 },
             new PropertyGetterNode(AccessModifier.Public, new BlockStatementNode([
                 new ReturnStatementNode(
                     new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+                    {
+                        ReturnTypeMetadata = TypeMetadata.I32,
+                    }
                 )
             ])),
             new PropertySetterNode(AccessModifier.Private, new BlockStatementNode([
                 new ExpressionStatementNode(
                     new BinaryExpressionNode(
                         BinaryExpressionKind.Assignment,
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field),
+                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        },
                         new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        }
                     )
+                    {
+                        ReturnTypeMetadata = TypeMetadata.I32,
+                    }
                 )
             ]))
-        );
+        )
+        {
+            Metadata = new PropertyMetadata(
+                new TypeMetadata("Test"),
+                "count",
+                TypeMetadata.I32
+            ),
+        };
 
         var property = tree.Find<PropertyDeclarationNode>();
         Assert.That(property, Is.Not.Null);
@@ -73,22 +93,43 @@ public class GenerateGettersAndSettersTests
 
         var expected = new PropertyDeclarationNode(
             "count",
-            new TypeNode("i32"),
+            new TypeNode("i32") { Metadata = TypeMetadata.I32 },
             new PropertyGetterNode(AccessModifier.Public, new BlockStatementNode([
                 new ReturnStatementNode(
                     new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+                    {
+                        ReturnTypeMetadata = TypeMetadata.I32,
+                    }
                 )
             ])),
             new PropertySetterNode(AccessModifier.Public, new BlockStatementNode([
                 new ExpressionStatementNode(
                     new BinaryExpressionNode(
                         BinaryExpressionKind.Assignment,
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field),
+                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        },
                         new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        }
                     )
+                    {
+                        ReturnTypeMetadata = TypeMetadata.I32,
+                    }
                 )
             ]))
-        );
+        )
+        {
+            Metadata = new PropertyMetadata(
+                new TypeMetadata("Test"),
+                "count",
+                TypeMetadata.I32,
+                AccessModifierMetadata.Public,
+                AccessModifierMetadata.Public
+            ),
+        };
 
         var property = tree.Find<PropertyDeclarationNode>();
         Assert.That(property, Is.Not.Null);
@@ -118,22 +159,43 @@ public class GenerateGettersAndSettersTests
 
         var expected = new PropertyDeclarationNode(
             "count",
-            new TypeNode("i32"),
+            new TypeNode("i32") { Metadata = TypeMetadata.I32 },
             new PropertyGetterNode(AccessModifier.Public, new BlockStatementNode([
                 new ReturnStatementNode(
                     new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+                    {
+                        ReturnTypeMetadata = TypeMetadata.I32,
+                    }
                 )
             ])),
             new PropertySetterNode(AccessModifier.Public, new BlockStatementNode([
                 new ExpressionStatementNode(
                     new BinaryExpressionNode(
                         BinaryExpressionKind.Assignment,
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field),
+                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        },
                         new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32,
+                        }
                     )
+                    {
+                        ReturnTypeMetadata = TypeMetadata.I32,
+                    }
                 )
             ]))
-        );
+        )
+        {
+            Metadata = new PropertyMetadata(
+                new TypeMetadata("Test"),
+                "count",
+                TypeMetadata.I32,
+                AccessModifierMetadata.Public,
+                AccessModifierMetadata.Public
+            ),
+        };
 
         var property = tree.Find<PropertyDeclarationNode>();
         Assert.That(property, Is.Not.Null);

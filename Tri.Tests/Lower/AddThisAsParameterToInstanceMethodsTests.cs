@@ -1,5 +1,6 @@
 using Trilang;
 using Trilang.Lower;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -33,17 +34,27 @@ public class AddThisAsParameterToInstanceMethodsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var testType = new TypeMetadata("Test");
         var expected = new MethodDeclarationNode(
             AccessModifier.Public,
             false,
             "test",
             [
-                new ParameterNode(MemberAccessExpressionNode.This, new TypeNode("Test")),
-                new ParameterNode("a", new TypeNode("i32")),
+                new ParameterNode(MemberAccessExpressionNode.This, new TypeNode("Test") { Metadata = testType }),
+                new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 }),
             ],
-            new TypeNode("void"),
+            new TypeNode("void") { Metadata = TypeMetadata.Void },
             new BlockStatementNode([])
-        );
+        )
+        {
+            Metadata = new MethodMetadata(
+                testType,
+                AccessModifierMetadata.Public,
+                false,
+                "test",
+                new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.Void)
+            ),
+        };
 
         var returnStatement = tree.Find<MethodDeclarationNode>();
         Assert.That(returnStatement, Is.EqualTo(expected));
@@ -63,14 +74,22 @@ public class AddThisAsParameterToInstanceMethodsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var testType = new TypeMetadata("Test");
         var expected = new ConstructorDeclarationNode(
             AccessModifier.Public,
             [
-                new ParameterNode(MemberAccessExpressionNode.This, new TypeNode("Test")),
-                new ParameterNode("a", new TypeNode("i32")),
+                new ParameterNode(MemberAccessExpressionNode.This, new TypeNode("Test") { Metadata = testType }),
+                new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 }),
             ],
             new BlockStatementNode([])
-        );
+        )
+        {
+            Metadata = new ConstructorMetadata(
+                testType,
+                AccessModifierMetadata.Public,
+                [TypeMetadata.I32]
+            )
+        };
 
         var returnStatement = tree.Find<ConstructorDeclarationNode>();
         Assert.That(returnStatement, Is.EqualTo(expected));
@@ -90,7 +109,10 @@ public class AddThisAsParameterToInstanceMethodsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var expected = new ParameterNode(MemberAccessExpressionNode.This, new TypeNode("Test"));
+        var expected = new ParameterNode(
+            MemberAccessExpressionNode.This,
+            new TypeNode("Test") { Metadata = new TypeMetadata("Test") }
+        );
 
         var getter = tree.Find<PropertyGetterNode>();
         Assert.That(getter, Is.Not.Null);

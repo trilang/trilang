@@ -65,7 +65,7 @@ public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNod
 
     public ISyntaxNode? Parent { get; set; }
 
-    public IExpressionNode? Expression { get; }
-
     public ISymbolTable? SymbolTable { get; set; }
+
+    public IExpressionNode? Expression { get; }
 }

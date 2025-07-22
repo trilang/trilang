@@ -27,7 +27,8 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return ElementType.Equals(other.ElementType);
+        return ElementType.Equals(other.ElementType) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

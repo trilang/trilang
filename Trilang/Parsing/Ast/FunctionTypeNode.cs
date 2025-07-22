@@ -35,7 +35,8 @@ public class FunctionTypeNode : IInlineTypeNode, IEquatable<FunctionTypeNode>
             return true;
 
         return ParameterTypes.SequenceEqual(other.ParameterTypes) &&
-               ReturnType.Equals(other.ReturnType);
+               ReturnType.Equals(other.ReturnType) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

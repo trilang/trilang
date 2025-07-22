@@ -27,7 +27,8 @@ public class NewArrayExpressionNode : IExpressionNode, IEquatable<NewArrayExpres
             return true;
 
         return Type.Equals(other.Type) &&
-               Size.Equals(other.Size);
+               Size.Equals(other.Size) &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
     }
 
     public override bool Equals(object? obj)

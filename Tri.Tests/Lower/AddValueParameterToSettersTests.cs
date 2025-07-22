@@ -1,5 +1,6 @@
 using Trilang;
 using Trilang.Lower;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -33,7 +34,10 @@ public class AddValueParameterToSettersTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var expected = new ParameterNode(MemberAccessExpressionNode.Value, new TypeNode("i32"));
+        var expected = new ParameterNode(
+            MemberAccessExpressionNode.Value,
+            new TypeNode("i32") { Metadata = TypeMetadata.I32 }
+        );
 
         var setter = tree.Find<PropertySetterNode>();
         Assert.That(setter, Is.Not.Null);

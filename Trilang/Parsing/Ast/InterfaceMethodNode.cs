@@ -32,7 +32,8 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
 
         return Name == other.Name &&
                ParameterTypes.SequenceEqual(other.ParameterTypes) &&
-               ReturnType.Equals(other.ReturnType);
+               ReturnType.Equals(other.ReturnType) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

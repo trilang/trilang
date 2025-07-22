@@ -1,4 +1,5 @@
 using Trilang;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -69,7 +70,14 @@ public class BreakContinueWithinLoopTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var breakNode = tree.Find<BreakNode>();
-        var loop = tree.Find<WhileNode>(x => x.Condition.Equals(LiteralExpressionNode.False()));
+        var loop = tree.Find<WhileNode>(x =>
+            x.Condition.Equals(
+                new LiteralExpressionNode(LiteralExpressionKind.Boolean, false)
+                {
+                    ReturnTypeMetadata = TypeMetadata.Bool
+                }
+            )
+        );
         Assert.That(breakNode, Is.Not.Null);
         Assert.That(breakNode.LoopNode, Is.EqualTo(loop));
     }
@@ -92,7 +100,14 @@ public class BreakContinueWithinLoopTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var continueNode = tree.Find<ContinueNode>();
-        var loop = tree.Find<WhileNode>(x => x.Condition.Equals(LiteralExpressionNode.False()));
+        var loop = tree.Find<WhileNode>(x =>
+            x.Condition.Equals(
+                new LiteralExpressionNode(LiteralExpressionKind.Boolean, false)
+                {
+                    ReturnTypeMetadata = TypeMetadata.Bool
+                }
+            )
+        );
         Assert.That(continueNode, Is.Not.Null);
         Assert.That(continueNode.LoopNode, Is.EqualTo(loop));
     }

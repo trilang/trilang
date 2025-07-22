@@ -71,7 +71,6 @@ public class PropertyGetterNode : ISyntaxNode, IEquatable<PropertyGetterNode>
 
     public AccessModifier AccessModifier { get; }
 
-
     public BlockStatementNode? Body
     {
         get => body;

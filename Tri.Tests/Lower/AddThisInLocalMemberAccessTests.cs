@@ -1,5 +1,6 @@
 using Trilang;
 using Trilang.Lower;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -38,8 +39,14 @@ public class AddThisInLocalMemberAccessTests
         lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new MemberAccessExpressionNode(
-            new MemberAccessExpressionNode("this"),
-            "count");
+            new MemberAccessExpressionNode("this")
+            {
+                ReturnTypeMetadata = new TypeMetadata("Test"),
+            },
+            "count")
+        {
+            ReturnTypeMetadata = TypeMetadata.I32,
+        };
 
         var method = tree.Find<MethodDeclarationNode>();
         var returnStatement = method?.Body.Find<ReturnStatementNode>();
@@ -66,8 +73,14 @@ public class AddThisInLocalMemberAccessTests
         lowering.Lower(tree, LoweringOptions.Default);
 
         var expected = new MemberAccessExpressionNode(
-            new MemberAccessExpressionNode("this"),
-            "print");
+            new MemberAccessExpressionNode("this")
+            {
+                ReturnTypeMetadata = new TypeMetadata("Test"),
+            },
+            "print")
+        {
+            ReturnTypeMetadata = new FunctionTypeMetadata([], TypeMetadata.Void),
+        };
 
         var returnStatement = tree.Find<CallExpressionNode>();
         Assert.That(returnStatement, Is.Not.Null);

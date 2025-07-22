@@ -28,7 +28,8 @@ public class TupleTypeNode : IInlineTypeNode, IEquatable<TupleTypeNode>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Types.SequenceEqual(other.Types);
+        return Types.SequenceEqual(other.Types) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

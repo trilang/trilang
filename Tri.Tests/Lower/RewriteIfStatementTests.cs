@@ -1,4 +1,5 @@
 using Trilang.Lower;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -34,15 +35,21 @@ public class RewriteIfStatementTests
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("a", new TypeNode("i32"))],
-                new TypeNode("i32"),
+                [new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new IfStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThanOrEqual,
-                            new MemberAccessExpressionNode("a"),
-                            LiteralExpressionNode.Number(0)
-                        ),
+                            new MemberAccessExpressionNode("a") { ReturnTypeMetadata = TypeMetadata.I32 },
+                            new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32
+                            }
+                        )
+                        {
+                            ReturnTypeMetadata = TypeMetadata.Bool
+                        },
                         new BlockStatementNode([
                             new GoToNode("if_0_then")
                         ]),
@@ -54,6 +61,9 @@ public class RewriteIfStatementTests
                         new LabelNode("if_0_then"),
                         new ReturnStatementNode(
                             new MemberAccessExpressionNode("a")
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32
+                            }
                         ),
                         new GoToNode("if_0_end"),
                     ]),
@@ -63,13 +73,25 @@ public class RewriteIfStatementTests
                             new UnaryExpressionNode(
                                 UnaryExpressionKind.UnaryMinus,
                                 new MemberAccessExpressionNode("a")
+                                {
+                                    ReturnTypeMetadata = TypeMetadata.I32
+                                }
                             )
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32
+                            }
                         ),
                         new GoToNode("if_0_end"),
                     ]),
                     new LabelNode("if_0_end"),
                 ])
             )
+            {
+                Metadata = new FunctionMetadata(
+                    "test",
+                    new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
+                )
+            }
         ]);
 
         var lowering = new Lowering();
@@ -94,15 +116,24 @@ public class RewriteIfStatementTests
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("a", new TypeNode("i32"))],
-                new TypeNode("i32"),
+                [new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new IfStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThanOrEqual,
-                            new MemberAccessExpressionNode("a"),
-                            LiteralExpressionNode.Number(0)
-                        ),
+                            new MemberAccessExpressionNode("a")
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32
+                            },
+                            new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32
+                            }
+                        )
+                        {
+                            ReturnTypeMetadata = TypeMetadata.Bool
+                        },
                         new BlockStatementNode([
                             new GoToNode("if_0_then")
                         ]),
@@ -114,6 +145,9 @@ public class RewriteIfStatementTests
                         new LabelNode("if_0_then"),
                         new ReturnStatementNode(
                             new MemberAccessExpressionNode("a")
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32
+                            }
                         ),
                         new GoToNode("if_0_end"),
                     ]),
@@ -122,10 +156,22 @@ public class RewriteIfStatementTests
                         new UnaryExpressionNode(
                             UnaryExpressionKind.UnaryMinus,
                             new MemberAccessExpressionNode("a")
+                            {
+                                ReturnTypeMetadata = TypeMetadata.I32
+                            }
                         )
+                        {
+                            ReturnTypeMetadata = TypeMetadata.I32
+                        }
                     ),
                 ])
             )
+            {
+                Metadata = new FunctionMetadata(
+                    "test",
+                    new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
+                )
+            }
         ]);
 
         var lowering = new Lowering();

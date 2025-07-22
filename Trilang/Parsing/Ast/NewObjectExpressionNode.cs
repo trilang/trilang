@@ -30,7 +30,8 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
             return true;
 
         return Type.Equals(other.Type) &&
-               Parameters.SequenceEqual(other.Parameters);
+               Parameters.SequenceEqual(other.Parameters) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

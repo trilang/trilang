@@ -28,7 +28,8 @@ public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
             return true;
 
         return Expression.Equals(other.Expression) &&
-               Type.Equals(other.Type);
+               Type.Equals(other.Type) &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
     }
 
     public override bool Equals(object? obj)

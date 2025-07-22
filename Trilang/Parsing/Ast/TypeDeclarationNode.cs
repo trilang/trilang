@@ -66,7 +66,8 @@ public class TypeDeclarationNode :
                Interfaces.SequenceEqual(other.Interfaces) &&
                Properties.SequenceEqual(other.Properties) &&
                Constructors.SequenceEqual(other.Constructors) &&
-               Methods.SequenceEqual(other.Methods);
+               Methods.SequenceEqual(other.Methods) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

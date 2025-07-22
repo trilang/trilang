@@ -28,7 +28,8 @@ public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNo
         if (ReferenceEquals(this, other))
             return true;
 
-        return Expressions.SequenceEqual(other.Expressions);
+        return Expressions.SequenceEqual(other.Expressions) &&
+               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
     }
 
     public override bool Equals(object? obj)
