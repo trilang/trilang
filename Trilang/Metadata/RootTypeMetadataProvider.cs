@@ -1,12 +1,13 @@
 namespace Trilang.Metadata;
 
+// TODO: is not thread safe
 public class RootTypeMetadataProvider : ITypeMetadataProvider
 {
     private readonly Dictionary<string, ITypeMetadata> types;
 
     public RootTypeMetadataProvider()
     {
-        types = new Dictionary<string, ITypeMetadata>();
+        types = [];
 
         DefineType(TypeMetadata.Void.Name, TypeMetadata.Void);
         DefineType(TypeMetadata.Null.Name, TypeMetadata.Null);
@@ -34,6 +35,14 @@ public class RootTypeMetadataProvider : ITypeMetadataProvider
 
     public bool DefineType(string name, ITypeMetadata type)
         => types.TryAdd(name, type);
+
+    public T GetOrDefine<T>(T type) where T : ITypeMetadata
+        => GetType(type.ToString()!) switch
+        {
+            null => DefineType(type.ToString()!, type) ? type : throw new InvalidOperationException(),
+            T existingType => existingType,
+            _ => throw new InvalidOperationException(),
+        };
 
     public ITypeMetadataProvider CreateChild()
         => new TypeMetadataProvider(this);

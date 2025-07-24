@@ -177,6 +177,9 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
         node.Metadata = type.GetConstructor(node.Parameters.Select(x => x.Type.Metadata!));
 
+        foreach (var parameter in node.Parameters)
+            parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
+
         node.Body.Accept(this, context);
     }
 
@@ -205,23 +208,32 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
     public void VisitFunction(FunctionDeclarationNode node, TypeCheckerContext context)
     {
-        foreach (var parameter in node.Parameters)
+        var parameters = new ParameterMetadata[node.Parameters.Count];
+        for (var i = 0; i < node.Parameters.Count; i++)
+        {
+            var parameter = node.Parameters[i];
             parameter.Accept(this, context);
+
+            parameters[i] = new ParameterMetadata(parameter.Name, parameter.Type.Metadata!);
+        }
 
         node.ReturnType.Accept(this, context);
 
         // we can be sure that node.Metadata is not null here
         // because it is set as a part of TypeNode
         var typeProvider = node.SymbolTable!.TypeProvider;
-        var parameters = node.Parameters.Select(x => x.Type.Metadata!);
+        var parameterTypes = node.Parameters.Select(x => x.Type.Metadata!);
         var returnType = node.ReturnType.Metadata!;
-        var functionType = new FunctionTypeMetadata(parameters, returnType);
+        var functionType = new FunctionTypeMetadata(parameterTypes, returnType);
         functionType = typeProvider.GetType(functionType.ToString()) as FunctionTypeMetadata ??
                        throw new SemanticAnalysisException($"Unknown function type '{functionType}'");
 
-        node.Metadata = new FunctionMetadata(node.Name, functionType);
+        node.Metadata = new FunctionMetadata(node.Name, parameters, functionType);
 
-        node.Body?.Accept(this, context);
+        foreach (var parameter in node.Parameters)
+            parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
+
+        node.Body.Accept(this, context);
     }
 
     public void VisitFunctionType(FunctionTypeNode node, TypeCheckerContext context)
@@ -449,6 +461,9 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
         node.Metadata = type.GetMethod(node.Name);
 
+        foreach (var parameter in node.Parameters)
+            parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
+
         node.Body.Accept(this, context);
     }
 
@@ -547,8 +562,6 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Type.Accept(this, context);
         node.Getter?.Accept(this, context);
         node.Setter?.Accept(this, context);
-
-        // TODO: generate getter/setter?
     }
 
     public void VisitGetter(PropertyGetterNode node, TypeCheckerContext context)

@@ -7,12 +7,14 @@ public class MethodMetadata : IMetadata, IEquatable<MethodMetadata>
         AccessModifierMetadata accessModifier,
         bool isStatic,
         string name,
+        IReadOnlyList<ParameterMetadata> parameters,
         FunctionTypeMetadata typeMetadata)
     {
         DeclaringType = declaringType;
         AccessModifier = accessModifier;
         IsStatic = isStatic;
         Name = name;
+        Parameters = parameters;
         TypeMetadata = typeMetadata;
     }
 
@@ -34,6 +36,7 @@ public class MethodMetadata : IMetadata, IEquatable<MethodMetadata>
                AccessModifier == other.AccessModifier &&
                IsStatic == other.IsStatic &&
                Name == other.Name &&
+               Parameters.SequenceEqual(other.Parameters) &&
                TypeMetadata.Equals(other.TypeMetadata);
     }
 
@@ -52,7 +55,7 @@ public class MethodMetadata : IMetadata, IEquatable<MethodMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine((int)AccessModifier, IsStatic, Name, TypeMetadata);
+        => HashCode.Combine((int)AccessModifier, IsStatic, Name, Parameters, TypeMetadata);
 
     public override string ToString()
         => $"{Name}: {TypeMetadata}";
@@ -64,6 +67,8 @@ public class MethodMetadata : IMetadata, IEquatable<MethodMetadata>
     public bool IsStatic { get; }
 
     public string Name { get; }
+
+    public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
     public FunctionTypeMetadata TypeMetadata { get; }
 }

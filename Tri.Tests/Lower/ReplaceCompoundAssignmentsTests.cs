@@ -73,6 +73,7 @@ public class ReplaceCompoundAssignmentsTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
+                    [new ParameterMetadata("x", TypeMetadata.I32)],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.Void)
                 )
             }

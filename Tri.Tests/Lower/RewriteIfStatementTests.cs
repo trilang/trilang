@@ -89,6 +89,7 @@ public class RewriteIfStatementTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
+                    [new ParameterMetadata("a", TypeMetadata.I32)],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
@@ -169,6 +170,7 @@ public class RewriteIfStatementTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
+                    [new ParameterMetadata("a", TypeMetadata.I32)],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
                 )
             }

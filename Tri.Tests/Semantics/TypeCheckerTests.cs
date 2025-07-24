@@ -21,6 +21,7 @@ public class TypeCheckerTests
 
         var expected = new FunctionMetadata(
             "main",
+            [],
             new FunctionTypeMetadata([], TypeMetadata.Void));
 
         var function = tree.Find<FunctionDeclarationNode>();
@@ -43,6 +44,10 @@ public class TypeCheckerTests
 
         var expected = new FunctionMetadata(
             "main",
+            [
+                new ParameterMetadata("a", TypeMetadata.I32),
+                new ParameterMetadata("b", TypeMetadata.Bool)
+            ],
             new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void));
 
         var function = tree.Find<FunctionDeclarationNode>();
@@ -121,12 +126,14 @@ public class TypeCheckerTests
             AccessModifierMetadata.Public,
             false,
             "toString",
+            [],
             new FunctionTypeMetadata([], TypeMetadata.Void)));
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Public,
             false,
             "distance",
+            [new ParameterMetadata("other", TypeMetadata.I32)],
             new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
 
         var type = tree.Find<TypeDeclarationNode>();
@@ -186,6 +193,10 @@ public class TypeCheckerTests
 
         var expected = new FunctionMetadata(
             "add",
+            [
+                new ParameterMetadata("a", TypeMetadata.I32),
+                new ParameterMetadata("b", TypeMetadata.I32)
+            ],
             new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32));
 
         var node = tree.Find<FunctionDeclarationNode>();

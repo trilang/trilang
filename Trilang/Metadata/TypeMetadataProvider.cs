@@ -20,6 +20,14 @@ public class TypeMetadataProvider : ITypeMetadataProvider
             ? types.TryAdd(name, type)
             : parent.DefineType(name, type);
 
+    public T GetOrDefine<T>(T type) where T : ITypeMetadata
+        => GetType(type.ToString()!) switch
+        {
+            null => DefineType(type.ToString()!, type) ? type : throw new InvalidOperationException(),
+            T existingType => existingType,
+            _ => throw new InvalidOperationException(),
+        };
+
     public ITypeMetadataProvider CreateChild()
         => new TypeMetadataProvider(this);
 }

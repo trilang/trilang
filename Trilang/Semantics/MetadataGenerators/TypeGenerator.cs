@@ -79,60 +79,73 @@ internal class TypeGenerator
             {
                 foreach (var constructor in typeDeclarationNode.Constructors)
                 {
-                    var parameters = GetParameterTypes(typeProvider, constructor.Parameters);
+                    var parameters = constructor.Parameters
+                        .Select(x => typeProvider.GetType(x.Type.Name) ??
+                                     throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
+                    var functionType = new FunctionTypeMetadata(parameters, type);
+                    functionType = typeProvider.GetOrDefine(functionType);
+
+                    var parametersMetadata = GetParameters(typeProvider, constructor.Parameters);
                     var constructorMetadata = new ConstructorMetadata(
                         type,
                         GetAccessModifierMetadata(constructor.AccessModifier),
-                        parameters);
+                        parametersMetadata,
+                        functionType);
 
                     type.AddConstructor(constructorMetadata);
                 }
             }
             else
             {
-                type.AddConstructor(new ConstructorMetadata(type, AccessModifierMetadata.Public, []));
+                var functionType = new FunctionTypeMetadata([], type);
+                functionType = typeProvider.GetOrDefine(functionType);
+
+                type.AddConstructor(new ConstructorMetadata(
+                    type,
+                    AccessModifierMetadata.Public,
+                    [],
+                    functionType
+                ));
             }
 
             foreach (var method in typeDeclarationNode.Methods)
             {
-                var parameters = method.Parameters
+                var parameters = GetParameters(typeProvider, method.Parameters);
+                var parameterTypes = method.Parameters
                     .Select(x => typeProvider.GetType(x.Type.Name) ??
                                  throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
 
                 var returnType = typeProvider.GetType(method.ReturnType.Name) ??
                                  throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
 
-                var functionType = new FunctionTypeMetadata(parameters, returnType);
-
-                if (typeProvider.GetType(functionType.ToString()) is not FunctionTypeMetadata existingFunctionType)
-                {
-                    typeProvider.DefineType(functionType.ToString(), functionType);
-                    existingFunctionType = functionType;
-                }
+                var functionType = new FunctionTypeMetadata(parameterTypes, returnType);
+                functionType = typeProvider.GetOrDefine(functionType);
 
                 var methodMetadata = new MethodMetadata(
                     type,
                     GetAccessModifierMetadata(method.AccessModifier),
                     method.IsStatic,
                     method.Name,
-                    existingFunctionType);
+                    parameters,
+                    functionType);
 
                 type.AddMethod(methodMetadata);
             }
         }
     }
 
-    private ITypeMetadata[] GetParameterTypes(
+    private ParameterMetadata[] GetParameters(
         ITypeMetadataProvider typeProvider,
         IReadOnlyList<ParameterNode> parameters)
     {
-        var result = new ITypeMetadata[parameters.Count];
+        var result = new ParameterMetadata[parameters.Count];
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
+            var parameterType = typeProvider.GetType(parameter.Type.Name) ??
+                                throw new SemanticAnalysisException($"The '{parameter.Name}' parameter has unknown type: '{parameter.Type.Name}'.");
 
-            result[i] = typeProvider.GetType(parameter.Type.Name) ??
-                        throw new SemanticAnalysisException($"The '{parameter.Name}' parameter has unknown type: '{parameter.Type.Name}'.");
+            result[i] = new ParameterMetadata(parameter.Name, parameterType);
         }
 
         return result;

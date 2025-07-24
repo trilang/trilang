@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
@@ -70,4 +71,6 @@ public class ParameterNode : ISyntaxNode, IEquatable<ParameterNode>
     public string Name { get; }
 
     public IInlineTypeNode Type { get; }
+
+    public ParameterMetadata? Metadata { get; set; }
 }

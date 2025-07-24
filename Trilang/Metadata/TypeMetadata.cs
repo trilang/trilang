@@ -121,7 +121,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     }
 
     public ConstructorMetadata? GetConstructor(IEnumerable<ITypeMetadata> parameters)
-        => constructors.FirstOrDefault(c => c.ParameterTypes.SequenceEqual(parameters));
+        => constructors.FirstOrDefault(c => c.TypeMetadata.ParameterTypes.SequenceEqual(parameters));
 
     public void AddConstructor(ConstructorMetadata constructor)
     {

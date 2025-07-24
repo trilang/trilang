@@ -67,7 +67,7 @@ internal class MetadataComparer : IEqualityComparer<ITypeMetadata>
             if (c1.AccessModifier != c2.AccessModifier)
                 return false;
 
-            foreach (var (p1, p2) in c1.ParameterTypes.Zip(c2.ParameterTypes))
+            foreach (var (p1, p2) in c1.Parameters.Zip(c2.Parameters))
                 if (!Equals(p1, p2))
                     return false;
         }

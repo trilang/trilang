@@ -42,18 +42,24 @@ public class MetadataGeneratorTests
         expected.AddConstructor(new ConstructorMetadata(
             expected,
             AccessModifierMetadata.Public,
-            [TypeMetadata.I32, TypeMetadata.I32]));
+            [
+                new ParameterMetadata("x", TypeMetadata.I32),
+                new ParameterMetadata("y", TypeMetadata.I32)
+            ],
+            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], expected)));
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Public,
             false,
             "toString",
+            [],
             new FunctionTypeMetadata([], TypeMetadata.String)));
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Private,
             false,
             "distance",
+            [new ParameterMetadata("other", TypeMetadata.I32)],
             new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)));
 
         var typeProvider = tree.SymbolTable!.TypeProvider;

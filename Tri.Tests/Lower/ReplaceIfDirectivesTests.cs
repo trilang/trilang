@@ -176,6 +176,7 @@ public class ReplaceIfDirectivesTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
+                    [new ParameterMetadata("callback", new FunctionTypeMetadata([], TypeMetadata.Void))],
                     new FunctionTypeMetadata(
                         [new FunctionTypeMetadata([], TypeMetadata.Void)],
                         TypeMetadata.I32
@@ -241,6 +242,7 @@ public class ReplaceIfDirectivesTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
+                    [new ParameterMetadata("callback", new FunctionTypeMetadata([], TypeMetadata.Void))],
                     new FunctionTypeMetadata(
                         [new FunctionTypeMetadata([], TypeMetadata.Void)],
                         TypeMetadata.I32
@@ -306,6 +308,7 @@ public class ReplaceIfDirectivesTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
+                    [new ParameterMetadata("callback", new FunctionTypeMetadata([], TypeMetadata.Void))],
                     new FunctionTypeMetadata(
                         [new FunctionTypeMetadata([], TypeMetadata.Void)],
                         TypeMetadata.I32

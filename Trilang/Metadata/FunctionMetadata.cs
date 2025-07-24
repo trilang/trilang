@@ -2,9 +2,13 @@ namespace Trilang.Metadata;
 
 public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
 {
-    public FunctionMetadata(string name, FunctionTypeMetadata typeMetadata)
+    public FunctionMetadata(
+        string name,
+        IReadOnlyList<ParameterMetadata> parameters,
+        FunctionTypeMetadata typeMetadata)
     {
         Name = name;
+        Parameters = parameters;
         TypeMetadata = typeMetadata;
     }
 
@@ -23,6 +27,7 @@ public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
             return true;
 
         return Name == other.Name &&
+               Parameters.SequenceEqual(other.Parameters) &&
                TypeMetadata.Equals(other.TypeMetadata);
     }
 
@@ -41,12 +46,14 @@ public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, TypeMetadata);
+        => HashCode.Combine(Name, Parameters, TypeMetadata);
 
     public override string ToString()
         => $"{Name}: {TypeMetadata}";
 
     public string Name { get; }
+
+    public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
     public FunctionTypeMetadata TypeMetadata { get; }
 }

@@ -52,6 +52,7 @@ public class AddThisAsParameterToInstanceMethodsTests
                 AccessModifierMetadata.Public,
                 false,
                 "test",
+                [new ParameterMetadata("a", TypeMetadata.I32)],
                 new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.Void)
             ),
         };
@@ -87,7 +88,8 @@ public class AddThisAsParameterToInstanceMethodsTests
             Metadata = new ConstructorMetadata(
                 testType,
                 AccessModifierMetadata.Public,
-                [TypeMetadata.I32]
+                [new ParameterMetadata("a", TypeMetadata.I32)],
+                new FunctionTypeMetadata([TypeMetadata.I32], testType)
             )
         };
 
