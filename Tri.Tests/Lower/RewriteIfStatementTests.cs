@@ -32,16 +32,25 @@ public class RewriteIfStatementTests
                 }
             }
             """);
+        var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                [
+                    new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })
+                    {
+                        Metadata = parameterMetadata,
+                    }
+                ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new IfStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThanOrEqual,
-                            new MemberAccessExpressionNode("a") { ReturnTypeMetadata = TypeMetadata.I32 },
+                            new MemberAccessExpressionNode("a")
+                            {
+                                Reference = parameterMetadata,
+                            },
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
@@ -62,7 +71,7 @@ public class RewriteIfStatementTests
                         new ReturnStatementNode(
                             new MemberAccessExpressionNode("a")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                Reference = parameterMetadata,
                             }
                         ),
                         new GoToNode("if_0_end"),
@@ -74,7 +83,7 @@ public class RewriteIfStatementTests
                                 UnaryExpressionKind.UnaryMinus,
                                 new MemberAccessExpressionNode("a")
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32
+                                    Reference = parameterMetadata,
                                 }
                             )
                             {
@@ -89,7 +98,7 @@ public class RewriteIfStatementTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("a", TypeMetadata.I32)],
+                    [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
@@ -98,7 +107,7 @@ public class RewriteIfStatementTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -114,10 +123,16 @@ public class RewriteIfStatementTests
                 return -a;
             }
             """);
+        var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                [
+                    new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })
+                    {
+                        Metadata = parameterMetadata,
+                    }
+                ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new IfStatementNode(
@@ -125,7 +140,7 @@ public class RewriteIfStatementTests
                             BinaryExpressionKind.GreaterThanOrEqual,
                             new MemberAccessExpressionNode("a")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                Reference = parameterMetadata,
                             },
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                             {
@@ -147,7 +162,7 @@ public class RewriteIfStatementTests
                         new ReturnStatementNode(
                             new MemberAccessExpressionNode("a")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                Reference = parameterMetadata,
                             }
                         ),
                         new GoToNode("if_0_end"),
@@ -158,7 +173,7 @@ public class RewriteIfStatementTests
                             UnaryExpressionKind.UnaryMinus,
                             new MemberAccessExpressionNode("a")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                Reference = parameterMetadata,
                             }
                         )
                         {
@@ -170,7 +185,7 @@ public class RewriteIfStatementTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("a", TypeMetadata.I32)],
+                    [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
@@ -179,6 +194,6 @@ public class RewriteIfStatementTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

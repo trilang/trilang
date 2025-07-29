@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
@@ -28,7 +29,8 @@ public class PropertyGetterNode : ISyntaxNode, IEquatable<PropertyGetterNode>
             return true;
 
         return AccessModifier == other.AccessModifier &&
-               Equals(Body, other.Body);
+               Equals(Body, other.Body) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)
@@ -83,5 +85,5 @@ public class PropertyGetterNode : ISyntaxNode, IEquatable<PropertyGetterNode>
         }
     }
 
-    public IReadOnlyList<ParameterNode> Parameters { get; set; } = [];
+    public MethodMetadata? Metadata { get; set; }
 }

@@ -43,18 +43,34 @@ public class ReplaceIfDirectivesTests
         var lowering = new Lowering();
         lowering.Lower(tree, new LoweringOptions(directives));
 
+        var type1Metadata = new TypeMetadata("Type1");
+        type1Metadata.AddConstructor(
+            new ConstructorMetadata(
+                type1Metadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], type1Metadata)));
+
+        var type3Metadata = new TypeMetadata("Type3");
+        type3Metadata.AddConstructor(
+            new ConstructorMetadata(
+                type3Metadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], type3Metadata)));
+
         var expected = new SyntaxTree([
             new TypeDeclarationNode(AccessModifier.Public, "Type1", [], [], [], [], [])
             {
-                Metadata = new TypeMetadata("Type1"),
+                Metadata = type1Metadata,
             },
             new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
             {
-                Metadata = new TypeMetadata("Type3"),
+                Metadata = type3Metadata,
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -79,18 +95,34 @@ public class ReplaceIfDirectivesTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var type2Metadata = new TypeMetadata("Type2");
+        type2Metadata.AddConstructor(
+            new ConstructorMetadata(
+                type2Metadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], type2Metadata)));
+
+        var type3Metadata = new TypeMetadata("Type3");
+        type3Metadata.AddConstructor(
+            new ConstructorMetadata(
+                type3Metadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], type3Metadata)));
+
         var expected = new SyntaxTree([
             new TypeDeclarationNode(AccessModifier.Public, "Type2", [], [], [], [], [])
             {
-                Metadata = new TypeMetadata("Type2"),
+                Metadata = type2Metadata,
             },
             new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
             {
-                Metadata = new TypeMetadata("Type3"),
+                Metadata = type3Metadata,
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -111,14 +143,22 @@ public class ReplaceIfDirectivesTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var typeMetadata = new TypeMetadata("Type3");
+        typeMetadata.AddConstructor(
+            new ConstructorMetadata(
+                typeMetadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], typeMetadata)));
+
         var expected = new SyntaxTree([
             new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
             {
-                Metadata = new TypeMetadata("Type3"),
+                Metadata = typeMetadata,
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -142,6 +182,10 @@ public class ReplaceIfDirectivesTests
         var lowering = new Lowering();
         lowering.Lower(tree, new LoweringOptions(directives));
 
+        var parameterMetadata = new ParameterMetadata(
+            "callback",
+            new FunctionTypeMetadata([], TypeMetadata.Void)
+        );
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
@@ -153,6 +197,9 @@ public class ReplaceIfDirectivesTests
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void),
                         }
                     )
+                    {
+                        Metadata = parameterMetadata,
+                    }
                 ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
@@ -160,7 +207,7 @@ public class ReplaceIfDirectivesTests
                         new CallExpressionNode(
                             new MemberAccessExpressionNode("callback")
                             {
-                                ReturnTypeMetadata = new FunctionTypeMetadata([], TypeMetadata.Void),
+                                Reference = parameterMetadata,
                             },
                             []
                         )
@@ -176,7 +223,7 @@ public class ReplaceIfDirectivesTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("callback", new FunctionTypeMetadata([], TypeMetadata.Void))],
+                    [parameterMetadata],
                     new FunctionTypeMetadata(
                         [new FunctionTypeMetadata([], TypeMetadata.Void)],
                         TypeMetadata.I32
@@ -185,7 +232,7 @@ public class ReplaceIfDirectivesTests
             }
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -208,6 +255,10 @@ public class ReplaceIfDirectivesTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var parameterMetadata = new ParameterMetadata(
+            "callback",
+            new FunctionTypeMetadata([], TypeMetadata.Void)
+        );
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
@@ -219,6 +270,9 @@ public class ReplaceIfDirectivesTests
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void)
                         }
                     )
+                    {
+                        Metadata = parameterMetadata,
+                    }
                 ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
@@ -226,7 +280,7 @@ public class ReplaceIfDirectivesTests
                         new CallExpressionNode(
                             new MemberAccessExpressionNode("callback")
                             {
-                                ReturnTypeMetadata = new FunctionTypeMetadata([], TypeMetadata.Void)
+                                Reference = parameterMetadata,
                             },
                             []
                         )
@@ -242,7 +296,7 @@ public class ReplaceIfDirectivesTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("callback", new FunctionTypeMetadata([], TypeMetadata.Void))],
+                    [parameterMetadata],
                     new FunctionTypeMetadata(
                         [new FunctionTypeMetadata([], TypeMetadata.Void)],
                         TypeMetadata.I32
@@ -251,7 +305,7 @@ public class ReplaceIfDirectivesTests
             }
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -274,6 +328,10 @@ public class ReplaceIfDirectivesTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var parameterMetadata = new ParameterMetadata(
+            "callback",
+            new FunctionTypeMetadata([], TypeMetadata.Void)
+        );
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
@@ -285,6 +343,9 @@ public class ReplaceIfDirectivesTests
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void),
                         }
                     )
+                    {
+                        Metadata = parameterMetadata,
+                    }
                 ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
@@ -292,7 +353,7 @@ public class ReplaceIfDirectivesTests
                         new CallExpressionNode(
                             new MemberAccessExpressionNode("callback")
                             {
-                                ReturnTypeMetadata = new FunctionTypeMetadata([], TypeMetadata.Void),
+                                Reference = parameterMetadata,
                             },
                             []
                         )
@@ -308,7 +369,7 @@ public class ReplaceIfDirectivesTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("callback", new FunctionTypeMetadata([], TypeMetadata.Void))],
+                    [parameterMetadata],
                     new FunctionTypeMetadata(
                         [new FunctionTypeMetadata([], TypeMetadata.Void)],
                         TypeMetadata.I32
@@ -317,6 +378,6 @@ public class ReplaceIfDirectivesTests
             }
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

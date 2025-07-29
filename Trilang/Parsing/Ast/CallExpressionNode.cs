@@ -68,6 +68,12 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformCall(this);
 
+    public IExpressionNode Clone()
+        => new CallExpressionNode(Member.Clone(), Parameters.Select(x => x.Clone()).ToArray())
+        {
+            SymbolTable = SymbolTable,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

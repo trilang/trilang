@@ -35,7 +35,7 @@ public class ParseLoopTests
             ),
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -125,7 +125,7 @@ public class ParseLoopTests
             ),
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -159,6 +159,6 @@ public class ParseLoopTests
             ),
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

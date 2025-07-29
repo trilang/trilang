@@ -26,7 +26,7 @@ public class ParseExpressionTests
                 "main", [], new TypeNode("void"), new BlockStatementNode([variableDeclarationNode]))
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -54,7 +54,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -82,7 +82,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -110,7 +110,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -138,7 +138,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -170,7 +170,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -204,7 +204,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -233,7 +233,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -262,7 +262,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -291,7 +291,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -322,7 +322,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -351,7 +351,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -380,7 +380,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -409,7 +409,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -438,7 +438,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -469,7 +469,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -498,7 +498,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -527,7 +527,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -564,7 +564,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -596,7 +596,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -628,7 +628,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -689,7 +689,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -717,7 +717,7 @@ public class ParseExpressionTests
                 ]))
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -763,7 +763,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -792,7 +792,7 @@ public class ParseExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]

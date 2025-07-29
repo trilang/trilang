@@ -65,6 +65,13 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformArrayType(this);
 
+    public IInlineTypeNode Clone()
+        => new ArrayTypeNode(ElementType.Clone())
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

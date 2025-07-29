@@ -32,7 +32,7 @@ public class ParseCallExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -65,7 +65,7 @@ public class ParseCallExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -103,6 +103,6 @@ public class ParseCallExpressionTests
             )
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

@@ -70,6 +70,13 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformInterfaceMethod(this);
 
+    public InterfaceMethodNode Clone()
+        => new InterfaceMethodNode(Name, ParameterTypes.Select(t => t.Clone()).ToArray(), ReturnType.Clone())
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

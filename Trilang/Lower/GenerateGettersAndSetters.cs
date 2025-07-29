@@ -7,16 +7,23 @@ internal class GenerateGettersAndSetters : Visitor
 {
     protected override void VisitPropertyExit(PropertyDeclarationNode node)
     {
-        var typeMetadata = node.Type.Metadata;
+        var propertyMetadata = node.Metadata!;
+        var returnTypeMetadata = propertyMetadata.Type;
 
-        node.Getter ??= new PropertyGetterNode(AccessModifier.Public, null);
-        node.Setter ??= new PropertySetterNode(AccessModifier.Private, null);
+        node.Getter ??= new PropertyGetterNode(AccessModifier.Public, null)
+        {
+            Metadata = propertyMetadata.Getter,
+        };
+        node.Setter ??= new PropertySetterNode(AccessModifier.Private, null)
+        {
+            Metadata = propertyMetadata.Setter,
+        };
 
         node.Getter.Body ??= new BlockStatementNode([
             new ReturnStatementNode(
                 new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
                 {
-                    ReturnTypeMetadata = typeMetadata,
+                    Reference = propertyMetadata,
                 }
             ),
         ]);
@@ -27,15 +34,15 @@ internal class GenerateGettersAndSetters : Visitor
                     BinaryExpressionKind.Assignment,
                     new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
                     {
-                        ReturnTypeMetadata = typeMetadata,
+                        Reference = propertyMetadata,
                     },
                     new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
                     {
-                        ReturnTypeMetadata = typeMetadata,
+                        Reference = propertyMetadata,
                     }
                 )
                 {
-                    ReturnTypeMetadata = typeMetadata,
+                    ReturnTypeMetadata = returnTypeMetadata,
                 }
             )
         ]);

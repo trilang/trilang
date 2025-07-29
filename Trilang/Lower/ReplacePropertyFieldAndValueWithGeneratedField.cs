@@ -1,11 +1,15 @@
+using System.Diagnostics;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
-using static Trilang.Parsing.Ast.BinaryExpressionKind;
 
 namespace Trilang.Lower;
 
-internal class ReplaceCompoundAssignments : ITransformer
+internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
 {
+    private FieldMetadata? currentField;
+    private MethodMetadata? currentSetter;
+
     public ISyntaxNode TransformArrayAccess(ArrayAccessExpressionNode node)
     {
         var member = (IExpressionNode)node.Member.Transform(this);
@@ -40,41 +44,6 @@ internal class ReplaceCompoundAssignments : ITransformer
     {
         var left = (IExpressionNode)node.Left.Transform(this);
         var right = (IExpressionNode)node.Right.Transform(this);
-
-        if (node.Kind is AdditionAssignment
-            or SubtractionAssignment
-            or MultiplicationAssignment
-            or DivisionAssignment
-            or ModulusAssignment
-            or BitwiseAndAssignment
-            or BitwiseOrAssignment
-            or BitwiseXorAssignment)
-        {
-            var kind = node.Kind switch
-            {
-                AdditionAssignment => Addition,
-                SubtractionAssignment => Subtraction,
-                MultiplicationAssignment => Multiplication,
-                DivisionAssignment => Division,
-                ModulusAssignment => Modulus,
-                BitwiseAndAssignment => BitwiseAnd,
-                BitwiseOrAssignment => BitwiseOr,
-                BitwiseXorAssignment => BitwiseXor,
-                _ => throw new ArgumentOutOfRangeException(),
-            };
-            right = new BinaryExpressionNode(kind, left, right)
-            {
-                SymbolTable = node.SymbolTable,
-                ReturnTypeMetadata = node.ReturnTypeMetadata,
-            };
-
-            return new BinaryExpressionNode(Assignment, left.Clone(), right)
-            {
-                SymbolTable = node.SymbolTable,
-                ReturnTypeMetadata = node.ReturnTypeMetadata,
-            };
-        }
-
         if (ReferenceEquals(left, node.Left) && ReferenceEquals(right, node.Right))
             return node;
 
@@ -124,11 +93,7 @@ internal class ReplaceCompoundAssignments : ITransformer
     }
 
     public ISyntaxNode TransformConstructor(ConstructorDeclarationNode node)
-    {
-        node.Body.Transform(this);
-
-        return node;
-    }
+        => node;
 
     public ISyntaxNode TransformContinue(ContinueNode node)
         => node;
@@ -152,11 +117,7 @@ internal class ReplaceCompoundAssignments : ITransformer
     }
 
     public ISyntaxNode TransformFunction(FunctionDeclarationNode node)
-    {
-        node.Body.Transform(this);
-
-        return node;
-    }
+        => node;
 
     public ISyntaxNode TransformFunctionType(FunctionTypeNode node)
         => node;
@@ -202,26 +163,36 @@ internal class ReplaceCompoundAssignments : ITransformer
 
     public ISyntaxNode TransformMemberAccess(MemberAccessExpressionNode node)
     {
-        if (node.Member is null)
+        if (node.Member is not null)
             return node;
 
-        var member = (IExpressionNode)node.Member.Transform(this);
-        if (ReferenceEquals(member, node.Member))
-            return node;
-
-        return new MemberAccessExpressionNode(member, node.Name)
+        if (node.IsField)
         {
-            SymbolTable = node.SymbolTable,
-            Reference = node.Reference,
-        };
-    }
+            Debug.Assert(currentField is not null);
 
-    public ISyntaxNode TransformMethod(MethodDeclarationNode node)
-    {
-        node.Body.Transform(this);
+            return new MemberAccessExpressionNode(currentField.Name)
+            {
+                Reference = currentField,
+            };
+        }
+
+        if (node.IsValue)
+        {
+            Debug.Assert(currentSetter is not null);
+
+            var parameter = currentSetter.Parameters.First(x => x.Name == MemberAccessExpressionNode.Value);
+
+            return new MemberAccessExpressionNode(parameter.Name)
+            {
+                Reference = parameter,
+            };
+        }
 
         return node;
     }
+
+    public ISyntaxNode TransformMethod(MethodDeclarationNode node)
+        => node;
 
     public ISyntaxNode TransformNewArray(NewArrayExpressionNode node)
     {
@@ -266,8 +237,17 @@ internal class ReplaceCompoundAssignments : ITransformer
 
     public ISyntaxNode TransformProperty(PropertyDeclarationNode node)
     {
+        var propertyMetadata = node.Metadata!;
+        var returnTypeMetadata = propertyMetadata.Type;
+        var typeMetadata = propertyMetadata.DeclaringType;
+
+        currentField = new FieldMetadata($"<>_{propertyMetadata.Name}", returnTypeMetadata);
+        typeMetadata.AddField(currentField);
+
         node.Getter!.Transform(this);
         node.Setter!.Transform(this);
+
+        currentField = null;
 
         return node;
     }
@@ -281,7 +261,11 @@ internal class ReplaceCompoundAssignments : ITransformer
 
     public ISyntaxNode TransformSetter(PropertySetterNode node)
     {
+        currentSetter = node.Metadata!;
+
         node.Body!.Transform(this);
+
+        currentSetter = null;
 
         return node;
     }

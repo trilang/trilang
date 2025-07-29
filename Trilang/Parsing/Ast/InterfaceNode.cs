@@ -81,6 +81,16 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformInterface(this);
 
+    public IInlineTypeNode Clone()
+        => new InterfaceNode(
+            Properties.Select(x => x.Clone()).ToArray(),
+            Methods.Select(x => x.Clone()).ToArray()
+        )
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

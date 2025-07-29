@@ -23,11 +23,11 @@ internal class NotImplementedInterface : Visitor
                     throw new SemanticAnalysisException($"The '{interfaceProperty.Name}' property is not of the correct type.");
 
                 if (interfaceProperty.GetterModifier == AccessModifierMetadata.Public &&
-                    propertyType.GetterModifier != AccessModifierMetadata.Public)
+                    propertyType.Getter.AccessModifier != AccessModifierMetadata.Public)
                     throw new SemanticAnalysisException($"The implementation of an interface property getter '{interfaceProperty.Name}' cannot be private.");
 
                 if (interfaceProperty.SetterModifier == AccessModifierMetadata.Public &&
-                    propertyType.SetterModifier != AccessModifierMetadata.Public)
+                    propertyType.Setter.AccessModifier != AccessModifierMetadata.Public)
                     throw new SemanticAnalysisException($"The implementation of an interface property setter '{interfaceProperty.Name}' cannot be private.");
             }
 

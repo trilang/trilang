@@ -61,6 +61,13 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformTypeNode(this);
 
+    public IInlineTypeNode Clone()
+        => new TypeNode(Name)
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

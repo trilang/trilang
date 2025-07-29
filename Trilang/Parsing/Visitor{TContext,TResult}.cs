@@ -207,6 +207,27 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
     {
     }
 
+    public void VisitExpressionBlock(ExpressionBlockNode node, TContext context)
+    {
+        if (context.IsFinished)
+            return;
+
+        VisitExpressionBlockEnter(node, context);
+
+        foreach (var expression in node.Expressions)
+            expression.Accept(this, context);
+
+        VisitExpressionBlockExit(node, context);
+    }
+
+    protected virtual void VisitExpressionBlockEnter(ExpressionBlockNode node, TContext context)
+    {
+    }
+
+    protected virtual void VisitExpressionBlockExit(ExpressionBlockNode node, TContext context)
+    {
+    }
+
     public virtual void VisitExpressionStatement(ExpressionStatementNode node, TContext context)
     {
         if (context.IsFinished)

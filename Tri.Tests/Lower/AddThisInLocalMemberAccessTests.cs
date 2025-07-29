@@ -38,20 +38,29 @@ public class AddThisInLocalMemberAccessTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var expected = new MemberAccessExpressionNode(
-            new MemberAccessExpressionNode("this")
+        var typeMetadata = new TypeMetadata("Test");
+        var propertyMetadata = new PropertyMetadata(
+            typeMetadata,
+            "count",
+            TypeMetadata.I32
+        );
+        var expected = new CallExpressionNode(
+            new MemberAccessExpressionNode(
+                new MemberAccessExpressionNode("this")
+                {
+                    Reference = typeMetadata,
+                },
+                "<>_get_count")
             {
-                ReturnTypeMetadata = new TypeMetadata("Test"),
+                Reference = propertyMetadata.Getter,
             },
-            "count")
-        {
-            ReturnTypeMetadata = TypeMetadata.I32,
-        };
+            []
+        );
 
         var method = tree.Find<MethodDeclarationNode>();
         var returnStatement = method?.Body.Find<ReturnStatementNode>();
         Assert.That(returnStatement, Is.Not.Null);
-        Assert.That(returnStatement.Expression, Is.EqualTo(expected));
+        Assert.That(returnStatement.Expression, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -72,18 +81,28 @@ public class AddThisInLocalMemberAccessTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var typeMetadata = new TypeMetadata("Test");
+        var methodMetadata = new MethodMetadata(
+            typeMetadata,
+            AccessModifierMetadata.Public,
+            false,
+            "print",
+            [],
+            new FunctionTypeMetadata([], TypeMetadata.Void)
+        );
+
         var expected = new MemberAccessExpressionNode(
-            new MemberAccessExpressionNode("this")
+            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
             {
-                ReturnTypeMetadata = new TypeMetadata("Test"),
+                Reference = typeMetadata,
             },
             "print")
         {
-            ReturnTypeMetadata = new FunctionTypeMetadata([], TypeMetadata.Void),
+            Reference = methodMetadata,
         };
 
         var returnStatement = tree.Find<CallExpressionNode>();
         Assert.That(returnStatement, Is.Not.Null);
-        Assert.That(returnStatement.Member, Is.EqualTo(expected));
+        Assert.That(returnStatement.Member, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

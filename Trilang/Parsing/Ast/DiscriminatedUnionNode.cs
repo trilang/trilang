@@ -67,6 +67,13 @@ public class DiscriminatedUnionNode : IInlineTypeNode, IEquatable<DiscriminatedU
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformDiscriminatedUnion(this);
 
+    public IInlineTypeNode Clone()
+        => new DiscriminatedUnionNode(Types.Select(t => t.Clone()).ToArray())
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

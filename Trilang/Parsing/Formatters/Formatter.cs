@@ -167,6 +167,19 @@ public partial class Formatter : IFormatter
         }
     }
 
+    public void VisitExpressionBlock(ExpressionBlockNode node)
+    {
+        writer.WriteLine("{");
+
+        writer.Scoped(() =>
+        {
+            foreach (var expression in node.Expressions)
+                expression.Accept(this);
+        });
+
+        writer.Write("}");
+    }
+
     public void VisitExpressionStatement(ExpressionStatementNode node)
     {
         node.Expression.Accept(this);

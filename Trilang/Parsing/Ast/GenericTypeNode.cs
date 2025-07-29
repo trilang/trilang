@@ -69,6 +69,13 @@ public class GenericTypeNode : IInlineTypeNode, IEquatable<GenericTypeNode>
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformGenericType(this);
 
+    public IInlineTypeNode Clone()
+        => new GenericTypeNode(PrefixName, TypeArguments.Select(t => t.Clone()).ToArray())
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public string GetOpenGenericName()
         => $"{PrefixName}<{new string(',', TypeArguments.Count - 1)}>";
 

@@ -73,6 +73,13 @@ public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNo
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformInterfaceProperty(this);
 
+    public InterfacePropertyNode Clone()
+        => new InterfacePropertyNode(Name, Type.Clone(), GetterModifier, SetterModifier)
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

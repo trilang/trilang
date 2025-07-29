@@ -24,6 +24,8 @@ public interface ITransformer
 
     ISyntaxNode TransformDiscriminatedUnion(DiscriminatedUnionNode node);
 
+    ISyntaxNode TransformExpressionBlock(ExpressionBlockNode node);
+
     ISyntaxNode TransformExpressionStatement(ExpressionStatementNode node);
 
     ISyntaxNode TransformFunction(FunctionDeclarationNode node);

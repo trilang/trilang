@@ -2,6 +2,7 @@ using System.Text;
 
 namespace Trilang.Metadata;
 
+// TODO: immutable metadata
 public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 {
     public static readonly TypeMetadata Void = new TypeMetadata("void");
@@ -22,11 +23,12 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 
     private readonly List<ITypeMetadata> genericArguments;
     private readonly HashSet<InterfaceMetadata> interfaces;
+    private readonly HashSet<FieldMetadata> fields;
     private readonly HashSet<PropertyMetadata> properties;
     private readonly HashSet<ConstructorMetadata> constructors;
     private readonly HashSet<MethodMetadata> methods;
 
-    public TypeMetadata(string name) : this(name, [], [], [], [], [])
+    public TypeMetadata(string name) : this(name, [], [], [], [], [], [])
     {
     }
 
@@ -34,6 +36,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         string name,
         IEnumerable<ITypeMetadata> genericArguments,
         IEnumerable<InterfaceMetadata> interfaces,
+        IEnumerable<FieldMetadata> fields,
         IEnumerable<PropertyMetadata> properties,
         IEnumerable<ConstructorMetadata> constructors,
         IEnumerable<MethodMetadata> methods)
@@ -41,6 +44,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         Name = name;
         this.genericArguments = [..genericArguments];
         this.interfaces = [..interfaces];
+        this.fields = [..fields];
         this.properties = [..properties];
         this.constructors = [..constructors];
         this.methods = [..methods];
@@ -111,6 +115,9 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public void AddInterface(InterfaceMetadata interfaceMetadata)
         => interfaces.Add(interfaceMetadata);
 
+    public void AddField(FieldMetadata field)
+        => fields.Add(field);
+
     public PropertyMetadata? GetProperty(string name)
         => properties.FirstOrDefault(f => f.Name == name);
 
@@ -145,6 +152,8 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public IReadOnlyCollection<InterfaceMetadata> Interfaces => interfaces;
 
     public IReadOnlyCollection<PropertyMetadata> Properties => properties;
+
+    public IReadOnlyCollection<FieldMetadata> Fields => fields;
 
     public IReadOnlyCollection<ConstructorMetadata> Constructors => constructors;
 

@@ -58,6 +58,13 @@ public class TupleTypeNode : IInlineTypeNode, IEquatable<TupleTypeNode>
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformTupleType(this);
 
+    public IInlineTypeNode Clone()
+        => new TupleTypeNode(Types.Select(t => t.Clone()).ToArray())
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

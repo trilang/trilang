@@ -31,14 +31,23 @@ public class MetadataGeneratorTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expected = new TypeMetadata("Point");
-        expected.AddProperty(new PropertyMetadata(
+
+        var xProperty = new PropertyMetadata(
             expected,
             "x",
-            TypeMetadata.I32));
-        expected.AddProperty(new PropertyMetadata(
+            TypeMetadata.I32);
+        expected.AddProperty(xProperty);
+        expected.AddMethod(xProperty.Getter);
+        expected.AddMethod(xProperty.Setter);
+
+        var yProperty = new PropertyMetadata(
             expected,
             "y",
-            TypeMetadata.I32));
+            TypeMetadata.I32);
+        expected.AddProperty(yProperty);
+        expected.AddMethod(yProperty.Getter);
+        expected.AddMethod(yProperty.Setter);
+
         expected.AddConstructor(new ConstructorMetadata(
             expected,
             AccessModifierMetadata.Public,
@@ -89,6 +98,12 @@ public class MetadataGeneratorTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var typeMetadata = new TypeMetadata("Test");
+        typeMetadata.AddConstructor(
+            new ConstructorMetadata(
+                typeMetadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], typeMetadata)));
         var propertyMetadata = new PropertyMetadata(
             typeMetadata,
             "x",
@@ -96,6 +111,8 @@ public class MetadataGeneratorTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         typeMetadata.AddProperty(propertyMetadata);
+        typeMetadata.AddMethod(propertyMetadata.Getter);
+        typeMetadata.AddMethod(propertyMetadata.Setter);
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var actual = typeProvider.GetType("Test") as TypeMetadata;
@@ -122,15 +139,21 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var interface1Metadata = new InterfaceMetadata();
-        var interface2Metadata = new InterfaceMetadata();
+        var interfaceMetadata = new InterfaceMetadata();
         var expected = new TypeMetadata(
             "Point",
             [],
-            [interface1Metadata, interface2Metadata],
+            [interfaceMetadata],
+            [],
             [],
             [],
             []);
+        expected.AddConstructor(
+            new ConstructorMetadata(
+                expected,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], expected)));
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var actual = typeProvider.GetType("Point");
@@ -325,6 +348,13 @@ public class MetadataGeneratorTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expectedType = new TypeMetadata("Point");
+        expectedType.AddConstructor(
+            new ConstructorMetadata(
+                expectedType,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], expectedType)));
+
         var expectedAlias = new TypeAliasMetadata("MyPoint", [], expectedType);
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
@@ -347,6 +377,13 @@ public class MetadataGeneratorTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expectedType = new TypeMetadata("Point");
+        expectedType.AddConstructor(
+            new ConstructorMetadata(
+                expectedType,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], expectedType)));
+
         var expectedAlias = new TypeAliasMetadata("MyPoint", [], expectedType);
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
@@ -369,6 +406,13 @@ public class MetadataGeneratorTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expectedType = new TypeMetadata("Point");
+        expectedType.AddConstructor(
+            new ConstructorMetadata(
+                expectedType,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], expectedType)));
+
         var expectedArrayType = new TypeArrayMetadata(expectedType);
         var expectedAlias = new TypeAliasMetadata("MyPoint", [], expectedArrayType);
 
@@ -394,6 +438,13 @@ public class MetadataGeneratorTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expectedType = new TypeMetadata("Point");
+        expectedType.AddConstructor(
+            new ConstructorMetadata(
+                expectedType,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], expectedType)));
+
         var expectedArrayType = new TypeArrayMetadata(expectedType);
         var expectedAlias = new TypeAliasMetadata("MyPoint", [], expectedArrayType);
 
@@ -611,6 +662,12 @@ public class MetadataGeneratorTests
         var expected = new TypeMetadata("Test");
         expected.AddGenericArgument(new TypeArgumentMetadata("T1"));
         expected.AddGenericArgument(new TypeArgumentMetadata("T2"));
+        expected.AddConstructor(
+            new ConstructorMetadata(
+                expected,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], expected)));
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var actual = typeProvider.GetType("Test<,>");
@@ -698,6 +755,12 @@ public class MetadataGeneratorTests
 
         var expected = new TypeMetadata("List");
         expected.AddGenericArgument(TypeMetadata.I32);
+        expected.AddConstructor(
+            new ConstructorMetadata(
+                expected,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], expected)));
 
         Assert.That(closedType, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -870,8 +933,17 @@ public class MetadataGeneratorTests
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
+        var expected = new InterfaceMetadata();
+        expected.AddProperty(
+            new InterfacePropertyMetadata(
+                expected,
+                "x",
+                TypeMetadata.I32,
+                AccessModifierMetadata.Public,
+                AccessModifierMetadata.Private));
+
         Assert.That(property, Is.Not.Null);
-        Assert.That(property.Type, Is.EqualTo(new InterfaceMetadata()).Using(new MetadataComparer()));
+        Assert.That(property.Type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -1071,10 +1143,19 @@ public class MetadataGeneratorTests
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var type = typeProvider.GetType("Test<i32>");
+
+        var listMetadata = new TypeMetadata("List", [TypeMetadata.I32], [], [], [], [], []);
+        listMetadata.AddConstructor(
+            new ConstructorMetadata(
+                listMetadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], listMetadata)));
+
         var expected = new TypeAliasMetadata(
             "Test",
             [TypeMetadata.I32],
-            new TypeMetadata("List", [TypeMetadata.I32], [], [], [], []));
+            listMetadata);
 
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));

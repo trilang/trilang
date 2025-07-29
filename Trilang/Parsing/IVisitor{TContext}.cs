@@ -24,6 +24,8 @@ public interface IVisitor<in TContext>
 
     void VisitDiscriminatedUnion(DiscriminatedUnionNode node, TContext context);
 
+    void VisitExpressionBlock(ExpressionBlockNode node, TContext context);
+
     void VisitExpressionStatement(ExpressionStatementNode node, TContext context);
 
     void VisitFunction(FunctionDeclarationNode node, TContext context);

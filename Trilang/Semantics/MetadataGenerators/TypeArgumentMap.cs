@@ -138,6 +138,7 @@ internal class TypeArgumentMap
             [],
             [],
             [],
+            [],
             []);
 
         if (typeProvider.GetType(closed.ToString()) is TypeMetadata existingType)
@@ -154,8 +155,8 @@ internal class TypeArgumentMap
                     closed,
                     property.Name,
                     Map(property.Type),
-                    property.GetterModifier,
-                    property.SetterModifier));
+                    Map(closed, property.Getter),
+                    Map(closed, property.Setter)));
 
         foreach (var constructor in type.Constructors)
             closed.AddConstructor(
@@ -166,20 +167,22 @@ internal class TypeArgumentMap
                     Map(constructor.TypeMetadata)));
 
         foreach (var method in type.Methods)
-            closed.AddMethod(
-                new MethodMetadata(
-                    closed,
-                    method.AccessModifier,
-                    method.IsStatic,
-                    method.Name,
-                    method.Parameters.Select(Map).ToList(),
-                    Map(method.TypeMetadata)));
+            closed.AddMethod(Map(closed, method));
 
         return closed;
     }
 
     private ParameterMetadata Map(ParameterMetadata parameter)
         => new ParameterMetadata(parameter.Name, Map(parameter.Type));
+
+    private MethodMetadata Map(TypeMetadata closed, MethodMetadata method)
+        => new MethodMetadata(
+            closed,
+            method.AccessModifier,
+            method.IsStatic,
+            method.Name,
+            method.Parameters.Select(Map).ToList(),
+            Map(method.TypeMetadata));
 
     private bool HasTypeArgument(ITypeMetadata type)
         => type switch

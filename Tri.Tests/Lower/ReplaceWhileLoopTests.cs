@@ -34,10 +34,16 @@ public class ReplaceWhileLoopTests
                 return a;
             }
             """);
+        var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                [
+                    new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })
+                    {
+                        Metadata = parameterMetadata,
+                    }
+                ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
@@ -45,7 +51,7 @@ public class ReplaceWhileLoopTests
                             BinaryExpressionKind.Assignment,
                             new MemberAccessExpressionNode("a")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                Reference = parameterMetadata,
                             },
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                             {
@@ -64,7 +70,7 @@ public class ReplaceWhileLoopTests
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode("a")
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32
+                                    Reference = parameterMetadata,
                                 },
                                 new LiteralExpressionNode(LiteralExpressionKind.Number, 10)
                                 {
@@ -88,13 +94,13 @@ public class ReplaceWhileLoopTests
                                     BinaryExpressionKind.Assignment,
                                     new MemberAccessExpressionNode("a")
                                     {
-                                        ReturnTypeMetadata = TypeMetadata.I32
+                                        Reference = parameterMetadata,
                                     },
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Addition,
                                         new MemberAccessExpressionNode("a")
                                         {
-                                            ReturnTypeMetadata = TypeMetadata.I32
+                                            Reference = parameterMetadata,
                                         },
                                         new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
                                         {
@@ -116,7 +122,7 @@ public class ReplaceWhileLoopTests
                     new ReturnStatementNode(
                         new MemberAccessExpressionNode("a")
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32
+                            Reference = parameterMetadata,
                         }
                     )
                 ])
@@ -124,7 +130,7 @@ public class ReplaceWhileLoopTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("a", TypeMetadata.I32)],
+                    [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
@@ -133,7 +139,7 @@ public class ReplaceWhileLoopTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -153,10 +159,16 @@ public class ReplaceWhileLoopTests
                 return a;
             }
             """);
+        var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                [
+                    new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })
+                    {
+                        Metadata = parameterMetadata,
+                    }
+                ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
@@ -164,7 +176,7 @@ public class ReplaceWhileLoopTests
                             BinaryExpressionKind.Assignment,
                             new MemberAccessExpressionNode("a")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                Reference = parameterMetadata,
                             },
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                             {
@@ -183,7 +195,7 @@ public class ReplaceWhileLoopTests
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode("a")
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32
+                                    Reference = parameterMetadata,
                                 },
                                 new LiteralExpressionNode(LiteralExpressionKind.Number, 10)
                                 {
@@ -224,13 +236,13 @@ public class ReplaceWhileLoopTests
                                     BinaryExpressionKind.Assignment,
                                     new MemberAccessExpressionNode("a")
                                     {
-                                        ReturnTypeMetadata = TypeMetadata.I32
+                                        Reference = parameterMetadata,
                                     },
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Addition,
                                         new MemberAccessExpressionNode("a")
                                         {
-                                            ReturnTypeMetadata = TypeMetadata.I32
+                                            Reference = parameterMetadata,
                                         },
                                         new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
                                         {
@@ -252,7 +264,7 @@ public class ReplaceWhileLoopTests
                     new ReturnStatementNode(
                         new MemberAccessExpressionNode("a")
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32
+                            Reference = parameterMetadata,
                         }
                     )
                 ])
@@ -260,7 +272,7 @@ public class ReplaceWhileLoopTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("a", TypeMetadata.I32)],
+                    [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
@@ -269,7 +281,7 @@ public class ReplaceWhileLoopTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -291,10 +303,16 @@ public class ReplaceWhileLoopTests
                 return a;
             }
             """);
+        var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                [
+                    new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })
+                    {
+                        Metadata = parameterMetadata,
+                    }
+                ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
@@ -302,7 +320,7 @@ public class ReplaceWhileLoopTests
                             BinaryExpressionKind.Assignment,
                             new MemberAccessExpressionNode("a")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                Reference = parameterMetadata,
                             },
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                             {
@@ -321,7 +339,7 @@ public class ReplaceWhileLoopTests
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode("a")
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32
+                                    Reference = parameterMetadata,
                                 },
                                 new LiteralExpressionNode(LiteralExpressionKind.Number, 10)
                                 {
@@ -345,13 +363,13 @@ public class ReplaceWhileLoopTests
                                     BinaryExpressionKind.Assignment,
                                     new MemberAccessExpressionNode("a")
                                     {
-                                        ReturnTypeMetadata = TypeMetadata.I32
+                                        Reference = parameterMetadata,
                                     },
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Addition,
                                         new MemberAccessExpressionNode("a")
                                         {
-                                            ReturnTypeMetadata = TypeMetadata.I32
+                                            Reference = parameterMetadata,
                                         },
                                         new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
                                         {
@@ -371,7 +389,7 @@ public class ReplaceWhileLoopTests
                                     BinaryExpressionKind.Equality,
                                     new MemberAccessExpressionNode("a")
                                     {
-                                        ReturnTypeMetadata = TypeMetadata.I32
+                                        Reference = parameterMetadata,
                                     },
                                     new LiteralExpressionNode(LiteralExpressionKind.Number, 5)
                                     {
@@ -396,7 +414,7 @@ public class ReplaceWhileLoopTests
                     new ReturnStatementNode(
                         new MemberAccessExpressionNode("a")
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32
+                            Reference = parameterMetadata,
                         }
                     )
                 ])
@@ -404,7 +422,7 @@ public class ReplaceWhileLoopTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("a", TypeMetadata.I32)],
+                    [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
@@ -413,7 +431,7 @@ public class ReplaceWhileLoopTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -435,10 +453,16 @@ public class ReplaceWhileLoopTests
                 return a;
             }
             """);
+        var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                [
+                    new ParameterNode("a", new TypeNode("i32") { Metadata = TypeMetadata.I32 })
+                    {
+                        Metadata = parameterMetadata,
+                    }
+                ],
                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
@@ -446,7 +470,7 @@ public class ReplaceWhileLoopTests
                             BinaryExpressionKind.Assignment,
                             new MemberAccessExpressionNode("a")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                Reference = parameterMetadata,
                             },
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                             {
@@ -465,7 +489,7 @@ public class ReplaceWhileLoopTests
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode("a")
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32
+                                    Reference = parameterMetadata,
                                 },
                                 new LiteralExpressionNode(LiteralExpressionKind.Number, 10)
                                 {
@@ -489,13 +513,13 @@ public class ReplaceWhileLoopTests
                                     BinaryExpressionKind.Assignment,
                                     new MemberAccessExpressionNode("a")
                                     {
-                                        ReturnTypeMetadata = TypeMetadata.I32
+                                        Reference = parameterMetadata,
                                     },
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Addition,
                                         new MemberAccessExpressionNode("a")
                                         {
-                                            ReturnTypeMetadata = TypeMetadata.I32
+                                            Reference = parameterMetadata,
                                         },
                                         new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
                                         {
@@ -515,7 +539,7 @@ public class ReplaceWhileLoopTests
                                     BinaryExpressionKind.Equality,
                                     new MemberAccessExpressionNode("a")
                                     {
-                                        ReturnTypeMetadata = TypeMetadata.I32
+                                        Reference = parameterMetadata,
                                     },
                                     new LiteralExpressionNode(LiteralExpressionKind.Number, 5)
                                     {
@@ -540,7 +564,7 @@ public class ReplaceWhileLoopTests
                     new ReturnStatementNode(
                         new MemberAccessExpressionNode("a")
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32
+                            Reference = parameterMetadata,
                         }
                     )
                 ])
@@ -548,7 +572,7 @@ public class ReplaceWhileLoopTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("a", TypeMetadata.I32)],
+                    [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
@@ -557,6 +581,6 @@ public class ReplaceWhileLoopTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

@@ -72,7 +72,13 @@ internal class TypeGenerator
                     GetAccessModifierMetadata(property.Getter?.AccessModifier ?? AccessModifier.Public),
                     GetAccessModifierMetadata(property.Setter?.AccessModifier ?? AccessModifier.Private));
 
+                // TODO: add in a constructor?
                 type.AddProperty(propertyMetadata);
+                type.AddMethod(propertyMetadata.Getter);
+                type.AddMethod(propertyMetadata.Setter);
+
+                typeProvider.DefineType(propertyMetadata.Getter.TypeMetadata);
+                typeProvider.DefineType(propertyMetadata.Setter.TypeMetadata);
             }
 
             if (typeDeclarationNode.Constructors.Count > 0)

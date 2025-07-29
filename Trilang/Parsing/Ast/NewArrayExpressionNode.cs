@@ -65,6 +65,13 @@ public class NewArrayExpressionNode : IExpressionNode, IEquatable<NewArrayExpres
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformNewArray(this);
 
+    public IExpressionNode Clone()
+        => new NewArrayExpressionNode((ArrayTypeNode)Type.Clone(), Size.Clone())
+        {
+            SymbolTable = SymbolTable,
+            ReturnTypeMetadata = ReturnTypeMetadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

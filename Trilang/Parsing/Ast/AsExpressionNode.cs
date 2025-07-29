@@ -66,6 +66,13 @@ public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformAsExpression(this);
 
+    public IExpressionNode Clone()
+        => new AsExpressionNode(Expression.Clone(), Type.Clone())
+        {
+            SymbolTable = SymbolTable,
+            ReturnTypeMetadata = ReturnTypeMetadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

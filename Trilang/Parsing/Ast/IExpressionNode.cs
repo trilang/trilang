@@ -5,4 +5,6 @@ namespace Trilang.Parsing.Ast;
 public interface IExpressionNode : ISyntaxNode
 {
     ITypeMetadata? ReturnTypeMetadata { get; }
+
+    IExpressionNode Clone();
 }

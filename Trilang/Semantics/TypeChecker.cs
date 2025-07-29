@@ -1,7 +1,6 @@
 using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
-using Trilang.Symbols;
 using static Trilang.Parsing.Ast.BinaryExpressionKind;
 using static Trilang.Parsing.Ast.UnaryExpressionKind;
 using static Trilang.Metadata.TypeMetadata;
@@ -152,6 +151,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
     public void VisitCall(CallExpressionNode node, TypeCheckerContext context)
     {
+        // TODO: unused return value
         node.Member.Accept(this, context);
 
         foreach (var parameter in node.Parameters)
@@ -199,6 +199,9 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
         node.Metadata = metadata;
     }
+
+    public void VisitExpressionBlock(ExpressionBlockNode node, TypeCheckerContext context)
+        => throw new SemanticAnalysisException("Expression blocks are not supported");
 
     public void VisitExpressionStatement(ExpressionStatementNode node, TypeCheckerContext context)
     {
@@ -360,57 +363,58 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
     private static void VisitFirstMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
     {
         var typeProvider = node.SymbolTable!.TypeProvider;
-
-        node.Reference = node.SymbolTable!.GetId(node.Name) ??
-                         typeProvider.GetType(node.Name) as object ??
-                         throw new SemanticAnalysisException($"Unknown member '{node.Name}'");
-
-        if (node.Reference is IdSymbol id)
-            node.Reference = id.Node;
-
-        node.ReturnTypeMetadata = node.Reference switch
+        var symbol = node.SymbolTable!.GetId(node.Name);
+        if (symbol is not null)
         {
-            PropertyDeclarationNode propertyDeclarationNode
-                => propertyDeclarationNode.Type.Metadata,
+            node.Reference = symbol.Node switch
+            {
+                PropertyDeclarationNode propertyDeclarationNode
+                    => propertyDeclarationNode.Metadata,
 
-            VariableDeclarationStatementNode variableStatementNode
-                => variableStatementNode.Type.Metadata,
+                VariableDeclarationStatementNode variableStatementNode
+                    => variableStatementNode.Metadata,
 
-            ParameterNode parameterNode
-                => parameterNode.Type.Metadata,
+                ParameterNode parameterNode
+                    => parameterNode.Metadata,
 
-            FunctionDeclarationNode functionNode
-                => functionNode.Metadata?.TypeMetadata,
+                FunctionDeclarationNode functionNode
+                    => functionNode.Metadata,
 
-            MethodDeclarationNode methodNode
-                => methodNode.Metadata?.TypeMetadata,
+                MethodDeclarationNode methodNode
+                    => methodNode.Metadata,
 
-            TypeDeclarationNode typeDeclarationNode
-                => typeDeclarationNode.Metadata,
+                TypeDeclarationNode typeDeclarationNode
+                    => typeDeclarationNode.Metadata,
 
-            ITypeMetadata type =>
-                type,
+                _ => throw new SemanticAnalysisException(),
+            };
 
-            null => null,
-            _ => throw new SemanticAnalysisException(),
-        };
+            return;
+        }
+
+        // static access
+        var type = typeProvider.GetType(node.Name);
+        if (type is not null)
+        {
+            node.Reference = type;
+
+            return;
+        }
+
+        throw new SemanticAnalysisException($"Unknown member '{node.Name}'");
     }
 
     private void VisitNestedMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
     {
         node.Member!.Accept(this, context);
 
-        var returnTypeMetadata = node.Member.ReturnTypeMetadata;
-        while (returnTypeMetadata is TypeAliasMetadata alias)
-            returnTypeMetadata = alias.Type;
-
+        var returnTypeMetadata = node.Member.ReturnTypeMetadata.Unpack();
         if (returnTypeMetadata is TypeMetadata type)
         {
             var property = type.GetProperty(node.Name);
             if (property is not null)
             {
                 node.Reference = property;
-                node.ReturnTypeMetadata = property.Type;
 
                 return;
             }
@@ -419,7 +423,6 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             if (method is not null)
             {
                 node.Reference = method;
-                node.ReturnTypeMetadata = method.TypeMetadata;
 
                 return;
             }
@@ -433,7 +436,6 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             if (property is not null)
             {
                 node.Reference = property;
-                node.ReturnTypeMetadata = property.Type;
 
                 return;
             }
@@ -442,7 +444,6 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             if (method is not null)
             {
                 node.Reference = method;
-                node.ReturnTypeMetadata = method.TypeMetadata;
 
                 return;
             }
@@ -566,11 +567,19 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
     public void VisitGetter(PropertyGetterNode node, TypeCheckerContext context)
     {
+        var property = (PropertyDeclarationNode)node.Parent!;
+        var propertyMetadata = property.Metadata!;
+        node.Metadata = propertyMetadata.Getter;
+
         node.Body?.Accept(this, context);
     }
 
     public void VisitSetter(PropertySetterNode node, TypeCheckerContext context)
     {
+        var property = (PropertyDeclarationNode)node.Parent!;
+        var propertyMetadata = property.Metadata!;
+        node.Metadata = propertyMetadata.Setter;
+
         // TODO: check the backing field is set?
         node.Body?.Accept(this, context);
     }
@@ -726,6 +735,8 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
         if (!node.Expression.ReturnTypeMetadata.Equals(node.Type.Metadata))
             throw new SemanticAnalysisException($"Type mismatch in variable declaration '{node.Name}': expected '{node.Type.Metadata}', got '{node.Expression.ReturnTypeMetadata}'");
+
+        node.Metadata = new VariableMetadata(node.Name, node.Type.Metadata);
     }
 
     public void VisitWhile(WhileNode node, TypeCheckerContext context)

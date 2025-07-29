@@ -27,7 +27,8 @@ public class ParameterNode : ISyntaxNode, IEquatable<ParameterNode>
             return true;
 
         return Name == other.Name &&
-               Type.Equals(other.Type);
+               Type.Equals(other.Type) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)

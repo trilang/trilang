@@ -95,6 +95,9 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         });
     }
 
+    public void VisitExpressionBlock(ExpressionBlockNode node, SymbolFinderContext context)
+        => throw new SemanticAnalysisException("Expression blocks are not supported");
+
     public void VisitExpressionStatement(ExpressionStatementNode node, SymbolFinderContext context)
     {
         node.SymbolTable = context.SymbolTable;

@@ -78,18 +78,12 @@ internal class IrBuilder
         return register;
     }
 
-    private void LoadParameter(string name, int index)
+    public void LoadParameter(string name, int index)
     {
         var register = CreateRegister();
         var loadInstruction = new LoadParameterInstruction(register, index);
         currentBlock.AddInstruction(loadInstruction);
         AddDefinition(name, register);
-    }
-
-    public void LoadParameters(IReadOnlyList<ParameterNode> parameters)
-    {
-        foreach (var (i, parameter) in parameters.Index())
-            LoadParameter(parameter.Name, i);
     }
 
     public Register Move(Register source)

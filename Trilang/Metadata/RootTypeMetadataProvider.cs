@@ -33,6 +33,9 @@ public class RootTypeMetadataProvider : ITypeMetadataProvider
     public ITypeMetadata? GetType(string name)
         => types.GetValueOrDefault(name);
 
+    public bool DefineType(ITypeMetadata type)
+        => DefineType(type.ToString()!, type);
+
     public bool DefineType(string name, ITypeMetadata type)
         => types.TryAdd(name, type);
 

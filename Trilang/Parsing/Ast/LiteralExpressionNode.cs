@@ -80,6 +80,13 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformLiteral(this);
 
+    public IExpressionNode Clone()
+        => new LiteralExpressionNode(Kind, Value)
+        {
+            SymbolTable = SymbolTable,
+            ReturnTypeMetadata = ReturnTypeMetadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public LiteralExpressionKind Kind { get; }

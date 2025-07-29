@@ -68,6 +68,13 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformArrayAccess(this);
 
+    public IExpressionNode Clone()
+        => new ArrayAccessExpressionNode(Member.Clone(), Index.Clone())
+        {
+            SymbolTable = SymbolTable,
+            ReturnTypeMetadata = ReturnTypeMetadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

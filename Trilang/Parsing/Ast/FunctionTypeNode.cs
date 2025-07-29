@@ -73,6 +73,13 @@ public class FunctionTypeNode : IInlineTypeNode, IEquatable<FunctionTypeNode>
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformFunctionType(this);
 
+    public IInlineTypeNode Clone()
+        => new FunctionTypeNode(ParameterTypes.Select(t => t.Clone()).ToArray(), ReturnType.Clone())
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

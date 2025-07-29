@@ -24,6 +24,8 @@ public interface IVisitor
 
     void VisitDiscriminatedUnion(DiscriminatedUnionNode node);
 
+    void VisitExpressionBlock(ExpressionBlockNode node);
+
     void VisitExpressionStatement(ExpressionStatementNode node);
 
     void VisitFunction(FunctionDeclarationNode node);

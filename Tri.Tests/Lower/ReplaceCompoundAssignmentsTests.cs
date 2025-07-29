@@ -36,10 +36,16 @@ public class ReplaceCompoundAssignmentsTests
                   x {{op}} 1;
               }
               """);
+        var parameterMetadata = new ParameterMetadata("x", TypeMetadata.I32);
         var expected = new SyntaxTree([
             new FunctionDeclarationNode(
                 "test",
-                [new ParameterNode("x", new TypeNode("i32") { Metadata = TypeMetadata.I32 })],
+                [
+                    new ParameterNode("x", new TypeNode("i32") { Metadata = TypeMetadata.I32 })
+                    {
+                        Metadata = parameterMetadata,
+                    }
+                ],
                 new TypeNode("void") { Metadata = TypeMetadata.Void },
                 new BlockStatementNode([
                     new ExpressionStatementNode(
@@ -47,13 +53,13 @@ public class ReplaceCompoundAssignmentsTests
                             Assignment,
                             new MemberAccessExpressionNode("x")
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32,
+                                Reference = parameterMetadata,
                             },
                             new BinaryExpressionNode(
                                 kind,
                                 new MemberAccessExpressionNode("x")
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32,
+                                    Reference = parameterMetadata,
                                 },
                                 new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
                                 {
@@ -73,7 +79,7 @@ public class ReplaceCompoundAssignmentsTests
             {
                 Metadata = new FunctionMetadata(
                     "test",
-                    [new ParameterMetadata("x", TypeMetadata.I32)],
+                    [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.Void)
                 )
             }
@@ -82,6 +88,6 @@ public class ReplaceCompoundAssignmentsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

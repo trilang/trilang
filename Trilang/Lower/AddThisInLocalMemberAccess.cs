@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -13,15 +14,14 @@ internal class AddThisInLocalMemberAccess : Visitor
         if (node.IsThis || node.IsField || node.IsValue)
             return;
 
-        if (node.Reference is not PropertyDeclarationNode and not MethodDeclarationNode)
+        if (node.Reference is not PropertyMetadata and not MethodMetadata)
             return;
 
         var parent = node.FindInParent<TypeDeclarationNode>()!;
 
         node.Member = new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
         {
-            ReturnTypeMetadata = parent.Metadata,
-            Reference = parent,
+            Reference = parent.Metadata,
         };
     }
 }

@@ -113,14 +113,29 @@ public class TypeCheckerTests
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expected = new TypeMetadata("Point");
-        expected.AddProperty(new PropertyMetadata(
+        expected.AddConstructor(
+            new ConstructorMetadata(
+                expected,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata([], expected)));
+
+        var xProperty = new PropertyMetadata(
             expected,
             "x",
-            TypeMetadata.I32));
-        expected.AddProperty(new PropertyMetadata(
+            TypeMetadata.I32);
+        expected.AddProperty(xProperty);
+        expected.AddMethod(xProperty.Getter);
+        expected.AddMethod(xProperty.Setter);
+
+        var yProperty = new PropertyMetadata(
             expected,
             "y",
-            TypeMetadata.I32));
+            TypeMetadata.I32);
+        expected.AddProperty(yProperty);
+        expected.AddMethod(yProperty.Getter);
+        expected.AddMethod(yProperty.Setter);
+
         expected.AddMethod(new MethodMetadata(
             expected,
             AccessModifierMetadata.Public,

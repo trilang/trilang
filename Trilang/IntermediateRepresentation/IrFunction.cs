@@ -49,20 +49,4 @@ public record IrFunction(string Name, IrCode Code)
 
         return new IrFunction($"{type.Name}_ctor", code);
     }
-
-    public static IrFunction FromSetter(PropertySetterNode node, IrCode code)
-    {
-        var property = (PropertyDeclarationNode)node.Parent!;
-        var type = (TypeDeclarationNode)property.Parent!;
-
-        return new IrFunction($"{type.Name}_{property.Name}_Setter", code);
-    }
-
-    public static IrFunction FromGetter(PropertyGetterNode node, IrCode code)
-    {
-        var property = (PropertyDeclarationNode)node.Parent!;
-        var type = (TypeDeclarationNode)property.Parent!;
-
-        return new IrFunction($"{type.Name}_{property.Name}_Getter", code);
-    }
 }

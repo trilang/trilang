@@ -179,6 +179,24 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void VisitExpressionBlock(ExpressionBlockNode node)
+    {
+        VisitExpressionBlockEnter(node);
+
+        foreach (var expression in node.Expressions)
+            expression.Accept(this);
+
+        VisitExpressionBlockExit(node);
+    }
+
+    protected virtual void VisitExpressionBlockEnter(ExpressionBlockNode node)
+    {
+    }
+
+    protected virtual void VisitExpressionBlockExit(ExpressionBlockNode node)
+    {
+    }
+
     public virtual void VisitExpressionStatement(ExpressionStatementNode node)
     {
         VisitExpressionStatementEnter(node);

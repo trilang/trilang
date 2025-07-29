@@ -64,6 +64,13 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformUnaryExpression(this);
 
+    public IExpressionNode Clone()
+        => new UnaryExpressionNode(Kind, Operand.Clone())
+        {
+            SymbolTable = SymbolTable,
+            ReturnTypeMetadata = ReturnTypeMetadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public UnaryExpressionKind Kind { get; }

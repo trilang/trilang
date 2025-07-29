@@ -18,17 +18,9 @@ internal class CheckStaticAndInstanceMembersAccess : Visitor
         if (parentRef is null)
             return;
 
-        if (parentRef is ISyntaxNode)
+        if (parentRef is ITypeMetadata type)
         {
-            if (node.Reference is MethodMetadata { IsStatic: true } method)
-                throw new SemanticAnalysisException($"The static method '{method.Name}' cannot be called on an instance one.");
-        }
-        else if (parentRef is ITypeMetadata type)
-        {
-            while (type is TypeAliasMetadata alias)
-                type = alias.Type!;
-
-            if (type is TypeMetadata)
+            if (type.Unpack() is TypeMetadata)
             {
                 if (node.Reference is MethodMetadata { IsStatic: false } method)
                     throw new SemanticAnalysisException($"The instance method '{method.Name}' cannot be called on a static one.");
@@ -37,6 +29,11 @@ internal class CheckStaticAndInstanceMembersAccess : Visitor
             {
                 throw new SemanticAnalysisException($"'{parentRef}' can't be used to call static members.");
             }
+        }
+        else
+        {
+            if (node.Reference is MethodMetadata { IsStatic: true } method)
+                throw new SemanticAnalysisException($"The static method '{method.Name}' cannot be called on an instance one.");
         }
     }
 }

@@ -84,7 +84,7 @@ public class ParseFunctionTests
                 new BlockStatementNode())
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -103,7 +103,7 @@ public class ParseFunctionTests
                 new BlockStatementNode())
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -124,7 +124,7 @@ public class ParseFunctionTests
                 new BlockStatementNode())
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -141,6 +141,6 @@ public class ParseFunctionTests
                 new BlockStatementNode())
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected));
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

@@ -15,6 +15,9 @@ public class TypeMetadataProvider : ITypeMetadataProvider
         => types.GetValueOrDefault(name) ??
            parent.GetType(name);
 
+    public bool DefineType(ITypeMetadata type)
+        => DefineType(type.ToString()!, type);
+
     public bool DefineType(string name, ITypeMetadata type)
         => type is TypeArgumentMetadata
             ? types.TryAdd(name, type)

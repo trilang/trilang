@@ -1,3 +1,5 @@
+using Trilang.Parsing.Ast;
+
 namespace Trilang.Metadata;
 
 public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
@@ -12,8 +14,36 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
         DeclaringType = declaringType;
         Name = name;
         Type = type;
-        GetterModifier = getterModifier;
-        SetterModifier = setterModifier;
+        Getter = new MethodMetadata(
+            declaringType,
+            getterModifier,
+            false,
+            $"<>_get_{name}",
+            [],
+            new FunctionTypeMetadata([], type)
+        );
+        Setter = new MethodMetadata(
+            declaringType,
+            setterModifier,
+            false,
+            $"<>_set_{name}",
+            [new ParameterMetadata(MemberAccessExpressionNode.Value, type)],
+            new FunctionTypeMetadata([type], TypeMetadata.Void)
+        );
+    }
+
+    public PropertyMetadata(
+        TypeMetadata declaringType,
+        string name,
+        ITypeMetadata type,
+        MethodMetadata getter,
+        MethodMetadata setter)
+    {
+        DeclaringType = declaringType;
+        Name = name;
+        Type = type;
+        Getter = getter;
+        Setter = setter;
     }
 
     public static bool operator ==(PropertyMetadata? left, PropertyMetadata? right)
@@ -30,11 +60,11 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return DeclaringType.Equals(other.DeclaringType) &&
+        return DeclaringType == other.DeclaringType &&
                Name == other.Name &&
                Type.Equals(other.Type) &&
-               GetterModifier == other.GetterModifier &&
-               SetterModifier == other.SetterModifier;
+               Getter == other.Getter &&
+               Setter == other.Setter;
     }
 
     public override bool Equals(object? obj)
@@ -52,7 +82,7 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, Type);
+        => HashCode.Combine(Name, Type, Getter, Setter);
 
     public override string ToString()
         => $"{Name}: {Type}";
@@ -61,9 +91,9 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 
     public string Name { get; }
 
-    public AccessModifierMetadata GetterModifier { get; }
+    public MethodMetadata Getter { get; }
 
-    public AccessModifierMetadata SetterModifier { get; }
+    public MethodMetadata Setter { get; }
 
     public ITypeMetadata Type { get; }
 }

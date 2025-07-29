@@ -54,6 +54,12 @@ public class NullExpressionNode : IExpressionNode, IEquatable<NullExpressionNode
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformNull(this);
 
+    public IExpressionNode Clone()
+        => new NullExpressionNode
+        {
+            SymbolTable = SymbolTable,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

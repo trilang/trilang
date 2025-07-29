@@ -49,7 +49,10 @@ public class IrGenerator
     private IrFunction GenerateFunction(FunctionDeclarationNode node)
     {
         var builder = new IrBuilder();
-        builder.LoadParameters(node.Parameters);
+
+        foreach (var (i, parameter) in node.Parameters.Index())
+            builder.LoadParameter(parameter.Name, i);
+
         GenerateBlock(builder, node.Body);
 
         var code = builder.Build();
@@ -68,20 +71,20 @@ public class IrGenerator
         foreach (var constructor in typeDeclarationNode.Constructors)
             functions.Add(GenerateConstructor(constructor));
 
-        foreach (var property in typeDeclarationNode.Properties)
-        {
-            // getter/setter aren't null because they are generated on the lowering stage
-            functions.Add(GenerateGetter(property.Getter!));
-            functions.Add(GenerateSetter(property.Setter!));
-        }
-
         return functions;
     }
 
     private IrFunction GenerateMethod(MethodDeclarationNode node)
     {
         var builder = new IrBuilder();
-        builder.LoadParameters(node.Parameters);
+        var i = 0;
+
+        if (node.Metadata!.IsStatic)
+            builder.LoadParameter(MemberAccessExpressionNode.This, i++);
+
+        for (; i < node.Parameters.Count; i++)
+            builder.LoadParameter(node.Parameters[i].Name, i);
+
         GenerateBlock(builder, node.Body);
 
         var code = builder.Build();
@@ -93,37 +96,17 @@ public class IrGenerator
     private IrFunction GenerateConstructor(ConstructorDeclarationNode node)
     {
         var builder = new IrBuilder();
-        builder.LoadParameters(node.Parameters);
+
+        builder.LoadParameter(MemberAccessExpressionNode.This, 0);
+        for (var i = 0; i < node.Parameters.Count; i++)
+            builder.LoadParameter(node.Parameters[i].Name, i + 1);
+
         GenerateBlock(builder, node.Body);
 
         var code = builder.Build();
         ssaTransformer.Transform(code);
 
         return IrFunction.FromConstructor(node, code);
-    }
-
-    private IrFunction GenerateGetter(PropertyGetterNode node)
-    {
-        var builder = new IrBuilder();
-        builder.LoadParameters(node.Parameters);
-        GenerateBlock(builder, node.Body!);
-
-        var code = builder.Build();
-        ssaTransformer.Transform(code);
-
-        return IrFunction.FromGetter(node, code);
-    }
-
-    private IrFunction GenerateSetter(PropertySetterNode node)
-    {
-        var builder = new IrBuilder();
-        builder.LoadParameters(node.Parameters);
-        GenerateBlock(builder, node.Body!);
-
-        var code = builder.Build();
-        ssaTransformer.Transform(code);
-
-        return IrFunction.FromSetter(node, code);
     }
 
     private void GenerateStatement(IrBuilder builder, IStatementNode statementNode)

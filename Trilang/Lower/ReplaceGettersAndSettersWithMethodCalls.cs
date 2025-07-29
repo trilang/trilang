@@ -1,11 +1,40 @@
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
-using static Trilang.Parsing.Ast.BinaryExpressionKind;
 
 namespace Trilang.Lower;
 
-internal class ReplaceCompoundAssignments : ITransformer
+internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
 {
+    private enum AccessKind
+    {
+        Read,
+        Write,
+    }
+
+    private int tempVariableCounter = 0;
+
+    private static AccessKind FindParentAssignment(MemberAccessExpressionNode node)
+    {
+        var parent = node.Parent;
+        while (parent is not null)
+        {
+            // can only check for simple assignment
+            // compound assignments are remote at this point
+            if (parent is BinaryExpressionNode { Kind: BinaryExpressionKind.Assignment } result)
+            {
+                if (ReferenceEquals(result.Left, node))
+                    return AccessKind.Write;
+
+                return AccessKind.Read;
+            }
+
+            parent = parent.Parent;
+        }
+
+        return AccessKind.Read;
+    }
+
     public ISyntaxNode TransformArrayAccess(ArrayAccessExpressionNode node)
     {
         var member = (IExpressionNode)node.Member.Transform(this);
@@ -41,38 +70,52 @@ internal class ReplaceCompoundAssignments : ITransformer
         var left = (IExpressionNode)node.Left.Transform(this);
         var right = (IExpressionNode)node.Right.Transform(this);
 
-        if (node.Kind is AdditionAssignment
-            or SubtractionAssignment
-            or MultiplicationAssignment
-            or DivisionAssignment
-            or ModulusAssignment
-            or BitwiseAndAssignment
-            or BitwiseOrAssignment
-            or BitwiseXorAssignment)
+        if (node.Kind == BinaryExpressionKind.Assignment &&
+            left is MemberAccessExpressionNode { Reference: PropertyMetadata propertyMetadata } memberAccess)
         {
-            var kind = node.Kind switch
+            if (node.Parent is ExpressionStatementNode)
             {
-                AdditionAssignment => Addition,
-                SubtractionAssignment => Subtraction,
-                MultiplicationAssignment => Multiplication,
-                DivisionAssignment => Division,
-                ModulusAssignment => Modulus,
-                BitwiseAndAssignment => BitwiseAnd,
-                BitwiseOrAssignment => BitwiseOr,
-                BitwiseXorAssignment => BitwiseXor,
-                _ => throw new ArgumentOutOfRangeException(),
-            };
-            right = new BinaryExpressionNode(kind, left, right)
-            {
-                SymbolTable = node.SymbolTable,
-                ReturnTypeMetadata = node.ReturnTypeMetadata,
-            };
+                return new CallExpressionNode(
+                    new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter.Name)
+                    {
+                        Reference = propertyMetadata.Setter,
+                    },
+                    [right]
+                );
+            }
 
-            return new BinaryExpressionNode(Assignment, left.Clone(), right)
-            {
-                SymbolTable = node.SymbolTable,
-                ReturnTypeMetadata = node.ReturnTypeMetadata,
-            };
+            var name = $"<>_tmp_set{tempVariableCounter++}";
+            var variableMetadata = new VariableMetadata(name, right.ReturnTypeMetadata!);
+
+            return new ExpressionBlockNode([
+                new VariableDeclarationStatementNode(
+                    name,
+                    new TypeNode(variableMetadata.Type.ToString()!) { Metadata = variableMetadata.Type },
+                    right)
+                {
+                    Metadata = variableMetadata,
+                },
+                new ExpressionStatementNode(
+                    new CallExpressionNode(
+                        new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter.Name)
+                        {
+                            Reference = propertyMetadata.Setter,
+                        },
+                        [
+                            new MemberAccessExpressionNode(name)
+                            {
+                                Reference = variableMetadata,
+                            }
+                        ]
+                    )
+                ),
+                new ExpressionStatementNode(
+                    new MemberAccessExpressionNode(name)
+                    {
+                        Reference = variableMetadata,
+                    }
+                )
+            ]);
         }
 
         if (ReferenceEquals(left, node.Left) && ReferenceEquals(right, node.Right))
@@ -202,10 +245,28 @@ internal class ReplaceCompoundAssignments : ITransformer
 
     public ISyntaxNode TransformMemberAccess(MemberAccessExpressionNode node)
     {
+        // skip the first member because it can't be property access
+        // even local properties are accessed through `this`
         if (node.Member is null)
             return node;
 
         var member = (IExpressionNode)node.Member.Transform(this);
+
+        if (node.Reference is PropertyMetadata propertyMetadata)
+        {
+            var accessKind = FindParentAssignment(node);
+            if (accessKind == AccessKind.Read)
+            {
+                return new CallExpressionNode(
+                    new MemberAccessExpressionNode(member, propertyMetadata.Getter.Name)
+                    {
+                        Reference = propertyMetadata.Getter,
+                    },
+                    []
+                );
+            }
+        }
+
         if (ReferenceEquals(member, node.Member))
             return node;
 

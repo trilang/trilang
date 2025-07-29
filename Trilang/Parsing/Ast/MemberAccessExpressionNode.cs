@@ -39,7 +39,7 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
         return Name == other.Name &&
                Equals(Member, other.Member) &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
+               Equals(Reference, other.Reference);
     }
 
     public override bool Equals(object? obj)
@@ -76,6 +76,13 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformMemberAccess(this);
 
+    public IExpressionNode Clone()
+        => new MemberAccessExpressionNode(Member?.Clone(), Name)
+        {
+            SymbolTable = SymbolTable,
+            Reference = Reference,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }
@@ -84,9 +91,41 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public string Name { get; }
 
-    public object? Reference { get; set; }
+    public IMetadata? Reference { get; set; }
 
-    public ITypeMetadata? ReturnTypeMetadata { get; set; }
+    public ITypeMetadata? ReturnTypeMetadata
+        => Reference switch
+        {
+            VariableMetadata variable
+                => variable.Type,
+
+            ParameterMetadata parameter
+                => parameter.Type,
+
+            FieldMetadata field
+                => field.Type,
+
+            PropertyMetadata property
+                => property.Type,
+
+            MethodMetadata method
+                => method.TypeMetadata,
+
+            FunctionMetadata function
+                => function.TypeMetadata,
+
+            InterfacePropertyMetadata interfaceProperty
+                => interfaceProperty.Type,
+
+            InterfaceMethodMetadata interfaceMethod
+                => interfaceMethod.TypeMetadata,
+
+            ITypeMetadata type
+                => type,
+
+            null => null,
+            _ => throw new InvalidOperationException(),
+        };
 
     public bool IsThis
         => Name == This;

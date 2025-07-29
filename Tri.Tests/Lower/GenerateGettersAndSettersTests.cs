@@ -34,47 +34,64 @@ public class GenerateGettersAndSettersTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var typeMetadata = new TypeMetadata("Test");
+        var propertyMetadata = new PropertyMetadata(
+            typeMetadata,
+            "count",
+            TypeMetadata.I32
+        );
+        var fieldMetadata = new FieldMetadata($"<>_{propertyMetadata.Name}", propertyMetadata.Type);
+        var valueParameterMetadata = propertyMetadata.Setter.Parameters[0];
+
         var expected = new PropertyDeclarationNode(
             "count",
             new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-            new PropertyGetterNode(AccessModifier.Public, new BlockStatementNode([
-                new ReturnStatementNode(
-                    new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
-                    {
-                        ReturnTypeMetadata = TypeMetadata.I32,
-                    }
-                )
-            ])),
-            new PropertySetterNode(AccessModifier.Private, new BlockStatementNode([
-                new ExpressionStatementNode(
-                    new BinaryExpressionNode(
-                        BinaryExpressionKind.Assignment,
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+            new PropertyGetterNode(
+                AccessModifier.Public,
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new MemberAccessExpressionNode(fieldMetadata.Name)
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32,
-                        },
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                            Reference = fieldMetadata,
+                        }
+                    )
+                ])
+            )
+            {
+                Metadata = propertyMetadata.Getter,
+            },
+            new PropertySetterNode(
+                AccessModifier.Private,
+                new BlockStatementNode([
+                    new ExpressionStatementNode(
+                        new BinaryExpressionNode(
+                            BinaryExpressionKind.Assignment,
+                            new MemberAccessExpressionNode(fieldMetadata.Name)
+                            {
+                                Reference = fieldMetadata,
+                            },
+                            new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                            {
+                                Reference = valueParameterMetadata,
+                            }
+                        )
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
                     )
-                    {
-                        ReturnTypeMetadata = TypeMetadata.I32,
-                    }
-                )
-            ]))
+                ])
+            )
+            {
+                Metadata = propertyMetadata.Setter,
+            }
         )
         {
-            Metadata = new PropertyMetadata(
-                new TypeMetadata("Test"),
-                "count",
-                TypeMetadata.I32
-            ),
+            Metadata = propertyMetadata,
         };
 
         var property = tree.Find<PropertyDeclarationNode>();
         Assert.That(property, Is.Not.Null);
-        Assert.That(property, Is.EqualTo(expected));
+        Assert.That(property, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -91,49 +108,66 @@ public class GenerateGettersAndSettersTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var typeMetadata = new TypeMetadata("Test");
+        var propertyMetadata = new PropertyMetadata(
+            typeMetadata,
+            "count",
+            TypeMetadata.I32,
+            AccessModifierMetadata.Public,
+            AccessModifierMetadata.Public
+        );
+        var fieldMetadata = new FieldMetadata($"<>_{propertyMetadata.Name}", propertyMetadata.Type);
+        var valueParameterMetadata = propertyMetadata.Setter.Parameters[0];
+
         var expected = new PropertyDeclarationNode(
             "count",
             new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-            new PropertyGetterNode(AccessModifier.Public, new BlockStatementNode([
-                new ReturnStatementNode(
-                    new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
-                    {
-                        ReturnTypeMetadata = TypeMetadata.I32,
-                    }
-                )
-            ])),
-            new PropertySetterNode(AccessModifier.Public, new BlockStatementNode([
-                new ExpressionStatementNode(
-                    new BinaryExpressionNode(
-                        BinaryExpressionKind.Assignment,
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+            new PropertyGetterNode(
+                AccessModifier.Public,
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new MemberAccessExpressionNode(fieldMetadata.Name)
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32,
-                        },
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                            Reference = fieldMetadata,
+                        }
+                    )
+                ])
+            )
+            {
+                Metadata = propertyMetadata.Getter,
+            },
+            new PropertySetterNode(
+                AccessModifier.Public,
+                new BlockStatementNode([
+                    new ExpressionStatementNode(
+                        new BinaryExpressionNode(
+                            BinaryExpressionKind.Assignment,
+                            new MemberAccessExpressionNode(fieldMetadata.Name)
+                            {
+                                Reference = fieldMetadata,
+                            },
+                            new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                            {
+                                Reference = valueParameterMetadata,
+                            }
+                        )
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
                     )
-                    {
-                        ReturnTypeMetadata = TypeMetadata.I32,
-                    }
-                )
-            ]))
+                ])
+            )
+            {
+                Metadata = propertyMetadata.Setter,
+            }
         )
         {
-            Metadata = new PropertyMetadata(
-                new TypeMetadata("Test"),
-                "count",
-                TypeMetadata.I32,
-                AccessModifierMetadata.Public,
-                AccessModifierMetadata.Public
-            ),
+            Metadata = propertyMetadata,
         };
 
         var property = tree.Find<PropertyDeclarationNode>();
         Assert.That(property, Is.Not.Null);
-        Assert.That(property, Is.EqualTo(expected));
+        Assert.That(property, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -157,48 +191,65 @@ public class GenerateGettersAndSettersTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
+        var typeMetadata = new TypeMetadata("Test");
+        var propertyMetadata = new PropertyMetadata(
+            typeMetadata,
+            "count",
+            TypeMetadata.I32,
+            AccessModifierMetadata.Public,
+            AccessModifierMetadata.Public
+        );
+        var fieldMetadata = new FieldMetadata($"<>_{propertyMetadata.Name}", propertyMetadata.Type);
+        var valueParameterMetadata = propertyMetadata.Setter.Parameters[0];
+
         var expected = new PropertyDeclarationNode(
             "count",
             new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-            new PropertyGetterNode(AccessModifier.Public, new BlockStatementNode([
-                new ReturnStatementNode(
-                    new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
-                    {
-                        ReturnTypeMetadata = TypeMetadata.I32,
-                    }
-                )
-            ])),
-            new PropertySetterNode(AccessModifier.Public, new BlockStatementNode([
-                new ExpressionStatementNode(
-                    new BinaryExpressionNode(
-                        BinaryExpressionKind.Assignment,
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
+            new PropertyGetterNode(
+                AccessModifier.Public,
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new MemberAccessExpressionNode(fieldMetadata.Name)
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32,
-                        },
-                        new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                            Reference = fieldMetadata,
+                        }
+                    )
+                ])
+            )
+            {
+                Metadata = propertyMetadata.Getter,
+            },
+            new PropertySetterNode(
+                AccessModifier.Public,
+                new BlockStatementNode([
+                    new ExpressionStatementNode(
+                        new BinaryExpressionNode(
+                            BinaryExpressionKind.Assignment,
+                            new MemberAccessExpressionNode(fieldMetadata.Name)
+                            {
+                                Reference = fieldMetadata,
+                            },
+                            new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
+                            {
+                                Reference = valueParameterMetadata,
+                            }
+                        )
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
                     )
-                    {
-                        ReturnTypeMetadata = TypeMetadata.I32,
-                    }
-                )
-            ]))
+                ])
+            )
+            {
+                Metadata = propertyMetadata.Setter,
+            }
         )
         {
-            Metadata = new PropertyMetadata(
-                new TypeMetadata("Test"),
-                "count",
-                TypeMetadata.I32,
-                AccessModifierMetadata.Public,
-                AccessModifierMetadata.Public
-            ),
+            Metadata = propertyMetadata,
         };
 
         var property = tree.Find<PropertyDeclarationNode>();
         Assert.That(property, Is.Not.Null);
-        Assert.That(property, Is.EqualTo(expected));
+        Assert.That(property, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

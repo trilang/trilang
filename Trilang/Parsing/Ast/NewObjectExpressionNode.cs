@@ -68,6 +68,13 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformNewObject(this);
 
+    public IExpressionNode Clone()
+        => new NewObjectExpressionNode(Type.Clone(), Parameters.Select(x => x.Clone()).ToArray())
+        {
+            SymbolTable = SymbolTable,
+            Metadata = Metadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

@@ -66,6 +66,13 @@ public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNo
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformTuple(this);
 
+    public IExpressionNode Clone()
+        => new TupleExpressionNode(Expressions.Select(x => x.Clone()).ToArray())
+        {
+            SymbolTable = SymbolTable,
+            ReturnTypeMetadata = ReturnTypeMetadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }

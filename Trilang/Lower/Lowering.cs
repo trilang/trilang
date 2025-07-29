@@ -8,12 +8,11 @@ public class Lowering
     {
         // TODO: immutable tree?
         tree.Accept(new ReplaceIfDirectives(options.Directives));
-        tree.Accept(new GenerateGettersAndSetters());
         tree.Accept(new AddThisInLocalMemberAccess());
-        tree.Accept(new AddThisAsParameterToInstanceMethods());
-        tree.Accept(new AddValueParameterToSetters());
-
+        tree.Accept(new GenerateGettersAndSetters());
         tree.Transform(new ReplaceCompoundAssignments());
+        tree.Transform(new ReplacePropertyFieldAndValueWithGeneratedField());
+        tree.Transform(new ReplaceGettersAndSettersWithMethodCalls());
         tree.Accept(new ReplaceWhileLoop());
         tree.Accept(new RewriteIfStatement());
     }

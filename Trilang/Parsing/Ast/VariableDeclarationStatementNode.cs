@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
 
@@ -31,7 +32,8 @@ public class VariableDeclarationStatementNode : IStatementNode, IEquatable<Varia
 
         return Name == other.Name &&
                Type.Equals(other.Type) &&
-               Expression.Equals(other.Expression);
+               Expression.Equals(other.Expression) &&
+               Equals(Metadata, other.Metadata);
     }
 
     public override bool Equals(object? obj)
@@ -77,4 +79,6 @@ public class VariableDeclarationStatementNode : IStatementNode, IEquatable<Varia
     public IInlineTypeNode Type { get; }
 
     public IExpressionNode Expression { get; }
+
+    public VariableMetadata? Metadata { get; set; }
 }

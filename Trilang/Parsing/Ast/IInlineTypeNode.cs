@@ -7,4 +7,6 @@ public interface IInlineTypeNode : ISyntaxNode
     string Name { get; }
 
     ITypeMetadata? Metadata { get; }
+
+    IInlineTypeNode Clone();
 }

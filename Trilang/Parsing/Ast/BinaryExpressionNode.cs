@@ -73,6 +73,13 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
     public ISyntaxNode Transform(ITransformer transformer)
         => transformer.TransformBinaryExpression(this);
 
+    public IExpressionNode Clone()
+        => new BinaryExpressionNode(Kind, Left.Clone(), Right.Clone())
+        {
+            SymbolTable = SymbolTable,
+            ReturnTypeMetadata = ReturnTypeMetadata,
+        };
+
     public ISyntaxNode? Parent { get; set; }
 
     public ISymbolTable? SymbolTable { get; set; }
