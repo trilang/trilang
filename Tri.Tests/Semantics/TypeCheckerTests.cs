@@ -1,6 +1,6 @@
-using Tri.Tests.Builders;
 using Trilang;
 using Trilang.Metadata;
+using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 
@@ -8,13 +8,22 @@ namespace Tri.Tests.Semantics;
 
 public class TypeCheckerTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(code);
+
+        return tree;
+    }
+
     [Test]
     public void SetMetadataForFunctionReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(_ => { }))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -32,12 +41,11 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionParameterTypesTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .DefineParameter("b", t => t.Type("bool"))
-                .Body(_ => { }))
-            .Build();
+        var tree = Parse(
+            """
+            function main(a: i32, b: bool): void {
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -64,11 +72,12 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForVariableTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", "i32", exp => exp.Number(1))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                var a: i32 = 1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -81,11 +90,12 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForIncorrectVariableTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", "xxx", exp => exp.Number(1))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                var a: xxx = 1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -98,16 +108,19 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineProperty("x", "i32")
-                .DefineProperty("y", "i32")
-                .DefineMethod("toString", b => b.Body())
-                .DefineMethod("distance", b => b
-                    .DefineParameter("other", "i32")
-                    .ReturnType("f64")
-                    .Body()))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                x: i32;
+                y: i32;
+
+                public toString(): void {
+                }
+
+                public distance(other: i32): f64 {
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -159,9 +172,7 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForAliasType()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("MyInt", t => t.Type("i32"))
-            .Build();
+        var tree = Parse("public type MyInt = i32;");
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -175,13 +186,7 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("MyF", builder => builder
-                .FunctionType(f => f
-                    .DefineParameter("i32")
-                    .DefineParameter("bool")
-                    .ReturnType("f64")))
-            .Build();
+        var tree = Parse("public type MyF = (i32, bool) => f64;");
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -195,13 +200,12 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("add", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .DefineParameter("b", t => t.Type("i32"))
-                .ReturnType("i32")
-                .Body(body => body.Return(exp => exp.Number(0))))
-            .Build();
+        var tree = Parse(
+            """
+            function add(a: i32, b: i32): i32 {
+                return 0;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -222,12 +226,12 @@ public class TypeCheckerTests
     [Test]
     public void LiteralNumberTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(exp => exp.Number(1))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): i32 {
+                return 1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -243,12 +247,12 @@ public class TypeCheckerTests
     [Test]
     public void LiteralBoolTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("bool")
-                .Body(body => body
-                    .Return(exp => exp.True())))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): bool {
+                return true;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -264,12 +268,12 @@ public class TypeCheckerTests
     [Test]
     public void LiteralCharTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("char")
-                .Body(body => body
-                    .Return(exp => exp.Char('x'))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): char {
+                return 'x';
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -285,12 +289,12 @@ public class TypeCheckerTests
     [Test]
     public void LiteralStringTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("string")
-                .Body(body => body
-                    .Return(exp => exp.String("xxx"))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): string {
+                return "xxx";
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -306,12 +310,12 @@ public class TypeCheckerTests
     [Test]
     public void ReturnStatementDoesntTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("bool")
-                .Body(body => body
-                    .Return(exp => exp.Number(1))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): bool {
+                return 1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -324,12 +328,12 @@ public class TypeCheckerTests
     [Test]
     public void UnaryPlusTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(exp => exp.Number(1).UnaryMinus())))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): i32 {
+                return -1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -345,12 +349,12 @@ public class TypeCheckerTests
     [Test]
     public void UnaryMinusTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(exp => exp.Number(1).UnaryMinus())))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): i32 {
+                return -1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -366,12 +370,12 @@ public class TypeCheckerTests
     [Test]
     public void LogicalNotTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("bool")
-                .Body(body => body
-                    .Return(exp => exp.True().LogicalNot())))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): bool {
+                return !true;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -387,12 +391,12 @@ public class TypeCheckerTests
     [Test]
     public void BinaryExpressionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(exp => exp.Number(1).Number(2).Add())))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): i32 {
+                return 1 + 2;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -407,12 +411,12 @@ public class TypeCheckerTests
     [Test]
     public void LogicalNotIncorrectOperandTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(exp => exp.Number(1).LogicalNot())))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): i32 {
+                return !1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -425,13 +429,12 @@ public class TypeCheckerTests
     [Test]
     public void VariableExpressionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(exp => exp.MemberAccess("a"))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(a: i32): i32 {
+                return a;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -447,11 +450,12 @@ public class TypeCheckerTests
     [Test]
     public void VariableDeclarationIncorrectTypesTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", "i32", exp => exp.True())))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                var a: i32 = true;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -464,11 +468,13 @@ public class TypeCheckerTests
     [Test]
     public void IfIncorrectConditionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .If(exp => exp.Number(1), _ => { })))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                if (1) {
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -481,19 +487,15 @@ public class TypeCheckerTests
     [Test]
     public void FunctionCallIncorrectParameterTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("add", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .ReturnType("i32")
-                .Body(_ => { }))
-            .DefineFunction("main", builder => builder
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(exp => exp
-                        .True()
-                        .MemberAccess("add", true)
-                        .Call())))
-            .Build();
+        var tree = Parse(
+            """
+            function add(a: i32): i32 {
+            }
+
+            function main(): i32 {
+                return add(true);
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -506,11 +508,13 @@ public class TypeCheckerTests
     [Test]
     public void WhileNonBoolConditionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .While(exp => exp.Number(1), _ => { })))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): void {
+                while (1) {
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -523,12 +527,14 @@ public class TypeCheckerTests
     [Test]
     public void ReturnInConstructorTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineConstructor(ctor => ctor
-                    .Body(body => body
-                        .Return())))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                public constructor() {
+                    return;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -538,12 +544,14 @@ public class TypeCheckerTests
     [Test]
     public void ReturnWithExpressionInConstructorTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineConstructor(ctor => ctor
-                    .Body(body => body
-                        .Return(exp => exp.Number(0)))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                public constructor() {
+                    return 0;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -556,15 +564,14 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForInterfaceTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Point", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineProperty("y", "i32")
-                    .DefineMethod("distance", m => m
-                        .DefineParameter("Point")
-                        .ReturnType("f64"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+                distance(Point): f64;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -600,18 +607,16 @@ public class TypeCheckerTests
     [Test]
     public void SetReturnTypeForVariableWithFunctionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("add", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .DefineParameter("b", t => t.Type("i32"))
-                .ReturnType("i32"))
-            .DefineFunction("main", builder => builder
-                .Body(body => body
-                    .DefineVariable(
-                        "x",
-                        new FunctionTypeNode([new TypeNode("i32"), new TypeNode("i32")], new TypeNode("i32")),
-                        v => v.MemberAccess("add"))))
-            .Build();
+        var tree = Parse(
+            """
+            function add(a: i32, b: i32): i32 {
+                return 1;
+            }
+
+            function main(): void {
+                var x: (i32, i32) => i32 = add;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -625,14 +630,12 @@ public class TypeCheckerTests
     [Test]
     public void CallNonFunctionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .Body(body => body
-                    .Expression(r => r
-                        .MemberAccess("a")
-                        .Call())))
-            .Build();
+        var tree = Parse(
+            """
+            function test(a: i32): void {
+                a();
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -645,13 +648,14 @@ public class TypeCheckerTests
     [Test]
     public void ThisReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineMethod("toString", b => b
-                    .Body(body => body
-                        .Expression(exp => exp
-                            .MemberAccess("this")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                public toString(): void {
+                    this;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -666,15 +670,16 @@ public class TypeCheckerTests
     [Test]
     public void ThisWithMultipleMembersReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineProperty("a", "i32")
-                .DefineMethod("toString", b => b
-                    .Body(body => body
-                        .Expression(exp => exp
-                            .MemberAccess("this")
-                            .MemberAccess("a")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                a: i32;
+
+                public toString(): void {
+                    this.a;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -687,15 +692,16 @@ public class TypeCheckerTests
     [Test]
     public void ThisWithIncorrectPropertyNameTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineProperty("a", "i32")
-                .DefineMethod("toString", b => b
-                    .Body(body => body
-                        .Expression(exp => exp
-                            .MemberAccess("this")
-                            .MemberAccess("x")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                a: i32;
+
+                public toString(): void {
+                    this.x;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -708,18 +714,16 @@ public class TypeCheckerTests
     [Test]
     public void InterfaceMemberAccessReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Point", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")))
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Type("Point"))
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(r => r
-                        .MemberAccess("a")
-                        .MemberAccess("x"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point = {
+                x: i32;
+            }
+
+            function test(a: Point): i32 {
+                return a.x;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -738,18 +742,16 @@ public class TypeCheckerTests
     [Test]
     public void InterfaceMemberAccessIncorrectPropertyTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Point", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")))
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Type("Point"))
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(r => r
-                        .MemberAccess("a")
-                        .MemberAccess("c"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point = {
+                x: i32;
+            }
+
+            function test(a: Point): i32 {
+                return a.c;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -762,20 +764,18 @@ public class TypeCheckerTests
     [Test]
     public void AliasFunctionTypeMemberAccessReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("F", builder => builder
-                .FunctionType(f => f
-                    .ReturnType("void")))
-            .DefineType("Test", builder => builder
-                .DefineProperty("f", pt => pt.Type("F")))
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Type("Test"))
-                .ReturnType("F")
-                .Body(body => body
-                    .Return(r => r
-                        .MemberAccess("a")
-                        .MemberAccess("f"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type F = () => void;
+
+            public type Test {
+                f: F;
+            }
+
+            function test(a: Test): F {
+                return a.f;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -795,18 +795,17 @@ public class TypeCheckerTests
     [Test]
     public void NewOperatorSetCtorTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineConstructor(c => c
-                    .DefineParameter("x", "i32")
-                    .DefineParameter("y", "i32")))
-            .DefineFunction("test", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", new TypeNode("Point"), exp => exp
-                        .Number(1)
-                        .Number(2)
-                        .NewObject("Point"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                public constructor(x: i32, y: i32) {
+                }
+            }
+
+            function test(): void {
+                var a: Point = new Point(1, 2);
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -826,18 +825,17 @@ public class TypeCheckerTests
     [Test]
     public void NewOperatorForInterfaceTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Point", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineProperty("y", "i32")))
-            .DefineFunction("test", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", new TypeNode("Point"), exp => exp
-                        .Number(1)
-                        .Number(2)
-                        .NewObject("Point"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+            }
+
+            function test(): void {
+                var a: Point = new Point(1, 2);
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -850,17 +848,17 @@ public class TypeCheckerTests
     [Test]
     public void NewOperatorMissingConstructorTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineConstructor(c => c
-                    .DefineParameter("x", "i32")
-                    .DefineParameter("y", "i32")))
-            .DefineFunction("test", builder => builder
-                .Body(body => body
-                    .DefineVariable("a", new TypeNode("Point"), exp => exp
-                        .Number(2)
-                        .NewObject("Point"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                public constructor(x: i32, y: i32) {
+                }
+            }
+
+            function test(): void {
+                var a: Point = new Point(2);
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -873,13 +871,10 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForDiscriminatedUnionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("DU", builder => builder
-                .DiscriminatedUnion(du => du
-                    .AddCase(c => c.Interface())
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.FunctionType(f => f.ReturnType("void")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type DU = {} | i32 | () => void;
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -903,16 +898,12 @@ public class TypeCheckerTests
     [Test]
     public void AccessArrayElementTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Array("i32"))
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(r => r
-                        .MemberAccess("a")
-                        .Number(1)
-                        .ArrayAccess())))
-            .Build();
+        var tree = Parse(
+            """
+            function test(a: i32[]): i32 {
+                return a[1];
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -925,15 +916,12 @@ public class TypeCheckerTests
     [Test]
     public void UseArrayAccessorOnNotArrayTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .Body(body => body
-                    .Return(r => r
-                        .MemberAccess("a")
-                        .Number(1)
-                        .ArrayAccess())))
-            .Build();
+        var tree = Parse(
+            """
+            function test(a: i32): void {
+                return a[1];
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -946,15 +934,12 @@ public class TypeCheckerTests
     [Test]
     public void UseArrayAccessorWithNonNumberTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Array("i32"))
-                .Body(body => body
-                    .Return(r => r
-                        .MemberAccess("a")
-                        .String("xxx")
-                        .ArrayAccess())))
-            .Build();
+        var tree = Parse(
+            """
+            function test(a: i32[]): void {
+                return a["xxx"];
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -967,18 +952,12 @@ public class TypeCheckerTests
     [Test]
     public void GenerateMetadataForExpressionTupleTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .ReturnType(r => r
-                    .Tuple(t => t
-                        .AddCase(c => c.Type("i32"))
-                        .AddCase(c => c.Type("i32"))))
-                .Body(body => body
-                    .Return(r => r
-                        .Number(1)
-                        .Number(2)
-                        .Tuple())))
-            .Build();
+        var tree = Parse(
+            """
+            function test(): (i32, i32) {
+                return (1, 2);
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -993,14 +972,12 @@ public class TypeCheckerTests
     [Test]
     public void NewArrayReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("main", f => f
-                .ReturnType(t => t.Array("i32"))
-                .Body(body => body
-                    .Return(r => r
-                        .Number(10)
-                        .NewArray("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            function main(): i32[] {
+                return new i32[10];
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1015,11 +992,12 @@ public class TypeCheckerTests
     [Test]
     public void GenericPropertyTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("x", "T"))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> {
+                x: T;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1035,12 +1013,12 @@ public class TypeCheckerTests
     [Test]
     public void GenericArrayPropertyTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("x", pt => pt
-                    .Array("T")))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> {
+                x: T[];
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1056,13 +1034,11 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForClosedGenericTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T"))
-            .DefineAliasType("Test", t => t
-                .Generic("List", g => g
-                    .DefineGenericArgument("i32")))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {}
+            public type Test = List<i32>;
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1078,18 +1054,16 @@ public class TypeCheckerTests
     [Test]
     public void FindCtorInGenericTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("a", "T"))
-            .DefineFunction("main", f => f
-                .Body(body => body
-                    .DefineVariable(
-                        "x",
-                        new GenericTypeNode("Test", [new TypeNode("i32")]),
-                        exp => exp
-                            .NewObject("Test", "i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> {
+                a: T;
+            }
+
+            function main(): void {
+                var x: Test<i32> = new Test<i32>();
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1106,22 +1080,17 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForClosedGenericTypeFieldTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("a", "T"))
-            .DefineFunction("main", f => f
-                .ReturnType("i32")
-                .Body(body => body
-                    .DefineVariable(
-                        "x",
-                        new GenericTypeNode("Test", [new TypeNode("i32")]),
-                        exp => exp
-                            .NewObject("Test", "i32"))
-                    .Return(r => r
-                        .MemberAccess("x")
-                        .MemberAccess("a"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> {
+                a: T;
+            }
+
+            function main(): i32 {
+                var x: Test<i32> = new Test<i32>();
+                return x.a;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1137,25 +1106,22 @@ public class TypeCheckerTests
     [Test]
     public void MemberAccessNestedCallTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test1", t => t
-                .DefineMethod("b", m => m
-                    .ReturnType("Test2")
-                    .Body(body => body
-                        .Return(r => r
-                            .NewObject("Test2")))))
-            .DefineType("Test2", t => t
-                .DefineProperty("c", "i32"))
-            .DefineFunction("test", f => f
-                .DefineParameter("a", t => t.Type("Test1"))
-                .ReturnType("i32")
-                .Body(body => body
-                    .Return(r => r
-                        .MemberAccess("a")
-                        .MemberAccess("b")
-                        .Call()
-                        .MemberAccess("c"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test1 {
+                public b(): Test2 {
+                    return new Test2();
+                }
+            }
+
+            public type Test2 {
+                c: i32;
+            }
+
+            function test(a: Test1): i32 {
+                return a.b().c;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -1167,16 +1133,17 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForStaticClassTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineMethod("test", m => m.Static()))
-            .DefineFunction("main", f => f
-                .Body(body => body
-                    .Expression(e => e
-                        .MemberAccess("Test")
-                        .MemberAccess("test")
-                        .Call())))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test {
+                public static test(): void {
+                }
+            }
+
+            function main(): void {
+                Test.test();
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1200,18 +1167,12 @@ public class TypeCheckerTests
     [Test]
     public void SetReturnTypeForAsExpressionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", f => f
-                .DefineParameter("a", t => t.Type("i32"))
-                .ReturnType(t => t
-                    .DiscriminatedUnion(du => du
-                        .AddCase(c => c.Type("i8"))
-                        .AddCase(c => c.Type("null"))))
-                .Body(body => body
-                    .Return(r => r
-                        .MemberAccess("a")
-                        .As("i8"))))
-            .Build();
+        var tree = Parse(
+            """
+            function test(a: i32): i8 | null {
+                return a as i8;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);

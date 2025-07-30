@@ -83,4 +83,9 @@ public class Token : IEquatable<Token>
         => Kind == TokenKind.String && Value is not null
             ? (string)Value
             : throw new InvalidOperationException();
+
+    public string Char
+        => Kind == TokenKind.Char && Value is not null
+            ? (string)Value
+            : throw new InvalidOperationException();
 }

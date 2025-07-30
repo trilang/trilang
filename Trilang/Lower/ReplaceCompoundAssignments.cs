@@ -1,4 +1,3 @@
-using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using static Trilang.Parsing.Ast.BinaryExpressionKind;

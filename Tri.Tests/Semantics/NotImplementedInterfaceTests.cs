@@ -1,4 +1,4 @@
-using Tri.Tests.Builders;
+using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 
@@ -6,23 +6,31 @@ namespace Tri.Tests.Semantics;
 
 public class NotImplementedInterfaceTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(code);
+
+        return tree;
+    }
+
     [Test]
     public void EverythingIsImplementedInTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineMethod("toString", m => m
-                        .ReturnType("string"))))
-            .DefineType("Test", builder => builder
-                .AddInterface("Interface1")
-                .DefineProperty("x", "i32")
-                .DefineMethod("toString", m => m
-                    .ReturnType("string")
-                    .Body(body => body
-                        .Return(r => r.String("Hello, World!")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                x: i32;
+                toString(): string;
+            }
+
+            public type Test : Interface1 {
+                x: i32;
+                public toString(): string {
+                    return "Hello, World!";
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -34,19 +42,19 @@ public class NotImplementedInterfaceTests
     [Test]
     public void NotImplementedPropertyTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineMethod("toString", m => m
-                        .ReturnType("string"))))
-            .DefineType("Test", builder => builder
-                .AddInterface("Interface1")
-                .DefineMethod("toString", m => m
-                    .ReturnType("string")
-                    .Body(body => body
-                        .Return(r => r.String("Hello, World!")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                x: i32;
+                toString(): string;
+            }
+
+            public type Test : Interface1 {
+                public toString(): string {
+                    return "Hello, World!";
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -59,20 +67,20 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementPropertyWithIncorrectTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineMethod("toString", m => m
-                        .ReturnType("string"))))
-            .DefineType("Test", builder => builder
-                .AddInterface("Interface1")
-                .DefineProperty("x", "i8")
-                .DefineMethod("toString", m => m
-                    .ReturnType("string")
-                    .Body(body => body
-                        .Return(r => r.String("Hello, World!")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                x: i32;
+                toString(): string;
+            }
+
+            public type Test : Interface1 {
+                x: i8;
+                public toString(): string {
+                    return "Hello, World!";
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -85,16 +93,17 @@ public class NotImplementedInterfaceTests
     [Test]
     public void NotImplementedMethodTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineMethod("toString", m => m
-                        .ReturnType("string"))))
-            .DefineType("Test", builder => builder
-                .AddInterface("Interface1")
-                .DefineProperty("x", "i32"))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                x: i32;
+                toString(): string;
+            }
+
+            public type Test : Interface1 {
+                x: i32;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -107,20 +116,20 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementMethodWithIncorrectReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineMethod("toString", m => m
-                        .ReturnType("string"))))
-            .DefineType("Test", builder => builder
-                .AddInterface("Interface1")
-                .DefineProperty("x", "i32")
-                .DefineMethod("toString", m => m
-                    .ReturnType("i32")
-                    .Body(body => body
-                        .Return(r => r.Number(1)))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                x: i32;
+                toString(): string;
+            }
+
+            public type Test : Interface1 {
+                x: i32;
+                public toString(): i32 {
+                    return 1;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -133,21 +142,20 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementMethodWithIncorrectParametersTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineMethod("toString", m => m
-                        .ReturnType("string"))))
-            .DefineType("Test", builder => builder
-                .AddInterface("Interface1")
-                .DefineProperty("x", "i32")
-                .DefineMethod("toString", m => m
-                    .DefineParameter("a", "i32")
-                    .ReturnType("string")
-                    .Body(body => body
-                        .Return(r => r.String("Hello, World!")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                x: i32;
+                toString(): string;
+            }
+
+            public type Test : Interface1 {
+                x: i32;
+                public toString(a: i32): string {
+                    return "Hello, World!";
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -160,14 +168,17 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsMethodAsPrivateTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", a => a
-                .Interface(i => i
-                    .DefineMethod("method", m => m.ReturnType("void"))))
-            .DefineType("Test", t => t
-                .AddInterface("Interface1")
-                .DefineMethod("method", m => m.AccessModifier(AccessModifier.Private)))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                method(): void;
+            }
+
+            public type Test : Interface1 {
+                private method(): void {
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -180,16 +191,16 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsGetterAsPrivateTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", a => a
-                .Interface(i => i
-                    .DefineProperty("x", "i32", AccessModifier.Public, AccessModifier.Public)))
-            .DefineType("Test", t => t
-                .AddInterface("Interface1")
-                .DefineProperty("x", "i32", p => p
-                    .Getter(AccessModifier.Private)
-                    .Setter(AccessModifier.Public)))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                x: i32 { public get; public set; }
+            }
+
+            public type Test : Interface1 {
+                x: i32 { private get; public set; }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -202,16 +213,16 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsSetterAsPrivateTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Interface1", a => a
-                .Interface(i => i
-                    .DefineProperty("x", "i32", AccessModifier.Public, AccessModifier.Public)))
-            .DefineType("Test", t => t
-                .AddInterface("Interface1")
-                .DefineProperty("x", "i32", p => p
-                    .Getter(AccessModifier.Public)
-                    .Setter(AccessModifier.Private)))
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = {
+                x: i32 { public get; public set; }
+            }
+
+            public type Test : Interface1 {
+                x: i32 { public get; private set; }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 

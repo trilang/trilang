@@ -1,5 +1,5 @@
-using Tri.Tests.Builders;
 using Trilang.Metadata;
+using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 
@@ -7,25 +7,34 @@ namespace Tri.Tests.Semantics;
 
 public class MetadataGeneratorTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(code);
+
+        return tree;
+    }
+
     [Test]
     public void GenerateMetadataForTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineProperty("x", "i32")
-                .DefineProperty("y", "i32")
-                .DefineConstructor(b => b
-                    .DefineParameter("x", "i32")
-                    .DefineParameter("y", "i32"))
-                .DefineMethod("toString", b => b
-                    .ReturnType("string")
-                    .Body(body => body.Return(r => r.String("hello"))))
-                .DefineMethod("distance", b => b
-                    .AccessModifier(AccessModifier.Private)
-                    .DefineParameter("other", "i32")
-                    .ReturnType("i32")
-                    .Body(body => body.Return(r => r.Number(1)))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                x: i32;
+                y: i32;
+
+                public constructor(x: i32, y: i32) {}
+
+                public toString(): string {
+                    return "hello";
+                }
+
+                private distance(other: i32): i32 {
+                    return 1;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -87,12 +96,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForPropertyTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", builder => builder
-                .DefineProperty("x", "i32", p => p
-                    .Getter(AccessModifier.Public)
-                    .Setter(AccessModifier.Public)))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test {
+                x: i32 { public get; public set; }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -126,15 +135,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeWithInterfaceTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .AddInterface("Interface1")
-                .AddInterface("Interface2"))
-            .DefineAliasType("Interface1", builder => builder
-                .Interface())
-            .DefineAliasType("Interface2", builder => builder
-                .Interface())
-            .Build();
+        var tree = Parse(
+            """
+            public type Interface1 = { }
+            public type Interface2 = { }
+            public type Point : Interface1, Interface2 { }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -163,10 +169,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeMissingPropertyTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineProperty("x", "xxx"))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                x: xxx;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -179,13 +187,14 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeMissingParameterTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineMethod("distance", b => b
-                    .DefineParameter("other", "xxx")
-                    .ReturnType("f64")
-                    .Body(body => body.Return())))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                public distance(other: xxx): f64 {
+                    return;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -198,12 +207,14 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeMissingReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point", builder => builder
-                .DefineMethod("toString", b => b
-                    .ReturnType("xxx")
-                    .Body(body => body.Return())))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {
+                public toString(): xxx {
+                    return;
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -216,9 +227,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeAliasTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("MyInt", t => t.Type("i32"))
-            .Build();
+        var tree = Parse("public type MyInt = i32;");
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -233,9 +242,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeAliasMissingTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("MyInt", t => t.Type("xxx"))
-            .Build();
+        var tree = Parse("public type MyInt = xxx;");
 
         var semantic = new SemanticAnalysis();
 
@@ -248,11 +255,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeArrayTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .DefineParameter("arr", t => t.Array("i32"))
-                .Body(body => body.Return()))
-            .Build();
+        var tree = Parse(
+            """
+            function test(arr: i32[]): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -267,11 +275,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeArrayMissingTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .DefineParameter("arr", t => t.Type("xxx"))
-                .Body(body => body.Return()))
-            .Build();
+        var tree = Parse(
+            """
+            function test(arr: xxx): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -284,13 +293,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForFunctionTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Type("i32"))
-                .DefineParameter("b", t => t.Type("i32"))
-                .ReturnType("i32")
-                .Body(body => body.Return(r => r.Number(1))))
-            .Build();
+        var tree = Parse(
+            """
+            function test(a: i32, b: i32): i32 {
+                return 1;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -305,11 +313,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForFunctionTypeMissingParameterTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .DefineParameter("a", t => t.Type("xxx"))
-                .Body(body => body.Return()))
-            .Build();
+        var tree = Parse(
+            """
+            function test(a: xxx): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -322,11 +331,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForFunctionTypeMissingReturnTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", builder => builder
-                .ReturnType("xxx")
-                .Body(body => body.Return()))
-            .Build();
+        var tree = Parse(
+            """
+            function test(): xxx {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -339,10 +349,11 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForAliasAndTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point")
-            .DefineAliasType("MyPoint", t => t.Type("Point"))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {}
+            public type MyPoint = Point;
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -368,10 +379,11 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForForwardRefAliasAndTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("MyPoint", t => t.Type("Point"))
-            .DefineType("Point")
-            .Build();
+        var tree = Parse(
+            """
+            public type MyPoint = Point;
+            public type Point {}
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -397,10 +409,11 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForAliasAndArrayTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Point")
-            .DefineAliasType("MyPoint", t => t.Array("Point"))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point {}
+            public type MyPoint = Point[];
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -429,10 +442,11 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForForwardRefAliasAndArrayTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("MyPoint", t => t.Array("Point"))
-            .DefineType("Point")
-            .Build();
+        var tree = Parse(
+            """
+            public type MyPoint = Point[];
+            public type Point {}
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -461,15 +475,14 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForInterfaceType()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Point", builder => builder
-                .Interface(i => i
-                    .DefineProperty("x", "i32")
-                    .DefineProperty("y", "i32")
-                    .DefineMethod("distance", m => m
-                        .DefineParameter("Point")
-                        .ReturnType("f64"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Point = {
+                x: i32;
+                y: i32;
+                distance(Point): f64;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -507,13 +520,10 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForDiscriminatedUnionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("DU", builder => builder
-                .DiscriminatedUnion(du => du
-                    .AddCase(c => c.Interface())
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.FunctionType(f => f.ReturnType("void")))))
-            .Build();
+        var tree = Parse(
+            """
+            public type DU = {} | i32 | () => void;
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -536,12 +546,10 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTupleTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Tuple", builder => builder
-                .Tuple(t => t
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.Type("f64"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Tuple = (i32, f64);
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -560,14 +568,10 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForNestedTupleTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Tuple", builder => builder
-                .Tuple(t => t
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.Tuple(t2 => t2
-                        .AddCase(c2 => c2.Type("f64"))
-                        .AddCase(c2 => c2.Type("bool"))))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Tuple = (i32, (f64, bool));
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -590,14 +594,10 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForDuInTupleTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Tuple", builder => builder
-                .Tuple(t => t
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.DiscriminatedUnion(du => du
-                        .AddCase(c2 => c2.Type("bool"))
-                        .AddCase(c2 => c2.Type("i8"))))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Tuple = (i32, bool | i8);
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -620,14 +620,10 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTupleInDuTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Tuple", builder => builder
-                .DiscriminatedUnion(du => du
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.Tuple(t => t
-                        .AddCase(c2 => c2.Type("f64"))
-                        .AddCase(c2 => c2.Type("bool"))))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Tuple = i32 | (f64, bool);
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -650,11 +646,10 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineGenericArgument("T1")
-                .DefineGenericArgument("T2"))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T1, T2> {}
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -677,11 +672,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericPropertyTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("x", "T"))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> {
+                x: T;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -698,12 +694,13 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericPropertyInWrongTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test1", t => t
-                .DefineGenericArgument("T"))
-            .DefineType("Test2", t => t
-                .DefineProperty("x", "T"))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test1<T> {}
+            public type Test2 {
+                x: T;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -716,11 +713,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericArrayPropertyTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("x", pt => pt.Array("T")))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> {
+                x: T[];
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -739,13 +737,11 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T"))
-            .DefineAliasType("Test", t => t
-                .Generic("List", g => g
-                    .DefineGenericArgument("i32")))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {}
+            public type Test = List<i32>;
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -768,14 +764,13 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericPropertyTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("Prop", "T"))
-            .DefineAliasType("Test", t => t
-                .Generic("List", g => g
-                    .DefineGenericArgument("i32")))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {
+                Prop: T;
+            }
+            public type Test = List<i32>;
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -791,9 +786,10 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateDefaultCtorTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test")
-            .Build();
+        var tree = Parse(
+            """
+            public type Test {}
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -811,16 +807,16 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateInlineClosedGenericArrayTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("prop", pt => pt
-                    .Array("T")))
-            .DefineFunction("test", f => f
-                .DefineParameter("a", p => p
-                    .Generic("List", g => g
-                        .DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {
+                prop: T[];
+            }
+
+            function test(a: List<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -835,18 +831,16 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateInlineClosedGenericTupleTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("prop", pt => pt
-                    .Tuple(tuple => tuple
-                        .AddCase(c => c.Type("T"))
-                        .AddCase(c => c.Type("i32")))))
-            .DefineFunction("test", f => f
-                .DefineParameter("a", p => p
-                    .Generic("List", g => g
-                        .DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {
+                prop: (T, i32);
+            }
+
+            function test(a: List<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -863,18 +857,16 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateInlineClosedGenericDuTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("prop", pt => pt
-                    .DiscriminatedUnion(du => du
-                        .AddCase(c => c.Type("T"))
-                        .AddCase(c => c.Type("i32")))))
-            .DefineFunction("test", f => f
-                .DefineParameter("a", p => p
-                    .Generic("List", g => g
-                        .DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {
+                prop: T | i32;
+            }
+
+            function test(a: List<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -890,16 +882,16 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateInlineClosedGenericFunctionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("prop", pt => pt
-                    .FunctionType(f => f.ReturnType("T"))))
-            .DefineFunction("test", f => f
-                .DefineParameter("a", p => p
-                    .Generic("List", g => g
-                        .DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {
+                prop: () => T;
+            }
+
+            function test(a: List<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -916,16 +908,16 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateInlineClosedGenericInterfaceTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T")
-                .DefineProperty("prop", pt => pt
-                    .Interface(i => i.DefineProperty("x", "T"))))
-            .DefineFunction("test", f => f
-                .DefineParameter("a", p => p
-                    .Generic("List", g => g
-                        .DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {
+                prop: { x: T; };
+            }
+
+            function test(a: List<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -949,14 +941,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateHighOrderFunctionTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineFunction("test", f => f
-                .DefineParameter("a", t => t
-                    .FunctionType(ft => ft
-                        .DefineParameter(p => p
-                            .FunctionType(ft2 => ft2
-                                .DefineParameter("i32"))))))
-            .Build();
+        var tree = Parse(
+            """
+            function test(a: ((i32) => void) => void): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -974,13 +964,10 @@ public class MetadataGeneratorTests
     [Test]
     public void GenericAliasToDiscriminatedUnionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Test", t => t
-                .DefineGenericArgument("T")
-                .DiscriminatedUnion(du => du
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.Type("T"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> = i32 | T;
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -997,16 +984,14 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToDiscriminatedUnionTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Test", t => t
-                .DefineGenericArgument("T")
-                .DiscriminatedUnion(du => du
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.Type("T"))))
-            .DefineFunction("func", f => f
-                .DefineParameter("x",
-                    p => p.Generic("Test", g => g.DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> = i32 | T;
+
+            function func(x: Test<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1023,14 +1008,14 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToFunctionTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Test", t => t
-                .DefineGenericArgument("T")
-                .FunctionType(f => f.ReturnType("T")))
-            .DefineFunction("func", f => f
-                .DefineParameter("x",
-                    p => p.Generic("Test", g => g.DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> = () => T;
+
+            function func(x: Test<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1047,14 +1032,14 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToInterfaceTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Test", t => t
-                .DefineGenericArgument("T")
-                .Interface(i => i.DefineProperty("x", "T")))
-            .DefineFunction("func", f => f
-                .DefineParameter("x",
-                    p => p.Generic("Test", g => g.DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> = { x: T; }
+
+            function func(x: Test<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1077,16 +1062,14 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToTupleTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Test", t => t
-                .DefineGenericArgument("T")
-                .Tuple(tuple => tuple
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.Type("T"))))
-            .DefineFunction("func", f => f
-                .DefineParameter("x",
-                    p => p.Generic("Test", g => g.DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> = (i32, T);
+
+            function func(x: Test<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1103,14 +1086,14 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToArrayTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Test", t => t
-                .DefineGenericArgument("T")
-                .Array("T"))
-            .DefineFunction("func", f => f
-                .DefineParameter("x",
-                    p => p.Generic("Test", g => g.DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test<T> = T[];
+
+            function func(x: Test<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1127,16 +1110,15 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T"))
-            .DefineAliasType("Test", t => t
-                .DefineGenericArgument("T")
-                .Generic("List", g => g.DefineGenericArgument("T")))
-            .DefineFunction("func", f => f
-                .DefineParameter("x",
-                    p => p.Generic("Test", g => g.DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> {}
+            public type Test<T> = List<T>;
+
+            function func(x: Test<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -1164,18 +1146,15 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedAliasOnAliasTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("Alias1", a => a
-                .DefineGenericArgument("T1")
-                .DiscriminatedUnion(du => du
-                    .AddCase(c => c.Type("T1"))
-                    .AddCase(c => c.Type("i32"))))
-            .DefineAliasType("Alias2", a => a
-                .DefineGenericArgument("T1")
-                .Generic("Alias1", g => g.DefineGenericArgument("T1")))
-            .DefineFunction("test", f => f
-                .DefineParameter("x", p => p.Generic("Alias2", g => g.DefineGenericArgument("i32"))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Alias1<T1> = T1 | i32;
+            public type Alias2<T1> = Alias1<T1>;
+
+            function test(x: Alias2<i32>): void {
+                return;
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);

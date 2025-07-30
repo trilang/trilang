@@ -892,7 +892,7 @@ public class Parser
             return new LiteralExpressionNode(LiteralExpressionKind.String, token.String);
 
         if (context.Reader.Check(TokenKind.Char, out token))
-            return new LiteralExpressionNode(LiteralExpressionKind.Char, token.String);
+            return new LiteralExpressionNode(LiteralExpressionKind.Char, token.Char);
 
         return null;
     }

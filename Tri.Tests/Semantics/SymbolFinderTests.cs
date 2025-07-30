@@ -1,5 +1,5 @@
-using Tri.Tests.Builders;
 using Trilang;
+using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Symbols;
@@ -8,11 +8,19 @@ namespace Tri.Tests.Semantics;
 
 public class SymbolFinderTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(code);
+
+        return tree;
+    }
+
     [Test]
     public void FunctionInRootScopeTest()
     {
-        var function = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
-        var tree = new SyntaxTree([function]);
+        var tree = Parse("function main(): void { }");
+        var function = tree.Find<FunctionDeclarationNode>()!;
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -25,9 +33,13 @@ public class SymbolFinderTests
     [Test]
     public void TwoFunctionsInRootScopeTest()
     {
-        var function1 = FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode());
-        var function2 = FunctionDeclarationNode.Create("add", [], new TypeNode("void"), new BlockStatementNode());
-        var tree = new SyntaxTree([function1, function2]);
+        var tree = Parse(
+            """
+            function main(): void { }
+            function add(): void { }
+            """);
+        var function1 = tree.Find<FunctionDeclarationNode>(x => x.Name == "main")!;
+        var function2 = tree.Find<FunctionDeclarationNode>(x => x.Name == "add")!;
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -41,10 +53,11 @@ public class SymbolFinderTests
     [Test]
     public void SameFunctionInRootScopeTest()
     {
-        var tree = new SyntaxTree([
-            FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode()),
-            FunctionDeclarationNode.Create("main", [], new TypeNode("void"), new BlockStatementNode())
-        ]);
+        var tree = Parse(
+            """
+            function main(): void { }
+            function main(): void { }
+            """);
 
         var semantic = new SemanticAnalysis();
 
@@ -548,12 +561,7 @@ public class SymbolFinderTests
     [Test]
     public void TupleTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("T", builder => builder
-                .Tuple(t => t
-                    .AddCase(c => c.Type("i32"))
-                    .AddCase(c => c.Type("bool"))))
-            .Build();
+        var tree = Parse("public type T = (i32, bool);");
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -575,14 +583,7 @@ public class SymbolFinderTests
     [Test]
     public void NestedTupleTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineAliasType("T", builder => builder
-                .Tuple(t => t
-                    .AddCase(c => c.Tuple(t2 => t2
-                        .AddCase(c2 => c2.Type("i32"))
-                        .AddCase(c2 => c2.Type("i32"))))
-                    .AddCase(c => c.Type("bool"))))
-            .Build();
+        var tree = Parse("public type T = ((i32, i32), bool);");
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -610,18 +611,20 @@ public class SymbolFinderTests
     [Test]
     public void FieldInGetterTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineProperty("x", "i32", p => p
-                    .Getter(AccessModifier.Private, body => body
-                        .Return(r => r
-                            .MemberAccess("field")))
-                    .Setter(AccessModifier.Private, body => body
-                        .Expression(e => e
-                            .MemberAccess("field")
-                            .MemberAccess("value", true)
-                            .Assign()))))
-            .Build();
+        var tree = Parse(
+            """
+            public type Test {
+                x: i32 {
+                    private get {
+                        return field;
+                    }
+
+                    private set {
+                        field = value;
+                    }
+                }
+            }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -646,10 +649,7 @@ public class SymbolFinderTests
     [Test]
     public void GenericTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T"))
-            .Build();
+        var tree = Parse("public type List<T> { }");
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -664,11 +664,7 @@ public class SymbolFinderTests
     [Test]
     public void GenericTypeWithMultipleTypeArgumentsTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("Test", t => t
-                .DefineGenericArgument("T1")
-                .DefineGenericArgument("T2"))
-            .Build();
+        var tree = Parse("public type Test<T1, T2> { }");
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -683,13 +679,12 @@ public class SymbolFinderTests
     [Test]
     public void SymbolForClosedGenericTypeTest()
     {
-        var tree = new TreeBuilder()
-            .DefineType("List", t => t
-                .DefineGenericArgument("T"))
-            .DefineAliasType("Test", t => t
-                .Generic("List", g => g
-                    .DefineGenericArgument("i32")))
-            .Build();
+        var tree = Parse(
+            """
+            public type List<T> { }
+
+            public type Test = List<i32>;
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(tree, SemanticAnalysisOptions.Default);

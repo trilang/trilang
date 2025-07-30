@@ -1,6 +1,5 @@
 using Trilang.IntermediateRepresentation.Instructions;
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
 
 namespace Trilang.IntermediateRepresentation;
 
