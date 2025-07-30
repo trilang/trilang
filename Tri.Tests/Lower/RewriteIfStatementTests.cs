@@ -50,6 +50,7 @@ public class RewriteIfStatementTests
                             new MemberAccessExpressionNode("a")
                             {
                                 Reference = parameterMetadata,
+                                AccessKind = PropertyAccessKind.Read,
                             },
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                             {
@@ -72,6 +73,7 @@ public class RewriteIfStatementTests
                             new MemberAccessExpressionNode("a")
                             {
                                 Reference = parameterMetadata,
+                                AccessKind = PropertyAccessKind.Read,
                             }
                         ),
                         new GoToNode("if_0_end"),
@@ -84,6 +86,7 @@ public class RewriteIfStatementTests
                                 new MemberAccessExpressionNode("a")
                                 {
                                     Reference = parameterMetadata,
+                                    AccessKind = PropertyAccessKind.Read,
                                 }
                             )
                             {
@@ -141,6 +144,7 @@ public class RewriteIfStatementTests
                             new MemberAccessExpressionNode("a")
                             {
                                 Reference = parameterMetadata,
+                                AccessKind = PropertyAccessKind.Read,
                             },
                             new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
                             {
@@ -163,6 +167,7 @@ public class RewriteIfStatementTests
                             new MemberAccessExpressionNode("a")
                             {
                                 Reference = parameterMetadata,
+                                AccessKind = PropertyAccessKind.Read,
                             }
                         ),
                         new GoToNode("if_0_end"),
@@ -174,6 +179,7 @@ public class RewriteIfStatementTests
                             new MemberAccessExpressionNode("a")
                             {
                                 Reference = parameterMetadata,
+                                AccessKind = PropertyAccessKind.Read,
                             }
                         )
                         {

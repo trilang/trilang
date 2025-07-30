@@ -91,4 +91,15 @@ public class BinaryExpressionNode : IExpressionNode, IEquatable<BinaryExpression
     public IExpressionNode Right { get; }
 
     public ITypeMetadata? ReturnTypeMetadata { get; set; }
+
+    public bool IsCompoundAssignment
+        => Kind is
+            BinaryExpressionKind.AdditionAssignment or
+            BinaryExpressionKind.SubtractionAssignment or
+            BinaryExpressionKind.MultiplicationAssignment or
+            BinaryExpressionKind.DivisionAssignment or
+            BinaryExpressionKind.ModulusAssignment or
+            BinaryExpressionKind.BitwiseAndAssignment or
+            BinaryExpressionKind.BitwiseOrAssignment or
+            BinaryExpressionKind.BitwiseXorAssignment;
 }

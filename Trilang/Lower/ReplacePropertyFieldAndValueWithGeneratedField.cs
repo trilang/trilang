@@ -173,6 +173,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
             return new MemberAccessExpressionNode(currentField.Name)
             {
                 Reference = currentField,
+                AccessKind = node.AccessKind,
             };
         }
 
@@ -185,6 +186,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
             return new MemberAccessExpressionNode(parameter.Name)
             {
                 Reference = parameter,
+                AccessKind = node.AccessKind,
             };
         }
 

@@ -400,6 +400,9 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Reference, y.Reference))
             throw new Exception("Reference doesn't match.");
 
+        if (x.AccessKind != y.AccessKind)
+            throw new Exception($"AccessKind doesn't match. {x.AccessKind} != {y.AccessKind}.");
+
         return true;
     }
 

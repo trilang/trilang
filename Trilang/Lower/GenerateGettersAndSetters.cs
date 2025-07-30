@@ -24,6 +24,7 @@ internal class GenerateGettersAndSetters : Visitor
                 new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
                 {
                     Reference = propertyMetadata,
+                    AccessKind = PropertyAccessKind.Read,
                 }
             ),
         ]);
@@ -35,10 +36,12 @@ internal class GenerateGettersAndSetters : Visitor
                     new MemberAccessExpressionNode(MemberAccessExpressionNode.Field)
                     {
                         Reference = propertyMetadata,
+                        AccessKind = PropertyAccessKind.Write,
                     },
                     new MemberAccessExpressionNode(MemberAccessExpressionNode.Value)
                     {
                         Reference = propertyMetadata,
+                        AccessKind = PropertyAccessKind.Read,
                     }
                 )
                 {

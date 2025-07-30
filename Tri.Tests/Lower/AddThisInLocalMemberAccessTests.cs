@@ -46,13 +46,15 @@ public class AddThisInLocalMemberAccessTests
         );
         var expected = new CallExpressionNode(
             new MemberAccessExpressionNode(
-                new MemberAccessExpressionNode("this")
+                new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                 {
                     Reference = typeMetadata,
+                    AccessKind = PropertyAccessKind.Read,
                 },
                 "<>_get_count")
             {
                 Reference = propertyMetadata.Getter,
+                AccessKind = PropertyAccessKind.Read,
             },
             []
         );
@@ -95,10 +97,12 @@ public class AddThisInLocalMemberAccessTests
             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
             {
                 Reference = typeMetadata,
+                AccessKind = PropertyAccessKind.Read,
             },
             "print")
         {
             Reference = methodMetadata,
+            AccessKind = PropertyAccessKind.Read,
         };
 
         var returnStatement = tree.Find<CallExpressionNode>();

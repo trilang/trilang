@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using static Trilang.Parsing.Ast.BinaryExpressionKind;
@@ -41,14 +42,7 @@ internal class ReplaceCompoundAssignments : ITransformer
         var left = (IExpressionNode)node.Left.Transform(this);
         var right = (IExpressionNode)node.Right.Transform(this);
 
-        if (node.Kind is AdditionAssignment
-            or SubtractionAssignment
-            or MultiplicationAssignment
-            or DivisionAssignment
-            or ModulusAssignment
-            or BitwiseAndAssignment
-            or BitwiseOrAssignment
-            or BitwiseXorAssignment)
+        if (node.IsCompoundAssignment)
         {
             var kind = node.Kind switch
             {
@@ -62,13 +56,20 @@ internal class ReplaceCompoundAssignments : ITransformer
                 BitwiseXorAssignment => BitwiseXor,
                 _ => throw new ArgumentOutOfRangeException(),
             };
-            right = new BinaryExpressionNode(kind, left, right)
+
+            var read = (MemberAccessExpressionNode)left.Clone();
+            read.AccessKind = PropertyAccessKind.Read;
+
+            var write = (MemberAccessExpressionNode)left.Clone();
+            write.AccessKind = PropertyAccessKind.Write;
+
+            right = new BinaryExpressionNode(kind, read, right)
             {
                 SymbolTable = node.SymbolTable,
                 ReturnTypeMetadata = node.ReturnTypeMetadata,
             };
 
-            return new BinaryExpressionNode(Assignment, left.Clone(), right)
+            return new BinaryExpressionNode(Assignment, write, right)
             {
                 SymbolTable = node.SymbolTable,
                 ReturnTypeMetadata = node.ReturnTypeMetadata,

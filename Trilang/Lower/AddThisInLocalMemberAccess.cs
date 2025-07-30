@@ -22,6 +22,7 @@ internal class AddThisInLocalMemberAccess : Visitor
         node.Member = new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
         {
             Reference = parent.Metadata,
+            AccessKind = PropertyAccessKind.Read,
         };
     }
 }

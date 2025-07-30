@@ -6,34 +6,7 @@ namespace Trilang.Lower;
 
 internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
 {
-    private enum AccessKind
-    {
-        Read,
-        Write,
-    }
-
     private int tempVariableCounter = 0;
-
-    private static AccessKind FindParentAssignment(MemberAccessExpressionNode node)
-    {
-        var parent = node.Parent;
-        while (parent is not null)
-        {
-            // can only check for simple assignment
-            // compound assignments are remote at this point
-            if (parent is BinaryExpressionNode { Kind: BinaryExpressionKind.Assignment } result)
-            {
-                if (ReferenceEquals(result.Left, node))
-                    return AccessKind.Write;
-
-                return AccessKind.Read;
-            }
-
-            parent = parent.Parent;
-        }
-
-        return AccessKind.Read;
-    }
 
     public ISyntaxNode TransformArrayAccess(ArrayAccessExpressionNode node)
     {
@@ -79,6 +52,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
                     new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter.Name)
                     {
                         Reference = propertyMetadata.Setter,
+                        AccessKind = PropertyAccessKind.Read,
                     },
                     [right]
                 );
@@ -100,11 +74,13 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
                         new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter.Name)
                         {
                             Reference = propertyMetadata.Setter,
+                            AccessKind = PropertyAccessKind.Read,
                         },
                         [
                             new MemberAccessExpressionNode(name)
                             {
                                 Reference = variableMetadata,
+                                AccessKind = PropertyAccessKind.Read,
                             }
                         ]
                     )
@@ -113,6 +89,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
                     new MemberAccessExpressionNode(name)
                     {
                         Reference = variableMetadata,
+                        AccessKind = PropertyAccessKind.Read,
                     }
                 )
             ]);
@@ -252,19 +229,16 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
 
         var member = (IExpressionNode)node.Member.Transform(this);
 
-        if (node.Reference is PropertyMetadata propertyMetadata)
+        if (node is { Reference: PropertyMetadata propertyMetadata, AccessKind: PropertyAccessKind.Read })
         {
-            var accessKind = FindParentAssignment(node);
-            if (accessKind == AccessKind.Read)
-            {
-                return new CallExpressionNode(
-                    new MemberAccessExpressionNode(member, propertyMetadata.Getter.Name)
-                    {
-                        Reference = propertyMetadata.Getter,
-                    },
-                    []
-                );
-            }
+            return new CallExpressionNode(
+                new MemberAccessExpressionNode(member, propertyMetadata.Getter.Name)
+                {
+                    Reference = propertyMetadata.Getter,
+                    AccessKind = PropertyAccessKind.Read,
+                },
+                []
+            );
         }
 
         if (ReferenceEquals(member, node.Member))
@@ -274,6 +248,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
         {
             SymbolTable = node.SymbolTable,
             Reference = node.Reference,
+            AccessKind = node.AccessKind,
         };
     }
 

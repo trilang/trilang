@@ -81,6 +81,7 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
         {
             SymbolTable = SymbolTable,
             Reference = Reference,
+            AccessKind = AccessKind,
         };
 
     public ISyntaxNode? Parent { get; set; }
@@ -135,4 +136,6 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public bool IsValue
         => Name == Value;
+
+    public PropertyAccessKind? AccessKind { get; set; }
 }

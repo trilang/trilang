@@ -77,6 +77,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(backingField.Name)
                                     {
                                         Reference = backingField,
+                                        AccessKind = PropertyAccessKind.Read,
                                     }
                                 ),
                             ])
@@ -93,10 +94,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(backingField.Name)
                                         {
                                             Reference = backingField,
+                                            AccessKind = PropertyAccessKind.Write,
                                         },
                                         new MemberAccessExpressionNode(valueParameter.Name)
                                         {
                                             Reference = valueParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     )
                                     {
@@ -138,11 +141,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode("p")
                                 {
                                     Reference = pParameter,
+                                    AccessKind = PropertyAccessKind.Read,
                                 },
                                 count.Getter.Name
                             )
                             {
                                 Reference = count.Getter,
+                                AccessKind = PropertyAccessKind.Read,
                             },
                             []
                         )
@@ -243,6 +248,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(xBackingField.Name)
                                     {
                                         Reference = xBackingField,
+                                        AccessKind = PropertyAccessKind.Read,
                                     }
                                 ),
                             ])
@@ -259,10 +265,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(xBackingField.Name)
                                         {
                                             Reference = xBackingField,
+                                            AccessKind = PropertyAccessKind.Write,
                                         },
                                         new MemberAccessExpressionNode(xValueParameter.Name)
                                         {
                                             Reference = xValueParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     )
                                     {
@@ -301,6 +309,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(pointBackingField.Name)
                                     {
                                         Reference = pointBackingField,
+                                        AccessKind = PropertyAccessKind.Read,
                                     }
                                 ),
                             ])
@@ -317,10 +326,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(pointBackingField.Name)
                                         {
                                             Reference = pointBackingField,
+                                            AccessKind = PropertyAccessKind.Write,
                                         },
                                         new MemberAccessExpressionNode(pointValueParameter.Name)
                                         {
                                             Reference = pointValueParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     )
                                     {
@@ -364,11 +375,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode("t")
                                         {
                                             Reference = tParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         },
                                         pointProperty.Getter.Name
                                     )
                                     {
                                         Reference = pointProperty.Getter,
+                                        AccessKind = PropertyAccessKind.Read,
                                     },
                                     []
                                 ),
@@ -376,6 +389,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             )
                             {
                                 Reference = xProperty.Getter,
+                                AccessKind = PropertyAccessKind.Read,
                             },
                             []
                         )
@@ -453,6 +467,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(xBackingField.Name)
                                     {
                                         Reference = xBackingField,
+                                        AccessKind = PropertyAccessKind.Read,
                                     }
                                 ),
                             ])
@@ -469,10 +484,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(xBackingField.Name)
                                         {
                                             Reference = xBackingField,
+                                            AccessKind = PropertyAccessKind.Write,
                                         },
                                         new MemberAccessExpressionNode(valueParameter.Name)
                                         {
                                             Reference = valueParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     )
                                     {
@@ -514,11 +531,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode("p")
                                 {
                                     Reference = pParameter,
+                                    AccessKind = PropertyAccessKind.Read,
                                 },
                                 xProperty.Setter.Name
                             )
                             {
                                 Reference = xProperty.Setter,
+                                AccessKind = PropertyAccessKind.Read,
                             },
                             [
                                 new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
@@ -602,6 +621,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(xBackingField.Name)
                                     {
                                         Reference = xBackingField,
+                                        AccessKind = PropertyAccessKind.Read,
                                     }
                                 ),
                             ])
@@ -618,10 +638,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(xBackingField.Name)
                                         {
                                             Reference = xBackingField,
+                                            AccessKind = PropertyAccessKind.Write,
                                         },
                                         new MemberAccessExpressionNode(valueParameter.Name)
                                         {
                                             Reference = valueParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     )
                                     {
@@ -676,16 +698,19 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode("p")
                                         {
                                             Reference = pParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         },
                                         xProperty.Setter.Name
                                     )
                                     {
                                         Reference = xProperty.Setter,
+                                        AccessKind = PropertyAccessKind.Read,
                                     },
                                     [
                                         new MemberAccessExpressionNode(tmpVariable.Name)
                                         {
                                             Reference = tmpVariable,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     ]
                                 )
@@ -694,6 +719,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode(tmpVariable.Name)
                                 {
                                     Reference = tmpVariable,
+                                    AccessKind = PropertyAccessKind.Read,
                                 }
                             )
                         ])
@@ -771,6 +797,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(xBackingField.Name)
                                     {
                                         Reference = xBackingField,
+                                        AccessKind = PropertyAccessKind.Read,
                                     }
                                 ),
                             ])
@@ -787,10 +814,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(xBackingField.Name)
                                         {
                                             Reference = xBackingField,
+                                            AccessKind = PropertyAccessKind.Write,
                                         },
                                         new MemberAccessExpressionNode(valueParameter.Name)
                                         {
                                             Reference = valueParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     )
                                     {
@@ -829,22 +858,32 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new ExpressionStatementNode(
                         new CallExpressionNode(
                             new MemberAccessExpressionNode(
-                                new MemberAccessExpressionNode("p") { Reference = pParameter },
+                                new MemberAccessExpressionNode("p")
+                                {
+                                    Reference = pParameter,
+                                    AccessKind = PropertyAccessKind.Read,
+                                },
                                 xProperty.Setter.Name
                             )
                             {
                                 Reference = xProperty.Setter,
+                                AccessKind = PropertyAccessKind.Read,
                             },
                             [
                                 new BinaryExpressionNode(
                                     BinaryExpressionKind.Addition,
                                     new CallExpressionNode(
                                         new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode("p") { Reference = pParameter },
+                                            new MemberAccessExpressionNode("p")
+                                            {
+                                                Reference = pParameter,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
                                             xProperty.Getter.Name
                                         )
                                         {
                                             Reference = xProperty.Getter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         },
                                         []
                                     ),
@@ -933,6 +972,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(xBackingField.Name)
                                     {
                                         Reference = xBackingField,
+                                        AccessKind = PropertyAccessKind.Read,
                                     }
                                 ),
                             ])
@@ -949,10 +989,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(xBackingField.Name)
                                         {
                                             Reference = xBackingField,
+                                            AccessKind = PropertyAccessKind.Write,
                                         },
                                         new MemberAccessExpressionNode(valueParameter.Name)
                                         {
                                             Reference = valueParameter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     )
                                     {
@@ -997,11 +1039,16 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     BinaryExpressionKind.Addition,
                                     new CallExpressionNode(
                                         new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode("p") { Reference = pParameter },
+                                            new MemberAccessExpressionNode("p")
+                                            {
+                                                Reference = pParameter,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
                                             xProperty.Getter.Name
                                         )
                                         {
                                             Reference = xProperty.Getter,
+                                            AccessKind = PropertyAccessKind.Read,
                                         },
                                         []
                                     ),
@@ -1020,16 +1067,22 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             new ExpressionStatementNode(
                                 new CallExpressionNode(
                                     new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode("p") { Reference = pParameter },
+                                        new MemberAccessExpressionNode("p")
+                                        {
+                                            Reference = pParameter,
+                                            AccessKind = PropertyAccessKind.Read,
+                                        },
                                         xProperty.Setter.Name
                                     )
                                     {
                                         Reference = xProperty.Setter,
+                                        AccessKind = PropertyAccessKind.Read,
                                     },
                                     [
                                         new MemberAccessExpressionNode(tmpVariable.Name)
                                         {
                                             Reference = tmpVariable,
+                                            AccessKind = PropertyAccessKind.Read,
                                         }
                                     ]
                                 )
@@ -1038,6 +1091,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode(tmpVariable.Name)
                                 {
                                     Reference = tmpVariable,
+                                    AccessKind = PropertyAccessKind.Read,
                                 }
                             )
                         ])

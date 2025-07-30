@@ -56,4 +56,94 @@ public class CheckAccessModifiersTests
             () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.Nothing);
     }
+
+    [Test]
+    public void PrivateGetterTest()
+    {
+        var tree = Parse(
+            """
+            public type Point {
+                x: i32 { private get; private set; }
+            }
+
+            function test(): i32 {
+                var p: Point = new Point();
+
+                return p.x;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo($"The getter of 'x' is private."));
+    }
+
+    [Test]
+    public void PrivateSetterTest()
+    {
+        var tree = Parse(
+            """
+            public type Point {
+                x: i32 { private get; private set; }
+            }
+
+            function test(): void {
+                var p: Point = new Point();
+
+                p.x = 1;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo($"The setter of 'x' is private."));
+    }
+
+    [Test]
+    public void PrivateGetterInTheSameTypeTest()
+    {
+        var tree = Parse(
+            """
+            public type Point {
+                x: i32 { private get; private set; }
+
+                public getX(): i32 {
+                    return x;
+                }
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.Nothing);
+    }
+
+    [Test]
+    public void PrivateSetterInTheSameTypeTest()
+    {
+        var tree = Parse(
+            """
+            public type Point {
+                x: i32 { private get; private set; }
+
+                public constructor(x: i32) {
+                    this.x = x;
+                }
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.Nothing);
+    }
 }
