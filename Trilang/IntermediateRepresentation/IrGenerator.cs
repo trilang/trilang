@@ -207,6 +207,9 @@ public class IrGenerator
             CallExpressionNode callExpressionNode
                 => throw new NotImplementedException(),
 
+            ExpressionBlockNode expressionBlockNode
+                => throw new NotImplementedException(),
+
             LiteralExpressionNode literalExpressionNode
                 => GenerateLiteral(builder, literalExpressionNode),
 
@@ -233,6 +236,7 @@ public class IrGenerator
 
     private Register GenerateArrayAccess(IrBuilder builder, ArrayAccessExpressionNode node)
     {
+        // TODO: invalid code, fix!!!
         var array = GenerateExpression(builder, node.Member);
         var index = GenerateExpression(builder, node.Index);
 
@@ -352,7 +356,7 @@ public class IrGenerator
 
     private Register GenerateMemberAccess(IrBuilder builder, MemberAccessExpressionNode node)
     {
-        if (node.Member is null)
+        if (node.IsFirstMember)
         {
             var assignment = builder.CurrentBlock.FindAssignment(node.Name);
             if (assignment is not null)

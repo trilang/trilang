@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 using Trilang.Symbols;
@@ -136,6 +137,10 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
 
     public bool IsValue
         => Name == Value;
+
+    [MemberNotNullWhen(false, nameof(Member))]
+    public bool IsFirstMember
+        => Member is null;
 
     public PropertyAccessKind? AccessKind { get; set; }
 }

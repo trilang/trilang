@@ -202,7 +202,7 @@ internal class ReplaceCompoundAssignments : ITransformer
 
     public ISyntaxNode TransformMemberAccess(MemberAccessExpressionNode node)
     {
-        if (node.Member is null)
+        if (node.IsFirstMember)
             return node;
 
         var member = (IExpressionNode)node.Member.Transform(this);

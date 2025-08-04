@@ -348,7 +348,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
     public void VisitMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
     {
-        if (node.Member is null)
+        if (node.IsFirstMember)
         {
             VisitFirstMemberAccess(node, context);
             return;

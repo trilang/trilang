@@ -224,7 +224,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
     {
         // skip the first member because it can't be property access
         // even local properties are accessed through `this`
-        if (node.Member is null)
+        if (node.IsFirstMember)
             return node;
 
         var member = (IExpressionNode)node.Member.Transform(this);
