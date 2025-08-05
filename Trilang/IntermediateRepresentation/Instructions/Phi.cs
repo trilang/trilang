@@ -44,7 +44,7 @@ public class Phi : IEquatable<Phi>, IInstruction
         => HashCode.Combine(Result, Sources);
 
     public override string ToString()
-        => $"phi {Result}, {string.Join(", ", Sources)}";
+        => $"phi\t{Result}, {string.Join(", ", Sources)}";
 
     public Register Result { get; }
 

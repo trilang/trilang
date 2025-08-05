@@ -10,6 +10,6 @@ public record BinaryOperation(
     {
         var op = Kind.ToString().ToLower();
 
-        return $"{op} {Result}, {Left}, {Right}";
+        return $"{op}\t{Result}, {Left}, {Right}";
     }
 }

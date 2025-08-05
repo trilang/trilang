@@ -6,5 +6,5 @@ public record Branch(
     string ElseBlock) : IInstruction
 {
     public override string ToString()
-        => $"br {Condition}, {ThenBlock}, {ElseBlock}";
+        => $"br\t{Condition}, {ThenBlock}, {ElseBlock}";
 }

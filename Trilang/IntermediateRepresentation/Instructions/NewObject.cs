@@ -24,5 +24,5 @@ public record NewObject(
         => HashCode.Combine(Result, Constructor, Arguments);
 
     public override string ToString()
-        => $"new {Constructor.DeclaringType}, {string.Join(", ", Arguments)}";
+        => $"new\t{Constructor.DeclaringType}, {string.Join(", ", Arguments)}";
 }

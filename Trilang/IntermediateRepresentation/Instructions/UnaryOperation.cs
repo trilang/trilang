@@ -9,6 +9,6 @@ public record UnaryOperation(
     {
         var op = Kind.ToString().ToLower();
 
-        return $"{op} {Result}, {Operand}";
+        return $"{op}\t{Result}, {Operand}";
     }
 }
