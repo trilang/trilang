@@ -143,7 +143,7 @@ internal class SsaRenamer
                     stack.Push(newRegister);
                     block.ReplaceInstruction(
                         i,
-                        new Phi(newRegister, phiInstruction.Sources));
+                        phiInstruction with { Result = newRegister });
                 }
             }
             else if (instruction is Return returnInstruction)
