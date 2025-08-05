@@ -121,7 +121,7 @@ public class Block : IEquatable<Block>
 
             var assignment = block.GetAssignment(name);
             if (assignment is not null)
-                return assignment.Value;
+                return assignment;
 
             foreach (var previousBlock in block.Previous)
                 if (!visited.Contains(previousBlock))

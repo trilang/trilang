@@ -173,7 +173,7 @@ public partial class Formatter : IFormatter
 
         writer.Scoped(() =>
         {
-            foreach (var expression in node.Expressions)
+            foreach (var expression in node.Statements)
                 expression.Accept(this);
         });
 

@@ -1,6 +1,6 @@
 namespace Trilang.IntermediateRepresentation.Instructions;
 
-public record BinaryInstruction(
+public record BinaryOperation(
     Register Result,
     BinaryInstructionKind Kind,
     Register Left,

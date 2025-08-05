@@ -214,7 +214,7 @@ public abstract class Visitor<TContext, TResult> : IVisitor<TContext>
 
         VisitExpressionBlockEnter(node, context);
 
-        foreach (var expression in node.Expressions)
+        foreach (var expression in node.Statements)
             expression.Accept(this, context);
 
         VisitExpressionBlockExit(node, context);

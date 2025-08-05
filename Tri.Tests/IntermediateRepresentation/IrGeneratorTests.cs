@@ -50,10 +50,10 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadInstruction(new Register(0), 1),
-                new LoadInstruction(new Register(1), 2),
-                new BinaryInstruction(new Register(2), @operator, new Register(0), new Register(1)),
-                new ReturnInstruction(new Register(2)),
+                new LoadConst(new Register(0), 1),
+                new LoadConst(new Register(1), 2),
+                new BinaryOperation(new Register(2), @operator, new Register(0), new Register(1)),
+                new Return(new Register(2)),
             ]))
         };
 
@@ -83,10 +83,10 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadInstruction(new Register(0), 1),
-                new LoadInstruction(new Register(1), 2),
-                new BinaryInstruction(new Register(2), @operator, new Register(0), new Register(1)),
-                new ReturnInstruction(new Register(2)),
+                new LoadConst(new Register(0), 1),
+                new LoadConst(new Register(1), 2),
+                new BinaryOperation(new Register(2), @operator, new Register(0), new Register(1)),
+                new Return(new Register(2)),
             ]))
         };
 
@@ -110,9 +110,9 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadInstruction(new Register(1), 1),
-                new MoveInstruction(new Register(2), new Register(1)),
+                new LoadParameter(new Register(0), 0),
+                new LoadConst(new Register(1), 1),
+                new Move(new Register(2), new Register(1)),
             ]))
         };
 
@@ -144,10 +144,10 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadInstruction(new Register(1), 1),
-                new BinaryInstruction(new Register(2), @operator, new Register(0), new Register(1)),
-                new MoveInstruction(new Register(3), new Register(2)),
+                new LoadParameter(new Register(0), 0),
+                new LoadConst(new Register(1), 1),
+                new BinaryOperation(new Register(2), @operator, new Register(0), new Register(1)),
+                new Move(new Register(3), new Register(2)),
             ]))
         };
 
@@ -174,13 +174,13 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadInstruction(new Register(1), 1),
-                new BinaryInstruction(new Register(2), Add, new Register(0), new Register(1)),
-                new MoveInstruction(new Register(4), new Register(2)),
-                new LoadInstruction(new Register(3), 10),
-                new MoveInstruction(new Register(5), new Register(3)),
-                new ReturnInstruction(new Register(5)),
+                new LoadParameter(new Register(0), 0),
+                new LoadConst(new Register(1), 1),
+                new BinaryOperation(new Register(2), Add, new Register(0), new Register(1)),
+                new Move(new Register(4), new Register(2)),
+                new LoadConst(new Register(3), 10),
+                new Move(new Register(5), new Register(3)),
+                new Return(new Register(5)),
             ]))
         };
 
@@ -204,10 +204,10 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadParameterInstruction(new Register(1), 1),
-                new BinaryInstruction(new Register(2), Add, new Register(0), new Register(1)),
-                new ReturnInstruction(new Register(2)),
+                new LoadParameter(new Register(0), 0),
+                new LoadParameter(new Register(1), 1),
+                new BinaryOperation(new Register(2), Add, new Register(0), new Register(1)),
+                new Return(new Register(2)),
             ]))
         };
 
@@ -234,12 +234,12 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadInstruction(new Register(0), 1),
-                new MoveInstruction(new Register(1), new Register(0)),
-                new LoadInstruction(new Register(2), 2),
-                new MoveInstruction(new Register(3), new Register(2)),
-                new BinaryInstruction(new Register(4), Add, new Register(1), new Register(3)),
-                new ReturnInstruction(new Register(4)),
+                new LoadConst(new Register(0), 1),
+                new Move(new Register(1), new Register(0)),
+                new LoadConst(new Register(2), 2),
+                new Move(new Register(3), new Register(2)),
+                new BinaryOperation(new Register(4), Add, new Register(1), new Register(3)),
+                new Return(new Register(4)),
             ]))
         };
 
@@ -263,8 +263,8 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadInstruction(new Register(0), null),
-                new ReturnInstruction(new Register(0)),
+                new LoadConst(new Register(0), null),
+                new Return(new Register(0)),
             ]))
         };
 
@@ -288,9 +288,9 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new UnaryInstruction(new Register(1), UnaryInstructionKind.Neg, new Register(0)),
-                new ReturnInstruction(new Register(1)),
+                new LoadParameter(new Register(0), 0),
+                new UnaryOperation(new Register(1), UnaryInstructionKind.Neg, new Register(0)),
+                new Return(new Register(1)),
             ]))
         };
 
@@ -314,9 +314,9 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new UnaryInstruction(new Register(1), UnaryInstructionKind.Not, new Register(0)),
-                new ReturnInstruction(new Register(1)),
+                new LoadParameter(new Register(0), 0),
+                new UnaryOperation(new Register(1), UnaryInstructionKind.Not, new Register(0)),
+                new Return(new Register(1)),
             ]))
         };
 
@@ -340,9 +340,9 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new UnaryInstruction(new Register(1), UnaryInstructionKind.Not, new Register(0)),
-                new ReturnInstruction(new Register(1)),
+                new LoadParameter(new Register(0), 0),
+                new UnaryOperation(new Register(1), UnaryInstructionKind.Not, new Register(0)),
+                new Return(new Register(1)),
             ]))
         };
 
@@ -366,10 +366,10 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadInstruction(new Register(1), 0),
+                new LoadParameter(new Register(0), 0),
+                new LoadConst(new Register(1), 0),
                 new ArrayElement(new Register(2), new Register(0), new Register(1)),
-                new ReturnInstruction(new Register(2)),
+                new Return(new Register(2)),
             ]))
         };
 
@@ -393,12 +393,12 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadParameterInstruction(new Register(1), 1),
-                new LoadInstruction(new Register(2), 2),
-                new BinaryInstruction(new Register(3), Add, new Register(1), new Register(2)),
+                new LoadParameter(new Register(0), 0),
+                new LoadParameter(new Register(1), 1),
+                new LoadConst(new Register(2), 2),
+                new BinaryOperation(new Register(3), Add, new Register(1), new Register(2)),
                 new ArrayElement(new Register(4), new Register(0), new Register(3)),
-                new ReturnInstruction(new Register(4)),
+                new Return(new Register(4)),
             ]))
         };
 
@@ -424,10 +424,10 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadInstruction(new Register(0), 10),
-                new NewArrayInstruction(new Register(1), new TypeArrayMetadata(TypeMetadata.I32), new Register(0)),
-                new MoveInstruction(new Register(2), new Register(1)),
-                new ReturnInstruction(new Register(2)),
+                new LoadConst(new Register(0), 10),
+                new NewArray(new Register(1), new TypeArrayMetadata(TypeMetadata.I32), new Register(0)),
+                new Move(new Register(2), new Register(1)),
+                new Return(new Register(2)),
             ]))
         };
 
@@ -459,15 +459,15 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("Point_ctor", new Block("entry", [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadParameterInstruction(new Register(1), 1),
-                new LoadParameterInstruction(new Register(2), 2),
+                new LoadParameter(new Register(0), 0),
+                new LoadParameter(new Register(1), 1),
+                new LoadParameter(new Register(2), 2),
             ])),
             new IrFunction("test", new Block("entry", [
-                new LoadInstruction(new Register(0), 1),
-                new LoadInstruction(new Register(1), 2),
-                new NewObjectInstruction(new Register(2), ctor, [new Register(0), new Register(1)]),
-                new ReturnInstruction(new Register(2)),
+                new LoadConst(new Register(0), 1),
+                new LoadConst(new Register(1), 2),
+                new NewObject(new Register(2), ctor, [new Register(0), new Register(1)]),
+                new Return(new Register(2)),
             ]))
         };
 
@@ -496,25 +496,25 @@ public class IrGeneratorTests
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadParameterInstruction(new Register(1), 1),
-                new BinaryInstruction(new Register(2), Ge, new Register(0), new Register(1)),
-                new BranchInstruction(new Register(2), "if_0_then", "if_0_else"),
+                new LoadParameter(new Register(0), 0),
+                new LoadParameter(new Register(1), 1),
+                new BinaryOperation(new Register(2), Ge, new Register(0), new Register(1)),
+                new Branch(new Register(2), "if_0_then", "if_0_else"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new ReturnInstruction(new Register(0)),
-                        new JumpInstruction("if_0_end"),
+                        new Return(new Register(0)),
+                        new Jump("if_0_end"),
                     ],
                     [endBlock]
                 ),
                 new Block(
                     "if_0_else",
                     [
-                        new ReturnInstruction(new Register(1)),
-                        new JumpInstruction("if_0_end"),
+                        new Return(new Register(1)),
+                        new Jump("if_0_end"),
                     ],
                     [endBlock]
                 ),
@@ -549,26 +549,26 @@ public class IrGeneratorTests
         var functions = ir.Generate([tree]);
 
         var endBlock = new Block("if_0_end", [
-            new PhiInstruction(new Register(7), [new Register(2), new Register(6)]),
-            new ReturnInstruction(new Register(7)),
+            new Phi(new Register(7), [new Register(2), new Register(6)]),
+            new Return(new Register(7)),
         ]);
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadInstruction(new Register(1), 0),
-                new MoveInstruction(new Register(2), new Register(1)),
-                new LoadInstruction(new Register(3), 0),
-                new BinaryInstruction(new Register(4), Gt, new Register(0), new Register(3)),
-                new BranchInstruction(new Register(4), "if_0_then", "if_0_end"),
+                new LoadParameter(new Register(0), 0),
+                new LoadConst(new Register(1), 0),
+                new Move(new Register(2), new Register(1)),
+                new LoadConst(new Register(3), 0),
+                new BinaryOperation(new Register(4), Gt, new Register(0), new Register(3)),
+                new Branch(new Register(4), "if_0_then", "if_0_end"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new LoadInstruction(new Register(5), 10),
-                        new MoveInstruction(new Register(6), new Register(5)),
-                        new JumpInstruction("if_0_end"),
+                        new LoadConst(new Register(5), 10),
+                        new Move(new Register(6), new Register(5)),
+                        new Jump("if_0_end"),
                     ],
                     [endBlock]
                 ),
@@ -607,39 +607,39 @@ public class IrGeneratorTests
         var functions = ir.Generate([tree]);
 
         var endBlock0 = new Block("if_0_end");
-        var endBlock1 = new Block("if_1_end", [new JumpInstruction("if_0_end")], [endBlock0]);
+        var endBlock1 = new Block("if_1_end", [new Jump("if_0_end")], [endBlock0]);
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameterInstruction(new Register(0), 0),
-                new LoadInstruction(new Register(1), 0),
-                new BinaryInstruction(new Register(2), Gt, new Register(0), new Register(1)),
-                new BranchInstruction(new Register(2), "if_0_then", "if_0_else"),
+                new LoadParameter(new Register(0), 0),
+                new LoadConst(new Register(1), 0),
+                new BinaryOperation(new Register(2), Gt, new Register(0), new Register(1)),
+                new Branch(new Register(2), "if_0_then", "if_0_else"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new LoadInstruction(new Register(3), 10),
-                        new BinaryInstruction(new Register(4), Gt, new Register(0), new Register(3)),
-                        new BranchInstruction(new Register(4), "if_1_then", "if_1_else"),
+                        new LoadConst(new Register(3), 10),
+                        new BinaryOperation(new Register(4), Gt, new Register(0), new Register(3)),
+                        new Branch(new Register(4), "if_1_then", "if_1_else"),
                     ],
                     [
                         new Block(
                             "if_1_then",
                             [
-                                new LoadInstruction(new Register(5), 1),
-                                new ReturnInstruction(new Register(5)),
-                                new JumpInstruction("if_1_end"),
+                                new LoadConst(new Register(5), 1),
+                                new Return(new Register(5)),
+                                new Jump("if_1_end"),
                             ],
                             [endBlock1]
                         ),
                         new Block(
                             "if_1_else",
                             [
-                                new LoadInstruction(new Register(6), 2),
-                                new ReturnInstruction(new Register(6)),
-                                new JumpInstruction("if_1_end"),
+                                new LoadConst(new Register(6), 2),
+                                new Return(new Register(6)),
+                                new Jump("if_1_end"),
                             ],
                             [endBlock1]
                         ),
@@ -648,9 +648,9 @@ public class IrGeneratorTests
                 new Block(
                     "if_0_else",
                     [
-                        new LoadInstruction(new Register(7), 0),
-                        new ReturnInstruction(new Register(7)),
-                        new JumpInstruction("if_0_end"),
+                        new LoadConst(new Register(7), 0),
+                        new Return(new Register(7)),
+                        new Jump("if_0_end"),
                     ],
                     [endBlock0]
                 ),
@@ -687,38 +687,38 @@ public class IrGeneratorTests
         var functions = ir.Generate([tree]);
 
         var endBlock = new Block("if_0_end", [
-            new PhiInstruction(new Register(10), [new Register(8), new Register(9)]),
-            new ReturnInstruction(new Register(10))
+            new Phi(new Register(10), [new Register(8), new Register(9)]),
+            new Return(new Register(10))
         ]);
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block(
                 "entry",
                 [
-                    new LoadParameterInstruction(new Register(0), 0),
-                    new LoadInstruction(new Register(1), 0),
-                    new MoveInstruction(new Register(2), new Register(1)),
-                    new LoadInstruction(new Register(3), 0),
-                    new BinaryInstruction(new Register(4), Gt, new Register(0), new Register(3)),
-                    new BranchInstruction(new Register(4), "if_0_then", "if_0_else"),
+                    new LoadParameter(new Register(0), 0),
+                    new LoadConst(new Register(1), 0),
+                    new Move(new Register(2), new Register(1)),
+                    new LoadConst(new Register(3), 0),
+                    new BinaryOperation(new Register(4), Gt, new Register(0), new Register(3)),
+                    new Branch(new Register(4), "if_0_then", "if_0_else"),
                 ],
                 [
                     new Block(
                         "if_0_then",
                         [
-                            new LoadInstruction(new Register(5), 1),
-                            new MoveInstruction(new Register(9), new Register(5)),
-                            new JumpInstruction("if_0_end"),
+                            new LoadConst(new Register(5), 1),
+                            new Move(new Register(9), new Register(5)),
+                            new Jump("if_0_end"),
                         ],
                         [endBlock]
                     ),
                     new Block(
                         "if_0_else",
                         [
-                            new LoadInstruction(new Register(6), 1),
-                            new UnaryInstruction(new Register(7), UnaryInstructionKind.Neg, new Register(6)),
-                            new MoveInstruction(new Register(8), new Register(7)),
-                            new JumpInstruction("if_0_end"),
+                            new LoadConst(new Register(6), 1),
+                            new UnaryOperation(new Register(7), UnaryInstructionKind.Neg, new Register(6)),
+                            new Move(new Register(8), new Register(7)),
+                            new Jump("if_0_end"),
                         ],
                         [endBlock]
                     ),
@@ -750,25 +750,25 @@ public class IrGeneratorTests
 
         var loopEnd = new Block(
             "loop_0_end", [
-                new ReturnInstruction(new Register(6))
+                new Return(new Register(6))
             ]
         );
         var ifThen = new Block(
             "if_0_then",
             [
-                new LoadInstruction(new Register(4), 1),
-                new BinaryInstruction(new Register(5), Add, new Register(6), new Register(4)),
-                new MoveInstruction(new Register(7), new Register(5)),
-                new JumpInstruction("loop_0_start"),
+                new LoadConst(new Register(4), 1),
+                new BinaryOperation(new Register(5), Add, new Register(6), new Register(4)),
+                new Move(new Register(7), new Register(5)),
+                new Jump("loop_0_start"),
             ]
         );
         var loopStart = new Block(
             "loop_0_start",
             [
-                new PhiInstruction(new Register(6), [new Register(1), new Register(7)]),
-                new LoadInstruction(new Register(2), 10),
-                new BinaryInstruction(new Register(3), Lt, new Register(6), new Register(2)),
-                new BranchInstruction(new Register(3), "if_0_then", "loop_0_end"),
+                new Phi(new Register(6), [new Register(1), new Register(7)]),
+                new LoadConst(new Register(2), 10),
+                new BinaryOperation(new Register(3), Lt, new Register(6), new Register(2)),
+                new Branch(new Register(3), "if_0_then", "loop_0_end"),
             ],
             [ifThen, loopEnd]
         );
@@ -776,9 +776,9 @@ public class IrGeneratorTests
         var entry = new Block(
             "entry",
             [
-                new LoadInstruction(new Register(0), 0),
-                new MoveInstruction(new Register(1), new Register(0)),
-                new JumpInstruction("loop_0_start"),
+                new LoadConst(new Register(0), 0),
+                new Move(new Register(1), new Register(0)),
+                new Jump("loop_0_start"),
             ],
             [loopStart]
         );

@@ -1,6 +1,6 @@
 namespace Trilang.IntermediateRepresentation.Instructions;
 
-public record JumpInstruction(string Block) : IInstruction
+public record Jump(string Block) : IInstruction
 {
     public override string ToString()
         => $"jmp {Block}";

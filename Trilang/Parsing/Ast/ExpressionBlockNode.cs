@@ -6,10 +6,10 @@ namespace Trilang.Parsing.Ast;
 
 public class ExpressionBlockNode : IExpressionNode, IEquatable<ExpressionBlockNode>
 {
-    private readonly List<IStatementNode> expressions;
+    private readonly List<IStatementNode> statements;
 
     public ExpressionBlockNode(IEnumerable<IStatementNode> expressions)
-        => this.expressions = [..expressions];
+        => this.statements = [..expressions];
 
     public static bool operator ==(ExpressionBlockNode? left, ExpressionBlockNode? right)
         => Equals(left, right);
@@ -25,7 +25,7 @@ public class ExpressionBlockNode : IExpressionNode, IEquatable<ExpressionBlockNo
         if (ReferenceEquals(this, other))
             return true;
 
-        return expressions.Equals(other.expressions);
+        return statements.Equals(other.statements);
     }
 
     public override bool Equals(object? obj)
@@ -43,7 +43,7 @@ public class ExpressionBlockNode : IExpressionNode, IEquatable<ExpressionBlockNo
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(expressions);
+        => HashCode.Combine(statements);
 
     public override string ToString()
     {
@@ -69,11 +69,11 @@ public class ExpressionBlockNode : IExpressionNode, IEquatable<ExpressionBlockNo
 
     public ISymbolTable? SymbolTable { get; set; }
 
-    public IReadOnlyList<IStatementNode> Expressions
-        => expressions;
+    public IReadOnlyList<IStatementNode> Statements
+        => statements;
 
     public ITypeMetadata? ReturnTypeMetadata
-        => expressions.Count > 0
-            ? (expressions[^1] as ExpressionStatementNode)?.Expression.ReturnTypeMetadata
+        => statements.Count > 0
+            ? (statements[^1] as ExpressionStatementNode)?.Expression.ReturnTypeMetadata
             : null;
 }

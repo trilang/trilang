@@ -145,7 +145,7 @@ internal class SsaTransformer
                     var register = block.GetAssignment(variable) ??
                                    throw new Exception($"Variable {variable} not defined in block {d}");
 
-                    d.InsertInstruction(0, new PhiInstruction(register, []));
+                    d.InsertInstruction(0, new Phi(register, []));
 
                     if (d.GetAssignment(variable) is not null)
                         continue;

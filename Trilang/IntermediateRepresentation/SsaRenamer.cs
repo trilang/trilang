@@ -55,7 +55,7 @@ internal class SsaRenamer
                         Index = Rename(arrayElement.Index),
                     });
             }
-            else if (instruction is BinaryInstruction binaryInstruction)
+            else if (instruction is BinaryOperation binaryInstruction)
             {
                 block.ReplaceInstruction(
                     i,
@@ -65,22 +65,22 @@ internal class SsaRenamer
                         Right = Rename(binaryInstruction.Right),
                     });
             }
-            else if (instruction is BranchInstruction branchInstruction)
+            else if (instruction is Branch branchInstruction)
             {
                 block.ReplaceInstruction(
                     i,
                     branchInstruction with { Condition = Rename(branchInstruction.Condition) });
             }
-            else if (instruction is JumpInstruction)
+            else if (instruction is Jump)
             {
                 // nothing to rename here
             }
-            else if (instruction is LoadInstruction)
+            else if (instruction is LoadConst)
             {
                 // no need to rename registers here
                 // load instruction is mainly used to load a const to a new register
             }
-            else if (instruction is LoadParameterInstruction loadParameterInstruction)
+            else if (instruction is LoadParameter loadParameterInstruction)
             {
                 if (!registers.TryGetValue(loadParameterInstruction.Result, out var stack))
                 {
@@ -94,7 +94,7 @@ internal class SsaRenamer
                     Debug.Fail("Imposibru!");
                 }
             }
-            else if (instruction is MoveInstruction moveInstruction)
+            else if (instruction is Move moveInstruction)
             {
                 moveInstruction = moveInstruction with { Source = Rename(moveInstruction.Source) };
                 block.ReplaceInstruction(i, moveInstruction);
@@ -113,22 +113,22 @@ internal class SsaRenamer
                     block.ReplaceInstruction(i, moveInstruction with { Result = newRegister });
                 }
             }
-            else if (instruction is NewArrayInstruction newArrayInstruction)
+            else if (instruction is NewArray newArrayInstruction)
             {
                 block.ReplaceInstruction(
                     i,
                     newArrayInstruction with { Size = Rename(newArrayInstruction.Size) });
             }
-            else if (instruction is NewObjectInstruction newObjectInstruction)
+            else if (instruction is NewObject newObjectInstruction)
             {
                 block.ReplaceInstruction(
                     i,
-                    new NewObjectInstruction(
-                        newObjectInstruction.Result,
-                        newObjectInstruction.Constructor,
-                        newObjectInstruction.Arguments.Select(Rename).ToArray()));
+                    newObjectInstruction with
+                    {
+                        Arguments = newObjectInstruction.Arguments.Select(Rename).ToArray()
+                    });
             }
-            else if (instruction is PhiInstruction phiInstruction)
+            else if (instruction is Phi phiInstruction)
             {
                 if (!registers.TryGetValue(phiInstruction.Result, out var stack))
                 {
@@ -143,19 +143,19 @@ internal class SsaRenamer
                     stack.Push(newRegister);
                     block.ReplaceInstruction(
                         i,
-                        new PhiInstruction(newRegister, phiInstruction.Sources));
+                        new Phi(newRegister, phiInstruction.Sources));
                 }
             }
-            else if (instruction is ReturnInstruction returnInstruction)
+            else if (instruction is Return returnInstruction)
             {
                 if (returnInstruction.Expression is null)
                     continue;
 
                 block.ReplaceInstruction(
                     i,
-                    new ReturnInstruction(Rename(returnInstruction.Expression.Value)));
+                    new Return(Rename(returnInstruction.Expression.Value)));
             }
-            else if (instruction is UnaryInstruction unaryInstruction)
+            else if (instruction is UnaryOperation unaryInstruction)
             {
                 block.ReplaceInstruction(
                     i,
@@ -172,7 +172,7 @@ internal class SsaRenamer
             for (var i = 0; i < next.Instructions.Count; i++)
             {
                 var instruction = next.Instructions[i];
-                if (instruction is not PhiInstruction phi)
+                if (instruction is not Phi phi)
                     break;
 
                 if (!registers.TryGetValue(phi.Result, out var stack))
@@ -183,7 +183,7 @@ internal class SsaRenamer
 
                 next.ReplaceInstruction(
                     i,
-                    new PhiInstruction(phi.Result, [..phi.Sources, stack.Peek()]));
+                    new Phi(phi.Result, [..phi.Sources, stack.Peek()]));
             }
         }
 

@@ -1,6 +1,6 @@
 namespace Trilang.IntermediateRepresentation.Instructions;
 
-public record BranchInstruction(
+public record Branch(
     Register Condition,
     string ThenBlock,
     string ElseBlock) : IInstruction

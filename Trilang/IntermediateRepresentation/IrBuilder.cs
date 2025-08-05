@@ -24,7 +24,7 @@ internal class IrBuilder
     private Register BinaryInstruction(BinaryInstructionKind kind, Register left, Register right)
     {
         var register = CreateRegister();
-        var binaryInstruction = new BinaryInstruction(register, kind, left, right);
+        var binaryInstruction = new BinaryOperation(register, kind, left, right);
         currentBlock.AddInstruction(binaryInstruction);
 
         return register;
@@ -33,7 +33,7 @@ internal class IrBuilder
     private Register UnaryInstruction(UnaryInstructionKind kind, Register operand)
     {
         var register = CreateRegister();
-        var unaryInstruction = new UnaryInstruction(register, kind, operand);
+        var unaryInstruction = new UnaryOperation(register, kind, operand);
         currentBlock.AddInstruction(unaryInstruction);
 
         return register;
@@ -55,7 +55,7 @@ internal class IrBuilder
 
     public void Branch(Register conditionRegister, Block thenBlock, Block elseBlock)
     {
-        var branch = new BranchInstruction(conditionRegister, thenBlock.Label, elseBlock.Label);
+        var branch = new Branch(conditionRegister, thenBlock.Label, elseBlock.Label);
         currentBlock.AddInstruction(branch);
         currentBlock.AddNext(thenBlock);
         currentBlock.AddNext(elseBlock);
@@ -63,15 +63,15 @@ internal class IrBuilder
 
     public void Jump(Block block)
     {
-        var jump = new JumpInstruction(block.Label);
+        var jump = new Jump(block.Label);
         currentBlock.AddInstruction(jump);
         currentBlock.AddNext(block);
     }
 
-    public Register Load(object? value)
+    public Register LoadConst(object? value)
     {
         var register = CreateRegister();
-        var loadInstruction = new LoadInstruction(register, value);
+        var loadInstruction = new LoadConst(register, value);
         currentBlock.AddInstruction(loadInstruction);
 
         return register;
@@ -80,7 +80,7 @@ internal class IrBuilder
     public void LoadParameter(string name, int index)
     {
         var register = CreateRegister();
-        var loadInstruction = new LoadParameterInstruction(register, index);
+        var loadInstruction = new LoadParameter(register, index);
         currentBlock.AddInstruction(loadInstruction);
         AddDefinition(name, register);
     }
@@ -88,7 +88,7 @@ internal class IrBuilder
     public Register Move(Register source)
     {
         var register = CreateRegister();
-        var move = new MoveInstruction(register, source);
+        var move = new Move(register, source);
         currentBlock.AddInstruction(move);
 
         return register;
@@ -96,7 +96,7 @@ internal class IrBuilder
 
     public Register Move(Register destination, Register source)
     {
-        var move = new MoveInstruction(destination, source);
+        var move = new Move(destination, source);
         currentBlock.AddInstruction(move);
 
         return destination;
@@ -105,7 +105,7 @@ internal class IrBuilder
     public Register NewArray(TypeArrayMetadata type, Register size)
     {
         var register = CreateRegister();
-        var allocate = new NewArrayInstruction(register, type, size);
+        var allocate = new NewArray(register, type, size);
         currentBlock.AddInstruction(allocate);
 
         return register;
@@ -114,7 +114,7 @@ internal class IrBuilder
     public Register NewObject(ConstructorMetadata constructor, IReadOnlyList<Register> parameters)
     {
         var register = CreateRegister();
-        var allocate = new NewObjectInstruction(register, constructor, parameters);
+        var allocate = new NewObject(register, constructor, parameters);
         currentBlock.AddInstruction(allocate);
 
         return register;
@@ -122,7 +122,7 @@ internal class IrBuilder
 
     public void Return(Register? register = null)
     {
-        var ret = new ReturnInstruction(register);
+        var ret = new Return(register);
         currentBlock.AddInstruction(ret);
     }
 

@@ -218,7 +218,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
     private bool CompareExpressionBlockNode(ExpressionBlockNode x, ExpressionBlockNode y)
     {
-        if (!x.Expressions.SequenceEqual(y.Expressions, this))
+        if (!x.Statements.SequenceEqual(y.Statements, this))
             throw new Exception("Expression doesn't match.");
 
         return true;

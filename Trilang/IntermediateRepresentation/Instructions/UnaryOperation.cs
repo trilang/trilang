@@ -1,6 +1,6 @@
 namespace Trilang.IntermediateRepresentation.Instructions;
 
-public record UnaryInstruction(
+public record UnaryOperation(
     Register Result,
     UnaryInstructionKind Kind,
     Register Operand) : IInstruction

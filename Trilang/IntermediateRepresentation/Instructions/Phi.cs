@@ -1,20 +1,20 @@
 namespace Trilang.IntermediateRepresentation.Instructions;
 
-public class PhiInstruction : IEquatable<PhiInstruction>, IInstruction
+public class Phi : IEquatable<Phi>, IInstruction
 {
-    public PhiInstruction(Register result, IReadOnlyCollection<Register> sources)
+    public Phi(Register result, IReadOnlyCollection<Register> sources)
     {
         Result = result;
         Sources = sources;
     }
 
-    public static bool operator ==(PhiInstruction? left, PhiInstruction? right)
+    public static bool operator ==(Phi? left, Phi? right)
         => Equals(left, right);
 
-    public static bool operator !=(PhiInstruction? left, PhiInstruction? right)
+    public static bool operator !=(Phi? left, Phi? right)
         => !Equals(left, right);
 
-    public bool Equals(PhiInstruction? other)
+    public bool Equals(Phi? other)
     {
         if (other is null)
             return false;
@@ -37,7 +37,7 @@ public class PhiInstruction : IEquatable<PhiInstruction>, IInstruction
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((PhiInstruction)obj);
+        return Equals((Phi)obj);
     }
 
     public override int GetHashCode()

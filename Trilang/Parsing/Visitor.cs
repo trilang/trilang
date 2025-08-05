@@ -183,7 +183,7 @@ public abstract class Visitor : IVisitor
     {
         VisitExpressionBlockEnter(node);
 
-        foreach (var expression in node.Expressions)
+        foreach (var expression in node.Statements)
             expression.Accept(this);
 
         VisitExpressionBlockExit(node);
