@@ -47,4 +47,7 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         => $"{ItemMetadata}[]";
 
     public ITypeMetadata? ItemMetadata { get; set; }
+
+    public bool IsValueType
+        => false;
 }

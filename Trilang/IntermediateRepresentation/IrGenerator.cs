@@ -41,7 +41,7 @@ public class IrGenerator
                 => throw new NotImplementedException(),
 
             TypeDeclarationNode typeDeclarationNode
-                => GenerateFunctionFromType(typeDeclarationNode),
+                => GenerateFunctionsFromType(typeDeclarationNode),
 
             _ => throw new ArgumentOutOfRangeException(nameof(declaration)),
         };
@@ -51,7 +51,7 @@ public class IrGenerator
         var builder = new IrBuilder();
 
         foreach (var (i, parameter) in node.Parameters.Index())
-            builder.LoadParameter(parameter.Name, i);
+            builder.LoadParameter(parameter.Name, parameter.Type.Metadata!, i);
 
         GenerateBlock(builder, node.Body);
 
@@ -61,7 +61,7 @@ public class IrGenerator
         return IrFunction.FromFunction(node, code);
     }
 
-    private IReadOnlyList<IrFunction> GenerateFunctionFromType(TypeDeclarationNode typeDeclarationNode)
+    private IReadOnlyList<IrFunction> GenerateFunctionsFromType(TypeDeclarationNode typeDeclarationNode)
     {
         var functions = new List<IrFunction>();
 
@@ -80,10 +80,13 @@ public class IrGenerator
         var i = 0;
 
         if (node.Metadata!.IsStatic)
-            builder.LoadParameter(MemberAccessExpressionNode.This, i++);
+            builder.LoadParameter(MemberAccessExpressionNode.This, node.Metadata!.DeclaringType, i++);
 
         for (; i < node.Parameters.Count; i++)
-            builder.LoadParameter(node.Parameters[i].Name, i);
+        {
+            var parameter = node.Parameters[i];
+            builder.LoadParameter(parameter.Name, parameter.Type.Metadata!, i);
+        }
 
         GenerateBlock(builder, node.Body);
 
@@ -97,9 +100,12 @@ public class IrGenerator
     {
         var builder = new IrBuilder();
 
-        builder.LoadParameter(MemberAccessExpressionNode.This, 0);
+        builder.LoadParameter(MemberAccessExpressionNode.This, node.Metadata!.DeclaringType, 0);
         for (var i = 0; i < node.Parameters.Count; i++)
-            builder.LoadParameter(node.Parameters[i].Name, i + 1);
+        {
+            var parameter = node.Parameters[i];
+            builder.LoadParameter(parameter.Name, parameter.Type.Metadata!, i + 1);
+        }
 
         GenerateBlock(builder, node.Body);
 
@@ -250,42 +256,42 @@ public class IrGenerator
 
         if (node.Kind == Addition)
         {
-            return builder.Add(left, right);
+            return builder.Add(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == Subtraction)
         {
-            return builder.Sub(left, right);
+            return builder.Sub(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == Multiplication)
         {
-            return builder.Mul(left, right);
+            return builder.Mul(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == Division)
         {
-            return builder.Div(left, right);
+            return builder.Div(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == Modulus)
         {
-            return builder.Mod(left, right);
+            return builder.Mod(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == BitwiseAnd)
         {
-            return builder.And(left, right);
+            return builder.And(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == BitwiseOr)
         {
-            return builder.Or(left, right);
+            return builder.Or(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == BitwiseXor)
         {
-            return builder.Xor(left, right);
+            return builder.Xor(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == ConditionalAnd)
@@ -300,32 +306,32 @@ public class IrGenerator
 
         if (node.Kind == Equality)
         {
-            return builder.Eq(left, right);
+            return builder.Eq(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == Inequality)
         {
-            return builder.Ne(left, right);
+            return builder.Ne(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == LessThan)
         {
-            return builder.Lt(left, right);
+            return builder.Lt(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == LessThanOrEqual)
         {
-            return builder.Le(left, right);
+            return builder.Le(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == GreaterThan)
         {
-            return builder.Gt(left, right);
+            return builder.Gt(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == GreaterThanOrEqual)
         {
-            return builder.Ge(left, right);
+            return builder.Ge(node.ReturnTypeMetadata!, left, right);
         }
 
         if (node.Kind == Assignment)
@@ -370,7 +376,7 @@ public class IrGenerator
     }
 
     private Register GenerateLiteral(IrBuilder builder, LiteralExpressionNode node)
-        => builder.LoadConst(node.Value);
+        => builder.LoadConst(node.ReturnTypeMetadata!, node.Value);
 
     private Register GenerateMemberAccess(IrBuilder builder, MemberAccessExpressionNode node)
     {
@@ -400,8 +406,8 @@ public class IrGenerator
         return builder.NewObject(node.Metadata!, parameters);
     }
 
-    private Register GenerateNull(IrBuilder builder, NullExpressionNode _)
-        => builder.LoadConst(null);
+    private Register GenerateNull(IrBuilder builder, NullExpressionNode node)
+        => builder.LoadConst(node.ReturnTypeMetadata, null);
 
     private Register GenerateUnaryExpression(IrBuilder builder, UnaryExpressionNode node)
     {
@@ -410,13 +416,13 @@ public class IrGenerator
         return node.Kind switch
         {
             UnaryExpressionKind.UnaryMinus
-                => builder.Neg(operand),
+                => builder.Neg(node.ReturnTypeMetadata!, operand),
 
             UnaryExpressionKind.UnaryPlus
                 => operand,
 
             UnaryExpressionKind.LogicalNot or UnaryExpressionKind.BitwiseNot
-                => builder.Not(operand),
+                => builder.Not(node.ReturnTypeMetadata!, operand),
 
             _ => throw new NotImplementedException(),
         };

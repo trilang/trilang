@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Trilang.IntermediateRepresentation.Instructions;
+using Trilang.Metadata;
 
 namespace Trilang.IntermediateRepresentation;
 
@@ -108,7 +109,7 @@ internal class SsaRenamer
                 }
                 else
                 {
-                    var newRegister = GetNewRegister();
+                    var newRegister = GetNewRegister(moveInstruction.Result.Type);
                     stack.Push(newRegister);
                     block.ReplaceInstruction(i, moveInstruction with { Result = newRegister });
                 }
@@ -139,7 +140,7 @@ internal class SsaRenamer
                 }
                 else
                 {
-                    var newRegister = GetNewRegister();
+                    var newRegister = GetNewRegister(phiInstruction.Result.Type);
                     stack.Push(newRegister);
                     block.ReplaceInstruction(
                         i,
@@ -183,7 +184,7 @@ internal class SsaRenamer
 
                 next.ReplaceInstruction(
                     i,
-                    new Phi(phi.Result, [..phi.Sources, stack.Peek()]));
+                    phi with { Sources = [..phi.Sources, stack.Peek()] });
             }
         }
 
@@ -202,8 +203,8 @@ internal class SsaRenamer
         }
     }
 
-    private Register GetNewRegister()
-        => new Register(registerCounter++);
+    private Register GetNewRegister(ITypeMetadata type)
+        => new Register(registerCounter++, type);
 
     private Register Rename(Register register)
         => registers.TryGetValue(register, out var stack)

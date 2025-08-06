@@ -43,4 +43,7 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
         => Name;
 
     public string Name { get; }
+
+    public bool IsValueType
+        => throw new NotSupportedException();
 }

@@ -18,21 +18,26 @@ internal class IrBuilder
         currentBlock = entryBlock;
     }
 
-    private Register CreateRegister()
-        => new Register(registerCounter++);
-
-    private Register BinaryInstruction(BinaryInstructionKind kind, Register left, Register right)
+    private Register CreateRegister(ITypeMetadata type)
     {
-        var register = CreateRegister();
+        if (!type.IsValueType && type is not TypePointerMetadata)
+            type = new TypePointerMetadata(type);
+
+        return new Register(registerCounter++, type);
+    }
+
+    private Register BinaryInstruction(ITypeMetadata type, BinaryInstructionKind kind, Register left, Register right)
+    {
+        var register = CreateRegister(type);
         var binaryInstruction = new BinaryOperation(register, kind, left, right);
         currentBlock.AddInstruction(binaryInstruction);
 
         return register;
     }
 
-    private Register UnaryInstruction(UnaryInstructionKind kind, Register operand)
+    private Register UnaryInstruction(ITypeMetadata type, UnaryInstructionKind kind, Register operand)
     {
-        var register = CreateRegister();
+        var register = CreateRegister(type);
         var unaryInstruction = new UnaryOperation(register, kind, operand);
         currentBlock.AddInstruction(unaryInstruction);
 
@@ -68,18 +73,18 @@ internal class IrBuilder
         currentBlock.AddNext(block);
     }
 
-    public Register LoadConst(object? value)
+    public Register LoadConst(ITypeMetadata type, object? value)
     {
-        var register = CreateRegister();
+        var register = CreateRegister(type);
         var loadInstruction = new LoadConst(register, value);
         currentBlock.AddInstruction(loadInstruction);
 
         return register;
     }
 
-    public void LoadParameter(string name, int index)
+    public void LoadParameter(string name, ITypeMetadata type, int index)
     {
-        var register = CreateRegister();
+        var register = CreateRegister(type);
         var loadInstruction = new LoadParameter(register, index);
         currentBlock.AddInstruction(loadInstruction);
         AddDefinition(name, register);
@@ -87,7 +92,7 @@ internal class IrBuilder
 
     public Register Move(Register source)
     {
-        var register = CreateRegister();
+        var register = CreateRegister(source.Type);
         var move = new Move(register, source);
         currentBlock.AddInstruction(move);
 
@@ -104,7 +109,7 @@ internal class IrBuilder
 
     public Register NewArray(TypeArrayMetadata type, Register size)
     {
-        var register = CreateRegister();
+        var register = CreateRegister(type);
         var allocate = new NewArray(register, type, size);
         currentBlock.AddInstruction(allocate);
 
@@ -113,7 +118,7 @@ internal class IrBuilder
 
     public Register NewObject(ConstructorMetadata constructor, IReadOnlyList<Register> parameters)
     {
-        var register = CreateRegister();
+        var register = CreateRegister(constructor.DeclaringType);
         var allocate = new NewObject(register, constructor, parameters);
         currentBlock.AddInstruction(allocate);
 
@@ -128,60 +133,64 @@ internal class IrBuilder
 
     public Register ArrayElement(Register array, Register index)
     {
-        var register = CreateRegister();
+        // TODO:
+        var pointer = (TypePointerMetadata)array.Type;
+        var type = ((TypeArrayMetadata)pointer.Type).ItemMetadata!;
+
+        var register = CreateRegister(type);
         var element = new ArrayElement(register, array, index);
         currentBlock.AddInstruction(element);
 
         return register;
     }
 
-    public Register Add(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Add, left, right);
+    public Register Add(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Add, left, right);
 
-    public Register Sub(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Sub, left, right);
+    public Register Sub(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Sub, left, right);
 
-    public Register Mul(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Mul, left, right);
+    public Register Mul(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Mul, left, right);
 
-    public Register Div(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Div, left, right);
+    public Register Div(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Div, left, right);
 
-    public Register Mod(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Mod, left, right);
+    public Register Mod(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Mod, left, right);
 
-    public Register And(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.And, left, right);
+    public Register And(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.And, left, right);
 
-    public Register Or(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Or, left, right);
+    public Register Or(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Or, left, right);
 
-    public Register Xor(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Xor, left, right);
+    public Register Xor(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Xor, left, right);
 
-    public Register Eq(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Eq, left, right);
+    public Register Eq(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Eq, left, right);
 
-    public Register Ne(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Ne, left, right);
+    public Register Ne(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Ne, left, right);
 
-    public Register Lt(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Lt, left, right);
+    public Register Lt(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Lt, left, right);
 
-    public Register Le(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Le, left, right);
+    public Register Le(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Le, left, right);
 
-    public Register Gt(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Gt, left, right);
+    public Register Gt(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Gt, left, right);
 
-    public Register Ge(Register left, Register right)
-        => BinaryInstruction(BinaryInstructionKind.Ge, left, right);
+    public Register Ge(ITypeMetadata type, Register left, Register right)
+        => BinaryInstruction(type, BinaryInstructionKind.Ge, left, right);
 
-    public Register Neg(Register operand)
-        => UnaryInstruction(UnaryInstructionKind.Neg, operand);
+    public Register Neg(ITypeMetadata type, Register operand)
+        => UnaryInstruction(type, UnaryInstructionKind.Neg, operand);
 
-    public Register Not(Register operand)
-        => UnaryInstruction(UnaryInstructionKind.Not, operand);
+    public Register Not(ITypeMetadata type, Register operand)
+        => UnaryInstruction(type, UnaryInstructionKind.Not, operand);
 
     public Register AddAssignment(string name, Register register)
     {

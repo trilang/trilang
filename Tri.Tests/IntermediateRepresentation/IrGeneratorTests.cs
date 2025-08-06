@@ -50,10 +50,15 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadConst(new Register(0), 1),
-                new LoadConst(new Register(1), 2),
-                new BinaryOperation(new Register(2), @operator, new Register(0), new Register(1)),
-                new Return(new Register(2)),
+                new LoadConst(new Register(0, TypeMetadata.I32), 1),
+                new LoadConst(new Register(1, TypeMetadata.I32), 2),
+                new BinaryOperation(
+                    new Register(2, TypeMetadata.I32),
+                    @operator,
+                    new Register(0, TypeMetadata.I32),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new Return(new Register(2, TypeMetadata.I32)),
             ]))
         };
 
@@ -83,10 +88,15 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadConst(new Register(0), 1),
-                new LoadConst(new Register(1), 2),
-                new BinaryOperation(new Register(2), @operator, new Register(0), new Register(1)),
-                new Return(new Register(2)),
+                new LoadConst(new Register(0, TypeMetadata.I32), 1),
+                new LoadConst(new Register(1, TypeMetadata.I32), 2),
+                new BinaryOperation(
+                    new Register(2, TypeMetadata.Bool),
+                    @operator,
+                    new Register(0, TypeMetadata.I32),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new Return(new Register(2, TypeMetadata.Bool)),
             ]))
         };
 
@@ -110,9 +120,9 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new LoadConst(new Register(1), 1),
-                new Move(new Register(2), new Register(1)),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadConst(new Register(1, TypeMetadata.I32), 1),
+                new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
             ]))
         };
 
@@ -144,10 +154,15 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new LoadConst(new Register(1), 1),
-                new BinaryOperation(new Register(2), @operator, new Register(0), new Register(1)),
-                new Move(new Register(3), new Register(2)),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadConst(new Register(1, TypeMetadata.I32), 1),
+                new BinaryOperation(
+                    new Register(2, TypeMetadata.I32),
+                    @operator,
+                    new Register(0, TypeMetadata.I32),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new Move(new Register(3, TypeMetadata.I32), new Register(2, TypeMetadata.I32)),
             ]))
         };
 
@@ -174,13 +189,18 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new LoadConst(new Register(1), 1),
-                new BinaryOperation(new Register(2), Add, new Register(0), new Register(1)),
-                new Move(new Register(4), new Register(2)),
-                new LoadConst(new Register(3), 10),
-                new Move(new Register(5), new Register(3)),
-                new Return(new Register(5)),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadConst(new Register(1, TypeMetadata.I32), 1),
+                new BinaryOperation(
+                    new Register(2, TypeMetadata.I32),
+                    Add,
+                    new Register(0, TypeMetadata.I32),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new Move(new Register(4, TypeMetadata.I32), new Register(2, TypeMetadata.I32)),
+                new LoadConst(new Register(3, TypeMetadata.I32), 10),
+                new Move(new Register(5, TypeMetadata.I32), new Register(3, TypeMetadata.I32)),
+                new Return(new Register(5, TypeMetadata.I32)),
             ]))
         };
 
@@ -204,10 +224,15 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new LoadParameter(new Register(1), 1),
-                new BinaryOperation(new Register(2), Add, new Register(0), new Register(1)),
-                new Return(new Register(2)),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new BinaryOperation(
+                    new Register(2, TypeMetadata.I32),
+                    Add,
+                    new Register(0, TypeMetadata.I32),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new Return(new Register(2, TypeMetadata.I32)),
             ]))
         };
 
@@ -234,12 +259,17 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadConst(new Register(0), 1),
-                new Move(new Register(1), new Register(0)),
-                new LoadConst(new Register(2), 2),
-                new Move(new Register(3), new Register(2)),
-                new BinaryOperation(new Register(4), Add, new Register(1), new Register(3)),
-                new Return(new Register(4)),
+                new LoadConst(new Register(0, TypeMetadata.I32), 1),
+                new Move(new Register(1, TypeMetadata.I32), new Register(0, TypeMetadata.I32)),
+                new LoadConst(new Register(2, TypeMetadata.I32), 2),
+                new Move(new Register(3, TypeMetadata.I32), new Register(2, TypeMetadata.I32)),
+                new BinaryOperation(
+                    new Register(4, TypeMetadata.I32),
+                    Add,
+                    new Register(1, TypeMetadata.I32),
+                    new Register(3, TypeMetadata.I32)
+                ),
+                new Return(new Register(4, TypeMetadata.I32)),
             ]))
         };
 
@@ -263,8 +293,8 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadConst(new Register(0), null),
-                new Return(new Register(0)),
+                new LoadConst(new Register(0, TypeMetadata.Null), null),
+                new Return(new Register(0, TypeMetadata.Null)),
             ]))
         };
 
@@ -288,9 +318,13 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new UnaryOperation(new Register(1), UnaryInstructionKind.Neg, new Register(0)),
-                new Return(new Register(1)),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new UnaryOperation(
+                    new Register(1, TypeMetadata.I32),
+                    UnaryInstructionKind.Neg,
+                    new Register(0, TypeMetadata.I32)
+                ),
+                new Return(new Register(1, TypeMetadata.I32)),
             ]))
         };
 
@@ -314,9 +348,13 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new UnaryOperation(new Register(1), UnaryInstructionKind.Not, new Register(0)),
-                new Return(new Register(1)),
+                new LoadParameter(new Register(0, TypeMetadata.Bool), 0),
+                new UnaryOperation(
+                    new Register(1, TypeMetadata.Bool),
+                    UnaryInstructionKind.Not,
+                    new Register(0, TypeMetadata.Bool)
+                ),
+                new Return(new Register(1, TypeMetadata.Bool)),
             ]))
         };
 
@@ -340,9 +378,13 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new UnaryOperation(new Register(1), UnaryInstructionKind.Not, new Register(0)),
-                new Return(new Register(1)),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new UnaryOperation(
+                    new Register(1, TypeMetadata.I32),
+                    UnaryInstructionKind.Not,
+                    new Register(0, TypeMetadata.I32)
+                ),
+                new Return(new Register(1, TypeMetadata.I32)),
             ]))
         };
 
@@ -363,13 +405,21 @@ public class IrGeneratorTests
         var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayPointerType = new TypePointerMetadata(arrayType);
+
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new LoadConst(new Register(1), 0),
-                new ArrayElement(new Register(2), new Register(0), new Register(1)),
-                new Return(new Register(2)),
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                new ArrayElement(
+                    new Register(2, TypeMetadata.I32),
+                    new Register(0, arrayPointerType),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new Return(new Register(2, TypeMetadata.I32)),
             ]))
         };
 
@@ -390,15 +440,28 @@ public class IrGeneratorTests
         var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayPointerType = new TypePointerMetadata(arrayType);
+
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new LoadParameter(new Register(1), 1),
-                new LoadConst(new Register(2), 2),
-                new BinaryOperation(new Register(3), Add, new Register(1), new Register(2)),
-                new ArrayElement(new Register(4), new Register(0), new Register(3)),
-                new Return(new Register(4)),
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadConst(new Register(2, TypeMetadata.I32), 2),
+                new BinaryOperation(
+                    new Register(3, TypeMetadata.I32),
+                    Add,
+                    new Register(1, TypeMetadata.I32),
+                    new Register(2, TypeMetadata.I32)
+                ),
+                new ArrayElement(
+                    new Register(4, TypeMetadata.I32),
+                    new Register(0, arrayPointerType),
+                    new Register(3, TypeMetadata.I32)
+                ),
+                new Return(new Register(4, TypeMetadata.I32)),
             ]))
         };
 
@@ -421,13 +484,21 @@ public class IrGeneratorTests
         var ir = new IrGenerator();
         var functions = ir.Generate([tree]);
 
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayPointerType = new TypePointerMetadata(arrayType);
+
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block("entry", [
-                new LoadConst(new Register(0), 10),
-                new NewArray(new Register(1), new TypeArrayMetadata(TypeMetadata.I32), new Register(0)),
-                new Move(new Register(2), new Register(1)),
-                new Return(new Register(2)),
+                new LoadConst(new Register(0, TypeMetadata.I32), 10),
+                new NewArray(
+                    new Register(1, arrayPointerType),
+                    new TypeArrayMetadata(TypeMetadata.I32),
+                    new Register(0, TypeMetadata.I32)
+                ),
+                new Move(new Register(2, arrayPointerType), new Register(1, arrayPointerType)),
+                new Return(new Register(2, arrayPointerType)),
             ]))
         };
 
@@ -455,19 +526,24 @@ public class IrGeneratorTests
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
         var ctor = pointType.Constructors.First();
+        var pointPointerType = new TypePointerMetadata(pointType);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("Point_ctor", new Block("entry", [
-                new LoadParameter(new Register(0), 0),
-                new LoadParameter(new Register(1), 1),
-                new LoadParameter(new Register(2), 2),
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(2, TypeMetadata.I32), 2),
             ])),
             new IrFunction("test", new Block("entry", [
-                new LoadConst(new Register(0), 1),
-                new LoadConst(new Register(1), 2),
-                new NewObject(new Register(2), ctor, [new Register(0), new Register(1)]),
-                new Return(new Register(2)),
+                new LoadConst(new Register(0, TypeMetadata.I32), 1),
+                new LoadConst(new Register(1, TypeMetadata.I32), 2),
+                new NewObject(
+                    new Register(2, pointPointerType),
+                    ctor,
+                    [new Register(0, TypeMetadata.I32), new Register(1, TypeMetadata.I32)]
+                ),
+                new Return(new Register(2, pointPointerType)),
             ]))
         };
 
@@ -496,16 +572,21 @@ public class IrGeneratorTests
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameter(new Register(0), 0),
-                new LoadParameter(new Register(1), 1),
-                new BinaryOperation(new Register(2), Ge, new Register(0), new Register(1)),
-                new Branch(new Register(2), "if_0_then", "if_0_else"),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new BinaryOperation(
+                    new Register(2, TypeMetadata.Bool),
+                    Ge,
+                    new Register(0, TypeMetadata.I32),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new Branch(new Register(2, TypeMetadata.Bool), "if_0_then", "if_0_else"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new Return(new Register(0)),
+                        new Return(new Register(0, TypeMetadata.I32)),
                         new Jump("if_0_end"),
                     ],
                     [endBlock]
@@ -513,7 +594,7 @@ public class IrGeneratorTests
                 new Block(
                     "if_0_else",
                     [
-                        new Return(new Register(1)),
+                        new Return(new Register(1, TypeMetadata.I32)),
                         new Jump("if_0_end"),
                     ],
                     [endBlock]
@@ -549,25 +630,33 @@ public class IrGeneratorTests
         var functions = ir.Generate([tree]);
 
         var endBlock = new Block("if_0_end", [
-            new Phi(new Register(7), [new Register(2), new Register(6)]),
-            new Return(new Register(7)),
+            new Phi(
+                new Register(7, TypeMetadata.I32),
+                [new Register(2, TypeMetadata.I32), new Register(6, TypeMetadata.I32)]
+            ),
+            new Return(new Register(7, TypeMetadata.I32)),
         ]);
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameter(new Register(0), 0),
-                new LoadConst(new Register(1), 0),
-                new Move(new Register(2), new Register(1)),
-                new LoadConst(new Register(3), 0),
-                new BinaryOperation(new Register(4), Gt, new Register(0), new Register(3)),
-                new Branch(new Register(4), "if_0_then", "if_0_end"),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
+                new LoadConst(new Register(3, TypeMetadata.I32), 0),
+                new BinaryOperation(
+                    new Register(4, TypeMetadata.Bool),
+                    Gt,
+                    new Register(0, TypeMetadata.I32),
+                    new Register(3, TypeMetadata.I32)
+                ),
+                new Branch(new Register(4, TypeMetadata.Bool), "if_0_then", "if_0_end"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new LoadConst(new Register(5), 10),
-                        new Move(new Register(6), new Register(5)),
+                        new LoadConst(new Register(5, TypeMetadata.I32), 10),
+                        new Move(new Register(6, TypeMetadata.I32), new Register(5, TypeMetadata.I32)),
                         new Jump("if_0_end"),
                     ],
                     [endBlock]
@@ -611,25 +700,35 @@ public class IrGeneratorTests
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameter(new Register(0), 0),
-                new LoadConst(new Register(1), 0),
-                new BinaryOperation(new Register(2), Gt, new Register(0), new Register(1)),
-                new Branch(new Register(2), "if_0_then", "if_0_else"),
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                new BinaryOperation(
+                    new Register(2, TypeMetadata.Bool),
+                    Gt,
+                    new Register(0, TypeMetadata.I32),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new Branch(new Register(2, TypeMetadata.Bool), "if_0_then", "if_0_else"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new LoadConst(new Register(3), 10),
-                        new BinaryOperation(new Register(4), Gt, new Register(0), new Register(3)),
-                        new Branch(new Register(4), "if_1_then", "if_1_else"),
+                        new LoadConst(new Register(3, TypeMetadata.I32), 10),
+                        new BinaryOperation(
+                            new Register(4, TypeMetadata.Bool),
+                            Gt,
+                            new Register(0, TypeMetadata.I32),
+                            new Register(3, TypeMetadata.I32)
+                        ),
+                        new Branch(new Register(4, TypeMetadata.Bool), "if_1_then", "if_1_else"),
                     ],
                     [
                         new Block(
                             "if_1_then",
                             [
-                                new LoadConst(new Register(5), 1),
-                                new Return(new Register(5)),
+                                new LoadConst(new Register(5, TypeMetadata.I32), 1),
+                                new Return(new Register(5, TypeMetadata.I32)),
                                 new Jump("if_1_end"),
                             ],
                             [endBlock1]
@@ -637,8 +736,8 @@ public class IrGeneratorTests
                         new Block(
                             "if_1_else",
                             [
-                                new LoadConst(new Register(6), 2),
-                                new Return(new Register(6)),
+                                new LoadConst(new Register(6, TypeMetadata.I32), 2),
+                                new Return(new Register(6, TypeMetadata.I32)),
                                 new Jump("if_1_end"),
                             ],
                             [endBlock1]
@@ -648,8 +747,8 @@ public class IrGeneratorTests
                 new Block(
                     "if_0_else",
                     [
-                        new LoadConst(new Register(7), 0),
-                        new Return(new Register(7)),
+                        new LoadConst(new Register(7, TypeMetadata.I32), 0),
+                        new Return(new Register(7, TypeMetadata.I32)),
                         new Jump("if_0_end"),
                     ],
                     [endBlock0]
@@ -687,27 +786,35 @@ public class IrGeneratorTests
         var functions = ir.Generate([tree]);
 
         var endBlock = new Block("if_0_end", [
-            new Phi(new Register(10), [new Register(8), new Register(9)]),
-            new Return(new Register(10))
+            new Phi(
+                new Register(10, TypeMetadata.I32),
+                [new Register(8, TypeMetadata.I32), new Register(9, TypeMetadata.I32)]
+            ),
+            new Return(new Register(10, TypeMetadata.I32))
         ]);
         var expected = new List<IrFunction>
         {
             new IrFunction("test", new Block(
                 "entry",
                 [
-                    new LoadParameter(new Register(0), 0),
-                    new LoadConst(new Register(1), 0),
-                    new Move(new Register(2), new Register(1)),
-                    new LoadConst(new Register(3), 0),
-                    new BinaryOperation(new Register(4), Gt, new Register(0), new Register(3)),
-                    new Branch(new Register(4), "if_0_then", "if_0_else"),
+                    new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                    new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                    new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
+                    new LoadConst(new Register(3, TypeMetadata.I32), 0),
+                    new BinaryOperation(
+                        new Register(4, TypeMetadata.Bool),
+                        Gt,
+                        new Register(0, TypeMetadata.I32),
+                        new Register(3, TypeMetadata.I32)
+                    ),
+                    new Branch(new Register(4, TypeMetadata.Bool), "if_0_then", "if_0_else"),
                 ],
                 [
                     new Block(
                         "if_0_then",
                         [
-                            new LoadConst(new Register(5), 1),
-                            new Move(new Register(9), new Register(5)),
+                            new LoadConst(new Register(5, TypeMetadata.I32), 1),
+                            new Move(new Register(9, TypeMetadata.I32), new Register(5, TypeMetadata.I32)),
                             new Jump("if_0_end"),
                         ],
                         [endBlock]
@@ -715,9 +822,13 @@ public class IrGeneratorTests
                     new Block(
                         "if_0_else",
                         [
-                            new LoadConst(new Register(6), 1),
-                            new UnaryOperation(new Register(7), UnaryInstructionKind.Neg, new Register(6)),
-                            new Move(new Register(8), new Register(7)),
+                            new LoadConst(new Register(6, TypeMetadata.I32), 1),
+                            new UnaryOperation(
+                                new Register(7, TypeMetadata.I32),
+                                UnaryInstructionKind.Neg,
+                                new Register(6, TypeMetadata.I32)
+                            ),
+                            new Move(new Register(8, TypeMetadata.I32), new Register(7, TypeMetadata.I32)),
                             new Jump("if_0_end"),
                         ],
                         [endBlock]
@@ -750,25 +861,38 @@ public class IrGeneratorTests
 
         var loopEnd = new Block(
             "loop_0_end", [
-                new Return(new Register(6))
+                new Return(new Register(6, TypeMetadata.I32))
             ]
         );
         var ifThen = new Block(
             "if_0_then",
             [
-                new LoadConst(new Register(4), 1),
-                new BinaryOperation(new Register(5), Add, new Register(6), new Register(4)),
-                new Move(new Register(7), new Register(5)),
+                new LoadConst(new Register(4, TypeMetadata.I32), 1),
+                new BinaryOperation(
+                    new Register(5, TypeMetadata.I32),
+                    Add,
+                    new Register(6, TypeMetadata.I32),
+                    new Register(4, TypeMetadata.I32)
+                ),
+                new Move(new Register(7, TypeMetadata.I32), new Register(5, TypeMetadata.I32)),
                 new Jump("loop_0_start"),
             ]
         );
         var loopStart = new Block(
             "loop_0_start",
             [
-                new Phi(new Register(6), [new Register(1), new Register(7)]),
-                new LoadConst(new Register(2), 10),
-                new BinaryOperation(new Register(3), Lt, new Register(6), new Register(2)),
-                new Branch(new Register(3), "if_0_then", "loop_0_end"),
+                new Phi(
+                    new Register(6, TypeMetadata.I32),
+                    [new Register(1, TypeMetadata.I32), new Register(7, TypeMetadata.I32)]
+                ),
+                new LoadConst(new Register(2, TypeMetadata.I32), 10),
+                new BinaryOperation(
+                    new Register(3, TypeMetadata.Bool),
+                    Lt,
+                    new Register(6, TypeMetadata.I32),
+                    new Register(2, TypeMetadata.I32)
+                ),
+                new Branch(new Register(3, TypeMetadata.Bool), "if_0_then", "loop_0_end"),
             ],
             [ifThen, loopEnd]
         );
@@ -776,8 +900,8 @@ public class IrGeneratorTests
         var entry = new Block(
             "entry",
             [
-                new LoadConst(new Register(0), 0),
-                new Move(new Register(1), new Register(0)),
+                new LoadConst(new Register(0, TypeMetadata.I32), 0),
+                new Move(new Register(1, TypeMetadata.I32), new Register(0, TypeMetadata.I32)),
                 new Jump("loop_0_start"),
             ],
             [loopStart]

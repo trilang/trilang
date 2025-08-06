@@ -5,21 +5,21 @@ namespace Trilang.Metadata;
 // TODO: immutable metadata
 public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 {
-    public static readonly TypeMetadata Void = new TypeMetadata("void");
-    public static readonly TypeMetadata Null = new TypeMetadata("null");
-    public static readonly TypeMetadata I8 = new TypeMetadata("i8");
-    public static readonly TypeMetadata I16 = new TypeMetadata("i16");
-    public static readonly TypeMetadata I32 = new TypeMetadata("i32");
-    public static readonly TypeMetadata I64 = new TypeMetadata("i64");
-    public static readonly TypeMetadata U8 = new TypeMetadata("u8");
-    public static readonly TypeMetadata U16 = new TypeMetadata("u16");
-    public static readonly TypeMetadata U32 = new TypeMetadata("u32");
-    public static readonly TypeMetadata U64 = new TypeMetadata("u64");
-    public static readonly TypeMetadata F32 = new TypeMetadata("f32");
-    public static readonly TypeMetadata F64 = new TypeMetadata("f64");
-    public static readonly TypeMetadata Char = new TypeMetadata("char");
-    public static readonly TypeMetadata Bool = new TypeMetadata("bool");
-    public static readonly TypeMetadata String = new TypeMetadata("string");
+    public static readonly TypeMetadata Void = new TypeMetadata("void", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata Null = new TypeMetadata("null", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata I8 = new TypeMetadata("i8", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata I16 = new TypeMetadata("i16", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata I32 = new TypeMetadata("i32", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata I64 = new TypeMetadata("i64", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata U8 = new TypeMetadata("u8", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata U16 = new TypeMetadata("u16", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata U32 = new TypeMetadata("u32", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata U64 = new TypeMetadata("u64", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata F32 = new TypeMetadata("f32", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata F64 = new TypeMetadata("f64", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata Char = new TypeMetadata("char", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata Bool = new TypeMetadata("bool", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata String = new TypeMetadata("string", [], [], [], [], [], [], false);
 
     private readonly List<ITypeMetadata> genericArguments;
     private readonly HashSet<InterfaceMetadata> interfaces;
@@ -28,7 +28,27 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     private readonly HashSet<ConstructorMetadata> constructors;
     private readonly HashSet<MethodMetadata> methods;
 
-    public TypeMetadata(string name) : this(name, [], [], [], [], [], [])
+    private TypeMetadata(
+        string name,
+        IEnumerable<ITypeMetadata> genericArguments,
+        IEnumerable<InterfaceMetadata> interfaces,
+        IEnumerable<FieldMetadata> fields,
+        IEnumerable<PropertyMetadata> properties,
+        IEnumerable<ConstructorMetadata> constructors,
+        IEnumerable<MethodMetadata> methods,
+        bool isValueType)
+    {
+        Name = name;
+        this.genericArguments = [..genericArguments];
+        this.interfaces = [..interfaces];
+        this.fields = [..fields];
+        this.properties = [..properties];
+        this.constructors = [..constructors];
+        this.methods = [..methods];
+        IsValueType = isValueType;
+    }
+
+    public TypeMetadata(string name) : this(name, [], [], [], [], [], [], false)
     {
     }
 
@@ -39,15 +59,8 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         IEnumerable<FieldMetadata> fields,
         IEnumerable<PropertyMetadata> properties,
         IEnumerable<ConstructorMetadata> constructors,
-        IEnumerable<MethodMetadata> methods)
+        IEnumerable<MethodMetadata> methods) : this(name, genericArguments, interfaces, fields, properties, constructors, methods, false)
     {
-        Name = name;
-        this.genericArguments = [..genericArguments];
-        this.interfaces = [..interfaces];
-        this.fields = [..fields];
-        this.properties = [..properties];
-        this.constructors = [..constructors];
-        this.methods = [..methods];
     }
 
     public static bool operator ==(TypeMetadata? left, TypeMetadata? right)
@@ -158,4 +171,6 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public IReadOnlyCollection<ConstructorMetadata> Constructors => constructors;
 
     public IReadOnlyCollection<MethodMetadata> Methods => methods;
+
+    public bool IsValueType { get; }
 }

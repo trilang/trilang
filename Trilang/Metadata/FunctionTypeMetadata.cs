@@ -58,4 +58,7 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     public IReadOnlyList<ITypeMetadata> ParameterTypes => parameterTypes;
 
     public ITypeMetadata ReturnType { get; set; }
+
+    public bool IsValueType
+        => false;
 }

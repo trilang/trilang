@@ -93,7 +93,12 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     public InterfaceMethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(m => m.Name == name);
 
-    public IReadOnlyCollection<InterfacePropertyMetadata> Properties => properties;
+    public IReadOnlyCollection<InterfacePropertyMetadata> Properties
+        => properties;
 
-    public IReadOnlyCollection<InterfaceMethodMetadata> Methods => methods;
+    public IReadOnlyCollection<InterfaceMethodMetadata> Methods
+        => methods;
+
+    public bool IsValueType
+        => false;
 }

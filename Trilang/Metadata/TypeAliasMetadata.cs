@@ -84,4 +84,7 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
     public IReadOnlyCollection<ITypeMetadata> GenericArguments => genericArguments;
 
     public ITypeMetadata? Type { get; set; }
+
+    public bool IsValueType
+        => Type?.IsValueType ?? false;
 }

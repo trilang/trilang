@@ -53,4 +53,7 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;
+
+    public bool IsValueType
+        => true;
 }
