@@ -2,8 +2,9 @@ namespace Trilang.Metadata;
 
 public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
 {
-    public FieldMetadata(string name, ITypeMetadata type)
+    public FieldMetadata(TypeMetadata declaringType, string name, ITypeMetadata type)
     {
+        DeclaringType = declaringType;
         Name = name;
         Type = type;
     }
@@ -45,6 +46,8 @@ public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
 
     public override string ToString()
         => $"{Name}: {Type}";
+
+    public TypeMetadata DeclaringType { get; }
 
     public string Name { get; }
 

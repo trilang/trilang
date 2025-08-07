@@ -49,7 +49,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         point.AddMethod(count.Getter);
         point.AddMethod(count.Setter);
 
-        var backingField = new FieldMetadata($"<>_{count.Name}", count.Type);
+        var backingField = new FieldMetadata(point, $"<>_{count.Name}", count.Type);
         point.AddField(backingField);
 
         var valueParameter = count.Setter.Parameters[0];
@@ -201,7 +201,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         pointType.AddMethod(xProperty.Getter);
         pointType.AddMethod(xProperty.Setter);
 
-        var xBackingField = new FieldMetadata($"<>_{xProperty.Name}", xProperty.Type);
+        var xBackingField = new FieldMetadata(pointType, $"<>_{xProperty.Name}", xProperty.Type);
         pointType.AddField(xBackingField);
 
         var xValueParameter = xProperty.Setter.Parameters[0];
@@ -219,7 +219,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         testType.AddMethod(pointProperty.Getter);
         testType.AddMethod(pointProperty.Setter);
 
-        var pointBackingField = new FieldMetadata($"<>_{pointProperty.Name}", pointProperty.Type);
+        var pointBackingField = new FieldMetadata(testType, $"<>_{pointProperty.Name}", pointProperty.Type);
         testType.AddField(pointBackingField);
 
         var pointValueParameter = pointProperty.Setter.Parameters[0];
@@ -439,7 +439,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         point.AddMethod(xProperty.Getter);
         point.AddMethod(xProperty.Setter);
 
-        var xBackingField = new FieldMetadata($"<>_{xProperty.Name}", xProperty.Type);
+        var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
         var valueParameter = xProperty.Setter.Parameters[0];
@@ -592,7 +592,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         point.AddMethod(xProperty.Getter);
         point.AddMethod(xProperty.Setter);
 
-        var xBackingField = new FieldMetadata($"<>_{xProperty.Name}", xProperty.Type);
+        var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
         var valueParameter = xProperty.Setter.Parameters[0];
@@ -769,7 +769,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         point.AddMethod(xProperty.Getter);
         point.AddMethod(xProperty.Setter);
 
-        var xBackingField = new FieldMetadata($"<>_{xProperty.Name}", xProperty.Type);
+        var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
         var valueParameter = xProperty.Setter.Parameters[0];
@@ -943,7 +943,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         point.AddMethod(xProperty.Getter);
         point.AddMethod(xProperty.Setter);
 
-        var xBackingField = new FieldMetadata($"<>_{xProperty.Name}", xProperty.Type);
+        var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
         var valueParameter = xProperty.Setter.Parameters[0];

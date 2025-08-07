@@ -40,7 +40,7 @@ public class GenerateGettersAndSettersTests
             "count",
             TypeMetadata.I32
         );
-        var fieldMetadata = new FieldMetadata($"<>_{propertyMetadata.Name}", propertyMetadata.Type);
+        var fieldMetadata = new FieldMetadata(typeMetadata, $"<>_{propertyMetadata.Name}", propertyMetadata.Type);
         var valueParameterMetadata = propertyMetadata.Setter.Parameters[0];
 
         var expected = new PropertyDeclarationNode(
@@ -119,7 +119,7 @@ public class GenerateGettersAndSettersTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public
         );
-        var fieldMetadata = new FieldMetadata($"<>_{propertyMetadata.Name}", propertyMetadata.Type);
+        var fieldMetadata = new FieldMetadata(typeMetadata, $"<>_{propertyMetadata.Name}", propertyMetadata.Type);
         var valueParameterMetadata = propertyMetadata.Setter.Parameters[0];
 
         var expected = new PropertyDeclarationNode(
@@ -205,7 +205,7 @@ public class GenerateGettersAndSettersTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public
         );
-        var fieldMetadata = new FieldMetadata($"<>_{propertyMetadata.Name}", propertyMetadata.Type);
+        var fieldMetadata = new FieldMetadata(typeMetadata, $"<>_{propertyMetadata.Name}", propertyMetadata.Type);
         var valueParameterMetadata = propertyMetadata.Setter.Parameters[0];
 
         var expected = new PropertyDeclarationNode(

@@ -79,4 +79,25 @@ public class CheckStaticAndInstanceMembersAccessTests
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("'Test' can't be used to call static members."));
     }
+
+    [Test]
+    public void AccessInstanceMethodWithThisTest()
+    {
+        var tree = Parse(
+            """
+            public type Test {
+                public method1(): void { }
+
+                public method2(): void {
+                    this.method1();
+                }
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.Nothing);
+    }
 }

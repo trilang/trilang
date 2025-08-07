@@ -362,7 +362,6 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
     private static void VisitFirstMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
     {
-        var typeProvider = node.SymbolTable!.TypeProvider;
         var symbol = node.SymbolTable!.GetId(node.Name);
         if (symbol is not null)
         {
@@ -384,7 +383,9 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
                     => methodNode.Metadata,
 
                 TypeDeclarationNode typeDeclarationNode
-                    => typeDeclarationNode.Metadata,
+                    => node.IsThis
+                        ? new ParameterMetadata(MemberAccessExpressionNode.This, typeDeclarationNode.Metadata!)
+                        : typeDeclarationNode.Metadata,
 
                 _ => throw new SemanticAnalysisException(),
             };
@@ -393,6 +394,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
 
         // static access
+        var typeProvider = node.SymbolTable!.TypeProvider;
         var type = typeProvider.GetType(node.Name);
         if (type is not null)
         {
