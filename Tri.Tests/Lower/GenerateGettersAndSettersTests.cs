@@ -50,7 +50,14 @@ public class GenerateGettersAndSettersTests
                 AccessModifier.Public,
                 new BlockStatementNode([
                     new ReturnStatementNode(
-                        new MemberAccessExpressionNode(fieldMetadata.Name)
+                        new MemberAccessExpressionNode(
+                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                            {
+                                Reference = typeMetadata,
+                                AccessKind = PropertyAccessKind.Read,
+                            },
+                            fieldMetadata.Name
+                        )
                         {
                             Reference = fieldMetadata,
                             AccessKind = PropertyAccessKind.Read,
@@ -67,7 +74,14 @@ public class GenerateGettersAndSettersTests
                     new ExpressionStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Assignment,
-                            new MemberAccessExpressionNode(fieldMetadata.Name)
+                            new MemberAccessExpressionNode(
+                                new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                {
+                                    Reference = typeMetadata,
+                                    AccessKind = PropertyAccessKind.Read,
+                                },
+                                fieldMetadata.Name
+                            )
                             {
                                 Reference = fieldMetadata,
                                 AccessKind = PropertyAccessKind.Write,
@@ -129,7 +143,14 @@ public class GenerateGettersAndSettersTests
                 AccessModifier.Public,
                 new BlockStatementNode([
                     new ReturnStatementNode(
-                        new MemberAccessExpressionNode(fieldMetadata.Name)
+                        new MemberAccessExpressionNode(
+                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                            {
+                                Reference = typeMetadata,
+                                AccessKind = PropertyAccessKind.Read,
+                            },
+                            fieldMetadata.Name
+                        )
                         {
                             Reference = fieldMetadata,
                             AccessKind = PropertyAccessKind.Read,
@@ -146,7 +167,14 @@ public class GenerateGettersAndSettersTests
                     new ExpressionStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Assignment,
-                            new MemberAccessExpressionNode(fieldMetadata.Name)
+                            new MemberAccessExpressionNode(
+                                new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                {
+                                    Reference = typeMetadata,
+                                    AccessKind = PropertyAccessKind.Read,
+                                },
+                                fieldMetadata.Name
+                            )
                             {
                                 Reference = fieldMetadata,
                                 AccessKind = PropertyAccessKind.Write,
@@ -215,7 +243,14 @@ public class GenerateGettersAndSettersTests
                 AccessModifier.Public,
                 new BlockStatementNode([
                     new ReturnStatementNode(
-                        new MemberAccessExpressionNode(fieldMetadata.Name)
+                        new MemberAccessExpressionNode(
+                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                            {
+                                Reference = typeMetadata,
+                                AccessKind = PropertyAccessKind.Read,
+                            },
+                            fieldMetadata.Name
+                        )
                         {
                             Reference = fieldMetadata,
                             AccessKind = PropertyAccessKind.Read,
@@ -232,7 +267,14 @@ public class GenerateGettersAndSettersTests
                     new ExpressionStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Assignment,
-                            new MemberAccessExpressionNode(fieldMetadata.Name)
+                            new MemberAccessExpressionNode(
+                                new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                {
+                                    Reference = typeMetadata,
+                                    AccessKind = PropertyAccessKind.Read,
+                                },
+                                fieldMetadata.Name
+                            )
                             {
                                 Reference = fieldMetadata,
                                 AccessKind = PropertyAccessKind.Write,

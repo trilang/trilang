@@ -170,7 +170,13 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
         {
             Debug.Assert(currentField is not null);
 
-            return new MemberAccessExpressionNode(currentField.Name)
+            var thisMember = new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+            {
+                Reference = currentField.DeclaringType,
+                AccessKind = PropertyAccessKind.Read,
+            };
+
+            return new MemberAccessExpressionNode(thisMember, currentField.Name)
             {
                 Reference = currentField,
                 AccessKind = node.AccessKind,

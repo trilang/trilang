@@ -74,7 +74,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             AccessModifier.Public,
                             new BlockStatementNode([
                                 new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(backingField.Name)
+                                    new MemberAccessExpressionNode(
+                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                        {
+                                            Reference = point,
+                                            AccessKind = PropertyAccessKind.Read,
+                                        },
+                                        backingField.Name
+                                    )
                                     {
                                         Reference = backingField,
                                         AccessKind = PropertyAccessKind.Read,
@@ -91,7 +98,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new ExpressionStatementNode(
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(backingField.Name)
+                                        new MemberAccessExpressionNode(
+                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                            {
+                                                Reference = point,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
+                                            backingField.Name
+                                        )
                                         {
                                             Reference = backingField,
                                             AccessKind = PropertyAccessKind.Write,
@@ -245,7 +259,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             AccessModifier.Public,
                             new BlockStatementNode([
                                 new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(xBackingField.Name)
+                                    new MemberAccessExpressionNode(
+                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                        {
+                                            Reference = pointType,
+                                            AccessKind = PropertyAccessKind.Read,
+                                        },
+                                        xBackingField.Name
+                                    )
                                     {
                                         Reference = xBackingField,
                                         AccessKind = PropertyAccessKind.Read,
@@ -262,7 +283,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new ExpressionStatementNode(
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(xBackingField.Name)
+                                        new MemberAccessExpressionNode(
+                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                            {
+                                                Reference = pointType,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
+                                            xBackingField.Name
+                                        )
                                         {
                                             Reference = xBackingField,
                                             AccessKind = PropertyAccessKind.Write,
@@ -306,7 +334,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             AccessModifier.Public,
                             new BlockStatementNode([
                                 new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(pointBackingField.Name)
+                                    new MemberAccessExpressionNode(
+                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                        {
+                                            Reference = testType,
+                                            AccessKind = PropertyAccessKind.Read,
+                                        },
+                                        pointBackingField.Name
+                                    )
                                     {
                                         Reference = pointBackingField,
                                         AccessKind = PropertyAccessKind.Read,
@@ -323,7 +358,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new ExpressionStatementNode(
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(pointBackingField.Name)
+                                        new MemberAccessExpressionNode(
+                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                            {
+                                                Reference = testType,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
+                                            pointBackingField.Name
+                                        )
                                         {
                                             Reference = pointBackingField,
                                             AccessKind = PropertyAccessKind.Write,
@@ -464,7 +506,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             AccessModifier.Public,
                             new BlockStatementNode([
                                 new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(xBackingField.Name)
+                                    new MemberAccessExpressionNode(
+                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                        {
+                                            Reference = point,
+                                            AccessKind = PropertyAccessKind.Read,
+                                        },
+                                        xBackingField.Name
+                                    )
                                     {
                                         Reference = xBackingField,
                                         AccessKind = PropertyAccessKind.Read,
@@ -481,7 +530,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new ExpressionStatementNode(
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(xBackingField.Name)
+                                        new MemberAccessExpressionNode(
+                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                            {
+                                                Reference = point,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
+                                            xBackingField.Name
+                                        )
                                         {
                                             Reference = xBackingField,
                                             AccessKind = PropertyAccessKind.Write,
@@ -618,7 +674,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             AccessModifier.Public,
                             new BlockStatementNode([
                                 new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(xBackingField.Name)
+                                    new MemberAccessExpressionNode(
+                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                        {
+                                            Reference = point,
+                                            AccessKind = PropertyAccessKind.Read,
+                                        },
+                                        xBackingField.Name
+                                    )
                                     {
                                         Reference = xBackingField,
                                         AccessKind = PropertyAccessKind.Read,
@@ -635,7 +698,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new ExpressionStatementNode(
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(xBackingField.Name)
+                                        new MemberAccessExpressionNode(
+                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                            {
+                                                Reference = point,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
+                                            xBackingField.Name
+                                        )
                                         {
                                             Reference = xBackingField,
                                             AccessKind = PropertyAccessKind.Write,
@@ -794,7 +864,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             AccessModifier.Public,
                             new BlockStatementNode([
                                 new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(xBackingField.Name)
+                                    new MemberAccessExpressionNode(
+                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                        {
+                                            Reference = point,
+                                            AccessKind = PropertyAccessKind.Read,
+                                        },
+                                        xBackingField.Name
+                                    )
                                     {
                                         Reference = xBackingField,
                                         AccessKind = PropertyAccessKind.Read,
@@ -811,7 +888,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new ExpressionStatementNode(
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(xBackingField.Name)
+                                        new MemberAccessExpressionNode(
+                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                            {
+                                                Reference = point,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
+                                            xBackingField.Name
+                                        )
                                         {
                                             Reference = xBackingField,
                                             AccessKind = PropertyAccessKind.Write,
@@ -969,7 +1053,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             AccessModifier.Public,
                             new BlockStatementNode([
                                 new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(xBackingField.Name)
+                                    new MemberAccessExpressionNode(
+                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                        {
+                                            Reference = point,
+                                            AccessKind = PropertyAccessKind.Read,
+                                        },
+                                        xBackingField.Name
+                                    )
                                     {
                                         Reference = xBackingField,
                                         AccessKind = PropertyAccessKind.Read,
@@ -986,7 +1077,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new ExpressionStatementNode(
                                     new BinaryExpressionNode(
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(xBackingField.Name)
+                                        new MemberAccessExpressionNode(
+                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                            {
+                                                Reference = point,
+                                                AccessKind = PropertyAccessKind.Read,
+                                            },
+                                            xBackingField.Name
+                                        )
                                         {
                                             Reference = xBackingField,
                                             AccessKind = PropertyAccessKind.Write,
