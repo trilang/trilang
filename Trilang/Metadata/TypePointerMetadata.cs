@@ -42,6 +42,9 @@ public class TypePointerMetadata : ITypeMetadata, IEquatable<TypePointerMetadata
     public override string ToString()
         => $"{Type}*";
 
+    public IMetadata? GetMember(string name)
+        => Type.GetMember(name);
+
     public ITypeMetadata Type { get; }
 
     public bool IsValueType

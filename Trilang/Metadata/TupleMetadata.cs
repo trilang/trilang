@@ -51,6 +51,9 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     public void AddType(ITypeMetadata type)
         => types.Add(type);
 
+    public IMetadata? GetMember(string name)
+        => null;
+
     public IReadOnlyList<ITypeMetadata> Types
         => types;
 

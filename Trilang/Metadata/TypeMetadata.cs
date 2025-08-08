@@ -131,6 +131,9 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public void AddField(FieldMetadata field)
         => fields.Add(field);
 
+    public FieldMetadata? GetField(string name)
+        => fields.FirstOrDefault(f => f.Name == name);
+
     public PropertyMetadata? GetProperty(string name)
         => properties.FirstOrDefault(f => f.Name == name);
 
@@ -157,6 +160,11 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         if (!methods.Add(method))
             throw new ArgumentException($"Method with name {method.Name} already exists in type {Name}");
     }
+
+    public IMetadata? GetMember(string name)
+        => GetProperty(name) ??
+           GetMethod(name) ??
+           GetField(name) as IMetadata;
 
     public string Name { get; }
 

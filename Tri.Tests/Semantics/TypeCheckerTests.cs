@@ -708,7 +708,7 @@ public class TypeCheckerTests
         Assert.That(
             () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Cannot find member 'x' in type 'Point'"));
+                .And.Message.EqualTo("Cannot find member 'x' in 'Point'"));
     }
 
     [Test]
@@ -758,7 +758,7 @@ public class TypeCheckerTests
         Assert.That(
             () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Cannot find member 'c' in interface 'Point'"));
+                .And.Message.EqualTo("Cannot find member 'c' in 'Point'"));
     }
 
     [Test]

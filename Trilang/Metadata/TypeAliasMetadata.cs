@@ -79,9 +79,13 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
     public void AddGenericArgument(ITypeMetadata genericArgument)
         => genericArguments.Add(genericArgument);
 
+    public IMetadata? GetMember(string name)
+        => Type?.GetMember(name);
+
     public string Name { get; }
 
-    public IReadOnlyCollection<ITypeMetadata> GenericArguments => genericArguments;
+    public IReadOnlyCollection<ITypeMetadata> GenericArguments
+        => genericArguments;
 
     public ITypeMetadata? Type { get; set; }
 

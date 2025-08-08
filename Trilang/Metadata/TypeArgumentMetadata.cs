@@ -42,6 +42,9 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
     public override string ToString()
         => Name;
 
+    public IMetadata? GetMember(string name)
+        => null;
+
     public string Name { get; }
 
     public bool IsValueType

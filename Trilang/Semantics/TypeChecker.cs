@@ -360,7 +360,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             throw new SemanticAnalysisException($"Cannot determine return type for member '{node.Name}'");
     }
 
-    private static void VisitFirstMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
+    private static void VisitFirstMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext _)
     {
         var symbol = node.SymbolTable!.GetId(node.Name);
         if (symbol is not null)
@@ -410,48 +410,9 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
     {
         node.Member!.Accept(this, context);
 
-        var returnTypeMetadata = node.Member.ReturnTypeMetadata.Unpack();
-        if (returnTypeMetadata is TypeMetadata type)
-        {
-            var property = type.GetProperty(node.Name);
-            if (property is not null)
-            {
-                node.Reference = property;
-
-                return;
-            }
-
-            var method = type.GetMethod(node.Name);
-            if (method is not null)
-            {
-                node.Reference = method;
-
-                return;
-            }
-
-            throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in type '{node.Member.ReturnTypeMetadata}'");
-        }
-
-        if (returnTypeMetadata is InterfaceMetadata @interface)
-        {
-            var property = @interface.GetProperty(node.Name);
-            if (property is not null)
-            {
-                node.Reference = property;
-
-                return;
-            }
-
-            var method = @interface.GetMethod(node.Name);
-            if (method is not null)
-            {
-                node.Reference = method;
-
-                return;
-            }
-
-            throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in interface '{node.Member.ReturnTypeMetadata}'");
-        }
+        var returnTypeMetadata = node.Member.ReturnTypeMetadata;
+        node.Reference = returnTypeMetadata!.GetMember(node.Name) ??
+                         throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in '{returnTypeMetadata}'");
     }
 
     public void VisitMethod(MethodDeclarationNode node, TypeCheckerContext context)

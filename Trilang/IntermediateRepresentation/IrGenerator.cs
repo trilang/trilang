@@ -79,7 +79,7 @@ public class IrGenerator
         var builder = new IrBuilder();
         var i = 0;
 
-        if (node.Metadata!.IsStatic)
+        if (!node.Metadata!.IsStatic)
             builder.LoadParameter(MemberAccessExpressionNode.This, node.Metadata!.DeclaringType, i++);
 
         for (; i < node.Parameters.Count; i++)

@@ -55,6 +55,9 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     public void AddParameter(ITypeMetadata parameter)
         => parameterTypes.Add(parameter);
 
+    public IMetadata? GetMember(string name)
+        => null;
+
     public IReadOnlyList<ITypeMetadata> ParameterTypes => parameterTypes;
 
     public ITypeMetadata ReturnType { get; set; }

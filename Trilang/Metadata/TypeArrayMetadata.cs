@@ -46,6 +46,9 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
     public override string ToString()
         => $"{ItemMetadata}[]";
 
+    public IMetadata? GetMember(string name)
+        => null;
+
     public ITypeMetadata? ItemMetadata { get; set; }
 
     public bool IsValueType
