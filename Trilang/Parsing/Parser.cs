@@ -714,10 +714,12 @@ public class Parser
         {
             if (context.Reader.Check(TokenKind.Dot))
             {
-                if (!context.Reader.Check(TokenKind.Identifier, out var token))
+                if (context.Reader.Check(TokenKind.Identifier, out var id))
+                    member = new MemberAccessExpressionNode(member, id.Identifier);
+                else if (context.Reader.Check(TokenKind.Number, out var number))
+                    member = new MemberAccessExpressionNode(member, number.Number.ToString());
+                else
                     throw new ParseException("Expected an identifier.");
-
-                member = new MemberAccessExpressionNode(member, token.Identifier);
             }
             else if (context.Reader.Check(TokenKind.OpenBracket))
             {

@@ -82,6 +82,9 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
 
     public IReadOnlyList<IExpressionNode> Parameters { get; }
 
+    public FunctionTypeMetadata? Metadata
+        => Member.ReturnTypeMetadata as FunctionTypeMetadata;
+
     public ITypeMetadata? ReturnTypeMetadata
-        => (Member.ReturnTypeMetadata as FunctionTypeMetadata)?.ReturnType;
+        => Metadata?.ReturnType;
 }

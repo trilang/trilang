@@ -3,13 +3,20 @@ namespace Trilang.Metadata;
 public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
 {
     private readonly List<ITypeMetadata> types;
+    private readonly List<FieldMetadata> fields;
 
     public TupleMetadata() : this([])
     {
     }
 
     public TupleMetadata(IEnumerable<ITypeMetadata> types)
-        => this.types = [..types];
+    {
+        this.types = [];
+        this.fields = [];
+
+        foreach (var type in types)
+            AddType(type);
+    }
 
     public static bool operator ==(TupleMetadata? left, TupleMetadata? right)
         => Equals(left, right);
@@ -49,10 +56,15 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         => $"({string.Join(", ", types)})";
 
     public void AddType(ITypeMetadata type)
-        => types.Add(type);
+    {
+        var name = types.Count.ToString();
+
+        types.Add(type);
+        fields.Add(new FieldMetadata(this, name, type));
+    }
 
     public IMetadata? GetMember(string name)
-        => null;
+        => fields.FirstOrDefault(f => f.Name == name);
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;

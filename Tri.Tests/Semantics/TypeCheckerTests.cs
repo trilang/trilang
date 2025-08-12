@@ -1183,4 +1183,41 @@ public class TypeCheckerTests
         Assert.That(asExp, Is.Not.Null);
         Assert.That(asExp.ReturnTypeMetadata, Is.EqualTo(expectedType).Using(new MetadataComparer()));
     }
+
+    [Test]
+    public void TupleMemberAccessTest()
+    {
+        var tree = Parse(
+            """
+            function test(a: (i32, string)): string {
+                return a.1;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var tupleMember = tree.Find<MemberAccessExpressionNode>();
+        Assert.That(tupleMember, Is.Not.Null);
+        Assert.That(tupleMember.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.String).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void TupleMemberAccessIndexOutsideTest()
+    {
+        var tree = Parse(
+            """
+            function test(a: (i32, string)): string {
+                return a.2;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Cannot find member '2' in '(i32, string)'")
+        );
+    }
 }

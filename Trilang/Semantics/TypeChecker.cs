@@ -106,6 +106,12 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         else if (node.Kind is Assignment or AdditionAssignment or
                      SubtractionAssignment or MultiplicationAssignment or
                      DivisionAssignment or ModulusAssignment &&
+                 node.Left is MemberAccessExpressionNode or ArrayAccessExpressionNode &&
+                 Equals(node.Left.ReturnTypeMetadata, node.Right.ReturnTypeMetadata))
+        {
+            node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
+        }
+        else if (node.Kind is AdditionAssignment or SubtractionAssignment or MultiplicationAssignment or DivisionAssignment or ModulusAssignment &&
                  node.Left is MemberAccessExpressionNode &&
                  (Equals(node.Right.ReturnTypeMetadata, I8) ||
                   Equals(node.Right.ReturnTypeMetadata, I16) ||

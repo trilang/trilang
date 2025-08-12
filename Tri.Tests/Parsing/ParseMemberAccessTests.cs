@@ -401,4 +401,58 @@ public class ParseMemberAccessTests
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
+
+    [Test]
+    public void ParseTupleMemberAccessTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            function test(t: (i32, string)): i32 {
+                return t.0;
+            }
+            """);
+        var expected = new SyntaxTree([
+            FunctionDeclarationNode.Create(
+                "test",
+                [
+                    new ParameterNode(
+                        "t",
+                        new TupleTypeNode([
+                            new TypeNode("i32"),
+                            new TypeNode("string")
+                        ])
+                    )
+                ],
+                new TypeNode("i32"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new MemberAccessExpressionNode(
+                            new MemberAccessExpressionNode("t"),
+                            "0"
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+    }
+
+    [Test]
+    public void ParseTupleMemberAccessWithIncorrectIndexTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            function test(t: (i32, string)): i32 {
+                return t.0x;
+            }
+            """;
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+        );
+    }
 }
