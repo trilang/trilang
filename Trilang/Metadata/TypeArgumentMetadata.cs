@@ -49,4 +49,6 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
 
     public bool IsValueType
         => throw new NotSupportedException();
+
+    public TypeLayout? Layout { get; set; }
 }

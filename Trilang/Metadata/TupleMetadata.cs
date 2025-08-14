@@ -2,6 +2,7 @@ namespace Trilang.Metadata;
 
 public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
 {
+    // TODO: combine to a single collection?
     private readonly List<ITypeMetadata> types;
     private readonly List<FieldMetadata> fields;
 
@@ -60,7 +61,7 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         var name = types.Count.ToString();
 
         types.Add(type);
-        fields.Add(new FieldMetadata(this, name, type));
+        fields.Add(new FieldMetadata(this, name, type)); // TODO: use property?
     }
 
     public IMetadata? GetMember(string name)
@@ -69,6 +70,11 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     public IReadOnlyList<ITypeMetadata> Types
         => types;
 
+    public IReadOnlyList<FieldMetadata> Fields
+        => fields;
+
     public bool IsValueType
         => true;
+
+    public TypeLayout? Layout { get; set; }
 }

@@ -49,4 +49,7 @@ public class RootTypeMetadataProvider : ITypeMetadataProvider
 
     public ITypeMetadataProvider CreateChild()
         => new TypeMetadataProvider(this);
+
+    public IEnumerable<ITypeMetadata> Types
+        => types.Values;
 }

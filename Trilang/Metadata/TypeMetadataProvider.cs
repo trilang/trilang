@@ -33,4 +33,7 @@ public class TypeMetadataProvider : ITypeMetadataProvider
 
     public ITypeMetadataProvider CreateChild()
         => new TypeMetadataProvider(this);
+
+    public IEnumerable<ITypeMetadata> Types
+        => types.Values;
 }

@@ -20,7 +20,7 @@ internal class CheckStaticAndInstanceMembersAccess : Visitor
 
         if (parentRef is ITypeMetadata type)
         {
-            if (type.Unpack() is TypeMetadata)
+            if (type.UnpackAlias() is TypeMetadata)
             {
                 if (node.Reference is MethodMetadata { IsStatic: false } method)
                     throw new SemanticAnalysisException($"The instance method '{method.Name}' cannot be called on a static one.");

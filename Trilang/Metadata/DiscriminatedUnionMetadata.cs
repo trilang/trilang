@@ -61,4 +61,6 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
 
     public bool IsValueType
         => true;
+
+    public TypeLayout? Layout { get; set; }
 }

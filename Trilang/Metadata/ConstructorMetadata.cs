@@ -51,6 +51,9 @@ public class ConstructorMetadata : IMetadata, IEquatable<ConstructorMetadata>
     public override int GetHashCode()
         => HashCode.Combine(AccessModifier, Parameters, TypeMetadata);
 
+    public override string ToString()
+        => $"ctor: {TypeMetadata}";
+
     public TypeMetadata DeclaringType { get; }
 
     public AccessModifierMetadata AccessModifier { get; }

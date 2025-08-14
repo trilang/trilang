@@ -11,4 +11,6 @@ public interface ITypeMetadataProvider
     T GetOrDefine<T>(T type) where T : ITypeMetadata;
 
     ITypeMetadataProvider CreateChild();
+
+    IEnumerable<ITypeMetadata> Types { get; }
 }

@@ -5,15 +5,24 @@ using static Trilang.Parsing.Ast.BinaryExpressionKind;
 
 namespace Trilang.IntermediateRepresentation;
 
+// TODO: traverse metadata instead of AST
 public class IrGenerator
 {
     private readonly SsaTransformer ssaTransformer;
+    private readonly TypeLayoutGenerator layoutGenerator;
 
     public IrGenerator()
-        => ssaTransformer = new SsaTransformer();
-
-    public IReadOnlyList<IrFunction> Generate(IReadOnlyList<SyntaxTree> syntaxTrees)
     {
+        ssaTransformer = new SsaTransformer();
+        layoutGenerator = new TypeLayoutGenerator();
+    }
+
+    public IReadOnlyList<IrFunction> Generate(
+        IEnumerable<ITypeMetadata> types,
+        IReadOnlyList<SyntaxTree> syntaxTrees)
+    {
+        layoutGenerator.Generate(types);
+
         var functions = new List<IrFunction>();
         foreach (var syntaxTree in syntaxTrees)
             functions.AddRange(Generate(syntaxTree));

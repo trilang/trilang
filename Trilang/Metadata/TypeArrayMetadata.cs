@@ -2,12 +2,19 @@ namespace Trilang.Metadata;
 
 public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
 {
+    private readonly List<FieldMetadata> fields;
+
     public TypeArrayMetadata() : this(null)
     {
     }
 
     public TypeArrayMetadata(ITypeMetadata? itemMetadata)
-        => ItemMetadata = itemMetadata;
+    {
+        fields = [];
+        ItemMetadata = itemMetadata;
+
+        fields.Add(new FieldMetadata(this, "size", TypeMetadata.I64)); // TODO: use property?
+    }
 
     public static bool operator ==(TypeArrayMetadata? left, TypeArrayMetadata? right)
         => Equals(left, right);
@@ -47,10 +54,15 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         => $"{ItemMetadata}[]";
 
     public IMetadata? GetMember(string name)
-        => null;
+        => Fields.FirstOrDefault(x => x.Name == name);
+
+    public IReadOnlyList<FieldMetadata> Fields
+        => fields;
 
     public ITypeMetadata? ItemMetadata { get; set; }
 
     public bool IsValueType
         => false;
+
+    public TypeLayout? Layout { get; set; }
 }

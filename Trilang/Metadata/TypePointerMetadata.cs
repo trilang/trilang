@@ -48,5 +48,7 @@ public class TypePointerMetadata : ITypeMetadata, IEquatable<TypePointerMetadata
     public ITypeMetadata Type { get; }
 
     public bool IsValueType
-        => false;
+        => true;
+
+    public TypeLayout? Layout { get; set; }
 }

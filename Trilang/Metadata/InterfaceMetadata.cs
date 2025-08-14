@@ -105,4 +105,6 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
 
     public bool IsValueType
         => false;
+
+    public TypeLayout? Layout { get; set; }
 }

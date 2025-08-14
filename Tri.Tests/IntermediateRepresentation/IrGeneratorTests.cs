@@ -43,9 +43,10 @@ public class IrGeneratorTests
               }
               """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -81,9 +82,10 @@ public class IrGeneratorTests
               }
               """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -113,9 +115,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -147,9 +150,10 @@ public class IrGeneratorTests
               }
               """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -182,9 +186,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -217,9 +222,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -252,9 +258,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -286,9 +293,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -311,9 +319,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -341,9 +350,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -371,9 +381,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -402,12 +413,12 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
-
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -437,12 +448,12 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
-
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -481,12 +492,12 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
-
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -520,13 +531,15 @@ public class IrGeneratorTests
             """;
         var tree = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
-
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
-        var ctor = pointType.Constructors.First();
         var pointPointerType = new TypePointerMetadata(pointType);
+        var ctor = pointType.Constructors.First();
+        var ctorPointer = new TypePointerMetadata(ctor.TypeMetadata);
+        var voidPointer = new TypePointerMetadata(TypeMetadata.Void);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
@@ -564,9 +577,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var endBlock = new Block("if_0_end");
         var entryBlock = new Block(
@@ -625,9 +639,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var endBlock = new Block("if_0_end", [
             new Phi(
@@ -691,9 +706,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var endBlock0 = new Block("if_0_end");
         var endBlock1 = new Block("if_1_end", [new Jump("if_0_end")], [endBlock0]);
@@ -781,9 +797,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var endBlock = new Block("if_0_end", [
             new Phi(
@@ -855,9 +872,10 @@ public class IrGeneratorTests
             }
             """;
         var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
 
         var ir = new IrGenerator();
-        var functions = ir.Generate([tree]);
+        var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var loopEnd = new Block(
             "loop_0_end", [

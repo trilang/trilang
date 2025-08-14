@@ -32,7 +32,7 @@ public class Compiler
         }
 
         var ir = new IrGenerator();
-        var functions = ir.Generate(syntaxTrees);
+        var functions = ir.Generate(rootTypeMetadataProvider.Types, syntaxTrees);
 
         if (options.OperatingSystem == CompilerOptionOs.Linux)
         {

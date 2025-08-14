@@ -91,4 +91,6 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
 
     public bool IsValueType
         => Type?.IsValueType ?? false;
+
+    public TypeLayout? Layout { get; set; }
 }

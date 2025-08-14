@@ -2,6 +2,10 @@ namespace Trilang.Metadata;
 
 public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetadata>
 {
+    public const string FunctionField = "function";
+    public const string ContextField = "context";
+
+    private readonly List<FieldMetadata> fields;
     private readonly List<ITypeMetadata> parameterTypes;
 
     public FunctionTypeMetadata() : this([], null!)
@@ -10,6 +14,15 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
 
     public FunctionTypeMetadata(IEnumerable<ITypeMetadata> parameterTypes, ITypeMetadata returnType)
     {
+        // TODO: use property?
+        fields =
+        [
+            // TODO: replace pointer with something else? introduce delegate type?
+            new FieldMetadata(this, FunctionField, new TypePointerMetadata(TypeMetadata.Void)),
+            new FieldMetadata(this, ContextField,
+                new DiscriminatedUnionMetadata([new InterfaceMetadata(), TypeMetadata.Null])),
+        ];
+
         this.parameterTypes = [..parameterTypes];
         ReturnType = returnType;
     }
@@ -56,12 +69,20 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
         => parameterTypes.Add(parameter);
 
     public IMetadata? GetMember(string name)
-        => null;
+        => fields.FirstOrDefault(f => f.Name == name);
+
+    public IReadOnlyList<FieldMetadata> Fields => fields;
+
+    public FieldMetadata Function => fields[0];
+
+    public FieldMetadata Context => fields[1];
 
     public IReadOnlyList<ITypeMetadata> ParameterTypes => parameterTypes;
 
     public ITypeMetadata ReturnType { get; set; }
 
     public bool IsValueType
-        => false;
+        => true;
+
+    public TypeLayout? Layout { get; set; }
 }

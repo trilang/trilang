@@ -196,6 +196,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
     public void VisitDiscriminatedUnion(DiscriminatedUnionNode node, TypeCheckerContext context)
     {
         // TODO: eliminate duplicates
+        // TODO: restrict recursive types
         foreach (var type in node.Types)
             type.Accept(this, context);
 
@@ -416,9 +417,11 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
     {
         node.Member!.Accept(this, context);
 
-        var returnTypeMetadata = node.Member.ReturnTypeMetadata;
-        node.Reference = returnTypeMetadata!.GetMember(node.Name) ??
+        var returnTypeMetadata = node.Member.ReturnTypeMetadata!;
+        node.Reference = returnTypeMetadata.GetMember(node.Name) ??
                          throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in '{returnTypeMetadata}'");
+
+        // TODO: do not allow fields
     }
 
     public void VisitMethod(MethodDeclarationNode node, TypeCheckerContext context)
@@ -452,7 +455,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, context);
 
-        if (node.Type.Metadata is not TypeMetadata type)
+        if (node.Type.Metadata is not TypeMetadata type || type.IsValueType)
             throw new SemanticAnalysisException($"Cannot create an instance of type '{node.Type.Metadata}'");
 
         var parameters = node.Parameters.Select(x => x.ReturnTypeMetadata!).ToList();
@@ -582,6 +585,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
     public void VisitTupleType(TupleTypeNode node, TypeCheckerContext context)
     {
+        // TODO: restrict recursive types
         foreach (var type in node.Types)
             type.Accept(this, context);
 

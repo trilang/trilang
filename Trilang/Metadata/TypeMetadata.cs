@@ -181,4 +181,6 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public IReadOnlyCollection<MethodMetadata> Methods => methods;
 
     public bool IsValueType { get; }
+
+    public TypeLayout? Layout { get; set; }
 }
