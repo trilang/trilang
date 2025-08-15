@@ -2,9 +2,10 @@ namespace Trilang.Metadata;
 
 public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
 {
-    // TODO: combine to a single collection?
     private readonly List<ITypeMetadata> types;
     private readonly List<FieldMetadata> fields;
+    private readonly List<PropertyMetadata> properties;
+    private readonly List<MethodMetadata> methods;
 
     public TupleMetadata() : this([])
     {
@@ -14,6 +15,8 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     {
         this.types = [];
         this.fields = [];
+        this.properties = [];
+        this.methods = [];
 
         foreach (var type in types)
             AddType(type);
@@ -61,17 +64,40 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         var name = types.Count.ToString();
 
         types.Add(type);
-        fields.Add(new FieldMetadata(this, name, type)); // TODO: use property?
+        fields.Add(new FieldMetadata(this, $"<>_{name}", type));
+
+        // TODO: add in ctor?
+        var propertyMetadata = new PropertyMetadata(this, name, type);
+        properties.Add(propertyMetadata);
+        methods.Add(propertyMetadata.Getter);
+        methods.Add(propertyMetadata.Setter);
     }
 
     public IMetadata? GetMember(string name)
+        => GetProperty(name) ??
+           GetMethod(name) ??
+           GetField(name) as IMetadata;
+
+    public FieldMetadata? GetField(string name)
         => fields.FirstOrDefault(f => f.Name == name);
+
+    public PropertyMetadata? GetProperty(string name)
+        => properties.FirstOrDefault(f => f.Name == name);
+
+    public MethodMetadata? GetMethod(string name)
+        => methods.FirstOrDefault(f => f.Name == name);
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;
 
     public IReadOnlyList<FieldMetadata> Fields
         => fields;
+
+    public IReadOnlyList<PropertyMetadata> Properties
+        => properties;
+
+    public IReadOnlyList<MethodMetadata> Methods
+        => methods;
 
     public bool IsValueType
         => true;

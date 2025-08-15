@@ -420,8 +420,6 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         var returnTypeMetadata = node.Member.ReturnTypeMetadata!;
         node.Reference = returnTypeMetadata.GetMember(node.Name) ??
                          throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in '{returnTypeMetadata}'");
-
-        // TODO: do not allow fields
     }
 
     public void VisitMethod(MethodDeclarationNode node, TypeCheckerContext context)

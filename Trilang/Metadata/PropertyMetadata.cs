@@ -5,7 +5,7 @@ namespace Trilang.Metadata;
 public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 {
     public PropertyMetadata(
-        TypeMetadata declaringType,
+        ITypeMetadata declaringType,
         string name,
         ITypeMetadata type,
         AccessModifierMetadata getterModifier = AccessModifierMetadata.Public,
@@ -87,7 +87,7 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
     public override string ToString()
         => $"{Name}: {Type}";
 
-    public TypeMetadata DeclaringType { get; }
+    public ITypeMetadata DeclaringType { get; }
 
     public string Name { get; }
 

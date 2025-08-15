@@ -32,5 +32,6 @@ public class SemanticAnalysis
         tree.Accept(new CheckAccessModifiers());
         tree.Accept(new RecursiveTypeAlias());
         tree.Accept(new CheckStaticAndInstanceMembersAccess());
+        tree.Accept(new RestrictFieldAccess());
     }
 }

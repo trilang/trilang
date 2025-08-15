@@ -247,7 +247,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
     {
         var propertyMetadata = node.Metadata!;
         var returnTypeMetadata = propertyMetadata.Type;
-        var typeMetadata = propertyMetadata.DeclaringType;
+        var typeMetadata = (TypeMetadata)propertyMetadata.DeclaringType;
 
         currentField = new FieldMetadata(typeMetadata, $"<>_{propertyMetadata.Name}", returnTypeMetadata);
         typeMetadata.AddField(currentField);

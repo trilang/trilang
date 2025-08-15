@@ -76,9 +76,6 @@ internal class TypeLayoutGenerator
         TypeMetadata.Char.Layout = new TypeLayout([
             new FieldLayout(null, 0, 2),
         ]);
-
-        // TODO: add string layout
-        // TypeMetadata.String.Layout = new TypeLayout([]);
     }
 
     private TypeLayout Generate(ITypeMetadata type)
@@ -166,10 +163,6 @@ internal class TypeLayoutGenerator
         foreach (var field in type.Fields)
             layout.AddField(field, GetFieldSize(field.Type));
 
-        // pointer to data
-        // TODO: use field?
-        layout.AddGap(PointerSize);
-
         return layout;
     }
 
@@ -187,7 +180,6 @@ internal class TypeLayoutGenerator
         var layout = new TypeLayout();
 
         // pointer to actual type
-        // TODO: use field?
         layout.AddGap(PointerSize);
 
         return layout;

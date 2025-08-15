@@ -129,7 +129,7 @@ public class MetadataGeneratorTests
 
         var actualProperty = actual.GetProperty("x");
         Assert.That(actualProperty, Is.Not.Null);
-        Assert.That(propertyMetadata, Is.EqualTo(actualProperty));
+        Assert.That(propertyMetadata, Is.EqualTo(actualProperty).Using(new MetadataComparer()));
     }
 
     [Test]

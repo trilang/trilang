@@ -3,6 +3,8 @@ namespace Trilang.Metadata;
 public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
 {
     private readonly List<FieldMetadata> fields;
+    private readonly List<PropertyMetadata> properties;
+    private readonly List<MethodMetadata> methods;
 
     public TypeArrayMetadata() : this(null)
     {
@@ -10,10 +12,18 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
 
     public TypeArrayMetadata(ITypeMetadata? itemMetadata)
     {
-        fields = [];
+        this.fields = [];
+        this.properties = [];
+        this.methods = [];
+
         ItemMetadata = itemMetadata;
 
-        fields.Add(new FieldMetadata(this, "size", TypeMetadata.I64)); // TODO: use property?
+        fields.Add(new FieldMetadata(this, "<>_size", TypeMetadata.I64));
+
+        var sizeProperty = new PropertyMetadata(this, "size", TypeMetadata.I64);
+        properties.Add(sizeProperty);
+        methods.Add(sizeProperty.Getter);
+        methods.Add(sizeProperty.Setter);
     }
 
     public static bool operator ==(TypeArrayMetadata? left, TypeArrayMetadata? right)
@@ -54,10 +64,27 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         => $"{ItemMetadata}[]";
 
     public IMetadata? GetMember(string name)
-        => Fields.FirstOrDefault(x => x.Name == name);
+        => GetProperty(name) ??
+           GetMethod(name) ??
+           GetField(name) as IMetadata;
+
+    public FieldMetadata? GetField(string name)
+        => fields.FirstOrDefault(f => f.Name == name);
+
+    public PropertyMetadata? GetProperty(string name)
+        => properties.FirstOrDefault(f => f.Name == name);
+
+    public MethodMetadata? GetMethod(string name)
+        => methods.FirstOrDefault(f => f.Name == name);
 
     public IReadOnlyList<FieldMetadata> Fields
         => fields;
+
+    public IReadOnlyList<PropertyMetadata> Properties
+        => properties;
+
+    public IReadOnlyList<MethodMetadata> Methods
+        => methods;
 
     public ITypeMetadata? ItemMetadata { get; set; }
 

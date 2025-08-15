@@ -55,7 +55,7 @@ internal class CheckAccessModifiers : Visitor
             return;
 
         var type = node.FindInParent<TypeDeclarationNode>()?.Metadata;
-        if (property.DeclaringType == type)
+        if (property.DeclaringType.Equals(type))
             return;
 
         if (node.AccessKind == PropertyAccessKind.Read &&

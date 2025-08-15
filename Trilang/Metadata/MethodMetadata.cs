@@ -3,7 +3,7 @@ namespace Trilang.Metadata;
 public class MethodMetadata : IMetadata, IEquatable<MethodMetadata>
 {
     public MethodMetadata(
-        TypeMetadata declaringType,
+        ITypeMetadata declaringType,
         AccessModifierMetadata accessModifier,
         bool isStatic,
         string name,
@@ -60,7 +60,7 @@ public class MethodMetadata : IMetadata, IEquatable<MethodMetadata>
     public override string ToString()
         => $"{Name}: {TypeMetadata}";
 
-    public TypeMetadata DeclaringType { get; }
+    public ITypeMetadata DeclaringType { get; }
 
     public AccessModifierMetadata AccessModifier { get; }
 

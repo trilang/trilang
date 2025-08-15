@@ -4,6 +4,8 @@ using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
+// TODO: support getter-only/setter-only properties
+// TODO: don't generate backing field if it's not needed
 public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarationNode>
 {
     private PropertyGetterNode? getter;
