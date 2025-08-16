@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class MethodMetadata : IMetadata, IEquatable<MethodMetadata>
+public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
 {
     public MethodMetadata(
         ITypeMetadata declaringType,

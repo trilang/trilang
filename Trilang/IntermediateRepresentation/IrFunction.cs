@@ -1,5 +1,5 @@
 using System.Text;
-using Trilang.Parsing.Ast;
+using Trilang.Metadata;
 
 namespace Trilang.IntermediateRepresentation;
 
@@ -33,20 +33,32 @@ public record IrFunction(string Name, IrCode Code)
         return sb.ToString();
     }
 
-    public static IrFunction FromFunction(FunctionDeclarationNode node, IrCode code)
-        => new IrFunction(node.Name, code);
-
-    public static IrFunction FromMethod(MethodDeclarationNode node, IrCode code)
+    public static IrFunction FromMethod(IFunctionMetadata method, IrCode code)
     {
-        var type = (TypeDeclarationNode)node.Parent!;
+        var name = new StringBuilder();
+        if (method.DeclaringType is not null)
+            name.Append(MangleTypeName(method.DeclaringType)).Append('_');
 
-        return new IrFunction($"{type.Name}_{node.Name}", code);
+        name.Append(method.Name);
+
+        if (method.IsStatic)
+            name.Append("_s");
+
+        return new IrFunction(name.ToString(), code);
     }
 
-    public static IrFunction FromConstructor(ConstructorDeclarationNode node, IrCode code)
-    {
-        var type = (TypeDeclarationNode)node.Parent!;
+    private static string MangleTypeName(ITypeMetadata metadata)
+        => metadata switch
+        {
+            TupleMetadata tuple
+                => $"_{string.Join("_", tuple.Types.Select(MangleTypeName))}_",
 
-        return new IrFunction($"{type.Name}_ctor", code);
-    }
+            TypeArrayMetadata array
+                => $"array_{MangleTypeName(array.ItemMetadata!)}_",
+
+            TypeMetadata type
+                => type.Name,
+
+            _ => throw new ArgumentOutOfRangeException(nameof(metadata)),
+        };
 }

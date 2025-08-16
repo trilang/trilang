@@ -1,9 +1,9 @@
 namespace Trilang.Metadata;
 
-public class ConstructorMetadata : IMetadata, IEquatable<ConstructorMetadata>
+public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMetadata>
 {
     public ConstructorMetadata(
-        TypeMetadata declaringType,
+        ITypeMetadata declaringType,
         AccessModifierMetadata accessModifier,
         IReadOnlyList<ParameterMetadata> parameters,
         FunctionTypeMetadata typeMetadata)
@@ -54,7 +54,11 @@ public class ConstructorMetadata : IMetadata, IEquatable<ConstructorMetadata>
     public override string ToString()
         => $"ctor: {TypeMetadata}";
 
-    public TypeMetadata DeclaringType { get; }
+    public ITypeMetadata DeclaringType { get; }
+
+    public bool IsStatic => false;
+
+    public string Name => "ctor";
 
     public AccessModifierMetadata AccessModifier { get; }
 

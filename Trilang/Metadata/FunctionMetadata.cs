@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
+public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 {
     public FunctionMetadata(
         string name,
@@ -50,6 +50,10 @@ public class FunctionMetadata : IMetadata, IEquatable<FunctionMetadata>
 
     public override string ToString()
         => $"{Name}: {TypeMetadata}";
+
+    public ITypeMetadata? DeclaringType => null;
+
+    public bool IsStatic => true;
 
     public string Name { get; }
 

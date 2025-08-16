@@ -2,8 +2,8 @@ namespace Trilang.Metadata;
 
 public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetadata>
 {
-    public const string FunctionField = "function";
-    public const string ContextField = "context";
+    private const string FunctionField = "function";
+    private const string ContextField = "context";
 
     private readonly List<FieldMetadata> fields;
     private readonly List<ITypeMetadata> parameterTypes;
@@ -14,7 +14,6 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
 
     public FunctionTypeMetadata(IEnumerable<ITypeMetadata> parameterTypes, ITypeMetadata returnType)
     {
-        // TODO: use property?
         fields =
         [
             // TODO: replace pointer with something else? introduce delegate type?

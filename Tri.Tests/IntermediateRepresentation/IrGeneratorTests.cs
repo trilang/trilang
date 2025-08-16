@@ -50,7 +50,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new LoadConst(new Register(1, TypeMetadata.I32), 2),
                 new BinaryOperation(
@@ -89,7 +89,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new LoadConst(new Register(1, TypeMetadata.I32), 2),
                 new BinaryOperation(
@@ -122,7 +122,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
@@ -157,7 +157,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -193,7 +193,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -229,7 +229,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -265,7 +265,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new Move(new Register(1, TypeMetadata.I32), new Register(0, TypeMetadata.I32)),
                 new LoadConst(new Register(2, TypeMetadata.I32), 2),
@@ -300,7 +300,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.Null), null),
                 new Return(new Register(0, TypeMetadata.Null)),
             ]))
@@ -326,7 +326,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.I32),
@@ -357,7 +357,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.Bool), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.Bool),
@@ -388,7 +388,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.I32),
@@ -416,21 +416,52 @@ public class IrGeneratorTests
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
+        var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 0),
-                new ArrayElement(
-                    new Register(2, TypeMetadata.I32),
+                new GetElementPointer(
+                    new Register(2, new TypePointerMetadata(TypeMetadata.I32)),
                     new Register(0, arrayPointerType),
                     new Register(1, TypeMetadata.I32)
                 ),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Load(
+                    new Register(3, TypeMetadata.I32),
+                    new Register(2, new TypePointerMetadata(TypeMetadata.I32))
+                ),
+                new Return(new Register(3, TypeMetadata.I32)),
+            ])),
+            new IrFunction("array_i32__<>_get_size", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new GetMemberPointer(
+                    new Register(1, new TypePointerMetadata(arraySize.Type)),
+                    new Register(0, arrayPointerType),
+                    arraySize
+                ),
+                new Load(
+                    new Register(2, arraySize.Type),
+                    new Register(1, new TypePointerMetadata(arraySize.Type))
+                ),
+                new Return(new Register(2, arraySize.Type)),
+            ])),
+            new IrFunction("array_i32__<>_set_size", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I64), 1),
+                new GetMemberPointer(
+                    new Register(2, new TypePointerMetadata(arraySize.Type)),
+                    new Register(0, arrayPointerType),
+                    arraySize
+                ),
+                new Store(
+                    new Register(2, new TypePointerMetadata(arraySize.Type)),
+                    new Register(1, TypeMetadata.I64)
+                ),
             ]))
         };
 
@@ -451,13 +482,14 @@ public class IrGeneratorTests
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
+        var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new LoadConst(new Register(2, TypeMetadata.I32), 2),
@@ -467,12 +499,108 @@ public class IrGeneratorTests
                     new Register(1, TypeMetadata.I32),
                     new Register(2, TypeMetadata.I32)
                 ),
-                new ArrayElement(
-                    new Register(4, TypeMetadata.I32),
+                new GetElementPointer(
+                    new Register(4, new TypePointerMetadata(TypeMetadata.I32)),
                     new Register(0, arrayPointerType),
                     new Register(3, TypeMetadata.I32)
                 ),
-                new Return(new Register(4, TypeMetadata.I32)),
+                new Load(
+                    new Register(5, TypeMetadata.I32),
+                    new Register(4, new TypePointerMetadata(TypeMetadata.I32))
+                ),
+                new Return(new Register(5, TypeMetadata.I32)),
+            ])),
+            new IrFunction("array_i32__<>_get_size", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new GetMemberPointer(
+                    new Register(1, new TypePointerMetadata(arraySize.Type)),
+                    new Register(0, arrayPointerType),
+                    arraySize
+                ),
+                new Load(
+                    new Register(2, arraySize.Type),
+                    new Register(1, new TypePointerMetadata(arraySize.Type))
+                ),
+                new Return(new Register(2, arraySize.Type)),
+            ])),
+            new IrFunction("array_i32__<>_set_size", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I64), 1),
+                new GetMemberPointer(
+                    new Register(2, new TypePointerMetadata(arraySize.Type)),
+                    new Register(0, arrayPointerType),
+                    arraySize
+                ),
+                new Store(
+                    new Register(2, new TypePointerMetadata(arraySize.Type)),
+                    new Register(1, TypeMetadata.I64)
+                ),
+            ]))
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void ArraySetElementTest()
+    {
+        const string code =
+            """
+            function test(a: i32[]): void {
+                a[0] = 10;
+            }
+            """;
+        var tree = Parse(code);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayPointerType = new TypePointerMetadata(arrayType);
+        var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("test_s", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                new GetElementPointer(
+                    new Register(2, new TypePointerMetadata(TypeMetadata.I32)),
+                    new Register(0, arrayPointerType),
+                    new Register(1, TypeMetadata.I32)
+                ),
+                new LoadConst(new Register(3, TypeMetadata.I32), 10),
+                new Store(
+                    new Register(2, new TypePointerMetadata(TypeMetadata.I32)),
+                    new Register(3, TypeMetadata.I32)
+                ),
+            ])),
+            new IrFunction("array_i32__<>_get_size", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new GetMemberPointer(
+                    new Register(1, new TypePointerMetadata(arraySize.Type)),
+                    new Register(0, arrayPointerType),
+                    arraySize
+                ),
+                new Load(
+                    new Register(2, arraySize.Type),
+                    new Register(1, new TypePointerMetadata(arraySize.Type))
+                ),
+                new Return(new Register(2, arraySize.Type)),
+            ])),
+            new IrFunction("array_i32__<>_set_size", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I64), 1),
+                new GetMemberPointer(
+                    new Register(2, new TypePointerMetadata(arraySize.Type)),
+                    new Register(0, arrayPointerType),
+                    arraySize
+                ),
+                new Store(
+                    new Register(2, new TypePointerMetadata(arraySize.Type)),
+                    new Register(1, TypeMetadata.I64)
+                ),
             ]))
         };
 
@@ -495,21 +623,49 @@ public class IrGeneratorTests
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
+        var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_s", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 10),
-                new NewArray(
+                new ArrayAlloc(
                     new Register(1, arrayPointerType),
-                    new TypeArrayMetadata(TypeMetadata.I32),
+                    8,
+                    4,
                     new Register(0, TypeMetadata.I32)
                 ),
                 new Move(new Register(2, arrayPointerType), new Register(1, arrayPointerType)),
                 new Return(new Register(2, arrayPointerType)),
+            ])),
+            new IrFunction("array_i32__<>_get_size", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new GetMemberPointer(
+                    new Register(1, new TypePointerMetadata(arraySize.Type)),
+                    new Register(0, arrayPointerType),
+                    arraySize
+                ),
+                new Load(
+                    new Register(2, arraySize.Type),
+                    new Register(1, new TypePointerMetadata(arraySize.Type))
+                ),
+                new Return(new Register(2, arraySize.Type)),
+            ])),
+            new IrFunction("array_i32__<>_set_size", new Block("entry", [
+                new LoadParameter(new Register(0, arrayPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I64), 1),
+                new GetMemberPointer(
+                    new Register(2, new TypePointerMetadata(arraySize.Type)),
+                    new Register(0, arrayPointerType),
+                    arraySize
+                ),
+                new Store(
+                    new Register(2, new TypePointerMetadata(arraySize.Type)),
+                    new Register(1, TypeMetadata.I64)
+                ),
             ]))
         };
 
@@ -536,7 +692,6 @@ public class IrGeneratorTests
         var pointPointerType = new TypePointerMetadata(pointType);
         var ctor = pointType.Constructors.First();
         var ctorPointer = new TypePointerMetadata(ctor.TypeMetadata);
-        var voidPointer = new TypePointerMetadata(TypeMetadata.Void);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -548,15 +703,26 @@ public class IrGeneratorTests
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new LoadParameter(new Register(2, TypeMetadata.I32), 2),
             ])),
-            new IrFunction("test", new Block("entry", [
-                new LoadConst(new Register(0, TypeMetadata.I32), 1),
-                new LoadConst(new Register(1, TypeMetadata.I32), 2),
-                new NewObject(
-                    new Register(2, pointPointerType),
-                    ctor,
-                    [new Register(0, TypeMetadata.I32), new Register(1, TypeMetadata.I32)]
+            new IrFunction("test_s", new Block("entry", [
+                new Alloc(new Register(0, pointPointerType), 0),
+                new GetMemberPointer(
+                    new Register(1, ctorPointer),
+                    new Register(0, pointPointerType),
+                    ctor
                 ),
-                new Return(new Register(2, pointPointerType)),
+                new Load(new Register(2, ctor.TypeMetadata), new Register(1, ctorPointer)),
+                new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                new LoadConst(new Register(4, TypeMetadata.I32), 2),
+                new Call(
+                    new Register(5, pointPointerType),
+                    new Register(2, ctor.TypeMetadata),
+                    [
+                        new Register(3, TypeMetadata.I32),
+                        new Register(4, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+                new Return(new Register(5, pointPointerType)),
             ]))
         };
 
@@ -618,7 +784,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max", entryBlock)
+            new IrFunction("max_s", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -682,7 +848,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max", entryBlock)
+            new IrFunction("max_s", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -774,7 +940,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max", entryBlock)
+            new IrFunction("max_s", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -811,7 +977,7 @@ public class IrGeneratorTests
         ]);
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block(
+            new IrFunction("test_s", new Block(
                 "entry",
                 [
                     new LoadParameter(new Register(0, TypeMetadata.I32), 0),
@@ -927,7 +1093,831 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", entry)
+            new IrFunction("test_s", entry)
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallMethodTest()
+    {
+        const string code =
+            """
+            public type Test {
+                public method1(): i32 {
+                    return 0;
+                }
+
+                public method2(): void {
+                    this.method1();
+                }
+            }
+            """;
+        var tree = Parse(code);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var testType = (TypeMetadata)typeProvider.GetType("Test")!;
+        var typePointer = new TypePointerMetadata(testType);
+        var method = testType.GetMethod("method1")!;
+        var methodPointer = new TypePointerMetadata(method.TypeMetadata);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("Test_method1", new Block("entry", [
+                new LoadParameter(new Register(0, new TypePointerMetadata(testType)), 0),
+                new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                new Return(new Register(1, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Test_method2", new Block("entry", [
+                new LoadParameter(new Register(0, typePointer), 0),
+                new GetMemberPointer(
+                    new Register(1, methodPointer),
+                    new Register(0, typePointer),
+                    method
+                ),
+                new Load(new Register(2, method.TypeMetadata), new Register(1, methodPointer)),
+                new Call(
+                    new Register(3, TypeMetadata.I32),
+                    new Register(2, method.TypeMetadata),
+                    [],
+                    false
+                ),
+            ])),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallMethodWithVoidReturnTypeTest()
+    {
+        const string code =
+            """
+            public type Test {
+                public method1(): void { }
+
+                public method2(): void {
+                    this.method1();
+                }
+            }
+            """;
+        var tree = Parse(code);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var testType = (TypeMetadata)typeProvider.GetType("Test")!;
+        var typePointer = new TypePointerMetadata(testType);
+        var method = testType.GetMethod("method1")!;
+        var methodPointer = new TypePointerMetadata(method.TypeMetadata);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("Test_method1", new Block("entry", [
+                new LoadParameter(new Register(0, new TypePointerMetadata(testType)), 0),
+            ])),
+            new IrFunction("Test_method2", new Block("entry", [
+                new LoadParameter(new Register(0, typePointer), 0),
+                new GetMemberPointer(
+                    new Register(1, methodPointer),
+                    new Register(0, typePointer),
+                    method
+                ),
+                new Load(new Register(2, method.TypeMetadata), new Register(1, methodPointer)),
+                new Call(
+                    new Register(3, TypeMetadata.Void),
+                    new Register(2, method.TypeMetadata),
+                    [],
+                    false
+                ),
+            ])),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallSetterTest()
+    {
+        const string code =
+            """
+            public type Point {
+                public constructor(x: i32) {
+                    this.x = x;
+                }
+
+                x: i32 {
+                    public get {
+                        return field;
+                    }
+
+                    private set {
+                        field = value;
+                    }
+                }
+            }
+            """;
+        var tree = Parse(code);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointPointerType = new TypePointerMetadata(pointType);
+        var field = pointType.GetField("<>_x")!;
+        var fieldPointer = new TypePointerMetadata(field.Type);
+        var setter = pointType.GetMethod("<>_set_x")!;
+        var setterPointer = new TypePointerMetadata(setter.TypeMetadata);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("Point_<>_get_x", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
+                new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
+                new Return(new Register(2, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_<>_set_x", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
+                new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_ctor", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(new Register(2, setterPointer), new Register(0, pointPointerType), setter),
+                new Load(new Register(3, setter.TypeMetadata), new Register(2, setterPointer)),
+                new Call(
+                    new Register(4, TypeMetadata.Void),
+                    new Register(3, setter.TypeMetadata),
+                    [
+                        new Register(1, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+            ])),
+        };
+
+        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallGetterTest()
+    {
+        const string code =
+            """
+            public type Point {
+                public constructor(x: i32) {
+                    this.x = x;
+                }
+
+                x: i32;
+            }
+
+            function test(): i32 {
+                var p: Point = new Point(1);
+
+                return p.x;
+            }
+            """;
+        var tree = Parse(code);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointPointerType = new TypePointerMetadata(pointType);
+        var field = pointType.GetField("<>_x")!;
+        var fieldPointer = new TypePointerMetadata(field.Type);
+        var getter = pointType.GetMethod("<>_get_x")!;
+        var getterPointer = new TypePointerMetadata(getter.TypeMetadata);
+        var setter = pointType.GetMethod("<>_set_x")!;
+        var setterPointer = new TypePointerMetadata(setter.TypeMetadata);
+        var ctor = pointType.GetConstructor([TypeMetadata.I32])!;
+        var ctorPointer = new TypePointerMetadata(ctor.TypeMetadata);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("Point_<>_get_x", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
+                new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
+                new Return(new Register(2, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_<>_set_x", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
+                new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_ctor", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(
+                    new Register(2, setterPointer),
+                    new Register(0, pointPointerType),
+                    setter
+                ),
+                new Load(new Register(3, setter.TypeMetadata), new Register(2, setterPointer)),
+                new Call(
+                    new Register(4, TypeMetadata.Void),
+                    new Register(3, setter.TypeMetadata),
+                    [
+                        new Register(1, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+            ])),
+            new IrFunction("test_s", new Block("entry", [
+                new Alloc(new Register(0, pointPointerType), 4),
+                new GetMemberPointer(
+                    new Register(1, ctorPointer),
+                    new Register(0, pointPointerType),
+                    ctor
+                ),
+                new Load(new Register(2, ctor.TypeMetadata), new Register(1, ctorPointer)),
+                new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                new Call(
+                    new Register(4, pointPointerType),
+                    new Register(2, ctor.TypeMetadata),
+                    [
+                        new Register(3, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+                new Move(new Register(5, pointPointerType), new Register(4, pointPointerType)),
+                new GetMemberPointer(
+                    new Register(6, getterPointer),
+                    new Register(5, pointPointerType),
+                    getter
+                ),
+                new Load(new Register(7, getter.TypeMetadata), new Register(6, getterPointer)),
+                new Call(
+                    new Register(8, TypeMetadata.I32),
+                    new Register(7, getter.TypeMetadata),
+                    [],
+                    false
+                ),
+                new Return(new Register(8, TypeMetadata.I32)),
+            ])),
+        };
+
+        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallUnaryOpTest()
+    {
+        const string code =
+            """
+            public type Point {
+                public constructor(x: i32) {
+                    this.x = x;
+                }
+
+                x: i32;
+            }
+
+            function test(): i32 {
+                var p: Point = new Point(1);
+
+                return -p.x;
+            }
+            """;
+        var tree = Parse(code);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointPointerType = new TypePointerMetadata(pointType);
+        var field = pointType.GetField("<>_x")!;
+        var fieldPointer = new TypePointerMetadata(field.Type);
+        var getter = pointType.GetMethod("<>_get_x")!;
+        var getterPointer = new TypePointerMetadata(getter.TypeMetadata);
+        var setter = pointType.GetMethod("<>_set_x")!;
+        var setterPointer = new TypePointerMetadata(setter.TypeMetadata);
+        var ctor = pointType.GetConstructor([TypeMetadata.I32])!;
+        var ctorPointer = new TypePointerMetadata(ctor.TypeMetadata);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("Point_<>_get_x", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
+                new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
+                new Return(new Register(2, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_<>_set_x", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
+                new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_ctor", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(new Register(2, setterPointer), new Register(0, pointPointerType), setter),
+                new Load(new Register(3, setter.TypeMetadata), new Register(2, setterPointer)),
+                new Call(
+                    new Register(4, TypeMetadata.Void),
+                    new Register(3, setter.TypeMetadata),
+                    [
+                        new Register(1, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+            ])),
+            new IrFunction("test_s", new Block("entry", [
+                new Alloc(new Register(0, pointPointerType), 4),
+                new GetMemberPointer(new Register(1, ctorPointer), new Register(0, pointPointerType), ctor),
+                new Load(new Register(2, ctor.TypeMetadata), new Register(1, ctorPointer)),
+                new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                new Call(
+                    new Register(4, pointPointerType),
+                    new Register(2, ctor.TypeMetadata),
+                    [
+                        new Register(3, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+                new Move(new Register(5, pointPointerType), new Register(4, pointPointerType)),
+                new GetMemberPointer(new Register(6, getterPointer), new Register(5, pointPointerType), getter),
+                new Load(new Register(7, getter.TypeMetadata), new Register(6, getterPointer)),
+                new Call(
+                    new Register(8, TypeMetadata.I32),
+                    new Register(7, getter.TypeMetadata),
+                    [],
+                    false
+                ),
+                new UnaryOperation(
+                    new Register(9, TypeMetadata.I32),
+                    UnaryInstructionKind.Neg,
+                    new Register(8, TypeMetadata.I32)
+                ),
+                new Return(new Register(9, TypeMetadata.I32)),
+            ])),
+        };
+
+        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallBinaryOpTest()
+    {
+        const string code =
+            """
+            public type Point {
+                public constructor(x: i32, y: i32) {
+                    this.x = x;
+                    this.y = y;
+                }
+
+                x: i32;
+                y: i32;
+            }
+
+            function test(): i32 {
+                var p: Point = new Point(1, 2);
+
+                return p.x + p.y;
+            }
+            """;
+        var tree = Parse(code);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointPointerType = new TypePointerMetadata(pointType);
+        var xField = pointType.GetField("<>_x")!;
+        var xFieldPointer = new TypePointerMetadata(xField.Type);
+        var yField = pointType.GetField("<>_y")!;
+        var yFieldPointer = new TypePointerMetadata(yField.Type);
+        var xGetter = pointType.GetMethod("<>_get_x")!;
+        var xGetterPointer = new TypePointerMetadata(xGetter.TypeMetadata);
+        var xSetter = pointType.GetMethod("<>_set_x")!;
+        var xSetterPointer = new TypePointerMetadata(xSetter.TypeMetadata);
+        var yGetter = pointType.GetMethod("<>_get_y")!;
+        var yGetterPointer = new TypePointerMetadata(yGetter.TypeMetadata);
+        var ySetter = pointType.GetMethod("<>_set_y")!;
+        var ySetterPointer = new TypePointerMetadata(ySetter.TypeMetadata);
+        var ctor = pointType.GetConstructor([TypeMetadata.I32, TypeMetadata.I32])!;
+        var ctorPointer = new TypePointerMetadata(ctor.TypeMetadata);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("Point_<>_get_x", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new GetMemberPointer(new Register(1, xFieldPointer), new Register(0, pointPointerType), xField),
+                new Load(new Register(2, TypeMetadata.I32), new Register(1, xFieldPointer)),
+                new Return(new Register(2, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_<>_set_x", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(new Register(2, xFieldPointer), new Register(0, pointPointerType), xField),
+                new Store(new Register(2, xFieldPointer), new Register(1, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_<>_get_y", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new GetMemberPointer(new Register(1, yFieldPointer), new Register(0, pointPointerType), yField),
+                new Load(new Register(2, TypeMetadata.I32), new Register(1, yFieldPointer)),
+                new Return(new Register(2, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_<>_set_y", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(new Register(2, yFieldPointer), new Register(0, pointPointerType), yField),
+                new Store(new Register(2, yFieldPointer), new Register(1, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Point_ctor", new Block("entry", [
+                new LoadParameter(new Register(0, pointPointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(2, TypeMetadata.I32), 2),
+                new GetMemberPointer(new Register(3, xSetterPointer), new Register(0, pointPointerType), xSetter),
+                new Load(new Register(4, xSetter.TypeMetadata), new Register(3, xSetterPointer)),
+                new Call(
+                    new Register(5, TypeMetadata.Void),
+                    new Register(4, xSetter.TypeMetadata),
+                    [
+                        new Register(1, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+                new GetMemberPointer(new Register(6, ySetterPointer), new Register(0, pointPointerType), ySetter),
+                new Load(new Register(7, ySetter.TypeMetadata), new Register(6, ySetterPointer)),
+                new Call(
+                    new Register(8, TypeMetadata.Void),
+                    new Register(7, ySetter.TypeMetadata),
+                    [
+                        new Register(2, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+            ])),
+            new IrFunction("test_s", new Block("entry", [
+                new Alloc(new Register(0, pointPointerType), 8),
+                new GetMemberPointer(new Register(1, ctorPointer), new Register(0, pointPointerType), ctor),
+                new Load(new Register(2, ctor.TypeMetadata), new Register(1, ctorPointer)),
+                new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                new LoadConst(new Register(4, TypeMetadata.I32), 2),
+                new Call(
+                    new Register(5, pointPointerType),
+                    new Register(2, ctor.TypeMetadata),
+                    [
+                        new Register(3, TypeMetadata.I32),
+                        new Register(4, TypeMetadata.I32),
+                    ],
+                    false
+                ),
+                new Move(new Register(6, pointPointerType), new Register(5, pointPointerType)),
+                new GetMemberPointer(
+                    new Register(7, xGetterPointer),
+                    new Register(6, pointPointerType),
+                    xGetter
+                ),
+                new Load(new Register(8, xGetter.TypeMetadata), new Register(7, xGetterPointer)),
+                new Call(
+                    new Register(9, TypeMetadata.I32),
+                    new Register(8, xGetter.TypeMetadata),
+                    [],
+                    false
+                ),
+                new GetMemberPointer(
+                    new Register(10, yGetterPointer),
+                    new Register(6, pointPointerType),
+                    yGetter
+                ),
+                new Load(new Register(11, yGetter.TypeMetadata), new Register(10, yGetterPointer)),
+                new Call(
+                    new Register(12, TypeMetadata.I32),
+                    new Register(11, yGetter.TypeMetadata),
+                    [],
+                    false
+                ),
+                new BinaryOperation(
+                    new Register(13, TypeMetadata.I32),
+                    Add,
+                    new Register(9, TypeMetadata.I32),
+                    new Register(12, TypeMetadata.I32)
+                ),
+                new Return(new Register(13, TypeMetadata.I32)),
+            ])),
+        };
+
+        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallComplexTypeAccessTest()
+    {
+        const string code =
+            """
+            public type Test1 {
+                x: i32;
+
+                public constructor(x: i32) {
+                    this.x = x;
+                }
+            }
+
+            public type Test2 {
+                obj: Test1;
+
+                public constructor(obj: Test1) {
+                    this.obj = obj;
+                }
+            }
+
+            function test(): i32 {
+                var test1: Test1 = new Test1(1);
+                var test2: Test2 = new Test2(test1);
+
+                return test2.obj.x;
+            }
+            """;
+        var tree = Parse(code);
+
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var test1Type = (TypeMetadata)typeProvider.GetType("Test1")!;
+        var test1PointerType = new TypePointerMetadata(test1Type);
+        var test2Type = (TypeMetadata)typeProvider.GetType("Test2")!;
+        var test2PointerType = new TypePointerMetadata(test2Type);
+
+        // Test1 members
+        var test1XField = test1Type.GetField("<>_x")!;
+        var test1XFieldPointer = new TypePointerMetadata(test1XField.Type);
+        var test1XGetter = test1Type.GetMethod("<>_get_x")!;
+        var test1XGetterPointer = new TypePointerMetadata(test1XGetter.TypeMetadata);
+        var test1XSetter = test1Type.GetMethod("<>_set_x")!;
+        var test1XSetterPointer = new TypePointerMetadata(test1XSetter.TypeMetadata);
+        var test1Ctor = test1Type.GetConstructor([TypeMetadata.I32])!;
+        var test1CtorPointer = new TypePointerMetadata(test1Ctor.TypeMetadata);
+
+        // Test2 members
+        var test2ObjField = test2Type.GetField("<>_obj")!;
+        var test2ObjFieldPointer = new TypePointerMetadata(test2ObjField.Type);
+        var test2ObjGetter = test2Type.GetMethod("<>_get_obj")!;
+        var test2ObjGetterPointer = new TypePointerMetadata(test2ObjGetter.TypeMetadata);
+        var test2ObjSetter = test2Type.GetMethod("<>_set_obj")!;
+        var test2ObjSetterPointer = new TypePointerMetadata(test2ObjSetter.TypeMetadata);
+        var test2Ctor = test2Type.GetConstructor([test1Type])!;
+        var test2CtorPointer = new TypePointerMetadata(test2Ctor.TypeMetadata);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            // Test1
+            new IrFunction("Test1_<>_get_x", new Block("entry", [
+                new LoadParameter(new Register(0, test1PointerType), 0),
+                new GetMemberPointer(
+                    new Register(1, test1XFieldPointer),
+                    new Register(0, test1PointerType),
+                    test1XField
+                ),
+                new Load(new Register(2, TypeMetadata.I32), new Register(1, test1XFieldPointer)),
+                new Return(new Register(2, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Test1_<>_set_x", new Block("entry", [
+                new LoadParameter(new Register(0, test1PointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(
+                    new Register(2, test1XFieldPointer),
+                    new Register(0, test1PointerType),
+                    test1XField
+                ),
+                new Store(new Register(2, test1XFieldPointer), new Register(1, TypeMetadata.I32)),
+            ])),
+            new IrFunction("Test1_ctor", new Block("entry", [
+                new LoadParameter(new Register(0, test1PointerType), 0),
+                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new GetMemberPointer(
+                    new Register(2, test1XSetterPointer),
+                    new Register(0, test1PointerType),
+                    test1XSetter
+                ),
+                new Load(new Register(3, test1XSetter.TypeMetadata), new Register(2, test1XSetterPointer)),
+                new Call(
+                    new Register(4, TypeMetadata.Void),
+                    new Register(3, test1XSetter.TypeMetadata),
+                    [
+                        new Register(1, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+            ])),
+
+            // Test2
+            new IrFunction("Test2_<>_get_obj", new Block("entry", [
+                new LoadParameter(new Register(0, test2PointerType), 0),
+                new GetMemberPointer(
+                    new Register(1, new TypePointerMetadata(test2ObjFieldPointer)),
+                    new Register(0, test2PointerType),
+                    test2ObjField
+                ),
+                new Load(
+                    new Register(2, test2ObjFieldPointer),
+                    new Register(1, new TypePointerMetadata(test2ObjFieldPointer))
+                ),
+                new Return(new Register(2, test2ObjFieldPointer)),
+            ])),
+            new IrFunction("Test2_<>_set_obj", new Block("entry", [
+                new LoadParameter(new Register(0, test2PointerType), 0),
+                new LoadParameter(new Register(1, test1PointerType), 1),
+                new GetMemberPointer(
+                    new Register(2, new TypePointerMetadata(test2ObjFieldPointer)),
+                    new Register(0, test2PointerType),
+                    test2ObjField
+                ),
+                new Store(
+                    new Register(2, new TypePointerMetadata(test2ObjFieldPointer)),
+                    new Register(1, test1PointerType)
+                ),
+            ])),
+            new IrFunction("Test2_ctor", new Block("entry", [
+                new LoadParameter(new Register(0, test2PointerType), 0),
+                new LoadParameter(new Register(1, test1PointerType), 1),
+                new GetMemberPointer(
+                    new Register(2, test2ObjSetterPointer),
+                    new Register(0, test2PointerType),
+                    test2ObjSetter
+                ),
+                new Load(new Register(3, test2ObjSetter.TypeMetadata), new Register(2, test2ObjSetterPointer)),
+                new Call(
+                    new Register(4, TypeMetadata.Void),
+                    new Register(3, test2ObjSetter.TypeMetadata),
+                    [
+                        new Register(1, test1PointerType)
+                    ],
+                    false
+                ),
+            ])),
+
+            // test
+            new IrFunction("test_s", new Block("entry", [
+                new Alloc(new Register(0, test1PointerType), 4),
+                new GetMemberPointer(
+                    new Register(1, test1CtorPointer),
+                    new Register(0, test1PointerType),
+                    test1Ctor
+                ),
+                new Load(new Register(2, test1Ctor.TypeMetadata), new Register(1, test1CtorPointer)),
+                new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                new Call(
+                    new Register(4, test1PointerType),
+                    new Register(2, test1Ctor.TypeMetadata),
+                    [
+                        new Register(3, TypeMetadata.I32)
+                    ],
+                    false
+                ),
+                new Move(new Register(5, test1PointerType), new Register(4, test1PointerType)),
+
+                new Alloc(new Register(6, test2PointerType), 8),
+                new GetMemberPointer(
+                    new Register(7, test2CtorPointer),
+                    new Register(6, test2PointerType),
+                    test2Ctor
+                ),
+                new Load(new Register(8, test2Ctor.TypeMetadata), new Register(7, test2CtorPointer)),
+                new Call(
+                    new Register(9, test2PointerType),
+                    new Register(8, test2Ctor.TypeMetadata),
+                    [
+                        new Register(5, test1PointerType)
+                    ],
+                    false
+                ),
+                new Move(new Register(10, test2PointerType), new Register(9, test2PointerType)),
+
+                new GetMemberPointer(
+                    new Register(11, test2ObjGetterPointer),
+                    new Register(10, test2PointerType),
+                    test2ObjGetter
+                ),
+                new Load(new Register(12, test2ObjGetter.TypeMetadata), new Register(11, test2ObjGetterPointer)),
+                new Call(
+                    new Register(13, test1PointerType),
+                    new Register(12, test2ObjGetter.TypeMetadata),
+                    [],
+                    false
+                ),
+
+                new GetMemberPointer(
+                    new Register(14, test1XGetterPointer),
+                    new Register(13, test1PointerType),
+                    test1XGetter
+                ),
+                new Load(new Register(15, test1XGetter.TypeMetadata), new Register(14, test1XGetterPointer)),
+                new Call(
+                    new Register(16, TypeMetadata.I32),
+                    new Register(15, test1XGetter.TypeMetadata),
+                    [],
+                    false
+                ),
+
+                new Return(new Register(16, TypeMetadata.I32)),
+            ])),
+        };
+
+        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallFunctionTest()
+    {
+        const string code =
+            """
+            function main(): void {
+                test1();
+            }
+
+            function test1(): void { }
+            """;
+        var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var functionType = (FunctionTypeMetadata)typeProvider.GetType("() => void")!;
+        var functionPointer = new TypePointerMetadata(functionType);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("main_s", new Block("entry", [
+                new GetMemberPointer(
+                    new Register(0, functionPointer),
+                    null,
+                    new FunctionMetadata("test1", [], functionType)
+                ),
+                new Load(new Register(1, functionType), new Register(0, functionPointer)),
+                new Call(
+                    new Register(2, TypeMetadata.Void),
+                    new Register(1, functionType),
+                    [],
+                    true
+                )
+            ])),
+            new IrFunction("test1_s", new Block("entry", [])),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CallStaticMethodTest()
+    {
+        const string code =
+            """
+            public type Test {
+                public static test(): void { }
+            }
+
+            function main(): void {
+                Test.test();
+            }
+            """;
+        var tree = Parse(code);
+        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var testType = (TypeMetadata)typeProvider.GetType("Test")!;
+        var testMethod = testType.GetMethod("test")!;
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("Test_test_s", new Block("entry", [])),
+            new IrFunction("main_s", new Block("entry", [
+                new GetMemberPointer(
+                    new Register(0, new TypePointerMetadata(testMethod.TypeMetadata)),
+                    null,
+                    testMethod
+                ),
+                new Load(
+                    new Register(1, testMethod.TypeMetadata),
+                    new Register(0, new TypePointerMetadata(testMethod.TypeMetadata))
+                ),
+                new Call(
+                    new Register(2, TypeMetadata.Void),
+                    new Register(1, testMethod.TypeMetadata),
+                    [],
+                    true
+                )
+            ])),
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));

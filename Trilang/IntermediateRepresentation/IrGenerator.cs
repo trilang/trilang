@@ -5,123 +5,52 @@ using static Trilang.Parsing.Ast.BinaryExpressionKind;
 
 namespace Trilang.IntermediateRepresentation;
 
-// TODO: traverse metadata instead of AST
 public class IrGenerator
 {
     private readonly SsaTransformer ssaTransformer;
     private readonly TypeLayoutGenerator layoutGenerator;
+    private readonly IrDiscoveryPhase discoveryPhase;
 
     public IrGenerator()
     {
         ssaTransformer = new SsaTransformer();
         layoutGenerator = new TypeLayoutGenerator();
+        discoveryPhase = new IrDiscoveryPhase();
     }
 
     public IReadOnlyList<IrFunction> Generate(
         IEnumerable<ITypeMetadata> types,
         IReadOnlyList<SyntaxTree> syntaxTrees)
     {
-        layoutGenerator.Generate(types);
+        var typeMetadata = types as ITypeMetadata[] ?? types.ToArray();
+        layoutGenerator.Generate(typeMetadata);
 
         var functions = new List<IrFunction>();
-        foreach (var syntaxTree in syntaxTrees)
-            functions.AddRange(Generate(syntaxTree));
+        var functionsToGenerate = discoveryPhase.Discover(typeMetadata, syntaxTrees);
+
+        foreach (var (metadata, body) in functionsToGenerate)
+            functions.Add(GenerateFunction(metadata, body));
 
         return functions;
     }
 
-    private IReadOnlyList<IrFunction> Generate(SyntaxTree tree)
-    {
-        var functions = new List<IrFunction>();
-
-        foreach (var declaration in tree.Declarations)
-            functions.AddRange(GenerateDeclaration(declaration));
-
-        return functions;
-    }
-
-    private IReadOnlyList<IrFunction> GenerateDeclaration(IDeclarationNode declaration)
-        => declaration switch
-        {
-            FunctionDeclarationNode functionDeclarationNode
-                => [GenerateFunction(functionDeclarationNode)],
-
-            TypeAliasDeclarationNode typeAliasDeclarationNode
-                => throw new NotImplementedException(),
-
-            TypeDeclarationNode typeDeclarationNode
-                => GenerateFunctionsFromType(typeDeclarationNode),
-
-            _ => throw new ArgumentOutOfRangeException(nameof(declaration)),
-        };
-
-    private IrFunction GenerateFunction(FunctionDeclarationNode node)
+    private IrFunction GenerateFunction(IFunctionMetadata method, BlockStatementNode body)
     {
         var builder = new IrBuilder();
 
-        foreach (var (i, parameter) in node.Parameters.Index())
-            builder.LoadParameter(parameter.Name, parameter.Type.Metadata!, i);
+        var parameterIndex = 0;
+        if (!method.IsStatic)
+            builder.LoadParameter(MemberAccessExpressionNode.This, method.DeclaringType, parameterIndex++);
 
-        GenerateBlock(builder, node.Body);
+        foreach (var parameter in method.Parameters)
+            builder.LoadParameter(parameter.Name, parameter.Type, parameterIndex++);
+
+        GenerateBlock(builder, body);
 
         var code = builder.Build();
         ssaTransformer.Transform(code);
 
-        return IrFunction.FromFunction(node, code);
-    }
-
-    private IReadOnlyList<IrFunction> GenerateFunctionsFromType(TypeDeclarationNode typeDeclarationNode)
-    {
-        var functions = new List<IrFunction>();
-
-        foreach (var method in typeDeclarationNode.Methods)
-            functions.Add(GenerateMethod(method));
-
-        foreach (var constructor in typeDeclarationNode.Constructors)
-            functions.Add(GenerateConstructor(constructor));
-
-        return functions;
-    }
-
-    private IrFunction GenerateMethod(MethodDeclarationNode node)
-    {
-        var builder = new IrBuilder();
-        var i = 0;
-
-        if (!node.Metadata!.IsStatic)
-            builder.LoadParameter(MemberAccessExpressionNode.This, node.Metadata!.DeclaringType, i++);
-
-        for (; i < node.Parameters.Count; i++)
-        {
-            var parameter = node.Parameters[i];
-            builder.LoadParameter(parameter.Name, parameter.Type.Metadata!, i);
-        }
-
-        GenerateBlock(builder, node.Body);
-
-        var code = builder.Build();
-        ssaTransformer.Transform(code);
-
-        return IrFunction.FromMethod(node, code);
-    }
-
-    private IrFunction GenerateConstructor(ConstructorDeclarationNode node)
-    {
-        var builder = new IrBuilder();
-
-        builder.LoadParameter(MemberAccessExpressionNode.This, node.Metadata!.DeclaringType, 0);
-        for (var i = 0; i < node.Parameters.Count; i++)
-        {
-            var parameter = node.Parameters[i];
-            builder.LoadParameter(parameter.Name, parameter.Type.Metadata!, i + 1);
-        }
-
-        GenerateBlock(builder, node.Body);
-
-        var code = builder.Build();
-        ssaTransformer.Transform(code);
-
-        return IrFunction.FromConstructor(node, code);
+        return IrFunction.FromMethod(method, code);
     }
 
     private void GenerateStatement(IrBuilder builder, IStatementNode statementNode)
@@ -173,7 +102,9 @@ public class IrGenerator
         if (node.Else!.Statements is not [GoToNode elseGoTo])
             throw new Exception("The 'if' statement must have a 'goto' statement as the 'else' branch.");
 
-        var condition = GenerateExpression(builder, node.Condition);
+        var condition = GenerateExpression(builder, node.Condition)!.Value;
+        condition = builder.Deref(condition, node.Condition.ReturnTypeMetadata!);
+
         var thenBlock = builder.FindBlock(thenGoTo.Label) ??
                         builder.CreateBlock(thenGoTo.Label);
         var elseBlock = builder.FindBlock(elseGoTo.Label) ??
@@ -193,21 +124,31 @@ public class IrGenerator
 
     private void GenerateReturn(IrBuilder builder, ReturnStatementNode node)
     {
-        var expression = node.Expression is not null
-            ? GenerateExpression(builder, node.Expression)
-            : (Register?)null;
+        var expression = node.Expression;
+        if (expression is null)
+        {
+            builder.Return();
 
-        builder.Return(expression);
+            return;
+        }
+
+        var register = GenerateExpression(builder, expression)!.Value;
+        register = builder.Deref(register, expression.ReturnTypeMetadata!);
+
+        builder.Return(register);
     }
 
     private void GenerateVariableDeclaration(IrBuilder builder, VariableDeclarationStatementNode node)
     {
-        var expression = GenerateExpression(builder, node.Expression);
-        var register = builder.Move(expression);
+        var expression = node.Expression;
+        var expressionRegister = GenerateExpression(builder, expression);
+        expressionRegister = builder.Deref(expressionRegister!.Value, expression.ReturnTypeMetadata!);
+
+        var register = builder.Move(expressionRegister.Value);
         builder.AddDefinition(node.Name, register);
     }
 
-    private Register GenerateExpression(IrBuilder builder, IExpressionNode node)
+    private Register? GenerateExpression(IrBuilder builder, IExpressionNode node)
         => node switch
         {
             ArrayAccessExpressionNode arrayAccessExpressionNode
@@ -251,18 +192,47 @@ public class IrGenerator
 
     private Register GenerateArrayAccess(IrBuilder builder, ArrayAccessExpressionNode node)
     {
-        // TODO: invalid code, fix!!!
-        var array = GenerateExpression(builder, node.Member);
-        var index = GenerateExpression(builder, node.Index);
+        var array = GenerateExpression(builder, node.Member)!.Value;
+        var index = GenerateExpression(builder, node.Index)!.Value;
+        index = builder.Deref(index, node.Index.ReturnTypeMetadata!);
 
-        return builder.ArrayElement(array, index);
+        return builder.GetElementPointer(array, index);
     }
 
     private Register GenerateBinaryExpression(IrBuilder builder, BinaryExpressionNode node)
     {
-        var left = GenerateExpression(builder, node.Left);
-        var right = GenerateExpression(builder, node.Right);
+        if (node.Kind is AdditionAssignment
+            or SubtractionAssignment
+            or MultiplicationAssignment
+            or DivisionAssignment
+            or ModulusAssignment
+            or BitwiseAndAssignment
+            or BitwiseOrAssignment
+            or BitwiseXorAssignment)
+            Debug.Fail($"Compound assignment operators ({node.Kind}) should have been lowered to simple assignment on the previous stage.");
 
+        var left = GenerateExpression(builder, node.Left)!.Value;
+        var right = GenerateExpression(builder, node.Right)!.Value;
+        right = builder.Deref(right, node.Right.ReturnTypeMetadata!);
+
+        if (node.Kind == Assignment)
+        {
+            if (left.Type is TypePointerMetadata)
+            {
+                builder.Store(left, right);
+
+                return right;
+            }
+
+            var register = builder.Move(left, right);
+            var variable = builder.CurrentBlock.FindVariable(left);
+            if (variable is not null)
+                builder.AddAssignment(variable, register);
+
+            return register;
+        }
+
+        left = builder.Deref(left, node.Left.ReturnTypeMetadata!);
         if (node.Kind == Addition)
         {
             return builder.Add(node.ReturnTypeMetadata!, left, right);
@@ -343,32 +313,39 @@ public class IrGenerator
             return builder.Ge(node.ReturnTypeMetadata!, left, right);
         }
 
-        if (node.Kind == Assignment)
-        {
-            var register = builder.Move(left, right);
-            var variable = builder.CurrentBlock.FindVariable(left);
-            if (variable is not null)
-                builder.AddAssignment(variable, register);
-
-            return register;
-        }
-
-        if (node.Kind is AdditionAssignment
-            or SubtractionAssignment
-            or MultiplicationAssignment
-            or DivisionAssignment
-            or ModulusAssignment
-            or BitwiseAndAssignment
-            or BitwiseOrAssignment
-            or BitwiseXorAssignment)
-            Debug.Fail($"Compound assignment operators ({node.Kind}) should have been lowered to simple assignment on the previous stage.");
-
         throw new Exception("Unknown binary expression kind.");
     }
 
     private Register GenerateCall(IrBuilder builder, CallExpressionNode node)
     {
-        throw new NotImplementedException();
+        var delegatePointerRegister = GenerateExpression(builder, node.Member)!.Value;
+        var isStatic = false;
+        if (node.Member is MemberAccessExpressionNode { Reference: IFunctionMetadata function })
+            isStatic = function.IsStatic;
+
+        return GenerateCall(builder, delegatePointerRegister, node.Parameters, isStatic);
+    }
+
+    private Register GenerateCall(
+        IrBuilder builder,
+        Register delegatePointerRegister,
+        IReadOnlyList<IExpressionNode> parameters,
+        bool isStatic)
+    {
+        var parameterRegisters = new Register[parameters.Count];
+
+        var delegateRegister = builder.Load(delegatePointerRegister);
+
+        for (var i = 0; i < parameters.Count; i++)
+        {
+            var parameter = parameters[i];
+            var register = GenerateExpression(builder, parameter)!.Value;
+            register = builder.Deref(register, parameter.ReturnTypeMetadata!);
+
+            parameterRegisters[i] = register;
+        }
+
+        return builder.Call(delegateRegister, parameterRegisters, isStatic);
     }
 
     private Register GenerateExpressionBlock(IrBuilder builder, ExpressionBlockNode node)
@@ -379,7 +356,7 @@ public class IrGenerator
         // `ExpressionBlockNode` is generated by the compiler,
         // and the last statement should be an expression
         var lastExpression = (ExpressionStatementNode)node.Statements[^1];
-        var result = GenerateExpression(builder, lastExpression.Expression);
+        var result = GenerateExpression(builder, lastExpression.Expression)!.Value;
 
         return result;
     }
@@ -387,32 +364,43 @@ public class IrGenerator
     private Register GenerateLiteral(IrBuilder builder, LiteralExpressionNode node)
         => builder.LoadConst(node.ReturnTypeMetadata!, node.Value);
 
-    private Register GenerateMemberAccess(IrBuilder builder, MemberAccessExpressionNode node)
+    private Register? GenerateMemberAccess(IrBuilder builder, MemberAccessExpressionNode node)
     {
         if (node.IsFirstMember)
         {
-            var assignment = builder.CurrentBlock.FindAssignment(node.Name);
-            if (assignment is not null)
-                return assignment.Value;
+            return node.Reference switch
+            {
+                FunctionMetadata
+                    => builder.GetMemberPointer(node.Reference),
+
+                TypeMetadata
+                    => null,
+
+                _ => builder.CurrentBlock.FindAssignment(node.Name) ??
+                     throw new IrException($"Undefined variable '{node.Name}'.")
+            };
         }
 
-        throw new NotImplementedException();
+        var source = GenerateExpression(builder, node.Member);
+        var result = builder.GetMemberPointer(node.Reference!, source);
+
+        return result;
     }
 
     private Register GenerateNewArray(IrBuilder builder, NewArrayExpressionNode node)
     {
-        var size = GenerateExpression(builder, node.Size);
+        var size = GenerateExpression(builder, node.Size)!.Value;
+        size = builder.Deref(size, node.Size.ReturnTypeMetadata!);
 
-        return builder.NewArray((TypeArrayMetadata)node.Type.Metadata!, size);
+        return builder.ArrayAlloc((TypeArrayMetadata)node.Type.Metadata!, size);
     }
 
     private Register GenerateNewObject(IrBuilder builder, NewObjectExpressionNode node)
     {
-        var parameters = new Register[node.Parameters.Count];
-        for (var i = 0; i < node.Parameters.Count; i++)
-            parameters[i] = GenerateExpression(builder, node.Parameters[i]);
+        var memory = builder.Alloc(node.ReturnTypeMetadata!);
+        var member = builder.GetMemberPointer(node.Metadata!, memory);
 
-        return builder.NewObject(node.Metadata!, parameters);
+        return GenerateCall(builder, member, node.Parameters, false);
     }
 
     private Register GenerateNull(IrBuilder builder, NullExpressionNode node)
@@ -420,7 +408,8 @@ public class IrGenerator
 
     private Register GenerateUnaryExpression(IrBuilder builder, UnaryExpressionNode node)
     {
-        var operand = GenerateExpression(builder, node.Operand);
+        var operand = GenerateExpression(builder, node.Operand)!.Value;
+        operand = builder.Deref(operand, node.Operand.ReturnTypeMetadata!);
 
         return node.Kind switch
         {

@@ -19,16 +19,27 @@ internal class IrBuilder
     }
 
     private Register CreateRegister(ITypeMetadata type)
-    {
-        if (!type.IsValueType && type is not TypePointerMetadata)
-            type = new TypePointerMetadata(type);
+        => new Register(registerCounter++, type);
 
-        return new Register(registerCounter++, type);
+    private ITypeMetadata MapToIrType(ITypeMetadata type)
+        => !type.IsValueType ? new TypePointerMetadata(type) : type;
+
+    private int GetLevel(ITypeMetadata type)
+    {
+        var level = 0;
+
+        while (type is TypePointerMetadata pointer)
+        {
+            level++;
+            type = pointer.Type;
+        }
+
+        return level;
     }
 
     private Register BinaryInstruction(ITypeMetadata type, BinaryInstructionKind kind, Register left, Register right)
     {
-        var register = CreateRegister(type);
+        var register = CreateRegister(MapToIrType(type));
         var binaryInstruction = new BinaryOperation(register, kind, left, right);
         currentBlock.AddInstruction(binaryInstruction);
 
@@ -37,7 +48,7 @@ internal class IrBuilder
 
     private Register UnaryInstruction(ITypeMetadata type, UnaryInstructionKind kind, Register operand)
     {
-        var register = CreateRegister(type);
+        var register = CreateRegister(MapToIrType(type));
         var unaryInstruction = new UnaryOperation(register, kind, operand);
         currentBlock.AddInstruction(unaryInstruction);
 
@@ -75,7 +86,7 @@ internal class IrBuilder
 
     public Register LoadConst(ITypeMetadata type, object? value)
     {
-        var register = CreateRegister(type);
+        var register = CreateRegister(MapToIrType(type));
         var loadInstruction = new LoadConst(register, value);
         currentBlock.AddInstruction(loadInstruction);
 
@@ -84,19 +95,49 @@ internal class IrBuilder
 
     public void LoadParameter(string name, ITypeMetadata type, int index)
     {
-        var register = CreateRegister(type);
+        var register = CreateRegister(MapToIrType(type));
         var loadInstruction = new LoadParameter(register, index);
         currentBlock.AddInstruction(loadInstruction);
         AddDefinition(name, register);
     }
 
+    public Register Load(Register source)
+    {
+        var pointer = (TypePointerMetadata)source.Type;
+        var register = CreateRegister(pointer.Type);
+        var load = new Load(register, source);
+        currentBlock.AddInstruction(load);
+
+        return register;
+    }
+
+    public Register Deref(Register source, ITypeMetadata expected)
+    {
+        expected = MapToIrType(expected);
+
+        var sourceLevel = GetLevel(source.Type);
+        var expectedLevel = GetLevel(expected);
+
+        if (sourceLevel == expectedLevel)
+            return source;
+
+        if (sourceLevel > expectedLevel)
+            return Load(source);
+
+        throw new IrException($"Cannot dereference from pointer level {sourceLevel} to higher level {expectedLevel}. Expected level must be less than or equal to source level.");
+    }
+
+    public void Store(Register destination, Register source)
+    {
+        var store = new Store(destination, source);
+        currentBlock.AddInstruction(store);
+    }
+
     public Register Move(Register source)
     {
         var register = CreateRegister(source.Type);
-        var move = new Move(register, source);
-        currentBlock.AddInstruction(move);
 
-        return register;
+        return Move(register, source);
     }
 
     public Register Move(Register destination, Register source)
@@ -107,41 +148,10 @@ internal class IrBuilder
         return destination;
     }
 
-    public Register NewArray(TypeArrayMetadata type, Register size)
-    {
-        var register = CreateRegister(type);
-        var allocate = new NewArray(register, type, size);
-        currentBlock.AddInstruction(allocate);
-
-        return register;
-    }
-
-    public Register NewObject(ConstructorMetadata constructor, IReadOnlyList<Register> parameters)
-    {
-        var register = CreateRegister(constructor.DeclaringType);
-        var allocate = new NewObject(register, constructor, parameters);
-        currentBlock.AddInstruction(allocate);
-
-        return register;
-    }
-
     public void Return(Register? register = null)
     {
         var ret = new Return(register);
         currentBlock.AddInstruction(ret);
-    }
-
-    public Register ArrayElement(Register array, Register index)
-    {
-        // TODO:
-        var pointer = (TypePointerMetadata)array.Type;
-        var type = ((TypeArrayMetadata)pointer.Type).ItemMetadata!;
-
-        var register = CreateRegister(type);
-        var element = new ArrayElement(register, array, index);
-        currentBlock.AddInstruction(element);
-
-        return register;
     }
 
     public Register Add(ITypeMetadata type, Register left, Register right)
@@ -191,6 +201,65 @@ internal class IrBuilder
 
     public Register Not(ITypeMetadata type, Register operand)
         => UnaryInstruction(type, UnaryInstructionKind.Not, operand);
+
+    public Register GetElementPointer(Register array, Register index)
+    {
+        var pointer = (TypePointerMetadata)array.Type;
+        var type = ((TypeArrayMetadata)pointer.Type).ItemMetadata!;
+        var register = CreateRegister(new TypePointerMetadata(type));
+        var element = new GetElementPointer(register, array, index);
+        currentBlock.AddInstruction(element);
+
+        return register;
+    }
+
+    public Register GetMemberPointer(IMetadata member, Register? source = null)
+    {
+        var resultType = member switch
+        {
+            FieldMetadata field => MapToIrType(field.Type),
+            MethodMetadata method => method.TypeMetadata,
+            ConstructorMetadata constructor => constructor.TypeMetadata,
+            FunctionMetadata function => function.TypeMetadata,
+
+            // TODO: interface?
+            _ => throw new IrException($"Unsupported member type '{member.GetType().Name}'.")
+        };
+
+        var register = CreateRegister(new TypePointerMetadata(resultType));
+        var getMember = new GetMemberPointer(register, source, member);
+        currentBlock.AddInstruction(getMember);
+
+        return register;
+    }
+
+    public Register Call(Register function, IReadOnlyList<Register> parameters, bool isStatic)
+    {
+        var functionType = (FunctionTypeMetadata)function.Type;
+        var register = CreateRegister(MapToIrType(functionType.ReturnType));
+        var call = new Call(register, function, parameters, isStatic);
+        currentBlock.AddInstruction(call);
+
+        return register;
+    }
+
+    public Register Alloc(ITypeMetadata type)
+    {
+        var register = CreateRegister(new TypePointerMetadata(type));
+        var allocate = new Alloc(register, type.Layout!.Size);
+        currentBlock.AddInstruction(allocate);
+
+        return register;
+    }
+
+    public Register ArrayAlloc(TypeArrayMetadata type, Register size)
+    {
+        var register = CreateRegister(MapToIrType(type));
+        var allocate = new ArrayAlloc(register, type.Layout!.Size, type.ItemMetadata!.Layout!.Size, size);
+        currentBlock.AddInstruction(allocate);
+
+        return register;
+    }
 
     public Register AddAssignment(string name, Register register)
     {

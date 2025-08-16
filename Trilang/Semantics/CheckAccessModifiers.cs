@@ -40,11 +40,11 @@ internal class CheckAccessModifiers : Visitor
 
         // no need to check access modifier
         // ctor is used inside the type
-        if (ctor.DeclaringType == parentType)
+        if (ctor.DeclaringType.Equals(parentType))
             return;
 
         if (ctor.AccessModifier != AccessModifierMetadata.Public)
-            throw new SemanticAnalysisException($"The constructor of '{ctor.DeclaringType.Name}' is not accessible.");
+            throw new SemanticAnalysisException($"The constructor of '{ctor.DeclaringType}' is not accessible.");
     }
 
     protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)

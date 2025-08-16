@@ -46,7 +46,17 @@ internal class SsaRenamer
         {
             var instruction = block.Instructions[i];
 
-            if (instruction is ArrayElement arrayElement)
+            if (instruction is Alloc)
+            {
+                // nothing to rename here
+            }
+            else if (instruction is ArrayAlloc arrayAlloc)
+            {
+                block.ReplaceInstruction(
+                    i,
+                    arrayAlloc with { Count = Rename(arrayAlloc.Count) });
+            }
+            else if (instruction is GetElementPointer arrayElement)
             {
                 block.ReplaceInstruction(
                     i,
@@ -56,111 +66,149 @@ internal class SsaRenamer
                         Index = Rename(arrayElement.Index),
                     });
             }
-            else if (instruction is BinaryOperation binaryInstruction)
+            else if (instruction is BinaryOperation binary)
             {
                 block.ReplaceInstruction(
                     i,
-                    binaryInstruction with
+                    binary with
                     {
-                        Left = Rename(binaryInstruction.Left),
-                        Right = Rename(binaryInstruction.Right),
+                        Left = Rename(binary.Left),
+                        Right = Rename(binary.Right),
                     });
             }
-            else if (instruction is Branch branchInstruction)
+            else if (instruction is Branch branch)
             {
                 block.ReplaceInstruction(
                     i,
-                    branchInstruction with { Condition = Rename(branchInstruction.Condition) });
+                    branch with { Condition = Rename(branch.Condition) });
+            }
+            else if (instruction is Call call)
+            {
+                call = call with
+                {
+                    Parameters = call.Parameters.Select(Rename).ToArray(),
+                    Function = Rename(call.Function),
+                };
+                block.ReplaceInstruction(i, call);
+
+                if (!registers.TryGetValue(call.Result, out var stack))
+                {
+                    stack = new Stack<Register>();
+                    stack.Push(call.Result);
+
+                    registers[call.Result] = stack;
+                }
+                else
+                {
+                    var newRegister = GetNewRegister(call.Result.Type);
+                    stack.Push(newRegister);
+                    block.ReplaceInstruction(i, call with { Result = newRegister });
+                }
             }
             else if (instruction is Jump)
             {
                 // nothing to rename here
+            }
+            else if (instruction is GetMemberPointer getMember)
+            {
+                if (getMember.Source is not null)
+                {
+                    getMember = getMember with { Source = Rename(getMember.Source.Value) };
+                    block.ReplaceInstruction(i, getMember);
+                }
+
+                if (!registers.TryGetValue(getMember.Result, out var stack))
+                {
+                    stack = new Stack<Register>();
+                    stack.Push(getMember.Result);
+
+                    registers[getMember.Result] = stack;
+                }
+                else
+                {
+                    var newRegister = GetNewRegister(getMember.Result.Type);
+                    stack.Push(newRegister);
+                    block.ReplaceInstruction(i, getMember with { Result = newRegister });
+                }
+            }
+            else if (instruction is Load load)
+            {
+                load = load with { Source = Rename(load.Source) };
+                block.ReplaceInstruction(i, load);
             }
             else if (instruction is LoadConst)
             {
                 // no need to rename registers here
                 // load instruction is mainly used to load a const to a new register
             }
-            else if (instruction is LoadParameter loadParameterInstruction)
+            else if (instruction is LoadParameter loadParameter)
             {
-                if (!registers.TryGetValue(loadParameterInstruction.Result, out var stack))
+                if (!registers.TryGetValue(loadParameter.Result, out var stack))
                 {
                     stack = new Stack<Register>();
-                    stack.Push(loadParameterInstruction.Result);
+                    stack.Push(loadParameter.Result);
 
-                    registers[loadParameterInstruction.Result] = stack;
+                    registers[loadParameter.Result] = stack;
                 }
                 else
                 {
                     Debug.Fail("Imposibru!");
                 }
             }
-            else if (instruction is Move moveInstruction)
+            else if (instruction is Move move)
             {
-                moveInstruction = moveInstruction with { Source = Rename(moveInstruction.Source) };
-                block.ReplaceInstruction(i, moveInstruction);
+                move = move with { Source = Rename(move.Source) };
+                block.ReplaceInstruction(i, move);
 
-                if (!registers.TryGetValue(moveInstruction.Result, out var stack))
+                if (!registers.TryGetValue(move.Result, out var stack))
                 {
                     stack = new Stack<Register>();
-                    stack.Push(moveInstruction.Result);
+                    stack.Push(move.Result);
 
-                    registers[moveInstruction.Result] = stack;
+                    registers[move.Result] = stack;
                 }
                 else
                 {
-                    var newRegister = GetNewRegister(moveInstruction.Result.Type);
+                    var newRegister = GetNewRegister(move.Result.Type);
                     stack.Push(newRegister);
-                    block.ReplaceInstruction(i, moveInstruction with { Result = newRegister });
+                    block.ReplaceInstruction(i, move with { Result = newRegister });
                 }
             }
-            else if (instruction is NewArray newArrayInstruction)
+            else if (instruction is Phi phi)
             {
-                block.ReplaceInstruction(
-                    i,
-                    newArrayInstruction with { Size = Rename(newArrayInstruction.Size) });
-            }
-            else if (instruction is NewObject newObjectInstruction)
-            {
-                block.ReplaceInstruction(
-                    i,
-                    newObjectInstruction with
-                    {
-                        Arguments = newObjectInstruction.Arguments.Select(Rename).ToArray()
-                    });
-            }
-            else if (instruction is Phi phiInstruction)
-            {
-                if (!registers.TryGetValue(phiInstruction.Result, out var stack))
+                if (!registers.TryGetValue(phi.Result, out var stack))
                 {
                     stack = new Stack<Register>();
-                    stack.Push(phiInstruction.Result);
+                    stack.Push(phi.Result);
 
-                    registers[phiInstruction.Result] = stack;
+                    registers[phi.Result] = stack;
                 }
                 else
                 {
-                    var newRegister = GetNewRegister(phiInstruction.Result.Type);
+                    var newRegister = GetNewRegister(phi.Result.Type);
                     stack.Push(newRegister);
                     block.ReplaceInstruction(
                         i,
-                        phiInstruction with { Result = newRegister });
+                        phi with { Result = newRegister });
                 }
             }
-            else if (instruction is Return returnInstruction)
+            else if (instruction is Return ret)
             {
-                if (returnInstruction.Expression is null)
+                if (ret.Expression is null)
                     continue;
 
-                block.ReplaceInstruction(
-                    i,
-                    new Return(Rename(returnInstruction.Expression.Value)));
+                block.ReplaceInstruction(i, new Return(Rename(ret.Expression.Value)));
             }
-            else if (instruction is UnaryOperation unaryInstruction)
+            else if (instruction is Store store)
+            {
+                store = new Store(Rename(store.Destination), Rename(store.Source));
+                block.ReplaceInstruction(i, store);
+            }
+            else if (instruction is UnaryOperation unary)
             {
                 block.ReplaceInstruction(
                     i,
-                    unaryInstruction with { Operand = Rename(unaryInstruction.Operand) });
+                    unary with { Operand = Rename(unary.Operand) });
             }
             else
             {
