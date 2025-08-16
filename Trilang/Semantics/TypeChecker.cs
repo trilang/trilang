@@ -216,7 +216,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Expression.Accept(this, context);
     }
 
-    public void VisitFunction(FunctionDeclarationNode node, TypeCheckerContext context)
+    public void VisitFunctionSignature(FunctionDeclarationNode node, TypeCheckerContext context)
     {
         var parameters = new ParameterMetadata[node.Parameters.Count];
         for (var i = 0; i < node.Parameters.Count; i++)
@@ -242,9 +242,10 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
         foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
-
-        node.Body.Accept(this, context);
     }
+
+    public void VisitFunction(FunctionDeclarationNode node, TypeCheckerContext context)
+        => node.Body.Accept(this, context);
 
     public void VisitFunctionType(FunctionTypeNode node, TypeCheckerContext context)
     {
@@ -556,6 +557,10 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
 
     public void VisitTree(SyntaxTree node, TypeCheckerContext context)
     {
+        // preprocess function to generate correct metadata before processing bodies/other types
+        foreach (var function in node.Declarations.OfType<FunctionDeclarationNode>())
+            VisitFunctionSignature(function, context);
+
         foreach (var statement in node.Declarations)
             statement.Accept(this, context);
     }

@@ -224,6 +224,35 @@ public class TypeCheckerTests
     }
 
     [Test]
+    public void SetMetadataForForwardDefinedFunctionTest()
+    {
+        var tree = Parse(
+            """
+            function test1(): void {
+                test2();
+            }
+
+            function test2(): void { }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var expected = new FunctionMetadata(
+            "test2",
+            [],
+            new FunctionTypeMetadata([], TypeMetadata.Void));
+
+        var node = tree.Find<FunctionDeclarationNode>(x => x.Name == "test2");
+        Assert.That(node, Is.Not.Null);
+        Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
+
+        var memberAccess = tree.Find<MemberAccessExpressionNode>();
+        Assert.That(memberAccess, Is.Not.Null);
+        Assert.That(memberAccess.Reference, Is.EqualTo(expected).Using(new MetadataComparer()));
+    }
+
+    [Test]
     public void LiteralNumberTest()
     {
         var tree = Parse(
