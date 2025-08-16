@@ -53,7 +53,7 @@ public class GenerateGettersAndSettersTests
                         new MemberAccessExpressionNode(
                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                             {
-                                Reference = typeMetadata,
+                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
                                 AccessKind = PropertyAccessKind.Read,
                             },
                             fieldMetadata.Name
@@ -77,7 +77,7 @@ public class GenerateGettersAndSettersTests
                             new MemberAccessExpressionNode(
                                 new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                 {
-                                    Reference = typeMetadata,
+                                    Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
                                     AccessKind = PropertyAccessKind.Read,
                                 },
                                 fieldMetadata.Name
@@ -146,7 +146,7 @@ public class GenerateGettersAndSettersTests
                         new MemberAccessExpressionNode(
                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                             {
-                                Reference = typeMetadata,
+                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
                                 AccessKind = PropertyAccessKind.Read,
                             },
                             fieldMetadata.Name
@@ -170,7 +170,7 @@ public class GenerateGettersAndSettersTests
                             new MemberAccessExpressionNode(
                                 new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                 {
-                                    Reference = typeMetadata,
+                                    Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
                                     AccessKind = PropertyAccessKind.Read,
                                 },
                                 fieldMetadata.Name
@@ -246,7 +246,7 @@ public class GenerateGettersAndSettersTests
                         new MemberAccessExpressionNode(
                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                             {
-                                Reference = typeMetadata,
+                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
                                 AccessKind = PropertyAccessKind.Read,
                             },
                             fieldMetadata.Name
@@ -270,7 +270,7 @@ public class GenerateGettersAndSettersTests
                             new MemberAccessExpressionNode(
                                 new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                 {
-                                    Reference = typeMetadata,
+                                    Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
                                     AccessKind = PropertyAccessKind.Read,
                                 },
                                 fieldMetadata.Name

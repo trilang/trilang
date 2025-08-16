@@ -390,12 +390,10 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
                 MethodDeclarationNode methodNode
                     => methodNode.Metadata,
 
-                TypeDeclarationNode typeDeclarationNode
-                    => node.IsThis
-                        ? new ParameterMetadata(MemberAccessExpressionNode.This, typeDeclarationNode.Metadata!)
-                        : typeDeclarationNode.Metadata,
+                TypeDeclarationNode typeDeclarationNode when node.IsThis
+                    => new ParameterMetadata(MemberAccessExpressionNode.This, typeDeclarationNode.Metadata!),
 
-                _ => throw new SemanticAnalysisException(),
+                _ => throw new SemanticAnalysisException("Unknown symbol"),
             };
 
             return;

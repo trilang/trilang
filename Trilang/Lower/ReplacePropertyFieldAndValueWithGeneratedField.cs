@@ -172,7 +172,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
 
             var thisMember = new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
             {
-                Reference = currentField.DeclaringType,
+                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, currentField.DeclaringType),
                 AccessKind = PropertyAccessKind.Read,
             };
 

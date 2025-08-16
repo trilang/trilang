@@ -77,7 +77,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(
                                         new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                         {
-                                            Reference = point,
+                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                             AccessKind = PropertyAccessKind.Read,
                                         },
                                         backingField.Name
@@ -101,7 +101,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(
                                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                             {
-                                                Reference = point,
+                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
                                             backingField.Name
@@ -262,7 +262,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(
                                         new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                         {
-                                            Reference = pointType,
+                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, pointType),
                                             AccessKind = PropertyAccessKind.Read,
                                         },
                                         xBackingField.Name
@@ -286,7 +286,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(
                                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                             {
-                                                Reference = pointType,
+                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, pointType),
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
                                             xBackingField.Name
@@ -337,7 +337,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(
                                         new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                         {
-                                            Reference = testType,
+                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, testType),
                                             AccessKind = PropertyAccessKind.Read,
                                         },
                                         pointBackingField.Name
@@ -361,7 +361,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(
                                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                             {
-                                                Reference = testType,
+                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, testType),
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
                                             pointBackingField.Name
@@ -509,7 +509,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(
                                         new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                         {
-                                            Reference = point,
+                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                             AccessKind = PropertyAccessKind.Read,
                                         },
                                         xBackingField.Name
@@ -533,7 +533,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(
                                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                             {
-                                                Reference = point,
+                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
                                             xBackingField.Name
@@ -677,7 +677,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(
                                         new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                         {
-                                            Reference = point,
+                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                             AccessKind = PropertyAccessKind.Read,
                                         },
                                         xBackingField.Name
@@ -701,7 +701,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(
                                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                             {
-                                                Reference = point,
+                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
                                             xBackingField.Name
@@ -867,7 +867,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(
                                         new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                         {
-                                            Reference = point,
+                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                             AccessKind = PropertyAccessKind.Read,
                                         },
                                         xBackingField.Name
@@ -891,7 +891,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(
                                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                             {
-                                                Reference = point,
+                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
                                             xBackingField.Name
@@ -1056,7 +1056,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     new MemberAccessExpressionNode(
                                         new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                         {
-                                            Reference = point,
+                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                             AccessKind = PropertyAccessKind.Read,
                                         },
                                         xBackingField.Name
@@ -1080,7 +1080,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode(
                                             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                             {
-                                                Reference = point,
+                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
                                             xBackingField.Name

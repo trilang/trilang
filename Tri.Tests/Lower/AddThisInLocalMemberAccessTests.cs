@@ -48,7 +48,7 @@ public class AddThisInLocalMemberAccessTests
             new MemberAccessExpressionNode(
                 new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                 {
-                    Reference = typeMetadata,
+                    Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
                     AccessKind = PropertyAccessKind.Read,
                 },
                 "<>_get_count")
@@ -96,7 +96,7 @@ public class AddThisInLocalMemberAccessTests
         var expected = new MemberAccessExpressionNode(
             new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
             {
-                Reference = typeMetadata,
+                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
                 AccessKind = PropertyAccessKind.Read,
             },
             "print")
