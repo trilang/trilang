@@ -69,16 +69,23 @@ internal class TypeGenerator
                     type,
                     property.Name,
                     propertyType,
-                    GetAccessModifierMetadata(property.Getter?.AccessModifier ?? AccessModifier.Public),
-                    GetAccessModifierMetadata(property.Setter?.AccessModifier ?? AccessModifier.Private));
+                    GetAccessModifierMetadata(property.Getter?.AccessModifier),
+                    GetAccessModifierMetadata(property.Setter?.AccessModifier));
 
                 // TODO: add in a constructor?
                 type.AddProperty(propertyMetadata);
-                type.AddMethod(propertyMetadata.Getter);
-                type.AddMethod(propertyMetadata.Setter);
 
-                typeProvider.DefineType(propertyMetadata.Getter.TypeMetadata);
-                typeProvider.DefineType(propertyMetadata.Setter.TypeMetadata);
+                if (propertyMetadata.Getter is not null)
+                {
+                    type.AddMethod(propertyMetadata.Getter);
+                    typeProvider.DefineType(propertyMetadata.Getter.TypeMetadata);
+                }
+
+                if (propertyMetadata.Setter is not null)
+                {
+                    type.AddMethod(propertyMetadata.Setter);
+                    typeProvider.DefineType(propertyMetadata.Setter.TypeMetadata);
+                }
             }
 
             if (typeDeclarationNode.Constructors.Count > 0)
@@ -94,7 +101,7 @@ internal class TypeGenerator
                     var parametersMetadata = GetParameters(typeProvider, constructor.Parameters);
                     var constructorMetadata = new ConstructorMetadata(
                         type,
-                        GetAccessModifierMetadata(constructor.AccessModifier),
+                        GetAccessModifierMetadata(constructor.AccessModifier) ?? AccessModifierMetadata.Public,
                         parametersMetadata,
                         functionType);
 
@@ -129,7 +136,7 @@ internal class TypeGenerator
 
                 var methodMetadata = new MethodMetadata(
                     type,
-                    GetAccessModifierMetadata(method.AccessModifier),
+                    GetAccessModifierMetadata(method.AccessModifier) ?? AccessModifierMetadata.Public,
                     method.IsStatic,
                     method.Name,
                     parameters,
@@ -157,12 +164,13 @@ internal class TypeGenerator
         return result;
     }
 
-    private static AccessModifierMetadata GetAccessModifierMetadata(AccessModifier accessModifier)
+    private static AccessModifierMetadata? GetAccessModifierMetadata(AccessModifier? accessModifier)
         => accessModifier switch
         {
             AccessModifier.Public => AccessModifierMetadata.Public,
             AccessModifier.Private => AccessModifierMetadata.Private,
 
+            null => null,
             _ => throw new ArgumentOutOfRangeException(nameof(accessModifier), accessModifier, null)
         };
 }

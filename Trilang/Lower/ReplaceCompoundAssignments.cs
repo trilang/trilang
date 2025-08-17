@@ -266,22 +266,22 @@ internal class ReplaceCompoundAssignments : ITransformer
 
     public ISyntaxNode TransformProperty(PropertyDeclarationNode node)
     {
-        node.Getter!.Transform(this);
-        node.Setter!.Transform(this);
+        node.Getter?.Transform(this);
+        node.Setter?.Transform(this);
 
         return node;
     }
 
     public ISyntaxNode TransformGetter(PropertyGetterNode node)
     {
-        node.Body!.Transform(this);
+        node.Body?.Transform(this);
 
         return node;
     }
 
     public ISyntaxNode TransformSetter(PropertySetterNode node)
     {
-        node.Body!.Transform(this);
+        node.Body?.Transform(this);
 
         return node;
     }

@@ -450,19 +450,6 @@ public class IrGeneratorTests
                 ),
                 new Return(new Register(2, arraySize.Type)),
             ])),
-            new IrFunction("array_i32__<>_set_size", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I64), 1),
-                new GetMemberPointer(
-                    new Register(2, new TypePointerMetadata(arraySize.Type)),
-                    new Register(0, arrayPointerType),
-                    arraySize
-                ),
-                new Store(
-                    new Register(2, new TypePointerMetadata(arraySize.Type)),
-                    new Register(1, TypeMetadata.I64)
-                ),
-            ]))
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -523,19 +510,6 @@ public class IrGeneratorTests
                 ),
                 new Return(new Register(2, arraySize.Type)),
             ])),
-            new IrFunction("array_i32__<>_set_size", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I64), 1),
-                new GetMemberPointer(
-                    new Register(2, new TypePointerMetadata(arraySize.Type)),
-                    new Register(0, arrayPointerType),
-                    arraySize
-                ),
-                new Store(
-                    new Register(2, new TypePointerMetadata(arraySize.Type)),
-                    new Register(1, TypeMetadata.I64)
-                ),
-            ]))
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -589,19 +563,6 @@ public class IrGeneratorTests
                 ),
                 new Return(new Register(2, arraySize.Type)),
             ])),
-            new IrFunction("array_i32__<>_set_size", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I64), 1),
-                new GetMemberPointer(
-                    new Register(2, new TypePointerMetadata(arraySize.Type)),
-                    new Register(0, arrayPointerType),
-                    arraySize
-                ),
-                new Store(
-                    new Register(2, new TypePointerMetadata(arraySize.Type)),
-                    new Register(1, TypeMetadata.I64)
-                ),
-            ]))
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -654,19 +615,6 @@ public class IrGeneratorTests
                 ),
                 new Return(new Register(2, arraySize.Type)),
             ])),
-            new IrFunction("array_i32__<>_set_size", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I64), 1),
-                new GetMemberPointer(
-                    new Register(2, new TypePointerMetadata(arraySize.Type)),
-                    new Register(0, arrayPointerType),
-                    arraySize
-                ),
-                new Store(
-                    new Register(2, new TypePointerMetadata(arraySize.Type)),
-                    new Register(1, TypeMetadata.I64)
-                ),
-            ]))
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));

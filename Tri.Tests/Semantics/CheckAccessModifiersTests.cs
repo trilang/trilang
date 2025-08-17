@@ -146,4 +146,48 @@ public class CheckAccessModifiersTests
             () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.Nothing);
     }
+
+    [Test]
+    public void MissingGetterTest()
+    {
+        var tree = Parse(
+            """
+            public type Point {
+                x: i32 { public set; }
+            }
+
+            function test(p: Point): i32 {
+                return p.x;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'x' property does not have a getter."));
+    }
+
+    [Test]
+    public void MissingSetterTest()
+    {
+        var tree = Parse(
+            """
+            public type Point {
+                x: i32 { public get; }
+            }
+
+            function test(p: Point): void {
+                p.x = 1;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'x' property does not have a setter."));
+    }
 }

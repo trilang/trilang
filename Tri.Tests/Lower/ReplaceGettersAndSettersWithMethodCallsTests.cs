@@ -46,13 +46,11 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var count = new PropertyMetadata(point, "x", TypeMetadata.I32);
         point.AddProperty(count);
-        point.AddMethod(count.Getter);
-        point.AddMethod(count.Setter);
+        point.AddMethod(count.Getter!);
+        point.AddMethod(count.Setter!);
 
         var backingField = new FieldMetadata(point, $"<>_{count.Name}", count.Type);
         point.AddField(backingField);
-
-        var valueParameter = count.Setter.Parameters[0];
 
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
@@ -70,61 +68,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclarationNode(
                         "x",
                         new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                        new PropertyGetterNode(
-                            AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                        {
-                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                            AccessKind = PropertyAccessKind.Read,
-                                        },
-                                        backingField.Name
-                                    )
-                                    {
-                                        Reference = backingField,
-                                        AccessKind = PropertyAccessKind.Read,
-                                    }
-                                ),
-                            ])
-                        )
-                        {
-                            Metadata = count.Getter,
-                        },
-                        new PropertySetterNode(
-                            AccessModifier.Private,
-                            new BlockStatementNode([
-                                new ExpressionStatementNode(
-                                    new BinaryExpressionNode(
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                            {
-                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                                AccessKind = PropertyAccessKind.Read,
-                                            },
-                                            backingField.Name
-                                        )
-                                        {
-                                            Reference = backingField,
-                                            AccessKind = PropertyAccessKind.Write,
-                                        },
-                                        new MemberAccessExpressionNode(valueParameter.Name)
-                                        {
-                                            Reference = valueParameter,
-                                            AccessKind = PropertyAccessKind.Read,
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = TypeMetadata.I32,
-                                    }
-                                ),
-                            ])
-                        )
-                        {
-                            Metadata = count.Setter,
-                        }
+                        null,
+                        null
                     )
                     {
                         Metadata = count,
@@ -157,7 +102,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     Reference = pParameter,
                                     AccessKind = PropertyAccessKind.Read,
                                 },
-                                count.Getter.Name
+                                count.Getter!.Name
                             )
                             {
                                 Reference = count.Getter,
@@ -182,7 +127,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var tree = Parse(
             """
             public type Point {
-                x: i32 { public set; }
+                x: i32 { public get; public set; }
             }
 
             public type Test {
@@ -212,13 +157,11 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         pointType.AddProperty(xProperty);
-        pointType.AddMethod(xProperty.Getter);
-        pointType.AddMethod(xProperty.Setter);
+        pointType.AddMethod(xProperty.Getter!);
+        pointType.AddMethod(xProperty.Setter!);
 
         var xBackingField = new FieldMetadata(pointType, $"<>_{xProperty.Name}", xProperty.Type);
         pointType.AddField(xBackingField);
-
-        var xValueParameter = xProperty.Setter.Parameters[0];
 
         var testType = new TypeMetadata("Test");
         testType.AddConstructor(
@@ -230,13 +173,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var pointProperty = new PropertyMetadata(testType, "point", pointType);
         testType.AddProperty(pointProperty);
-        testType.AddMethod(pointProperty.Getter);
-        testType.AddMethod(pointProperty.Setter);
+        testType.AddMethod(pointProperty.Getter!);
+        testType.AddMethod(pointProperty.Setter!);
 
         var pointBackingField = new FieldMetadata(testType, $"<>_{pointProperty.Name}", pointProperty.Type);
         testType.AddField(pointBackingField);
 
-        var pointValueParameter = pointProperty.Setter.Parameters[0];
+        var pointValueParameter = pointProperty.Setter!.Parameters[0];
 
         var tParameter = new ParameterMetadata("t", testType);
         var testFunction = new FunctionMetadata(
@@ -257,55 +200,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                        {
-                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, pointType),
-                                            AccessKind = PropertyAccessKind.Read,
-                                        },
-                                        xBackingField.Name
-                                    )
-                                    {
-                                        Reference = xBackingField,
-                                        AccessKind = PropertyAccessKind.Read,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
                         new PropertySetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ExpressionStatementNode(
-                                    new BinaryExpressionNode(
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                            {
-                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, pointType),
-                                                AccessKind = PropertyAccessKind.Read,
-                                            },
-                                            xBackingField.Name
-                                        )
-                                        {
-                                            Reference = xBackingField,
-                                            AccessKind = PropertyAccessKind.Write,
-                                        },
-                                        new MemberAccessExpressionNode(xValueParameter.Name)
-                                        {
-                                            Reference = xValueParameter,
-                                            AccessKind = PropertyAccessKind.Read,
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = xProperty.Type,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Setter,
@@ -330,61 +232,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclarationNode(
                         "point",
                         new TypeNode("Point") { Metadata = pointType },
-                        new PropertyGetterNode(
-                            AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                        {
-                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, testType),
-                                            AccessKind = PropertyAccessKind.Read,
-                                        },
-                                        pointBackingField.Name
-                                    )
-                                    {
-                                        Reference = pointBackingField,
-                                        AccessKind = PropertyAccessKind.Read,
-                                    }
-                                ),
-                            ])
-                        )
-                        {
-                            Metadata = pointProperty.Getter,
-                        },
-                        new PropertySetterNode(
-                            AccessModifier.Private,
-                            new BlockStatementNode([
-                                new ExpressionStatementNode(
-                                    new BinaryExpressionNode(
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                            {
-                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, testType),
-                                                AccessKind = PropertyAccessKind.Read,
-                                            },
-                                            pointBackingField.Name
-                                        )
-                                        {
-                                            Reference = pointBackingField,
-                                            AccessKind = PropertyAccessKind.Write,
-                                        },
-                                        new MemberAccessExpressionNode(pointValueParameter.Name)
-                                        {
-                                            Reference = pointValueParameter,
-                                            AccessKind = PropertyAccessKind.Read,
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = pointProperty.Type,
-                                    }
-                                ),
-                            ])
-                        )
-                        {
-                            Metadata = pointProperty.Setter,
-                        }
+                        null,
+                        null
                     )
                     {
                         Metadata = pointProperty,
@@ -419,7 +268,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                             Reference = tParameter,
                                             AccessKind = PropertyAccessKind.Read,
                                         },
-                                        pointProperty.Getter.Name
+                                        pointProperty.Getter!.Name
                                     )
                                     {
                                         Reference = pointProperty.Getter,
@@ -427,7 +276,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     },
                                     []
                                 ),
-                                xProperty.Getter.Name
+                                xProperty.Getter!.Name
                             )
                             {
                                 Reference = xProperty.Getter,
@@ -452,7 +301,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var tree = Parse(
             """
             public type Point {
-                x: i32 { public set; }
+                x: i32 { public get; public set; }
             }
 
             function test(p: Point): void {
@@ -478,13 +327,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         point.AddProperty(xProperty);
-        point.AddMethod(xProperty.Getter);
-        point.AddMethod(xProperty.Setter);
+        point.AddMethod(xProperty.Getter!);
+        point.AddMethod(xProperty.Setter!);
 
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var valueParameter = xProperty.Setter.Parameters[0];
+        var valueParameter = xProperty.Setter!.Parameters[0];
 
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
@@ -504,55 +353,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                        {
-                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                            AccessKind = PropertyAccessKind.Read,
-                                        },
-                                        xBackingField.Name
-                                    )
-                                    {
-                                        Reference = xBackingField,
-                                        AccessKind = PropertyAccessKind.Read,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
                         new PropertySetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ExpressionStatementNode(
-                                    new BinaryExpressionNode(
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                            {
-                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                                AccessKind = PropertyAccessKind.Read,
-                                            },
-                                            xBackingField.Name
-                                        )
-                                        {
-                                            Reference = xBackingField,
-                                            AccessKind = PropertyAccessKind.Write,
-                                        },
-                                        new MemberAccessExpressionNode(valueParameter.Name)
-                                        {
-                                            Reference = valueParameter,
-                                            AccessKind = PropertyAccessKind.Read,
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = TypeMetadata.I32,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Setter,
@@ -619,7 +427,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var tree = Parse(
             """
             public type Point {
-                x: i32 { public set; }
+                x: i32 { public get; public set; }
             }
 
             function test(p: Point): i32 {
@@ -645,13 +453,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         point.AddProperty(xProperty);
-        point.AddMethod(xProperty.Getter);
-        point.AddMethod(xProperty.Setter);
+        point.AddMethod(xProperty.Getter!);
+        point.AddMethod(xProperty.Setter!);
 
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var valueParameter = xProperty.Setter.Parameters[0];
+        var valueParameter = xProperty.Setter!.Parameters[0];
         var tmpVariable = new VariableMetadata("<>_tmp_set0", xProperty.Type);
 
         var pParameter = new ParameterMetadata("p", point);
@@ -672,55 +480,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                        {
-                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                            AccessKind = PropertyAccessKind.Read,
-                                        },
-                                        xBackingField.Name
-                                    )
-                                    {
-                                        Reference = xBackingField,
-                                        AccessKind = PropertyAccessKind.Read,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
                         new PropertySetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ExpressionStatementNode(
-                                    new BinaryExpressionNode(
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                            {
-                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                                AccessKind = PropertyAccessKind.Read,
-                                            },
-                                            xBackingField.Name
-                                        )
-                                        {
-                                            Reference = xBackingField,
-                                            AccessKind = PropertyAccessKind.Write,
-                                        },
-                                        new MemberAccessExpressionNode(valueParameter.Name)
-                                        {
-                                            Reference = valueParameter,
-                                            AccessKind = PropertyAccessKind.Read,
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = TypeMetadata.I32,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Setter,
@@ -810,7 +577,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var tree = Parse(
             """
             public type Point {
-                x: i32 { public set; }
+                x: i32 { public get; public set; }
             }
 
             function test(p: Point): void {
@@ -836,13 +603,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         point.AddProperty(xProperty);
-        point.AddMethod(xProperty.Getter);
-        point.AddMethod(xProperty.Setter);
+        point.AddMethod(xProperty.Getter!);
+        point.AddMethod(xProperty.Setter!);
 
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var valueParameter = xProperty.Setter.Parameters[0];
+        var valueParameter = xProperty.Setter!.Parameters[0];
 
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
@@ -862,55 +629,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                        {
-                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                            AccessKind = PropertyAccessKind.Read,
-                                        },
-                                        xBackingField.Name
-                                    )
-                                    {
-                                        Reference = xBackingField,
-                                        AccessKind = PropertyAccessKind.Read,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
                         new PropertySetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ExpressionStatementNode(
-                                    new BinaryExpressionNode(
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                            {
-                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                                AccessKind = PropertyAccessKind.Read,
-                                            },
-                                            xBackingField.Name
-                                        )
-                                        {
-                                            Reference = xBackingField,
-                                            AccessKind = PropertyAccessKind.Write,
-                                        },
-                                        new MemberAccessExpressionNode(valueParameter.Name)
-                                        {
-                                            Reference = valueParameter,
-                                            AccessKind = PropertyAccessKind.Read,
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = TypeMetadata.I32,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Setter,
@@ -963,7 +689,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                                 Reference = pParameter,
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
-                                            xProperty.Getter.Name
+                                            xProperty.Getter!.Name
                                         )
                                         {
                                             Reference = xProperty.Getter,
@@ -998,7 +724,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var tree = Parse(
             """
             public type Point {
-                x: i32 { public set; }
+                x: i32 { public get; public set; }
             }
 
             function test(p: Point): i32 {
@@ -1024,13 +750,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         point.AddProperty(xProperty);
-        point.AddMethod(xProperty.Getter);
-        point.AddMethod(xProperty.Setter);
+        point.AddMethod(xProperty.Getter!);
+        point.AddMethod(xProperty.Setter!);
 
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var valueParameter = xProperty.Setter.Parameters[0];
+        var valueParameter = xProperty.Setter!.Parameters[0];
         var tmpVariable = new VariableMetadata("<>_tmp_set0", xProperty.Type);
 
         var pParameter = new ParameterMetadata("p", point);
@@ -1051,55 +777,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         new TypeNode("i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ReturnStatementNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                        {
-                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                            AccessKind = PropertyAccessKind.Read,
-                                        },
-                                        xBackingField.Name
-                                    )
-                                    {
-                                        Reference = xBackingField,
-                                        AccessKind = PropertyAccessKind.Read,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
                         new PropertySetterNode(
                             AccessModifier.Public,
-                            new BlockStatementNode([
-                                new ExpressionStatementNode(
-                                    new BinaryExpressionNode(
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
-                                            {
-                                                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, point),
-                                                AccessKind = PropertyAccessKind.Read,
-                                            },
-                                            xBackingField.Name
-                                        )
-                                        {
-                                            Reference = xBackingField,
-                                            AccessKind = PropertyAccessKind.Write,
-                                        },
-                                        new MemberAccessExpressionNode(valueParameter.Name)
-                                        {
-                                            Reference = valueParameter,
-                                            AccessKind = PropertyAccessKind.Read,
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = TypeMetadata.I32,
-                                    }
-                                ),
-                            ])
+                            null
                         )
                         {
                             Metadata = xProperty.Setter,
@@ -1142,7 +827,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                                 Reference = pParameter,
                                                 AccessKind = PropertyAccessKind.Read,
                                             },
-                                            xProperty.Getter.Name
+                                            xProperty.Getter!.Name
                                         )
                                         {
                                             Reference = xProperty.Getter,

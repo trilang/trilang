@@ -138,16 +138,16 @@ public class TypeCheckerTests
             "x",
             TypeMetadata.I32);
         expected.AddProperty(xProperty);
-        expected.AddMethod(xProperty.Getter);
-        expected.AddMethod(xProperty.Setter);
+        expected.AddMethod(xProperty.Getter!);
+        expected.AddMethod(xProperty.Setter!);
 
         var yProperty = new PropertyMetadata(
             expected,
             "y",
             TypeMetadata.I32);
         expected.AddProperty(yProperty);
-        expected.AddMethod(yProperty.Getter);
-        expected.AddMethod(yProperty.Setter);
+        expected.AddMethod(yProperty.Getter!);
+        expected.AddMethod(yProperty.Setter!);
 
         expected.AddMethod(new MethodMetadata(
             expected,

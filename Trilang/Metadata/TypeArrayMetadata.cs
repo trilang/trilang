@@ -20,10 +20,9 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
 
         fields.Add(new FieldMetadata(this, "<>_size", TypeMetadata.I64));
 
-        var sizeProperty = new PropertyMetadata(this, "size", TypeMetadata.I64);
+        var sizeProperty = new PropertyMetadata(this, "size", TypeMetadata.I64, AccessModifierMetadata.Public);
         properties.Add(sizeProperty);
-        methods.Add(sizeProperty.Getter);
-        methods.Add(sizeProperty.Setter);
+        methods.Add(sizeProperty.Getter!);
     }
 
     public static bool operator ==(TypeArrayMetadata? left, TypeArrayMetadata? right)

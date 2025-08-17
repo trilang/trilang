@@ -67,10 +67,9 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         fields.Add(new FieldMetadata(this, $"<>_{name}", type));
 
         // TODO: add in ctor?
-        var propertyMetadata = new PropertyMetadata(this, name, type);
+        var propertyMetadata = new PropertyMetadata(this, name, type, AccessModifierMetadata.Public);
         properties.Add(propertyMetadata);
-        methods.Add(propertyMetadata.Getter);
-        methods.Add(propertyMetadata.Setter);
+        methods.Add(propertyMetadata.Getter!);
     }
 
     public IMetadata? GetMember(string name)

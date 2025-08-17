@@ -9,7 +9,6 @@ public class Lowering
         // TODO: immutable tree?
         tree.Accept(new ReplaceIfDirectives(options.Directives));
         tree.Accept(new AddThisInLocalMemberAccess());
-        tree.Accept(new GenerateGettersAndSetters());
         tree.Transform(new ReplaceCompoundAssignments());
         tree.Transform(new ReplacePropertyFieldAndValueWithGeneratedField());
         tree.Transform(new ReplaceGettersAndSettersWithMethodCalls());

@@ -4,40 +4,40 @@ namespace Trilang.Metadata;
 
 public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 {
-    public PropertyMetadata(
-        ITypeMetadata declaringType,
+    public PropertyMetadata(ITypeMetadata declaringType,
         string name,
         ITypeMetadata type,
-        AccessModifierMetadata getterModifier = AccessModifierMetadata.Public,
-        AccessModifierMetadata setterModifier = AccessModifierMetadata.Private)
+        AccessModifierMetadata? getterModifier = null,
+        AccessModifierMetadata? setterModifier = null)
     {
         DeclaringType = declaringType;
         Name = name;
         Type = type;
-        Getter = new MethodMetadata(
-            declaringType,
-            getterModifier,
-            false,
-            $"<>_get_{name}",
-            [],
-            new FunctionTypeMetadata([], type)
-        );
-        Setter = new MethodMetadata(
-            declaringType,
-            setterModifier,
-            false,
-            $"<>_set_{name}",
-            [new ParameterMetadata(MemberAccessExpressionNode.Value, type)],
-            new FunctionTypeMetadata([type], TypeMetadata.Void)
-        );
+
+        var hasGetter = getterModifier is not null;
+        var hasSetter = setterModifier is not null;
+
+        if (!hasGetter && !hasSetter)
+        {
+            Getter = GenerateGetter(AccessModifierMetadata.Public);
+            Setter = GenerateSetter(AccessModifierMetadata.Private);
+        }
+        else
+        {
+            if (hasGetter)
+                Getter = GenerateGetter(getterModifier!.Value);
+
+            if (hasSetter)
+                Setter = GenerateSetter(setterModifier!.Value);
+        }
     }
 
     public PropertyMetadata(
         TypeMetadata declaringType,
         string name,
         ITypeMetadata type,
-        MethodMetadata getter,
-        MethodMetadata setter)
+        MethodMetadata? getter,
+        MethodMetadata? setter)
     {
         DeclaringType = declaringType;
         Name = name;
@@ -60,7 +60,7 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return DeclaringType == other.DeclaringType &&
+        return Equals(DeclaringType, other.DeclaringType) &&
                Name == other.Name &&
                Type.Equals(other.Type) &&
                Getter == other.Getter &&
@@ -87,13 +87,33 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
     public override string ToString()
         => $"{Name}: {Type}";
 
+    private MethodMetadata GenerateGetter(AccessModifierMetadata getterModifier)
+        => new MethodMetadata(
+            DeclaringType,
+            getterModifier,
+            false,
+            $"<>_get_{Name}",
+            [],
+            new FunctionTypeMetadata([], Type)
+        );
+
+    private MethodMetadata GenerateSetter(AccessModifierMetadata setterModifier)
+        => new MethodMetadata(
+            DeclaringType,
+            setterModifier,
+            false,
+            $"<>_set_{Name}",
+            [new ParameterMetadata(MemberAccessExpressionNode.Value, Type)],
+            new FunctionTypeMetadata([Type], TypeMetadata.Void)
+        );
+
     public ITypeMetadata DeclaringType { get; }
 
     public string Name { get; }
 
-    public MethodMetadata Getter { get; }
+    public MethodMetadata? Getter { get; }
 
-    public MethodMetadata Setter { get; }
+    public MethodMetadata? Setter { get; }
 
     public ITypeMetadata Type { get; }
 }

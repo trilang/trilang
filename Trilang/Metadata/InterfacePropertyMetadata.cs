@@ -6,8 +6,8 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
         InterfaceMetadata declaringType,
         string name,
         ITypeMetadata type,
-        AccessModifierMetadata getterModifier,
-        AccessModifierMetadata setterModifier)
+        AccessModifierMetadata? getterModifier,
+        AccessModifierMetadata? setterModifier)
     {
         DeclaringType = declaringType;
         Name = name;
@@ -63,7 +63,7 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
 
     public ITypeMetadata Type { get; }
 
-    public AccessModifierMetadata GetterModifier { get; }
+    public AccessModifierMetadata? GetterModifier { get; }
 
-    public AccessModifierMetadata SetterModifier { get; }
+    public AccessModifierMetadata? SetterModifier { get; }
 }

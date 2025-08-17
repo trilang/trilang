@@ -49,7 +49,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
             if (node.Parent is ExpressionStatementNode)
             {
                 return new CallExpressionNode(
-                    new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter.Name)
+                    new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter!.Name)
                     {
                         Reference = propertyMetadata.Setter,
                         AccessKind = PropertyAccessKind.Read,
@@ -71,7 +71,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
                 },
                 new ExpressionStatementNode(
                     new CallExpressionNode(
-                        new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter.Name)
+                        new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter!.Name)
                         {
                             Reference = propertyMetadata.Setter,
                             AccessKind = PropertyAccessKind.Read,
@@ -232,7 +232,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
         if (node is { Reference: PropertyMetadata propertyMetadata, AccessKind: PropertyAccessKind.Read })
         {
             return new CallExpressionNode(
-                new MemberAccessExpressionNode(member, propertyMetadata.Getter.Name)
+                new MemberAccessExpressionNode(member, propertyMetadata.Getter!.Name)
                 {
                     Reference = propertyMetadata.Getter,
                     AccessKind = PropertyAccessKind.Read,
@@ -302,22 +302,22 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
 
     public ISyntaxNode TransformProperty(PropertyDeclarationNode node)
     {
-        node.Getter!.Transform(this);
-        node.Setter!.Transform(this);
+        node.Getter?.Transform(this);
+        node.Setter?.Transform(this);
 
         return node;
     }
 
     public ISyntaxNode TransformGetter(PropertyGetterNode node)
     {
-        node.Body!.Transform(this);
+        node.Body?.Transform(this);
 
         return node;
     }
 
     public ISyntaxNode TransformSetter(PropertySetterNode node)
     {
-        node.Body!.Transform(this);
+        node.Body?.Transform(this);
 
         return node;
     }

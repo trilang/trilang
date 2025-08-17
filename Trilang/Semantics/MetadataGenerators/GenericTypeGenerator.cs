@@ -93,8 +93,14 @@ internal class GenericTypeGenerator
         foreach (var property in open.Properties)
         {
             var propertyType = typeArgumentsMap.Map(property.Type);
-            var getter = PopulateClosedMethod(typeProvider, typeArgumentsMap, closed, property.Getter);
-            var setter = PopulateClosedMethod(typeProvider, typeArgumentsMap, closed, property.Setter);
+            var getter = default(MethodMetadata);
+            if (property.Getter is not null)
+                getter = PopulateClosedMethod(typeProvider, typeArgumentsMap, closed, property.Getter);
+
+            var setter = default(MethodMetadata);
+            if (property.Setter is not null)
+                setter = PopulateClosedMethod(typeProvider, typeArgumentsMap, closed, property.Setter);
+
             var propertyMetadata = new PropertyMetadata(
                 closed,
                 property.Name,

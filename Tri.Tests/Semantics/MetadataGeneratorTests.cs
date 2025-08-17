@@ -46,16 +46,16 @@ public class MetadataGeneratorTests
             "x",
             TypeMetadata.I32);
         expected.AddProperty(xProperty);
-        expected.AddMethod(xProperty.Getter);
-        expected.AddMethod(xProperty.Setter);
+        expected.AddMethod(xProperty.Getter!);
+        expected.AddMethod(xProperty.Setter!);
 
         var yProperty = new PropertyMetadata(
             expected,
             "y",
             TypeMetadata.I32);
         expected.AddProperty(yProperty);
-        expected.AddMethod(yProperty.Getter);
-        expected.AddMethod(yProperty.Setter);
+        expected.AddMethod(yProperty.Getter!);
+        expected.AddMethod(yProperty.Setter!);
 
         expected.AddConstructor(new ConstructorMetadata(
             expected,
@@ -120,8 +120,8 @@ public class MetadataGeneratorTests
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         typeMetadata.AddProperty(propertyMetadata);
-        typeMetadata.AddMethod(propertyMetadata.Getter);
-        typeMetadata.AddMethod(propertyMetadata.Setter);
+        typeMetadata.AddMethod(propertyMetadata.Getter!);
+        typeMetadata.AddMethod(propertyMetadata.Setter!);
 
         var typeProvider = tree.SymbolTable!.TypeProvider;
         var actual = typeProvider.GetType("Test") as TypeMetadata;

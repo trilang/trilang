@@ -58,12 +58,22 @@ internal class CheckAccessModifiers : Visitor
         if (property.DeclaringType.Equals(type))
             return;
 
-        if (node.AccessKind == PropertyAccessKind.Read &&
-            property.Getter.AccessModifier == AccessModifierMetadata.Private)
-            throw new SemanticAnalysisException($"The getter of '{property.Name}' is private.");
+        if (node.AccessKind == PropertyAccessKind.Read)
+        {
+            if (property.Getter is null)
+                throw new SemanticAnalysisException($"The '{property.Name}' property does not have a getter.");
 
-        if (node.AccessKind == PropertyAccessKind.Write &&
-            property.Setter.AccessModifier == AccessModifierMetadata.Private)
-            throw new SemanticAnalysisException($"The setter of '{property.Name}' is private.");
+            if (property.Getter.AccessModifier == AccessModifierMetadata.Private)
+                throw new SemanticAnalysisException($"The getter of '{property.Name}' is private.");
+        }
+
+        if (node.AccessKind == PropertyAccessKind.Write)
+        {
+            if (property.Setter is null)
+                throw new SemanticAnalysisException($"The '{property.Name}' property does not have a setter.");
+
+            if (property.Setter.AccessModifier == AccessModifierMetadata.Private)
+                throw new SemanticAnalysisException($"The setter of '{property.Name}' is private.");
+        }
     }
 }

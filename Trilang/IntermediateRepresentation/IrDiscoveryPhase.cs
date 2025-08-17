@@ -18,22 +18,23 @@ internal class IrDiscoveryPhase : Visitor
         foreach (var tree in syntaxTrees)
             VisitTree(tree);
 
-        foreach (var type in types)
+        foreach (var metadata in types)
         {
-            var properties = type switch
+            var properties = metadata switch
             {
                 TupleMetadata tuple => tuple.Properties,
                 TypeArrayMetadata array => array.Properties,
+                TypeMetadata type => type.Properties,
                 _ => [],
             };
 
             foreach (var property in properties)
             {
-                // TODO: remove duplicate in `GenerateGettersAndSetters`?
                 var declaringType = property.DeclaringType;
-                var fieldMetadata = (FieldMetadata)declaringType.GetMember($"<>_{property.Name}")!;
+                var fieldMetadata = declaringType.GetMember($"<>_{property.Name}") as FieldMetadata ??
+                                    throw new Exception("Internal error: field metadata is null.");
 
-                if (!functionsToGenerate.ContainsKey(property.Getter))
+                if (property.Getter is not null && !functionsToGenerate.ContainsKey(property.Getter))
                 {
                     functionsToGenerate.Add(
                         property.Getter,
@@ -56,7 +57,7 @@ internal class IrDiscoveryPhase : Visitor
                     );
                 }
 
-                if (!functionsToGenerate.ContainsKey(property.Setter))
+                if (property.Setter is not null && !functionsToGenerate.ContainsKey(property.Setter))
                 {
                     var valueParameter = property.Setter.Parameters
                         .First(x => x.Name == MemberAccessExpressionNode.Value);

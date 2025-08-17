@@ -252,8 +252,8 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
         currentField = new FieldMetadata(typeMetadata, $"<>_{propertyMetadata.Name}", returnTypeMetadata);
         typeMetadata.AddField(currentField);
 
-        node.Getter!.Transform(this);
-        node.Setter!.Transform(this);
+        node.Getter?.Transform(this);
+        node.Setter?.Transform(this);
 
         currentField = null;
 
@@ -262,7 +262,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
 
     public ISyntaxNode TransformGetter(PropertyGetterNode node)
     {
-        node.Body!.Transform(this);
+        node.Body?.Transform(this);
 
         return node;
     }
@@ -271,7 +271,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
     {
         currentSetter = node.Metadata!;
 
-        node.Body!.Transform(this);
+        node.Body?.Transform(this);
 
         currentSetter = null;
 

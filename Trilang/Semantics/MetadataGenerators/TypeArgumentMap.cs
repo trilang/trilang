@@ -150,13 +150,23 @@ internal class TypeArgumentMap
             closed.AddInterface(Map(@interface));
 
         foreach (var property in type.Properties)
+        {
+            var getter = default(MethodMetadata);
+            if (property.Getter is not null)
+                getter = Map(closed, property.Getter);
+
+            var setter = default(MethodMetadata);
+            if (property.Setter is not null)
+                setter = Map(closed, property.Setter);
+
             closed.AddProperty(
                 new PropertyMetadata(
                     closed,
                     property.Name,
                     Map(property.Type),
-                    Map(closed, property.Getter),
-                    Map(closed, property.Setter)));
+                    getter,
+                    setter));
+        }
 
         foreach (var constructor in type.Constructors)
             closed.AddConstructor(
