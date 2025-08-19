@@ -18,6 +18,8 @@ public interface IVisitor
 
     void VisitCall(CallExpressionNode node);
 
+    void VisitCast(CastExpressionNode node);
+
     void VisitConstructor(ConstructorDeclarationNode node);
 
     void VisitContinue(ContinueNode node);

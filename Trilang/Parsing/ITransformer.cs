@@ -18,6 +18,8 @@ public interface ITransformer
 
     ISyntaxNode TransformCall(CallExpressionNode node);
 
+    ISyntaxNode TransformCast(CastExpressionNode node);
+
     ISyntaxNode TransformConstructor(ConstructorDeclarationNode node);
 
     ISyntaxNode TransformContinue(ContinueNode node);

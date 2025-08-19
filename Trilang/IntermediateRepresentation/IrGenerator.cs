@@ -163,6 +163,9 @@ public class IrGenerator
             CallExpressionNode callExpressionNode
                 => GenerateCall(builder, callExpressionNode),
 
+            CastExpressionNode castExpressionNode
+                => throw new NotImplementedException(),
+
             ExpressionBlockNode expressionBlockNode
                 => GenerateExpressionBlock(builder, expressionBlockNode),
 

@@ -73,6 +73,14 @@ internal class SymbolFinder : IVisitor<ISymbolTable>
             parameter.Accept(this, context);
     }
 
+    public void VisitCast(CastExpressionNode node, ISymbolTable context)
+    {
+        map.Add(node, context);
+
+        node.Type.Accept(this, context);
+        node.Expression.Accept(this, context);
+    }
+
     public void VisitConstructor(ConstructorDeclarationNode node, ISymbolTable context)
     {
         map.Add(node, context);

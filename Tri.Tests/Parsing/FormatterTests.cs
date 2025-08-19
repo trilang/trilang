@@ -2066,4 +2066,33 @@ public class FormatterTests
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void FormatCastExpressionTest()
+    {
+        var tree = new SyntaxTree([
+            new FunctionDeclarationNode(
+                "test",
+                [new ParameterNode("a", new TypeNode("i32"))],
+                new TypeNode("i8"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new CastExpressionNode(
+                            new TypeNode("i8"),
+                            new MemberAccessExpressionNode("a")
+                        )
+                    )
+                ])
+            )
+        ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            function test(a: i32): i8 {
+                return (i8)a;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
 }

@@ -184,6 +184,12 @@ internal class TypeChecker : IVisitor
         }
     }
 
+    public void VisitCast(CastExpressionNode node)
+    {
+        node.Type.Accept(this);
+        node.Expression.Accept(this);
+    }
+
     public void VisitConstructor(ConstructorDeclarationNode node)
     {
         foreach (var parameter in node.Parameters)

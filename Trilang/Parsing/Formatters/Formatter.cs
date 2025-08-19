@@ -135,6 +135,14 @@ public partial class Formatter : IFormatter
         writer.Write(")");
     }
 
+    public void VisitCast(CastExpressionNode node)
+    {
+        writer.Write('(');
+        node.Type.Accept(this);
+        writer.Write(')');
+        node.Expression.Accept(this);
+    }
+
     public void VisitConstructor(ConstructorDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);

@@ -1241,4 +1241,22 @@ public class TypeCheckerTests
                 .And.Message.EqualTo("Cannot find member '2' in '(i32, string)'")
         );
     }
+
+    [Test]
+    public void CastExpressionTest()
+    {
+        var tree = Parse(
+            """
+            function test(a: i32): i8 {
+                return (i8)a;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var castExp = tree.Find<CastExpressionNode>();
+        Assert.That(castExp, Is.Not.Null);
+        Assert.That(castExp.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I8).Using(new MetadataComparer()));
+    }
 }

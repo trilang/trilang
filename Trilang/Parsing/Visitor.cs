@@ -127,6 +127,24 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public void VisitCast(CastExpressionNode node)
+    {
+        VisitCastEnter(node);
+
+        node.Type.Accept(this);
+        node.Expression.Accept(this);
+
+        VisitCastExit(node);
+    }
+
+    protected virtual void VisitCastEnter(CastExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitCastExit(CastExpressionNode node)
+    {
+    }
+
     public virtual void VisitConstructor(ConstructorDeclarationNode node)
     {
         VisitConstructorEnter(node);

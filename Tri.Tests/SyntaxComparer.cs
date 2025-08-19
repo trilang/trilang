@@ -7,8 +7,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
     public static readonly SyntaxComparer Instance = new SyntaxComparer();
 
     public bool Equals(ISyntaxNode? x, ISyntaxNode? y)
-    {
-        return (x, y) switch
+        => (x, y) switch
         {
             (null, null) => true,
             (null, _) => throw new Exception("x is null"),
@@ -28,6 +27,8 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 => CompareBreakNode(x1, y1),
             (CallExpressionNode x1, CallExpressionNode y1)
                 => CompareCallExpressionNode(x1, y1),
+            (CastExpressionNode x1, CastExpressionNode y1)
+                => CompareCastExpressionNode(x1, y1),
             (ConstructorDeclarationNode x1, ConstructorDeclarationNode y1)
                 => CompareConstructorDeclarationNode(x1, y1),
             (ContinueNode x1, ContinueNode y1)
@@ -101,7 +102,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
             _ => throw new Exception($"{x.GetType()} != {y.GetType()}"),
         };
-    }
 
     private bool CompareArrayAccessExpressionNode(ArrayAccessExpressionNode x, ArrayAccessExpressionNode y)
     {
@@ -179,6 +179,17 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!x.Parameters.SequenceEqual(y.Parameters, this))
             throw new Exception("Arguments don't match.");
+
+        return true;
+    }
+
+    private bool CompareCastExpressionNode(CastExpressionNode x, CastExpressionNode y)
+    {
+        if (!Equals(x.Type, y.Type))
+            throw new Exception("TargetType doesn't match.");
+
+        if (!Equals(x.Expression, y.Expression))
+            throw new Exception("Expression doesn't match.");
 
         return true;
     }

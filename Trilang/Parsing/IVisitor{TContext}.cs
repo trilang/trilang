@@ -18,6 +18,8 @@ public interface IVisitor<in TContext>
 
     void VisitCall(CallExpressionNode node, TContext context);
 
+    void VisitCast(CastExpressionNode node, TContext context);
+
     void VisitConstructor(ConstructorDeclarationNode node, TContext context);
 
     void VisitContinue(ContinueNode node, TContext context);

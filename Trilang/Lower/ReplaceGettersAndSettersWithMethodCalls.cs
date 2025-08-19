@@ -140,6 +140,15 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
         return new CallExpressionNode(member, parameters);
     }
 
+    public ISyntaxNode TransformCast(CastExpressionNode node)
+    {
+        var expression = (IExpressionNode)node.Expression.Transform(this);
+        if (ReferenceEquals(expression, node.Expression))
+            return node;
+
+        return new CastExpressionNode(node.Type, expression);
+    }
+
     public ISyntaxNode TransformConstructor(ConstructorDeclarationNode node)
     {
         node.Body.Transform(this);

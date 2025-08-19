@@ -668,7 +668,8 @@ public class Parser
 
     private IExpressionNode? TryParseAsExpression(ParserContext context)
     {
-        var expression = TryParseUnaryExpression(context);
+        var expression = TryParseCastExpression(context) ??
+                         TryParseUnaryExpression(context);
         if (expression is null)
             return null;
 
@@ -680,6 +681,25 @@ public class Parser
 
         return new AsExpressionNode(expression, type);
     }
+
+    private IExpressionNode? TryParseCastExpression(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            if (!c.Reader.Check(TokenKind.OpenParenthesis))
+                return null;
+
+            var type = c.Parser.TryParseDiscriminatedUnion(c);
+            if (type is null)
+                return null;
+
+            if (!c.Reader.Check(TokenKind.CloseParenthesis))
+                throw new ParseException("Expected a close parenthesis.");
+
+            var expression = c.Parser.TryParseUnaryExpression(c) ??
+                             throw new ParseException("Expected an expression.");
+
+            return new CastExpressionNode(type, expression);
+        });
 
     private IExpressionNode? TryParseUnaryExpression(ParserContext context)
     {

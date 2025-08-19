@@ -811,4 +811,67 @@ public class ParseExpressionTests
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type."));
     }
+
+    [Test]
+    public void ParseCastExpressionTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            function test(a: i32): i8 {
+                return (i8)a;
+            }
+            """);
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                "test",
+                [new ParameterNode("a", new TypeNode("i32"))],
+                new TypeNode("i8"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        new CastExpressionNode(
+                            new TypeNode("i8"),
+                            new MemberAccessExpressionNode("a")
+                        )
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+    }
+
+    [Test]
+    public void ParseCastExpressionMissingCloseParenTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            function test(a: i32): i8 {
+                return (i8 a;
+            }
+            """;
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close parenthesis."));
+    }
+
+    [Test]
+    public void ParseCastExpressionMissingExpressionTest()
+    {
+        var parser = new Parser();
+        const string code =
+            """
+            function test(a: i32): i8 {
+                return (i8);
+            }
+            """;
+
+        Assert.That(
+            () => parser.Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an expression."));
+    }
 }
