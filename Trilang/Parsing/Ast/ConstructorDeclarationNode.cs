@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -76,8 +75,6 @@ public class ConstructorDeclarationNode : ISyntaxNode, IEquatable<ConstructorDec
         => transformer.TransformConstructor(this);
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public AccessModifier AccessModifier { get; }
 

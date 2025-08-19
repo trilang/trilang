@@ -8,10 +8,14 @@ internal class TypeGenerator
 {
     private record Item(TypeMetadata Metadata, TypeDeclarationNode Node);
 
+    private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public TypeGenerator()
-        => typesToProcess = [];
+    public TypeGenerator(SymbolTableMap symbolTableMap)
+    {
+        this.symbolTableMap = symbolTableMap;
+        typesToProcess = [];
+    }
 
     public void CreateTypes(IReadOnlyDictionary<string, TypeSymbol> types)
     {
@@ -23,7 +27,7 @@ internal class TypeGenerator
             if (symbol.Node is not TypeDeclarationNode typeDeclarationNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a TypeDeclarationNode, but found '{symbol.Node.GetType().Name}' instead.");
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var metadata = new TypeMetadata(typeDeclarationNode.Name);
 
             foreach (var genericArgument in typeDeclarationNode.GenericArguments)
@@ -46,7 +50,7 @@ internal class TypeGenerator
     {
         foreach (var (type, typeDeclarationNode) in typesToProcess)
         {
-            var typeProvider = typeDeclarationNode.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(typeDeclarationNode).TypeProvider;
 
             foreach (var @interface in typeDeclarationNode.Interfaces)
             {

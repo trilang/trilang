@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -69,13 +68,10 @@ public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNo
     public IExpressionNode Clone()
         => new TupleExpressionNode(Expressions.Select(x => x.Clone()).ToArray())
         {
-            SymbolTable = SymbolTable,
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public IReadOnlyList<IExpressionNode> Expressions { get; }
 

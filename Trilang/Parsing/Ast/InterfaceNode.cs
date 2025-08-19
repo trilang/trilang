@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -87,13 +86,10 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
             Methods.Select(x => x.Clone()).ToArray()
         )
         {
-            SymbolTable = SymbolTable,
             Metadata = Metadata,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public string Name { get; }
 

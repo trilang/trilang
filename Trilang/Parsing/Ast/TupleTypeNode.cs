@@ -1,5 +1,4 @@
 using Trilang.Metadata;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -61,13 +60,10 @@ public class TupleTypeNode : IInlineTypeNode, IEquatable<TupleTypeNode>
     public IInlineTypeNode Clone()
         => new TupleTypeNode(Types.Select(t => t.Clone()).ToArray())
         {
-            SymbolTable = SymbolTable,
             Metadata = Metadata,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public string Name { get; }
 

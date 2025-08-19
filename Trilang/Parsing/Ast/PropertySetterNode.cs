@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -68,8 +67,6 @@ public class PropertySetterNode : ISyntaxNode, IEquatable<PropertySetterNode>
         => transformer.TransformSetter(this);
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public AccessModifier AccessModifier { get; }
 

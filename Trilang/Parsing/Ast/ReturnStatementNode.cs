@@ -1,5 +1,4 @@
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -64,8 +63,6 @@ public class ReturnStatementNode : IStatementNode, IEquatable<ReturnStatementNod
         => transformer.TransformReturn(this);
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public IExpressionNode? Expression { get; }
 }

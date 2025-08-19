@@ -8,10 +8,14 @@ internal class FunctionTypeGenerator
 {
     private record Item(FunctionTypeMetadata Metadata, FunctionTypeNode Node);
 
+    private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public FunctionTypeGenerator()
-        => typesToProcess = [];
+    public FunctionTypeGenerator(SymbolTableMap symbolTableMap)
+    {
+        this.symbolTableMap = symbolTableMap;
+        typesToProcess = [];
+    }
 
     public void CreateFunctionTypes(IReadOnlyDictionary<string, TypeSymbol> types)
     {
@@ -23,7 +27,7 @@ internal class FunctionTypeGenerator
             if (symbol.Node is not FunctionTypeNode function)
                 throw new SemanticAnalysisException($"The '{symbol.Name}' symbol is not a function.");
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var functionTypeMetadata = new FunctionTypeMetadata();
             if (typeProvider.DefineType(symbol.Name, functionTypeMetadata))
                 typesToProcess.Add(new Item(functionTypeMetadata, function));
@@ -35,7 +39,7 @@ internal class FunctionTypeGenerator
         foreach (var (functionTypeMetadata, functionTypeNode) in typesToProcess)
         {
             // TODO: generic?
-            var typeProvider = functionTypeNode.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(functionTypeNode).TypeProvider;
 
             foreach (var parameterType in functionTypeNode.ParameterTypes)
             {

@@ -1,5 +1,4 @@
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -79,6 +78,4 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
 
     public IReadOnlyList<IDeclarationNode> Declarations
         => declarations;
-
-    public ISymbolTable? SymbolTable { get; set; }
 }

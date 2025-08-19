@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -71,12 +70,9 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
     public IExpressionNode Clone()
         => new CallExpressionNode(Member.Clone(), Parameters.Select(x => x.Clone()).ToArray())
         {
-            SymbolTable = SymbolTable,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public IExpressionNode Member { get; }
 

@@ -15,7 +15,6 @@ internal class ReplaceCompoundAssignments : ITransformer
 
         return new ArrayAccessExpressionNode(member, index)
         {
-            SymbolTable = node.SymbolTable,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -31,7 +30,6 @@ internal class ReplaceCompoundAssignments : ITransformer
 
         return new AsExpressionNode(expression, node.Type)
         {
-            SymbolTable = node.SymbolTable,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -64,13 +62,11 @@ internal class ReplaceCompoundAssignments : ITransformer
 
             right = new BinaryExpressionNode(kind, read, right)
             {
-                SymbolTable = node.SymbolTable,
                 ReturnTypeMetadata = node.ReturnTypeMetadata,
             };
 
             return new BinaryExpressionNode(Assignment, write, right)
             {
-                SymbolTable = node.SymbolTable,
                 ReturnTypeMetadata = node.ReturnTypeMetadata,
             };
         }
@@ -80,7 +76,6 @@ internal class ReplaceCompoundAssignments : ITransformer
 
         return new BinaryExpressionNode(node.Kind, left, right)
         {
-            SymbolTable = node.SymbolTable,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -145,10 +140,7 @@ internal class ReplaceCompoundAssignments : ITransformer
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new ExpressionStatementNode(expression)
-        {
-            SymbolTable = node.SymbolTable,
-        };
+        return new ExpressionStatementNode(expression);
     }
 
     public ISyntaxNode TransformFunction(FunctionDeclarationNode node)
@@ -179,10 +171,7 @@ internal class ReplaceCompoundAssignments : ITransformer
         if (ReferenceEquals(condition, node.Condition))
             return node;
 
-        return new IfStatementNode(condition, then, @else)
-        {
-            SymbolTable = node.SymbolTable,
-        };
+        return new IfStatementNode(condition, then, @else);
     }
 
     public ISyntaxNode TransformInterface(InterfaceNode node)
@@ -211,7 +200,6 @@ internal class ReplaceCompoundAssignments : ITransformer
 
         return new MemberAccessExpressionNode(member, node.Name)
         {
-            SymbolTable = node.SymbolTable,
             Reference = node.Reference,
         };
     }
@@ -231,7 +219,6 @@ internal class ReplaceCompoundAssignments : ITransformer
 
         return new NewArrayExpressionNode(node.Type, size)
         {
-            SymbolTable = node.SymbolTable,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -253,7 +240,6 @@ internal class ReplaceCompoundAssignments : ITransformer
 
         return new NewObjectExpressionNode(node.Type, parameters)
         {
-            SymbolTable = node.SymbolTable,
             Metadata = node.Metadata,
         };
     }
@@ -295,10 +281,7 @@ internal class ReplaceCompoundAssignments : ITransformer
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new ReturnStatementNode(expression)
-        {
-            SymbolTable = node.SymbolTable,
-        };
+        return new ReturnStatementNode(expression);
     }
 
     public ISyntaxNode TransformTree(SyntaxTree node)
@@ -326,7 +309,6 @@ internal class ReplaceCompoundAssignments : ITransformer
 
         return new TupleExpressionNode(expressions)
         {
-            SymbolTable = node.SymbolTable,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -362,7 +344,6 @@ internal class ReplaceCompoundAssignments : ITransformer
 
         return new UnaryExpressionNode(node.Kind, operand)
         {
-            SymbolTable = node.SymbolTable,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -373,10 +354,7 @@ internal class ReplaceCompoundAssignments : ITransformer
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new VariableDeclarationStatementNode(node.Name, node.Type, expression)
-        {
-            SymbolTable = node.SymbolTable,
-        };
+        return new VariableDeclarationStatementNode(node.Name, node.Type, expression);
     }
 
     public ISyntaxNode TransformWhile(WhileNode node)
@@ -386,9 +364,6 @@ internal class ReplaceCompoundAssignments : ITransformer
         if (ReferenceEquals(condition, node.Condition))
             return node;
 
-        return new WhileNode(condition, body)
-        {
-            SymbolTable = node.SymbolTable,
-        };
+        return new WhileNode(condition, body);
     }
 }

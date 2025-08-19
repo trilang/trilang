@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -71,13 +70,10 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
     public IExpressionNode Clone()
         => new NewObjectExpressionNode(Type.Clone(), Parameters.Select(x => x.Clone()).ToArray())
         {
-            SymbolTable = SymbolTable,
             Metadata = Metadata,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public IInlineTypeNode Type { get; }
 

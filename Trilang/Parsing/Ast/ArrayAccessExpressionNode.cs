@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -71,13 +70,10 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
     public IExpressionNode Clone()
         => new ArrayAccessExpressionNode(Member.Clone(), Index.Clone())
         {
-            SymbolTable = SymbolTable,
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public IExpressionNode Member { get; }
 

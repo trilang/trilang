@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -68,13 +67,10 @@ public class NewArrayExpressionNode : IExpressionNode, IEquatable<NewArrayExpres
     public IExpressionNode Clone()
         => new NewArrayExpressionNode((ArrayTypeNode)Type.Clone(), Size.Clone())
         {
-            SymbolTable = SymbolTable,
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public ArrayTypeNode Type { get; }
 

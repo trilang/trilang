@@ -8,10 +8,14 @@ internal class FunctionGenerator
 {
     private record Item(FunctionTypeMetadata Metadata, FunctionDeclarationNode Node);
 
+    private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public FunctionGenerator()
-        => typesToProcess = [];
+    public FunctionGenerator(SymbolTableMap symbolTableMap)
+    {
+        this.symbolTableMap = symbolTableMap;
+        typesToProcess = [];
+    }
 
     public void CreateFunctions(IReadOnlyDictionary<string, IdSymbol> functions)
     {
@@ -20,7 +24,7 @@ internal class FunctionGenerator
             if (symbol.Node is not FunctionDeclarationNode function)
                 continue;
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
 
             var parameters = string.Join(", ", function.Parameters.Select(p => p.Type.Name));
             var name = $"({parameters}) => {function.ReturnType.Name}";
@@ -34,7 +38,7 @@ internal class FunctionGenerator
     {
         foreach (var (functionTypeMetadata, function) in typesToProcess)
         {
-            var typeProvider = function.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(function).TypeProvider;
 
             foreach (var functionParameter in function.Parameters)
             {

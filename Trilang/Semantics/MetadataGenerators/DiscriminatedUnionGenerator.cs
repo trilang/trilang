@@ -8,10 +8,14 @@ internal class DiscriminatedUnionGenerator
 {
     private record Item(DiscriminatedUnionMetadata Metadata, DiscriminatedUnionNode Node);
 
+    private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public DiscriminatedUnionGenerator()
-        => typesToProcess = [];
+    public DiscriminatedUnionGenerator(SymbolTableMap symbolTableMap)
+    {
+        this.symbolTableMap = symbolTableMap;
+        typesToProcess = [];
+    }
 
     public void CreateDiscriminatedUnion(IReadOnlyDictionary<string, TypeSymbol> types)
     {
@@ -23,7 +27,7 @@ internal class DiscriminatedUnionGenerator
             if (symbol.Node is not DiscriminatedUnionNode discriminatedUnionNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a DiscriminatedUnionNode, but found '{symbol.Node.GetType().Name}' instead.");
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var metadata = new DiscriminatedUnionMetadata();
             if (typeProvider.DefineType(symbol.Name, metadata))
                 typesToProcess.Add(new Item(metadata, discriminatedUnionNode));
@@ -34,7 +38,7 @@ internal class DiscriminatedUnionGenerator
     {
         foreach (var (metadata, node) in typesToProcess)
         {
-            var typeProvider = node.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
             foreach (var typeNode in node.Types)
             {

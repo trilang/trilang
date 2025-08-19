@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -57,12 +56,9 @@ public class NullExpressionNode : IExpressionNode, IEquatable<NullExpressionNode
     public IExpressionNode Clone()
         => new NullExpressionNode
         {
-            SymbolTable = SymbolTable,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public ITypeMetadata ReturnTypeMetadata
         => TypeMetadata.Null;

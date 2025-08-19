@@ -1,5 +1,4 @@
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -54,8 +53,6 @@ public class BreakNode : IStatementNode, IEquatable<BreakNode>
         => transformer.TransformBreak(this);
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public WhileNode? LoopNode { get; set; }
 }

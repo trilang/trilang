@@ -8,10 +8,14 @@ internal class InterfaceGenerator
 {
     private record Item(InterfaceMetadata Metadata, InterfaceNode Node);
 
+    private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public InterfaceGenerator()
-        => typesToProcess = [];
+    public InterfaceGenerator(SymbolTableMap symbolTableMap)
+    {
+        this.symbolTableMap = symbolTableMap;
+        typesToProcess = [];
+    }
 
     public void CreateInterfaces(IReadOnlyDictionary<string, TypeSymbol> types)
     {
@@ -23,7 +27,7 @@ internal class InterfaceGenerator
             if (symbol.Node is not InterfaceNode interfaceNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an InterfaceNode, but found '{symbol.Node.GetType().Name}' instead.");
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var metadata = new InterfaceMetadata();
             if (typeProvider.DefineType(symbol.Name, metadata))
                 typesToProcess.Add(new Item(metadata, interfaceNode));
@@ -34,7 +38,7 @@ internal class InterfaceGenerator
     {
         foreach (var (metadata, interfaceNode) in typesToProcess)
         {
-            var typeProvider = interfaceNode.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(interfaceNode).TypeProvider;
 
             foreach (var property in interfaceNode.Properties)
             {

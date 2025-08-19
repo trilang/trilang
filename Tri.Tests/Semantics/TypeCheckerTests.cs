@@ -687,10 +687,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var thisNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "this");
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = typeProvider.GetType("Point");
         Assert.That(thisNode, Is.Not.Null);
         Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
@@ -755,10 +754,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = typeProvider.GetType("Point");
         Assert.That(aNode, Is.Not.Null);
         Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
@@ -807,9 +805,8 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
         var pointType = typeProvider.GetType("Test");
         Assert.That(aNode, Is.Not.Null);
@@ -837,9 +834,8 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var type = typeProvider.GetType("Point") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
@@ -989,11 +985,10 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expected = new TupleMetadata([TypeMetadata.I32, TypeMetadata.I32]);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var actual = typeProvider.GetType("(i32, i32)");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1070,9 +1065,8 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var closedType = typeProvider.GetType("List<i32>");
         var genericTypeNode = tree.Find<GenericTypeNode>();
         Assert.That(closedType, Is.Not.Null);
@@ -1095,9 +1089,8 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var closedType = typeProvider.GetType("Test<i32>") as TypeMetadata;
         var ctor = closedType!.GetConstructor([]);
 
@@ -1175,9 +1168,8 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var type = typeProvider.GetType("Test");
         Assert.That(type, Is.Not.Null);
 

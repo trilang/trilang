@@ -1,5 +1,4 @@
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -62,6 +61,4 @@ public class LabelNode : IEquatable<LabelNode>, IStatementNode
     public string Name { get; }
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 }

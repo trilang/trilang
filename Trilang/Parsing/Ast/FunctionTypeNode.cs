@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -76,13 +75,10 @@ public class FunctionTypeNode : IInlineTypeNode, IEquatable<FunctionTypeNode>
     public IInlineTypeNode Clone()
         => new FunctionTypeNode(ParameterTypes.Select(t => t.Clone()).ToArray(), ReturnType.Clone())
         {
-            SymbolTable = SymbolTable,
             Metadata = Metadata,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public string Name { get; }
 

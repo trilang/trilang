@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -80,14 +79,11 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
     public IExpressionNode Clone()
         => new MemberAccessExpressionNode(Member?.Clone(), Name)
         {
-            SymbolTable = SymbolTable,
             Reference = Reference,
             AccessKind = AccessKind,
         };
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public IExpressionNode? Member { get; set; }
 

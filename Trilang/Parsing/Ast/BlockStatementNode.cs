@@ -1,5 +1,4 @@
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -105,6 +104,4 @@ public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
 
     public IReadOnlyList<IStatementNode> Statements
         => statements;
-
-    public ISymbolTable? SymbolTable { get; set; }
 }

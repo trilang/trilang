@@ -5,10 +5,14 @@ namespace Trilang.Semantics;
 
 internal class VariableUsedBeforeDeclared : Visitor
 {
+    private readonly SymbolTableMap symbolFinderMap;
     private readonly List<HashSet<string>> scopes;
 
-    public VariableUsedBeforeDeclared()
-        => scopes = [];
+    public VariableUsedBeforeDeclared(SymbolTableMap symbolFinderMap)
+    {
+        this.symbolFinderMap = symbolFinderMap;
+        scopes = [];
+    }
 
     protected override void VisitBlockEnter(BlockStatementNode node)
         => scopes.Add([]);
@@ -28,7 +32,7 @@ internal class VariableUsedBeforeDeclared : Visitor
         if (node.Member is not null || node.IsThis || node.IsField || node.IsValue)
             return;
 
-        var symbol = node.SymbolTable?.GetId(node.Name);
+        var symbol = symbolFinderMap.Get(node).GetId(node.Name);
         if (symbol is not null)
         {
             if (symbol.Node is ParameterNode
@@ -45,7 +49,7 @@ internal class VariableUsedBeforeDeclared : Visitor
         }
 
         // access static member
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolFinderMap.Get(node).TypeProvider;
         var type = typeProvider.GetType(node.Name);
         if (type is null)
             throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");

@@ -1,5 +1,4 @@
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -72,8 +71,6 @@ public class IfDirectiveNode : IDeclarationNode, IStatementNode, IEquatable<IfDi
         => transformer.TransformIfDirective(this);
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public string DirectiveName { get; }
 

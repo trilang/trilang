@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -72,7 +71,6 @@ public class GenericTypeNode : IInlineTypeNode, IEquatable<GenericTypeNode>
     public IInlineTypeNode Clone()
         => new GenericTypeNode(PrefixName, TypeArguments.Select(t => t.Clone()).ToArray())
         {
-            SymbolTable = SymbolTable,
             Metadata = Metadata,
         };
 
@@ -80,8 +78,6 @@ public class GenericTypeNode : IInlineTypeNode, IEquatable<GenericTypeNode>
         => $"{PrefixName}<{new string(',', TypeArguments.Count - 1)}>";
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public string PrefixName { get; }
 

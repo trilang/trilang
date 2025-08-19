@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -66,8 +65,6 @@ public class ExpressionBlockNode : IExpressionNode, IEquatable<ExpressionBlockNo
         => throw new NotSupportedException();
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public IReadOnlyList<IStatementNode> Statements
         => statements;

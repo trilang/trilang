@@ -11,18 +11,18 @@ namespace Tri.Tests.IntermediateRepresentation;
 
 public class IrGeneratorTests
 {
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, ITypeMetadataProvider) Parse(string code)
     {
         var parser = new Parser();
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        return tree;
+        return (tree, typeProvider);
     }
 
     [Test]
@@ -42,8 +42,7 @@ public class IrGeneratorTests
                   return 1 {{op}} 2;
               }
               """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -81,8 +80,7 @@ public class IrGeneratorTests
                   return 1 {{op}} 2;
               }
               """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -114,8 +112,7 @@ public class IrGeneratorTests
                 x = 1;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -149,8 +146,7 @@ public class IrGeneratorTests
                   x {{op}} 1;
               }
               """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -185,8 +181,7 @@ public class IrGeneratorTests
                 return x;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -221,8 +216,7 @@ public class IrGeneratorTests
                 return a + b;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -257,8 +251,7 @@ public class IrGeneratorTests
                 return a + b;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -292,8 +285,7 @@ public class IrGeneratorTests
                 return null;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -318,8 +310,7 @@ public class IrGeneratorTests
                 return -a;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -349,8 +340,7 @@ public class IrGeneratorTests
                 return !a;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -380,8 +370,7 @@ public class IrGeneratorTests
                 return ~a;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -411,9 +400,8 @@ public class IrGeneratorTests
                 return a[0];
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
@@ -464,9 +452,8 @@ public class IrGeneratorTests
                 return a[index + 2];
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
@@ -524,9 +511,8 @@ public class IrGeneratorTests
                 a[0] = 10;
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
@@ -579,9 +565,8 @@ public class IrGeneratorTests
                 return a;
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
@@ -633,9 +618,8 @@ public class IrGeneratorTests
                 return new Point(1, 2);
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var ctor = pointType.Constructors.First();
@@ -690,8 +674,7 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -752,8 +735,7 @@ public class IrGeneratorTests
                 return b;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -819,8 +801,7 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -910,8 +891,7 @@ public class IrGeneratorTests
                 return b;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -985,8 +965,7 @@ public class IrGeneratorTests
                 return i;
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -1062,9 +1041,8 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var testType = (TypeMetadata)typeProvider.GetType("Test")!;
         var typePointer = new TypePointerMetadata(testType);
         var method = testType.GetMethod("method1")!;
@@ -1113,9 +1091,8 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var testType = (TypeMetadata)typeProvider.GetType("Test")!;
         var typePointer = new TypePointerMetadata(testType);
         var method = testType.GetMethod("method1")!;
@@ -1170,9 +1147,8 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = pointType.GetField("<>_x")!;
@@ -1235,9 +1211,8 @@ public class IrGeneratorTests
                 return p.x;
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = pointType.GetField("<>_x")!;
@@ -1340,9 +1315,8 @@ public class IrGeneratorTests
                 return -p.x;
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = pointType.GetField("<>_x")!;
@@ -1440,9 +1414,8 @@ public class IrGeneratorTests
                 return p.x + p.y;
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var xField = pointType.GetField("<>_x")!;
@@ -1595,9 +1568,8 @@ public class IrGeneratorTests
                 return test2.obj.x;
             }
             """;
-        var tree = Parse(code);
+        var (tree, typeProvider) = Parse(code);
 
-        var typeProvider = tree.SymbolTable!.TypeProvider;
         var test1Type = (TypeMetadata)typeProvider.GetType("Test1")!;
         var test1PointerType = new TypePointerMetadata(test1Type);
         var test2Type = (TypeMetadata)typeProvider.GetType("Test2")!;
@@ -1795,8 +1767,8 @@ public class IrGeneratorTests
 
             function test1(): void { }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
+
         var functionType = (FunctionTypeMetadata)typeProvider.GetType("() => void")!;
         var functionPointer = new TypePointerMetadata(functionType);
 
@@ -1838,8 +1810,8 @@ public class IrGeneratorTests
                 Test.test();
             }
             """;
-        var tree = Parse(code);
-        var typeProvider = tree.SymbolTable!.TypeProvider;
+        var (tree, typeProvider) = Parse(code);
+
         var testType = (TypeMetadata)typeProvider.GetType("Test")!;
         var testMethod = testType.GetMethod("test")!;
 

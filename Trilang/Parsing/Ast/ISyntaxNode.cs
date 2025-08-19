@@ -1,5 +1,3 @@
-using Trilang.Symbols;
-
 namespace Trilang.Parsing.Ast;
 
 public interface ISyntaxNode
@@ -11,6 +9,4 @@ public interface ISyntaxNode
     ISyntaxNode Transform(ITransformer transformer);
 
     ISyntaxNode? Parent { get; set; }
-
-    ISymbolTable? SymbolTable { get; set; }
 }

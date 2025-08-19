@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -83,7 +82,6 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
     public IExpressionNode Clone()
         => new LiteralExpressionNode(Kind, Value)
         {
-            SymbolTable = SymbolTable,
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
@@ -94,6 +92,4 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
     public object Value { get; }
 
     public ITypeMetadata? ReturnTypeMetadata { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 }

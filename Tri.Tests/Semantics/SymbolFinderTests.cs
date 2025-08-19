@@ -23,11 +23,11 @@ public class SymbolFinderTests
         var function = tree.Find<FunctionDeclarationNode>()!;
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
     }
 
     [Test]
@@ -42,12 +42,12 @@ public class SymbolFinderTests
         var function2 = tree.Find<FunctionDeclarationNode>(x => x.Name == "add")!;
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(tree.SymbolTable.Ids, Contains.Key(function1.Name).WithValue(new IdSymbol(function1)));
-        Assert.That(tree.SymbolTable.Ids, Contains.Key(function2.Name).WithValue(new IdSymbol(function2)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(treeSymbolTable.Ids, Contains.Key(function1.Name).WithValue(new IdSymbol(function1)));
+        Assert.That(treeSymbolTable.Ids, Contains.Key(function2.Name).WithValue(new IdSymbol(function2)));
     }
 
     [Test]
@@ -80,17 +80,16 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Ids, Contains.Key("add").WithValue(new IdSymbol(function)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Ids, Contains.Key("add").WithValue(new IdSymbol(function)));
 
-        Assert.That(function.Body, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
-        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
+        var functionBodySymbolTable = map.Get(function.Body);
+        Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(functionBodySymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
+        Assert.That(functionBodySymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
     }
 
     [Test]
@@ -128,17 +127,16 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
 
-        Assert.That(function.Body, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
-        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
+        var functionBodySymbolTable = map.Get(function.Body);
+        Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(functionBodySymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
+        Assert.That(functionBodySymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
     }
 
     [Test]
@@ -180,15 +178,15 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
 
-        Assert.That(ifStatement.Then.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Then.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Then.SymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
+        var thenSymbolTable = map.Get(ifStatement.Then);
+        Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(thenSymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
     }
 
     [Test]
@@ -210,20 +208,19 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
 
-        Assert.That(ifStatement.Then.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Then.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Then.SymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
+        var thenSymbolTable = map.Get(ifStatement.Then);
+        Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(thenSymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
 
-        Assert.That(ifStatement.Else, Is.Not.Null);
-        Assert.That(ifStatement.Else.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Else.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Else.SymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
+        var elseSymbolTable = map.Get(ifStatement.Else!);
+        Assert.That(elseSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(elseSymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
     }
 
     [Test]
@@ -246,25 +243,23 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([function]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
 
-        Assert.That(function.Body, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable, Is.Not.Null);
-        Assert.That(function.Body.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(function.Body.SymbolTable.Ids, Contains.Key(a1.Name).WithValue(new IdSymbol(a1)));
+        var functionBodySymbolTable = map.Get(function.Body);
+        Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(functionBodySymbolTable.Ids, Contains.Key(a1.Name).WithValue(new IdSymbol(a1)));
 
-        Assert.That(ifStatement.Then.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Then.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Then.SymbolTable.Ids, Contains.Key(a2.Name).WithValue(new IdSymbol(a2)));
+        var thenSymbolTable = map.Get(ifStatement.Then);
+        Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(thenSymbolTable.Ids, Contains.Key(a2.Name).WithValue(new IdSymbol(a2)));
 
-        Assert.That(ifStatement.Else, Is.Not.Null);
-        Assert.That(ifStatement.Else.SymbolTable, Is.Not.Null);
-        Assert.That(ifStatement.Else.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(ifStatement.Else.SymbolTable.Ids, Contains.Key(a3.Name).WithValue(new IdSymbol(a3)));
+        var elseSymbolTable = map.Get(ifStatement.Else!);
+        Assert.That(elseSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(elseSymbolTable.Ids, Contains.Key(a3.Name).WithValue(new IdSymbol(a3)));
     }
 
     [Test]
@@ -280,15 +275,15 @@ public class SymbolFinderTests
         ]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var arrayTypeNode = tree.Find<ArrayTypeNode>();
         Assert.That(arrayTypeNode, Is.Not.Null);
 
+        var treeSymbolTable = map.Get(tree);
         var symbol = TypeSymbol.Array(arrayTypeNode);
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key("i32[]").WithValue(symbol));
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Types, Contains.Key("i32[]").WithValue(symbol));
     }
 
     [Test]
@@ -305,11 +300,11 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type(type)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type(type)));
     }
 
     [Test]
@@ -343,12 +338,12 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(ctor.Body.SymbolTable, Is.Not.Null);
-        Assert.That(ctor.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(ctor.Body.SymbolTable.Ids, Contains.Key("this").WithValue(new IdSymbol("this", type)));
-        Assert.That(ctor.Body.SymbolTable.Ids, Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter)));
+        var ctorSymbolTable = map.Get(ctor.Body);
+        Assert.That(ctorSymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(ctorSymbolTable.Ids, Contains.Key("this").WithValue(new IdSymbol("this", type)));
+        Assert.That(ctorSymbolTable.Ids, Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter)));
     }
 
     [Test]
@@ -373,12 +368,12 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(method.Body.SymbolTable, Is.Not.Null);
-        Assert.That(method.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(method.Body.SymbolTable.Ids, Contains.Key("this").WithValue(new IdSymbol("this", type)));
-        Assert.That(method.Body.SymbolTable.Ids, Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter)));
+        var methodSymbolTable = map.Get(method.Body);
+        Assert.That(methodSymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(methodSymbolTable.Ids, Contains.Key("this").WithValue(new IdSymbol("this", type)));
+        Assert.That(methodSymbolTable.Ids, Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter)));
     }
 
     [Test]
@@ -388,11 +383,11 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Alias(type)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Alias(type)));
     }
 
     [Test]
@@ -418,15 +413,15 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([aliasType]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(2));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key(type.Name).WithValue(TypeSymbol.FunctionType(type)));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key(aliasType.Name).WithValue(TypeSymbol.Alias(aliasType)));
     }
 
@@ -462,18 +457,18 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([type]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(tree.SymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Type(type)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(treeSymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Type(type)));
 
-        Assert.That(type.SymbolTable, Is.Not.Null);
-        Assert.That(type.SymbolTable.Ids, Has.Count.EqualTo(4));
-        Assert.That(type.SymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(type.Properties[0])));
-        Assert.That(type.SymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(type.Properties[1])));
-        Assert.That(type.SymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(type.Methods[0])));
-        Assert.That(type.SymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(type.Methods[1])));
+        var typeSymbolTable = map.Get(type);
+        Assert.That(typeSymbolTable.Ids, Has.Count.EqualTo(4));
+        Assert.That(typeSymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(type.Properties[0])));
+        Assert.That(typeSymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(type.Properties[1])));
+        Assert.That(typeSymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(type.Methods[0])));
+        Assert.That(typeSymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(type.Methods[1])));
     }
 
     [Test]
@@ -493,19 +488,20 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([alias]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
-        Assert.That(tree.SymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
-        Assert.That(tree.SymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(2));
+        Assert.That(treeSymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
+        Assert.That(treeSymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
 
-        Assert.That(@interface.SymbolTable, Is.Not.Null);
-        Assert.That(@interface.SymbolTable.Ids, Has.Count.EqualTo(4));
-        Assert.That(@interface.SymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(@interface.Properties[0])));
-        Assert.That(@interface.SymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(@interface.Properties[1])));
-        Assert.That(@interface.SymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(@interface.Methods[0])));
-        Assert.That(@interface.SymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(@interface.Methods[1])));
+        var interfaceSymbolTable = map.Get(@interface);
+        Assert.That(interfaceSymbolTable, Is.Not.Null);
+        Assert.That(interfaceSymbolTable.Ids, Has.Count.EqualTo(4));
+        Assert.That(interfaceSymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(@interface.Properties[0])));
+        Assert.That(interfaceSymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(@interface.Properties[1])));
+        Assert.That(interfaceSymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(@interface.Methods[0])));
+        Assert.That(interfaceSymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(@interface.Methods[1])));
     }
 
     [Test]
@@ -521,12 +517,12 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([alias]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(3));
-        Assert.That(tree.SymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
-        Assert.That(tree.SymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(3));
+        Assert.That(treeSymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
+        Assert.That(treeSymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
     }
 
     [Test]
@@ -545,16 +541,16 @@ public class SymbolFinderTests
         var tree = new SyntaxTree([alias]);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(4));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(4));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key(discriminatedUnionNode.Name)
                 .WithValue(TypeSymbol.DiscriminatedUnion(discriminatedUnionNode)));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
     }
 
@@ -564,19 +560,20 @@ public class SymbolFinderTests
         var tree = Parse("public type T = (i32, bool);");
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var aliasNode = tree.Find<TypeAliasDeclarationNode>();
         var tupleNode = tree.Find<TupleTypeNode>();
         Assert.That(aliasNode, Is.Not.Null);
         Assert.That(tupleNode, Is.Not.Null);
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(2));
+
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(2));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key("(i32, bool)").WithValue(TypeSymbol.Tuple(tupleNode)));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key("T").WithValue(TypeSymbol.Alias(aliasNode)));
     }
 
@@ -586,7 +583,7 @@ public class SymbolFinderTests
         var tree = Parse("public type T = ((i32, i32), bool);");
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var aliasNode = tree.Find<TypeAliasDeclarationNode>();
         var tupleNode = tree.Find<TupleTypeNode>(x => x.Name == "((i32, i32), bool)");
@@ -595,16 +592,17 @@ public class SymbolFinderTests
         Assert.That(aliasNode, Is.Not.Null);
         Assert.That(tupleNode, Is.Not.Null);
         Assert.That(nestedTupleNode, Is.Not.Null);
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(3));
+
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(3));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key("(i32, i32)").WithValue(TypeSymbol.Tuple(nestedTupleNode)));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key("((i32, i32), bool)").WithValue(TypeSymbol.Tuple(tupleNode)));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key("T").WithValue(TypeSymbol.Alias(aliasNode)));
     }
 
@@ -627,23 +625,23 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var property = tree.Find<PropertyDeclarationNode>();
         var getter = tree.Find<PropertyGetterNode>();
         Assert.That(getter, Is.Not.Null);
-        Assert.That(getter.Body, Is.Not.Null);
-        Assert.That(getter.Body.SymbolTable, Is.Not.Null);
-        Assert.That(getter.Body.SymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(getter.Body.SymbolTable.Ids, Contains.Key("field").WithValue(new IdSymbol("field", property)));
+
+        var getterSymbolTable = map.Get(getter.Body!);
+        Assert.That(getterSymbolTable.Ids, Has.Count.EqualTo(1));
+        Assert.That(getterSymbolTable.Ids, Contains.Key("field").WithValue(new IdSymbol("field", property)));
 
         var setter = tree.Find<PropertySetterNode>();
         Assert.That(setter, Is.Not.Null);
-        Assert.That(setter.Body, Is.Not.Null);
-        Assert.That(setter.Body.SymbolTable, Is.Not.Null);
-        Assert.That(setter.Body.SymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(setter.Body.SymbolTable.Ids, Contains.Key("field").WithValue(new IdSymbol("field", property)));
-        Assert.That(setter.Body.SymbolTable.Ids, Contains.Key("value").WithValue(new IdSymbol("value", property)));
+
+        var setterSymbolTable = map.Get(setter.Body!);
+        Assert.That(setterSymbolTable.Ids, Has.Count.EqualTo(2));
+        Assert.That(setterSymbolTable.Ids, Contains.Key("field").WithValue(new IdSymbol("field", property)));
+        Assert.That(setterSymbolTable.Ids, Contains.Key("value").WithValue(new IdSymbol("value", property)));
     }
 
     [Test]
@@ -652,13 +650,14 @@ public class SymbolFinderTests
         var tree = Parse("public type List<T> { }");
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var type = tree.Find<TypeDeclarationNode>();
         Assert.That(type, Is.Not.Null);
-        Assert.That(type.SymbolTable, Is.Not.Null);
-        Assert.That(type.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(type.SymbolTable.Types, Contains.Key("List<>").WithValue(TypeSymbol.OpenGenericType(type)));
+
+        var typeSymbolTable = map.Get(type);
+        Assert.That(typeSymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(typeSymbolTable.Types, Contains.Key("List<>").WithValue(TypeSymbol.OpenGenericType(type)));
     }
 
     [Test]
@@ -667,13 +666,15 @@ public class SymbolFinderTests
         var tree = Parse("public type Test<T1, T2> { }");
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var type = tree.Find<TypeDeclarationNode>();
         Assert.That(type, Is.Not.Null);
-        Assert.That(type.SymbolTable, Is.Not.Null);
-        Assert.That(type.SymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(type.SymbolTable.Types, Contains.Key("Test<,>").WithValue(TypeSymbol.OpenGenericType(type)));
+
+        var typeSymbolTable = map.Get(type);
+        Assert.That(typeSymbolTable, Is.Not.Null);
+        Assert.That(typeSymbolTable.Types, Has.Count.EqualTo(1));
+        Assert.That(typeSymbolTable.Types, Contains.Key("Test<,>").WithValue(TypeSymbol.OpenGenericType(type)));
     }
 
     [Test]
@@ -687,7 +688,7 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (map, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var alias = tree.Find<TypeAliasDeclarationNode>();
         Assert.That(alias, Is.Not.Null);
@@ -695,13 +696,13 @@ public class SymbolFinderTests
         var closedGeneric = tree.Find<GenericTypeNode>();
         Assert.That(closedGeneric, Is.Not.Null);
 
-        Assert.That(tree.SymbolTable, Is.Not.Null);
-        Assert.That(tree.SymbolTable.Types, Has.Count.EqualTo(3));
+        var treeSymbolTable = map.Get(tree);
+        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(3));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key("Test").WithValue(TypeSymbol.Alias(alias)));
         Assert.That(
-            tree.SymbolTable.Types,
+            treeSymbolTable.Types,
             Contains.Key("List<i32>").WithValue(TypeSymbol.GenericType(closedGeneric)));
     }
 }

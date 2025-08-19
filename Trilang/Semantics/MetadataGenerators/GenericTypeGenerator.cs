@@ -8,10 +8,14 @@ internal class GenericTypeGenerator
 {
     private record Item(ITypeMetadata Closed, ITypeMetadata Open, GenericTypeNode Node);
 
+    private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public GenericTypeGenerator()
-        => typesToProcess = [];
+    public GenericTypeGenerator(SymbolTableMap symbolTableMap)
+    {
+        this.symbolTableMap = symbolTableMap;
+        typesToProcess = [];
+    }
 
     public void CreateGenericTypes(IReadOnlyDictionary<string, TypeSymbol> types)
     {
@@ -23,7 +27,7 @@ internal class GenericTypeGenerator
             if (symbol.Node is not GenericTypeNode genericTypeNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a GenericTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
 
-            var typeProvider = genericTypeNode.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
 
             // ignore open generic types
             if (IsOpenGeneric(typeProvider, genericTypeNode))
@@ -31,14 +35,12 @@ internal class GenericTypeGenerator
 
             var openName = genericTypeNode.GetOpenGenericName();
             var openGenericType = typeProvider.GetType(openName);
-            var closedType = default(ITypeMetadata);
-
-            if (openGenericType is TypeMetadata type)
-                closedType = new TypeMetadata(type.Name);
-            else if (openGenericType is TypeAliasMetadata alias)
-                closedType = new TypeAliasMetadata(alias.Name);
-            else
-                throw new SemanticAnalysisException($"The '{openName}' generic type is not defined.");
+            var closedType = openGenericType switch
+            {
+                TypeMetadata type => (ITypeMetadata)new TypeMetadata(type.Name),
+                TypeAliasMetadata alias => new TypeAliasMetadata(alias.Name),
+                _ => throw new SemanticAnalysisException($"The '{openName}' generic type is not defined."),
+            };
 
             if (typeProvider.DefineType(symbol.Name, closedType))
                 typesToProcess.Add(new Item(closedType, openGenericType, genericTypeNode));
@@ -63,7 +65,7 @@ internal class GenericTypeGenerator
         TypeMetadata closed,
         TypeMetadata open)
     {
-        var typeProvider = genericTypeNode.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
 
         foreach (var argumentNode in genericTypeNode.TypeArguments)
         {
@@ -163,7 +165,7 @@ internal class GenericTypeGenerator
         TypeAliasMetadata closed,
         TypeAliasMetadata open)
     {
-        var typeProvider = genericTypeNode.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
 
         foreach (var argumentNode in genericTypeNode.TypeArguments)
         {

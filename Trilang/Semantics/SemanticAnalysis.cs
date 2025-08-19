@@ -17,21 +17,28 @@ public class SemanticAnalysis
     public SemanticAnalysis(ITypeMetadataProvider typeMetadataProvider)
         => this.typeMetadataProvider = typeMetadataProvider;
 
-    public void Analyze(SyntaxTree tree, SemanticAnalysisOptions options)
+    public SemanticAnalysisResult Analyze(SyntaxTree tree, SemanticAnalysisOptions options)
     {
         var rootSymbolTable = new RootSymbolTable(typeMetadataProvider);
 
-        tree.Accept(new SymbolFinder(), new SymbolFinderContext(rootSymbolTable, options));
+        var symbolFinder = new SymbolFinder(options);
+        tree.Accept(symbolFinder, rootSymbolTable);
+
+        var metadataGenerator = new MetadataGenerator(symbolFinder.Map);
+        metadataGenerator.Generate(rootSymbolTable);
+
+        // TODO: reorder
         tree.Accept(new ThisOutsideOfClass());
         tree.Accept(new ThisInStaticMethods());
         tree.Accept(new BreakContinueWithinLoop());
-        tree.Accept(new MetadataGenerator());
-        tree.Accept(new VariableUsedBeforeDeclared());
-        tree.Accept(new TypeChecker(), new TypeCheckerContext(options.Directives));
+        tree.Accept(new VariableUsedBeforeDeclared(symbolFinder.Map));
+        tree.Accept(new TypeChecker(options.Directives, symbolFinder.Map));
         tree.Accept(new NotImplementedInterface());
         tree.Accept(new CheckAccessModifiers());
         tree.Accept(new RecursiveTypeAlias());
         tree.Accept(new CheckStaticAndInstanceMembersAccess());
         tree.Accept(new RestrictFieldAccess());
+
+        return new SemanticAnalysisResult(symbolFinder.Map, typeMetadataProvider);
     }
 }

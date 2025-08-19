@@ -1,5 +1,4 @@
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -67,8 +66,6 @@ public class WhileNode : IStatementNode, IEquatable<WhileNode>
         => transformer.TransformWhile(this);
 
     public ISyntaxNode? Parent { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 
     public IExpressionNode Condition { get; }
 

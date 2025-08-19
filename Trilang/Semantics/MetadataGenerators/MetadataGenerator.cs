@@ -1,35 +1,47 @@
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.MetadataGenerators;
 
 internal class MetadataGenerator : Visitor
 {
-    private void BuildSymbolTableTypes(ISymbolTable? symbolTable)
+    private readonly TypeGenerator typeGenerator;
+    private readonly InterfaceGenerator interfaceGenerator;
+    private readonly DiscriminatedUnionGenerator discriminatedUnionGenerator;
+    private readonly AliasGenerator aliasGenerator;
+    private readonly TupleGenerator tupleGenerator;
+    private readonly ArrayGenerator arrayGenerator;
+    private readonly GenericTypeGenerator genericTypeGenerator;
+    private readonly FunctionTypeGenerator functionTypeGenerator;
+    private readonly FunctionGenerator functionGenerator;
+
+    public MetadataGenerator(SymbolTableMap symbolTableMap)
     {
-        if (symbolTable is null)
-            throw new ArgumentNullException(nameof(symbolTable));
+        typeGenerator = new TypeGenerator(symbolTableMap);
+        interfaceGenerator = new InterfaceGenerator(symbolTableMap);
+        discriminatedUnionGenerator = new DiscriminatedUnionGenerator(symbolTableMap);
+        aliasGenerator = new AliasGenerator(symbolTableMap);
+        tupleGenerator = new TupleGenerator(symbolTableMap);
+        arrayGenerator = new ArrayGenerator(symbolTableMap);
+        genericTypeGenerator = new GenericTypeGenerator(symbolTableMap);
+        functionTypeGenerator = new FunctionTypeGenerator(symbolTableMap);
+        functionGenerator = new FunctionGenerator(symbolTableMap);
+    }
 
-        var typeGenerator = new TypeGenerator();
-        var interfaceGenerator = new InterfaceGenerator();
-        var discriminatedUnionGenerator = new DiscriminatedUnionGenerator();
-        var aliasGenerator = new AliasGenerator();
-        var tupleGenerator = new TupleGenerator();
-        var arrayGenerator = new ArrayGenerator();
-        var genericTypeGenerator = new GenericTypeGenerator();
-        var functionTypeGenerator = new FunctionTypeGenerator();
-        var functionGenerator = new FunctionGenerator();
+    public void Generate(RootSymbolTable rootSymbolTable)
+    {
+        var types = rootSymbolTable.Types;
+        var ids = rootSymbolTable.Ids;
 
-        typeGenerator.CreateTypes(symbolTable.Types);
-        interfaceGenerator.CreateInterfaces(symbolTable.Types);
-        discriminatedUnionGenerator.CreateDiscriminatedUnion(symbolTable.Types);
-        aliasGenerator.CreateAliases(symbolTable.Types);
-        tupleGenerator.CreateTuples(symbolTable.Types);
-        arrayGenerator.CreateArrays(symbolTable.Types);
-        functionTypeGenerator.CreateFunctionTypes(symbolTable.Types);
-        functionGenerator.CreateFunctions(symbolTable.Ids);
-        genericTypeGenerator.CreateGenericTypes(symbolTable.Types);
+        typeGenerator.CreateTypes(types);
+        interfaceGenerator.CreateInterfaces(types);
+        discriminatedUnionGenerator.CreateDiscriminatedUnion(types);
+        aliasGenerator.CreateAliases(types);
+        tupleGenerator.CreateTuples(types);
+        arrayGenerator.CreateArrays(types);
+        functionTypeGenerator.CreateFunctionTypes(types);
+        functionGenerator.CreateFunctions(ids);
+        genericTypeGenerator.CreateGenericTypes(types);
 
         aliasGenerator.PopulateAliases();
         interfaceGenerator.PopulateInterfaces();
@@ -41,7 +53,4 @@ internal class MetadataGenerator : Visitor
         functionGenerator.PopulateFunctions();
         genericTypeGenerator.PopulateGenericTypes();
     }
-
-    protected override void VisitTreeEnter(SyntaxTree node)
-        => BuildSymbolTableTypes(node.SymbolTable);
 }

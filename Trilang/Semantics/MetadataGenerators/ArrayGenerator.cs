@@ -8,10 +8,14 @@ internal class ArrayGenerator
 {
     private record Item(TypeArrayMetadata Metadata, ArrayTypeNode Node);
 
+    private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public ArrayGenerator()
-        => typesToProcess = [];
+    public ArrayGenerator(SymbolTableMap symbolTableMap)
+    {
+        this.symbolTableMap = symbolTableMap;
+        typesToProcess = [];
+    }
 
     public void CreateArrays(IReadOnlyDictionary<string, TypeSymbol> types)
     {
@@ -23,7 +27,7 @@ internal class ArrayGenerator
             if (symbol.Node is not ArrayTypeNode arrayTypeNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an ArrayTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var metadata = new TypeArrayMetadata();
             if (typeProvider.DefineType(symbol.Name, metadata))
                 typesToProcess.Add(new Item(metadata, arrayTypeNode));
@@ -34,7 +38,7 @@ internal class ArrayGenerator
     {
         foreach (var (arrayMetadata, arrayTypeNode) in typesToProcess)
         {
-            var typeProvider = arrayTypeNode.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(arrayTypeNode).TypeProvider;
             var itemMetadata = typeProvider.GetType(arrayTypeNode.ElementType.Name) ??
                                throw new SemanticAnalysisException($"The '{arrayTypeNode.ElementType.Name}' array item type is not defined.");
 

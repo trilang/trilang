@@ -7,12 +7,21 @@ using static Trilang.Metadata.TypeMetadata;
 
 namespace Trilang.Semantics;
 
-internal class TypeChecker : IVisitor<TypeCheckerContext>
+internal class TypeChecker : IVisitor
 {
-    public void VisitArrayAccess(ArrayAccessExpressionNode node, TypeCheckerContext context)
+    private readonly IEnumerable<string> directives;
+    private readonly SymbolTableMap symbolTableMap;
+
+    public TypeChecker(IEnumerable<string> directives, SymbolTableMap symbolTableMap)
     {
-        node.Member.Accept(this, context);
-        node.Index.Accept(this, context);
+        this.directives = directives;
+        this.symbolTableMap = symbolTableMap;
+    }
+
+    public void VisitArrayAccess(ArrayAccessExpressionNode node)
+    {
+        node.Member.Accept(this);
+        node.Index.Accept(this);
 
         if (node.Member.ReturnTypeMetadata is not TypeArrayMetadata typeArray)
             throw new SemanticAnalysisException("Array access must be of type array");
@@ -23,34 +32,34 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.ReturnTypeMetadata = typeArray.ItemMetadata;
     }
 
-    public void VisitArrayType(ArrayTypeNode node, TypeCheckerContext context)
+    public void VisitArrayType(ArrayTypeNode node)
     {
-        node.ElementType.Accept(this, context);
+        node.ElementType.Accept(this);
 
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         node.Metadata = typeProvider.GetType(node.Name) ??
                         throw new SemanticAnalysisException($"Unknown array type '{node.Name}'");
     }
 
-    public void VisitAsExpression(AsExpressionNode node, TypeCheckerContext context)
+    public void VisitAsExpression(AsExpressionNode node)
     {
-        node.Expression.Accept(this, context);
-        node.Type.Accept(this, context);
+        node.Expression.Accept(this);
+        node.Type.Accept(this);
 
         if (node.Expression.ReturnTypeMetadata is null || node.Type.Metadata is null)
             throw new SemanticAnalysisException("Cannot determine return type for expression");
 
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
         var metadata = new DiscriminatedUnionMetadata([node.Type.Metadata, Null]);
         typeProvider.DefineType(metadata.ToString(), metadata);
         node.ReturnTypeMetadata = metadata;
     }
 
-    public void VisitBinaryExpression(BinaryExpressionNode node, TypeCheckerContext context)
+    public void VisitBinaryExpression(BinaryExpressionNode node)
     {
-        node.Left.Accept(this, context);
-        node.Right.Accept(this, context);
+        node.Left.Accept(this);
+        node.Right.Accept(this);
 
         // TODO: more complex logic
         if (node.Kind == BinaryExpressionKind.Unknown ||
@@ -145,23 +154,23 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void VisitBlock(BlockStatementNode node, TypeCheckerContext context)
+    public void VisitBlock(BlockStatementNode node)
     {
         foreach (var statement in node.Statements)
-            statement.Accept(this, context);
+            statement.Accept(this);
     }
 
-    public void VisitBreak(BreakNode node, TypeCheckerContext context)
+    public void VisitBreak(BreakNode node)
     {
     }
 
-    public void VisitCall(CallExpressionNode node, TypeCheckerContext context)
+    public void VisitCall(CallExpressionNode node)
     {
         // TODO: unused return value
-        node.Member.Accept(this, context);
+        node.Member.Accept(this);
 
         foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+            parameter.Accept(this);
 
         if (node.Member.ReturnTypeMetadata is not FunctionTypeMetadata function)
             throw new SemanticAnalysisException("Cannot call a non-function member");
@@ -175,10 +184,10 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void VisitConstructor(ConstructorDeclarationNode node, TypeCheckerContext context)
+    public void VisitConstructor(ConstructorDeclarationNode node)
     {
         foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+            parameter.Accept(this);
 
         var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
         node.Metadata = type.GetConstructor(node.Parameters.Select(x => x.Type.Metadata!));
@@ -186,52 +195,52 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
 
-        node.Body.Accept(this, context);
+        node.Body.Accept(this);
     }
 
-    public void VisitContinue(ContinueNode node, TypeCheckerContext context)
+    public void VisitContinue(ContinueNode node)
     {
     }
 
-    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node, TypeCheckerContext context)
+    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node)
     {
         // TODO: eliminate duplicates
         // TODO: restrict recursive types
         foreach (var type in node.Types)
-            type.Accept(this, context);
+            type.Accept(this);
 
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var metadata = typeProvider.GetType(node.Name) ??
                        throw new SemanticAnalysisException($"Unknown discriminated union type '{node.Name}'");
 
         node.Metadata = metadata;
     }
 
-    public void VisitExpressionBlock(ExpressionBlockNode node, TypeCheckerContext context)
+    public void VisitExpressionBlock(ExpressionBlockNode node)
         => throw new SemanticAnalysisException("Expression blocks are not supported");
 
-    public void VisitExpressionStatement(ExpressionStatementNode node, TypeCheckerContext context)
+    public void VisitExpressionStatement(ExpressionStatementNode node)
     {
         // TODO: check whether the result of expression is used
-        node.Expression.Accept(this, context);
+        node.Expression.Accept(this);
     }
 
-    public void VisitFunctionSignature(FunctionDeclarationNode node, TypeCheckerContext context)
+    public void VisitFunctionSignature(FunctionDeclarationNode node)
     {
         var parameters = new ParameterMetadata[node.Parameters.Count];
         for (var i = 0; i < node.Parameters.Count; i++)
         {
             var parameter = node.Parameters[i];
-            parameter.Accept(this, context);
+            parameter.Accept(this);
 
             parameters[i] = new ParameterMetadata(parameter.Name, parameter.Type.Metadata!);
         }
 
-        node.ReturnType.Accept(this, context);
+        node.ReturnType.Accept(this);
 
         // we can be sure that node.Metadata is not null here
         // because it is set as a part of TypeNode
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var parameterTypes = node.Parameters.Select(x => x.Type.Metadata!);
         var returnType = node.ReturnType.Metadata!;
         var functionType = new FunctionTypeMetadata(parameterTypes, returnType);
@@ -244,17 +253,17 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
     }
 
-    public void VisitFunction(FunctionDeclarationNode node, TypeCheckerContext context)
-        => node.Body.Accept(this, context);
+    public void VisitFunction(FunctionDeclarationNode node)
+        => node.Body.Accept(this);
 
-    public void VisitFunctionType(FunctionTypeNode node, TypeCheckerContext context)
+    public void VisitFunctionType(FunctionTypeNode node)
     {
         foreach (var parameterType in node.ParameterTypes)
-            parameterType.Accept(this, context);
+            parameterType.Accept(this);
 
-        node.ReturnType.Accept(this, context);
+        node.ReturnType.Accept(this);
 
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var parameters = node.ParameterTypes.Select(x => x.Metadata!);
         var returnType = node.ReturnType.Metadata!;
         var functionType = new FunctionTypeMetadata(parameters, returnType);
@@ -264,12 +273,12 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = functionType;
     }
 
-    public void VisitGenericType(GenericTypeNode node, TypeCheckerContext context)
+    public void VisitGenericType(GenericTypeNode node)
     {
         foreach (var typeArgument in node.TypeArguments)
-            typeArgument.Accept(this, context);
+            typeArgument.Accept(this);
 
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var metadata = typeProvider.GetType(node.Name) ??
                        typeProvider.GetType(node.GetOpenGenericName()) ??
                        throw new SemanticAnalysisException($"Unknown generic type '{node.Name}'");
@@ -277,70 +286,74 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = metadata;
     }
 
-    public void VisitGoTo(GoToNode node, TypeCheckerContext context)
+    public void VisitGoTo(GoToNode node)
     {
     }
 
-    public void VisitIfDirective(IfDirectiveNode node, TypeCheckerContext context)
+    public void VisitIfDirective(IfDirectiveNode node)
     {
-        if (context.HasDirective(node.DirectiveName))
+        if (directives.Contains(node.DirectiveName))
+        {
             foreach (var then in node.Then)
-                then.Accept(this, context);
+                then.Accept(this);
+        }
         else
+        {
             foreach (var @else in node.Else)
-                @else.Accept(this, context);
+                @else.Accept(this);
+        }
     }
 
-    public void VisitIf(IfStatementNode node, TypeCheckerContext context)
+    public void VisitIf(IfStatementNode node)
     {
         // TODO: data flow
-        node.Condition.Accept(this, context);
-        node.Then.Accept(this, context);
-        node.Else?.Accept(this, context);
+        node.Condition.Accept(this);
+        node.Then.Accept(this);
+        node.Else?.Accept(this);
 
         if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
             throw new SemanticAnalysisException("The condition returns non-boolean type.");
     }
 
-    public void VisitInterface(InterfaceNode node, TypeCheckerContext context)
+    public void VisitInterface(InterfaceNode node)
     {
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var metadata = typeProvider.GetType(node.Name) as InterfaceMetadata ??
                        throw new SemanticAnalysisException($"Unknown interface type '{node.Name}'");
 
         node.Metadata = metadata;
 
         foreach (var property in node.Properties)
-            property.Accept(this, context);
+            property.Accept(this);
 
         foreach (var method in node.Methods)
-            method.Accept(this, context);
+            method.Accept(this);
     }
 
-    public void VisitInterfaceProperty(InterfacePropertyNode node, TypeCheckerContext context)
+    public void VisitInterfaceProperty(InterfacePropertyNode node)
     {
-        node.Type.Accept(this, context);
+        node.Type.Accept(this);
 
         var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
         node.Metadata = type.GetProperty(node.Name);
     }
 
-    public void VisitInterfaceMethod(InterfaceMethodNode node, TypeCheckerContext context)
+    public void VisitInterfaceMethod(InterfaceMethodNode node)
     {
         foreach (var parameter in node.ParameterTypes)
-            parameter.Accept(this, context);
+            parameter.Accept(this);
 
-        node.ReturnType.Accept(this, context);
+        node.ReturnType.Accept(this);
 
         var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
         node.Metadata = type.GetMethod(node.Name);
     }
 
-    public void VisitLabel(LabelNode node, TypeCheckerContext context)
+    public void VisitLabel(LabelNode node)
     {
     }
 
-    public void VisitLiteral(LiteralExpressionNode node, TypeCheckerContext context)
+    public void VisitLiteral(LiteralExpressionNode node)
     {
         node.ReturnTypeMetadata = node.Kind switch
         {
@@ -354,23 +367,23 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         };
     }
 
-    public void VisitMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
+    public void VisitMemberAccess(MemberAccessExpressionNode node)
     {
         if (node.IsFirstMember)
         {
-            VisitFirstMemberAccess(node, context);
+            VisitFirstMemberAccess(node);
             return;
         }
 
-        VisitNestedMemberAccess(node, context);
+        VisitNestedMemberAccess(node);
 
         if (node.ReturnTypeMetadata is null)
             throw new SemanticAnalysisException($"Cannot determine return type for member '{node.Name}'");
     }
 
-    private static void VisitFirstMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext _)
+    private void VisitFirstMemberAccess(MemberAccessExpressionNode node)
     {
-        var symbol = node.SymbolTable!.GetId(node.Name);
+        var symbol = symbolTableMap.Get(node).GetId(node.Name);
         if (symbol is not null)
         {
             node.Reference = symbol.Node switch
@@ -400,7 +413,7 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
 
         // static access
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var type = typeProvider.GetType(node.Name);
         if (type is not null)
         {
@@ -412,21 +425,21 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         throw new SemanticAnalysisException($"Unknown member '{node.Name}'");
     }
 
-    private void VisitNestedMemberAccess(MemberAccessExpressionNode node, TypeCheckerContext context)
+    private void VisitNestedMemberAccess(MemberAccessExpressionNode node)
     {
-        node.Member!.Accept(this, context);
+        node.Member!.Accept(this);
 
         var returnTypeMetadata = node.Member.ReturnTypeMetadata!;
         node.Reference = returnTypeMetadata.GetMember(node.Name) ??
                          throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in '{returnTypeMetadata}'");
     }
 
-    public void VisitMethod(MethodDeclarationNode node, TypeCheckerContext context)
+    public void VisitMethod(MethodDeclarationNode node)
     {
         foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+            parameter.Accept(this);
 
-        node.ReturnType.Accept(this, context);
+        node.ReturnType.Accept(this);
 
         var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
         node.Metadata = type.GetMethod(node.Name);
@@ -434,23 +447,23 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
 
-        node.Body.Accept(this, context);
+        node.Body.Accept(this);
     }
 
-    public void VisitNewArray(NewArrayExpressionNode node, TypeCheckerContext context)
+    public void VisitNewArray(NewArrayExpressionNode node)
     {
-        node.Type.Accept(this, context);
-        node.Size.Accept(this, context);
+        node.Type.Accept(this);
+        node.Size.Accept(this);
 
         node.ReturnTypeMetadata = node.Type.Metadata;
     }
 
-    public void VisitNewObject(NewObjectExpressionNode node, TypeCheckerContext context)
+    public void VisitNewObject(NewObjectExpressionNode node)
     {
-        node.Type.Accept(this, context);
+        node.Type.Accept(this);
 
         foreach (var parameter in node.Parameters)
-            parameter.Accept(this, context);
+            parameter.Accept(this);
 
         if (node.Type.Metadata is not TypeMetadata type || type.IsValueType)
             throw new SemanticAnalysisException($"Cannot create an instance of type '{node.Type.Metadata}'");
@@ -462,13 +475,13 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = ctor;
     }
 
-    public void VisitNull(NullExpressionNode node, TypeCheckerContext context)
+    public void VisitNull(NullExpressionNode node)
     {
     }
 
-    public void VisitReturn(ReturnStatementNode node, TypeCheckerContext context)
+    public void VisitReturn(ReturnStatementNode node)
     {
-        node.Expression?.Accept(this, context);
+        node.Expression?.Accept(this);
 
         var expressionType = node.Expression?.ReturnTypeMetadata ?? TypeMetadata.Void;
         var method = node.FindInParent<MethodDeclarationNode>();
@@ -521,54 +534,54 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void VisitParameter(ParameterNode node, TypeCheckerContext context)
-        => node.Type.Accept(this, context);
+    public void VisitParameter(ParameterNode node)
+        => node.Type.Accept(this);
 
-    public void VisitProperty(PropertyDeclarationNode node, TypeCheckerContext context)
+    public void VisitProperty(PropertyDeclarationNode node)
     {
         var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
         node.Metadata = type.GetProperty(node.Name);
 
-        node.Type.Accept(this, context);
-        node.Getter?.Accept(this, context);
-        node.Setter?.Accept(this, context);
+        node.Type.Accept(this);
+        node.Getter?.Accept(this);
+        node.Setter?.Accept(this);
     }
 
-    public void VisitGetter(PropertyGetterNode node, TypeCheckerContext context)
+    public void VisitGetter(PropertyGetterNode node)
     {
         var property = (PropertyDeclarationNode)node.Parent!;
         var propertyMetadata = property.Metadata!;
         node.Metadata = propertyMetadata.Getter;
 
-        node.Body?.Accept(this, context);
+        node.Body?.Accept(this);
     }
 
-    public void VisitSetter(PropertySetterNode node, TypeCheckerContext context)
+    public void VisitSetter(PropertySetterNode node)
     {
         var property = (PropertyDeclarationNode)node.Parent!;
         var propertyMetadata = property.Metadata!;
         node.Metadata = propertyMetadata.Setter;
 
         // TODO: check the backing field is set?
-        node.Body?.Accept(this, context);
+        node.Body?.Accept(this);
     }
 
-    public void VisitTree(SyntaxTree node, TypeCheckerContext context)
+    public void VisitTree(SyntaxTree node)
     {
         // preprocess function to generate correct metadata before processing bodies/other types
         foreach (var function in node.Declarations.OfType<FunctionDeclarationNode>())
-            VisitFunctionSignature(function, context);
+            VisitFunctionSignature(function);
 
         foreach (var statement in node.Declarations)
-            statement.Accept(this, context);
+            statement.Accept(this);
     }
 
-    public void VisitTuple(TupleExpressionNode node, TypeCheckerContext context)
+    public void VisitTuple(TupleExpressionNode node)
     {
         foreach (var expression in node.Expressions)
-            expression.Accept(this, context);
+            expression.Accept(this);
 
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
         // we can't generate metadata for this tuple in GenerateMetadata
         // because we don't know the types of the expressions yet
@@ -584,13 +597,13 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.ReturnTypeMetadata = existingTuple;
     }
 
-    public void VisitTupleType(TupleTypeNode node, TypeCheckerContext context)
+    public void VisitTupleType(TupleTypeNode node)
     {
         // TODO: restrict recursive types
         foreach (var type in node.Types)
-            type.Accept(this, context);
+            type.Accept(this);
 
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var types = node.Types.Select(x => x.Metadata!);
         var tuple = new TupleMetadata(types);
         tuple = typeProvider.GetType(tuple.ToString()) as TupleMetadata ??
@@ -599,18 +612,18 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = tuple;
     }
 
-    public void VisitTypeAlias(TypeAliasDeclarationNode node, TypeCheckerContext context)
+    public void VisitTypeAlias(TypeAliasDeclarationNode node)
     {
-        node.Type.Accept(this, context);
+        node.Type.Accept(this);
 
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         node.Metadata = typeProvider.GetType(node.FullName) ??
                         throw new SemanticAnalysisException($"Unknown type '{node.Name}'");
     }
 
-    public void VisitType(TypeDeclarationNode node, TypeCheckerContext context)
+    public void VisitType(TypeDeclarationNode node)
     {
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var metadata = typeProvider.GetType(node.FullName);
         if (metadata is not TypeMetadata type)
             throw new SemanticAnalysisException($"The '{node.Name}' type is not a type.");
@@ -618,30 +631,30 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = type;
 
         foreach (var @interface in node.Interfaces)
-            @interface.Accept(this, context);
+            @interface.Accept(this);
 
         foreach (var property in node.Properties)
-            property.Accept(this, context);
+            property.Accept(this);
 
         foreach (var constructor in node.Constructors)
-            constructor.Accept(this, context);
+            constructor.Accept(this);
 
         foreach (var method in node.Methods)
-            method.Accept(this, context);
+            method.Accept(this);
     }
 
-    public void VisitTypeNode(TypeNode node, TypeCheckerContext context)
+    public void VisitTypeNode(TypeNode node)
     {
-        var typeProvider = node.SymbolTable!.TypeProvider;
+        var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var type = typeProvider.GetType(node.Name) ??
                    throw new SemanticAnalysisException($"Referenced unknown type '{node.Name}'");
 
         node.Metadata = type;
     }
 
-    public void VisitUnaryExpression(UnaryExpressionNode node, TypeCheckerContext context)
+    public void VisitUnaryExpression(UnaryExpressionNode node)
     {
-        node.Operand.Accept(this, context);
+        node.Operand.Accept(this);
 
         // TODO: more complex logic
         if (node.Kind == UnaryExpressionKind.Unknown || node.Operand.ReturnTypeMetadata is null)
@@ -697,12 +710,12 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         }
     }
 
-    public void VisitVariable(VariableDeclarationStatementNode node, TypeCheckerContext context)
+    public void VisitVariable(VariableDeclarationStatementNode node)
     {
         // TODO: infer type
         // TODO: unused variable
-        node.Type.Accept(this, context);
-        node.Expression.Accept(this, context);
+        node.Type.Accept(this);
+        node.Expression.Accept(this);
 
         if (node.Expression.ReturnTypeMetadata is null)
             throw new SemanticAnalysisException($"Cannot determine type of expression in variable declaration '{node.Name}'");
@@ -713,10 +726,10 @@ internal class TypeChecker : IVisitor<TypeCheckerContext>
         node.Metadata = new VariableMetadata(node.Name, node.Type.Metadata);
     }
 
-    public void VisitWhile(WhileNode node, TypeCheckerContext context)
+    public void VisitWhile(WhileNode node)
     {
-        node.Condition.Accept(this, context);
-        node.Body.Accept(this, context);
+        node.Condition.Accept(this);
+        node.Body.Accept(this);
 
         if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
             throw new SemanticAnalysisException("Condition must be a boolean");

@@ -8,10 +8,14 @@ internal class TupleGenerator
 {
     private record Item(TupleMetadata Metadata, TupleTypeNode Node);
 
+    private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public TupleGenerator()
-        => typesToProcess = [];
+    public TupleGenerator(SymbolTableMap symbolTableMap)
+    {
+        this.symbolTableMap = symbolTableMap;
+        typesToProcess = [];
+    }
 
     public void CreateTuples(IReadOnlyDictionary<string, TypeSymbol> types)
     {
@@ -23,7 +27,7 @@ internal class TupleGenerator
             if (symbol.Node is not TupleTypeNode tupleNode)
                 throw new SemanticAnalysisException();
 
-            var typeProvider = symbol.Node.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var tuple = new TupleMetadata();
             if (typeProvider.DefineType(symbol.Name, tuple))
                 typesToProcess.Add(new Item(tuple, tupleNode));
@@ -34,7 +38,7 @@ internal class TupleGenerator
     {
         foreach (var (tuple, tupleNode) in typesToProcess)
         {
-            var typeProvider = tupleNode.SymbolTable!.TypeProvider;
+            var typeProvider = symbolTableMap.Get(tupleNode).TypeProvider;
 
             foreach (var typeNode in tupleNode.Types)
             {

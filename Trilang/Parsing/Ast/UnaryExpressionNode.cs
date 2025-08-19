@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
-using Trilang.Symbols;
 
 namespace Trilang.Parsing.Ast;
 
@@ -67,7 +66,6 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     public IExpressionNode Clone()
         => new UnaryExpressionNode(Kind, Operand.Clone())
         {
-            SymbolTable = SymbolTable,
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
@@ -78,6 +76,4 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     public IExpressionNode Operand { get; }
 
     public ITypeMetadata? ReturnTypeMetadata { get; set; }
-
-    public ISymbolTable? SymbolTable { get; set; }
 }

@@ -4,56 +4,68 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics;
 
-internal class SymbolFinder : IVisitor<SymbolFinderContext>
+internal class SymbolFinder : IVisitor<ISymbolTable>
 {
-    public void VisitArrayAccess(ArrayAccessExpressionNode node, SymbolFinderContext context)
+    private readonly SemanticAnalysisOptions options;
+    private readonly SymbolTableMap map;
+
+    public SymbolFinder(SemanticAnalysisOptions options)
     {
-        node.SymbolTable = context.SymbolTable;
+        this.options = options;
+
+        map = new SymbolTableMap();
+    }
+
+    public void VisitArrayAccess(ArrayAccessExpressionNode node, ISymbolTable context)
+    {
+        map.Add(node, context);
 
         node.Member.Accept(this, context);
         node.Index.Accept(this, context);
     }
 
-    public void VisitArrayType(ArrayTypeNode node, SymbolFinderContext context)
+    public void VisitArrayType(ArrayTypeNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
-        context.SymbolTable.TryAddType(TypeSymbol.Array(node));
+        context.TryAddType(TypeSymbol.Array(node));
 
         node.ElementType.Accept(this, context);
     }
 
-    public void VisitAsExpression(AsExpressionNode node, SymbolFinderContext context)
+    public void VisitAsExpression(AsExpressionNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Expression.Accept(this, context);
         node.Type.Accept(this, context);
     }
 
-    public void VisitBinaryExpression(BinaryExpressionNode node, SymbolFinderContext context)
+    public void VisitBinaryExpression(BinaryExpressionNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Left.Accept(this, context);
         node.Right.Accept(this, context);
     }
 
-    public void VisitBlock(BlockStatementNode node, SymbolFinderContext context)
-        => context.Scoped(c =>
-        {
-            node.SymbolTable = c.SymbolTable;
-
-            foreach (var statement in node.Statements)
-                statement.Accept(this, c);
-        });
-
-    public void VisitBreak(BreakNode node, SymbolFinderContext context)
-        => node.SymbolTable = context.SymbolTable;
-
-    public void VisitCall(CallExpressionNode node, SymbolFinderContext context)
+    private void VisitBlockWithoutScope(BlockStatementNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
+
+        foreach (var statement in node.Statements)
+            statement.Accept(this, context);
+    }
+
+    public void VisitBlock(BlockStatementNode node, ISymbolTable context)
+        => VisitBlockWithoutScope(node, context.CreateChild());
+
+    public void VisitBreak(BreakNode node, ISymbolTable context)
+        => map.Add(node, context);
+
+    public void VisitCall(CallExpressionNode node, ISymbolTable context)
+    {
+        map.Add(node, context);
 
         node.Member.Accept(this, context);
 
@@ -61,77 +73,67 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             parameter.Accept(this, context);
     }
 
-    public void VisitConstructor(ConstructorDeclarationNode node, SymbolFinderContext context)
+    public void VisitConstructor(ConstructorDeclarationNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
-        context.Scoped(c =>
-        {
-            c.DisableNextScope();
+        var child = context.CreateChild();
+        child.TryAddId(new IdSymbol(MemberAccessExpressionNode.This, node.Parent));
 
-            c.SymbolTable.TryAddId(new IdSymbol(MemberAccessExpressionNode.This, node.Parent));
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this, child);
 
-            foreach (var parameter in node.Parameters)
-                parameter.Accept(this, c);
-
-            node.Body.Accept(this, c);
-        });
+        VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitContinue(ContinueNode node, SymbolFinderContext context)
-        => node.SymbolTable = context.SymbolTable;
+    public void VisitContinue(ContinueNode node, ISymbolTable context)
+        => map.Add(node, context);
 
-    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node, SymbolFinderContext context)
+    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node, ISymbolTable context)
     {
         var symbol = TypeSymbol.DiscriminatedUnion(node);
-        context.SymbolTable.TryAddType(symbol);
+        context.TryAddType(symbol);
 
-        context.Scoped(c =>
-        {
-            node.SymbolTable = c.SymbolTable;
+        var child = context.CreateChild();
+        map.Add(node, child);
 
-            foreach (var type in node.Types)
-                type.Accept(this, c);
-        });
+        foreach (var type in node.Types)
+            type.Accept(this, child);
     }
 
-    public void VisitExpressionBlock(ExpressionBlockNode node, SymbolFinderContext context)
+    public void VisitExpressionBlock(ExpressionBlockNode node, ISymbolTable context)
         => throw new SemanticAnalysisException("Expression blocks are not supported");
 
-    public void VisitExpressionStatement(ExpressionStatementNode node, SymbolFinderContext context)
+    public void VisitExpressionStatement(ExpressionStatementNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Expression.Accept(this, context);
     }
 
-    public void VisitFunction(FunctionDeclarationNode node, SymbolFinderContext context)
+    public void VisitFunction(FunctionDeclarationNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         var symbol = new IdSymbol(node);
-        if (!context.SymbolTable.TryAddId(symbol))
+        if (!context.TryAddId(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' function is already defined.");
 
         node.ReturnType.Accept(this, context);
 
-        context.Scoped(c =>
-        {
-            c.DisableNextScope();
+        var child = context.CreateChild();
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this, child);
 
-            foreach (var parameter in node.Parameters)
-                parameter.Accept(this, c);
-
-            node.Body?.Accept(this, c);
-        });
+        VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitFunctionType(FunctionTypeNode node, SymbolFinderContext context)
+    public void VisitFunctionType(FunctionTypeNode node, ISymbolTable context)
     {
         var symbol = TypeSymbol.FunctionType(node);
-        context.SymbolTable.TryAddType(symbol);
+        context.TryAddType(symbol);
 
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         foreach (var parameterType in node.ParameterTypes)
             parameterType.Accept(this, context);
@@ -139,135 +141,131 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.ReturnType.Accept(this, context);
     }
 
-    public void VisitGenericType(GenericTypeNode node, SymbolFinderContext context)
+    public void VisitGenericType(GenericTypeNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         foreach (var typeArgument in node.TypeArguments)
             typeArgument.Accept(this, context);
 
         var symbol = TypeSymbol.GenericType(node);
-        node.SymbolTable.TryAddType(symbol);
+        context.TryAddType(symbol);
     }
 
-    public void VisitGoTo(GoToNode node, SymbolFinderContext context)
+    public void VisitGoTo(GoToNode node, ISymbolTable context)
     {
     }
 
-    public void VisitIfDirective(IfDirectiveNode node, SymbolFinderContext context)
+    public void VisitIfDirective(IfDirectiveNode node, ISymbolTable context)
     {
-        if (context.SemanticAnalysisOptions.HasDirective(node.DirectiveName))
+        if (options.HasDirective(node.DirectiveName))
+        {
             foreach (var then in node.Then)
                 then.Accept(this, context);
+        }
         else
+        {
             foreach (var @else in node.Else)
                 @else.Accept(this, context);
+        }
     }
 
-    public void VisitIf(IfStatementNode node, SymbolFinderContext context)
+    public void VisitIf(IfStatementNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Condition.Accept(this, context);
         node.Then.Accept(this, context);
         node.Else?.Accept(this, context);
     }
 
-    public void VisitInterface(InterfaceNode node, SymbolFinderContext context)
+    public void VisitInterface(InterfaceNode node, ISymbolTable context)
     {
         var symbol = TypeSymbol.Interface(node);
-        context.SymbolTable.TryAddType(symbol);
+        context.TryAddType(symbol);
 
-        context.Scoped(c =>
-        {
-            node.SymbolTable = c.SymbolTable;
+        var child = context.CreateChild();
+        map.Add(node, child);
 
-            foreach (var property in node.Properties)
-                property.Accept(this, c);
+        foreach (var property in node.Properties)
+            property.Accept(this, child);
 
-            foreach (var method in node.Methods)
-                method.Accept(this, c);
-        });
+        foreach (var method in node.Methods)
+            method.Accept(this, child);
     }
 
-    public void VisitInterfaceProperty(InterfacePropertyNode node, SymbolFinderContext context)
+    public void VisitInterfaceProperty(InterfacePropertyNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Type.Accept(this, context);
 
         var symbol = new IdSymbol(node);
-        if (!context.SymbolTable.TryAddId(symbol))
+        if (!context.TryAddId(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' property is already defined.");
     }
 
-    public void VisitInterfaceMethod(InterfaceMethodNode node, SymbolFinderContext context)
+    public void VisitInterfaceMethod(InterfaceMethodNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         var symbol = new IdSymbol(node);
-        if (!context.SymbolTable.TryAddId(symbol))
+        if (!context.TryAddId(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' method is already defined.");
 
-        context.Scoped(c =>
-        {
-            foreach (var parameter in node.ParameterTypes)
-                parameter.Accept(this, c);
+        var child = context.CreateChild();
+        foreach (var parameter in node.ParameterTypes)
+            parameter.Accept(this, child);
 
-            node.ReturnType.Accept(this, c);
-        });
+        node.ReturnType.Accept(this, child);
     }
 
-    public void VisitLabel(LabelNode node, SymbolFinderContext context)
+    public void VisitLabel(LabelNode node, ISymbolTable context)
     {
     }
 
-    public void VisitLiteral(LiteralExpressionNode node, SymbolFinderContext context)
+    public void VisitLiteral(LiteralExpressionNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
     }
 
-    public void VisitMemberAccess(MemberAccessExpressionNode node, SymbolFinderContext context)
+    public void VisitMemberAccess(MemberAccessExpressionNode node, ISymbolTable context)
     {
         node.Member?.Accept(this, context);
 
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
     }
 
-    public void VisitMethod(MethodDeclarationNode node, SymbolFinderContext context)
+    public void VisitMethod(MethodDeclarationNode node, ISymbolTable context)
     {
         var symbol = new IdSymbol(node);
-        if (!context.SymbolTable.TryAddId(symbol))
+        if (!context.TryAddId(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' method is already defined.");
 
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.ReturnType.Accept(this, context);
 
-        context.Scoped(c =>
-        {
-            c.DisableNextScope();
+        var child = context.CreateChild();
+        child.TryAddId(new IdSymbol(MemberAccessExpressionNode.This, node.Parent));
 
-            c.SymbolTable.TryAddId(new IdSymbol(MemberAccessExpressionNode.This, node.Parent));
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this, child);
 
-            foreach (var parameter in node.Parameters)
-                parameter.Accept(this, c);
-
-            node.Body.Accept(this, c);
-        });
+        VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitNewArray(NewArrayExpressionNode node, SymbolFinderContext context)
+    public void VisitNewArray(NewArrayExpressionNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Type.Accept(this, context);
         node.Size.Accept(this, context);
     }
 
-    public void VisitNewObject(NewObjectExpressionNode node, SymbolFinderContext context)
+    public void VisitNewObject(NewObjectExpressionNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Type.Accept(this, context);
 
@@ -275,33 +273,33 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
             parameter.Accept(this, context);
     }
 
-    public void VisitNull(NullExpressionNode node, SymbolFinderContext context)
-        => node.SymbolTable = context.SymbolTable;
+    public void VisitNull(NullExpressionNode node, ISymbolTable context)
+        => map.Add(node, context);
 
-    public void VisitReturn(ReturnStatementNode node, SymbolFinderContext context)
+    public void VisitReturn(ReturnStatementNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Expression?.Accept(this, context);
     }
 
-    public void VisitParameter(ParameterNode node, SymbolFinderContext context)
+    public void VisitParameter(ParameterNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         var symbol = new IdSymbol(node);
-        if (!context.SymbolTable.TryAddId(symbol))
+        if (!context.TryAddId(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' parameter is already defined.");
 
         node.Type.Accept(this, context);
     }
 
-    public void VisitProperty(PropertyDeclarationNode node, SymbolFinderContext context)
+    public void VisitProperty(PropertyDeclarationNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         var symbol = new IdSymbol(node);
-        if (!context.SymbolTable.TryAddId(symbol))
+        if (!context.TryAddId(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' property is already defined.");
 
         node.Type.Accept(this, context);
@@ -309,143 +307,136 @@ internal class SymbolFinder : IVisitor<SymbolFinderContext>
         node.Setter?.Accept(this, context);
     }
 
-    public void VisitGetter(PropertyGetterNode node, SymbolFinderContext context)
+    public void VisitGetter(PropertyGetterNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
-        context.Scoped(c =>
-        {
-            c.DisableNextScope();
+        var child = context.CreateChild();
+        var fieldSymbol = new IdSymbol(MemberAccessExpressionNode.Field, node.Parent);
+        if (!child.TryAddId(fieldSymbol))
+            throw new SemanticAnalysisException();
 
-            var fieldSymbol = new IdSymbol(MemberAccessExpressionNode.Field, node.Parent);
-            if (!c.SymbolTable.TryAddId(fieldSymbol))
-                throw new SemanticAnalysisException();
-
-            node.Body?.Accept(this, c);
-        });
+        if (node.Body is not null)
+            VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitSetter(PropertySetterNode node, SymbolFinderContext context)
+    public void VisitSetter(PropertySetterNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
-        context.Scoped(c =>
-        {
-            c.DisableNextScope();
+        var child = context.CreateChild();
+        var fieldSymbol = new IdSymbol(MemberAccessExpressionNode.Field, node.Parent);
+        if (!child.TryAddId(fieldSymbol))
+            throw new SemanticAnalysisException();
 
-            var fieldSymbol = new IdSymbol(MemberAccessExpressionNode.Field, node.Parent);
-            if (!c.SymbolTable.TryAddId(fieldSymbol))
-                throw new SemanticAnalysisException();
+        var valueSymbol = new IdSymbol(MemberAccessExpressionNode.Value, node.Parent);
+        if (!child.TryAddId(valueSymbol))
+            throw new SemanticAnalysisException();
 
-            var valueSymbol = new IdSymbol(MemberAccessExpressionNode.Value, node.Parent);
-            if (!c.SymbolTable.TryAddId(valueSymbol))
-                throw new SemanticAnalysisException();
-
-            node.Body?.Accept(this, c);
-        });
+        if (node.Body is not null)
+            VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitTree(SyntaxTree node, SymbolFinderContext context)
+    public void VisitTree(SyntaxTree node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         foreach (var function in node.Declarations)
             function.Accept(this, context);
     }
 
-    public void VisitTuple(TupleExpressionNode node, SymbolFinderContext context)
+    public void VisitTuple(TupleExpressionNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         foreach (var expression in node.Expressions)
             expression.Accept(this, context);
     }
 
-    public void VisitTupleType(TupleTypeNode node, SymbolFinderContext context)
+    public void VisitTupleType(TupleTypeNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         foreach (var type in node.Types)
             type.Accept(this, context);
 
         var symbol = TypeSymbol.Tuple(node);
-        context.SymbolTable.TryAddType(symbol);
+        context.TryAddType(symbol);
     }
 
-    public void VisitTypeAlias(TypeAliasDeclarationNode node, SymbolFinderContext context)
+    public void VisitTypeAlias(TypeAliasDeclarationNode node, ISymbolTable context)
     {
-        if (!context.SymbolTable.TryAddType(TypeSymbol.Alias(node)))
+        if (!context.TryAddType(TypeSymbol.Alias(node)))
             throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
 
-        context.Scoped(c =>
-        {
-            node.SymbolTable = c.SymbolTable;
+        var child = context.CreateChild();
+        map.Add(node, child);
 
-            foreach (var genericArgument in node.GenericArguments)
-                genericArgument.Accept(this, c);
+        foreach (var genericArgument in node.GenericArguments)
+            genericArgument.Accept(this, child);
 
-            node.Type.Accept(this, c);
-        });
+        node.Type.Accept(this, child);
     }
 
-    public void VisitType(TypeDeclarationNode node, SymbolFinderContext context)
+    public void VisitType(TypeDeclarationNode node, ISymbolTable context)
     {
         var symbol = node.GenericArguments.Count > 0
             ? TypeSymbol.OpenGenericType(node)
             : TypeSymbol.Type(node);
-        if (!context.SymbolTable.TryAddType(symbol))
+        if (!context.TryAddType(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
 
-        context.Scoped(c =>
-        {
-            node.SymbolTable = c.SymbolTable;
+        var child = context.CreateChild();
+        map.Add(node, child);
 
-            foreach (var genericArgument in node.GenericArguments)
-                genericArgument.Accept(this, c);
+        foreach (var genericArgument in node.GenericArguments)
+            genericArgument.Accept(this, child);
 
-            foreach (var @interface in node.Interfaces)
-                @interface.Accept(this, c);
+        foreach (var @interface in node.Interfaces)
+            @interface.Accept(this, child);
 
-            foreach (var property in node.Properties)
-                property.Accept(this, c);
+        foreach (var property in node.Properties)
+            property.Accept(this, child);
 
-            foreach (var constructor in node.Constructors)
-                constructor.Accept(this, c);
+        foreach (var constructor in node.Constructors)
+            constructor.Accept(this, child);
 
-            foreach (var method in node.Methods)
-                method.Accept(this, c);
-        });
+        foreach (var method in node.Methods)
+            method.Accept(this, child);
     }
 
-    public void VisitTypeNode(TypeNode node, SymbolFinderContext context)
+    public void VisitTypeNode(TypeNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
     }
 
-    public void VisitUnaryExpression(UnaryExpressionNode node, SymbolFinderContext context)
+    public void VisitUnaryExpression(UnaryExpressionNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Operand.Accept(this, context);
     }
 
-    public void VisitVariable(VariableDeclarationStatementNode node, SymbolFinderContext context)
+    public void VisitVariable(VariableDeclarationStatementNode node, ISymbolTable context)
     {
         node.Type.Accept(this, context);
         node.Expression.Accept(this, context);
 
         var symbol = new IdSymbol(node);
-        if (!context.SymbolTable.TryAddId(symbol))
+        if (!context.TryAddId(symbol))
             throw new SemanticAnalysisException($"The '{node.Name}' variable is already defined.");
 
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
     }
 
-    public void VisitWhile(WhileNode node, SymbolFinderContext context)
+    public void VisitWhile(WhileNode node, ISymbolTable context)
     {
-        node.SymbolTable = context.SymbolTable;
+        map.Add(node, context);
 
         node.Condition.Accept(this, context);
         node.Body.Accept(this, context);
     }
+
+    public SymbolTableMap Map
+        => map;
 }
