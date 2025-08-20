@@ -8,14 +8,14 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
         bool isStatic,
         string name,
         IReadOnlyList<ParameterMetadata> parameters,
-        FunctionTypeMetadata typeMetadata)
+        FunctionTypeMetadata type)
     {
         DeclaringType = declaringType;
         AccessModifier = accessModifier;
         IsStatic = isStatic;
         Name = name;
         Parameters = parameters;
-        TypeMetadata = typeMetadata;
+        Type = type;
     }
 
     public static bool operator ==(MethodMetadata? left, MethodMetadata? right)
@@ -37,7 +37,7 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
                IsStatic == other.IsStatic &&
                Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
-               TypeMetadata.Equals(other.TypeMetadata);
+               Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)
@@ -55,10 +55,10 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine((int)AccessModifier, IsStatic, Name, Parameters, TypeMetadata);
+        => HashCode.Combine((int)AccessModifier, IsStatic, Name, Parameters, Type);
 
     public override string ToString()
-        => $"{Name}: {TypeMetadata}";
+        => $"{Name}: {Type}";
 
     public ITypeMetadata DeclaringType { get; }
 
@@ -70,5 +70,5 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
 
     public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
-    public FunctionTypeMetadata TypeMetadata { get; }
+    public FunctionTypeMetadata Type { get; }
 }

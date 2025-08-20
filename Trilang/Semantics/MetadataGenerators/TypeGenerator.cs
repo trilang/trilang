@@ -82,13 +82,13 @@ internal class TypeGenerator
                 if (propertyMetadata.Getter is not null)
                 {
                     type.AddMethod(propertyMetadata.Getter);
-                    typeProvider.DefineType(propertyMetadata.Getter.TypeMetadata);
+                    typeProvider.DefineType(propertyMetadata.Getter.Type);
                 }
 
                 if (propertyMetadata.Setter is not null)
                 {
                     type.AddMethod(propertyMetadata.Setter);
-                    typeProvider.DefineType(propertyMetadata.Setter.TypeMetadata);
+                    typeProvider.DefineType(propertyMetadata.Setter.Type);
                 }
             }
 

@@ -145,7 +145,7 @@ internal class GenericTypeGenerator
         // TODO: support generic methods
         var parameters = GetParameters(typeArgumentsMap, method.Parameters);
 
-        var methodType = method.TypeMetadata;
+        var methodType = method.Type;
         var parameterTypes = methodType.ParameterTypes.Select(typeArgumentsMap.Map);
         var returnType = typeArgumentsMap.Map(methodType.ReturnType);
         var functionType = new FunctionTypeMetadata(parameterTypes, returnType);

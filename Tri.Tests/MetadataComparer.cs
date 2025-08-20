@@ -69,7 +69,7 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (!x.Parameters.SequenceEqual(y.Parameters, this))
             throw new Exception("Parameters don't match.");
 
-        if (!Equals(x.TypeMetadata, y.TypeMetadata))
+        if (!Equals(x.Type, y.Type))
             throw new Exception("TypeMetadata doesn't match.");
 
         return true;
@@ -102,7 +102,7 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (!x.Parameters.SequenceEqual(y.Parameters, this))
             throw new Exception("Parameters don't match.");
 
-        if (!Equals(x.TypeMetadata, y.TypeMetadata))
+        if (!Equals(x.Type, y.Type))
             throw new Exception("TypeMetadata doesn't match.");
 
         return true;
@@ -172,7 +172,7 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (!x.Parameters.SequenceEqual(y.Parameters, this))
             throw new Exception("Parameters don't match.");
 
-        if (!Equals(x.TypeMetadata, y.TypeMetadata))
+        if (!Equals(x.Type, y.Type))
             throw new Exception("TypeMetadata doesn't match.");
 
         return true;

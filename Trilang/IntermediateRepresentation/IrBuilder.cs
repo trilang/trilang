@@ -24,19 +24,6 @@ internal class IrBuilder
     private ITypeMetadata MapToIrType(ITypeMetadata type)
         => !type.IsValueType ? new TypePointerMetadata(type) : type;
 
-    private int GetLevel(ITypeMetadata type)
-    {
-        var level = 0;
-
-        while (type is TypePointerMetadata pointer)
-        {
-            level++;
-            type = pointer.Type;
-        }
-
-        return level;
-    }
-
     private Register BinaryInstruction(ITypeMetadata type, BinaryInstructionKind kind, Register left, Register right)
     {
         var register = CreateRegister(MapToIrType(type));
@@ -109,6 +96,19 @@ internal class IrBuilder
         currentBlock.AddInstruction(load);
 
         return register;
+    }
+
+    private int GetLevel(ITypeMetadata type)
+    {
+        var level = 0;
+
+        while (type is TypePointerMetadata pointer)
+        {
+            level++;
+            type = pointer.Type;
+        }
+
+        return level;
     }
 
     public Register Deref(Register source, ITypeMetadata expected)
@@ -218,9 +218,9 @@ internal class IrBuilder
         var resultType = member switch
         {
             FieldMetadata field => MapToIrType(field.Type),
-            MethodMetadata method => method.TypeMetadata,
-            ConstructorMetadata constructor => constructor.TypeMetadata,
-            FunctionMetadata function => function.TypeMetadata,
+            MethodMetadata method => method.Type,
+            ConstructorMetadata constructor => constructor.Type,
+            FunctionMetadata function => function.Type,
 
             // TODO: interface?
             _ => throw new IrException($"Unsupported member type '{member.GetType().Name}'.")

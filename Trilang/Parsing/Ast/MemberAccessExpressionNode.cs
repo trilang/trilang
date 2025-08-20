@@ -107,10 +107,10 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
                 => property.Type,
 
             MethodMetadata method
-                => method.TypeMetadata,
+                => method.Type,
 
             FunctionMetadata function
-                => function.TypeMetadata,
+                => function.Type,
 
             InterfacePropertyMetadata interfaceProperty
                 => interfaceProperty.Type,

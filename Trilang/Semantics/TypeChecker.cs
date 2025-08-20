@@ -493,7 +493,7 @@ internal class TypeChecker : IVisitor
         var method = node.FindInParent<MethodDeclarationNode>();
         if (method is not null)
         {
-            var methodReturnType = method.Metadata?.TypeMetadata.ReturnType;
+            var methodReturnType = method.Metadata?.Type.ReturnType;
             if (!Equals(methodReturnType, expressionType))
                 throw new SemanticAnalysisException($"Method return type mismatch: expected '{methodReturnType}', got '{expressionType}'");
 
@@ -512,7 +512,7 @@ internal class TypeChecker : IVisitor
         var function = node.FindInParent<FunctionDeclarationNode>();
         if (function is not null)
         {
-            var functionReturnType = function.Metadata?.TypeMetadata.ReturnType;
+            var functionReturnType = function.Metadata?.Type.ReturnType;
             if (!Equals(functionReturnType, expressionType))
                 throw new SemanticAnalysisException($"Function return type mismatch: expected '{functionReturnType}', got '{expressionType}'");
 

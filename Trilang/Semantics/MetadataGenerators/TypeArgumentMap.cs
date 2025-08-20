@@ -174,7 +174,7 @@ internal class TypeArgumentMap
                     closed,
                     constructor.AccessModifier,
                     constructor.Parameters.Select(Map).ToList(),
-                    Map(constructor.TypeMetadata)));
+                    Map(constructor.Type)));
 
         foreach (var method in type.Methods)
             closed.AddMethod(Map(closed, method));
@@ -192,7 +192,7 @@ internal class TypeArgumentMap
             method.IsStatic,
             method.Name,
             method.Parameters.Select(Map).ToList(),
-            Map(method.TypeMetadata));
+            Map(method.Type));
 
     private bool HasTypeArgument(ITypeMetadata type)
         => type switch
@@ -225,7 +225,7 @@ internal class TypeArgumentMap
                    typeMetadata.Interfaces.Any(HasTypeArgument) ||
                    typeMetadata.Properties.Select(x => x.Type).Any(HasTypeArgument) ||
                    typeMetadata.Constructors.SelectMany(x => x.Parameters).Select(x => x.Type).Any(HasTypeArgument) ||
-                   typeMetadata.Methods.Select(x => x.TypeMetadata).Any(HasTypeArgument),
+                   typeMetadata.Methods.Select(x => x.Type).Any(HasTypeArgument),
 
             _ => throw new ArgumentOutOfRangeException(nameof(type)),
         };

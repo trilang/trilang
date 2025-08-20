@@ -322,23 +322,43 @@ public class IrGenerator
     private Register GenerateCall(IrBuilder builder, CallExpressionNode node)
     {
         var delegatePointerRegister = GenerateExpression(builder, node.Member)!.Value;
-        var isStatic = false;
-        if (node.Member is MemberAccessExpressionNode { Reference: IFunctionMetadata function })
-            isStatic = function.IsStatic;
 
-        return GenerateCall(builder, delegatePointerRegister, node.Parameters, isStatic);
+        var isStatic = false;
+        var functionType = default(FunctionTypeMetadata);
+        if (node.Member is MemberAccessExpressionNode member)
+        {
+            if (member.Reference is IFunctionMetadata function)
+            {
+                isStatic = function.IsStatic;
+                functionType = function.Type;
+            }
+            else if (member.Reference is ParameterMetadata parameter)
+            {
+                functionType = (FunctionTypeMetadata)parameter.Type;
+            }
+            else if (member.Reference is VariableMetadata variable)
+            {
+                functionType = (FunctionTypeMetadata)variable.Type;
+            }
+            else
+            {
+                throw new Exception("Unknown member type.");
+            }
+        }
+
+        return GenerateCall(builder, delegatePointerRegister, node.Parameters, isStatic, functionType!);
     }
 
     private Register GenerateCall(
         IrBuilder builder,
-        Register delegatePointerRegister,
+        Register delegateRegister,
         IReadOnlyList<IExpressionNode> parameters,
-        bool isStatic)
+        bool isStatic,
+        FunctionTypeMetadata functionType)
     {
+        delegateRegister = builder.Deref(delegateRegister, functionType);
+
         var parameterRegisters = new Register[parameters.Count];
-
-        var delegateRegister = builder.Load(delegatePointerRegister);
-
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
@@ -400,10 +420,12 @@ public class IrGenerator
 
     private Register GenerateNewObject(IrBuilder builder, NewObjectExpressionNode node)
     {
-        var memory = builder.Alloc(node.ReturnTypeMetadata!);
-        var member = builder.GetMemberPointer(node.Metadata!, memory);
+        var constructorMetadata = node.Metadata!;
 
-        return GenerateCall(builder, member, node.Parameters, false);
+        var memory = builder.Alloc(node.ReturnTypeMetadata!);
+        var member = builder.GetMemberPointer(constructorMetadata, memory);
+
+        return GenerateCall(builder, member, node.Parameters, false, constructorMetadata.Type);
     }
 
     private Register GenerateNull(IrBuilder builder, NullExpressionNode node)

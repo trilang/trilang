@@ -5,11 +5,11 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
     public FunctionMetadata(
         string name,
         IReadOnlyList<ParameterMetadata> parameters,
-        FunctionTypeMetadata typeMetadata)
+        FunctionTypeMetadata type)
     {
         Name = name;
         Parameters = parameters;
-        TypeMetadata = typeMetadata;
+        Type = type;
     }
 
     public static bool operator ==(FunctionMetadata? left, FunctionMetadata? right)
@@ -28,7 +28,7 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 
         return Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
-               TypeMetadata.Equals(other.TypeMetadata);
+               Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)
@@ -46,10 +46,10 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, Parameters, TypeMetadata);
+        => HashCode.Combine(Name, Parameters, Type);
 
     public override string ToString()
-        => $"{Name}: {TypeMetadata}";
+        => $"{Name}: {Type}";
 
     public ITypeMetadata? DeclaringType => null;
 
@@ -59,5 +59,5 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 
     public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
-    public FunctionTypeMetadata TypeMetadata { get; }
+    public FunctionTypeMetadata Type { get; }
 }

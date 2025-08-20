@@ -12,4 +12,6 @@ public interface IFunctionMetadata : IMetadata
     string Name { get; }
 
     IReadOnlyList<ParameterMetadata> Parameters { get; }
+
+    FunctionTypeMetadata Type { get; }
 }

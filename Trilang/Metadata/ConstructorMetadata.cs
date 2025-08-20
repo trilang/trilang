@@ -6,12 +6,12 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
         ITypeMetadata declaringType,
         AccessModifierMetadata accessModifier,
         IReadOnlyList<ParameterMetadata> parameters,
-        FunctionTypeMetadata typeMetadata)
+        FunctionTypeMetadata type)
     {
         DeclaringType = declaringType;
         AccessModifier = accessModifier;
         Parameters = parameters;
-        TypeMetadata = typeMetadata;
+        Type = type;
     }
 
     public static bool operator ==(ConstructorMetadata? left, ConstructorMetadata? right)
@@ -31,7 +31,7 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
         return DeclaringType.Equals(other.DeclaringType) &&
                AccessModifier == other.AccessModifier &&
                Parameters.SequenceEqual(other.Parameters) &&
-               TypeMetadata.Equals(other.TypeMetadata);
+               Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)
@@ -49,10 +49,10 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(AccessModifier, Parameters, TypeMetadata);
+        => HashCode.Combine(AccessModifier, Parameters, Type);
 
     public override string ToString()
-        => $"ctor: {TypeMetadata}";
+        => $"ctor: {Type}";
 
     public ITypeMetadata DeclaringType { get; }
 
@@ -64,5 +64,5 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
 
     public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
-    public FunctionTypeMetadata TypeMetadata { get; }
+    public FunctionTypeMetadata Type { get; }
 }
