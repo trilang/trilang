@@ -592,7 +592,7 @@ public class Parser
 
     private IExpressionNode? TryParseBinaryExpression(ParserContext context, int parentPrecedence = 0)
     {
-        var left = TryParseAsExpression(context);
+        var left = TryParseIsExpression(context);
         if (left is null)
             return null;
 
@@ -666,20 +666,20 @@ public class Parser
         return left;
     }
 
-    private IExpressionNode? TryParseAsExpression(ParserContext context)
+    private IExpressionNode? TryParseIsExpression(ParserContext context)
     {
         var expression = TryParseCastExpression(context) ??
                          TryParseUnaryExpression(context);
         if (expression is null)
             return null;
 
-        if (!context.Reader.Check(TokenKind.As))
+        if (!context.Reader.Check(TokenKind.Is))
             return expression;
 
         var type = TryParseDiscriminatedUnion(context) ??
                    throw new ParseException("Expected a type.");
 
-        return new AsExpressionNode(expression, type);
+        return new IsExpressionNode(expression, type);
     }
 
     private IExpressionNode? TryParseCastExpression(ParserContext context)

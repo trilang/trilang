@@ -261,6 +261,15 @@ internal class IrBuilder
         return register;
     }
 
+    public Register Is(Register source, ITypeMetadata type)
+    {
+        var register = CreateRegister(TypeMetadata.Bool);
+        var isInstruction = new IsType(register, source, type);
+        currentBlock.AddInstruction(isInstruction);
+
+        return register;
+    }
+
     public Register AddAssignment(string name, Register register)
     {
         currentBlock.AddAssignment(name, register, false);

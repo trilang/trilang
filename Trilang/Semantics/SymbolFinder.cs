@@ -33,14 +33,6 @@ internal class SymbolFinder : IVisitor<ISymbolTable>
         node.ElementType.Accept(this, context);
     }
 
-    public void VisitAsExpression(AsExpressionNode node, ISymbolTable context)
-    {
-        map.Add(node, context);
-
-        node.Expression.Accept(this, context);
-        node.Type.Accept(this, context);
-    }
-
     public void VisitBinaryExpression(BinaryExpressionNode node, ISymbolTable context)
     {
         map.Add(node, context);
@@ -226,6 +218,14 @@ internal class SymbolFinder : IVisitor<ISymbolTable>
             parameter.Accept(this, child);
 
         node.ReturnType.Accept(this, child);
+    }
+
+    public void VisitAsExpression(IsExpressionNode node, ISymbolTable context)
+    {
+        map.Add(node, context);
+
+        node.Expression.Accept(this, context);
+        node.Type.Accept(this, context);
     }
 
     public void VisitLabel(LabelNode node, ISymbolTable context)

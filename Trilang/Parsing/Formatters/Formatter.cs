@@ -52,13 +52,6 @@ public partial class Formatter : IFormatter
         writer.Write("[]");
     }
 
-    public void VisitAsExpression(AsExpressionNode node)
-    {
-        node.Expression.Accept(this);
-        writer.Write(" as ");
-        node.Type.Accept(this);
-    }
-
     public void VisitBinaryExpression(BinaryExpressionNode node)
     {
         node.Left.Accept(this);
@@ -451,6 +444,13 @@ public partial class Formatter : IFormatter
         writer.Write("): ");
         node.ReturnType.Accept(this);
         writer.Write(";");
+    }
+
+    public void VisitAsExpression(IsExpressionNode node)
+    {
+        node.Expression.Accept(this);
+        writer.Write(" is ");
+        node.Type.Accept(this);
     }
 
     public void VisitLabel(LabelNode node)

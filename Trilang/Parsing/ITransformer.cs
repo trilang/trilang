@@ -8,8 +8,6 @@ public interface ITransformer
 
     ISyntaxNode TransformArrayType(ArrayTypeNode node);
 
-    ISyntaxNode TransformAsExpression(AsExpressionNode node);
-
     ISyntaxNode TransformBinaryExpression(BinaryExpressionNode node);
 
     ISyntaxNode TransformBlock(BlockStatementNode node);
@@ -47,6 +45,8 @@ public interface ITransformer
     ISyntaxNode TransformInterfaceProperty(InterfacePropertyNode node);
 
     ISyntaxNode TransformInterfaceMethod(InterfaceMethodNode node);
+
+    ISyntaxNode TransformAsExpression(IsExpressionNode node);
 
     ISyntaxNode TransformLabel(LabelNode node);
 

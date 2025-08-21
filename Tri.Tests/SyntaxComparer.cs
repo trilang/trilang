@@ -17,8 +17,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 => CompareArrayAccessExpressionNode(x1, y1),
             (ArrayTypeNode x1, ArrayTypeNode y1)
                 => CompareArrayTypeNode(x1, y1),
-            (AsExpressionNode x1, AsExpressionNode y1)
-                => CompareAsExpressionNode(x1, y1),
             (BinaryExpressionNode x1, BinaryExpressionNode y1)
                 => CompareBinaryExpressionNode(x1, y1),
             (BlockStatementNode x1, BlockStatementNode y1)
@@ -57,6 +55,8 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 => CompareInterfaceNode(x1, y1),
             (InterfacePropertyNode x1, InterfacePropertyNode y1)
                 => CompareInterfacePropertyNode(x1, y1),
+            (IsExpressionNode x1, IsExpressionNode y1)
+                => CompareAsExpressionNode(x1, y1),
             (LabelNode x1, LabelNode y1)
                 => CompareLabelNode(x1, y1),
             (LiteralExpressionNode x1, LiteralExpressionNode y1)
@@ -123,20 +123,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             throw new Exception("ElementType doesn't match.");
 
         if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
-        return true;
-    }
-
-    private bool CompareAsExpressionNode(AsExpressionNode x, AsExpressionNode y)
-    {
-        if (!Equals(x.Expression, y.Expression))
-            throw new Exception("Expression doesn't match.");
-
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("TargetType doesn't match.");
-
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
             throw new Exception("Metadata doesn't match.");
 
         return true;
@@ -373,6 +359,20 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             throw new Exception($"HasSetter doesn't match. {x.SetterModifier} != {y.SetterModifier}.");
 
         if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
+            throw new Exception("Metadata doesn't match.");
+
+        return true;
+    }
+
+    private bool CompareAsExpressionNode(IsExpressionNode x, IsExpressionNode y)
+    {
+        if (!Equals(x.Expression, y.Expression))
+            throw new Exception("Expression doesn't match.");
+
+        if (!Equals(x.Type, y.Type))
+            throw new Exception("TargetType doesn't match.");
+
+        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
             throw new Exception("Metadata doesn't match.");
 
         return true;

@@ -105,6 +105,25 @@ internal class SsaRenamer
                     block.ReplaceInstruction(i, call with { Result = newRegister });
                 }
             }
+            else if (instruction is IsType isType)
+            {
+                isType = isType with { Source = Rename(isType.Source) };
+                block.ReplaceInstruction(i, isType);
+
+                if (!registers.TryGetValue(isType.Result, out var stack))
+                {
+                    stack = new Stack<Register>();
+                    stack.Push(isType.Result);
+
+                    registers[isType.Result] = stack;
+                }
+                else
+                {
+                    var newRegister = GetNewRegister(isType.Result.Type);
+                    stack.Push(newRegister);
+                    block.ReplaceInstruction(i, isType with { Result = newRegister });
+                }
+            }
             else if (instruction is Jump)
             {
                 // nothing to rename here

@@ -78,7 +78,7 @@ internal class TypeLayoutGenerator
         ]);
     }
 
-    private TypeLayout Generate(ITypeMetadata type)
+    private TypeLayout? Generate(ITypeMetadata type)
         => type switch
         {
             DiscriminatedUnionMetadata discriminatedUnionMetadata
@@ -131,8 +131,8 @@ internal class TypeLayoutGenerator
         return layout;
     }
 
-    private TypeLayout Generate(InterfaceMetadata type)
-        => throw new NotSupportedException($"Can't calculate a type layout for the interface type ({type}).");
+    private TypeLayout? Generate(InterfaceMetadata type)
+        => null;
 
     private TypeLayout Generate(TupleMetadata tuple)
     {
@@ -143,7 +143,7 @@ internal class TypeLayoutGenerator
         return layout;
     }
 
-    private TypeLayout Generate(TypeAliasMetadata alias)
+    private TypeLayout? Generate(TypeAliasMetadata alias)
     {
         var type = alias.Type!;
         if (type.Layout is not null)
@@ -191,7 +191,7 @@ internal class TypeLayoutGenerator
         if (fieldType.IsValueType)
         {
             fieldType.Layout ??= Generate(fieldType);
-            size = fieldType.Layout.Size;
+            size = fieldType.Layout!.Size;
         }
 
         return size;

@@ -773,7 +773,7 @@ public class ParseExpressionTests
         var tree = parser.Parse(
             """
             function test(a: i32): i8 {
-                return a as i8;
+                return a is i8;
             }
             """);
         var expected = new SyntaxTree([
@@ -783,7 +783,7 @@ public class ParseExpressionTests
                 new TypeNode("i8"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
-                        new AsExpressionNode(
+                        new IsExpressionNode(
                             new MemberAccessExpressionNode("a"),
                             new TypeNode("i8")
                         )
@@ -802,7 +802,7 @@ public class ParseExpressionTests
         const string code =
             """
             function test(a: i32): i8 {
-                return a as;
+                return a is;
             }
             """;
 

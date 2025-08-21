@@ -2010,10 +2010,10 @@ public class FormatterTests
             FunctionDeclarationNode.Create(
                 "test",
                 [new ParameterNode("a", new TypeNode("i32"))],
-                new TypeNode("i8"),
+                new TypeNode("bool"),
                 new BlockStatementNode([
                     new ReturnStatementNode(
-                        new AsExpressionNode(
+                        new IsExpressionNode(
                             new MemberAccessExpressionNode("a"),
                             new TypeNode("i8")
                         )
@@ -2024,8 +2024,8 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function test(a: i32): i8 {
-                return a as i8;
+            function test(a: i32): bool {
+                return a is i8;
             }
             """;
 

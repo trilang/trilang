@@ -8,8 +8,6 @@ public interface IVisitor<in TContext>
 
     void VisitArrayType(ArrayTypeNode node, TContext context);
 
-    void VisitAsExpression(AsExpressionNode node, TContext context);
-
     void VisitBinaryExpression(BinaryExpressionNode node, TContext context);
 
     void VisitBlock(BlockStatementNode node, TContext context);
@@ -47,6 +45,8 @@ public interface IVisitor<in TContext>
     void VisitInterfaceProperty(InterfacePropertyNode node, TContext context);
 
     void VisitInterfaceMethod(InterfaceMethodNode node, TContext context);
+
+    void VisitAsExpression(IsExpressionNode node, TContext context);
 
     void VisitLabel(LabelNode node, TContext context);
 

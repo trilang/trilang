@@ -39,24 +39,6 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public virtual void VisitAsExpression(AsExpressionNode node)
-    {
-        VisitAsExpressionEnter(node);
-
-        node.Expression.Accept(this);
-        node.Type.Accept(this);
-
-        VisitAsExpressionExit(node);
-    }
-
-    protected virtual void VisitAsExpressionEnter(AsExpressionNode node)
-    {
-    }
-
-    protected virtual void VisitAsExpressionExit(AsExpressionNode node)
-    {
-    }
-
     public virtual void VisitBinaryExpression(BinaryExpressionNode node)
     {
         VisitBinaryExpressionEnter(node);
@@ -400,6 +382,24 @@ public abstract class Visitor : IVisitor
     }
 
     protected virtual void VisitInterfaceMethodExit(InterfaceMethodNode node)
+    {
+    }
+
+    public virtual void VisitAsExpression(IsExpressionNode node)
+    {
+        VisitAsExpressionEnter(node);
+
+        node.Expression.Accept(this);
+        node.Type.Accept(this);
+
+        VisitAsExpressionExit(node);
+    }
+
+    protected virtual void VisitAsExpressionEnter(IsExpressionNode node)
+    {
+    }
+
+    protected virtual void VisitAsExpressionExit(IsExpressionNode node)
     {
     }
 

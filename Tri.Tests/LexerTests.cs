@@ -83,7 +83,7 @@ public class LexerTests
     [TestCase("get", TokenKind.Get)]
     [TestCase("set", TokenKind.Set)]
     [TestCase("static", TokenKind.Static)]
-    [TestCase("as", TokenKind.As)]
+    [TestCase("is", TokenKind.Is)]
     public void TokenizeKeywordTest(string code, TokenKind kind)
     {
         var lexer = new Lexer();

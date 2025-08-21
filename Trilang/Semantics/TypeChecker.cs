@@ -41,21 +41,6 @@ internal class TypeChecker : IVisitor
                         throw new SemanticAnalysisException($"Unknown array type '{node.Name}'");
     }
 
-    public void VisitAsExpression(AsExpressionNode node)
-    {
-        node.Expression.Accept(this);
-        node.Type.Accept(this);
-
-        if (node.Expression.ReturnTypeMetadata is null || node.Type.Metadata is null)
-            throw new SemanticAnalysisException("Cannot determine return type for expression");
-
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-
-        var metadata = new DiscriminatedUnionMetadata([node.Type.Metadata, Null]);
-        typeProvider.DefineType(metadata.ToString(), metadata);
-        node.ReturnTypeMetadata = metadata;
-    }
-
     public void VisitBinaryExpression(BinaryExpressionNode node)
     {
         node.Left.Accept(this);
@@ -353,6 +338,12 @@ internal class TypeChecker : IVisitor
 
         var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
         node.Metadata = type.GetMethod(node.Name);
+    }
+
+    public void VisitAsExpression(IsExpressionNode node)
+    {
+        node.Expression.Accept(this);
+        node.Type.Accept(this);
     }
 
     public void VisitLabel(LabelNode node)

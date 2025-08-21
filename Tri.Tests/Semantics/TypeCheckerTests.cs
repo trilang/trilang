@@ -1186,26 +1186,6 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void SetReturnTypeForAsExpressionTest()
-    {
-        var tree = Parse(
-            """
-            function test(a: i32): i8 | null {
-                return a as i8;
-            }
-            """);
-
-        var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
-
-        var expectedType = new DiscriminatedUnionMetadata([TypeMetadata.I8, TypeMetadata.Null]);
-
-        var asExp = tree.Find<AsExpressionNode>();
-        Assert.That(asExp, Is.Not.Null);
-        Assert.That(asExp.ReturnTypeMetadata, Is.EqualTo(expectedType).Using(new MetadataComparer()));
-    }
-
-    [Test]
     public void TupleMemberAccessTest()
     {
         var tree = Parse(

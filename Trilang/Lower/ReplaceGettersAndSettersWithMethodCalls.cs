@@ -24,18 +24,6 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
     public ISyntaxNode TransformArrayType(ArrayTypeNode node)
         => node;
 
-    public ISyntaxNode TransformAsExpression(AsExpressionNode node)
-    {
-        var expression = (IExpressionNode)node.Expression.Transform(this);
-        if (ReferenceEquals(expression, node.Expression))
-            return node;
-
-        return new AsExpressionNode(expression, node.Type)
-        {
-            ReturnTypeMetadata = node.ReturnTypeMetadata,
-        };
-    }
-
     public ISyntaxNode TransformBinaryExpression(BinaryExpressionNode node)
     {
         var left = (IExpressionNode)node.Left.Transform(this);
@@ -213,6 +201,15 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
 
     public ISyntaxNode TransformInterfaceMethod(InterfaceMethodNode node)
         => node;
+
+    public ISyntaxNode TransformAsExpression(IsExpressionNode node)
+    {
+        var expression = (IExpressionNode)node.Expression.Transform(this);
+        if (ReferenceEquals(expression, node.Expression))
+            return node;
+
+        return new IsExpressionNode(expression, node.Type);
+    }
 
     public ISyntaxNode TransformLabel(LabelNode node)
         => node;

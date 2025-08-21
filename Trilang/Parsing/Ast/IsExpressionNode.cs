@@ -4,21 +4,21 @@ using Trilang.Parsing.Formatters;
 namespace Trilang.Parsing.Ast;
 
 // TODO: replace by pattern matching
-public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
+public class IsExpressionNode : IExpressionNode, IEquatable<IsExpressionNode>
 {
-    public AsExpressionNode(IExpressionNode expression, IInlineTypeNode type)
+    public IsExpressionNode(IExpressionNode expression, IInlineTypeNode type)
     {
         Expression = expression;
         Type = type;
     }
 
-    public static bool operator ==(AsExpressionNode? left, AsExpressionNode? right)
+    public static bool operator ==(IsExpressionNode? left, IsExpressionNode? right)
         => Equals(left, right);
 
-    public static bool operator !=(AsExpressionNode? left, AsExpressionNode? right)
+    public static bool operator !=(IsExpressionNode? left, IsExpressionNode? right)
         => !Equals(left, right);
 
-    public bool Equals(AsExpressionNode? other)
+    public bool Equals(IsExpressionNode? other)
     {
         if (other is null)
             return false;
@@ -27,8 +27,7 @@ public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
             return true;
 
         return Expression.Equals(other.Expression) &&
-               Type.Equals(other.Type) &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
+               Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)
@@ -42,7 +41,7 @@ public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((AsExpressionNode)obj);
+        return Equals((IsExpressionNode)obj);
     }
 
     public override int GetHashCode()
@@ -66,10 +65,7 @@ public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
         => transformer.TransformAsExpression(this);
 
     public IExpressionNode Clone()
-        => new AsExpressionNode(Expression.Clone(), Type.Clone())
-        {
-            ReturnTypeMetadata = ReturnTypeMetadata,
-        };
+        => new IsExpressionNode(Expression.Clone(), Type.Clone());
 
     public ISyntaxNode? Parent { get; set; }
 
@@ -77,5 +73,6 @@ public class AsExpressionNode : IExpressionNode, IEquatable<AsExpressionNode>
 
     public IInlineTypeNode Type { get; }
 
-    public ITypeMetadata? ReturnTypeMetadata { get; set; }
+    public ITypeMetadata ReturnTypeMetadata
+        => TypeMetadata.Bool;
 }

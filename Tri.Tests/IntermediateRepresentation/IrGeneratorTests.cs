@@ -1917,4 +1917,37 @@ public class IrGeneratorTests
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
+
+    [Test]
+    public void IsTypeTest()
+    {
+        const string code =
+            """
+            function test(obj: {}): bool {
+                return obj is i8;
+            }
+            """;
+        var (tree, typeProvider) = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var any = typeProvider.GetType("{ }")!;
+        var anyPointer = new TypePointerMetadata(any);
+
+        var expected = new[]
+        {
+            new IrFunction("test_s", new Block("entry", [
+                new LoadParameter(new Register(0, anyPointer), 0),
+                new IsType(
+                    new Register(1, TypeMetadata.Bool),
+                    new Register(0, anyPointer),
+                    TypeMetadata.I8
+                ),
+                new Return(new Register(1, TypeMetadata.Bool)),
+            ])),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
 }
