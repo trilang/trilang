@@ -39,7 +39,7 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
 
         foreach (var (m1, m2) in methods.Zip(other.methods))
         {
-            if (m1.Name != m2.Name || !m1.TypeMetadata.Equals(m2.TypeMetadata))
+            if (m1.Name != m2.Name || !m1.Type.Equals(m2.Type))
                 return false;
         }
 
@@ -66,7 +66,7 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     public override string ToString()
     {
         var propertyNames = properties.Select(f => $"{f.Name}: {f.Type};");
-        var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.TypeMetadata.ParameterTypes)}): {m.TypeMetadata.ReturnType};");
+        var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.Type.ParameterTypes)}): {m.Type.ReturnType};");
 
         var combinedSignatures = propertyNames.Concat(methodNames).ToList();
 

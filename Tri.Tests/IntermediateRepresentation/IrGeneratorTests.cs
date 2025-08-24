@@ -1919,6 +1919,52 @@ public class IrGeneratorTests
     }
 
     [Test]
+    public void CallInterfaceMethodTest()
+    {
+        const string code =
+            """
+            public type Interface = {
+                method(): void;
+            }
+
+            function test(p: Interface): void {
+                p.method();
+            }
+            """;
+        var (tree, typeProvider) = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var interfaceType = (TypeAliasMetadata)typeProvider.GetType("Interface")!;
+        var interfacePointer = new TypePointerMetadata(interfaceType);
+
+        var method = (InterfaceMethodMetadata)interfaceType.GetMember("method")!;
+        var methodPointer = new TypePointerMetadata(method.Type);
+
+        var expected = new List<IrFunction>
+        {
+            new IrFunction("test_s", new Block("entry", [
+                new LoadParameter(new Register(0, interfacePointer), 0),
+                new GetMemberPointer(
+                    new Register(1, methodPointer),
+                    new Register(0, interfacePointer),
+                    method
+                ),
+                new Load(new Register(2, method.Type), new Register(1, methodPointer)),
+                new Call(
+                    new Register(3, TypeMetadata.Void),
+                    new Register(2, method.Type),
+                    [],
+                    false
+                ),
+            ])),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
     public void IsTypeTest()
     {
         const string code =

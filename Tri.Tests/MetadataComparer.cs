@@ -135,7 +135,7 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (x.Name != y.Name)
             throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
 
-        if (!Equals(x.TypeMetadata, y.TypeMetadata))
+        if (!Equals(x.Type, y.Type))
             throw new Exception("TypeMetadata doesn't match.");
 
         return true;

@@ -332,6 +332,10 @@ public class IrGenerator
                 isStatic = function.IsStatic;
                 functionType = function.Type;
             }
+            else if (member.Reference is InterfaceMethodMetadata interfaceMethod)
+            {
+                functionType = interfaceMethod.Type;
+            }
             else if (member.Reference is ParameterMetadata parameter)
             {
                 functionType = (FunctionTypeMetadata)parameter.Type;

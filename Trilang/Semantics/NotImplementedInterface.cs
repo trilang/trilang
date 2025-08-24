@@ -36,7 +36,7 @@ internal class NotImplementedInterface : Visitor
                 var method = type.GetMethod(interfaceMethod.Name) ??
                              throw new SemanticAnalysisException($"The '{interfaceMethod.Name}' method is not implemented.");
 
-                if (!interfaceMethod.TypeMetadata.Equals(method.Type))
+                if (!interfaceMethod.Type.Equals(method.Type))
                     throw new SemanticAnalysisException($"The '{interfaceMethod.Name}' method is not of the correct type.");
 
                 if (method.AccessModifier == AccessModifierMetadata.Private)

@@ -97,7 +97,7 @@ internal class TypeArgumentMap
                 x.SetterModifier));
 
         var methods = interfaceMetadata.Methods
-            .Select(x => new InterfaceMethodMetadata(interfaceMetadata, x.Name, Map(x.TypeMetadata)));
+            .Select(x => new InterfaceMethodMetadata(interfaceMetadata, x.Name, Map(x.Type)));
 
         var metadata = new InterfaceMetadata(properties, methods);
 
@@ -206,7 +206,7 @@ internal class TypeArgumentMap
 
             InterfaceMetadata interfaceMetadata
                 => interfaceMetadata.Properties.Select(x => x.Type).Any(HasTypeArgument) ||
-                   interfaceMetadata.Methods.Select(x => x.TypeMetadata).Any(HasTypeArgument),
+                   interfaceMetadata.Methods.Select(x => x.Type).Any(HasTypeArgument),
 
             TupleMetadata tupleMetadata
                 => tupleMetadata.Types.Any(HasTypeArgument),

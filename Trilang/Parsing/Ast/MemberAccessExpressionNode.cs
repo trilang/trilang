@@ -116,7 +116,7 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
                 => interfaceProperty.Type,
 
             InterfaceMethodMetadata interfaceMethod
-                => interfaceMethod.TypeMetadata,
+                => interfaceMethod.Type,
 
             ITypeMetadata type
                 => type,

@@ -2,11 +2,11 @@ namespace Trilang.Metadata;
 
 public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMetadata>
 {
-    public InterfaceMethodMetadata(InterfaceMetadata declaringType, string name, FunctionTypeMetadata typeMetadata)
+    public InterfaceMethodMetadata(InterfaceMetadata declaringType, string name, FunctionTypeMetadata type)
     {
         DeclaringType = declaringType;
         Name = name;
-        TypeMetadata = typeMetadata;
+        Type = type;
     }
 
     public static bool operator ==(InterfaceMethodMetadata? left, InterfaceMethodMetadata? right)
@@ -25,7 +25,7 @@ public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMeta
 
         return DeclaringType.Equals(other.DeclaringType) &&
                Name == other.Name &&
-               TypeMetadata.Equals(other.TypeMetadata);
+               Type.Equals(other.Type);
     }
 
     public override bool Equals(object? obj)
@@ -43,14 +43,14 @@ public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMeta
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(DeclaringType, Name, TypeMetadata);
+        => HashCode.Combine(DeclaringType, Name, Type);
 
     public override string ToString()
-        => $"{Name}: {TypeMetadata}";
+        => $"{Name}: {Type}";
 
     public InterfaceMetadata DeclaringType { get; }
 
     public string Name { get; }
 
-    public FunctionTypeMetadata TypeMetadata { get; }
+    public FunctionTypeMetadata Type { get; }
 }

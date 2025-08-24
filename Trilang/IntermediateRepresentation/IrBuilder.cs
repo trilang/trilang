@@ -221,8 +221,8 @@ internal class IrBuilder
             MethodMetadata method => method.Type,
             ConstructorMetadata constructor => constructor.Type,
             FunctionMetadata function => function.Type,
+            InterfaceMethodMetadata interfaceMethod => interfaceMethod.Type,
 
-            // TODO: interface?
             _ => throw new IrException($"Unsupported member type '{member.GetType().Name}'.")
         };
 
