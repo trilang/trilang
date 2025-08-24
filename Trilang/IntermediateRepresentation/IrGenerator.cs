@@ -161,7 +161,7 @@ public class IrGenerator
                 => GenerateCall(builder, callExpressionNode),
 
             CastExpressionNode castExpressionNode
-                => throw new NotImplementedException(),
+                => GenerateCast(builder, castExpressionNode),
 
             ExpressionBlockNode expressionBlockNode
                 => GenerateExpressionBlock(builder, expressionBlockNode),
@@ -369,6 +369,14 @@ public class IrGenerator
         }
 
         return builder.Call(delegateRegister, parameterRegisters, isStatic);
+    }
+
+    private Register GenerateCast(IrBuilder builder, CastExpressionNode node)
+    {
+        var expression = GenerateExpression(builder, node.Expression)!.Value;
+        var result = builder.Cast(expression, node.Type.Metadata!);
+
+        return result;
     }
 
     private Register GenerateExpressionBlock(IrBuilder builder, ExpressionBlockNode node)

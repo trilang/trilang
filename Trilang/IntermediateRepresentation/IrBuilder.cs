@@ -270,6 +270,15 @@ internal class IrBuilder
         return register;
     }
 
+    public Register Cast(Register source, ITypeMetadata type)
+    {
+        var register = CreateRegister(MapToIrType(type));
+        var castInstruction = new Cast(register, source, type);
+        currentBlock.AddInstruction(castInstruction);
+
+        return register;
+    }
+
     public Register AddAssignment(string name, Register register)
     {
         currentBlock.AddAssignment(name, register, false);

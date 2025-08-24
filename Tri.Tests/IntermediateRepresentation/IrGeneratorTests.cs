@@ -1950,4 +1950,75 @@ public class IrGeneratorTests
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
+
+    [Test]
+    public void CastValueTypeTest()
+    {
+        const string code =
+            """
+            function test(obj: {}): i8 {
+                return (i8)obj;
+            }
+            """;
+        var (tree, typeProvider) = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var any = typeProvider.GetType("{ }")!;
+        var anyPointer = new TypePointerMetadata(any);
+
+        var expected = new[]
+        {
+            new IrFunction("test_s", new Block("entry", [
+                new LoadParameter(new Register(0, anyPointer), 0),
+                new Cast(
+                    new Register(1, TypeMetadata.I8),
+                    new Register(0, anyPointer),
+                    TypeMetadata.I8
+                ),
+                new Return(new Register(1, TypeMetadata.I8)),
+            ])),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void CastTest()
+    {
+        const string code =
+            """
+            public type Test { }
+
+            function test(obj: {}): Test {
+                return (Test)obj;
+            }
+            """;
+        var (tree, typeProvider) = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var any = typeProvider.GetType("{ }")!;
+        var anyPointer = new TypePointerMetadata(any);
+
+        var testType = (TypeMetadata)typeProvider.GetType("Test")!;
+        var testPointer = new TypePointerMetadata(testType);
+
+        var expected = new[]
+        {
+            new IrFunction("test_s", new Block("entry", [
+                new LoadParameter(new Register(0, anyPointer), 0),
+                new Cast(
+                    new Register(1, testPointer),
+                    new Register(0, anyPointer),
+                    testType
+                ),
+                new Return(new Register(1, testPointer)),
+            ])),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
 }
