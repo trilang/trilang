@@ -185,7 +185,7 @@ public class IrGenerator
                 => GenerateNull(builder, nullExpressionNode),
 
             TupleExpressionNode tupleExpressionNode
-                => throw new NotImplementedException(),
+                => GenerateTuple(builder, tupleExpressionNode),
 
             UnaryExpressionNode unaryExpressionNode
                 => GenerateUnaryExpression(builder, unaryExpressionNode),
@@ -276,16 +276,6 @@ public class IrGenerator
             return builder.Xor(node.ReturnTypeMetadata!, left, right);
         }
 
-        if (node.Kind == ConditionalAnd)
-        {
-            throw new NotImplementedException();
-        }
-
-        if (node.Kind == ConditionalOr)
-        {
-            throw new NotImplementedException();
-        }
-
         if (node.Kind == Equality)
         {
             return builder.Eq(node.ReturnTypeMetadata!, left, right);
@@ -316,7 +306,7 @@ public class IrGenerator
             return builder.Ge(node.ReturnTypeMetadata!, left, right);
         }
 
-        throw new Exception("Unknown binary expression kind.");
+        throw new IrException("Unknown binary expression kind.");
     }
 
     private Register GenerateCall(IrBuilder builder, CallExpressionNode node)
@@ -346,7 +336,7 @@ public class IrGenerator
             }
             else
             {
-                throw new Exception("Unknown member type.");
+                throw new IrException("Unknown member type.");
             }
         }
 
@@ -451,6 +441,11 @@ public class IrGenerator
     private Register GenerateNull(IrBuilder builder, NullExpressionNode node)
         => builder.LoadConst(node.ReturnTypeMetadata, null);
 
+    private Register GenerateTuple(IrBuilder builder, TupleExpressionNode node)
+    {
+        throw new NotImplementedException();
+    }
+
     private Register GenerateUnaryExpression(IrBuilder builder, UnaryExpressionNode node)
     {
         var operand = GenerateExpression(builder, node.Operand)!.Value;
@@ -467,7 +462,7 @@ public class IrGenerator
             UnaryExpressionKind.LogicalNot or UnaryExpressionKind.BitwiseNot
                 => builder.Not(node.ReturnTypeMetadata!, operand),
 
-            _ => throw new NotImplementedException(),
+            _ => throw new IrException("Unknown unary expression kind."),
         };
     }
 }

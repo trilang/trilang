@@ -2,7 +2,7 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class BlockStatementNode : IStatementNode, IEquatable<BlockStatementNode>
+public class BlockStatementNode : IStatementNode, IBlockNode, IEquatable<BlockStatementNode>
 {
     private readonly List<IStatementNode> statements;
 

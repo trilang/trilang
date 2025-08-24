@@ -2067,4 +2067,63 @@ public class IrGeneratorTests
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
     }
+
+    [Test]
+    public void ConditionalAndTest()
+    {
+        const string code =
+            """
+            function test(a: bool, b: bool): i32 {
+                if (a && b) {
+                    return 1;
+                }
+
+                return 0;
+            }
+            """;
+        var (tree, typeProvider) = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new[]
+        {
+            new IrFunction("test_s", new Block(
+                "entry",
+                [
+                    new LoadParameter(new Register(0, TypeMetadata.Bool), 0),
+                    new LoadParameter(new Register(1, TypeMetadata.Bool), 1),
+                    new Move(new Register(2, TypeMetadata.Bool), new Register(0, TypeMetadata.Bool)),
+                    new Branch(new Register(2, TypeMetadata.Bool), "if_1_then", "if_1_end"),
+                ],
+                [
+                    new Block("if_1_then", [
+                        new Move(new Register(5, TypeMetadata.Bool), new Register(1, TypeMetadata.Bool)),
+                        new Jump("if_1_end"),
+                    ]),
+                    new Block("if_1_end", [
+                        new Phi(
+                            new Register(6, TypeMetadata.Bool),
+                            [
+                                new Register(2, TypeMetadata.Bool),
+                                new Register(5, TypeMetadata.Bool),
+                            ]
+                        ),
+                        new Branch(new Register(6, TypeMetadata.Bool), "if_0_then", "if_0_end"),
+                    ]),
+                    new Block("if_0_then", [
+                        new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                        new Return(new Register(3, TypeMetadata.I32)),
+                        new Jump("if_0_end"),
+                    ]),
+                    new Block("if_0_end", [
+                        new LoadConst(new Register(4, TypeMetadata.I32), 0),
+                        new Return(new Register(4, TypeMetadata.I32)),
+                    ]),
+                ]
+            )),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
 }

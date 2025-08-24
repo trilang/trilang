@@ -30,7 +30,7 @@ internal class RewriteIfStatement : Visitor
 
     protected override void VisitIfEnter(IfStatementNode node)
     {
-        var parentBlock = (BlockStatementNode)node.Parent!;
+        var parentBlock = (IBlockNode)node.Parent!;
 
         var label = GetLoopLabel(node);
         var thenBlockName = $"{label}_then";
@@ -89,7 +89,7 @@ internal class RewriteIfStatement : Visitor
             parentBlock.InsertAfter(newIf, new LabelNode(endBlockName));
 
         if (generateElseBlock)
-            parentBlock.InsertAfter(newIf, elseBlock!);
+            parentBlock.InsertAfter(newIf, elseBlock);
 
         if (generateThenBlock)
             parentBlock.InsertAfter(newIf, thenBlock);

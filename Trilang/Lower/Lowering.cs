@@ -12,6 +12,7 @@ public class Lowering
         tree.Transform(new ReplaceCompoundAssignments());
         tree.Transform(new ReplacePropertyFieldAndValueWithGeneratedField());
         tree.Transform(new ReplaceGettersAndSettersWithMethodCalls());
+        tree.Transform(new ReplaceConditionalOperators());
         tree.Accept(new ReplaceWhileLoop());
         tree.Accept(new RewriteIfStatement());
     }
