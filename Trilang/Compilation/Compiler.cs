@@ -33,6 +33,9 @@ public class Compiler
 
         var ir = new IrGenerator();
         var functions = ir.Generate(rootTypeMetadataProvider.Types, syntaxTrees);
+        if (options.PrintIr)
+            foreach (var function in functions)
+                Console.WriteLine(function);
 
         if (options.OperatingSystem == CompilerOptionOs.Linux)
         {

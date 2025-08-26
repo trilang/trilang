@@ -17,6 +17,9 @@ internal class Options
     [Option("platform", Required = false, HelpText = "Specifies the target platform architecture for compilation.")]
     public CompilerOptionPlatform? Platform { get; set; }
 
+    [Option("print-ir", Required = false, HelpText = "Prints the intermediate representation to the console.")]
+    public bool PrintIr { get; set; }
+
     [Option('d', "directive", Required = false, Separator = ',', HelpText = "Specifies a directive to include in the compilation.")]
     public IEnumerable<string>? Directives { get; set; }
 }

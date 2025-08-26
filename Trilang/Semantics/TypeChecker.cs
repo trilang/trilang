@@ -436,6 +436,7 @@ internal class TypeChecker : IVisitor
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
+        // TODO: check missing return statements (CFG)
         node.ReturnType.Accept(this);
 
         var type = ((TypeDeclarationNode)node.Parent!).Metadata!;

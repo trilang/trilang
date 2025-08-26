@@ -45,6 +45,8 @@ public class CompilerOptions
 
     public CompilerOptionPlatform Platform { get; set; }
 
+    public bool PrintIr { get; set; }
+
     public IEnumerable<string> Directives
         => directives;
 }

@@ -49,7 +49,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new LoadConst(new Register(1, TypeMetadata.I32), 2),
                 new BinaryOperation(
@@ -87,7 +87,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new LoadConst(new Register(1, TypeMetadata.I32), 2),
                 new BinaryOperation(
@@ -119,7 +119,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
@@ -153,7 +153,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -188,7 +188,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -223,7 +223,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -258,7 +258,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new Move(new Register(1, TypeMetadata.I32), new Register(0, TypeMetadata.I32)),
                 new LoadConst(new Register(2, TypeMetadata.I32), 2),
@@ -292,7 +292,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.Null), null),
                 new Return(new Register(0, TypeMetadata.Null)),
             ]))
@@ -317,7 +317,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.I32),
@@ -347,7 +347,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.Bool), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.Bool),
@@ -377,7 +377,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.I32),
@@ -411,7 +411,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 0),
                 new GetElementPointer(
@@ -463,7 +463,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new LoadConst(new Register(2, TypeMetadata.I32), 2),
@@ -522,7 +522,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 0),
                 new GetElementPointer(
@@ -576,7 +576,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 10),
                 new ArrayAlloc(
                     new Register(1, arrayPointerType),
@@ -635,7 +635,7 @@ public class IrGeneratorTests
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new LoadParameter(new Register(2, TypeMetadata.I32), 2),
             ])),
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(
                     new Register(1, ctorPointer),
@@ -715,7 +715,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max_s", entryBlock)
+            new IrFunction("max", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -778,7 +778,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max_s", entryBlock)
+            new IrFunction("max", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -869,7 +869,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max_s", entryBlock)
+            new IrFunction("max", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -905,7 +905,7 @@ public class IrGeneratorTests
         ]);
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block(
+            new IrFunction("test", new Block(
                 "entry",
                 [
                     new LoadParameter(new Register(0, TypeMetadata.I32), 0),
@@ -1020,7 +1020,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", entry)
+            new IrFunction("test", entry)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -1259,7 +1259,7 @@ public class IrGeneratorTests
                     false
                 ),
             ])),
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 4),
                 new GetMemberPointer(
                     new Register(1, ctorPointer),
@@ -1359,7 +1359,7 @@ public class IrGeneratorTests
                     false
                 ),
             ])),
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 4),
                 new GetMemberPointer(new Register(1, ctorPointer), new Register(0, pointPointerType), ctor),
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
@@ -1487,7 +1487,7 @@ public class IrGeneratorTests
                     false
                 ),
             ])),
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 8),
                 new GetMemberPointer(new Register(1, ctorPointer), new Register(0, pointPointerType), ctor),
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
@@ -1687,7 +1687,7 @@ public class IrGeneratorTests
             ])),
 
             // test
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new Alloc(new Register(0, test1PointerType), 4),
                 new GetMemberPointer(
                     new Register(1, test1CtorPointer),
@@ -1777,7 +1777,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("main_s", new Block("entry", [
+            new IrFunction("main", new Block("entry", [
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
@@ -1791,7 +1791,7 @@ public class IrGeneratorTests
                     true
                 )
             ])),
-            new IrFunction("test1_s", new Block("entry", [])),
+            new IrFunction("test1", new Block("entry", [])),
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -1821,7 +1821,7 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             new IrFunction("Test_test_s", new Block("entry", [])),
-            new IrFunction("main_s", new Block("entry", [
+            new IrFunction("main", new Block("entry", [
                 new GetMemberPointer(
                     new Register(0, new TypePointerMetadata(testMethod.Type)),
                     null,
@@ -1865,8 +1865,8 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [])),
-            new IrFunction("main_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [])),
+            new IrFunction("main", new Block("entry", [
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
@@ -1904,7 +1904,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, functionType), 0),
                 new Call(
                     new Register(1, TypeMetadata.Void),
@@ -1944,7 +1944,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, interfacePointer), 0),
                 new GetMemberPointer(
                     new Register(1, methodPointer),
@@ -1983,7 +1983,7 @@ public class IrGeneratorTests
 
         var expected = new[]
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, anyPointer), 0),
                 new IsType(
                     new Register(1, TypeMetadata.Bool),
@@ -2016,7 +2016,7 @@ public class IrGeneratorTests
 
         var expected = new[]
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, anyPointer), 0),
                 new Cast(
                     new Register(1, TypeMetadata.I8),
@@ -2054,7 +2054,7 @@ public class IrGeneratorTests
 
         var expected = new[]
         {
-            new IrFunction("test_s", new Block("entry", [
+            new IrFunction("test", new Block("entry", [
                 new LoadParameter(new Register(0, anyPointer), 0),
                 new Cast(
                     new Register(1, testPointer),
@@ -2088,7 +2088,7 @@ public class IrGeneratorTests
 
         var expected = new[]
         {
-            new IrFunction("test_s", new Block(
+            new IrFunction("test", new Block(
                 "entry",
                 [
                     new LoadParameter(new Register(0, TypeMetadata.Bool), 0),

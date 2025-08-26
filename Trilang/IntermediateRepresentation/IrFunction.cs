@@ -41,7 +41,7 @@ public record IrFunction(string Name, IrCode Code)
 
         name.Append(method.Name);
 
-        if (method.IsStatic)
+        if (method.IsStatic && method is not FunctionMetadata)
             name.Append("_s");
 
         return new IrFunction(name.ToString(), code);
