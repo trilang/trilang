@@ -27,12 +27,12 @@ public class SemanticAnalysis
         var metadataGenerator = new MetadataGenerator(symbolFinder.Map);
         metadataGenerator.Generate(rootSymbolTable);
 
-        // TODO: reorder
+        // TODO: built a graph
+        tree.Accept(new TypeChecker(options.Directives, symbolFinder.Map));
         tree.Accept(new ThisOutsideOfClass());
         tree.Accept(new ThisInStaticMethods());
         tree.Accept(new BreakContinueWithinLoop());
         tree.Accept(new VariableUsedBeforeDeclared(symbolFinder.Map));
-        tree.Accept(new TypeChecker(options.Directives, symbolFinder.Map));
         tree.Accept(new NotImplementedInterface());
         tree.Accept(new MemberAccessKindAnalyser());
         tree.Accept(new CheckAccessModifiers());

@@ -21,18 +21,15 @@ internal class VariableUsedBeforeDeclared : Visitor
         => scopes.RemoveAt(scopes.Count - 1);
 
     protected override void VisitVariableEnter(VariableDeclarationStatementNode node)
-    {
-        var scope = scopes.LastOrDefault();
-
-        scope?.Add(node.Name);
-    }
+        => scopes[^1].Add(node.Name);
 
     protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
     {
-        if (node.Member is not null || node.IsThis || node.IsField || node.IsValue)
+        if (!node.IsFirstMember || node.IsThis || node.IsField || node.IsValue)
             return;
 
-        var symbol = symbolFinderMap.Get(node).GetId(node.Name);
+        var symbolTable = symbolFinderMap.Get(node);
+        var symbol = symbolTable.GetId(node.Name);
         if (symbol is not null)
         {
             if (symbol.Node is ParameterNode
@@ -49,7 +46,7 @@ internal class VariableUsedBeforeDeclared : Visitor
         }
 
         // access static member
-        var typeProvider = symbolFinderMap.Get(node).TypeProvider;
+        var typeProvider = symbolTable.TypeProvider;
         var type = typeProvider.GetType(node.Name);
         if (type is null)
             throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");

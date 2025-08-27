@@ -380,7 +380,8 @@ internal class TypeChecker : IVisitor
 
     private void VisitFirstMemberAccess(MemberAccessExpressionNode node)
     {
-        var symbol = symbolTableMap.Get(node).GetId(node.Name);
+        var symbolTable = symbolTableMap.Get(node);
+        var symbol = symbolTable.GetId(node.Name);
         if (symbol is not null)
         {
             node.Reference = symbol.Node switch
@@ -410,16 +411,10 @@ internal class TypeChecker : IVisitor
         }
 
         // static access
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
+        var typeProvider = symbolTable.TypeProvider;
         var type = typeProvider.GetType(node.Name);
         if (type is not null)
-        {
             node.Reference = type;
-
-            return;
-        }
-
-        throw new SemanticAnalysisException($"Unknown member '{node.Name}'");
     }
 
     private void VisitNestedMemberAccess(MemberAccessExpressionNode node)
