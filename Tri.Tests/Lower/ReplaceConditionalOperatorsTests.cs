@@ -60,7 +60,7 @@ public class ReplaceConditionalOperatorsTests
                                 new TypeNode("bool") { Metadata = TypeMetadata.Bool },
                                 new MemberAccessExpressionNode("a")
                                 {
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                     Reference = aParameter,
                                 }
                             )
@@ -70,7 +70,7 @@ public class ReplaceConditionalOperatorsTests
                             new IfStatementNode(
                                 new MemberAccessExpressionNode("cond_0")
                                 {
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                 },
                                 new BlockStatementNode([
@@ -87,12 +87,12 @@ public class ReplaceConditionalOperatorsTests
                                         BinaryExpressionKind.Assignment,
                                         new MemberAccessExpressionNode("cond_0")
                                         {
-                                            AccessKind = PropertyAccessKind.Write,
+                                            AccessKind = MemberAccessKind.Write,
                                             Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                         },
                                         new MemberAccessExpressionNode("b")
                                         {
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                             Reference = bParameter,
                                         }
                                     )
@@ -103,7 +103,7 @@ public class ReplaceConditionalOperatorsTests
                             new ExpressionStatementNode(
                                 new MemberAccessExpressionNode("cond_0")
                                 {
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                 }
                             )
@@ -187,7 +187,7 @@ public class ReplaceConditionalOperatorsTests
                                 new TypeNode("bool") { Metadata = TypeMetadata.Bool },
                                 new MemberAccessExpressionNode("a")
                                 {
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                     Reference = aParameter,
                                 }
                             )
@@ -199,7 +199,7 @@ public class ReplaceConditionalOperatorsTests
                                     UnaryExpressionKind.LogicalNot,
                                     new MemberAccessExpressionNode("cond_0")
                                     {
-                                        AccessKind = PropertyAccessKind.Read,
+                                        AccessKind = MemberAccessKind.Read,
                                         Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                     }
                                 )
@@ -220,12 +220,12 @@ public class ReplaceConditionalOperatorsTests
                                         BinaryExpressionKind.Assignment,
                                         new MemberAccessExpressionNode("cond_0")
                                         {
-                                            AccessKind = PropertyAccessKind.Write,
+                                            AccessKind = MemberAccessKind.Write,
                                             Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                         },
                                         new MemberAccessExpressionNode("b")
                                         {
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                             Reference = bParameter,
                                         }
                                     )
@@ -236,7 +236,7 @@ public class ReplaceConditionalOperatorsTests
                             new ExpressionStatementNode(
                                 new MemberAccessExpressionNode("cond_0")
                                 {
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                 }
                             )
@@ -329,7 +329,7 @@ public class ReplaceConditionalOperatorsTests
                                         new TypeNode("bool") { Metadata = TypeMetadata.Bool },
                                         new MemberAccessExpressionNode("a")
                                         {
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                             Reference = aParameter,
                                         }
                                     )
@@ -339,7 +339,7 @@ public class ReplaceConditionalOperatorsTests
                                     new IfStatementNode(
                                         new MemberAccessExpressionNode("cond_0")
                                         {
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                             Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                         },
                                         new BlockStatementNode([
@@ -356,12 +356,12 @@ public class ReplaceConditionalOperatorsTests
                                                 BinaryExpressionKind.Assignment,
                                                 new MemberAccessExpressionNode("cond_0")
                                                 {
-                                                    AccessKind = PropertyAccessKind.Write,
+                                                    AccessKind = MemberAccessKind.Write,
                                                     Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                                 },
                                                 new MemberAccessExpressionNode("b")
                                                 {
-                                                    AccessKind = PropertyAccessKind.Read,
+                                                    AccessKind = MemberAccessKind.Read,
                                                     Reference = bParameter,
                                                 }
                                             )
@@ -372,7 +372,7 @@ public class ReplaceConditionalOperatorsTests
                                     new ExpressionStatementNode(
                                         new MemberAccessExpressionNode("cond_0")
                                         {
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                             Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                         }
                                     )
@@ -384,7 +384,7 @@ public class ReplaceConditionalOperatorsTests
                             new IfStatementNode(
                                 new MemberAccessExpressionNode("cond_1")
                                 {
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
                                 },
                                 new BlockStatementNode([
@@ -401,12 +401,12 @@ public class ReplaceConditionalOperatorsTests
                                         BinaryExpressionKind.Assignment,
                                         new MemberAccessExpressionNode("cond_1")
                                         {
-                                            AccessKind = PropertyAccessKind.Write,
+                                            AccessKind = MemberAccessKind.Write,
                                             Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
                                         },
                                         new MemberAccessExpressionNode("c")
                                         {
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                             Reference = cParameter,
                                         }
                                     )
@@ -417,7 +417,7 @@ public class ReplaceConditionalOperatorsTests
                             new ExpressionStatementNode(
                                 new MemberAccessExpressionNode("cond_1")
                                 {
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
                                 }
                             )

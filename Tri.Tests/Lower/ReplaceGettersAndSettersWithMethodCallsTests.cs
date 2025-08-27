@@ -100,13 +100,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode("p")
                                 {
                                     Reference = pParameter,
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                 },
                                 count.Getter!.Name
                             )
                             {
                                 Reference = count.Getter,
-                                AccessKind = PropertyAccessKind.Read,
+                                AccessKind = MemberAccessKind.Read,
                             },
                             []
                         )
@@ -266,13 +266,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode("t")
                                         {
                                             Reference = tParameter,
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                         },
                                         pointProperty.Getter!.Name
                                     )
                                     {
                                         Reference = pointProperty.Getter,
-                                        AccessKind = PropertyAccessKind.Read,
+                                        AccessKind = MemberAccessKind.Read,
                                     },
                                     []
                                 ),
@@ -280,7 +280,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             )
                             {
                                 Reference = xProperty.Getter,
-                                AccessKind = PropertyAccessKind.Read,
+                                AccessKind = MemberAccessKind.Read,
                             },
                             []
                         )
@@ -395,13 +395,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode("p")
                                 {
                                     Reference = pParameter,
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                 },
                                 xProperty.Setter.Name
                             )
                             {
                                 Reference = xProperty.Setter,
-                                AccessKind = PropertyAccessKind.Read,
+                                AccessKind = MemberAccessKind.Read,
                             },
                             [
                                 new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
@@ -535,19 +535,19 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode("p")
                                         {
                                             Reference = pParameter,
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                         },
                                         xProperty.Setter.Name
                                     )
                                     {
                                         Reference = xProperty.Setter,
-                                        AccessKind = PropertyAccessKind.Read,
+                                        AccessKind = MemberAccessKind.Read,
                                     },
                                     [
                                         new MemberAccessExpressionNode(tmpVariable.Name)
                                         {
                                             Reference = tmpVariable,
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                         }
                                     ]
                                 )
@@ -556,7 +556,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode(tmpVariable.Name)
                                 {
                                     Reference = tmpVariable,
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                 }
                             )
                         ])
@@ -671,13 +671,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode("p")
                                 {
                                     Reference = pParameter,
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                 },
                                 xProperty.Setter.Name
                             )
                             {
                                 Reference = xProperty.Setter,
-                                AccessKind = PropertyAccessKind.Read,
+                                AccessKind = MemberAccessKind.Read,
                             },
                             [
                                 new BinaryExpressionNode(
@@ -687,13 +687,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                             new MemberAccessExpressionNode("p")
                                             {
                                                 Reference = pParameter,
-                                                AccessKind = PropertyAccessKind.Read,
+                                                AccessKind = MemberAccessKind.Read,
                                             },
                                             xProperty.Getter!.Name
                                         )
                                         {
                                             Reference = xProperty.Getter,
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                         },
                                         []
                                     ),
@@ -825,13 +825,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                             new MemberAccessExpressionNode("p")
                                             {
                                                 Reference = pParameter,
-                                                AccessKind = PropertyAccessKind.Read,
+                                                AccessKind = MemberAccessKind.Read,
                                             },
                                             xProperty.Getter!.Name
                                         )
                                         {
                                             Reference = xProperty.Getter,
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                         },
                                         []
                                     ),
@@ -853,19 +853,19 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         new MemberAccessExpressionNode("p")
                                         {
                                             Reference = pParameter,
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                         },
                                         xProperty.Setter.Name
                                     )
                                     {
                                         Reference = xProperty.Setter,
-                                        AccessKind = PropertyAccessKind.Read,
+                                        AccessKind = MemberAccessKind.Read,
                                     },
                                     [
                                         new MemberAccessExpressionNode(tmpVariable.Name)
                                         {
                                             Reference = tmpVariable,
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                         }
                                     ]
                                 )
@@ -874,7 +874,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 new MemberAccessExpressionNode(tmpVariable.Name)
                                 {
                                     Reference = tmpVariable,
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                 }
                             )
                         ])

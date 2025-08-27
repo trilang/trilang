@@ -1,9 +1,8 @@
-using Trilang.Parsing;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.MetadataGenerators;
 
-internal class MetadataGenerator : Visitor
+internal class MetadataGenerator
 {
     private readonly TypeGenerator typeGenerator;
     private readonly InterfaceGenerator interfaceGenerator;

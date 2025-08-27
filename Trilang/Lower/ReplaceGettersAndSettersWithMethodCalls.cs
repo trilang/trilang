@@ -38,7 +38,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
                     new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter!.Name)
                     {
                         Reference = propertyMetadata.Setter,
-                        AccessKind = PropertyAccessKind.Read,
+                        AccessKind = MemberAccessKind.Read,
                     },
                     [right]
                 );
@@ -60,13 +60,13 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
                         new MemberAccessExpressionNode(memberAccess.Member, propertyMetadata.Setter!.Name)
                         {
                             Reference = propertyMetadata.Setter,
-                            AccessKind = PropertyAccessKind.Read,
+                            AccessKind = MemberAccessKind.Read,
                         },
                         [
                             new MemberAccessExpressionNode(name)
                             {
                                 Reference = variableMetadata,
-                                AccessKind = PropertyAccessKind.Read,
+                                AccessKind = MemberAccessKind.Read,
                             }
                         ]
                     )
@@ -75,7 +75,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
                     new MemberAccessExpressionNode(name)
                     {
                         Reference = variableMetadata,
-                        AccessKind = PropertyAccessKind.Read,
+                        AccessKind = MemberAccessKind.Read,
                     }
                 )
             ]);
@@ -226,13 +226,13 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
 
         var member = (IExpressionNode)node.Member.Transform(this);
 
-        if (node is { Reference: PropertyMetadata propertyMetadata, AccessKind: PropertyAccessKind.Read })
+        if (node is { Reference: PropertyMetadata propertyMetadata, AccessKind: MemberAccessKind.Read })
         {
             return new CallExpressionNode(
                 new MemberAccessExpressionNode(member, propertyMetadata.Getter!.Name)
                 {
                     Reference = propertyMetadata.Getter,
-                    AccessKind = PropertyAccessKind.Read,
+                    AccessKind = MemberAccessKind.Read,
                 },
                 []
             );

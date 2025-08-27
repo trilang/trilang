@@ -208,7 +208,7 @@ public class ReplaceIfDirectivesTests
                             new MemberAccessExpressionNode("callback")
                             {
                                 Reference = parameterMetadata,
-                                AccessKind = PropertyAccessKind.Read,
+                                AccessKind = MemberAccessKind.Read,
                             },
                             []
                         )
@@ -282,7 +282,7 @@ public class ReplaceIfDirectivesTests
                             new MemberAccessExpressionNode("callback")
                             {
                                 Reference = parameterMetadata,
-                                AccessKind = PropertyAccessKind.Read,
+                                AccessKind = MemberAccessKind.Read,
                             },
                             []
                         )
@@ -356,7 +356,7 @@ public class ReplaceIfDirectivesTests
                             new MemberAccessExpressionNode("callback")
                             {
                                 Reference = parameterMetadata,
-                                AccessKind = PropertyAccessKind.Read,
+                                AccessKind = MemberAccessKind.Read,
                             },
                             []
                         )

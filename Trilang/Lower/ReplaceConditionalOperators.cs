@@ -51,7 +51,7 @@ internal class ReplaceConditionalOperators : ITransformer
                 new IfStatementNode(
                     new MemberAccessExpressionNode(variableName)
                     {
-                        AccessKind = PropertyAccessKind.Read,
+                        AccessKind = MemberAccessKind.Read,
                         Reference = variableMetadata,
                     },
                     new BlockStatementNode([
@@ -60,7 +60,7 @@ internal class ReplaceConditionalOperators : ITransformer
                                 BinaryExpressionKind.Assignment,
                                 new MemberAccessExpressionNode(variableName)
                                 {
-                                    AccessKind = PropertyAccessKind.Write,
+                                    AccessKind = MemberAccessKind.Write,
                                     Reference = variableMetadata,
                                 },
                                 right
@@ -71,7 +71,7 @@ internal class ReplaceConditionalOperators : ITransformer
                 new ExpressionStatementNode(
                     new MemberAccessExpressionNode(variableName)
                     {
-                        AccessKind = PropertyAccessKind.Read,
+                        AccessKind = MemberAccessKind.Read,
                         Reference = variableMetadata,
                     }
                 ),
@@ -101,7 +101,7 @@ internal class ReplaceConditionalOperators : ITransformer
                         UnaryExpressionKind.LogicalNot,
                         new MemberAccessExpressionNode(variableName)
                         {
-                            AccessKind = PropertyAccessKind.Read,
+                            AccessKind = MemberAccessKind.Read,
                             Reference = variableMetadata,
                         }
                     )
@@ -114,7 +114,7 @@ internal class ReplaceConditionalOperators : ITransformer
                                 BinaryExpressionKind.Assignment,
                                 new MemberAccessExpressionNode(variableName)
                                 {
-                                    AccessKind = PropertyAccessKind.Write,
+                                    AccessKind = MemberAccessKind.Write,
                                     Reference = variableMetadata,
                                 },
                                 right
@@ -125,7 +125,7 @@ internal class ReplaceConditionalOperators : ITransformer
                 new ExpressionStatementNode(
                     new MemberAccessExpressionNode(variableName)
                     {
-                        AccessKind = PropertyAccessKind.Read,
+                        AccessKind = MemberAccessKind.Read,
                         Reference = variableMetadata,
                     }
                 ),

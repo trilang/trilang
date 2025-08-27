@@ -44,13 +44,13 @@ internal class IrDiscoveryPhase : Visitor
                                     new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                     {
                                         Reference = new ParameterMetadata(MemberAccessExpressionNode.This, declaringType),
-                                        AccessKind = PropertyAccessKind.Read,
+                                        AccessKind = MemberAccessKind.Read,
                                     },
                                     fieldMetadata.Name
                                 )
                                 {
                                     Reference = fieldMetadata,
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                 }
                             ),
                         ])
@@ -71,18 +71,18 @@ internal class IrDiscoveryPhase : Visitor
                                         new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
                                         {
                                             Reference = new ParameterMetadata(MemberAccessExpressionNode.This, declaringType),
-                                            AccessKind = PropertyAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Read,
                                         },
                                         fieldMetadata.Name
                                     )
                                     {
                                         Reference = fieldMetadata,
-                                        AccessKind = PropertyAccessKind.Write,
+                                        AccessKind = MemberAccessKind.Write,
                                     },
                                     new MemberAccessExpressionNode(valueParameter.Name)
                                     {
                                         Reference = valueParameter,
-                                        AccessKind = PropertyAccessKind.Read,
+                                        AccessKind = MemberAccessKind.Read,
                                     }
                                 )
                                 {

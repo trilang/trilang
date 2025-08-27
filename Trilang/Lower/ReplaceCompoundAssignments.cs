@@ -43,10 +43,10 @@ internal class ReplaceCompoundAssignments : ITransformer
             };
 
             var read = (MemberAccessExpressionNode)left.Clone();
-            read.AccessKind = PropertyAccessKind.Read;
+            read.AccessKind = MemberAccessKind.Read;
 
             var write = (MemberAccessExpressionNode)left.Clone();
-            write.AccessKind = PropertyAccessKind.Write;
+            write.AccessKind = MemberAccessKind.Write;
 
             right = new BinaryExpressionNode(kind, read, right)
             {

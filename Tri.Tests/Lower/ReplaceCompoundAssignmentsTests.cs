@@ -54,14 +54,14 @@ public class ReplaceCompoundAssignmentsTests
                             new MemberAccessExpressionNode("x")
                             {
                                 Reference = parameterMetadata,
-                                AccessKind = PropertyAccessKind.Write,
+                                AccessKind = MemberAccessKind.Write,
                             },
                             new BinaryExpressionNode(
                                 kind,
                                 new MemberAccessExpressionNode("x")
                                 {
                                     Reference = parameterMetadata,
-                                    AccessKind = PropertyAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Read,
                                 },
                                 new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
                                 {

@@ -138,5 +138,5 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
     public bool IsFirstMember
         => Member is null;
 
-    public PropertyAccessKind? AccessKind { get; set; }
+    public MemberAccessKind? AccessKind { get; set; }
 }

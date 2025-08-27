@@ -6,33 +6,6 @@ namespace Trilang.Semantics;
 
 internal class CheckAccessModifiers : Visitor
 {
-    private static PropertyAccessKind FindParentAssignment(MemberAccessExpressionNode node)
-    {
-        var parent = node.Parent;
-        while (parent is not null)
-        {
-            if (parent is BinaryExpressionNode { Kind: BinaryExpressionKind.Assignment } assignment)
-            {
-                if (ReferenceEquals(assignment.Left, node))
-                    return PropertyAccessKind.Write;
-
-                return PropertyAccessKind.Read;
-            }
-
-            if (parent is BinaryExpressionNode { IsCompoundAssignment: true } compound)
-            {
-                if (ReferenceEquals(compound.Left, node))
-                    return PropertyAccessKind.ReadWrite;
-
-                return PropertyAccessKind.Read;
-            }
-
-            parent = parent.Parent;
-        }
-
-        return PropertyAccessKind.Read;
-    }
-
     protected override void VisitNewObjectEnter(NewObjectExpressionNode node)
     {
         var ctor = node.Metadata!;
@@ -49,7 +22,8 @@ internal class CheckAccessModifiers : Visitor
 
     protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
     {
-        node.AccessKind = FindParentAssignment(node);
+        if (node.AccessKind is null)
+            return;
 
         if (node.Reference is not PropertyMetadata property)
             return;
@@ -58,7 +32,7 @@ internal class CheckAccessModifiers : Visitor
         if (property.DeclaringType.Equals(type))
             return;
 
-        if (node.AccessKind == PropertyAccessKind.Read)
+        if (node.AccessKind == MemberAccessKind.Read)
         {
             if (property.Getter is null)
                 throw new SemanticAnalysisException($"The '{property.Name}' property does not have a getter.");
@@ -67,7 +41,7 @@ internal class CheckAccessModifiers : Visitor
                 throw new SemanticAnalysisException($"The getter of '{property.Name}' is private.");
         }
 
-        if (node.AccessKind == PropertyAccessKind.Write)
+        if (node.AccessKind == MemberAccessKind.Write)
         {
             if (property.Setter is null)
                 throw new SemanticAnalysisException($"The '{property.Name}' property does not have a setter.");

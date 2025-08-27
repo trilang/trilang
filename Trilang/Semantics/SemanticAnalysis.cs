@@ -34,6 +34,7 @@ public class SemanticAnalysis
         tree.Accept(new VariableUsedBeforeDeclared(symbolFinder.Map));
         tree.Accept(new TypeChecker(options.Directives, symbolFinder.Map));
         tree.Accept(new NotImplementedInterface());
+        tree.Accept(new MemberAccessKindAnalyser());
         tree.Accept(new CheckAccessModifiers());
         tree.Accept(new RecursiveTypeAlias());
         tree.Accept(new CheckStaticAndInstanceMembersAccess());
