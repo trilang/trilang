@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Passes;
 
 namespace Trilang.Semantics;
 

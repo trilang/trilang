@@ -1,10 +1,13 @@
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
-namespace Trilang.Semantics;
+namespace Trilang.Semantics.Passes;
 
-internal class MemberAccessKindAnalyser : Visitor
+internal class MemberAccessKindAnalyser : Visitor, ISemanticPass
 {
+    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+        => tree.Accept(this);
+
     private static MemberAccessKind FindParentAssignment(MemberAccessExpressionNode node)
     {
         var parent = node.Parent;
@@ -34,4 +37,8 @@ internal class MemberAccessKindAnalyser : Visitor
 
     protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
         => node.AccessKind = FindParentAssignment(node);
+
+    public string Name => nameof(MemberAccessKindAnalyser);
+
+    public IEnumerable<string> DependsOn => [];
 }

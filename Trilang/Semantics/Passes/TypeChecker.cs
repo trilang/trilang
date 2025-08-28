@@ -5,17 +5,19 @@ using static Trilang.Parsing.Ast.BinaryExpressionKind;
 using static Trilang.Parsing.Ast.UnaryExpressionKind;
 using static Trilang.Metadata.TypeMetadata;
 
-namespace Trilang.Semantics;
+namespace Trilang.Semantics.Passes;
 
-internal class TypeChecker : IVisitor
+internal class TypeChecker : IVisitor, ISemanticPass
 {
-    private readonly IEnumerable<string> directives;
-    private readonly SymbolTableMap symbolTableMap;
+    private IEnumerable<string> directives = null!;
+    private SymbolTableMap symbolTableMap = null!;
 
-    public TypeChecker(IEnumerable<string> directives, SymbolTableMap symbolTableMap)
+    public void Analyze(SyntaxTree tree, SemanticPassContext context)
     {
-        this.directives = directives;
-        this.symbolTableMap = symbolTableMap;
+        directives = context.Directives;
+        symbolTableMap = context.SymbolTableMap!;
+
+        tree.Accept(this);
     }
 
     public void VisitArrayAccess(ArrayAccessExpressionNode node)
@@ -727,4 +729,8 @@ internal class TypeChecker : IVisitor
         if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
             throw new SemanticAnalysisException("Condition must be a boolean");
     }
+
+    public string Name => nameof(TypeChecker);
+
+    public IEnumerable<string> DependsOn => [nameof(MetadataGenerator)];
 }

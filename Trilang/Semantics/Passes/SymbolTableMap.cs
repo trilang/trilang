@@ -1,7 +1,7 @@
 using Trilang.Parsing.Ast;
 using Trilang.Symbols;
 
-namespace Trilang.Semantics;
+namespace Trilang.Semantics.Passes;
 
 public class SymbolTableMap
 {

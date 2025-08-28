@@ -2,7 +2,7 @@ using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using Trilang.Symbols;
 
-namespace Trilang.Semantics.MetadataGenerators;
+namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class ArrayGenerator
 {

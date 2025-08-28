@@ -1,10 +1,13 @@
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
-namespace Trilang.Semantics;
+namespace Trilang.Semantics.Passes;
 
-internal class BreakContinueWithinLoop : Visitor
+internal class BreakContinueWithinLoop : Visitor, ISemanticPass
 {
+    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+        => tree.Accept(this);
+
     protected override void VisitBreakEnter(BreakNode node)
     {
         var whileLoop = node.FindInParent<WhileNode>() ??
@@ -20,4 +23,8 @@ internal class BreakContinueWithinLoop : Visitor
 
         node.LoopNode = whileLoop;
     }
+
+    public string Name => nameof(BreakContinueWithinLoop);
+
+    public IEnumerable<string> DependsOn => [];
 }

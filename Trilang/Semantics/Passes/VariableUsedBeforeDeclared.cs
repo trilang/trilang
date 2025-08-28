@@ -1,17 +1,21 @@
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
-namespace Trilang.Semantics;
+namespace Trilang.Semantics.Passes;
 
-internal class VariableUsedBeforeDeclared : Visitor
+internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
 {
-    private readonly SymbolTableMap symbolFinderMap;
     private readonly List<HashSet<string>> scopes;
+    private SymbolTableMap symbolFinderMap = null!;
 
-    public VariableUsedBeforeDeclared(SymbolTableMap symbolFinderMap)
+    public VariableUsedBeforeDeclared()
+        => scopes = [];
+
+    public void Analyze(SyntaxTree tree, SemanticPassContext context)
     {
-        this.symbolFinderMap = symbolFinderMap;
-        scopes = [];
+        symbolFinderMap = context.SymbolTableMap!;
+
+        tree.Accept(this);
     }
 
     protected override void VisitBlockEnter(BlockStatementNode node)
@@ -51,4 +55,8 @@ internal class VariableUsedBeforeDeclared : Visitor
         if (type is null)
             throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");
     }
+
+    public string Name => nameof(VariableUsedBeforeDeclared);
+
+    public IEnumerable<string> DependsOn => [nameof(MetadataGenerator)];
 }

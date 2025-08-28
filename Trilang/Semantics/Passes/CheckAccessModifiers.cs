@@ -2,10 +2,13 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
-namespace Trilang.Semantics;
+namespace Trilang.Semantics.Passes;
 
-internal class CheckAccessModifiers : Visitor
+internal class CheckAccessModifiers : Visitor, ISemanticPass
 {
+    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+        => tree.Accept(this);
+
     protected override void VisitNewObjectEnter(NewObjectExpressionNode node)
     {
         var ctor = node.Metadata!;
@@ -50,4 +53,12 @@ internal class CheckAccessModifiers : Visitor
                 throw new SemanticAnalysisException($"The setter of '{property.Name}' is private.");
         }
     }
+
+    public string Name => nameof(CheckAccessModifiers);
+
+    public IEnumerable<string> DependsOn =>
+    [
+        nameof(TypeChecker),
+        nameof(MemberAccessKindAnalyser),
+    ];
 }

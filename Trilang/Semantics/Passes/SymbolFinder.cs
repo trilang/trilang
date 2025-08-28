@@ -2,18 +2,23 @@ using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Symbols;
 
-namespace Trilang.Semantics;
+namespace Trilang.Semantics.Passes;
 
-internal class SymbolFinder : IVisitor<ISymbolTable>
+internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 {
-    private readonly SemanticAnalysisOptions options;
     private readonly SymbolTableMap map;
+    private HashSet<string> directives = null!;
 
-    public SymbolFinder(SemanticAnalysisOptions options)
+    public SymbolFinder()
+        => map = new SymbolTableMap();
+
+    public void Analyze(SyntaxTree tree, SemanticPassContext context)
     {
-        this.options = options;
+        directives = context.Directives;
 
-        map = new SymbolTableMap();
+        tree.Accept(this, context.RootSymbolTable);
+
+        context.SymbolTableMap = map;
     }
 
     public void VisitArrayAccess(ArrayAccessExpressionNode node, ISymbolTable context)
@@ -158,7 +163,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>
 
     public void VisitIfDirective(IfDirectiveNode node, ISymbolTable context)
     {
-        if (options.HasDirective(node.DirectiveName))
+        if (directives.Contains(node.DirectiveName))
         {
             foreach (var then in node.Then)
                 then.Accept(this, context);
@@ -445,6 +450,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>
         node.Body.Accept(this, context);
     }
 
-    public SymbolTableMap Map
-        => map;
+    public string Name => nameof(SymbolFinder);
+
+    public IEnumerable<string> DependsOn => [];
 }

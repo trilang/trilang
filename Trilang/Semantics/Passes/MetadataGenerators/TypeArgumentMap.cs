@@ -1,6 +1,6 @@
 using Trilang.Metadata;
 
-namespace Trilang.Semantics.MetadataGenerators;
+namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class TypeArgumentMap
 {

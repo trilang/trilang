@@ -2,10 +2,13 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
-namespace Trilang.Semantics;
+namespace Trilang.Semantics.Passes;
 
-internal class NotImplementedInterface : Visitor
+internal class NotImplementedInterface : Visitor, ISemanticPass
 {
+    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+        => tree.Accept(this);
+
     protected override void VisitTypeEnter(TypeDeclarationNode node)
     {
         var type = node.Metadata;
@@ -44,4 +47,8 @@ internal class NotImplementedInterface : Visitor
             }
         }
     }
+
+    public string Name => nameof(NotImplementedInterface);
+
+    public IEnumerable<string> DependsOn => [nameof(TypeChecker)];
 }
