@@ -17,7 +17,7 @@ public class IrGeneratorTests
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);

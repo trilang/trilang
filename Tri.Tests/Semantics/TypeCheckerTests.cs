@@ -117,7 +117,8 @@ public class TypeCheckerTests
                 public toString(): void {
                 }
 
-                public distance(other: i32): f64 {
+                public distance(other: i32): i32 {
+                    return 0;
                 }
             }
             """);
@@ -162,7 +163,7 @@ public class TypeCheckerTests
             false,
             "distance",
             [new ParameterMetadata("other", TypeMetadata.I32)],
-            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.F64)));
+            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)));
 
         var type = tree.Find<TypeDeclarationNode>();
         Assert.That(type, Is.Not.Null);
@@ -687,7 +688,7 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var thisNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "this");
         var pointType = typeProvider.GetType("Point");
@@ -754,7 +755,7 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
         var pointType = typeProvider.GetType("Point");
@@ -805,7 +806,7 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var aNode = tree.Find<MemberAccessExpressionNode>(m => m.Name == "a");
         var pointType = typeProvider.GetType("Test");
@@ -834,7 +835,7 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var type = typeProvider.GetType("Point") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -985,7 +986,7 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expected = new TupleMetadata([TypeMetadata.I32, TypeMetadata.I32]);
 
@@ -1065,7 +1066,7 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var closedType = typeProvider.GetType("List<i32>");
         var genericTypeNode = tree.Find<GenericTypeNode>();
@@ -1089,7 +1090,7 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var closedType = typeProvider.GetType("Test<i32>") as TypeMetadata;
         var ctor = closedType!.GetConstructor([]);
@@ -1168,7 +1169,7 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var type = typeProvider.GetType("Test");
         Assert.That(type, Is.Not.Null);

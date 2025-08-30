@@ -6,195 +6,221 @@ public static class Helpers
 {
     public static T? Find<T>(this ISyntaxNode? node, Func<T, bool>? predicate = null)
         where T : class, ISyntaxNode
+        => Where(node, predicate).FirstOrDefault();
+
+    public static IEnumerable<T> Where<T>(this ISyntaxNode? node, Func<T, bool>? predicate = null)
+        where T : class, ISyntaxNode
     {
         if (node is null)
-            return null;
+            yield break;
 
-        if (node is T syntaxNode && (predicate is null || predicate(syntaxNode)))
-            return syntaxNode;
+        var q = new Queue<ISyntaxNode?>();
+        q.Enqueue(node);
 
-        return node switch
+        while (q.TryDequeue(out node))
         {
-            ArrayTypeNode arrayTypeNode
-                => Find(arrayTypeNode.ElementType, predicate),
+            if (node is T syntaxNode && (predicate is null || predicate(syntaxNode)))
+                yield return syntaxNode;
 
-            ArrayAccessExpressionNode arrayNode
-                => Find(arrayNode.Member, predicate) ??
-                   Find(arrayNode.Index, predicate),
+            switch (node)
+            {
+                case ArrayTypeNode arrayTypeNode:
+                    q.Enqueue(arrayTypeNode.ElementType);
+                    break;
+                case ArrayAccessExpressionNode arrayNode:
+                    q.Enqueue(arrayNode.Member);
+                    q.Enqueue(arrayNode.Index);
+                    break;
+                case BinaryExpressionNode binaryExpressionNode:
+                    q.Enqueue(binaryExpressionNode.Left);
+                    q.Enqueue(binaryExpressionNode.Right);
+                    break;
+                case BlockStatementNode blockStatementNode:
+                    foreach (var statement in blockStatementNode.Statements)
+                        q.Enqueue(statement);
 
-            BinaryExpressionNode binaryExpressionNode
-                => Find(binaryExpressionNode.Left, predicate) ??
-                   Find(binaryExpressionNode.Right, predicate),
+                    break;
+                case BreakNode:
+                    break;
+                case CallExpressionNode callExpressionNode:
+                    q.Enqueue(callExpressionNode.Member);
+                    foreach (var parameter in callExpressionNode.Parameters)
+                        q.Enqueue(parameter);
 
-            BlockStatementNode blockStatementNode
-                => blockStatementNode.Statements
-                    .Select(x => Find(x, predicate))
-                    .FirstOrDefault(x => x is not null),
+                    break;
+                case CastExpressionNode castExpressionNode:
+                    q.Enqueue(castExpressionNode.Type);
+                    q.Enqueue(castExpressionNode.Expression);
+                    break;
+                case ConstructorDeclarationNode constructorDeclarationNode:
+                    foreach (var parameter in constructorDeclarationNode.Parameters)
+                        q.Enqueue(parameter);
 
-            BreakNode
-                => null,
+                    q.Enqueue(constructorDeclarationNode.Body);
+                    break;
+                case ContinueNode:
+                    break;
+                case DiscriminatedUnionNode discriminatedUnionNode:
+                    foreach (var type in discriminatedUnionNode.Types)
+                        q.Enqueue(type);
 
-            CallExpressionNode callExpressionNode
-                => Find(callExpressionNode.Member, predicate) ??
-                   callExpressionNode.Parameters
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null),
+                    break;
+                case ExpressionBlockNode expressionBlockNode:
+                    foreach (var statement in expressionBlockNode.Statements)
+                        q.Enqueue(statement);
 
-            ConstructorDeclarationNode constructorDeclarationNode
-                => constructorDeclarationNode.Parameters
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   Find(constructorDeclarationNode.Body, predicate),
+                    break;
+                case ExpressionStatementNode expressionStatementNode:
+                    q.Enqueue(expressionStatementNode.Expression);
+                    break;
+                case FunctionDeclarationNode functionDeclarationNode:
+                    foreach (var parameter in functionDeclarationNode.Parameters)
+                        q.Enqueue(parameter);
 
-            ContinueNode
-                => null,
+                    q.Enqueue(functionDeclarationNode.Body);
+                    q.Enqueue(functionDeclarationNode.ReturnType);
+                    break;
+                case FunctionTypeNode functionTypeDeclarationNode:
+                    foreach (var parameterType in functionTypeDeclarationNode.ParameterTypes)
+                        q.Enqueue(parameterType);
 
-            DiscriminatedUnionNode discriminatedUnionNode
-                => discriminatedUnionNode.Types
-                    .Select(x => Find(x, predicate))
-                    .FirstOrDefault(x => x is not null),
+                    q.Enqueue(functionTypeDeclarationNode.ReturnType);
+                    break;
+                case GenericTypeNode genericTypeNode:
+                    foreach (var typeArgument in genericTypeNode.TypeArguments)
+                        q.Enqueue(typeArgument);
 
-            ExpressionStatementNode expressionStatementNode
-                => Find(expressionStatementNode.Expression, predicate),
+                    break;
+                case GoToNode:
+                    break;
+                case IfDirectiveNode ifDirectiveNode:
+                    foreach (var item in ifDirectiveNode.Then)
+                        q.Enqueue(item);
 
-            FunctionDeclarationNode functionDeclarationNode
-                => functionDeclarationNode.Parameters
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   Find(functionDeclarationNode.Body, predicate) ??
-                   Find(functionDeclarationNode.ReturnType, predicate),
+                    foreach (var item in ifDirectiveNode.Else)
+                        q.Enqueue(item);
 
-            FunctionTypeNode functionTypeDeclarationNode
-                => functionTypeDeclarationNode.ParameterTypes
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   Find(functionTypeDeclarationNode.ReturnType, predicate),
+                    break;
+                case IfStatementNode ifStatementNode:
+                    q.Enqueue(ifStatementNode.Condition);
+                    q.Enqueue(ifStatementNode.Then);
+                    q.Enqueue(ifStatementNode.Else);
+                    break;
+                case InterfaceNode interfaceNode:
+                    foreach (var property in interfaceNode.Properties)
+                        q.Enqueue(property);
 
-            GenericTypeNode genericTypeNode
-                => genericTypeNode.TypeArguments
-                    .Select(x => Find(x, predicate))
-                    .FirstOrDefault(x => x is not null),
+                    foreach (var method in interfaceNode.Methods)
+                        q.Enqueue(method);
 
-            IfDirectiveNode ifDirectiveNode
-                => ifDirectiveNode.Then
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   ifDirectiveNode.Else
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null),
+                    break;
+                case InterfacePropertyNode interfacePropertyNode:
+                    q.Enqueue(interfacePropertyNode.Type);
+                    break;
+                case IsExpressionNode isExpressionNode:
+                    q.Enqueue(isExpressionNode.Expression);
+                    q.Enqueue(isExpressionNode.Type);
+                    break;
+                case LabelNode:
+                    break;
+                case InterfaceMethodNode interfaceMethodNode:
+                    foreach (var parameterTypes in interfaceMethodNode.ParameterTypes)
+                        q.Enqueue(parameterTypes);
 
-            IfStatementNode ifStatementNode
-                => Find(ifStatementNode.Condition, predicate) ??
-                   Find(ifStatementNode.Then, predicate) ??
-                   Find(ifStatementNode.Else, predicate),
+                    q.Enqueue(interfaceMethodNode.ReturnType);
+                    break;
+                case LiteralExpressionNode:
+                    break;
+                case MemberAccessExpressionNode memberAccessExpressionNode:
+                    q.Enqueue(memberAccessExpressionNode.Member);
+                    break;
+                case MethodDeclarationNode methodDeclarationNode:
+                    foreach (var parameter in methodDeclarationNode.Parameters)
+                        q.Enqueue(parameter);
 
-            InterfaceNode interfaceNode
-                => interfaceNode.Properties
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   interfaceNode.Methods
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null),
+                    q.Enqueue(methodDeclarationNode.ReturnType);
+                    q.Enqueue(methodDeclarationNode.Body);
+                    break;
+                case NewArrayExpressionNode newArrayExpressionNode:
+                    q.Enqueue(newArrayExpressionNode.Type);
+                    q.Enqueue(newArrayExpressionNode.Size);
+                    break;
+                case NewObjectExpressionNode newExpressionNode:
+                    q.Enqueue(newExpressionNode.Type);
+                    foreach (var parameter in newExpressionNode.Parameters)
+                        q.Enqueue(parameter);
 
-            InterfacePropertyNode interfacePropertyNode
-                => Find(interfacePropertyNode.Type, predicate),
+                    break;
+                case NullExpressionNode:
+                    break;
+                case ParameterNode parameterNode:
+                    q.Enqueue(parameterNode.Type);
+                    break;
+                case PropertyDeclarationNode propertyDeclarationNode:
+                    q.Enqueue(propertyDeclarationNode.Type);
+                    q.Enqueue(propertyDeclarationNode.Getter);
+                    q.Enqueue(propertyDeclarationNode.Setter);
+                    break;
+                case PropertyGetterNode propertyGetterNode:
+                    q.Enqueue(propertyGetterNode.Body);
+                    break;
+                case PropertySetterNode propertySetterNode:
+                    q.Enqueue(propertySetterNode.Body);
+                    break;
+                case ReturnStatementNode returnStatementNode:
+                    q.Enqueue(returnStatementNode.Expression);
+                    break;
+                case SyntaxTree syntaxTree:
+                    foreach (var declaration in syntaxTree.Declarations)
+                        q.Enqueue(declaration);
 
-            InterfaceMethodNode interfaceMethodNode
-                => interfaceMethodNode.ParameterTypes
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   Find(interfaceMethodNode.ReturnType, predicate),
+                    break;
+                case TupleExpressionNode tupleExpressionNode:
+                    foreach (var expression in tupleExpressionNode.Expressions)
+                        q.Enqueue(expression);
 
-            LiteralExpressionNode
-                => null,
+                    break;
+                case TupleTypeNode tupleTypeNode:
+                    foreach (var type in tupleTypeNode.Types)
+                        q.Enqueue(type);
 
-            MemberAccessExpressionNode memberAccessExpressionNode
-                => Find(memberAccessExpressionNode.Member, predicate),
+                    break;
+                case TypeAliasDeclarationNode typeAliasNode:
+                    q.Enqueue(typeAliasNode.Type);
+                    break;
+                case TypeDeclarationNode typeDeclarationNode:
+                    foreach (var genericArgument in typeDeclarationNode.GenericArguments)
+                        q.Enqueue(genericArgument);
 
-            MethodDeclarationNode methodDeclarationNode
-                => methodDeclarationNode.Parameters
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   Find(methodDeclarationNode.ReturnType, predicate) ??
-                   Find(methodDeclarationNode.Body, predicate),
+                    foreach (var property in typeDeclarationNode.Properties)
+                        q.Enqueue(property);
 
-            NewArrayExpressionNode newArrayExpressionNode
-                => Find(newArrayExpressionNode.Type, predicate) ??
-                   Find(newArrayExpressionNode.Size, predicate),
+                    foreach (var method in typeDeclarationNode.Methods)
+                        q.Enqueue(method);
 
-            NewObjectExpressionNode newExpressionNode
-                => Find(newExpressionNode.Type, predicate) ??
-                   newExpressionNode.Parameters
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null),
+                    foreach (var constructor in typeDeclarationNode.Constructors)
+                        q.Enqueue(constructor);
 
-            NullExpressionNode
-                => null,
+                    break;
+                case TypeNode:
+                    break;
+                case UnaryExpressionNode unaryExpressionNode:
+                    q.Enqueue(unaryExpressionNode.Operand);
+                    break;
+                case VariableDeclarationStatementNode variableDeclarationStatementNode:
+                    q.Enqueue(variableDeclarationStatementNode.Expression);
+                    break;
+                case WhileNode whileNode:
+                    q.Enqueue(whileNode.Condition);
+                    q.Enqueue(whileNode.Body);
+                    break;
 
-            ParameterNode parameterNode
-                => Find(parameterNode.Type, predicate),
-
-            PropertyDeclarationNode propertyDeclarationNode
-                => Find(propertyDeclarationNode.Type, predicate) ??
-                   Find(propertyDeclarationNode.Getter, predicate) ??
-                   Find(propertyDeclarationNode.Setter, predicate),
-
-            PropertyGetterNode propertyGetterNode
-                => Find(propertyGetterNode.Body, predicate),
-
-            PropertySetterNode propertySetterNode
-                => Find(propertySetterNode.Body, predicate),
-
-            ReturnStatementNode returnStatementNode
-                => Find(returnStatementNode.Expression, predicate),
-
-            SyntaxTree syntaxTree
-                => syntaxTree.Declarations
-                    .Select(x => Find(x, predicate))
-                    .FirstOrDefault(x => x is not null),
-
-            TupleExpressionNode tupleExpressionNode
-                => tupleExpressionNode.Expressions
-                    .Select(x => Find(x, predicate))
-                    .FirstOrDefault(x => x is not null),
-
-            TupleTypeNode tupleTypeNode
-                => tupleTypeNode.Types
-                    .Select(x => Find(x, predicate))
-                    .FirstOrDefault(x => x is not null),
-
-            TypeAliasDeclarationNode typeAliasNode
-                => Find(typeAliasNode.Type, predicate),
-
-            TypeDeclarationNode typeDeclarationNode
-                => typeDeclarationNode.GenericArguments
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   typeDeclarationNode.Properties
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   typeDeclarationNode.Methods
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null) ??
-                   typeDeclarationNode.Constructors
-                       .Select(x => Find(x, predicate))
-                       .FirstOrDefault(x => x is not null),
-
-            TypeNode
-                => null,
-
-            UnaryExpressionNode unaryExpressionNode
-                => Find(unaryExpressionNode.Operand, predicate),
-
-            VariableDeclarationStatementNode variableDeclarationStatementNode
-                => Find(variableDeclarationStatementNode.Expression, predicate),
-
-            WhileNode whileNode
-                => Find(whileNode.Condition, predicate) ??
-                   Find(whileNode.Body, predicate),
-
-            _ => throw new ArgumentOutOfRangeException(nameof(node)),
-        };
+                case null:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(node));
+            }
+        }
     }
 
     public static T? FindInParent<T>(this ISyntaxNode node)

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics.Passes;
+using Trilang.Semantics.Passes.ControlFlow;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics;
@@ -9,6 +10,26 @@ namespace Trilang.Semantics;
 public class SemanticAnalysis
 {
     private readonly ITypeMetadataProvider typeMetadataProvider;
+
+    // TODO: reflection
+    private readonly ISemanticPass[] semanticPasses =
+    [
+        new BreakContinueWithinLoop(),
+        new CheckAccessModifiers(),
+        new CheckStaticAndInstanceMembersAccess(),
+        new ControlFlowAnalyzer(),
+        new MemberAccessKindAnalyser(),
+        new MetadataGenerator(),
+        new MissingReturnStatement(),
+        new NotImplementedInterface(),
+        new RecursiveTypeAlias(),
+        new RestrictFieldAccess(),
+        new SymbolFinder(),
+        new ThisInStaticMethods(),
+        new ThisOutsideOfClass(),
+        new TypeChecker(),
+        new VariableUsedBeforeDeclared()
+    ];
 
     public SemanticAnalysis()
         : this(new RootTypeMetadataProvider())
@@ -23,38 +44,22 @@ public class SemanticAnalysis
         var rootSymbolTable = new RootSymbolTable(typeMetadataProvider);
         var context = new SemanticPassContext([..options.Directives], rootSymbolTable);
 
-        var passes = GetPasses();
-        foreach (var pass in passes)
+        foreach (var pass in GetSortedPasses())
             pass.Analyze(tree, context);
 
-        return new SemanticAnalysisResult(context.SymbolTableMap!, typeMetadataProvider);
+        return new SemanticAnalysisResult(
+            context.SymbolTableMap!,
+            typeMetadataProvider,
+            context.ControlFlowGraphs!);
     }
 
-    private List<ISemanticPass> GetPasses()
+    private List<ISemanticPass> GetSortedPasses()
     {
-        // TODO: reflection?
-        var passes = new ISemanticPass[]
-        {
-            new BreakContinueWithinLoop(),
-            new CheckAccessModifiers(),
-            new CheckStaticAndInstanceMembersAccess(),
-            new MemberAccessKindAnalyser(),
-            new MetadataGenerator(),
-            new NotImplementedInterface(),
-            new RecursiveTypeAlias(),
-            new RestrictFieldAccess(),
-            new SymbolFinder(),
-            new ThisInStaticMethods(),
-            new ThisOutsideOfClass(),
-            new TypeChecker(),
-            new VariableUsedBeforeDeclared(),
-        };
-
-        var passMap = passes.ToDictionary(p => p.Name, p => p);
+        var passMap = semanticPasses.ToDictionary(p => p.Name, p => p);
         var inDegree = new Dictionary<string, int>();
         var graph = new Dictionary<string, List<string>>();
 
-        foreach (var pass in passes)
+        foreach (var pass in semanticPasses)
         {
             var passName = pass.Name;
 
@@ -62,7 +67,7 @@ public class SemanticAnalysis
             graph[passName] = [];
         }
 
-        foreach (var pass in passes)
+        foreach (var pass in semanticPasses)
         {
             var passName = pass.Name;
 
@@ -79,9 +84,9 @@ public class SemanticAnalysis
         var queue = new Queue<string>();
         var result = new List<ISemanticPass>();
 
-        foreach (var kvp in inDegree)
-            if (kvp.Value == 0)
-                queue.Enqueue(kvp.Key);
+        foreach (var (key, value) in inDegree)
+            if (value == 0)
+                queue.Enqueue(key);
 
         while (queue.Count > 0)
         {
@@ -96,7 +101,7 @@ public class SemanticAnalysis
             }
         }
 
-        Debug.Assert(result.Count == passes.Length, "Circular dependency detected in semantic passes.");
+        Debug.Assert(result.Count == semanticPasses.Length, "Circular dependency detected in semantic passes.");
 
         return result;
     }
