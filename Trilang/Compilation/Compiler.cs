@@ -17,7 +17,6 @@ public class Compiler
         var semantic = new SemanticAnalysis(rootTypeMetadataProvider);
         var semanticOptions = new SemanticAnalysisOptions(options.Directives);
         var lowering = new Lowering();
-        var loweringOptions = new LoweringOptions(options.Directives);
 
         var syntaxTrees = new List<SyntaxTree>();
         var project = Project.Load(options.Path);
@@ -25,8 +24,8 @@ public class Compiler
         {
             var code = File.ReadAllText(sourceFile.FilePath);
             var tree = parser.Parse(code);
-            semantic.Analyze(tree, semanticOptions);
-            lowering.Lower(tree, loweringOptions);
+            var (_, _, cfgs) = semantic.Analyze(tree, semanticOptions);
+            lowering.Lower(tree, new LoweringOptions(options.Directives, cfgs));
 
             syntaxTrees.Add(tree);
         }

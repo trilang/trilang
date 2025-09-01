@@ -48,108 +48,111 @@ internal class ControlFlowAnalyzer : ISemanticPass
 
     private void BuildControlFlowGraph(IFunctionMetadata metadata, BlockStatementNode body)
     {
-        var builder = new ControlFlowGraphBuilder();
+        var builder = new ControlFlowGraphBuilder(body);
 
-        BuildControlFlowGraphForBlock(builder, body.Statements);
+        BuildControlFlowGraph(builder, body);
 
         graph!.Add(metadata, builder.Build());
     }
 
-    private void BuildControlFlowGraphForBlock(ControlFlowGraphBuilder builder, IEnumerable<IStatementNode> statements)
+    private void BuildControlFlowGraph(ControlFlowGraphBuilder builder, BlockStatementNode block)
     {
-        foreach (var statement in statements)
+        foreach (var statement in block.Statements)
+            BuildControlFlowGraph(builder, block, statement);
+    }
+
+    private void BuildControlFlowGraph(ControlFlowGraphBuilder builder, BlockStatementNode block, IStatementNode statement)
+    {
+        if (statement is BlockStatementNode blockStatement)
         {
-            if (statement is BlockStatementNode blockStatement)
+            BuildControlFlowGraph(builder, blockStatement);
+        }
+        else if (statement is IfStatementNode ifNode)
+        {
+            builder.Add(ifNode);
+
+            var ifNumber = ifCounter++;
+            var currentBlock = builder.CurrentBlock;
+            var thenBlock = new SemanticBlock($"then_{ifNumber}", ifNode.Then);
+            var endBlock = new SemanticBlock($"endif_{ifNumber}", block);
+
+            currentBlock.AddNext(thenBlock);
+
+            builder.CurrentBlock = thenBlock;
+            BuildControlFlowGraph(builder, ifNode.Then);
+            builder.CurrentBlock.AddNext(endBlock);
+
+            if (ifNode.Else is not null)
             {
-                BuildControlFlowGraphForBlock(builder, blockStatement.Statements);
-            }
-            else if (statement is IfStatementNode ifNode)
-            {
-                builder.Add(ifNode);
+                var elseBlock = new SemanticBlock($"else_{ifNumber}", ifNode.Else);
+                currentBlock.AddNext(elseBlock);
 
-                var ifNumber = ifCounter++;
-                var currentBlock = builder.CurrentBlock;
-                var thenBlock = new SemanticBlock($"then_{ifNumber}");
-                var endBlock = new SemanticBlock($"endif_{ifNumber}");
-
-                currentBlock.AddNext(thenBlock);
-
-                builder.CurrentBlock = thenBlock;
-                BuildControlFlowGraphForBlock(builder, ifNode.Then.Statements);
+                builder.CurrentBlock = elseBlock;
+                BuildControlFlowGraph(builder, ifNode.Else);
                 builder.CurrentBlock.AddNext(endBlock);
-
-                if (ifNode.Else is not null)
-                {
-                    var elseBlock = new SemanticBlock($"else_{ifNumber}");
-                    currentBlock.AddNext(elseBlock);
-
-                    builder.CurrentBlock = elseBlock;
-                    BuildControlFlowGraphForBlock(builder, ifNode.Else.Statements);
-                    builder.CurrentBlock.AddNext(endBlock);
-                }
-                else
-                {
-                    currentBlock.AddNext(endBlock);
-                }
-
-                builder.CurrentBlock = endBlock;
-            }
-            else if (statement is WhileNode whileNode)
-            {
-                var whileNumber = loopCounter++;
-                var currentBlock = builder.CurrentBlock;
-                var conditionBlock = new SemanticBlock($"loopcond_{whileNumber}");
-                var bodyBlock = new SemanticBlock($"loopbody_{whileNumber}");
-                var endBlock = new SemanticBlock($"loopend_{whileNumber}");
-                whileLoops.Push((conditionBlock, endBlock));
-
-                currentBlock.AddNext(conditionBlock);
-                conditionBlock.AddNext(bodyBlock);
-                conditionBlock.AddNext(endBlock);
-
-                builder.CurrentBlock = conditionBlock;
-                builder.Add(whileNode);
-
-                builder.CurrentBlock = bodyBlock;
-                BuildControlFlowGraphForBlock(builder, whileNode.Body.Statements);
-                builder.CurrentBlock.AddNext(conditionBlock);
-
-                builder.CurrentBlock = endBlock;
-                whileLoops.Pop();
-            }
-            else if (statement is BreakNode breakNode)
-            {
-                Debug.Assert(whileLoops.Count > 0, "While loop is not found.");
-
-                builder.Add(breakNode);
-
-                var (_, endBlock) = whileLoops.Peek();
-                builder.CurrentBlock.AddNext(endBlock);
-            }
-            else if (statement is ContinueNode continueNode)
-            {
-                Debug.Assert(whileLoops.Count > 0, "While loop is not found.");
-
-                builder.Add(continueNode);
-
-                var (conditionBlock, _) = whileLoops.Peek();
-                builder.CurrentBlock.AddNext(conditionBlock);
-            }
-
-            else if (statement is IfDirectiveNode ifDirectiveNode)
-            {
-                builder.Add(ifDirectiveNode);
-
-                BuildControlFlowGraphForBlock(
-                    builder,
-                    directives.Contains(ifDirectiveNode.DirectiveName)
-                        ? ifDirectiveNode.Then.OfType<IStatementNode>()
-                        : ifDirectiveNode.Else.OfType<IStatementNode>());
             }
             else
             {
-                builder.Add(statement);
+                currentBlock.AddNext(endBlock);
             }
+
+            builder.CurrentBlock = endBlock;
+        }
+        else if (statement is WhileNode whileNode)
+        {
+            var whileNumber = loopCounter++;
+            var currentBlock = builder.CurrentBlock;
+            var conditionBlock = new SemanticBlock($"loopcond_{whileNumber}", block);
+            var bodyBlock = new SemanticBlock($"loopbody_{whileNumber}", whileNode.Body);
+            var endBlock = new SemanticBlock($"loopend_{whileNumber}", block);
+            whileLoops.Push((conditionBlock, endBlock));
+
+            currentBlock.AddNext(conditionBlock);
+            conditionBlock.AddNext(bodyBlock);
+            conditionBlock.AddNext(endBlock);
+
+            builder.CurrentBlock = conditionBlock;
+            builder.Add(whileNode);
+
+            builder.CurrentBlock = bodyBlock;
+            BuildControlFlowGraph(builder, whileNode.Body);
+            builder.CurrentBlock.AddNext(conditionBlock);
+
+            builder.CurrentBlock = endBlock;
+            whileLoops.Pop();
+        }
+        else if (statement is BreakNode breakNode)
+        {
+            Debug.Assert(whileLoops.Count > 0, "While loop is not found.");
+
+            builder.Add(breakNode);
+
+            var (_, endBlock) = whileLoops.Peek();
+            builder.CurrentBlock.AddNext(endBlock);
+        }
+        else if (statement is ContinueNode continueNode)
+        {
+            Debug.Assert(whileLoops.Count > 0, "While loop is not found.");
+
+            builder.Add(continueNode);
+
+            var (conditionBlock, _) = whileLoops.Peek();
+            builder.CurrentBlock.AddNext(conditionBlock);
+        }
+        else if (statement is IfDirectiveNode ifDirectiveNode)
+        {
+            builder.Add(ifDirectiveNode);
+
+            var statements = directives.Contains(ifDirectiveNode.DirectiveName)
+                ? ifDirectiveNode.Then.OfType<IStatementNode>()
+                : ifDirectiveNode.Else.OfType<IStatementNode>();
+
+            foreach (var node in statements)
+                BuildControlFlowGraph(builder, block, node);
+        }
+        else
+        {
+            builder.Add(statement);
         }
     }
 

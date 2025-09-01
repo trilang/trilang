@@ -3,6 +3,7 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Tri.Tests.Lower;
 
@@ -41,7 +42,7 @@ public class ReplaceIfDirectivesTests
         var tree = Parse(code, directives);
 
         var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions(directives));
+        lowering.Lower(tree, new LoweringOptions(directives, new ControlFlowGraphMap()));
 
         var type1Metadata = new TypeMetadata("Type1");
         type1Metadata.AddConstructor(
@@ -180,7 +181,7 @@ public class ReplaceIfDirectivesTests
         var tree = Parse(code, directives);
 
         var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions(directives));
+        lowering.Lower(tree, new LoweringOptions(directives, new ControlFlowGraphMap()));
 
         var parameterMetadata = new ParameterMetadata(
             "callback",

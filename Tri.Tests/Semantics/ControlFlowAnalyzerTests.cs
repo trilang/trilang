@@ -31,8 +31,9 @@ public class ControlFlowAnalyzerTests
         var semantic = new SemanticAnalysis();
         var (_, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var entry = new SemanticBlock("entry", [
-            tree.Find<ReturnStatementNode>()!
+        var returnStatement = tree.Find<ReturnStatementNode>()!;
+        var entry = new SemanticBlock("entry", (BlockStatementNode)returnStatement.Parent!, [
+            returnStatement
         ]);
         var expected = new ControlFlowGraph(entry, entry);
         var function = new FunctionMetadata(
@@ -63,13 +64,15 @@ public class ControlFlowAnalyzerTests
         var semantic = new SemanticAnalysis();
         var (_, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var entry = new SemanticBlock("entry", [
+        var block = tree.Find<BlockStatementNode>()!;
+        var returnStatement = tree.Find<ReturnStatementNode>()!;
+        var entry = new SemanticBlock("entry", block, [
             tree.Find<IfStatementNode>()!
         ]);
-        var thenBlock = new SemanticBlock("then_0", [
-            tree.Find<ReturnStatementNode>()!
+        var thenBlock = new SemanticBlock("then_0", (BlockStatementNode)returnStatement.Parent!, [
+            returnStatement
         ]);
-        var endBlock = new SemanticBlock("endif_0");
+        var endBlock = new SemanticBlock("endif_0", block);
 
         entry.AddNext(thenBlock);
         entry.AddNext(endBlock);
@@ -107,13 +110,19 @@ public class ControlFlowAnalyzerTests
         var (_, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var returnStatements = tree.Where<ReturnStatementNode>().ToList();
-
-        var entry = new SemanticBlock("entry", [
-            tree.Find<IfStatementNode>()!
-        ]);
-        var thenBlock = new SemanticBlock("then_0", [returnStatements[0]]);
-        var elseBlock = new SemanticBlock("else_0", [returnStatements[1]]);
-        var endBlock = new SemanticBlock("endif_0");
+        var ifStatement = tree.Find<IfStatementNode>()!;
+        var entry = new SemanticBlock("entry", (BlockStatementNode)ifStatement.Parent!, [ifStatement]);
+        var thenBlock = new SemanticBlock(
+            "then_0",
+            (BlockStatementNode)returnStatements[0].Parent!,
+            [returnStatements[0]]
+        );
+        var elseBlock = new SemanticBlock(
+            "else_0",
+            (BlockStatementNode)returnStatements[1].Parent!,
+            [returnStatements[1]]
+        );
+        var endBlock = new SemanticBlock("endif_0", (BlockStatementNode)ifStatement.Parent!);
 
         entry.AddNext(thenBlock);
         entry.AddNext(elseBlock);
@@ -156,11 +165,11 @@ public class ControlFlowAnalyzerTests
         var innerIf = ifs[1];
         var returnStatement = tree.Find<ReturnStatementNode>()!;
 
-        var entry = new SemanticBlock("entry", [outerIf]);
-        var outerThenBlock = new SemanticBlock("then_0", [innerIf]);
-        var innerThenBlock = new SemanticBlock("then_1", [returnStatement]);
-        var outerEndBlock = new SemanticBlock("endif_0");
-        var innerEndBlock = new SemanticBlock("endif_1");
+        var entry = new SemanticBlock("entry", (BlockStatementNode)outerIf.Parent!, [outerIf]);
+        var outerThenBlock = new SemanticBlock("then_0", outerIf.Then, [innerIf]);
+        var innerThenBlock = new SemanticBlock("then_1", innerIf.Then, [returnStatement]);
+        var outerEndBlock = new SemanticBlock("endif_0", (BlockStatementNode)outerIf.Parent!);
+        var innerEndBlock = new SemanticBlock("endif_1", (BlockStatementNode)innerIf.Parent!);
 
         entry.AddNext(outerThenBlock);
         entry.AddNext(outerEndBlock);
@@ -198,14 +207,16 @@ public class ControlFlowAnalyzerTests
         var semantic = new SemanticAnalysis();
         var (_, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        var entry = new SemanticBlock("entry");
-        var conditionBlock = new SemanticBlock("loopcond_0", [
+        var block = tree.Find<BlockStatementNode>()!;
+        var returnStatement = tree.Find<ReturnStatementNode>()!;
+        var entry = new SemanticBlock("entry", block);
+        var conditionBlock = new SemanticBlock("loopcond_0", block, [
             tree.Find<WhileNode>()!
         ]);
-        var bodyBlock = new SemanticBlock("loopbody_0", [
-            tree.Find<ReturnStatementNode>()!
+        var bodyBlock = new SemanticBlock("loopbody_0", (BlockStatementNode)returnStatement.Parent!, [
+            returnStatement
         ]);
-        var endBlock = new SemanticBlock("loopend_0");
+        var endBlock = new SemanticBlock("loopend_0", block);
 
         entry.AddNext(conditionBlock);
         conditionBlock.AddNext(bodyBlock);
@@ -248,13 +259,13 @@ public class ControlFlowAnalyzerTests
         var innerWhile = whileNodes[1];
         var returnStatement = tree.Find<ReturnStatementNode>()!;
 
-        var entry = new SemanticBlock("entry");
-        var outerConditionBlock = new SemanticBlock("loopcond_0", [outerWhile]);
-        var outerBodyBlock = new SemanticBlock("loopbody_0");
-        var innerConditionBlock = new SemanticBlock("loopcond_1", [innerWhile]);
-        var innerBodyBlock = new SemanticBlock("loopbody_1", [returnStatement]);
-        var outerEndBlock = new SemanticBlock("loopend_0");
-        var innerEndBlock = new SemanticBlock("loopend_1");
+        var entry = new SemanticBlock("entry", (BlockStatementNode)outerWhile.Parent!);
+        var outerConditionBlock = new SemanticBlock("loopcond_0", (BlockStatementNode)outerWhile.Parent!, [outerWhile]);
+        var outerBodyBlock = new SemanticBlock("loopbody_0", outerWhile.Body);
+        var innerConditionBlock = new SemanticBlock("loopcond_1", outerWhile.Body, [innerWhile]);
+        var innerBodyBlock = new SemanticBlock("loopbody_1", innerWhile.Body, [returnStatement]);
+        var outerEndBlock = new SemanticBlock("loopend_0", (BlockStatementNode)outerWhile.Parent!);
+        var innerEndBlock = new SemanticBlock("loopend_1", outerWhile.Body);
 
         entry.AddNext(outerConditionBlock);
         outerConditionBlock.AddNext(outerBodyBlock);
@@ -297,10 +308,10 @@ public class ControlFlowAnalyzerTests
         var whileStatement = tree.Find<WhileNode>()!;
         var breakStatement = tree.Find<BreakNode>()!;
 
-        var entry = new SemanticBlock("entry");
-        var conditionBlock = new SemanticBlock("loopcond_0", [whileStatement]);
-        var bodyBlock = new SemanticBlock("loopbody_0", [breakStatement]);
-        var endBlock = new SemanticBlock("loopend_0");
+        var entry = new SemanticBlock("entry", (BlockStatementNode)whileStatement.Parent!);
+        var conditionBlock = new SemanticBlock("loopcond_0", (BlockStatementNode)whileStatement.Parent!, [whileStatement]);
+        var bodyBlock = new SemanticBlock("loopbody_0", whileStatement.Body, [breakStatement]);
+        var endBlock = new SemanticBlock("loopend_0", (BlockStatementNode)whileStatement.Parent!);
 
         entry.AddNext(conditionBlock);
         conditionBlock.AddNext(bodyBlock);
@@ -342,13 +353,13 @@ public class ControlFlowAnalyzerTests
         var innerWhile = tree.Where<WhileNode>().Skip(1).First();
         var breakStatement = tree.Find<BreakNode>()!;
 
-        var entry = new SemanticBlock("entry");
-        var outerConditionBlock = new SemanticBlock("loopcond_0", [outerWhile]);
-        var outerBodyBlock = new SemanticBlock("loopbody_0");
-        var innerConditionBlock = new SemanticBlock("loopcond_1", [innerWhile]);
-        var innerBodyBlock = new SemanticBlock("loopbody_1", [breakStatement]);
-        var outerEndBlock = new SemanticBlock("loopend_0");
-        var innerEndBlock = new SemanticBlock("loopend_1");
+        var entry = new SemanticBlock("entry", (BlockStatementNode)outerWhile.Parent!);
+        var outerConditionBlock = new SemanticBlock("loopcond_0", (BlockStatementNode)outerWhile.Parent!, [outerWhile]);
+        var outerBodyBlock = new SemanticBlock("loopbody_0", outerWhile.Body);
+        var innerConditionBlock = new SemanticBlock("loopcond_1", outerWhile.Body, [innerWhile]);
+        var innerBodyBlock = new SemanticBlock("loopbody_1", innerWhile.Body, [breakStatement]);
+        var outerEndBlock = new SemanticBlock("loopend_0", (BlockStatementNode)outerWhile.Parent!);
+        var innerEndBlock = new SemanticBlock("loopend_1", outerWhile.Body);
 
         entry.AddNext(outerConditionBlock);
         outerConditionBlock.AddNext(outerBodyBlock);
@@ -391,10 +402,10 @@ public class ControlFlowAnalyzerTests
         var whileStatement = tree.Find<WhileNode>()!;
         var continueStatement = tree.Find<ContinueNode>()!;
 
-        var entry = new SemanticBlock("entry");
-        var conditionBlock = new SemanticBlock("loopcond_0", [whileStatement]);
-        var bodyBlock = new SemanticBlock("loopbody_0", [continueStatement]);
-        var endBlock = new SemanticBlock("loopend_0");
+        var entry = new SemanticBlock("entry", (BlockStatementNode)whileStatement.Parent!);
+        var conditionBlock = new SemanticBlock("loopcond_0", (BlockStatementNode)whileStatement.Parent!, [whileStatement]);
+        var bodyBlock = new SemanticBlock("loopbody_0", whileStatement.Body, [continueStatement]);
+        var endBlock = new SemanticBlock("loopend_0", (BlockStatementNode)whileStatement.Parent!);
 
         entry.AddNext(conditionBlock);
         conditionBlock.AddNext(bodyBlock);
@@ -436,13 +447,13 @@ public class ControlFlowAnalyzerTests
         var innerWhile = tree.Where<WhileNode>().Skip(1).First();
         var continueStatement = tree.Find<ContinueNode>()!;
 
-        var entry = new SemanticBlock("entry");
-        var outerConditionBlock = new SemanticBlock("loopcond_0", [outerWhile]);
-        var outerBodyBlock = new SemanticBlock("loopbody_0");
-        var innerConditionBlock = new SemanticBlock("loopcond_1", [innerWhile]);
-        var innerBodyBlock = new SemanticBlock("loopbody_1", [continueStatement]);
-        var outerEndBlock = new SemanticBlock("loopend_0");
-        var innerEndBlock = new SemanticBlock("loopend_1");
+        var entry = new SemanticBlock("entry", (BlockStatementNode)outerWhile.Parent!);
+        var outerConditionBlock = new SemanticBlock("loopcond_0", (BlockStatementNode)outerWhile.Parent!, [outerWhile]);
+        var outerBodyBlock = new SemanticBlock("loopbody_0", outerWhile.Body);
+        var innerConditionBlock = new SemanticBlock("loopcond_1", outerWhile.Body, [innerWhile]);
+        var innerBodyBlock = new SemanticBlock("loopbody_1", innerWhile.Body, [continueStatement]);
+        var outerEndBlock = new SemanticBlock("loopend_0", (BlockStatementNode)outerWhile.Parent!);
+        var innerEndBlock = new SemanticBlock("loopend_1", outerWhile.Body);
 
         entry.AddNext(outerConditionBlock);
         outerConditionBlock.AddNext(outerBodyBlock);
@@ -488,12 +499,12 @@ public class ControlFlowAnalyzerTests
         var ifStatement = tree.Find<IfStatementNode>()!;
         var returnStatement = tree.Find<ReturnStatementNode>()!;
 
-        var entry = new SemanticBlock("entry");
-        var loopcondBlock = new SemanticBlock("loopcond_0", [whileStatement]);
-        var loopbodyBlock = new SemanticBlock("loopbody_0", [ifStatement]);
-        var thenBlock = new SemanticBlock("then_0", [returnStatement]);
-        var endIfBlock = new SemanticBlock("endif_0");
-        var loopendBlock = new SemanticBlock("loopend_0");
+        var entry = new SemanticBlock("entry", (BlockStatementNode)whileStatement.Parent!);
+        var loopcondBlock = new SemanticBlock("loopcond_0", (BlockStatementNode)whileStatement.Parent!, [whileStatement]);
+        var loopbodyBlock = new SemanticBlock("loopbody_0", whileStatement.Body, [ifStatement]);
+        var thenBlock = new SemanticBlock("then_0", ifStatement.Then, [returnStatement]);
+        var endIfBlock = new SemanticBlock("endif_0", whileStatement.Body);
+        var loopendBlock = new SemanticBlock("loopend_0", (BlockStatementNode)whileStatement.Parent!);
 
         entry.AddNext(loopcondBlock);
         loopcondBlock.AddNext(loopbodyBlock);
@@ -541,13 +552,13 @@ public class ControlFlowAnalyzerTests
         var ifs = tree.Where<IfStatementNode>().ToList();
         var returns = tree.Where<ReturnStatementNode>().ToList();
 
-        var entry = new SemanticBlock("entry", [ifs[0]]);
-        var then0Block = new SemanticBlock("then_0", [ifs[1]]);
-        var else0Block = new SemanticBlock("else_0", [returns[0]]);
-        var end0Block = new SemanticBlock("endif_0");
-        var then1Block = new SemanticBlock("then_1", [returns[1]]);
-        var else1Block = new SemanticBlock("else_1", [returns[2]]);
-        var end1Block = new SemanticBlock("endif_1");
+        var entry = new SemanticBlock("entry", (BlockStatementNode)ifs[0].Parent!, [ifs[0]]);
+        var then0Block = new SemanticBlock("then_0", ifs[0].Then, [ifs[1]]);
+        var else0Block = new SemanticBlock("else_0", ifs[0].Else!, [returns[0]]);
+        var end0Block = new SemanticBlock("endif_0", (BlockStatementNode)ifs[0].Parent!);
+        var then1Block = new SemanticBlock("then_1", ifs[1].Then, [returns[1]]);
+        var else1Block = new SemanticBlock("else_1", ifs[1].Else!, [returns[2]]);
+        var end1Block = new SemanticBlock("endif_1", ifs[0].Then);
 
         entry.AddNext(then0Block);
         entry.AddNext(else0Block);

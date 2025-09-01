@@ -69,6 +69,27 @@ public class MissingReturnStatementTests
     }
 
     [Test]
+    public void ValidReturnInFunctionWithIfElseTest()
+    {
+        var tree = Parse(
+            """
+            function test(): i32 {
+                if (false) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.Nothing);
+    }
+
+    [Test]
     public void MissingReturnInFunctionWithWhileTest()
     {
         var tree = Parse(

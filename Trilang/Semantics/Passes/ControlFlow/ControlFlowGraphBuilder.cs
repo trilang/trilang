@@ -6,9 +6,9 @@ internal class ControlFlowGraphBuilder
 {
     private readonly SemanticBlock entryBlock;
 
-    public ControlFlowGraphBuilder()
+    public ControlFlowGraphBuilder(BlockStatementNode node)
     {
-        CurrentBlock = new SemanticBlock("entry");
+        CurrentBlock = new SemanticBlock("entry", node);
 
         entryBlock = CurrentBlock;
     }

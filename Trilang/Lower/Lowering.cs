@@ -8,6 +8,7 @@ public class Lowering
     {
         // TODO: immutable tree?
         tree.Accept(new ReplaceIfDirectives(options.Directives));
+        new AddImplicitReturnStatements().InsertReturnStatements(options.ControlFlowGraphs);
         tree.Accept(new AddThisInLocalMemberAccess());
         tree.Transform(new ReplaceCompoundAssignments());
         tree.Transform(new ReplacePropertyFieldAndValueWithGeneratedField());

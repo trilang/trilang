@@ -37,6 +37,9 @@ internal class ControlFlowGraphComparer : IEqualityComparer<ControlFlowGraph>
             if (xBlock.Name != yBlock.Name)
                 throw new Exception($"Block name doesn't match: '{xBlock.Name} != {yBlock.Name}'.");
 
+            if (xBlock.BlockNode != yBlock.BlockNode)
+                throw new Exception("Block node doesn't match.");
+
             foreach (var (xStatement, yStatement) in xBlock.Statements.Zip(yBlock.Statements))
                 if (!SyntaxComparer.Instance.Equals(xStatement, yStatement))
                     throw new Exception("Statement doesn't match.");
