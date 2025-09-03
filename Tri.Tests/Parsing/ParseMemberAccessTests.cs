@@ -27,7 +27,7 @@ public class ParseMemberAccessTests
                         new TypeNode("i32"),
                         new ArrayAccessExpressionNode(
                             new MemberAccessExpressionNode("x"),
-                            LiteralExpressionNode.Number(0)
+                            LiteralExpressionNode.Integer(0)
                         )
                     )
                 ])
@@ -72,9 +72,9 @@ public class ParseMemberAccessTests
                             BinaryExpressionKind.Assignment,
                             new ArrayAccessExpressionNode(
                                 new MemberAccessExpressionNode("x"),
-                                LiteralExpressionNode.Number(0)
+                                LiteralExpressionNode.Integer(0)
                             ),
-                            LiteralExpressionNode.Number(1)
+                            LiteralExpressionNode.Integer(1)
                         )
                     )
                 ])
@@ -109,11 +109,11 @@ public class ParseMemberAccessTests
                                         new MemberAccessExpressionNode("a"),
                                         "b"
                                     ),
-                                    LiteralExpressionNode.Number(0)
+                                    LiteralExpressionNode.Integer(0)
                                 ),
                                 "c"
                             ),
-                            LiteralExpressionNode.Number(1)
+                            LiteralExpressionNode.Integer(1)
                         )
                     )
                 ])
@@ -143,9 +143,9 @@ public class ParseMemberAccessTests
                         new ArrayAccessExpressionNode(
                             new ArrayAccessExpressionNode(
                                 new MemberAccessExpressionNode("a"),
-                                LiteralExpressionNode.Number(0)
+                                LiteralExpressionNode.Integer(0)
                             ),
-                            LiteralExpressionNode.Number(1)
+                            LiteralExpressionNode.Integer(1)
                         )
                     )
                 ]))
@@ -259,9 +259,9 @@ public class ParseMemberAccessTests
                         new CallExpressionNode(
                             new CallExpressionNode(
                                 new MemberAccessExpressionNode("f"),
-                                [LiteralExpressionNode.Number(1)]
+                                [LiteralExpressionNode.Integer(1)]
                             ),
-                            [LiteralExpressionNode.Number(2)]
+                            [LiteralExpressionNode.Integer(2)]
                         )
                     )
                 ]))
@@ -322,7 +322,7 @@ public class ParseMemberAccessTests
                         new MemberAccessExpressionNode(
                             new NewArrayExpressionNode(
                                 new ArrayTypeNode(new TypeNode("i32")),
-                                LiteralExpressionNode.Number(0)
+                                LiteralExpressionNode.Integer(0)
                             ),
                             "size"
                         )
@@ -353,7 +353,7 @@ public class ParseMemberAccessTests
                     new ReturnStatementNode(
                         new CallExpressionNode(
                             new MemberAccessExpressionNode(
-                                LiteralExpressionNode.Number(1),
+                                LiteralExpressionNode.Integer(1),
                                 "toString"
                             ),
                             []
@@ -385,10 +385,10 @@ public class ParseMemberAccessTests
                     new ReturnStatementNode(
                         new BinaryExpressionNode(
                             BinaryExpressionKind.Addition,
-                            LiteralExpressionNode.Number(1),
+                            LiteralExpressionNode.Integer(1),
                             new CallExpressionNode(
                                 new MemberAccessExpressionNode(
-                                    LiteralExpressionNode.Number(2),
+                                    LiteralExpressionNode.Integer(2),
                                     "toString"
                                 ),
                                 []

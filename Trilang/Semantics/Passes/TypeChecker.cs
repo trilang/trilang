@@ -357,7 +357,8 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.ReturnTypeMetadata = node.Kind switch
         {
             // TODO: other types
-            LiteralExpressionKind.Number => I32,
+            LiteralExpressionKind.Integer => I32,
+            LiteralExpressionKind.Float => F64,
             LiteralExpressionKind.Boolean => Bool,
             LiteralExpressionKind.String => TypeMetadata.String,
             LiteralExpressionKind.Char => TypeMetadata.Char,

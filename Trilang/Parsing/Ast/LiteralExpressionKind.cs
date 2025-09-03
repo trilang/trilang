@@ -2,7 +2,8 @@ namespace Trilang.Parsing.Ast;
 
 public enum LiteralExpressionKind
 {
-    Number,
+    Integer,
+    Float,
     Boolean,
     String,
     Char,

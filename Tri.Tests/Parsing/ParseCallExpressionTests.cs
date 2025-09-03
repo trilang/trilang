@@ -56,9 +56,9 @@ public class ParseCallExpressionTests
                         new CallExpressionNode(
                             new MemberAccessExpressionNode("sum"),
                             [
-                                new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
-                                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                                new LiteralExpressionNode(LiteralExpressionKind.Number, 3),
+                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1),
+                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 3),
                             ])
                     )
                 ])
@@ -84,13 +84,13 @@ public class ParseCallExpressionTests
             new TypeNode("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.Addition,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1),
                 new CallExpressionNode(
                     new MemberAccessExpressionNode("sum"),
                     [
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 3),
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 1),
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 3),
                     ])
             )
         );

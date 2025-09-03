@@ -464,7 +464,8 @@ public partial class Formatter : IFormatter
     {
         switch (node.Kind)
         {
-            case LiteralExpressionKind.Number:
+            case LiteralExpressionKind.Integer:
+            case LiteralExpressionKind.Float:
                 writer.Write(node.Value.ToString()!);
                 break;
             case LiteralExpressionKind.Boolean:

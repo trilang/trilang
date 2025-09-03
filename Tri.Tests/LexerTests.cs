@@ -53,7 +53,75 @@ public class LexerTests
         var tokens = lexer.Tokenize(code);
         var expected = new[]
         {
-            Token.CreateNumber(number),
+            Token.CreateInteger(number),
+            Token.CreateEof(),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    [TestCase("1.0", 1.0)]
+    [TestCase("123.456", 123.456)]
+    [TestCase("0.5", 0.5)]
+    [TestCase("3.14159", 3.14159)]
+    [TestCase("0.0", 0.0)]
+    public void TokenizeFloatNumberTest(string code, double number)
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code);
+        var expected = new[]
+        {
+            Token.CreateFloat(number),
+            Token.CreateEof(),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TokenizeFloatNumberWithDoubleDotTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize("1.2.3");
+        var expected = new[]
+        {
+            Token.CreateFloat(1.2),
+            Token.Create(TokenKind.Dot),
+            Token.CreateInteger(3),
+            Token.CreateEof(),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TokenizeFloatNumberWithLeadingDotTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(".3");
+        var expected = new[]
+        {
+            Token.Create(TokenKind.Dot),
+            Token.CreateInteger(3),
+            Token.CreateEof(),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TokenizeMethodAfterNumberTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize("1.toString()");
+        var expected = new[]
+        {
+            Token.CreateInteger(1),
+            Token.Create(TokenKind.Dot),
+            Token.CreateId("toString"),
+            Token.Create(TokenKind.OpenParenthesis),
+            Token.Create(TokenKind.CloseParenthesis),
             Token.CreateEof(),
         };
 
@@ -203,7 +271,7 @@ public class LexerTests
     {
         var lexer = new Lexer();
 
-        Assert.Throws<Exception>(() => lexer.Tokenize(code));
+        Assert.Throws<LexerException>(() => lexer.Tokenize(code));
     }
 
     [Test]

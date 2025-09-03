@@ -68,9 +68,7 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
         => transformer.TransformCall(this);
 
     public IExpressionNode Clone()
-        => new CallExpressionNode(Member.Clone(), Parameters.Select(x => x.Clone()).ToArray())
-        {
-        };
+        => new CallExpressionNode(Member.Clone(), Parameters.Select(x => x.Clone()).ToArray());
 
     public ISyntaxNode? Parent { get; set; }
 

@@ -52,7 +52,7 @@ public class RewriteIfStatementTests
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
                             },
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
+                            new LiteralExpressionNode(LiteralExpressionKind.Integer, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
                             }
@@ -146,7 +146,7 @@ public class RewriteIfStatementTests
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
                             },
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
+                            new LiteralExpressionNode(LiteralExpressionKind.Integer, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
                             }

@@ -215,7 +215,7 @@ public class ReplaceIfDirectivesTests
                         )
                     ),
                     new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
@@ -289,7 +289,7 @@ public class ReplaceIfDirectivesTests
                         )
                     ),
                     new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32
                         }
@@ -363,7 +363,7 @@ public class ReplaceIfDirectivesTests
                         )
                     ),
                     new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }

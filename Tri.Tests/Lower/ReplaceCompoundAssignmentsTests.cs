@@ -63,7 +63,7 @@ public class ReplaceCompoundAssignmentsTests
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32,
                                 }

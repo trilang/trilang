@@ -794,7 +794,7 @@ public class ParseTypeTests
                         new FunctionTypeNode(
                             [new TypeNode("i32"), new TypeNode("i32")],
                             new TypeNode("void")),
-                        LiteralExpressionNode.Number(0)
+                        LiteralExpressionNode.Integer(0)
                     )
                 ])
             )
@@ -1029,7 +1029,7 @@ public class ParseTypeTests
                         new TypeNode("Point"),
                         new NewObjectExpressionNode(
                             new TypeNode("Point"),
-                            [LiteralExpressionNode.Number(1), LiteralExpressionNode.Number(2)]
+                            [LiteralExpressionNode.Integer(1), LiteralExpressionNode.Integer(2)]
                         )
                     )
                 ])

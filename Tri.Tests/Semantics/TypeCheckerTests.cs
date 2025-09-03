@@ -275,6 +275,27 @@ public class TypeCheckerTests
     }
 
     [Test]
+    public void LiteralFloatTest()
+    {
+        var tree = Parse(
+            """
+            function main(): f64 {
+                return 3.14;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var returnNode = tree.Find<ReturnStatementNode>();
+        Assert.That(returnNode, Is.Not.Null);
+        Assert.That(returnNode.Expression, Is.Not.Null);
+        Assert.That(
+            returnNode.Expression.ReturnTypeMetadata,
+            Is.EqualTo(TypeMetadata.F64).Using(new MetadataComparer()));
+    }
+
+    [Test]
     public void LiteralBoolTest()
     {
         var tree = Parse(

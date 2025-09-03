@@ -117,8 +117,8 @@ public class SymbolFinderTests
     [Test]
     public void FunctionWithVariablesInRootScopeTest()
     {
-        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1));
-        var b = new VariableDeclarationStatementNode("b", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2));
+        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Integer, 1));
+        var b = new VariableDeclarationStatementNode("b", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Integer, 2));
         var function = FunctionDeclarationNode.Create(
             "main",
             [],
@@ -148,8 +148,8 @@ public class SymbolFinderTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 1)),
-                    new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Number, 2))
+                    new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)),
+                    new VariableDeclarationStatementNode("a", new TypeNode("i32"), new LiteralExpressionNode(LiteralExpressionKind.Integer, 2))
                 ]))
         ]);
 
@@ -164,7 +164,7 @@ public class SymbolFinderTests
     [Test]
     public void IfScopeTest()
     {
-        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
+        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Integer(1));
         var ifStatement = new IfStatementNode(
             LiteralExpressionNode.True(),
             new BlockStatementNode([a])
@@ -192,8 +192,8 @@ public class SymbolFinderTests
     [Test]
     public void IfElseScopeTest()
     {
-        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
-        var b = new VariableDeclarationStatementNode("b", new TypeNode("i32"), LiteralExpressionNode.Number(1));
+        var a = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Integer(1));
+        var b = new VariableDeclarationStatementNode("b", new TypeNode("i32"), LiteralExpressionNode.Integer(1));
         var ifStatement = new IfStatementNode(
             LiteralExpressionNode.True(),
             new BlockStatementNode([a]),
@@ -226,9 +226,9 @@ public class SymbolFinderTests
     [Test]
     public void SameVariableInMultipleScopesTest()
     {
-        var a1 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
-        var a2 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
-        var a3 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Number(1));
+        var a1 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Integer(1));
+        var a2 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Integer(1));
+        var a3 = new VariableDeclarationStatementNode("a", new TypeNode("i32"), LiteralExpressionNode.Integer(1));
         var ifStatement = new IfStatementNode(
             LiteralExpressionNode.True(),
             new BlockStatementNode([a2]),
@@ -274,7 +274,7 @@ public class SymbolFinderTests
                     new ReturnStatementNode(
                         new NewArrayExpressionNode(
                             new ArrayTypeNode(new TypeNode("i32")),
-                            LiteralExpressionNode.Number(0)
+                            LiteralExpressionNode.Integer(0)
                         )
                     )
                 ])
@@ -463,7 +463,7 @@ public class SymbolFinderTests
                     [new ParameterNode("other", new TypeNode("Point"))],
                     new TypeNode("i32"),
                     new BlockStatementNode([
-                        new ReturnStatementNode(LiteralExpressionNode.Number(0))
+                        new ReturnStatementNode(LiteralExpressionNode.Integer(0))
                     ])
                 ),
             ]);

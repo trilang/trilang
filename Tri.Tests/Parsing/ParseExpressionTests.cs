@@ -19,7 +19,7 @@ public class ParseExpressionTests
         var variableDeclarationNode = new VariableDeclarationStatementNode(
             "x",
             new TypeNode("i32"),
-            new LiteralExpressionNode(LiteralExpressionKind.Number, 5)
+            new LiteralExpressionNode(LiteralExpressionKind.Integer, 5)
         );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -45,7 +45,7 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new UnaryExpressionNode(
                 UnaryExpressionKind.UnaryPlus,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -73,7 +73,7 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new UnaryExpressionNode(
                 UnaryExpressionKind.UnaryMinus,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -101,7 +101,7 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new UnaryExpressionNode(
                 UnaryExpressionKind.LogicalNot,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -129,7 +129,7 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new UnaryExpressionNode(
                 UnaryExpressionKind.BitwiseNot,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -162,7 +162,7 @@ public class ParseExpressionTests
                             UnaryExpressionKind.BitwiseNot,
                             new UnaryExpressionNode(
                                 UnaryExpressionKind.UnaryPlus,
-                                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
                             )
                         )
                     )
@@ -194,8 +194,8 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new BinaryExpressionNode(
                 kind,
-                LiteralExpressionNode.Number(2),
-                LiteralExpressionNode.Number(2)
+                LiteralExpressionNode.Integer(2),
+                LiteralExpressionNode.Integer(2)
             )
         );
         var expected = new SyntaxTree([
@@ -223,8 +223,8 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.BitwiseAnd,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -252,8 +252,8 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.BitwiseOr,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -281,8 +281,8 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.BitwiseXor,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -428,8 +428,8 @@ public class ParseExpressionTests
             new TypeNode("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.LessThan,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -457,8 +457,8 @@ public class ParseExpressionTests
             new TypeNode("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.LessThanOrEqual,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -488,8 +488,8 @@ public class ParseExpressionTests
             new TypeNode("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.GreaterThan,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -517,8 +517,8 @@ public class ParseExpressionTests
             new TypeNode("bool"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.GreaterThanOrEqual,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2)
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
             )
         );
         var expected = new SyntaxTree([
@@ -557,7 +557,7 @@ public class ParseExpressionTests
                         new BinaryExpressionNode(
                             kind,
                             new MemberAccessExpressionNode("x"),
-                            LiteralExpressionNode.Number(1)
+                            LiteralExpressionNode.Integer(1)
                         )
                     )
                 ])
@@ -585,9 +585,9 @@ public class ParseExpressionTests
                 BinaryExpressionKind.Multiplication,
                 new BinaryExpressionNode(
                     BinaryExpressionKind.Addition,
-                    new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
-                    new LiteralExpressionNode(LiteralExpressionKind.Number, 2)),
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 3)
+                    new LiteralExpressionNode(LiteralExpressionKind.Integer, 1),
+                    new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 3)
             )
         );
         var expected = new SyntaxTree([
@@ -615,7 +615,7 @@ public class ParseExpressionTests
             new TypeNode("i32"),
             new BinaryExpressionNode(
                 BinaryExpressionKind.Multiplication,
-                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
+                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
                 new MemberAccessExpressionNode("y")
             )
         );
@@ -667,14 +667,14 @@ public class ParseExpressionTests
                                         BinaryExpressionKind.LessThan,
                                         new BinaryExpressionNode(
                                             BinaryExpressionKind.Addition,
-                                            new LiteralExpressionNode(LiteralExpressionKind.Number, 1),
+                                            new LiteralExpressionNode(LiteralExpressionKind.Integer, 1),
                                             new BinaryExpressionNode(
                                                 BinaryExpressionKind.Multiplication,
-                                                new LiteralExpressionNode(LiteralExpressionKind.Number, 2),
-                                                new LiteralExpressionNode(LiteralExpressionKind.Number, 3)
+                                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
+                                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 3)
                                             )
                                         ),
-                                        new LiteralExpressionNode(LiteralExpressionKind.Number, 10)
+                                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 10)
                                     )
                                 )
                             )
@@ -710,8 +710,8 @@ public class ParseExpressionTests
                 new BlockStatementNode([
                     new ReturnStatementNode(
                         new TupleExpressionNode([
-                            LiteralExpressionNode.Number(1),
-                            LiteralExpressionNode.Number(2),
+                            LiteralExpressionNode.Integer(1),
+                            LiteralExpressionNode.Integer(2),
                         ])
                     )
                 ]))
@@ -756,7 +756,7 @@ public class ParseExpressionTests
                     new ReturnStatementNode(
                         new NewArrayExpressionNode(
                             new ArrayTypeNode(new TypeNode("i32")),
-                            LiteralExpressionNode.Number(10)
+                            LiteralExpressionNode.Integer(10)
                         )
                     )
                 ])
@@ -873,5 +873,31 @@ public class ParseExpressionTests
             () => parser.Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected an expression."));
+    }
+
+    [Test]
+    public void ParseFloatingNumberTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse(
+            """
+            function test(): f64 {
+                return 3.14;
+            }
+            """);
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                "test",
+                [],
+                new TypeNode("f64"),
+                new BlockStatementNode([
+                    new ReturnStatementNode(
+                        LiteralExpressionNode.Float(3.14)
+                    )
+                ])
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 }

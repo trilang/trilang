@@ -15,7 +15,7 @@ public class Lexer
             {
                 var length = span.IndexOf('\n');
                 if (length == -1)
-                    throw new Exception("Unterminated comment");
+                    throw new LexerException("Unterminated comment");
 
                 span = span[length..];
                 continue;
@@ -29,14 +29,35 @@ public class Lexer
 
             if (char.IsDigit(c))
             {
-                var number = 0;
+                var integerPart = 0;
                 while (span.Length > 0 && char.IsDigit(span[0]))
                 {
-                    number = number * 10 + (span[0] - '0');
+                    integerPart = integerPart * 10 + (span[0] - '0');
                     span = span[1..];
                 }
 
-                tokens.Add(Token.CreateNumber(number));
+                if (span.Length > 1 && span[0] == '.' && char.IsDigit(span[1]))
+                {
+                    span = span[1..];
+
+                    var fractionalPart = 0.0;
+                    var divisor = 10.0;
+
+                    while (span.Length > 0 && char.IsDigit(span[0]))
+                    {
+                        fractionalPart += (span[0] - '0') / divisor;
+                        divisor *= 10.0;
+                        span = span[1..];
+                    }
+
+                    var floatNumber = integerPart + fractionalPart;
+                    tokens.Add(Token.CreateFloat(floatNumber));
+                }
+                else
+                {
+                    tokens.Add(Token.CreateInteger(integerPart));
+                }
+
                 continue;
             }
 
@@ -86,7 +107,7 @@ public class Lexer
 
                 var length = span.IndexOfAny('\'', '\n');
                 if (length == -1)
-                    throw new Exception("Unterminated string");
+                    throw new LexerException("Unterminated string");
 
                 var str = span[..length].ToString();
                 tokens.Add(Token.CreateChar(str));
@@ -94,7 +115,7 @@ public class Lexer
                 span = span[length..];
 
                 if (span.Length == 0 || span[0] != '\'')
-                    throw new Exception("Unterminated string");
+                    throw new LexerException("Unterminated string");
 
                 span = span[1..];
                 continue;
@@ -106,7 +127,7 @@ public class Lexer
 
                 var length = span.IndexOfAny('"', '\n');
                 if (length == -1)
-                    throw new Exception("Unterminated string");
+                    throw new LexerException("Unterminated string");
 
                 var str = span[..length].ToString();
                 tokens.Add(Token.CreateString(str));
@@ -114,7 +135,7 @@ public class Lexer
                 span = span[length..];
 
                 if (span.Length == 0 || span[0] != '"')
-                    throw new Exception("Unterminated string");
+                    throw new LexerException("Unterminated string");
 
                 span = span[1..];
                 continue;
@@ -166,9 +187,9 @@ public class Lexer
                 ('%', _) => (Token.Create(TokenKind.Percent), 1),
 
                 ('.', _) => (Token.Create(TokenKind.Dot), 1),
-                ('#', _) => (Token.Create(TokenKind.Hash),1),
+                ('#', _) => (Token.Create(TokenKind.Hash), 1),
 
-                _ => throw new Exception($"Unexpected character '{c}'")
+                _ => throw new LexerException($"Unexpected character '{c}'")
             };
             tokens.Add(token);
             span = span[size..];

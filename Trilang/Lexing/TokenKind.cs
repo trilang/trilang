@@ -8,7 +8,8 @@ public enum TokenKind
     // WhiteSpace,
 
     Identifier,
-    Number,
+    Integer,
+    Float,
     String,
     Char,
 

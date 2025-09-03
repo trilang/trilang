@@ -179,8 +179,6 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var pointBackingField = new FieldMetadata(testType, $"<>_{pointProperty.Name}", pointProperty.Type);
         testType.AddField(pointBackingField);
 
-        var pointValueParameter = pointProperty.Setter!.Parameters[0];
-
         var tParameter = new ParameterMetadata("t", testType);
         var testFunction = new FunctionMetadata(
             "test",
@@ -333,8 +331,6 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var valueParameter = xProperty.Setter!.Parameters[0];
-
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
             "test",
@@ -397,14 +393,14 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     Reference = pParameter,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                xProperty.Setter.Name
+                                xProperty.Setter!.Name
                             )
                             {
                                 Reference = xProperty.Setter,
                                 AccessKind = MemberAccessKind.Read,
                             },
                             [
-                                new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32,
                                 }
@@ -459,7 +455,6 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var valueParameter = xProperty.Setter!.Parameters[0];
         var tmpVariable = new VariableMetadata("<>_tmp_set0", xProperty.Type);
 
         var pParameter = new ParameterMetadata("p", point);
@@ -521,7 +516,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             new VariableDeclarationStatementNode(
                                 tmpVariable.Name,
                                 new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                                new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32,
                                 }
@@ -537,7 +532,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                             Reference = pParameter,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        xProperty.Setter.Name
+                                        xProperty.Setter!.Name
                                     )
                                     {
                                         Reference = xProperty.Setter,
@@ -609,8 +604,6 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var valueParameter = xProperty.Setter!.Parameters[0];
-
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
             "test",
@@ -673,7 +666,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     Reference = pParameter,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                xProperty.Setter.Name
+                                xProperty.Setter!.Name
                             )
                             {
                                 Reference = xProperty.Setter,
@@ -697,7 +690,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         },
                                         []
                                     ),
-                                    new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                                    new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                                     {
                                         ReturnTypeMetadata = TypeMetadata.I32,
                                     }
@@ -756,7 +749,6 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var valueParameter = xProperty.Setter!.Parameters[0];
         var tmpVariable = new VariableMetadata("<>_tmp_set0", xProperty.Type);
 
         var pParameter = new ParameterMetadata("p", point);
@@ -835,7 +827,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         },
                                         []
                                     ),
-                                    new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                                    new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                                     {
                                         ReturnTypeMetadata = TypeMetadata.I32,
                                     }
@@ -855,7 +847,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                             Reference = pParameter,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        xProperty.Setter.Name
+                                        xProperty.Setter!.Name
                                     )
                                     {
                                         Reference = xProperty.Setter,

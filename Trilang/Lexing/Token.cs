@@ -50,8 +50,11 @@ public class Token : IEquatable<Token>
     public static Token CreateId(string value)
         => new Token(TokenKind.Identifier, value);
 
-    public static Token CreateNumber(int value)
-        => new Token(TokenKind.Number, value);
+    public static Token CreateInteger(int value)
+        => new Token(TokenKind.Integer, value);
+
+    public static Token CreateFloat(double value)
+        => new Token(TokenKind.Float, value);
 
     public static Token CreateChar(string value)
         => new Token(TokenKind.Char, value);
@@ -74,9 +77,14 @@ public class Token : IEquatable<Token>
             ? (string)Value
             : throw new InvalidOperationException();
 
-    public int Number
-        => Kind == TokenKind.Number && Value is not null
+    public int Integer
+        => Kind == TokenKind.Integer && Value is not null
             ? (int)Value
+            : throw new InvalidOperationException();
+
+    public double Float
+        => Kind == TokenKind.Float && Value is not null
+            ? (double)Value
             : throw new InvalidOperationException();
 
     public string String

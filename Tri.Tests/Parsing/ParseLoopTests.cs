@@ -27,7 +27,7 @@ public class ParseLoopTests
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThan,
                             new MemberAccessExpressionNode("x"),
-                            LiteralExpressionNode.Number(0)
+                            LiteralExpressionNode.Integer(0)
                         ),
                         new BlockStatementNode([])
                     )
@@ -117,7 +117,7 @@ public class ParseLoopTests
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThan,
                             new MemberAccessExpressionNode("x"),
-                            LiteralExpressionNode.Number(0)
+                            LiteralExpressionNode.Integer(0)
                         ),
                         new BlockStatementNode([new BreakNode()])
                     )
@@ -151,7 +151,7 @@ public class ParseLoopTests
                         new BinaryExpressionNode(
                             BinaryExpressionKind.GreaterThan,
                             new MemberAccessExpressionNode("x"),
-                            LiteralExpressionNode.Number(0)
+                            LiteralExpressionNode.Integer(0)
                         ),
                         new BlockStatementNode([new ContinueNode()])
                     )

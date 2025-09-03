@@ -11,8 +11,11 @@ public class LiteralExpressionNode : IExpressionNode, IEquatable<LiteralExpressi
         Value = value;
     }
 
-    public static LiteralExpressionNode Number(int number)
-        => new LiteralExpressionNode(LiteralExpressionKind.Number, number);
+    public static LiteralExpressionNode Integer(int number)
+        => new LiteralExpressionNode(LiteralExpressionKind.Integer, number);
+
+    public static LiteralExpressionNode Float(double number)
+        => new LiteralExpressionNode(LiteralExpressionKind.Float, number);
 
     public static LiteralExpressionNode True()
         => new LiteralExpressionNode(LiteralExpressionKind.Boolean, true);

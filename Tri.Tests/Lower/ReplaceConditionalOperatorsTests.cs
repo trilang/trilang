@@ -118,7 +118,7 @@ public class ReplaceConditionalOperatorsTests
                     new BlockStatementNode([
                         new LabelNode("if_0_then"),
                         new ReturnStatementNode(
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                            new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32,
                             }
@@ -127,7 +127,7 @@ public class ReplaceConditionalOperatorsTests
                     ]),
                     new LabelNode("if_0_end"),
                     new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 0)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
@@ -251,7 +251,7 @@ public class ReplaceConditionalOperatorsTests
                     new BlockStatementNode([
                         new LabelNode("if_0_then"),
                         new ReturnStatementNode(
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                            new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32,
                             }
@@ -260,7 +260,7 @@ public class ReplaceConditionalOperatorsTests
                     ]),
                     new LabelNode("if_0_end"),
                     new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 0)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
@@ -432,7 +432,7 @@ public class ReplaceConditionalOperatorsTests
                     new BlockStatementNode([
                         new LabelNode("if_0_then"),
                         new ReturnStatementNode(
-                            new LiteralExpressionNode(LiteralExpressionKind.Number, 1)
+                            new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32,
                             }
@@ -441,7 +441,7 @@ public class ReplaceConditionalOperatorsTests
                     ]),
                     new LabelNode("if_0_end"),
                     new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Number, 0)
+                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 0)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }

@@ -736,8 +736,8 @@ public class Parser
             {
                 if (context.Reader.Check(TokenKind.Identifier, out var id))
                     member = new MemberAccessExpressionNode(member, id.Identifier);
-                else if (context.Reader.Check(TokenKind.Number, out var number))
-                    member = new MemberAccessExpressionNode(member, number.Number.ToString());
+                else if (context.Reader.Check(TokenKind.Integer, out var number))
+                    member = new MemberAccessExpressionNode(member, number.Integer.ToString());
                 else
                     throw new ParseException("Expected an identifier.");
             }
@@ -901,8 +901,11 @@ public class Parser
 
     private LiteralExpressionNode? TryParseLiteral(ParserContext context)
     {
-        if (context.Reader.Check(TokenKind.Number, out var token))
-            return new LiteralExpressionNode(LiteralExpressionKind.Number, token.Number);
+        if (context.Reader.Check(TokenKind.Integer, out var token))
+            return new LiteralExpressionNode(LiteralExpressionKind.Integer, token.Integer);
+
+        if (context.Reader.Check(TokenKind.Float, out token))
+            return new LiteralExpressionNode(LiteralExpressionKind.Float, token.Float);
 
         if (context.Reader.Check(TokenKind.True, out token))
             return new LiteralExpressionNode(LiteralExpressionKind.Boolean, true);
