@@ -63,7 +63,7 @@ public class DiscriminatedUnionNode : IInlineTypeNode, IEquatable<DiscriminatedU
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitDiscriminatedUnion(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformDiscriminatedUnion(this);
 
     public IInlineTypeNode Clone()

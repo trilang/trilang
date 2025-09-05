@@ -2,91 +2,91 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Parsing;
 
-public interface ITransformer
+public interface ITransformer<out T>
 {
-    ISyntaxNode TransformArrayAccess(ArrayAccessExpressionNode node);
+    T TransformArrayAccess(ArrayAccessExpressionNode node);
 
-    ISyntaxNode TransformArrayType(ArrayTypeNode node);
+    T TransformArrayType(ArrayTypeNode node);
 
-    ISyntaxNode TransformBinaryExpression(BinaryExpressionNode node);
+    T TransformBinaryExpression(BinaryExpressionNode node);
 
-    ISyntaxNode TransformBlock(BlockStatementNode node);
+    T TransformBlock(BlockStatementNode node);
 
-    ISyntaxNode TransformBreak(BreakNode node);
+    T TransformBreak(BreakNode node);
 
-    ISyntaxNode TransformCall(CallExpressionNode node);
+    T TransformCall(CallExpressionNode node);
 
-    ISyntaxNode TransformCast(CastExpressionNode node);
+    T TransformCast(CastExpressionNode node);
 
-    ISyntaxNode TransformConstructor(ConstructorDeclarationNode node);
+    T TransformConstructor(ConstructorDeclarationNode node);
 
-    ISyntaxNode TransformContinue(ContinueNode node);
+    T TransformContinue(ContinueNode node);
 
-    ISyntaxNode TransformDiscriminatedUnion(DiscriminatedUnionNode node);
+    T TransformDiscriminatedUnion(DiscriminatedUnionNode node);
 
-    ISyntaxNode TransformExpressionBlock(ExpressionBlockNode node);
+    T TransformExpressionBlock(ExpressionBlockNode node);
 
-    ISyntaxNode TransformExpressionStatement(ExpressionStatementNode node);
+    T TransformExpressionStatement(ExpressionStatementNode node);
 
-    ISyntaxNode TransformFunction(FunctionDeclarationNode node);
+    T TransformFunction(FunctionDeclarationNode node);
 
-    ISyntaxNode TransformFunctionType(FunctionTypeNode node);
+    T TransformFunctionType(FunctionTypeNode node);
 
-    ISyntaxNode TransformGenericType(GenericTypeNode node);
+    T TransformGenericType(GenericTypeNode node);
 
-    ISyntaxNode TransformGoTo(GoToNode node);
+    T TransformGoTo(GoToNode node);
 
-    ISyntaxNode TransformIfDirective(IfDirectiveNode node);
+    T TransformIfDirective(IfDirectiveNode node);
 
-    ISyntaxNode TransformIf(IfStatementNode node);
+    T TransformIf(IfStatementNode node);
 
-    ISyntaxNode TransformInterface(InterfaceNode node);
+    T TransformInterface(InterfaceNode node);
 
-    ISyntaxNode TransformInterfaceProperty(InterfacePropertyNode node);
+    T TransformInterfaceProperty(InterfacePropertyNode node);
 
-    ISyntaxNode TransformInterfaceMethod(InterfaceMethodNode node);
+    T TransformInterfaceMethod(InterfaceMethodNode node);
 
-    ISyntaxNode TransformAsExpression(IsExpressionNode node);
+    T TransformAsExpression(IsExpressionNode node);
 
-    ISyntaxNode TransformLabel(LabelNode node);
+    T TransformLabel(LabelNode node);
 
-    ISyntaxNode TransformLiteral(LiteralExpressionNode node);
+    T TransformLiteral(LiteralExpressionNode node);
 
-    ISyntaxNode TransformMemberAccess(MemberAccessExpressionNode node);
+    T TransformMemberAccess(MemberAccessExpressionNode node);
 
-    ISyntaxNode TransformMethod(MethodDeclarationNode node);
+    T TransformMethod(MethodDeclarationNode node);
 
-    ISyntaxNode TransformNewArray(NewArrayExpressionNode node);
+    T TransformNewArray(NewArrayExpressionNode node);
 
-    ISyntaxNode TransformNewObject(NewObjectExpressionNode node);
+    T TransformNewObject(NewObjectExpressionNode node);
 
-    ISyntaxNode TransformNull(NullExpressionNode node);
+    T TransformNull(NullExpressionNode node);
 
-    ISyntaxNode TransformParameter(ParameterNode node);
+    T TransformParameter(ParameterNode node);
 
-    ISyntaxNode TransformProperty(PropertyDeclarationNode node);
+    T TransformProperty(PropertyDeclarationNode node);
 
-    ISyntaxNode TransformGetter(PropertyGetterNode node);
+    T TransformGetter(PropertyGetterNode node);
 
-    ISyntaxNode TransformSetter(PropertySetterNode node);
+    T TransformSetter(PropertySetterNode node);
 
-    ISyntaxNode TransformReturn(ReturnStatementNode node);
+    T TransformReturn(ReturnStatementNode node);
 
-    ISyntaxNode TransformTree(SyntaxTree node);
+    T TransformTree(SyntaxTree node);
 
-    ISyntaxNode TransformTuple(TupleExpressionNode node);
+    T TransformTuple(TupleExpressionNode node);
 
-    ISyntaxNode TransformTupleType(TupleTypeNode node);
+    T TransformTupleType(TupleTypeNode node);
 
-    ISyntaxNode TransformTypeAlias(TypeAliasDeclarationNode node);
+    T TransformTypeAlias(TypeAliasDeclarationNode node);
 
-    ISyntaxNode TransformType(TypeDeclarationNode node);
+    T TransformType(TypeDeclarationNode node);
 
-    ISyntaxNode TransformTypeNode(TypeNode node);
+    T TransformTypeNode(TypeNode node);
 
-    ISyntaxNode TransformUnaryExpression(UnaryExpressionNode node);
+    T TransformUnaryExpression(UnaryExpressionNode node);
 
-    ISyntaxNode TransformVariable(VariableDeclarationStatementNode node);
+    T TransformVariable(VariableDeclarationStatementNode node);
 
-    ISyntaxNode TransformWhile(WhileNode node);
+    T TransformWhile(WhileNode node);
 }

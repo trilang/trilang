@@ -82,7 +82,7 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitFunction(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformFunction(this);
 
     public ISyntaxNode? Parent { get; set; }

@@ -60,7 +60,7 @@ public class UnaryExpressionNode : IExpressionNode, IEquatable<UnaryExpressionNo
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitUnaryExpression(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformUnaryExpression(this);
 
     public IExpressionNode Clone()

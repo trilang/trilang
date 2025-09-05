@@ -5,7 +5,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Lower;
 
-internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer
+internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISyntaxNode>
 {
     private FieldMetadata? currentField;
     private MethodMetadata? currentSetter;

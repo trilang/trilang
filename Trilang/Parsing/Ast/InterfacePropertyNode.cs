@@ -71,7 +71,7 @@ public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNo
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitInterfaceProperty(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformInterfaceProperty(this);
 
     public InterfacePropertyNode Clone()

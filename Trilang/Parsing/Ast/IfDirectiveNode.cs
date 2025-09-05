@@ -67,7 +67,7 @@ public class IfDirectiveNode : IDeclarationNode, IStatementNode, IEquatable<IfDi
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitIfDirective(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformIfDirective(this);
 
     public ISyntaxNode? Parent { get; set; }

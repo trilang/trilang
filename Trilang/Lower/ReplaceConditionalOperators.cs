@@ -4,7 +4,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Lower;
 
-internal class ReplaceConditionalOperators : ITransformer
+internal class ReplaceConditionalOperators : ITransformer<ISyntaxNode>
 {
     private int conditionCounter;
 

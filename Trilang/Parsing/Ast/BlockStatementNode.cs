@@ -67,7 +67,7 @@ public class BlockStatementNode : IStatementNode, IBlockNode, IEquatable<BlockSt
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitBlock(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformBlock(this);
 
     public void Add(IStatementNode declaration)

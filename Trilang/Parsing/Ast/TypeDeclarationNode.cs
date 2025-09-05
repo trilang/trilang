@@ -107,7 +107,7 @@ public class TypeDeclarationNode :
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitType(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformType(this);
 
     public ISyntaxNode? Parent { get; set; }

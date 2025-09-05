@@ -63,7 +63,7 @@ public class ExpressionBlockNode : IExpressionNode, IBlockNode, IEquatable<Expre
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitExpressionBlock(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformExpressionBlock(this);
 
     public IExpressionNode Clone()

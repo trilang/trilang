@@ -4,7 +4,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Lower;
 
-internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer
+internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISyntaxNode>
 {
     private int tempVariableCounter = 0;
 

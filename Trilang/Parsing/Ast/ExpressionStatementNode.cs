@@ -58,7 +58,7 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitExpressionStatement(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformExpressionStatement(this);
 
     public ISyntaxNode? Parent { get; set; }

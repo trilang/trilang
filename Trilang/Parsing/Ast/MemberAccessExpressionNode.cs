@@ -73,7 +73,7 @@ public class MemberAccessExpressionNode : IExpressionNode, IEquatable<MemberAcce
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitMemberAccess(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformMemberAccess(this);
 
     public IExpressionNode Clone()

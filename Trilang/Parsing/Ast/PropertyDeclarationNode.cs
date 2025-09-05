@@ -86,7 +86,7 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitProperty(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformProperty(this);
 
     public ISyntaxNode? Parent { get; set; }

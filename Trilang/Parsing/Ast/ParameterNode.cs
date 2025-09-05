@@ -61,7 +61,7 @@ public class ParameterNode : ISyntaxNode, IEquatable<ParameterNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitParameter(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformParameter(this);
 
     public ISyntaxNode? Parent { get; set; }

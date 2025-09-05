@@ -6,7 +6,7 @@ public interface ISyntaxNode
 
     void Accept<TContext>(IVisitor<TContext> visitor, TContext context);
 
-    ISyntaxNode Transform(ITransformer transformer);
+    T Transform<T>(ITransformer<T> transformer);
 
     ISyntaxNode? Parent { get; set; }
 }

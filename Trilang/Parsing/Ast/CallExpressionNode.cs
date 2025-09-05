@@ -64,7 +64,7 @@ public class CallExpressionNode : IExpressionNode, IEquatable<CallExpressionNode
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitCall(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformCall(this);
 
     public IExpressionNode Clone()

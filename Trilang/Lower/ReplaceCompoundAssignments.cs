@@ -4,7 +4,7 @@ using static Trilang.Parsing.Ast.BinaryExpressionKind;
 
 namespace Trilang.Lower;
 
-internal class ReplaceCompoundAssignments : ITransformer
+internal class ReplaceCompoundAssignments : ITransformer<ISyntaxNode>
 {
     public ISyntaxNode TransformArrayAccess(ArrayAccessExpressionNode node)
     {

@@ -57,7 +57,7 @@ public class TupleTypeNode : IInlineTypeNode, IEquatable<TupleTypeNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitTupleType(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformTupleType(this);
 
     public IInlineTypeNode Clone()

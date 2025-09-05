@@ -49,7 +49,7 @@ public class BreakNode : IStatementNode, IEquatable<BreakNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitBreak(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformBreak(this);
 
     public ISyntaxNode? Parent { get; set; }

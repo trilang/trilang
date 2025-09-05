@@ -62,7 +62,7 @@ public class WhileNode : IStatementNode, IEquatable<WhileNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitWhile(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformWhile(this);
 
     public ISyntaxNode? Parent { get; set; }

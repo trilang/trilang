@@ -55,7 +55,7 @@ public class LabelNode : IEquatable<LabelNode>, IStatementNode
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitLabel(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformLabel(this);
 
     public string Name { get; }

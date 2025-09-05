@@ -57,7 +57,7 @@ public class TypeNode : IInlineTypeNode, IEquatable<TypeNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitTypeNode(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformTypeNode(this);
 
     public IInlineTypeNode Clone()

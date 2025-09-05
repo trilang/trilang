@@ -64,7 +64,7 @@ public class ArrayAccessExpressionNode : IExpressionNode, IEquatable<ArrayAccess
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitArrayAccess(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformArrayAccess(this);
 
     public IExpressionNode Clone()

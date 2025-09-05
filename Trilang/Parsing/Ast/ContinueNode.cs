@@ -49,7 +49,7 @@ public class ContinueNode : IStatementNode, IEquatable<ContinueNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitContinue(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformContinue(this);
 
     public ISyntaxNode? Parent { get; set; }

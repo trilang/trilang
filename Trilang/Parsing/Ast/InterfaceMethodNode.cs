@@ -71,7 +71,7 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitInterfaceMethod(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformInterfaceMethod(this);
 
     public InterfaceMethodNode Clone()

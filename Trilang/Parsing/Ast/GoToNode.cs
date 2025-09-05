@@ -55,7 +55,7 @@ public class GoToNode : IEquatable<GoToNode>, IStatementNode
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitGoTo(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformGoTo(this);
 
     public string Label { get; }

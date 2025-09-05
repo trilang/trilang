@@ -50,7 +50,7 @@ public class NullExpressionNode : IExpressionNode, IEquatable<NullExpressionNode
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitNull(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformNull(this);
 
     public IExpressionNode Clone()

@@ -63,7 +63,7 @@ public class CastExpressionNode : IExpressionNode, IEquatable<CastExpressionNode
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitCast(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformCast(this);
 
     public IExpressionNode Clone()

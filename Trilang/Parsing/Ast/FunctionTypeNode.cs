@@ -69,7 +69,7 @@ public class FunctionTypeNode : IInlineTypeNode, IEquatable<FunctionTypeNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitFunctionType(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformFunctionType(this);
 
     public IInlineTypeNode Clone()

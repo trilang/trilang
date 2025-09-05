@@ -61,7 +61,7 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitArrayType(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformArrayType(this);
 
     public IInlineTypeNode Clone()

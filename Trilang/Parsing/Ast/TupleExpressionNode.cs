@@ -65,7 +65,7 @@ public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNo
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitTuple(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformTuple(this);
 
     public IExpressionNode Clone()

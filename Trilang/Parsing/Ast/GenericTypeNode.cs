@@ -65,7 +65,7 @@ public class GenericTypeNode : IInlineTypeNode, IEquatable<GenericTypeNode>
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitGenericType(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformGenericType(this);
 
     public IInlineTypeNode Clone()

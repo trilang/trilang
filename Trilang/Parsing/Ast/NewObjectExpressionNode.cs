@@ -69,7 +69,7 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitNewObject(this, context);
 
-    public ISyntaxNode Transform(ITransformer transformer)
+    public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformNewObject(this);
 
     public IExpressionNode Clone()
