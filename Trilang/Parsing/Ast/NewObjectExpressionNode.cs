@@ -12,6 +12,11 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
 
         Type = type;
         Parameters = parameters;
+
+        Type.Parent = this;
+
+        foreach (var parameter in Parameters)
+            parameter.Parent = this;
     }
 
     public static bool operator ==(NewObjectExpressionNode? left, NewObjectExpressionNode? right)

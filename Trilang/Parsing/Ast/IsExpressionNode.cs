@@ -10,6 +10,9 @@ public class IsExpressionNode : IExpressionNode, IEquatable<IsExpressionNode>
     {
         Expression = expression;
         Type = type;
+
+        Expression.Parent = this;
+        Type.Parent = this;
     }
 
     public static bool operator ==(IsExpressionNode? left, IsExpressionNode? right)

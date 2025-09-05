@@ -9,6 +9,9 @@ public class CastExpressionNode : IExpressionNode, IEquatable<CastExpressionNode
     {
         Type = type;
         Expression = expression;
+
+        Type.Parent = this;
+        Expression.Parent = this;
     }
 
     public static bool operator ==(CastExpressionNode? left, CastExpressionNode? right)

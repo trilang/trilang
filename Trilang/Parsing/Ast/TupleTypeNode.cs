@@ -11,6 +11,9 @@ public class TupleTypeNode : IInlineTypeNode, IEquatable<TupleTypeNode>
 
         Name = $"({string.Join(", ", types.Select(t => t.Name))})";
         Types = types;
+
+        foreach (var type in Types)
+            type.Parent = this;
     }
 
     public static bool operator ==(TupleTypeNode? left, TupleTypeNode? right)

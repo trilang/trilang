@@ -13,6 +13,11 @@ public class InterfaceMethodNode : ISyntaxNode, IEquatable<InterfaceMethodNode>
         Name = name;
         ParameterTypes = parameterTypes;
         ReturnType = returnType;
+
+        foreach (var parameter in parameterTypes)
+            parameter.Parent = this;
+
+        ReturnType.Parent = this;
     }
 
     public static bool operator ==(InterfaceMethodNode? left, InterfaceMethodNode? right)

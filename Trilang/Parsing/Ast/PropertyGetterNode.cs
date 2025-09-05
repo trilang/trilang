@@ -11,6 +11,9 @@ public class PropertyGetterNode : ISyntaxNode, IEquatable<PropertyGetterNode>
     {
         AccessModifier = accessModifier;
         Body = body;
+
+        if (Body is not null)
+            Body.Parent = this;
     }
 
     public static bool operator ==(PropertyGetterNode? left, PropertyGetterNode? right)

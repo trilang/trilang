@@ -15,6 +15,8 @@ public class InterfacePropertyNode : ISyntaxNode, IEquatable<InterfacePropertyNo
         Type = type;
         GetterModifier = getterModifier;
         SetterModifier = setterModifier;
+
+        Type.Parent = this;
     }
 
     public static bool operator ==(InterfacePropertyNode? left, InterfacePropertyNode? right)

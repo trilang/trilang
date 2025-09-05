@@ -9,6 +9,9 @@ public class NewArrayExpressionNode : IExpressionNode, IEquatable<NewArrayExpres
     {
         Type = type;
         Size = size;
+
+        Type.Parent = this;
+        Size.Parent = this;
     }
 
     public static bool operator ==(NewArrayExpressionNode? left, NewArrayExpressionNode? right)

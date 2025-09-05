@@ -26,6 +26,12 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
         Setter = setter;
 
         Type.Parent = this;
+
+        if (Getter is not null)
+            Getter.Parent = this;
+
+        if (Setter is not null)
+            Setter.Parent = this;
     }
 
     public static bool operator ==(PropertyDeclarationNode? left, PropertyDeclarationNode? right)

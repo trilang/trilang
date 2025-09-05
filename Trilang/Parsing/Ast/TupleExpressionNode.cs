@@ -11,6 +11,9 @@ public class TupleExpressionNode : IExpressionNode, IEquatable<TupleExpressionNo
             throw new ArgumentException("Tuple must have at least 2 elements", nameof(expressions));
 
         Expressions = expressions;
+
+        foreach (var expression in expressions)
+            expression.Parent = this;
     }
 
     public static bool operator ==(TupleExpressionNode? left, TupleExpressionNode? right)
