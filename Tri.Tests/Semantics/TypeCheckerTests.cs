@@ -1261,4 +1261,79 @@ public class TypeCheckerTests
         Assert.That(castExp, Is.Not.Null);
         Assert.That(castExp.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I8).Using(new MetadataComparer()));
     }
+
+    [Test]
+    public void UseMethodBeforeDeclarationTest()
+    {
+        var tree = Parse(
+            """
+            public type Test {
+                public method1(): void {
+                    method2();
+                }
+
+                public method2(): void {}
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var type = typeProvider.GetType("Test")!;
+        var method = type.GetMember("method2")!;
+
+        var memberAccess = tree.Find<MemberAccessExpressionNode>();
+        Assert.That(memberAccess, Is.Not.Null);
+        Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void UseMethodBeforeDeclarationInCtorTest()
+    {
+        var tree = Parse(
+            """
+            public type Test {
+                public constructor() {
+                    method2();
+                }
+
+                public method2(): void {}
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var type = typeProvider.GetType("Test")!;
+        var method = type.GetMember("method2")!;
+
+        var memberAccess = tree.Find<MemberAccessExpressionNode>();
+        Assert.That(memberAccess, Is.Not.Null);
+        Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void UsePropertyBeforeDeclarationTest()
+    {
+        var tree = Parse(
+            """
+            public type Test {
+                public method1(): i32 {
+                    return prop;
+                }
+
+                prop: i32;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+
+        var type = typeProvider.GetType("Test")!;
+        var method = type.GetMember("prop")!;
+
+        var memberAccess = tree.Find<MemberAccessExpressionNode>();
+        Assert.That(memberAccess, Is.Not.Null);
+        Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
+    }
 }

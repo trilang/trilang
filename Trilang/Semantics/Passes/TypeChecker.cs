@@ -180,12 +180,6 @@ internal class TypeChecker : IVisitor, ISemanticPass
     public void VisitConstructor(ConstructorDeclarationNode node)
     {
         foreach (var parameter in node.Parameters)
-            parameter.Accept(this);
-
-        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
-        node.Metadata = type.GetConstructor(node.Parameters.Select(x => x.Type.Metadata!));
-
-        foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
 
         node.Body.Accept(this);
@@ -415,9 +409,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
 
         // static access
         var typeProvider = symbolTable.TypeProvider;
-        var type = typeProvider.GetType(node.Name);
-        if (type is not null)
-            node.Reference = type;
+        node.Reference = typeProvider.GetType(node.Name);
     }
 
     private void VisitNestedMemberAccess(MemberAccessExpressionNode node)
@@ -431,15 +423,6 @@ internal class TypeChecker : IVisitor, ISemanticPass
 
     public void VisitMethod(MethodDeclarationNode node)
     {
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this);
-
-        // TODO: check missing return statements (CFG)
-        node.ReturnType.Accept(this);
-
-        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
-        node.Metadata = type.GetMethod(node.Name);
-
         foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
 
@@ -535,9 +518,6 @@ internal class TypeChecker : IVisitor, ISemanticPass
 
     public void VisitProperty(PropertyDeclarationNode node)
     {
-        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
-        node.Metadata = type.GetProperty(node.Name);
-
         node.Type.Accept(this);
         node.Getter?.Accept(this);
         node.Setter?.Accept(this);
@@ -610,6 +590,9 @@ internal class TypeChecker : IVisitor, ISemanticPass
 
     public void VisitTypeAlias(TypeAliasDeclarationNode node)
     {
+        foreach (var genericArgument in node.GenericArguments)
+            genericArgument.Accept(this);
+
         node.Type.Accept(this);
 
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
@@ -626,9 +609,23 @@ internal class TypeChecker : IVisitor, ISemanticPass
 
         node.Metadata = type;
 
+        foreach (var genericArgument in node.GenericArguments)
+            genericArgument.Accept(this);
+
         foreach (var @interface in node.Interfaces)
             @interface.Accept(this);
 
+        // visit signatures first
+        foreach (var property in node.Properties)
+            VisitPropertySignature(property);
+
+        foreach (var constructor in node.Constructors)
+            VisitConstructorSignature(constructor);
+
+        foreach (var method in node.Methods)
+            VisitMethodSignature(method);
+
+        // visit bodies later to support forward references
         foreach (var property in node.Properties)
             property.Accept(this);
 
@@ -637,6 +634,32 @@ internal class TypeChecker : IVisitor, ISemanticPass
 
         foreach (var method in node.Methods)
             method.Accept(this);
+    }
+
+    private void VisitPropertySignature(PropertyDeclarationNode node)
+    {
+        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetProperty(node.Name);
+    }
+
+    private void VisitConstructorSignature(ConstructorDeclarationNode node)
+    {
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetConstructor(node.Parameters.Select(x => x.Type.Metadata!));
+    }
+
+    private void VisitMethodSignature(MethodDeclarationNode node)
+    {
+        foreach (var parameter in node.Parameters)
+            parameter.Accept(this);
+
+        node.ReturnType.Accept(this);
+
+        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        node.Metadata = type.GetMethod(node.Name);
     }
 
     public void VisitTypeNode(TypeNode node)
