@@ -789,7 +789,7 @@ public class ParseTypeTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "x",
                         new FunctionTypeNode(
                             [new TypeNode("i32"), new TypeNode("i32")],
@@ -995,7 +995,7 @@ public class ParseTypeTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "p",
                         new TypeNode("Point"),
                         new NewObjectExpressionNode(new TypeNode("Point"), [])
@@ -1024,7 +1024,7 @@ public class ParseTypeTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "p",
                         new TypeNode("Point"),
                         new NewObjectExpressionNode(
@@ -1127,7 +1127,7 @@ public class ParseTypeTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create("main", [], new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "x",
                         new DiscriminatedUnionNode([new TypeNode("i32"), new TypeNode("null")]),
                         new NullExpressionNode()

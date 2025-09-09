@@ -1,4 +1,4 @@
-namespace Trilang.Parsing.Ast;
+namespace Trilang.Semantics.Model;
 
 [Flags]
 public enum MemberAccessKind

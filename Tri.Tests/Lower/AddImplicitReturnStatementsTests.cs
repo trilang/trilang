@@ -2,23 +2,23 @@ using Trilang;
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Tri.Tests.Lower;
 
 public class AddImplicitReturnStatementsTests
 {
-    private static (SyntaxTree, ControlFlowGraphMap) Parse(string code)
+    private static (SemanticTree, ControlFlowGraphMap) Parse(string code)
     {
         var parser = new Parser();
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, cfgs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, cfgs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        return (tree, cfgs);
+        return (semanticTree, cfgs);
     }
 
     [Test]
@@ -29,10 +29,10 @@ public class AddImplicitReturnStatementsTests
         var lowering = new Lowering();
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
-        var function = tree.Find<FunctionDeclarationNode>()!;
-        var expected = new BlockStatementNode([new ReturnStatementNode()]);
+        var function = tree.Find<FunctionDeclaration>()!;
+        var expected = new BlockStatement([new ReturnStatement()]);
 
-        Assert.That(function.Body, Is.EqualTo(expected));
+        Assert.That(function.Body, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -48,29 +48,29 @@ public class AddImplicitReturnStatementsTests
         var lowering = new Lowering();
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
-        var function = tree.Find<FunctionDeclarationNode>()!;
-        var expected = new BlockStatementNode([
-            new BlockStatementNode([
-                new GoToNode("loop_0_start"),
-                new LabelNode("loop_0_start"),
-                new IfStatementNode(
-                    new LiteralExpressionNode(LiteralExpressionKind.Boolean, true)
+        var function = tree.Find<FunctionDeclaration>()!;
+        var expected = new BlockStatement([
+            new BlockStatement([
+                new GoTo("loop_0_start"),
+                new Label("loop_0_start"),
+                new IfStatement(
+                    new LiteralExpression(LiteralExpressionKind.Boolean, true)
                     {
                         ReturnTypeMetadata = TypeMetadata.Bool
                     },
-                    new BlockStatementNode([
-                        new GoToNode("loop_0_start"),
+                    new BlockStatement([
+                        new GoTo("loop_0_start"),
                     ]),
-                    new BlockStatementNode([
-                        new GoToNode("loop_0_end"),
+                    new BlockStatement([
+                        new GoTo("loop_0_end"),
                     ])
                 ),
-                new LabelNode("loop_0_end"),
+                new Label("loop_0_end"),
             ]),
-            new ReturnStatementNode(),
+            new ReturnStatement(),
         ]);
 
-        Assert.That(function.Body, Is.EqualTo(expected));
+        Assert.That(function.Body, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -88,29 +88,29 @@ public class AddImplicitReturnStatementsTests
         var lowering = new Lowering();
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
-        var function = tree.Find<FunctionDeclarationNode>()!;
-        var expected = new BlockStatementNode([
-            new IfStatementNode(
-                new LiteralExpressionNode(LiteralExpressionKind.Boolean, true)
+        var function = tree.Find<FunctionDeclaration>()!;
+        var expected = new BlockStatement([
+            new IfStatement(
+                new LiteralExpression(LiteralExpressionKind.Boolean, true)
                 {
                     ReturnTypeMetadata = TypeMetadata.Bool,
                 },
-                new BlockStatementNode([
-                    new GoToNode("if_0_then"),
+                new BlockStatement([
+                    new GoTo("if_0_then"),
                 ]),
-                new BlockStatementNode([
-                    new GoToNode("if_0_end"),
+                new BlockStatement([
+                    new GoTo("if_0_end"),
                 ])
             ),
-            new BlockStatementNode([
-                new LabelNode("if_0_then"),
-                new GoToNode("if_0_end"),
+            new BlockStatement([
+                new Label("if_0_then"),
+                new GoTo("if_0_end"),
             ]),
-            new LabelNode("if_0_end"),
-            new ReturnStatementNode(),
+            new Label("if_0_end"),
+            new ReturnStatement(),
         ]);
 
-        Assert.That(function.Body, Is.EqualTo(expected));
+        Assert.That(function.Body, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -130,34 +130,34 @@ public class AddImplicitReturnStatementsTests
         var lowering = new Lowering();
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
-        var function = tree.Find<FunctionDeclarationNode>()!;
-        var expected = new BlockStatementNode([
-            new IfStatementNode(
-                new LiteralExpressionNode(LiteralExpressionKind.Boolean, true)
+        var function = tree.Find<FunctionDeclaration>()!;
+        var expected = new BlockStatement([
+            new IfStatement(
+                new LiteralExpression(LiteralExpressionKind.Boolean, true)
                 {
                     ReturnTypeMetadata = TypeMetadata.Bool
                 },
-                new BlockStatementNode([
-                    new GoToNode("if_0_then"),
+                new BlockStatement([
+                    new GoTo("if_0_then"),
                 ]),
-                new BlockStatementNode([
-                    new GoToNode("if_0_else"),
+                new BlockStatement([
+                    new GoTo("if_0_else"),
                 ])
             ),
-            new BlockStatementNode([
-                new LabelNode("if_0_then"),
-                new ReturnStatementNode(),
-                new GoToNode("if_0_end"),
+            new BlockStatement([
+                new Label("if_0_then"),
+                new ReturnStatement(),
+                new GoTo("if_0_end"),
             ]),
-            new BlockStatementNode([
-                new LabelNode("if_0_else"),
-                new ReturnStatementNode(),
-                new GoToNode("if_0_end"),
+            new BlockStatement([
+                new Label("if_0_else"),
+                new ReturnStatement(),
+                new GoTo("if_0_end"),
             ]),
-            new LabelNode("if_0_end"),
+            new Label("if_0_end"),
         ]);
 
-        Assert.That(function.Body, Is.EqualTo(expected));
+        Assert.That(function.Body, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -175,13 +175,13 @@ public class AddImplicitReturnStatementsTests
         var lowering = new Lowering();
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
-        var function = tree.Find<FunctionDeclarationNode>()!;
-        var expected = new BlockStatementNode([
-            new BlockStatementNode([
-                new ReturnStatementNode(),
+        var function = tree.Find<FunctionDeclaration>()!;
+        var expected = new BlockStatement([
+            new BlockStatement([
+                new ReturnStatement(),
             ]),
         ]);
 
-        Assert.That(function.Body, Is.EqualTo(expected));
+        Assert.That(function.Body, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

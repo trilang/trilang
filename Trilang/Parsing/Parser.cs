@@ -468,7 +468,7 @@ public class Parser
             return new IfDirectiveNode(name, then, @else);
         });
 
-    private VariableDeclarationStatementNode? TryParseVariableStatement(ParserContext context)
+    private VariableDeclarationNode? TryParseVariableStatement(ParserContext context)
     {
         if (!context.Reader.Check(TokenKind.Var))
             return null;
@@ -491,7 +491,7 @@ public class Parser
         if (!context.Reader.Check(TokenKind.SemiColon))
             throw new ParseException("Expected a semicolon.");
 
-        return new VariableDeclarationStatementNode(name, type, expression);
+        return new VariableDeclarationNode(name, type, expression);
     }
 
     private IfStatementNode? TryParseIfStatement(ParserContext context)

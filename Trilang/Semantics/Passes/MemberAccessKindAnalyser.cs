@@ -1,19 +1,18 @@
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class MemberAccessKindAnalyser : Visitor, ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
 
-    private static MemberAccessKind FindParentAssignment(MemberAccessExpressionNode node)
+    private static MemberAccessKind FindParentAssignment(MemberAccessExpression node)
     {
         var parent = node.Parent;
         while (parent is not null)
         {
-            if (parent is BinaryExpressionNode { Kind: BinaryExpressionKind.Assignment } assignment)
+            if (parent is BinaryExpression { Kind: BinaryExpressionKind.Assignment } assignment)
             {
                 if (ReferenceEquals(assignment.Left, node))
                     return MemberAccessKind.Write;
@@ -21,7 +20,7 @@ internal class MemberAccessKindAnalyser : Visitor, ISemanticPass
                 return MemberAccessKind.Read;
             }
 
-            if (parent is BinaryExpressionNode { IsCompoundAssignment: true } compound)
+            if (parent is BinaryExpression { IsCompoundAssignment: true } compound)
             {
                 if (ReferenceEquals(compound.Left, node))
                     return MemberAccessKind.ReadWrite;
@@ -35,7 +34,7 @@ internal class MemberAccessKindAnalyser : Visitor, ISemanticPass
         return MemberAccessKind.Read;
     }
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
         => node.AccessKind = FindParentAssignment(node);
 
     public string Name => nameof(MemberAccessKindAnalyser);

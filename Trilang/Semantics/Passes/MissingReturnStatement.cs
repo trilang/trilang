@@ -1,5 +1,5 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Trilang.Semantics.Passes;
@@ -7,7 +7,7 @@ namespace Trilang.Semantics.Passes;
 // TODO: handle endless loops
 internal class MissingReturnStatement : ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
     {
         var cfgs = context.ControlFlowGraphs;
         if (cfgs is null)
@@ -27,7 +27,7 @@ internal class MissingReturnStatement : ISemanticPass
                 if (!visited.Add(block))
                     continue;
 
-                if (block.Statements.Any(x => x is ReturnStatementNode))
+                if (block.Statements.Any(x => x is ReturnStatement))
                     continue;
 
                 if (block.Next.Count == 0)

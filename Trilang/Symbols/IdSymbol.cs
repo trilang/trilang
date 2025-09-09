@@ -1,38 +1,38 @@
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;
 
 public class IdSymbol : ISymbol, IEquatable<IdSymbol>
 {
-    public IdSymbol(FunctionDeclarationNode node) : this(node.Name, node)
+    public IdSymbol(FunctionDeclaration node) : this(node.Name, node)
     {
     }
 
-    public IdSymbol(VariableDeclarationStatementNode node) : this(node.Name, node)
+    public IdSymbol(VariableDeclaration node) : this(node.Name, node)
     {
     }
 
-    public IdSymbol(ParameterNode node) : this(node.Name, node)
+    public IdSymbol(Parameter node) : this(node.Name, node)
     {
     }
 
-    public IdSymbol(PropertyDeclarationNode node) : this(node.Name, node)
+    public IdSymbol(PropertyDeclaration node) : this(node.Name, node)
     {
     }
 
-    public IdSymbol(MethodDeclarationNode node) : this(node.Name, node)
+    public IdSymbol(MethodDeclaration node) : this(node.Name, node)
     {
     }
 
-    public IdSymbol(InterfacePropertyNode node) : this(node.Name, node)
+    public IdSymbol(InterfaceProperty node) : this(node.Name, node)
     {
     }
 
-    public IdSymbol(InterfaceMethodNode node) : this(node.Name, node)
+    public IdSymbol(InterfaceMethod node) : this(node.Name, node)
     {
     }
 
-    public IdSymbol(string name, ISyntaxNode? node)
+    public IdSymbol(string name, ISemanticNode? node)
     {
         Name = name;
         Node = node;
@@ -78,5 +78,5 @@ public class IdSymbol : ISymbol, IEquatable<IdSymbol>
 
     public string Name { get; }
 
-    public ISyntaxNode? Node { get; }
+    public ISemanticNode? Node { get; }
 }

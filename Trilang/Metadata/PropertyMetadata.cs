@@ -1,4 +1,4 @@
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Metadata;
 
@@ -103,7 +103,7 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
             setterModifier,
             false,
             $"<>_set_{Name}",
-            [new ParameterMetadata(MemberAccessExpressionNode.Value, Type)],
+            [new ParameterMetadata(MemberAccessExpression.Value, Type)],
             new FunctionTypeMetadata([Type], TypeMetadata.Void)
         );
 

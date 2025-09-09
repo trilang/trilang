@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class GenericTypeGenerator
 {
-    private record Item(ITypeMetadata Closed, ITypeMetadata Open, GenericTypeNode Node);
+    private record Item(ITypeMetadata Closed, ITypeMetadata Open, GenericType Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -24,7 +24,7 @@ internal class GenericTypeGenerator
             if (!symbol.IsClosedGenericType)
                 continue;
 
-            if (symbol.Node is not GenericTypeNode genericTypeNode)
+            if (symbol.Node is not GenericType genericTypeNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a GenericTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
@@ -61,7 +61,7 @@ internal class GenericTypeGenerator
     }
 
     private void PopulateClosedTypes(
-        GenericTypeNode genericTypeNode,
+        GenericType genericTypeNode,
         TypeMetadata closed,
         TypeMetadata open)
     {
@@ -161,7 +161,7 @@ internal class GenericTypeGenerator
     }
 
     private void PopulateClosedTypes(
-        GenericTypeNode genericTypeNode,
+        GenericType genericTypeNode,
         TypeAliasMetadata closed,
         TypeAliasMetadata open)
     {
@@ -195,7 +195,7 @@ internal class GenericTypeGenerator
         return parametersMetadata;
     }
 
-    private bool IsOpenGeneric(ITypeMetadataProvider typeProvider, GenericTypeNode genericTypeNode)
+    private bool IsOpenGeneric(ITypeMetadataProvider typeProvider, GenericType genericTypeNode)
     {
         var isOpenGeneric = true;
         foreach (var argumentNode in genericTypeNode.TypeArguments)

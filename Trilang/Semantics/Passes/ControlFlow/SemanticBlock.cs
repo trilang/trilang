@@ -1,20 +1,20 @@
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes.ControlFlow;
 
 public class SemanticBlock
 {
     private readonly string name;
-    private readonly BlockStatementNode node;
-    private readonly List<IStatementNode> statements;
+    private readonly BlockStatement node;
+    private readonly List<IStatement> statements;
     private readonly HashSet<SemanticBlock> previous;
     private readonly HashSet<SemanticBlock> next;
 
-    public SemanticBlock(string name, BlockStatementNode node) : this(name, node, [])
+    public SemanticBlock(string name, BlockStatement node) : this(name, node, [])
     {
     }
 
-    public SemanticBlock(string name, BlockStatementNode node, IEnumerable<IStatementNode> statements)
+    public SemanticBlock(string name, BlockStatement node, IEnumerable<IStatement> statements)
     {
         this.name = name;
         this.node = node;
@@ -23,7 +23,7 @@ public class SemanticBlock
         next = [];
     }
 
-    public void AddStatement(IStatementNode statement)
+    public void AddStatement(IStatement statement)
         => statements.Add(statement);
 
     public void AddNext(SemanticBlock block)
@@ -42,9 +42,9 @@ public class SemanticBlock
 
     public string Name => name;
 
-    public BlockStatementNode BlockNode => node;
+    public BlockStatement BlockNode => node;
 
-    public IReadOnlyCollection<IStatementNode> Statements => statements;
+    public IReadOnlyCollection<IStatement> Statements => statements;
 
     public IReadOnlyCollection<SemanticBlock> Previous => previous;
 

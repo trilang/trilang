@@ -1,54 +1,14 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class NewArrayExpressionNode : IExpressionNode, IEquatable<NewArrayExpressionNode>
+public class NewArrayExpressionNode : IExpressionNode
 {
     public NewArrayExpressionNode(ArrayTypeNode type, IExpressionNode size)
     {
         Type = type;
         Size = size;
-
-        Type.Parent = this;
-        Size.Parent = this;
     }
-
-    public static bool operator ==(NewArrayExpressionNode? left, NewArrayExpressionNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(NewArrayExpressionNode? left, NewArrayExpressionNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(NewArrayExpressionNode? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Type.Equals(other.Type) &&
-               Size.Equals(other.Size) &&
-               Equals(ReturnTypeMetadata, other.ReturnTypeMetadata);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((NewArrayExpressionNode)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Type, Size);
 
     public override string ToString()
     {
@@ -58,26 +18,13 @@ public class NewArrayExpressionNode : IExpressionNode, IEquatable<NewArrayExpres
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitNewArray(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitNewArray(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformNewArray(this);
-
-    public IExpressionNode Clone()
-        => new NewArrayExpressionNode((ArrayTypeNode)Type.Clone(), Size.Clone())
-        {
-            ReturnTypeMetadata = ReturnTypeMetadata,
-        };
-
-    public ISyntaxNode? Parent { get; set; }
 
     public ArrayTypeNode Type { get; }
 
     public IExpressionNode Size { get; }
-
-    public ITypeMetadata? ReturnTypeMetadata { get; set; }
 }

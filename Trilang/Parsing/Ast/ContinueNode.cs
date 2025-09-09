@@ -2,39 +2,8 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class ContinueNode : IStatementNode, IEquatable<ContinueNode>
+public class ContinueNode : IStatementNode
 {
-    public static bool operator ==(ContinueNode? left, ContinueNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(ContinueNode? left, ContinueNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(ContinueNode? other)
-    {
-        if (other is null)
-            return false;
-
-        return true;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((ContinueNode)obj);
-    }
-
-    public override int GetHashCode()
-        => 0;
-
     public override string ToString()
     {
         var formatter = new Formatter();
@@ -43,16 +12,9 @@ public class ContinueNode : IStatementNode, IEquatable<ContinueNode>
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitContinue(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitContinue(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformContinue(this);
-
-    public ISyntaxNode? Parent { get; set; }
-
-    public WhileNode? LoopNode { get; set; }
 }

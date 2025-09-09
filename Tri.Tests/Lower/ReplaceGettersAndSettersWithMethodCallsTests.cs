@@ -1,22 +1,23 @@
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Model;
+using Type = Trilang.Semantics.Model.Type;
 
 namespace Tri.Tests.Lower;
 
 public class ReplaceGettersAndSettersWithMethodCallsTests
 {
-    private static SyntaxTree Parse(string code)
+    private static SemanticTree Parse(string code)
     {
         var parser = new Parser();
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        return tree;
+        return semanticTree;
     }
 
     [Test]
@@ -58,16 +59,16 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.I32));
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(
+        var expected = new SemanticTree([
+            new TypeDeclaration(
                 AccessModifier.Public,
                 "Point",
                 [],
                 [],
                 [
-                    new PropertyDeclarationNode(
+                    new PropertyDeclaration(
                         "x",
-                        new TypeNode("i32") { Metadata = TypeMetadata.I32 },
+                        new Type("i32") { Metadata = TypeMetadata.I32 },
                         null,
                         null
                     )
@@ -81,23 +82,23 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             {
                 Metadata = point,
             },
-            new FunctionDeclarationNode(
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "p",
-                        new TypeNode("Point") { Metadata = point }
+                        new Type("Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatementNode([
-                    new ReturnStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode(
-                                new MemberAccessExpressionNode("p")
+                new Type("i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement([
+                    new ReturnStatement(
+                        new CallExpression(
+                            new MemberAccessExpression(
+                                new MemberAccessExpression("p")
                                 {
                                     Reference = pParameter,
                                     AccessKind = MemberAccessKind.Read,
@@ -118,7 +119,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -186,24 +187,24 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             new FunctionTypeMetadata([testType], TypeMetadata.I32)
         );
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(
+        var expected = new SemanticTree([
+            new TypeDeclaration(
                 AccessModifier.Public,
                 "Point",
                 [],
                 [],
                 [
-                    new PropertyDeclarationNode(
+                    new PropertyDeclaration(
                         "x",
-                        new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                        new PropertyGetterNode(
+                        new Type("i32") { Metadata = TypeMetadata.I32 },
+                        new PropertyGetter(
                             AccessModifier.Public,
                             null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
-                        new PropertySetterNode(
+                        new PropertySetter(
                             AccessModifier.Public,
                             null
                         )
@@ -221,15 +222,15 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             {
                 Metadata = pointType,
             },
-            new TypeDeclarationNode(
+            new TypeDeclaration(
                 AccessModifier.Public,
                 "Test",
                 [],
                 [],
                 [
-                    new PropertyDeclarationNode(
+                    new PropertyDeclaration(
                         "point",
-                        new TypeNode("Point") { Metadata = pointType },
+                        new Type("Point") { Metadata = pointType },
                         null,
                         null
                     )
@@ -243,25 +244,25 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             {
                 Metadata = testType,
             },
-            new FunctionDeclarationNode(
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "t",
-                        new TypeNode("Test") { Metadata = testType }
+                        new Type("Test") { Metadata = testType }
                     )
                     {
                         Metadata = tParameter,
                     }
                 ],
-                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatementNode([
-                    new ReturnStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode(
-                                new CallExpressionNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode("t")
+                new Type("i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement([
+                    new ReturnStatement(
+                        new CallExpression(
+                            new MemberAccessExpression(
+                                new CallExpression(
+                                    new MemberAccessExpression(
+                                        new MemberAccessExpression("t")
                                         {
                                             Reference = tParameter,
                                             AccessKind = MemberAccessKind.Read,
@@ -290,7 +291,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -337,24 +338,24 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.Void));
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(
+        var expected = new SemanticTree([
+            new TypeDeclaration(
                 AccessModifier.Public,
                 "Point",
                 [],
                 [],
                 [
-                    new PropertyDeclarationNode(
+                    new PropertyDeclaration(
                         "x",
-                        new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                        new PropertyGetterNode(
+                        new Type("i32") { Metadata = TypeMetadata.I32 },
+                        new PropertyGetter(
                             AccessModifier.Public,
                             null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
-                        new PropertySetterNode(
+                        new PropertySetter(
                             AccessModifier.Public,
                             null
                         )
@@ -372,23 +373,23 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             {
                 Metadata = point,
             },
-            new FunctionDeclarationNode(
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "p",
-                        new TypeNode("Point") { Metadata = point }
+                        new Type("Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new TypeNode("void") { Metadata = TypeMetadata.Void },
-                new BlockStatementNode([
-                    new ExpressionStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode(
-                                new MemberAccessExpressionNode("p")
+                new Type("void") { Metadata = TypeMetadata.Void },
+                new BlockStatement([
+                    new ExpressionStatement(
+                        new CallExpression(
+                            new MemberAccessExpression(
+                                new MemberAccessExpression("p")
                                 {
                                     Reference = pParameter,
                                     AccessKind = MemberAccessKind.Read,
@@ -400,7 +401,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 AccessKind = MemberAccessKind.Read,
                             },
                             [
-                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
+                                new LiteralExpression(LiteralExpressionKind.Integer, 1)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32,
                                 }
@@ -414,7 +415,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -463,24 +464,24 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.I32));
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(
+        var expected = new SemanticTree([
+            new TypeDeclaration(
                 AccessModifier.Public,
                 "Point",
                 [],
                 [],
                 [
-                    new PropertyDeclarationNode(
+                    new PropertyDeclaration(
                         "x",
-                        new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                        new PropertyGetterNode(
+                        new Type("i32") { Metadata = TypeMetadata.I32 },
+                        new PropertyGetter(
                             AccessModifier.Public,
                             null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
-                        new PropertySetterNode(
+                        new PropertySetter(
                             AccessModifier.Public,
                             null
                         )
@@ -498,25 +499,25 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             {
                 Metadata = point,
             },
-            new FunctionDeclarationNode(
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "p",
-                        new TypeNode("Point") { Metadata = point }
+                        new Type("Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatementNode([
-                    new ReturnStatementNode(
-                        new ExpressionBlockNode([
-                            new VariableDeclarationStatementNode(
+                new Type("i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement([
+                    new ReturnStatement(
+                        new ExpressionBlock([
+                            new VariableDeclaration(
                                 tmpVariable.Name,
-                                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
+                                new Type("i32") { Metadata = TypeMetadata.I32 },
+                                new LiteralExpression(LiteralExpressionKind.Integer, 1)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32,
                                 }
@@ -524,10 +525,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             {
                                 Metadata = tmpVariable,
                             },
-                            new ExpressionStatementNode(
-                                new CallExpressionNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode("p")
+                            new ExpressionStatement(
+                                new CallExpression(
+                                    new MemberAccessExpression(
+                                        new MemberAccessExpression("p")
                                         {
                                             Reference = pParameter,
                                             AccessKind = MemberAccessKind.Read,
@@ -539,7 +540,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         AccessKind = MemberAccessKind.Read,
                                     },
                                     [
-                                        new MemberAccessExpressionNode(tmpVariable.Name)
+                                        new MemberAccessExpression(tmpVariable.Name)
                                         {
                                             Reference = tmpVariable,
                                             AccessKind = MemberAccessKind.Read,
@@ -547,8 +548,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     ]
                                 )
                             ),
-                            new ExpressionStatementNode(
-                                new MemberAccessExpressionNode(tmpVariable.Name)
+                            new ExpressionStatement(
+                                new MemberAccessExpression(tmpVariable.Name)
                                 {
                                     Reference = tmpVariable,
                                     AccessKind = MemberAccessKind.Read,
@@ -563,7 +564,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -610,24 +611,24 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.Void));
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(
+        var expected = new SemanticTree([
+            new TypeDeclaration(
                 AccessModifier.Public,
                 "Point",
                 [],
                 [],
                 [
-                    new PropertyDeclarationNode(
+                    new PropertyDeclaration(
                         "x",
-                        new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                        new PropertyGetterNode(
+                        new Type("i32") { Metadata = TypeMetadata.I32 },
+                        new PropertyGetter(
                             AccessModifier.Public,
                             null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
-                        new PropertySetterNode(
+                        new PropertySetter(
                             AccessModifier.Public,
                             null
                         )
@@ -645,23 +646,23 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             {
                 Metadata = point,
             },
-            new FunctionDeclarationNode(
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "p",
-                        new TypeNode("Point") { Metadata = point }
+                        new Type("Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new TypeNode("void") { Metadata = TypeMetadata.Void },
-                new BlockStatementNode([
-                    new ExpressionStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode(
-                                new MemberAccessExpressionNode("p")
+                new Type("void") { Metadata = TypeMetadata.Void },
+                new BlockStatement([
+                    new ExpressionStatement(
+                        new CallExpression(
+                            new MemberAccessExpression(
+                                new MemberAccessExpression("p")
                                 {
                                     Reference = pParameter,
                                     AccessKind = MemberAccessKind.Read,
@@ -673,11 +674,11 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                 AccessKind = MemberAccessKind.Read,
                             },
                             [
-                                new BinaryExpressionNode(
+                                new BinaryExpression(
                                     BinaryExpressionKind.Addition,
-                                    new CallExpressionNode(
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode("p")
+                                    new CallExpression(
+                                        new MemberAccessExpression(
+                                            new MemberAccessExpression("p")
                                             {
                                                 Reference = pParameter,
                                                 AccessKind = MemberAccessKind.Read,
@@ -690,7 +691,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         },
                                         []
                                     ),
-                                    new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
+                                    new LiteralExpression(LiteralExpressionKind.Integer, 1)
                                     {
                                         ReturnTypeMetadata = TypeMetadata.I32,
                                     }
@@ -708,7 +709,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -757,24 +758,24 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.I32));
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(
+        var expected = new SemanticTree([
+            new TypeDeclaration(
                 AccessModifier.Public,
                 "Point",
                 [],
                 [],
                 [
-                    new PropertyDeclarationNode(
+                    new PropertyDeclaration(
                         "x",
-                        new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                        new PropertyGetterNode(
+                        new Type("i32") { Metadata = TypeMetadata.I32 },
+                        new PropertyGetter(
                             AccessModifier.Public,
                             null
                         )
                         {
                             Metadata = xProperty.Getter,
                         },
-                        new PropertySetterNode(
+                        new PropertySetter(
                             AccessModifier.Public,
                             null
                         )
@@ -792,29 +793,29 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             {
                 Metadata = point,
             },
-            new FunctionDeclarationNode(
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "p",
-                        new TypeNode("Point") { Metadata = point }
+                        new Type("Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatementNode([
-                    new ReturnStatementNode(
-                        new ExpressionBlockNode([
-                            new VariableDeclarationStatementNode(
+                new Type("i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement([
+                    new ReturnStatement(
+                        new ExpressionBlock([
+                            new VariableDeclaration(
                                 tmpVariable.Name,
-                                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                                new BinaryExpressionNode(
+                                new Type("i32") { Metadata = TypeMetadata.I32 },
+                                new BinaryExpression(
                                     BinaryExpressionKind.Addition,
-                                    new CallExpressionNode(
-                                        new MemberAccessExpressionNode(
-                                            new MemberAccessExpressionNode("p")
+                                    new CallExpression(
+                                        new MemberAccessExpression(
+                                            new MemberAccessExpression("p")
                                             {
                                                 Reference = pParameter,
                                                 AccessKind = MemberAccessKind.Read,
@@ -827,7 +828,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         },
                                         []
                                     ),
-                                    new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
+                                    new LiteralExpression(LiteralExpressionKind.Integer, 1)
                                     {
                                         ReturnTypeMetadata = TypeMetadata.I32,
                                     }
@@ -839,10 +840,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             {
                                 Metadata = tmpVariable,
                             },
-                            new ExpressionStatementNode(
-                                new CallExpressionNode(
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode("p")
+                            new ExpressionStatement(
+                                new CallExpression(
+                                    new MemberAccessExpression(
+                                        new MemberAccessExpression("p")
                                         {
                                             Reference = pParameter,
                                             AccessKind = MemberAccessKind.Read,
@@ -854,7 +855,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                         AccessKind = MemberAccessKind.Read,
                                     },
                                     [
-                                        new MemberAccessExpressionNode(tmpVariable.Name)
+                                        new MemberAccessExpression(tmpVariable.Name)
                                         {
                                             Reference = tmpVariable,
                                             AccessKind = MemberAccessKind.Read,
@@ -862,8 +863,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     ]
                                 )
                             ),
-                            new ExpressionStatementNode(
-                                new MemberAccessExpressionNode(tmpVariable.Name)
+                            new ExpressionStatement(
+                                new MemberAccessExpression(tmpVariable.Name)
                                 {
                                     Reference = tmpVariable,
                                     AccessKind = MemberAccessKind.Read,
@@ -878,6 +879,6 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

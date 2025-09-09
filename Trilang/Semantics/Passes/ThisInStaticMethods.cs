@@ -1,19 +1,18 @@
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class ThisInStaticMethods : Visitor, ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
     {
         if (!node.IsThis)
             return;
 
-        var method = node.FindInParent<MethodDeclarationNode>();
+        var method = node.FindInParent<MethodDeclaration>();
         if (method is null || !method.IsStatic)
             return;
 

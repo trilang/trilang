@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class InterfaceGenerator
 {
-    private record Item(InterfaceMetadata Metadata, InterfaceNode Node);
+    private record Item(InterfaceMetadata Metadata, Interface Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -24,7 +24,7 @@ internal class InterfaceGenerator
             if (!symbol.IsInterface)
                 continue;
 
-            if (symbol.Node is not InterfaceNode interfaceNode)
+            if (symbol.Node is not Interface interfaceNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an InterfaceNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;

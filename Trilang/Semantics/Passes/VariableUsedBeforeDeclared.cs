@@ -1,5 +1,4 @@
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
@@ -11,23 +10,23 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
     public VariableUsedBeforeDeclared()
         => scopes = [];
 
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
     {
         symbolFinderMap = context.SymbolTableMap!;
 
         tree.Accept(this);
     }
 
-    protected override void VisitBlockEnter(BlockStatementNode node)
+    protected override void VisitBlockEnter(BlockStatement node)
         => scopes.Add([]);
 
-    protected override void VisitBlockExit(BlockStatementNode node)
+    protected override void VisitBlockExit(BlockStatement node)
         => scopes.RemoveAt(scopes.Count - 1);
 
-    protected override void VisitVariableEnter(VariableDeclarationStatementNode node)
+    protected override void VisitVariableEnter(VariableDeclaration node)
         => scopes[^1].Add(node.Name);
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
     {
         if (!node.IsFirstMember || node.IsThis || node.IsField || node.IsValue)
             return;
@@ -36,10 +35,10 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
         var symbol = symbolTable.GetId(node.Name);
         if (symbol is not null)
         {
-            if (symbol.Node is ParameterNode
-                or FunctionDeclarationNode
-                or PropertyDeclarationNode
-                or MethodDeclarationNode)
+            if (symbol.Node is Parameter
+                or FunctionDeclaration
+                or PropertyDeclaration
+                or MethodDeclaration)
                 return;
 
             for (var i = scopes.Count - 1; i >= 0; i--)

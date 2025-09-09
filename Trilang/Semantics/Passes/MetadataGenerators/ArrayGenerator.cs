@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class ArrayGenerator
 {
-    private record Item(TypeArrayMetadata Metadata, ArrayTypeNode Node);
+    private record Item(TypeArrayMetadata Metadata, ArrayType Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -24,7 +24,7 @@ internal class ArrayGenerator
             if (!symbol.IsArray)
                 continue;
 
-            if (symbol.Node is not ArrayTypeNode arrayTypeNode)
+            if (symbol.Node is not ArrayType arrayTypeNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an ArrayTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;

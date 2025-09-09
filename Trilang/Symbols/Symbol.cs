@@ -1,4 +1,4 @@
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;
 
@@ -6,5 +6,5 @@ public interface ISymbol
 {
     string Name { get; }
 
-    ISyntaxNode? Node { get; }
+    ISemanticNode? Node { get; }
 }

@@ -1333,7 +1333,7 @@ public class FormatterTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "x",
                         new TypeNode("i32"),
                         LiteralExpressionNode.Integer(0)
@@ -1360,7 +1360,7 @@ public class FormatterTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "x",
                         new FunctionTypeNode([], new TypeNode("void")),
                         LiteralExpressionNode.Integer(0)
@@ -1387,7 +1387,7 @@ public class FormatterTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "x",
                         new FunctionTypeNode(
                             [new TypeNode("i32"), new TypeNode("f64")],
@@ -1475,7 +1475,7 @@ public class FormatterTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "p",
                         new InterfaceNode(
                             [
@@ -1599,7 +1599,7 @@ public class FormatterTests
                 [],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "p",
                         new TypeNode("Point"),
                         new NewObjectExpressionNode(
@@ -1712,7 +1712,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create("main", [], new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "x",
                         new DiscriminatedUnionNode([new TypeNode("i32"), new TypeNode("null")]),
                         new NullExpressionNode()
@@ -2026,41 +2026,6 @@ public class FormatterTests
             """
             function test(a: i32): bool {
                 return a is i8;
-            }
-            """;
-
-        Assert.That(formatted, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void FormatGoToAndLabelTest()
-    {
-        var tree = new SyntaxTree([
-            new FunctionDeclarationNode(
-                "test",
-                [],
-                new TypeNode("void"),
-                new BlockStatementNode([
-                    new WhileNode(
-                        LiteralExpressionNode.True(),
-                        new BlockStatementNode([
-                            new GoToNode("end"),
-                        ])
-                    ),
-                    new LabelNode("end"),
-                    new ReturnStatementNode(),
-                ])
-            )
-        ]);
-        var formatted = tree.ToString();
-        const string expected =
-            """
-            function test(): void {
-                while (true) {
-                    goto end;
-                }
-            end:
-                return;
             }
             """;
 

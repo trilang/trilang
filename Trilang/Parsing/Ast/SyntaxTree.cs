@@ -2,51 +2,12 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
+public class SyntaxTree : ISyntaxNode
 {
     private readonly List<IDeclarationNode> declarations;
 
     public SyntaxTree(IReadOnlyList<IDeclarationNode> declarations)
-    {
-        this.declarations = [..declarations];
-
-        foreach (var function in declarations)
-            function.Parent = this;
-    }
-
-    public static bool operator ==(SyntaxTree? left, SyntaxTree? right)
-        => Equals(left, right);
-
-    public static bool operator !=(SyntaxTree? left, SyntaxTree? right)
-        => !Equals(left, right);
-
-    public bool Equals(SyntaxTree? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Declarations.SequenceEqual(other.Declarations);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((SyntaxTree)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Declarations);
+        => this.declarations = [..declarations];
 
     public override string ToString()
     {
@@ -56,25 +17,11 @@ public class SyntaxTree : ISyntaxNode, IEquatable<SyntaxTree>
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitTree(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitTree(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformTree(this);
-
-    public void Insert(int i, IDeclarationNode declaration)
-    {
-        declaration.Parent = this;
-        declarations.Insert(i, declaration);
-    }
-
-    public void Remove(IDeclarationNode declaration)
-        => declarations.Remove(declaration);
-
-    public ISyntaxNode? Parent { get; set; }
 
     public IReadOnlyList<IDeclarationNode> Declarations
         => declarations;

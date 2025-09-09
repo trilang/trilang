@@ -3,26 +3,26 @@ using Trilang.IntermediateRepresentation.Instructions;
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Model;
 using static Trilang.IntermediateRepresentation.Instructions.BinaryInstructionKind;
 
 namespace Tri.Tests.IntermediateRepresentation;
 
 public class IrGeneratorTests
 {
-    private static (SyntaxTree, ITypeMetadataProvider) Parse(string code)
+    private static (SemanticTree, ITypeMetadataProvider) Parse(string code)
     {
         var parser = new Parser();
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (_, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
+        lowering.Lower(semanticTree, LoweringOptions.Default);
 
-        return (tree, typeProvider);
+        return (semanticTree, typeProvider);
     }
 
     [Test]

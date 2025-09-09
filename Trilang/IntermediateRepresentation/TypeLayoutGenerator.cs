@@ -131,7 +131,7 @@ internal class TypeLayoutGenerator
         return layout;
     }
 
-    private TypeLayout? Generate(InterfaceMetadata type)
+    private TypeLayout? Generate(InterfaceMetadata _)
         => null;
 
     private TypeLayout Generate(TupleMetadata tuple)
@@ -175,7 +175,7 @@ internal class TypeLayoutGenerator
         return layout;
     }
 
-    private TypeLayout Generate(TypePointerMetadata type)
+    private TypeLayout Generate(TypePointerMetadata _)
     {
         var layout = new TypeLayout();
 

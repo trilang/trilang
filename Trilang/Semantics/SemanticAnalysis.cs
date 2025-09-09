@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes;
 using Trilang.Semantics.Passes.ControlFlow;
 using Trilang.Symbols;
@@ -39,15 +39,18 @@ public class SemanticAnalysis
     public SemanticAnalysis(ITypeMetadataProvider typeMetadataProvider)
         => this.typeMetadataProvider = typeMetadataProvider;
 
-    public SemanticAnalysisResult Analyze(SyntaxTree tree, SemanticAnalysisOptions options)
+    public SemanticAnalysisResult Analyze(Parsing.Ast.SyntaxTree tree, SemanticAnalysisOptions options)
     {
+        var semanticTree = (SemanticTree)tree.Transform(new ConvertToSemanticTree());
+
         var rootSymbolTable = new RootSymbolTable(typeMetadataProvider);
         var context = new SemanticPassContext([..options.Directives], rootSymbolTable);
 
         foreach (var pass in GetSortedPasses())
-            pass.Analyze(tree, context);
+            pass.Analyze(semanticTree, context);
 
         return new SemanticAnalysisResult(
+            semanticTree,
             context.SymbolTableMap!,
             typeMetadataProvider,
             context.ControlFlowGraphs!);

@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class AliasGenerator
 {
-    private record Item(TypeAliasMetadata Metadata, TypeAliasDeclarationNode Node);
+    private record Item(TypeAliasMetadata Metadata, TypeAliasDeclaration Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -24,7 +24,7 @@ internal class AliasGenerator
             if (!symbol.IsAlias)
                 continue;
 
-            if (symbol.Node is not TypeAliasDeclarationNode typeAliasNode)
+            if (symbol.Node is not TypeAliasDeclaration typeAliasNode)
                 throw new SemanticAnalysisException("The type alias declaration is not valid.");
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
@@ -52,7 +52,7 @@ internal class AliasGenerator
         {
             var typeProvider = symbolTableMap.Get(typeAliasNode).TypeProvider;
             var aliasedMetadata = typeProvider.GetType(typeAliasNode.Type.Name);
-            if (aliasedMetadata is null && typeAliasNode.Type is GenericTypeNode genericTypeNode)
+            if (aliasedMetadata is null && typeAliasNode.Type is GenericType genericTypeNode)
                 aliasedMetadata = typeProvider.GetType(genericTypeNode.GetOpenGenericName());
 
             if (aliasedMetadata is null)

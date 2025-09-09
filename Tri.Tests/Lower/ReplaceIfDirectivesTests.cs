@@ -1,23 +1,24 @@
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
+using Type = Trilang.Semantics.Model.Type;
 
 namespace Tri.Tests.Lower;
 
 public class ReplaceIfDirectivesTests
 {
-    private static SyntaxTree Parse(string code, IEnumerable<string> directives)
+    private static SemanticTree Parse(string code, IEnumerable<string> directives)
     {
         var parser = new Parser();
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, new SemanticAnalysisOptions(directives));
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions(directives));
 
-        return tree;
+        return semanticTree;
     }
 
     [Test]
@@ -60,18 +61,18 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata([], type3Metadata)));
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Public, "Type1", [], [], [], [], [])
+        var expected = new SemanticTree([
+            new TypeDeclaration(AccessModifier.Public, "Type1", [], [], [], [], [])
             {
                 Metadata = type1Metadata,
             },
-            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
+            new TypeDeclaration(AccessModifier.Public, "Type3", [], [], [], [], [])
             {
                 Metadata = type3Metadata,
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -112,18 +113,18 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata([], type3Metadata)));
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Public, "Type2", [], [], [], [], [])
+        var expected = new SemanticTree([
+            new TypeDeclaration(AccessModifier.Public, "Type2", [], [], [], [], [])
             {
                 Metadata = type2Metadata,
             },
-            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
+            new TypeDeclaration(AccessModifier.Public, "Type3", [], [], [], [], [])
             {
                 Metadata = type3Metadata,
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -152,14 +153,14 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata([], typeMetadata)));
 
-        var expected = new SyntaxTree([
-            new TypeDeclarationNode(AccessModifier.Public, "Type3", [], [], [], [], [])
+        var expected = new SemanticTree([
+            new TypeDeclaration(AccessModifier.Public, "Type3", [], [], [], [], [])
             {
                 Metadata = typeMetadata,
             },
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -187,13 +188,13 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata([], TypeMetadata.Void)
         );
-        var expected = new SyntaxTree([
-            new FunctionDeclarationNode(
+        var expected = new SemanticTree([
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "callback",
-                        new FunctionTypeNode([], new TypeNode("void") { Metadata = TypeMetadata.Void })
+                        new FunctionType([], new Type("void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void),
                         }
@@ -202,11 +203,11 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatementNode([
-                    new ExpressionStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode("callback")
+                new Type("i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement([
+                    new ExpressionStatement(
+                        new CallExpression(
+                            new MemberAccessExpression("callback")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
@@ -214,8 +215,8 @@ public class ReplaceIfDirectivesTests
                             []
                         )
                     ),
-                    new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
+                    new ReturnStatement(
+                        new LiteralExpression(LiteralExpressionKind.Integer, 1)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
@@ -234,7 +235,7 @@ public class ReplaceIfDirectivesTests
             }
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -261,13 +262,13 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata([], TypeMetadata.Void)
         );
-        var expected = new SyntaxTree([
-            new FunctionDeclarationNode(
+        var expected = new SemanticTree([
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "callback",
-                        new FunctionTypeNode([], new TypeNode("void") { Metadata = TypeMetadata.Void })
+                        new FunctionType([], new Type("void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void)
                         }
@@ -276,11 +277,11 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatementNode([
-                    new ExpressionStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode("callback")
+                new Type("i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement([
+                    new ExpressionStatement(
+                        new CallExpression(
+                            new MemberAccessExpression("callback")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
@@ -288,8 +289,8 @@ public class ReplaceIfDirectivesTests
                             []
                         )
                     ),
-                    new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
+                    new ReturnStatement(
+                        new LiteralExpression(LiteralExpressionKind.Integer, 2)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32
                         }
@@ -308,7 +309,7 @@ public class ReplaceIfDirectivesTests
             }
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -335,13 +336,13 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata([], TypeMetadata.Void)
         );
-        var expected = new SyntaxTree([
-            new FunctionDeclarationNode(
+        var expected = new SemanticTree([
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode(
+                    new Parameter(
                         "callback",
-                        new FunctionTypeNode([], new TypeNode("void") { Metadata = TypeMetadata.Void })
+                        new FunctionType([], new Type("void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void),
                         }
@@ -350,11 +351,11 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeNode("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatementNode([
-                    new ExpressionStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode("callback")
+                new Type("i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement([
+                    new ExpressionStatement(
+                        new CallExpression(
+                            new MemberAccessExpression("callback")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
@@ -362,8 +363,8 @@ public class ReplaceIfDirectivesTests
                             []
                         )
                     ),
-                    new ReturnStatementNode(
-                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 2)
+                    new ReturnStatement(
+                        new LiteralExpression(LiteralExpressionKind.Integer, 2)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
@@ -382,6 +383,6 @@ public class ReplaceIfDirectivesTests
             }
         ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

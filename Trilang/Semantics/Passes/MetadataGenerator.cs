@@ -1,11 +1,11 @@
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.MetadataGenerators;
 
 namespace Trilang.Semantics.Passes;
 
 internal class MetadataGenerator : ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
     {
         var rootSymbolTable = context.RootSymbolTable;
         var types = rootSymbolTable.Types;

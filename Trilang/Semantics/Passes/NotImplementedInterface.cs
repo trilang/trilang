@@ -1,15 +1,14 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class NotImplementedInterface : Visitor, ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
 
-    protected override void VisitTypeEnter(TypeDeclarationNode node)
+    protected override void VisitTypeEnter(TypeDeclaration node)
     {
         var type = node.Metadata;
         if (node.Interfaces.Count == 0 || type is null)

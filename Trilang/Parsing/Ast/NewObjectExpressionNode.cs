@@ -1,10 +1,9 @@
 using System.Diagnostics;
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpressionNode>
+public class NewObjectExpressionNode : IExpressionNode
 {
     public NewObjectExpressionNode(IInlineTypeNode type, IReadOnlyList<IExpressionNode> parameters)
     {
@@ -12,48 +11,7 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
 
         Type = type;
         Parameters = parameters;
-
-        Type.Parent = this;
-
-        foreach (var parameter in Parameters)
-            parameter.Parent = this;
     }
-
-    public static bool operator ==(NewObjectExpressionNode? left, NewObjectExpressionNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(NewObjectExpressionNode? left, NewObjectExpressionNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(NewObjectExpressionNode? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Type.Equals(other.Type) &&
-               Parameters.SequenceEqual(other.Parameters) &&
-               Equals(Metadata, other.Metadata);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((NewObjectExpressionNode)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Type, Parameters);
 
     public override string ToString()
     {
@@ -63,29 +21,13 @@ public class NewObjectExpressionNode : IExpressionNode, IEquatable<NewObjectExpr
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitNewObject(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitNewObject(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformNewObject(this);
-
-    public IExpressionNode Clone()
-        => new NewObjectExpressionNode(Type.Clone(), Parameters.Select(x => x.Clone()).ToArray())
-        {
-            Metadata = Metadata,
-        };
-
-    public ISyntaxNode? Parent { get; set; }
 
     public IInlineTypeNode Type { get; }
 
     public IReadOnlyList<IExpressionNode> Parameters { get; }
-
-    public ConstructorMetadata? Metadata { get; set; }
-
-    public ITypeMetadata? ReturnTypeMetadata
-        => Metadata?.DeclaringType;
 }

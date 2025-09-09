@@ -79,7 +79,7 @@ public class ParseCallExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new BinaryExpressionNode(

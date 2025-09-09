@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Lower;
 
 internal class AddThisInLocalMemberAccess : Visitor
 {
-    protected override void VisitMemberAccessExit(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessExit(MemberAccessExpression node)
     {
         if (node.Member is not null)
             return;
@@ -17,11 +17,11 @@ internal class AddThisInLocalMemberAccess : Visitor
         if (node.Reference is not PropertyMetadata and not MethodMetadata)
             return;
 
-        var parent = node.FindInParent<TypeDeclarationNode>()!;
+        var parent = node.FindInParent<TypeDeclaration>()!;
 
-        node.Member = new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+        node.Member = new MemberAccessExpression(MemberAccessExpression.This)
         {
-            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, parent.Metadata!),
+            Reference = new ParameterMetadata(MemberAccessExpression.This, parent.Metadata!),
             AccessKind = MemberAccessKind.Read,
         };
     }

@@ -3,8 +3,8 @@ using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Compilation;
 
@@ -18,20 +18,20 @@ public class Compiler
         var semanticOptions = new SemanticAnalysisOptions(options.Directives);
         var lowering = new Lowering();
 
-        var syntaxTrees = new List<SyntaxTree>();
+        var semanticTrees = new List<SemanticTree>();
         var project = Project.Load(options.Path);
         foreach (var sourceFile in project.SourceFiles)
         {
             var code = File.ReadAllText(sourceFile.FilePath);
             var tree = parser.Parse(code);
-            var (_, _, cfgs) = semantic.Analyze(tree, semanticOptions);
-            lowering.Lower(tree, new LoweringOptions(options.Directives, cfgs));
+            var (semanticTree, _, _, cfgs) = semantic.Analyze(tree, semanticOptions);
+            lowering.Lower(semanticTree, new LoweringOptions(options.Directives, cfgs));
 
-            syntaxTrees.Add(tree);
+            semanticTrees.Add(semanticTree);
         }
 
         var ir = new IrGenerator();
-        var functions = ir.Generate(rootTypeMetadataProvider.Types, syntaxTrees);
+        var functions = ir.Generate(rootTypeMetadataProvider.Types, semanticTrees);
         if (options.PrintIr)
             foreach (var function in functions)
                 Console.WriteLine(function);

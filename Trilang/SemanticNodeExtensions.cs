@@ -1,20 +1,21 @@
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
+using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang;
 
-public static class Helpers
+public static class SemanticNodeExtensions
 {
-    public static T? Find<T>(this ISyntaxNode? node, Func<T, bool>? predicate = null)
-        where T : class, ISyntaxNode
+    public static T? Find<T>(this ISemanticNode? node, Func<T, bool>? predicate = null)
+        where T : class, ISemanticNode
         => Where(node, predicate).FirstOrDefault();
 
-    public static IEnumerable<T> Where<T>(this ISyntaxNode? node, Func<T, bool>? predicate = null)
-        where T : class, ISyntaxNode
+    public static IEnumerable<T> Where<T>(this ISemanticNode? node, Func<T, bool>? predicate = null)
+        where T : class, ISemanticNode
     {
         if (node is null)
             yield break;
 
-        var q = new Queue<ISyntaxNode?>();
+        var q = new Queue<ISemanticNode?>();
         q.Enqueue(node);
 
         while (q.TryDequeue(out node))
@@ -24,76 +25,76 @@ public static class Helpers
 
             switch (node)
             {
-                case ArrayTypeNode arrayTypeNode:
+                case ArrayType arrayTypeNode:
                     q.Enqueue(arrayTypeNode.ElementType);
                     break;
-                case ArrayAccessExpressionNode arrayNode:
+                case ArrayAccessExpression arrayNode:
                     q.Enqueue(arrayNode.Member);
                     q.Enqueue(arrayNode.Index);
                     break;
-                case BinaryExpressionNode binaryExpressionNode:
+                case BinaryExpression binaryExpressionNode:
                     q.Enqueue(binaryExpressionNode.Left);
                     q.Enqueue(binaryExpressionNode.Right);
                     break;
-                case BlockStatementNode blockStatementNode:
+                case BlockStatement blockStatementNode:
                     foreach (var statement in blockStatementNode.Statements)
                         q.Enqueue(statement);
 
                     break;
-                case BreakNode:
+                case Break:
                     break;
-                case CallExpressionNode callExpressionNode:
+                case CallExpression callExpressionNode:
                     q.Enqueue(callExpressionNode.Member);
                     foreach (var parameter in callExpressionNode.Parameters)
                         q.Enqueue(parameter);
 
                     break;
-                case CastExpressionNode castExpressionNode:
+                case CastExpression castExpressionNode:
                     q.Enqueue(castExpressionNode.Type);
                     q.Enqueue(castExpressionNode.Expression);
                     break;
-                case ConstructorDeclarationNode constructorDeclarationNode:
+                case ConstructorDeclaration constructorDeclarationNode:
                     foreach (var parameter in constructorDeclarationNode.Parameters)
                         q.Enqueue(parameter);
 
                     q.Enqueue(constructorDeclarationNode.Body);
                     break;
-                case ContinueNode:
+                case Continue:
                     break;
-                case DiscriminatedUnionNode discriminatedUnionNode:
+                case DiscriminatedUnion discriminatedUnionNode:
                     foreach (var type in discriminatedUnionNode.Types)
                         q.Enqueue(type);
 
                     break;
-                case ExpressionBlockNode expressionBlockNode:
+                case ExpressionBlock expressionBlockNode:
                     foreach (var statement in expressionBlockNode.Statements)
                         q.Enqueue(statement);
 
                     break;
-                case ExpressionStatementNode expressionStatementNode:
+                case ExpressionStatement expressionStatementNode:
                     q.Enqueue(expressionStatementNode.Expression);
                     break;
-                case FunctionDeclarationNode functionDeclarationNode:
+                case FunctionDeclaration functionDeclarationNode:
                     foreach (var parameter in functionDeclarationNode.Parameters)
                         q.Enqueue(parameter);
 
                     q.Enqueue(functionDeclarationNode.Body);
                     q.Enqueue(functionDeclarationNode.ReturnType);
                     break;
-                case FunctionTypeNode functionTypeDeclarationNode:
+                case FunctionType functionTypeDeclarationNode:
                     foreach (var parameterType in functionTypeDeclarationNode.ParameterTypes)
                         q.Enqueue(parameterType);
 
                     q.Enqueue(functionTypeDeclarationNode.ReturnType);
                     break;
-                case GenericTypeNode genericTypeNode:
+                case GenericType genericTypeNode:
                     foreach (var typeArgument in genericTypeNode.TypeArguments)
                         q.Enqueue(typeArgument);
 
                     break;
-                case GoToNode:
+                case GoTo:
                     break;
-                case IfDirectiveNode ifDirectiveNode:
+                case IfDirective ifDirectiveNode:
                     foreach (var item in ifDirectiveNode.Then)
                         q.Enqueue(item);
 
@@ -101,12 +102,12 @@ public static class Helpers
                         q.Enqueue(item);
 
                     break;
-                case IfStatementNode ifStatementNode:
+                case IfStatement ifStatementNode:
                     q.Enqueue(ifStatementNode.Condition);
                     q.Enqueue(ifStatementNode.Then);
                     q.Enqueue(ifStatementNode.Else);
                     break;
-                case InterfaceNode interfaceNode:
+                case Interface interfaceNode:
                     foreach (var property in interfaceNode.Properties)
                         q.Enqueue(property);
 
@@ -114,81 +115,81 @@ public static class Helpers
                         q.Enqueue(method);
 
                     break;
-                case InterfacePropertyNode interfacePropertyNode:
+                case InterfaceProperty interfacePropertyNode:
                     q.Enqueue(interfacePropertyNode.Type);
                     break;
-                case IsExpressionNode isExpressionNode:
+                case IsExpression isExpressionNode:
                     q.Enqueue(isExpressionNode.Expression);
                     q.Enqueue(isExpressionNode.Type);
                     break;
-                case LabelNode:
+                case Label:
                     break;
-                case InterfaceMethodNode interfaceMethodNode:
+                case InterfaceMethod interfaceMethodNode:
                     foreach (var parameterTypes in interfaceMethodNode.ParameterTypes)
                         q.Enqueue(parameterTypes);
 
                     q.Enqueue(interfaceMethodNode.ReturnType);
                     break;
-                case LiteralExpressionNode:
+                case LiteralExpression:
                     break;
-                case MemberAccessExpressionNode memberAccessExpressionNode:
+                case MemberAccessExpression memberAccessExpressionNode:
                     q.Enqueue(memberAccessExpressionNode.Member);
                     break;
-                case MethodDeclarationNode methodDeclarationNode:
+                case MethodDeclaration methodDeclarationNode:
                     foreach (var parameter in methodDeclarationNode.Parameters)
                         q.Enqueue(parameter);
 
                     q.Enqueue(methodDeclarationNode.ReturnType);
                     q.Enqueue(methodDeclarationNode.Body);
                     break;
-                case NewArrayExpressionNode newArrayExpressionNode:
+                case NewArrayExpression newArrayExpressionNode:
                     q.Enqueue(newArrayExpressionNode.Type);
                     q.Enqueue(newArrayExpressionNode.Size);
                     break;
-                case NewObjectExpressionNode newExpressionNode:
+                case NewObjectExpression newExpressionNode:
                     q.Enqueue(newExpressionNode.Type);
                     foreach (var parameter in newExpressionNode.Parameters)
                         q.Enqueue(parameter);
 
                     break;
-                case NullExpressionNode:
+                case NullExpression:
                     break;
-                case ParameterNode parameterNode:
+                case Parameter parameterNode:
                     q.Enqueue(parameterNode.Type);
                     break;
-                case PropertyDeclarationNode propertyDeclarationNode:
+                case PropertyDeclaration propertyDeclarationNode:
                     q.Enqueue(propertyDeclarationNode.Type);
                     q.Enqueue(propertyDeclarationNode.Getter);
                     q.Enqueue(propertyDeclarationNode.Setter);
                     break;
-                case PropertyGetterNode propertyGetterNode:
+                case PropertyGetter propertyGetterNode:
                     q.Enqueue(propertyGetterNode.Body);
                     break;
-                case PropertySetterNode propertySetterNode:
+                case PropertySetter propertySetterNode:
                     q.Enqueue(propertySetterNode.Body);
                     break;
-                case ReturnStatementNode returnStatementNode:
+                case ReturnStatement returnStatementNode:
                     q.Enqueue(returnStatementNode.Expression);
                     break;
-                case SyntaxTree syntaxTree:
+                case SemanticTree syntaxTree:
                     foreach (var declaration in syntaxTree.Declarations)
                         q.Enqueue(declaration);
 
                     break;
-                case TupleExpressionNode tupleExpressionNode:
+                case TupleExpression tupleExpressionNode:
                     foreach (var expression in tupleExpressionNode.Expressions)
                         q.Enqueue(expression);
 
                     break;
-                case TupleTypeNode tupleTypeNode:
+                case TupleType tupleTypeNode:
                     foreach (var type in tupleTypeNode.Types)
                         q.Enqueue(type);
 
                     break;
-                case TypeAliasDeclarationNode typeAliasNode:
+                case TypeAliasDeclaration typeAliasNode:
                     q.Enqueue(typeAliasNode.Type);
                     break;
-                case TypeDeclarationNode typeDeclarationNode:
+                case TypeDeclaration typeDeclarationNode:
                     foreach (var genericArgument in typeDeclarationNode.GenericArguments)
                         q.Enqueue(genericArgument);
 
@@ -202,15 +203,15 @@ public static class Helpers
                         q.Enqueue(constructor);
 
                     break;
-                case TypeNode:
+                case Type:
                     break;
-                case UnaryExpressionNode unaryExpressionNode:
+                case UnaryExpression unaryExpressionNode:
                     q.Enqueue(unaryExpressionNode.Operand);
                     break;
-                case VariableDeclarationStatementNode variableDeclarationStatementNode:
+                case VariableDeclaration variableDeclarationStatementNode:
                     q.Enqueue(variableDeclarationStatementNode.Expression);
                     break;
-                case WhileNode whileNode:
+                case While whileNode:
                     q.Enqueue(whileNode.Condition);
                     q.Enqueue(whileNode.Body);
                     break;
@@ -223,8 +224,8 @@ public static class Helpers
         }
     }
 
-    public static T? FindInParent<T>(this ISyntaxNode node)
-        where T : ISyntaxNode
+    public static T? FindInParent<T>(this ISemanticNode node)
+        where T : ISemanticNode
     {
         var parent = node.Parent;
         while (parent is not null)

@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class TypeGenerator
 {
-    private record Item(TypeMetadata Metadata, TypeDeclarationNode Node);
+    private record Item(TypeMetadata Metadata, TypeDeclaration Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -24,7 +24,7 @@ internal class TypeGenerator
             if (symbol is { IsType: false, IsGenericType: false })
                 continue;
 
-            if (symbol.Node is not TypeDeclarationNode typeDeclarationNode)
+            if (symbol.Node is not TypeDeclaration typeDeclarationNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a TypeDeclarationNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
@@ -153,7 +153,7 @@ internal class TypeGenerator
 
     private ParameterMetadata[] GetParameters(
         ITypeMetadataProvider typeProvider,
-        IReadOnlyList<ParameterNode> parameters)
+        IReadOnlyList<Parameter> parameters)
     {
         var result = new ParameterMetadata[parameters.Count];
         for (var i = 0; i < parameters.Count; i++)

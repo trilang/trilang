@@ -1,18 +1,17 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class CheckAccessModifiers : Visitor, ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
 
-    protected override void VisitNewObjectEnter(NewObjectExpressionNode node)
+    protected override void VisitNewObjectEnter(NewObjectExpression node)
     {
         var ctor = node.Metadata!;
-        var parentType = node.FindInParent<TypeDeclarationNode>()?.Metadata;
+        var parentType = node.FindInParent<TypeDeclaration>()?.Metadata;
 
         // no need to check access modifier
         // ctor is used inside the type
@@ -23,7 +22,7 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
             throw new SemanticAnalysisException($"The constructor of '{ctor.DeclaringType}' is not accessible.");
     }
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
     {
         if (node.AccessKind is null)
             return;
@@ -31,7 +30,7 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         if (node.Reference is not PropertyMetadata property)
             return;
 
-        var type = node.FindInParent<TypeDeclarationNode>()?.Metadata;
+        var type = node.FindInParent<TypeDeclaration>()?.Metadata;
         if (property.DeclaringType.Equals(type))
             return;
 

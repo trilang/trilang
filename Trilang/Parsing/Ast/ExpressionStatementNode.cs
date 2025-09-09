@@ -2,47 +2,12 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStatementNode>
+public class ExpressionStatementNode : IStatementNode
 {
     public ExpressionStatementNode(IExpressionNode expression)
     {
         Expression = expression;
-        Expression.Parent = this;
     }
-
-    public static bool operator ==(ExpressionStatementNode? left, ExpressionStatementNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(ExpressionStatementNode? left, ExpressionStatementNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(ExpressionStatementNode? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Expression.Equals(other.Expression);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((ExpressionStatementNode)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Expression);
 
     public override string ToString()
     {
@@ -52,16 +17,11 @@ public class ExpressionStatementNode : IStatementNode, IEquatable<ExpressionStat
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitExpressionStatement(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitExpressionStatement(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformExpressionStatement(this);
-
-    public ISyntaxNode? Parent { get; set; }
 
     public IExpressionNode Expression { get; }
 }

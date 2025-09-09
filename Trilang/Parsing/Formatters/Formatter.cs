@@ -2,7 +2,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Parsing.Formatters;
 
-public partial class Formatter : IFormatter
+public partial class Formatter : INodeVisitor
 {
     private readonly Writer writer;
 
@@ -168,19 +168,6 @@ public partial class Formatter : IFormatter
         }
     }
 
-    public void VisitExpressionBlock(ExpressionBlockNode node)
-    {
-        writer.WriteLine("{");
-
-        writer.Scoped(() =>
-        {
-            foreach (var expression in node.Statements)
-                expression.Accept(this);
-        });
-
-        writer.Write("}");
-    }
-
     public void VisitExpressionStatement(ExpressionStatementNode node)
     {
         node.Expression.Accept(this);
@@ -298,13 +285,6 @@ public partial class Formatter : IFormatter
         writer.Write('>');
     }
 
-    public void VisitGoTo(GoToNode node)
-    {
-        writer.Write("goto ");
-        writer.Write(node.Label);
-        writer.WriteLine(';');
-    }
-
     public void VisitIfDirective(IfDirectiveNode node)
     {
         writer.Write("#if ");
@@ -350,48 +330,46 @@ public partial class Formatter : IFormatter
 
     public void VisitInterface(InterfaceNode node)
     {
-        if (node.Parent is TypeAliasDeclarationNode)
+        writer.Write("{ ");
+
+        foreach (var property in node.Properties)
         {
-            writer.WriteLine("{");
-
-            writer.Scoped(() =>
-            {
-                foreach (var property in node.Properties)
-                {
-                    property.Accept(this);
-                    writer.WriteLine();
-                }
-
-                if (node.Methods.Count > 0)
-                    writer.WriteLine();
-
-                foreach (var method in node.Methods)
-                {
-                    method.Accept(this);
-                    writer.WriteLine();
-                }
-            });
-
-            writer.Write("}");
+            property.Accept(this);
+            writer.Write(" ");
         }
-        else
-        {
-            writer.Write("{ ");
 
+        foreach (var method in node.Methods)
+        {
+            method.Accept(this);
+            writer.Write(" ");
+        }
+
+        writer.Write("}");
+    }
+
+    private void VisitInterfaceMultiLine(InterfaceNode node)
+    {
+        writer.WriteLine("{");
+
+        writer.Scoped(() =>
+        {
             foreach (var property in node.Properties)
             {
                 property.Accept(this);
-                writer.Write(" ");
+                writer.WriteLine();
             }
+
+            if (node.Methods.Count > 0)
+                writer.WriteLine();
 
             foreach (var method in node.Methods)
             {
                 method.Accept(this);
-                writer.Write(" ");
+                writer.WriteLine();
             }
+        });
 
-            writer.Write("}");
-        }
+        writer.Write("}");
     }
 
     public void VisitInterfaceProperty(InterfacePropertyNode node)
@@ -446,18 +424,11 @@ public partial class Formatter : IFormatter
         writer.Write(";");
     }
 
-    public void VisitAsExpression(IsExpressionNode node)
+    public void VisitIsExpression(IsExpressionNode node)
     {
         node.Expression.Accept(this);
         writer.Write(" is ");
         node.Type.Accept(this);
-    }
-
-    public void VisitLabel(LabelNode node)
-    {
-        writer.CancelIndent();
-        writer.Write(node.Name);
-        writer.WriteLine(':');
     }
 
     public void VisitLiteral(LiteralExpressionNode node)
@@ -624,7 +595,11 @@ public partial class Formatter : IFormatter
         writer.Write(node.Name);
         WriteGenericArguments(node);
         writer.Write(" = ");
-        node.Type.Accept(this);
+
+        if (node.Type is InterfaceNode interfaceNode)
+            VisitInterfaceMultiLine(interfaceNode);
+        else
+            node.Type.Accept(this);
 
         if (node.Type is not InterfaceNode)
             writer.Write(';');
@@ -698,7 +673,7 @@ public partial class Formatter : IFormatter
         node.Operand.Accept(this);
     }
 
-    public void VisitVariable(VariableDeclarationStatementNode node)
+    public void VisitVariable(VariableDeclarationNode node)
     {
         writer.Write("var ");
         writer.Write(node.Name);

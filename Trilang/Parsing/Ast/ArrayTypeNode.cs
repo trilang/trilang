@@ -1,51 +1,11 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
+public class ArrayTypeNode : IInlineTypeNode
 {
     public ArrayTypeNode(IInlineTypeNode elementType)
-    {
-        Name = $"{elementType.Name}[]";
-        ElementType = elementType;
-        ElementType.Parent = this;
-    }
-
-    public static bool operator ==(ArrayTypeNode? left, ArrayTypeNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(ArrayTypeNode? left, ArrayTypeNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(ArrayTypeNode? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return ElementType.Equals(other.ElementType) &&
-               Equals(Metadata, other.Metadata);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((ArrayTypeNode)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(ElementType);
+        => ElementType = elementType;
 
     public override string ToString()
     {
@@ -55,26 +15,11 @@ public class ArrayTypeNode : IInlineTypeNode, IEquatable<ArrayTypeNode>
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitArrayType(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitArrayType(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformArrayType(this);
 
-    public IInlineTypeNode Clone()
-        => new ArrayTypeNode(ElementType.Clone())
-        {
-            Metadata = Metadata,
-        };
-
-    public ISyntaxNode? Parent { get; set; }
-
-    public string Name { get; }
-
     public IInlineTypeNode ElementType { get; }
-
-    public ITypeMetadata? Metadata { get; set; }
 }

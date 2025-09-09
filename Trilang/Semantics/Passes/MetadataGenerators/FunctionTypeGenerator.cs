@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class FunctionTypeGenerator
 {
-    private record Item(FunctionTypeMetadata Metadata, FunctionTypeNode Node);
+    private record Item(FunctionTypeMetadata Metadata, FunctionType Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -24,7 +24,7 @@ internal class FunctionTypeGenerator
             if (!symbol.IsFunction)
                 continue;
 
-            if (symbol.Node is not FunctionTypeNode function)
+            if (symbol.Node is not FunctionType function)
                 throw new SemanticAnalysisException($"The '{symbol.Name}' symbol is not a function.");
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;

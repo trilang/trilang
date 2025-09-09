@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes.ControlFlow;
 
@@ -20,7 +20,7 @@ internal class ControlFlowAnalyzer : ISemanticPass
         loopCounter = 0;
     }
 
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
     {
         directives = context.Directives;
         graph = new ControlFlowGraphMap();
@@ -37,16 +37,16 @@ internal class ControlFlowAnalyzer : ISemanticPass
         context.ControlFlowGraphs = graph;
     }
 
-    private IEnumerable<FunctionDeclarationNode> GetFunctions(SyntaxTree tree)
-        => tree.Declarations.OfType<FunctionDeclarationNode>();
+    private IEnumerable<FunctionDeclaration> GetFunctions(SemanticTree tree)
+        => tree.Declarations.OfType<FunctionDeclaration>();
 
-    private IEnumerable<MethodDeclarationNode> GetMethods(SyntaxTree tree)
-        => tree.Declarations.OfType<TypeDeclarationNode>().SelectMany(x => x.Methods);
+    private IEnumerable<MethodDeclaration> GetMethods(SemanticTree tree)
+        => tree.Declarations.OfType<TypeDeclaration>().SelectMany(x => x.Methods);
 
-    private IEnumerable<ConstructorDeclarationNode> GetConstructors(SyntaxTree tree)
-        => tree.Declarations.OfType<TypeDeclarationNode>().SelectMany(x => x.Constructors);
+    private IEnumerable<ConstructorDeclaration> GetConstructors(SemanticTree tree)
+        => tree.Declarations.OfType<TypeDeclaration>().SelectMany(x => x.Constructors);
 
-    private void BuildControlFlowGraph(IFunctionMetadata metadata, BlockStatementNode body)
+    private void BuildControlFlowGraph(IFunctionMetadata metadata, BlockStatement body)
     {
         var builder = new ControlFlowGraphBuilder(body);
 
@@ -55,19 +55,19 @@ internal class ControlFlowAnalyzer : ISemanticPass
         graph!.Add(metadata, builder.Build());
     }
 
-    private void BuildControlFlowGraph(ControlFlowGraphBuilder builder, BlockStatementNode block)
+    private void BuildControlFlowGraph(ControlFlowGraphBuilder builder, BlockStatement block)
     {
         foreach (var statement in block.Statements)
             BuildControlFlowGraph(builder, block, statement);
     }
 
-    private void BuildControlFlowGraph(ControlFlowGraphBuilder builder, BlockStatementNode block, IStatementNode statement)
+    private void BuildControlFlowGraph(ControlFlowGraphBuilder builder, BlockStatement block, IStatement statement)
     {
-        if (statement is BlockStatementNode blockStatement)
+        if (statement is BlockStatement blockStatement)
         {
             BuildControlFlowGraph(builder, blockStatement);
         }
-        else if (statement is IfStatementNode ifNode)
+        else if (statement is IfStatement ifNode)
         {
             builder.Add(ifNode);
 
@@ -98,7 +98,7 @@ internal class ControlFlowAnalyzer : ISemanticPass
 
             builder.CurrentBlock = endBlock;
         }
-        else if (statement is WhileNode whileNode)
+        else if (statement is While whileNode)
         {
             var whileNumber = loopCounter++;
             var currentBlock = builder.CurrentBlock;
@@ -121,7 +121,7 @@ internal class ControlFlowAnalyzer : ISemanticPass
             builder.CurrentBlock = endBlock;
             whileLoops.Pop();
         }
-        else if (statement is BreakNode breakNode)
+        else if (statement is Break breakNode)
         {
             Debug.Assert(whileLoops.Count > 0, "While loop is not found.");
 
@@ -130,7 +130,7 @@ internal class ControlFlowAnalyzer : ISemanticPass
             var (_, endBlock) = whileLoops.Peek();
             builder.CurrentBlock.AddNext(endBlock);
         }
-        else if (statement is ContinueNode continueNode)
+        else if (statement is Continue continueNode)
         {
             Debug.Assert(whileLoops.Count > 0, "While loop is not found.");
 
@@ -139,13 +139,13 @@ internal class ControlFlowAnalyzer : ISemanticPass
             var (conditionBlock, _) = whileLoops.Peek();
             builder.CurrentBlock.AddNext(conditionBlock);
         }
-        else if (statement is IfDirectiveNode ifDirectiveNode)
+        else if (statement is IfDirective ifDirectiveNode)
         {
             builder.Add(ifDirectiveNode);
 
             var statements = directives.Contains(ifDirectiveNode.DirectiveName)
-                ? ifDirectiveNode.Then.OfType<IStatementNode>()
-                : ifDirectiveNode.Else.OfType<IStatementNode>();
+                ? ifDirectiveNode.Then.OfType<IStatement>()
+                : ifDirectiveNode.Else.OfType<IStatement>();
 
             foreach (var node in statements)
                 BuildControlFlowGraph(builder, block, node);

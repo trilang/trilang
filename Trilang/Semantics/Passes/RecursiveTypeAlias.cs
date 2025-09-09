@@ -1,6 +1,5 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
@@ -11,10 +10,10 @@ internal class RecursiveTypeAlias : Visitor, ISemanticPass
     public RecursiveTypeAlias()
         => visitedTypes = [];
 
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
 
-    protected override void VisitTypeAliasEnter(TypeAliasDeclarationNode node)
+    protected override void VisitTypeAliasEnter(TypeAliasDeclaration node)
     {
         var metadata = node.Metadata;
         if (metadata is null)

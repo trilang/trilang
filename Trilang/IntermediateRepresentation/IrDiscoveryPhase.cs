@@ -1,19 +1,19 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics;
+using Trilang.Semantics.Model;
 
 namespace Trilang.IntermediateRepresentation;
 
 internal class IrDiscoveryPhase : Visitor
 {
-    private readonly Dictionary<IFunctionMetadata, BlockStatementNode> functionsToGenerate;
+    private readonly Dictionary<IFunctionMetadata, BlockStatement> functionsToGenerate;
 
     public IrDiscoveryPhase()
         => functionsToGenerate = [];
 
-    public IReadOnlyDictionary<IFunctionMetadata, BlockStatementNode> Discover(
+    public IReadOnlyDictionary<IFunctionMetadata, BlockStatement> Discover(
         IEnumerable<ITypeMetadata> types,
-        IReadOnlyList<SyntaxTree> syntaxTrees)
+        IReadOnlyList<SemanticTree> syntaxTrees)
     {
         foreach (var tree in syntaxTrees)
             VisitTree(tree);
@@ -38,12 +38,12 @@ internal class IrDiscoveryPhase : Visitor
                 {
                     functionsToGenerate.Add(
                         property.Getter,
-                        new BlockStatementNode([
-                            new ReturnStatementNode(
-                                new MemberAccessExpressionNode(
-                                    new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                        new BlockStatement([
+                            new ReturnStatement(
+                                new MemberAccessExpression(
+                                    new MemberAccessExpression(MemberAccessExpression.This)
                                     {
-                                        Reference = new ParameterMetadata(MemberAccessExpressionNode.This, declaringType),
+                                        Reference = new ParameterMetadata(MemberAccessExpression.This, declaringType),
                                         AccessKind = MemberAccessKind.Read,
                                     },
                                     fieldMetadata.Name
@@ -60,17 +60,17 @@ internal class IrDiscoveryPhase : Visitor
                 if (property.Setter is not null && !functionsToGenerate.ContainsKey(property.Setter))
                 {
                     var valueParameter = property.Setter.Parameters
-                        .First(x => x.Name == MemberAccessExpressionNode.Value);
+                        .First(x => x.Name == MemberAccessExpression.Value);
                     functionsToGenerate.Add(
                         property.Setter,
-                        new BlockStatementNode([
-                            new ExpressionStatementNode(
-                                new BinaryExpressionNode(
+                        new BlockStatement([
+                            new ExpressionStatement(
+                                new BinaryExpression(
                                     BinaryExpressionKind.Assignment,
-                                    new MemberAccessExpressionNode(
-                                        new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+                                    new MemberAccessExpression(
+                                        new MemberAccessExpression(MemberAccessExpression.This)
                                         {
-                                            Reference = new ParameterMetadata(MemberAccessExpressionNode.This, declaringType),
+                                            Reference = new ParameterMetadata(MemberAccessExpression.This, declaringType),
                                             AccessKind = MemberAccessKind.Read,
                                         },
                                         fieldMetadata.Name
@@ -79,7 +79,7 @@ internal class IrDiscoveryPhase : Visitor
                                         Reference = fieldMetadata,
                                         AccessKind = MemberAccessKind.Write,
                                     },
-                                    new MemberAccessExpressionNode(valueParameter.Name)
+                                    new MemberAccessExpression(valueParameter.Name)
                                     {
                                         Reference = valueParameter,
                                         AccessKind = MemberAccessKind.Read,
@@ -98,18 +98,18 @@ internal class IrDiscoveryPhase : Visitor
         return functionsToGenerate;
     }
 
-    protected override void VisitFunctionEnter(FunctionDeclarationNode node)
+    protected override void VisitFunctionEnter(FunctionDeclaration node)
         => functionsToGenerate.Add(node.Metadata!, node.Body);
 
-    protected override void VisitGetterEnter(PropertyGetterNode node)
+    protected override void VisitGetterEnter(PropertyGetter node)
         => functionsToGenerate.Add(node.Metadata!, node.Body!);
 
-    protected override void VisitSetterEnter(PropertySetterNode node)
+    protected override void VisitSetterEnter(PropertySetter node)
         => functionsToGenerate.Add(node.Metadata!, node.Body!);
 
-    protected override void VisitMethodEnter(MethodDeclarationNode node)
+    protected override void VisitMethodEnter(MethodDeclaration node)
         => functionsToGenerate.Add(node.Metadata!, node.Body);
 
-    protected override void VisitConstructorEnter(ConstructorDeclarationNode node)
+    protected override void VisitConstructorEnter(ConstructorDeclaration node)
         => functionsToGenerate.Add(node.Metadata!, node.Body);
 }

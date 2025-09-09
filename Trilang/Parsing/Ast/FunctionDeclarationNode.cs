@@ -1,9 +1,8 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDeclarationNode>
+public class FunctionDeclarationNode : IDeclarationNode
 {
     public FunctionDeclarationNode(
         string name,
@@ -15,12 +14,6 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
         Parameters = parameters;
         ReturnType = returnType;
         Body = body;
-
-        foreach (var parameter in parameters)
-            parameter.Parent = this;
-
-        ReturnType.Parent = this;
-        Body.Parent = this;
     }
 
     public static FunctionDeclarationNode Create(
@@ -30,44 +23,6 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
         BlockStatementNode body)
         => new FunctionDeclarationNode(name, parameters, returnType, body);
 
-    public static bool operator ==(FunctionDeclarationNode? left, FunctionDeclarationNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(FunctionDeclarationNode? left, FunctionDeclarationNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(FunctionDeclarationNode? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Name == other.Name &&
-               Parameters.SequenceEqual(other.Parameters) &&
-               ReturnType.Equals(other.ReturnType) &&
-               Body.Equals(other.Body) &&
-               Equals(Metadata, other.Metadata);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((FunctionDeclarationNode)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Name, Parameters, ReturnType, Body);
-
     public override string ToString()
     {
         var formatter = new Formatter();
@@ -76,16 +31,11 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitFunction(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitFunction(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformFunction(this);
-
-    public ISyntaxNode? Parent { get; set; }
 
     public string Name { get; }
 
@@ -94,6 +44,4 @@ public class FunctionDeclarationNode : IDeclarationNode, IEquatable<FunctionDecl
     public IInlineTypeNode ReturnType { get; }
 
     public BlockStatementNode Body { get; }
-
-    public FunctionMetadata? Metadata { get; set; }
 }

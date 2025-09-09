@@ -1,15 +1,14 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class RestrictFieldAccess : Visitor, ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
 
-    protected override void VisitMemberAccessExit(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessExit(MemberAccessExpression node)
     {
         if (node.IsFirstMember)
             return;

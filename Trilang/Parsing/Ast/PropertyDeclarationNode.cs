@@ -1,14 +1,10 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
 // TODO: don't generate backing field if it's not needed
-public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarationNode>
+public class PropertyDeclarationNode : ISyntaxNode
 {
-    private PropertyGetterNode? getter;
-    private PropertySetterNode? setter;
-
     public PropertyDeclarationNode(string name, IInlineTypeNode type)
         : this(name, type, null, null)
     {
@@ -24,53 +20,7 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
         Type = type;
         Getter = getter;
         Setter = setter;
-
-        Type.Parent = this;
-
-        if (Getter is not null)
-            Getter.Parent = this;
-
-        if (Setter is not null)
-            Setter.Parent = this;
     }
-
-    public static bool operator ==(PropertyDeclarationNode? left, PropertyDeclarationNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(PropertyDeclarationNode? left, PropertyDeclarationNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(PropertyDeclarationNode? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Name == other.Name &&
-               Type.Equals(other.Type) &&
-               Equals(Getter, other.Getter) &&
-               Equals(Setter, other.Setter) &&
-               Equals(Metadata, other.Metadata);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((PropertyDeclarationNode)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Name, Type);
 
     public override string ToString()
     {
@@ -80,44 +30,17 @@ public class PropertyDeclarationNode : ISyntaxNode, IEquatable<PropertyDeclarati
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitProperty(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitProperty(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformProperty(this);
-
-    public ISyntaxNode? Parent { get; set; }
 
     public string Name { get; }
 
     public IInlineTypeNode Type { get; }
 
-    public PropertyGetterNode? Getter
-    {
-        get => getter;
-        set
-        {
-            getter = value;
+    public PropertyGetterNode? Getter { get; }
 
-            if (getter is not null)
-                getter.Parent = this;
-        }
-    }
-
-    public PropertySetterNode? Setter
-    {
-        get => setter;
-        set
-        {
-            setter = value;
-
-            if (setter is not null)
-                setter.Parent = this;
-        }
-    }
-
-    public PropertyMetadata? Metadata { get; set; }
+    public PropertySetterNode? Setter { get; }
 }

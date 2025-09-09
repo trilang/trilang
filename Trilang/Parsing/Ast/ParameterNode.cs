@@ -1,51 +1,14 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class ParameterNode : ISyntaxNode, IEquatable<ParameterNode>
+public class ParameterNode : ISyntaxNode
 {
     public ParameterNode(string name, IInlineTypeNode type)
     {
         Name = name;
         Type = type;
     }
-
-    public static bool operator ==(ParameterNode? left, ParameterNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(ParameterNode? left, ParameterNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(ParameterNode? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Name == other.Name &&
-               Type.Equals(other.Type) &&
-               Equals(Metadata, other.Metadata);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((ParameterNode)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Name, Type);
 
     public override string ToString()
     {
@@ -55,20 +18,13 @@ public class ParameterNode : ISyntaxNode, IEquatable<ParameterNode>
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitParameter(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitParameter(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformParameter(this);
-
-    public ISyntaxNode? Parent { get; set; }
 
     public string Name { get; }
 
     public IInlineTypeNode Type { get; }
-
-    public ParameterMetadata? Metadata { get; set; }
 }

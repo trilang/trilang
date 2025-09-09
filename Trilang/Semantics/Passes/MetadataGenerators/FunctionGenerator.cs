@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class FunctionGenerator
 {
-    private record Item(FunctionTypeMetadata Metadata, FunctionDeclarationNode Node);
+    private record Item(FunctionTypeMetadata Metadata, FunctionDeclaration Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -21,7 +21,7 @@ internal class FunctionGenerator
     {
         foreach (var (_, symbol) in functions)
         {
-            if (symbol.Node is not FunctionDeclarationNode function)
+            if (symbol.Node is not FunctionDeclaration function)
                 continue;
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;

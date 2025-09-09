@@ -1,10 +1,10 @@
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Lower;
 
 public class Lowering
 {
-    public void Lower(SyntaxTree tree, LoweringOptions options)
+    public void Lower(SemanticTree tree, LoweringOptions options)
     {
         // TODO: immutable tree?
         tree.Accept(new ReplaceIfDirectives(options.Directives));

@@ -1,41 +1,41 @@
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;
 
 public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
 {
-    private TypeSymbol(TypeSymbolKind typeKind, string name, ISyntaxNode node)
+    private TypeSymbol(TypeSymbolKind typeKind, string name, ISemanticNode node)
     {
         TypeKind = typeKind;
         Name = name;
         Node = node;
     }
 
-    public static TypeSymbol Type(TypeDeclarationNode node)
+    public static TypeSymbol Type(TypeDeclaration node)
         => new TypeSymbol(TypeSymbolKind.Type, node.Name, node);
 
-    public static TypeSymbol Array(ArrayTypeNode node)
+    public static TypeSymbol Array(ArrayType node)
         => new TypeSymbol(TypeSymbolKind.Array, node.Name, node);
 
-    public static TypeSymbol Alias(TypeAliasDeclarationNode node)
+    public static TypeSymbol Alias(TypeAliasDeclaration node)
         => new TypeSymbol(TypeSymbolKind.Alias, node.FullName, node);
 
-    public static TypeSymbol FunctionType(FunctionTypeNode node)
+    public static TypeSymbol FunctionType(FunctionType node)
         => new TypeSymbol(TypeSymbolKind.Function, node.Name, node);
 
-    public static TypeSymbol Interface(InterfaceNode node)
+    public static TypeSymbol Interface(Interface node)
         => new TypeSymbol(TypeSymbolKind.Interface, node.Name, node);
 
-    public static TypeSymbol DiscriminatedUnion(DiscriminatedUnionNode node)
+    public static TypeSymbol DiscriminatedUnion(DiscriminatedUnion node)
         => new TypeSymbol(TypeSymbolKind.DiscriminatedUnion, node.Name, node);
 
-    public static TypeSymbol Tuple(TupleTypeNode node)
+    public static TypeSymbol Tuple(TupleType node)
         => new TypeSymbol(TypeSymbolKind.Tuple, node.Name, node);
 
-    public static TypeSymbol OpenGenericType(TypeDeclarationNode node)
+    public static TypeSymbol OpenGenericType(TypeDeclaration node)
         => new TypeSymbol(TypeSymbolKind.OpenGenericType, node.FullName, node);
 
-    public static TypeSymbol GenericType(GenericTypeNode node)
+    public static TypeSymbol GenericType(GenericType node)
         => new TypeSymbol(TypeSymbolKind.GenericType, node.Name, node);
 
     public static bool operator ==(TypeSymbol? left, TypeSymbol? right)
@@ -81,7 +81,7 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
 
     public string Name { get; }
 
-    public ISyntaxNode Node { get; }
+    public ISemanticNode Node { get; }
 
     public bool IsType => TypeKind == TypeSymbolKind.Type;
 

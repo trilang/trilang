@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class TupleGenerator
 {
-    private record Item(TupleMetadata Metadata, TupleTypeNode Node);
+    private record Item(TupleMetadata Metadata, TupleType Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -24,7 +24,7 @@ internal class TupleGenerator
             if (!symbol.IsTuple)
                 continue;
 
-            if (symbol.Node is not TupleTypeNode tupleNode)
+            if (symbol.Node is not TupleType tupleNode)
                 throw new SemanticAnalysisException();
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;

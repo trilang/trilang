@@ -16,7 +16,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new LiteralExpressionNode(LiteralExpressionKind.Integer, 5)
@@ -40,7 +40,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new UnaryExpressionNode(
@@ -68,7 +68,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new UnaryExpressionNode(
@@ -96,7 +96,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new UnaryExpressionNode(
@@ -124,7 +124,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new UnaryExpressionNode(
@@ -155,7 +155,7 @@ public class ParseExpressionTests
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 "main", [], new TypeNode("void"), new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "x",
                         new TypeNode("i32"),
                         new UnaryExpressionNode(
@@ -189,7 +189,7 @@ public class ParseExpressionTests
               }
               """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new BinaryExpressionNode(
@@ -218,7 +218,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new BinaryExpressionNode(
@@ -247,7 +247,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new BinaryExpressionNode(
@@ -276,7 +276,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new BinaryExpressionNode(
@@ -305,7 +305,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("bool"),
             new BinaryExpressionNode(
@@ -336,7 +336,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("bool"),
             new BinaryExpressionNode(
@@ -365,7 +365,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("bool"),
             new BinaryExpressionNode(
@@ -394,7 +394,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("bool"),
             new BinaryExpressionNode(
@@ -423,7 +423,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("bool"),
             new BinaryExpressionNode(
@@ -452,7 +452,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("bool"),
             new BinaryExpressionNode(
@@ -483,7 +483,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("bool"),
             new BinaryExpressionNode(
@@ -512,7 +512,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("bool"),
             new BinaryExpressionNode(
@@ -578,7 +578,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new BinaryExpressionNode(
@@ -610,7 +610,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new BinaryExpressionNode(
@@ -642,7 +642,7 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationStatementNode(
+        var variableDeclarationNode = new VariableDeclarationNode(
             "x",
             new TypeNode("i32"),
             new BinaryExpressionNode(

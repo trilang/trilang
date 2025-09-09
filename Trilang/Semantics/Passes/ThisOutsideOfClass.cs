@@ -1,19 +1,18 @@
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class ThisOutsideOfClass : Visitor, ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
     {
         if (!node.IsThis)
             return;
 
-        var type = node.FindInParent<TypeDeclarationNode>();
+        var type = node.FindInParent<TypeDeclaration>();
         if (type is not null)
             return;
 

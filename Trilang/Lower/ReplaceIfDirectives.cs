@@ -1,5 +1,5 @@
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Lower;
 
@@ -10,12 +10,12 @@ internal class ReplaceIfDirectives : Visitor
     public ReplaceIfDirectives(IEnumerable<string> directives)
         => this.directives = [..directives];
 
-    protected override void VisitTreeEnter(SyntaxTree node)
+    protected override void VisitTreeEnter(SemanticTree node)
     {
         for (var i = 0; i < node.Declarations.Count; i++)
         {
             var declaration = node.Declarations[i];
-            if (declaration is not IfDirectiveNode ifDirective)
+            if (declaration is not IfDirective ifDirective)
                 continue;
 
             node.Remove(declaration);
@@ -25,18 +25,18 @@ internal class ReplaceIfDirectives : Visitor
                 statements = ifDirective.Then;
 
             foreach (var statement in statements)
-                node.Insert(i, (IDeclarationNode)statement);
+                node.Insert(i, (IDeclaration)statement);
 
             i--;
         }
     }
 
-    protected override void VisitBlockEnter(BlockStatementNode node)
+    protected override void VisitBlockEnter(BlockStatement node)
     {
         for (var i = 0; i < node.Statements.Count; i++)
         {
             var statement = node.Statements[i];
-            if (statement is not IfDirectiveNode ifDirective)
+            if (statement is not IfDirective ifDirective)
                 continue;
 
             node.Remove(statement);
@@ -46,7 +46,7 @@ internal class ReplaceIfDirectives : Visitor
                 statements = ifDirective.Then;
 
             foreach (var nestedStatement in statements)
-                node.Insert(i, (IStatementNode)nestedStatement);
+                node.Insert(i, (IStatement)nestedStatement);
 
             i--;
         }

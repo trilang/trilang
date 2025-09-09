@@ -2,7 +2,7 @@ using Trilang.Parsing.Ast;
 
 namespace Trilang.Parsing;
 
-public interface IVisitor
+public interface INodeVisitor
 {
     void VisitArrayAccess(ArrayAccessExpressionNode node);
 
@@ -24,8 +24,6 @@ public interface IVisitor
 
     void VisitDiscriminatedUnion(DiscriminatedUnionNode node);
 
-    void VisitExpressionBlock(ExpressionBlockNode node);
-
     void VisitExpressionStatement(ExpressionStatementNode node);
 
     void VisitFunction(FunctionDeclarationNode node);
@@ -33,8 +31,6 @@ public interface IVisitor
     void VisitFunctionType(FunctionTypeNode node);
 
     void VisitGenericType(GenericTypeNode node);
-
-    void VisitGoTo(GoToNode node);
 
     void VisitIfDirective(IfDirectiveNode node);
 
@@ -46,9 +42,7 @@ public interface IVisitor
 
     void VisitInterfaceMethod(InterfaceMethodNode node);
 
-    void VisitAsExpression(IsExpressionNode node);
-
-    void VisitLabel(LabelNode node);
+    void VisitIsExpression(IsExpressionNode node);
 
     void VisitLiteral(LiteralExpressionNode node);
 
@@ -86,7 +80,7 @@ public interface IVisitor
 
     void VisitUnaryExpression(UnaryExpressionNode node);
 
-    void VisitVariable(VariableDeclarationStatementNode node);
+    void VisitVariable(VariableDeclarationNode node);
 
     void VisitWhile(WhileNode node);
 }

@@ -41,7 +41,7 @@ internal class ControlFlowGraphComparer : IEqualityComparer<ControlFlowGraph>
                 throw new Exception("Block node doesn't match.");
 
             foreach (var (xStatement, yStatement) in xBlock.Statements.Zip(yBlock.Statements))
-                if (!SyntaxComparer.Instance.Equals(xStatement, yStatement))
+                if (!SemanticComparer.Instance.Equals(xStatement, yStatement))
                     throw new Exception("Statement doesn't match.");
         }
 

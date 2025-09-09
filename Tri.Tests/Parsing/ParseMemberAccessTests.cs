@@ -22,7 +22,7 @@ public class ParseMemberAccessTests
                 [new ParameterNode("x", new ArrayTypeNode(new TypeNode("i32")))],
                 new TypeNode("void"),
                 new BlockStatementNode([
-                    new VariableDeclarationStatementNode(
+                    new VariableDeclarationNode(
                         "a",
                         new TypeNode("i32"),
                         new ArrayAccessExpressionNode(

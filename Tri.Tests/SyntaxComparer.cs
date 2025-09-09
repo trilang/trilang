@@ -2,6 +2,7 @@ using Trilang.Parsing.Ast;
 
 namespace Tri.Tests;
 
+// ReSharper disable all UnusedParameter.Local
 internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 {
     public static readonly SyntaxComparer Instance = new SyntaxComparer();
@@ -33,8 +34,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 => CompareContinueNode(x1, y1),
             (DiscriminatedUnionNode x1, DiscriminatedUnionNode y1)
                 => CompareDiscriminatedUnionNode(x1, y1),
-            (ExpressionBlockNode x1, ExpressionBlockNode y1)
-                => CompareExpressionBlockNode(x1, y1),
             (ExpressionStatementNode x1, ExpressionStatementNode y1)
                 => CompareExpressionStatementNode(x1, y1),
             (FunctionDeclarationNode x1, FunctionDeclarationNode y1)
@@ -43,8 +42,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 => CompareFunctionTypeNode(x1, y1),
             (GenericTypeNode x1, GenericTypeNode y1)
                 => CompareGenericTypeNode(x1, y1),
-            (GoToNode x1, GoToNode y1)
-                => CompareGoToNode(x1, y1),
             (IfDirectiveNode x1, IfDirectiveNode y1)
                 => CompareIfDirectiveNode(x1, y1),
             (IfStatementNode x1, IfStatementNode y1)
@@ -57,8 +54,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 => CompareInterfacePropertyNode(x1, y1),
             (IsExpressionNode x1, IsExpressionNode y1)
                 => CompareAsExpressionNode(x1, y1),
-            (LabelNode x1, LabelNode y1)
-                => CompareLabelNode(x1, y1),
             (LiteralExpressionNode x1, LiteralExpressionNode y1)
                 => CompareLiteralExpressionNode(x1, y1),
             (MemberAccessExpressionNode x1, MemberAccessExpressionNode y1)
@@ -95,7 +90,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 => CompareTypeNode(x1, y1),
             (UnaryExpressionNode x1, UnaryExpressionNode y1)
                 => CompareUnaryExpressionNode(x1, y1),
-            (VariableDeclarationStatementNode x1, VariableDeclarationStatementNode y1)
+            (VariableDeclarationNode x1, VariableDeclarationNode y1)
                 => CompareVariableDeclarationStatementNode(x1, y1),
             (WhileNode x1, WhileNode y1)
                 => CompareWhileNode(x1, y1),
@@ -111,9 +106,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Index, y.Index))
             throw new Exception("Index doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -121,9 +113,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
     {
         if (!Equals(x.ElementType, y.ElementType))
             throw new Exception("ElementType doesn't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -138,9 +127,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!Equals(x.Right, y.Right))
             throw new Exception("Right doesn't match.");
-
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -191,9 +177,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Body, y.Body))
             throw new Exception("Body doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -206,17 +189,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
     {
         if (!x.Types.SequenceEqual(y.Types, this))
             throw new Exception("Cases don't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
-        return true;
-    }
-
-    private bool CompareExpressionBlockNode(ExpressionBlockNode x, ExpressionBlockNode y)
-    {
-        if (!x.Statements.SequenceEqual(y.Statements, this))
-            throw new Exception("Expression doesn't match.");
 
         return true;
     }
@@ -243,9 +215,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Body, y.Body))
             throw new Exception("Body doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -257,30 +226,13 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.ReturnType, y.ReturnType))
             throw new Exception("ReturnType doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
     private bool CompareGenericTypeNode(GenericTypeNode x, GenericTypeNode y)
     {
-        if (x.Name != y.Name)
-            throw new Exception("BaseType doesn't match.");
-
         if (!x.TypeArguments.SequenceEqual(y.TypeArguments, this))
             throw new Exception("Arguments don't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
-        return true;
-    }
-
-    private bool CompareGoToNode(GoToNode x, GoToNode y)
-    {
-        if (x.Label != y.Label)
-            throw new Exception($"Label doesn't match. {x.Label} != {y.Label}.");
 
         return true;
     }
@@ -324,9 +276,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.ReturnType, y.ReturnType))
             throw new Exception("ReturnType doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -337,9 +286,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!x.Methods.SequenceEqual(y.Methods, this))
             throw new Exception("Methods don't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -358,9 +304,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (x.SetterModifier != y.SetterModifier)
             throw new Exception($"HasSetter doesn't match. {x.SetterModifier} != {y.SetterModifier}.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -371,17 +314,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!Equals(x.Type, y.Type))
             throw new Exception("TargetType doesn't match.");
-
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
-            throw new Exception("Metadata doesn't match.");
-
-        return true;
-    }
-
-    private bool CompareLabelNode(LabelNode x, LabelNode y)
-    {
-        if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
 
         return true;
     }
@@ -394,9 +326,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!x.Value.Equals(y.Value))
             throw new Exception($"Value doesn't match. {x.Value} != {y.Value}.");
 
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -407,12 +336,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (x.Name != y.Name)
             throw new Exception($"Member doesn't match. {x.Name} != {y.Name}.");
-
-        if (!Equals(x.Reference, y.Reference))
-            throw new Exception("Reference doesn't match.");
-
-        if (x.AccessKind != y.AccessKind)
-            throw new Exception($"AccessKind doesn't match. {x.AccessKind} != {y.AccessKind}.");
 
         return true;
     }
@@ -437,9 +360,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Body, y.Body))
             throw new Exception("Body doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -451,9 +371,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Size, y.Size))
             throw new Exception("Sizes don't match.");
 
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -464,9 +381,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!x.Parameters.SequenceEqual(y.Parameters, this))
             throw new Exception("Arguments don't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -483,9 +397,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!Equals(x.Type, y.Type))
             throw new Exception("Type doesn't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -504,9 +415,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Setter, y.Setter))
             throw new Exception("Setter doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -518,9 +426,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Body, y.Body))
             throw new Exception("Body doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -531,9 +436,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!Equals(x.Body, y.Body))
             throw new Exception("Body doesn't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -559,9 +461,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!x.Expressions.SequenceEqual(y.Expressions, this))
             throw new Exception("Elements don't match.");
 
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -569,9 +468,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
     {
         if (!x.Types.SequenceEqual(y.Types, this))
             throw new Exception("Elements don't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -589,9 +485,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!Equals(x.Type, y.Type))
             throw new Exception("Type doesn't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -616,9 +509,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!x.Methods.SequenceEqual(y.Methods, this))
             throw new Exception("Methods don't match.");
 
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
@@ -626,9 +516,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
     {
         if (x.Name != y.Name)
             throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }
@@ -641,13 +528,10 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         if (!Equals(x.Operand, y.Operand))
             throw new Exception("Operand doesn't match.");
 
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
-            throw new Exception("Metadata doesn't match.");
-
         return true;
     }
 
-    private bool CompareVariableDeclarationStatementNode(VariableDeclarationStatementNode x, VariableDeclarationStatementNode y)
+    private bool CompareVariableDeclarationStatementNode(VariableDeclarationNode x, VariableDeclarationNode y)
     {
         if (x.Name != y.Name)
             throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
@@ -657,9 +541,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!Equals(x.Expression, y.Expression))
             throw new Exception("Initializer doesn't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
 
         return true;
     }

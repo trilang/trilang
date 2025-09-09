@@ -1,9 +1,9 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
-using static Trilang.Parsing.Ast.BinaryExpressionKind;
-using static Trilang.Parsing.Ast.UnaryExpressionKind;
+using Trilang.Semantics.Model;
+using static Trilang.Semantics.Model.BinaryExpressionKind;
+using static Trilang.Semantics.Model.UnaryExpressionKind;
 using static Trilang.Metadata.TypeMetadata;
+using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics.Passes;
 
@@ -12,7 +12,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
     private IEnumerable<string> directives = null!;
     private SymbolTableMap symbolTableMap = null!;
 
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
     {
         directives = context.Directives;
         symbolTableMap = context.SymbolTableMap!;
@@ -20,7 +20,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         tree.Accept(this);
     }
 
-    public void VisitArrayAccess(ArrayAccessExpressionNode node)
+    public void VisitArrayAccess(ArrayAccessExpression node)
     {
         node.Member.Accept(this);
         node.Index.Accept(this);
@@ -34,7 +34,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.ReturnTypeMetadata = typeArray.ItemMetadata;
     }
 
-    public void VisitArrayType(ArrayTypeNode node)
+    public void VisitArrayType(ArrayType node)
     {
         node.ElementType.Accept(this);
 
@@ -43,7 +43,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
                         throw new SemanticAnalysisException($"Unknown array type '{node.Name}'");
     }
 
-    public void VisitBinaryExpression(BinaryExpressionNode node)
+    public void VisitBinaryExpression(BinaryExpression node)
     {
         node.Left.Accept(this);
         node.Right.Accept(this);
@@ -102,13 +102,13 @@ internal class TypeChecker : IVisitor, ISemanticPass
         else if (node.Kind is Assignment or AdditionAssignment or
                      SubtractionAssignment or MultiplicationAssignment or
                      DivisionAssignment or ModulusAssignment &&
-                 node.Left is MemberAccessExpressionNode or ArrayAccessExpressionNode &&
+                 node.Left is MemberAccessExpression or ArrayAccessExpression &&
                  Equals(node.Left.ReturnTypeMetadata, node.Right.ReturnTypeMetadata))
         {
             node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
         }
         else if (node.Kind is AdditionAssignment or SubtractionAssignment or MultiplicationAssignment or DivisionAssignment or ModulusAssignment &&
-                 node.Left is MemberAccessExpressionNode &&
+                 node.Left is MemberAccessExpression &&
                  (Equals(node.Right.ReturnTypeMetadata, I8) ||
                   Equals(node.Right.ReturnTypeMetadata, I16) ||
                   Equals(node.Right.ReturnTypeMetadata, I32) ||
@@ -123,7 +123,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
             node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
         }
         else if (node.Kind is BitwiseAndAssignment or BitwiseOrAssignment or BitwiseXorAssignment &&
-                 node.Left is MemberAccessExpressionNode &&
+                 node.Left is MemberAccessExpression &&
                  (Equals(node.Right.ReturnTypeMetadata, I8) ||
                   Equals(node.Right.ReturnTypeMetadata, I16) ||
                   Equals(node.Right.ReturnTypeMetadata, I32) ||
@@ -141,17 +141,17 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitBlock(BlockStatementNode node)
+    public void VisitBlock(BlockStatement node)
     {
         foreach (var statement in node.Statements)
             statement.Accept(this);
     }
 
-    public void VisitBreak(BreakNode node)
+    public void VisitBreak(Break node)
     {
     }
 
-    public void VisitCall(CallExpressionNode node)
+    public void VisitCall(CallExpression node)
     {
         // TODO: unused return value
         node.Member.Accept(this);
@@ -171,13 +171,13 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitCast(CastExpressionNode node)
+    public void VisitCast(CastExpression node)
     {
         node.Type.Accept(this);
         node.Expression.Accept(this);
     }
 
-    public void VisitConstructor(ConstructorDeclarationNode node)
+    public void VisitConstructor(ConstructorDeclaration node)
     {
         foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
@@ -185,11 +185,11 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Body.Accept(this);
     }
 
-    public void VisitContinue(ContinueNode node)
+    public void VisitContinue(Continue node)
     {
     }
 
-    public void VisitDiscriminatedUnion(DiscriminatedUnionNode node)
+    public void VisitDiscriminatedUnion(DiscriminatedUnion node)
     {
         // TODO: eliminate duplicates
         // TODO: restrict recursive types
@@ -203,16 +203,16 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Metadata = metadata;
     }
 
-    public void VisitExpressionBlock(ExpressionBlockNode node)
+    public void VisitExpressionBlock(ExpressionBlock node)
         => throw new SemanticAnalysisException("Expression blocks are not supported");
 
-    public void VisitExpressionStatement(ExpressionStatementNode node)
+    public void VisitExpressionStatement(ExpressionStatement node)
     {
         // TODO: check whether the result of expression is used
         node.Expression.Accept(this);
     }
 
-    public void VisitFunctionSignature(FunctionDeclarationNode node)
+    public void VisitFunctionSignature(FunctionDeclaration node)
     {
         var parameters = new ParameterMetadata[node.Parameters.Count];
         for (var i = 0; i < node.Parameters.Count; i++)
@@ -240,10 +240,10 @@ internal class TypeChecker : IVisitor, ISemanticPass
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
     }
 
-    public void VisitFunction(FunctionDeclarationNode node)
+    public void VisitFunction(FunctionDeclaration node)
         => node.Body.Accept(this);
 
-    public void VisitFunctionType(FunctionTypeNode node)
+    public void VisitFunctionType(FunctionType node)
     {
         foreach (var parameterType in node.ParameterTypes)
             parameterType.Accept(this);
@@ -260,7 +260,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Metadata = functionType;
     }
 
-    public void VisitGenericType(GenericTypeNode node)
+    public void VisitGenericType(GenericType node)
     {
         foreach (var typeArgument in node.TypeArguments)
             typeArgument.Accept(this);
@@ -273,11 +273,11 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Metadata = metadata;
     }
 
-    public void VisitGoTo(GoToNode node)
+    public void VisitGoTo(GoTo node)
     {
     }
 
-    public void VisitIfDirective(IfDirectiveNode node)
+    public void VisitIfDirective(IfDirective node)
     {
         if (directives.Contains(node.DirectiveName))
         {
@@ -291,7 +291,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitIf(IfStatementNode node)
+    public void VisitIf(IfStatement node)
     {
         // TODO: data flow
         node.Condition.Accept(this);
@@ -302,7 +302,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
             throw new SemanticAnalysisException("The condition returns non-boolean type.");
     }
 
-    public void VisitInterface(InterfaceNode node)
+    public void VisitInterface(Interface node)
     {
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var metadata = typeProvider.GetType(node.Name) as InterfaceMetadata ??
@@ -317,36 +317,36 @@ internal class TypeChecker : IVisitor, ISemanticPass
             method.Accept(this);
     }
 
-    public void VisitInterfaceProperty(InterfacePropertyNode node)
+    public void VisitInterfaceProperty(InterfaceProperty node)
     {
         node.Type.Accept(this);
 
-        var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
+        var type = (InterfaceMetadata)((Interface)node.Parent!).Metadata!;
         node.Metadata = type.GetProperty(node.Name);
     }
 
-    public void VisitInterfaceMethod(InterfaceMethodNode node)
+    public void VisitInterfaceMethod(InterfaceMethod node)
     {
         foreach (var parameter in node.ParameterTypes)
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);
 
-        var type = (InterfaceMetadata)((InterfaceNode)node.Parent!).Metadata!;
+        var type = (InterfaceMetadata)((Interface)node.Parent!).Metadata!;
         node.Metadata = type.GetMethod(node.Name);
     }
 
-    public void VisitAsExpression(IsExpressionNode node)
+    public void VisitIsExpression(IsExpression node)
     {
         node.Expression.Accept(this);
         node.Type.Accept(this);
     }
 
-    public void VisitLabel(LabelNode node)
+    public void VisitLabel(Label node)
     {
     }
 
-    public void VisitLiteral(LiteralExpressionNode node)
+    public void VisitLiteral(LiteralExpression node)
     {
         node.ReturnTypeMetadata = node.Kind switch
         {
@@ -361,7 +361,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         };
     }
 
-    public void VisitMemberAccess(MemberAccessExpressionNode node)
+    public void VisitMemberAccess(MemberAccessExpression node)
     {
         if (node.IsFirstMember)
         {
@@ -375,7 +375,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
             throw new SemanticAnalysisException($"Cannot determine return type for member '{node.Name}'");
     }
 
-    private void VisitFirstMemberAccess(MemberAccessExpressionNode node)
+    private void VisitFirstMemberAccess(MemberAccessExpression node)
     {
         var symbolTable = symbolTableMap.Get(node);
         var symbol = symbolTable.GetId(node.Name);
@@ -383,23 +383,23 @@ internal class TypeChecker : IVisitor, ISemanticPass
         {
             node.Reference = symbol.Node switch
             {
-                PropertyDeclarationNode propertyDeclarationNode
+                PropertyDeclaration propertyDeclarationNode
                     => propertyDeclarationNode.Metadata,
 
-                VariableDeclarationStatementNode variableStatementNode
+                VariableDeclaration variableStatementNode
                     => variableStatementNode.Metadata,
 
-                ParameterNode parameterNode
+                Parameter parameterNode
                     => parameterNode.Metadata,
 
-                FunctionDeclarationNode functionNode
+                FunctionDeclaration functionNode
                     => functionNode.Metadata,
 
-                MethodDeclarationNode methodNode
+                MethodDeclaration methodNode
                     => methodNode.Metadata,
 
-                TypeDeclarationNode typeDeclarationNode when node.IsThis
-                    => new ParameterMetadata(MemberAccessExpressionNode.This, typeDeclarationNode.Metadata!),
+                TypeDeclaration typeDeclarationNode when node.IsThis
+                    => new ParameterMetadata(MemberAccessExpression.This, typeDeclarationNode.Metadata!),
 
                 _ => throw new SemanticAnalysisException("Unknown symbol"),
             };
@@ -412,7 +412,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Reference = typeProvider.GetType(node.Name);
     }
 
-    private void VisitNestedMemberAccess(MemberAccessExpressionNode node)
+    private void VisitNestedMemberAccess(MemberAccessExpression node)
     {
         node.Member!.Accept(this);
 
@@ -421,7 +421,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
                          throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in '{returnTypeMetadata}'");
     }
 
-    public void VisitMethod(MethodDeclarationNode node)
+    public void VisitMethod(MethodDeclaration node)
     {
         foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
@@ -429,7 +429,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Body.Accept(this);
     }
 
-    public void VisitNewArray(NewArrayExpressionNode node)
+    public void VisitNewArray(NewArrayExpression node)
     {
         node.Type.Accept(this);
         node.Size.Accept(this);
@@ -437,7 +437,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.ReturnTypeMetadata = node.Type.Metadata;
     }
 
-    public void VisitNewObject(NewObjectExpressionNode node)
+    public void VisitNewObject(NewObjectExpression node)
     {
         node.Type.Accept(this);
 
@@ -454,16 +454,16 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Metadata = ctor;
     }
 
-    public void VisitNull(NullExpressionNode node)
+    public void VisitNull(NullExpression node)
     {
     }
 
-    public void VisitReturn(ReturnStatementNode node)
+    public void VisitReturn(ReturnStatement node)
     {
         node.Expression?.Accept(this);
 
         var expressionType = node.Expression?.ReturnTypeMetadata ?? TypeMetadata.Void;
-        var method = node.FindInParent<MethodDeclarationNode>();
+        var method = node.FindInParent<MethodDeclaration>();
         if (method is not null)
         {
             var methodReturnType = method.Metadata?.Type.ReturnType;
@@ -473,7 +473,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
             return;
         }
 
-        var constructor = node.FindInParent<ConstructorDeclarationNode>();
+        var constructor = node.FindInParent<ConstructorDeclaration>();
         if (constructor is not null)
         {
             if (!Equals(TypeMetadata.Void, expressionType))
@@ -482,7 +482,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
             return;
         }
 
-        var function = node.FindInParent<FunctionDeclarationNode>();
+        var function = node.FindInParent<FunctionDeclaration>();
         if (function is not null)
         {
             var functionReturnType = function.Metadata?.Type.ReturnType;
@@ -492,20 +492,20 @@ internal class TypeChecker : IVisitor, ISemanticPass
             return;
         }
 
-        var getter = node.FindInParent<PropertyGetterNode>();
+        var getter = node.FindInParent<PropertyGetter>();
         if (getter is not null)
         {
-            var getterReturnType = ((PropertyDeclarationNode)getter.Parent!).Metadata!.Type;
+            var getterReturnType = ((PropertyDeclaration)getter.Parent!).Metadata!.Type;
             if (!Equals(getterReturnType, expressionType))
                 throw new SemanticAnalysisException($"Property getter return type mismatch: expected '{getterReturnType}', got '{expressionType}'");
 
             return;
         }
 
-        var setter = node.FindInParent<PropertySetterNode>();
+        var setter = node.FindInParent<PropertySetter>();
         if (setter is not null)
         {
-            var setterReturnType = ((PropertyDeclarationNode)setter.Parent!).Metadata!.Type;
+            var setterReturnType = ((PropertyDeclaration)setter.Parent!).Metadata!.Type;
             if (!Equals(setterReturnType, expressionType))
                 throw new SemanticAnalysisException($"Property setter return type mismatch: expected '{setterReturnType}', got '{expressionType}'");
 
@@ -513,28 +513,28 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitParameter(ParameterNode node)
+    public void VisitParameter(Parameter node)
         => node.Type.Accept(this);
 
-    public void VisitProperty(PropertyDeclarationNode node)
+    public void VisitProperty(PropertyDeclaration node)
     {
         node.Type.Accept(this);
         node.Getter?.Accept(this);
         node.Setter?.Accept(this);
     }
 
-    public void VisitGetter(PropertyGetterNode node)
+    public void VisitGetter(PropertyGetter node)
     {
-        var property = (PropertyDeclarationNode)node.Parent!;
+        var property = (PropertyDeclaration)node.Parent!;
         var propertyMetadata = property.Metadata!;
         node.Metadata = propertyMetadata.Getter;
 
         node.Body?.Accept(this);
     }
 
-    public void VisitSetter(PropertySetterNode node)
+    public void VisitSetter(PropertySetter node)
     {
-        var property = (PropertyDeclarationNode)node.Parent!;
+        var property = (PropertyDeclaration)node.Parent!;
         var propertyMetadata = property.Metadata!;
         node.Metadata = propertyMetadata.Setter;
 
@@ -542,17 +542,17 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Body?.Accept(this);
     }
 
-    public void VisitTree(SyntaxTree node)
+    public void VisitTree(SemanticTree node)
     {
         // preprocess function to generate correct metadata before processing bodies/other types
-        foreach (var function in node.Declarations.OfType<FunctionDeclarationNode>())
+        foreach (var function in node.Declarations.OfType<FunctionDeclaration>())
             VisitFunctionSignature(function);
 
         foreach (var statement in node.Declarations)
             statement.Accept(this);
     }
 
-    public void VisitTuple(TupleExpressionNode node)
+    public void VisitTuple(TupleExpression node)
     {
         foreach (var expression in node.Expressions)
             expression.Accept(this);
@@ -573,7 +573,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.ReturnTypeMetadata = existingTuple;
     }
 
-    public void VisitTupleType(TupleTypeNode node)
+    public void VisitTupleType(TupleType node)
     {
         // TODO: restrict recursive types
         foreach (var type in node.Types)
@@ -588,7 +588,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Metadata = tuple;
     }
 
-    public void VisitTypeAlias(TypeAliasDeclarationNode node)
+    public void VisitTypeAlias(TypeAliasDeclaration node)
     {
         foreach (var genericArgument in node.GenericArguments)
             genericArgument.Accept(this);
@@ -600,7 +600,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
                         throw new SemanticAnalysisException($"Unknown type '{node.Name}'");
     }
 
-    public void VisitType(TypeDeclarationNode node)
+    public void VisitType(TypeDeclaration node)
     {
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var metadata = typeProvider.GetType(node.FullName);
@@ -636,33 +636,33 @@ internal class TypeChecker : IVisitor, ISemanticPass
             method.Accept(this);
     }
 
-    private void VisitPropertySignature(PropertyDeclarationNode node)
+    private void VisitPropertySignature(PropertyDeclaration node)
     {
-        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        var type = ((TypeDeclaration)node.Parent!).Metadata!;
         node.Metadata = type.GetProperty(node.Name);
     }
 
-    private void VisitConstructorSignature(ConstructorDeclarationNode node)
+    private void VisitConstructorSignature(ConstructorDeclaration node)
     {
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
-        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        var type = ((TypeDeclaration)node.Parent!).Metadata!;
         node.Metadata = type.GetConstructor(node.Parameters.Select(x => x.Type.Metadata!));
     }
 
-    private void VisitMethodSignature(MethodDeclarationNode node)
+    private void VisitMethodSignature(MethodDeclaration node)
     {
         foreach (var parameter in node.Parameters)
             parameter.Accept(this);
 
         node.ReturnType.Accept(this);
 
-        var type = ((TypeDeclarationNode)node.Parent!).Metadata!;
+        var type = ((TypeDeclaration)node.Parent!).Metadata!;
         node.Metadata = type.GetMethod(node.Name);
     }
 
-    public void VisitTypeNode(TypeNode node)
+    public void VisitTypeNode(Type node)
     {
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var type = typeProvider.GetType(node.Name) ??
@@ -671,7 +671,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Metadata = type;
     }
 
-    public void VisitUnaryExpression(UnaryExpressionNode node)
+    public void VisitUnaryExpression(UnaryExpression node)
     {
         node.Operand.Accept(this);
 
@@ -729,7 +729,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitVariable(VariableDeclarationStatementNode node)
+    public void VisitVariable(VariableDeclaration node)
     {
         // TODO: infer type
         // TODO: unused variable
@@ -745,7 +745,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Metadata = new VariableMetadata(node.Name, node.Type.Metadata);
     }
 
-    public void VisitWhile(WhileNode node)
+    public void VisitWhile(While node)
     {
         node.Condition.Accept(this);
         node.Body.Accept(this);

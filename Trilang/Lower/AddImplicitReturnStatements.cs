@@ -1,5 +1,5 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Trilang.Lower;
@@ -22,11 +22,11 @@ internal class AddImplicitReturnStatements
                 if (!visited.Add(block))
                     continue;
 
-                if (block.Statements.Any(x => x is ReturnStatementNode))
+                if (block.Statements.Any(x => x is ReturnStatement))
                     continue;
 
                 if (block.Next.Count == 0)
-                    block.BlockNode.Add(new ReturnStatementNode());
+                    block.BlockNode.Add(new ReturnStatement());
 
                 foreach (var next in block.Next)
                     q.Enqueue(next);

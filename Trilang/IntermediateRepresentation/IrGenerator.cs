@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
-using static Trilang.Parsing.Ast.BinaryExpressionKind;
+using Trilang.Semantics.Model;
+using static Trilang.Semantics.Model.BinaryExpressionKind;
 
 namespace Trilang.IntermediateRepresentation;
 
@@ -20,13 +20,13 @@ public class IrGenerator
 
     public IReadOnlyList<IrFunction> Generate(
         IEnumerable<ITypeMetadata> types,
-        IReadOnlyList<SyntaxTree> syntaxTrees)
+        IReadOnlyList<SemanticTree> semanticTrees)
     {
         var typeMetadata = types as ITypeMetadata[] ?? types.ToArray();
         layoutGenerator.Generate(typeMetadata);
 
         var functions = new List<IrFunction>();
-        var functionsToGenerate = discoveryPhase.Discover(typeMetadata, syntaxTrees);
+        var functionsToGenerate = discoveryPhase.Discover(typeMetadata, semanticTrees);
 
         foreach (var (metadata, body) in functionsToGenerate)
             functions.Add(GenerateFunction(metadata, body));
@@ -34,13 +34,13 @@ public class IrGenerator
         return functions;
     }
 
-    private IrFunction GenerateFunction(IFunctionMetadata method, BlockStatementNode body)
+    private IrFunction GenerateFunction(IFunctionMetadata method, BlockStatement body)
     {
         var builder = new IrBuilder();
 
         var parameterIndex = 0;
         if (!method.IsStatic)
-            builder.LoadParameter(MemberAccessExpressionNode.This, method.DeclaringType, parameterIndex++);
+            builder.LoadParameter(MemberAccessExpression.This, method.DeclaringType, parameterIndex++);
 
         foreach (var parameter in method.Parameters)
             builder.LoadParameter(parameter.Name, parameter.Type, parameterIndex++);
@@ -53,39 +53,39 @@ public class IrGenerator
         return IrFunction.FromMethod(method, code);
     }
 
-    private void GenerateStatement(IrBuilder builder, IStatementNode statementNode)
+    private void GenerateStatement(IrBuilder builder, IStatement statementNode)
     {
-        if (statementNode is BlockStatementNode blockStatementNode)
+        if (statementNode is BlockStatement blockStatementNode)
             GenerateBlock(builder, blockStatementNode);
-        else if (statementNode is BreakNode)
+        else if (statementNode is Break)
             Debug.Fail("The 'break' statement is not supported. It is replaced with 'goto' in lowering.");
-        else if (statementNode is ContinueNode)
+        else if (statementNode is Continue)
             Debug.Fail("The 'continue' statement is not supported. It is replaced with 'goto' in lowering.");
-        else if (statementNode is ExpressionStatementNode expressionStatementNode)
+        else if (statementNode is ExpressionStatement expressionStatementNode)
             GenerateExpression(builder, expressionStatementNode.Expression);
-        else if (statementNode is GoToNode goToNode)
+        else if (statementNode is GoTo goToNode)
             GenerateGoTo(builder, goToNode);
-        else if (statementNode is IfStatementNode ifStatementNode)
+        else if (statementNode is IfStatement ifStatementNode)
             GenerateIf(builder, ifStatementNode);
-        else if (statementNode is LabelNode labelNode)
+        else if (statementNode is Label labelNode)
             GenerateLabel(builder, labelNode);
-        else if (statementNode is ReturnStatementNode returnStatementNode)
+        else if (statementNode is ReturnStatement returnStatementNode)
             GenerateReturn(builder, returnStatementNode);
-        else if (statementNode is VariableDeclarationStatementNode variableDeclarationStatementNode)
+        else if (statementNode is VariableDeclaration variableDeclarationStatementNode)
             GenerateVariableDeclaration(builder, variableDeclarationStatementNode);
-        else if (statementNode is WhileNode)
+        else if (statementNode is While)
             Debug.Fail("The 'while' statement is not supported. It is replaced with 'if' in lowering.");
         else
             throw new ArgumentOutOfRangeException(nameof(statementNode));
     }
 
-    private void GenerateBlock(IrBuilder builder, BlockStatementNode node)
+    private void GenerateBlock(IrBuilder builder, BlockStatement node)
     {
         foreach (var statement in node.Statements)
             GenerateStatement(builder, statement);
     }
 
-    private void GenerateGoTo(IrBuilder builder, GoToNode node)
+    private void GenerateGoTo(IrBuilder builder, GoTo node)
     {
         var label = node.Label;
         var block = builder.FindBlock(label) ??
@@ -94,12 +94,12 @@ public class IrGenerator
         builder.Jump(block);
     }
 
-    private void GenerateIf(IrBuilder builder, IfStatementNode node)
+    private void GenerateIf(IrBuilder builder, IfStatement node)
     {
-        if (node.Then.Statements is not [GoToNode thenGoTo])
+        if (node.Then.Statements is not [GoTo thenGoTo])
             throw new Exception("The 'if' statement must have a 'goto' statement as the 'then' branch.");
 
-        if (node.Else!.Statements is not [GoToNode elseGoTo])
+        if (node.Else!.Statements is not [GoTo elseGoTo])
             throw new Exception("The 'if' statement must have a 'goto' statement as the 'else' branch.");
 
         var condition = GenerateExpression(builder, node.Condition)!.Value;
@@ -113,7 +113,7 @@ public class IrGenerator
         builder.Branch(condition, thenBlock, elseBlock);
     }
 
-    private void GenerateLabel(IrBuilder builder, LabelNode node)
+    private void GenerateLabel(IrBuilder builder, Label node)
     {
         var label = node.Name;
         var block = builder.FindBlock(label) ??
@@ -122,7 +122,7 @@ public class IrGenerator
         builder.UseBlock(block);
     }
 
-    private void GenerateReturn(IrBuilder builder, ReturnStatementNode node)
+    private void GenerateReturn(IrBuilder builder, ReturnStatement node)
     {
         var expression = node.Expression;
         if (expression is null)
@@ -138,7 +138,7 @@ public class IrGenerator
         builder.Return(register);
     }
 
-    private void GenerateVariableDeclaration(IrBuilder builder, VariableDeclarationStatementNode node)
+    private void GenerateVariableDeclaration(IrBuilder builder, VariableDeclaration node)
     {
         var expression = node.Expression;
         var expressionRegister = GenerateExpression(builder, expression);
@@ -148,52 +148,52 @@ public class IrGenerator
         builder.AddDefinition(node.Name, register);
     }
 
-    private Register? GenerateExpression(IrBuilder builder, IExpressionNode node)
+    private Register? GenerateExpression(IrBuilder builder, IExpression node)
         => node switch
         {
-            ArrayAccessExpressionNode arrayAccessExpressionNode
+            ArrayAccessExpression arrayAccessExpressionNode
                 => GenerateArrayAccess(builder, arrayAccessExpressionNode),
 
-            BinaryExpressionNode binaryExpressionNode
+            BinaryExpression binaryExpressionNode
                 => GenerateBinaryExpression(builder, binaryExpressionNode),
 
-            CallExpressionNode callExpressionNode
+            CallExpression callExpressionNode
                 => GenerateCall(builder, callExpressionNode),
 
-            CastExpressionNode castExpressionNode
+            CastExpression castExpressionNode
                 => GenerateCast(builder, castExpressionNode),
 
-            ExpressionBlockNode expressionBlockNode
+            ExpressionBlock expressionBlockNode
                 => GenerateExpressionBlock(builder, expressionBlockNode),
 
-            IsExpressionNode isExpressionNode
+            IsExpression isExpressionNode
                 => GenerateIsExpression(builder, isExpressionNode),
 
-            LiteralExpressionNode literalExpressionNode
+            LiteralExpression literalExpressionNode
                 => GenerateLiteral(builder, literalExpressionNode),
 
-            MemberAccessExpressionNode memberAccessExpressionNode
+            MemberAccessExpression memberAccessExpressionNode
                 => GenerateMemberAccess(builder, memberAccessExpressionNode),
 
-            NewArrayExpressionNode newArrayExpressionNode
+            NewArrayExpression newArrayExpressionNode
                 => GenerateNewArray(builder, newArrayExpressionNode),
 
-            NewObjectExpressionNode newObjectExpressionNode
+            NewObjectExpression newObjectExpressionNode
                 => GenerateNewObject(builder, newObjectExpressionNode),
 
-            NullExpressionNode nullExpressionNode
+            NullExpression nullExpressionNode
                 => GenerateNull(builder, nullExpressionNode),
 
-            TupleExpressionNode tupleExpressionNode
+            TupleExpression tupleExpressionNode
                 => GenerateTuple(builder, tupleExpressionNode),
 
-            UnaryExpressionNode unaryExpressionNode
+            UnaryExpression unaryExpressionNode
                 => GenerateUnaryExpression(builder, unaryExpressionNode),
 
             _ => throw new ArgumentOutOfRangeException(nameof(node)),
         };
 
-    private Register GenerateArrayAccess(IrBuilder builder, ArrayAccessExpressionNode node)
+    private Register GenerateArrayAccess(IrBuilder builder, ArrayAccessExpression node)
     {
         var array = GenerateExpression(builder, node.Member)!.Value;
         var index = GenerateExpression(builder, node.Index)!.Value;
@@ -202,7 +202,7 @@ public class IrGenerator
         return builder.GetElementPointer(array, index);
     }
 
-    private Register GenerateBinaryExpression(IrBuilder builder, BinaryExpressionNode node)
+    private Register GenerateBinaryExpression(IrBuilder builder, BinaryExpression node)
     {
         if (node.Kind is AdditionAssignment
             or SubtractionAssignment
@@ -309,13 +309,13 @@ public class IrGenerator
         throw new IrException("Unknown binary expression kind.");
     }
 
-    private Register GenerateCall(IrBuilder builder, CallExpressionNode node)
+    private Register GenerateCall(IrBuilder builder, CallExpression node)
     {
         var delegatePointerRegister = GenerateExpression(builder, node.Member)!.Value;
 
         var isStatic = false;
         var functionType = default(FunctionTypeMetadata);
-        if (node.Member is MemberAccessExpressionNode member)
+        if (node.Member is MemberAccessExpression member)
         {
             if (member.Reference is IFunctionMetadata function)
             {
@@ -346,7 +346,7 @@ public class IrGenerator
     private Register GenerateCall(
         IrBuilder builder,
         Register delegateRegister,
-        IReadOnlyList<IExpressionNode> parameters,
+        IReadOnlyList<IExpression> parameters,
         bool isStatic,
         FunctionTypeMetadata functionType)
     {
@@ -365,7 +365,7 @@ public class IrGenerator
         return builder.Call(delegateRegister, parameterRegisters, isStatic);
     }
 
-    private Register GenerateCast(IrBuilder builder, CastExpressionNode node)
+    private Register GenerateCast(IrBuilder builder, CastExpression node)
     {
         var expression = GenerateExpression(builder, node.Expression)!.Value;
         var result = builder.Cast(expression, node.Type.Metadata!);
@@ -373,20 +373,20 @@ public class IrGenerator
         return result;
     }
 
-    private Register GenerateExpressionBlock(IrBuilder builder, ExpressionBlockNode node)
+    private Register GenerateExpressionBlock(IrBuilder builder, ExpressionBlock node)
     {
         for (var i = 0; i < node.Statements.Count - 1; i++)
             GenerateStatement(builder, node.Statements[i]);
 
         // `ExpressionBlockNode` is generated by the compiler,
         // and the last statement will always be an expression
-        var lastExpression = (ExpressionStatementNode)node.Statements[^1];
+        var lastExpression = (ExpressionStatement)node.Statements[^1];
         var result = GenerateExpression(builder, lastExpression.Expression)!.Value;
 
         return result;
     }
 
-    private Register GenerateIsExpression(IrBuilder builder, IsExpressionNode node)
+    private Register GenerateIsExpression(IrBuilder builder, IsExpression node)
     {
         var expression = GenerateExpression(builder, node.Expression)!.Value;
         var result = builder.Is(expression, node.Type.Metadata!);
@@ -394,10 +394,10 @@ public class IrGenerator
         return result;
     }
 
-    private Register GenerateLiteral(IrBuilder builder, LiteralExpressionNode node)
+    private Register GenerateLiteral(IrBuilder builder, LiteralExpression node)
         => builder.LoadConst(node.ReturnTypeMetadata!, node.Value);
 
-    private Register? GenerateMemberAccess(IrBuilder builder, MemberAccessExpressionNode node)
+    private Register? GenerateMemberAccess(IrBuilder builder, MemberAccessExpression node)
     {
         if (node.IsFirstMember)
         {
@@ -420,7 +420,7 @@ public class IrGenerator
         return result;
     }
 
-    private Register GenerateNewArray(IrBuilder builder, NewArrayExpressionNode node)
+    private Register GenerateNewArray(IrBuilder builder, NewArrayExpression node)
     {
         var size = GenerateExpression(builder, node.Size)!.Value;
         size = builder.Deref(size, node.Size.ReturnTypeMetadata!);
@@ -428,7 +428,7 @@ public class IrGenerator
         return builder.ArrayAlloc((TypeArrayMetadata)node.Type.Metadata!, size);
     }
 
-    private Register GenerateNewObject(IrBuilder builder, NewObjectExpressionNode node)
+    private Register GenerateNewObject(IrBuilder builder, NewObjectExpression node)
     {
         var constructorMetadata = node.Metadata!;
 
@@ -438,15 +438,15 @@ public class IrGenerator
         return GenerateCall(builder, member, node.Parameters, false, constructorMetadata.Type);
     }
 
-    private Register GenerateNull(IrBuilder builder, NullExpressionNode node)
+    private Register GenerateNull(IrBuilder builder, NullExpression node)
         => builder.LoadConst(node.ReturnTypeMetadata, null);
 
-    private Register GenerateTuple(IrBuilder builder, TupleExpressionNode node)
+    private Register GenerateTuple(IrBuilder builder, TupleExpression node)
     {
         throw new NotImplementedException();
     }
 
-    private Register GenerateUnaryExpression(IrBuilder builder, UnaryExpressionNode node)
+    private Register GenerateUnaryExpression(IrBuilder builder, UnaryExpression node)
     {
         var operand = GenerateExpression(builder, node.Operand)!.Value;
         operand = builder.Deref(operand, node.Operand.ReturnTypeMetadata!);

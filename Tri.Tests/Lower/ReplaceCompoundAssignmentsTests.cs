@@ -1,23 +1,24 @@
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
-using static Trilang.Parsing.Ast.BinaryExpressionKind;
+using Trilang.Semantics.Model;
+using static Trilang.Semantics.Model.BinaryExpressionKind;
+using Type = Trilang.Semantics.Model.Type;
 
 namespace Tri.Tests.Lower;
 
 public class ReplaceCompoundAssignmentsTests
 {
-    private static SyntaxTree Parse(string code)
+    private static SemanticTree Parse(string code)
     {
         var parser = new Parser();
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        return tree;
+        return semanticTree;
     }
 
     [TestCase("+=", Addition)]
@@ -37,33 +38,33 @@ public class ReplaceCompoundAssignmentsTests
               }
               """);
         var parameterMetadata = new ParameterMetadata("x", TypeMetadata.I32);
-        var expected = new SyntaxTree([
-            new FunctionDeclarationNode(
+        var expected = new SemanticTree([
+            new FunctionDeclaration(
                 "test",
                 [
-                    new ParameterNode("x", new TypeNode("i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter("x", new Type("i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeNode("void") { Metadata = TypeMetadata.Void },
-                new BlockStatementNode([
-                    new ExpressionStatementNode(
-                        new BinaryExpressionNode(
+                new Type("void") { Metadata = TypeMetadata.Void },
+                new BlockStatement([
+                    new ExpressionStatement(
+                        new BinaryExpression(
                             Assignment,
-                            new MemberAccessExpressionNode("x")
+                            new MemberAccessExpression("x")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Write,
                             },
-                            new BinaryExpressionNode(
+                            new BinaryExpression(
                                 kind,
-                                new MemberAccessExpressionNode("x")
+                                new MemberAccessExpression("x")
                                 {
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1)
+                                new LiteralExpression(LiteralExpressionKind.Integer, 1)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32,
                                 }
@@ -90,6 +91,6 @@ public class ReplaceCompoundAssignmentsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

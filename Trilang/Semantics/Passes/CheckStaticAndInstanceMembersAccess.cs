@@ -1,17 +1,16 @@
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class CheckStaticAndInstanceMembersAccess : Visitor, ISemanticPass
 {
-    public void Analyze(SyntaxTree tree, SemanticPassContext context)
+    public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
 
-    protected override void VisitMemberAccessExit(MemberAccessExpressionNode node)
+    protected override void VisitMemberAccessExit(MemberAccessExpression node)
     {
-        if (node.Member is not MemberAccessExpressionNode parent)
+        if (node.Member is not MemberAccessExpression parent)
             return;
 
         if (node.Reference is null)

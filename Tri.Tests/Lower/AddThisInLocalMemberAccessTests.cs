@@ -2,22 +2,22 @@ using Trilang;
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Model;
 
 namespace Tri.Tests.Lower;
 
 public class AddThisInLocalMemberAccessTests
 {
-    private static SyntaxTree Parse(string code)
+    private static SemanticTree Parse(string code)
     {
         var parser = new Parser();
         var tree = parser.Parse(code);
 
         var semantic = new SemanticAnalysis();
-        semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
-        return tree;
+        return semanticTree;
     }
 
     [Test]
@@ -44,11 +44,11 @@ public class AddThisInLocalMemberAccessTests
             "count",
             TypeMetadata.I32
         );
-        var expected = new CallExpressionNode(
-            new MemberAccessExpressionNode(
-                new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+        var expected = new CallExpression(
+            new MemberAccessExpression(
+                new MemberAccessExpression(MemberAccessExpression.This)
                 {
-                    Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
+                    Reference = new ParameterMetadata(MemberAccessExpression.This, typeMetadata),
                     AccessKind = MemberAccessKind.Read,
                 },
                 "<>_get_count")
@@ -59,10 +59,10 @@ public class AddThisInLocalMemberAccessTests
             []
         );
 
-        var method = tree.Find<MethodDeclarationNode>();
-        var returnStatement = method?.Body.Find<ReturnStatementNode>();
+        var method = tree.Find<MethodDeclaration>();
+        var returnStatement = method?.Body.Find<ReturnStatement>();
         Assert.That(returnStatement, Is.Not.Null);
-        Assert.That(returnStatement.Expression, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(returnStatement.Expression, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
@@ -93,10 +93,10 @@ public class AddThisInLocalMemberAccessTests
             new FunctionTypeMetadata([], TypeMetadata.Void)
         );
 
-        var expected = new MemberAccessExpressionNode(
-            new MemberAccessExpressionNode(MemberAccessExpressionNode.This)
+        var expected = new MemberAccessExpression(
+            new MemberAccessExpression(MemberAccessExpression.This)
             {
-                Reference = new ParameterMetadata(MemberAccessExpressionNode.This, typeMetadata),
+                Reference = new ParameterMetadata(MemberAccessExpression.This, typeMetadata),
                 AccessKind = MemberAccessKind.Read,
             },
             "print")
@@ -105,8 +105,8 @@ public class AddThisInLocalMemberAccessTests
             AccessKind = MemberAccessKind.Read,
         };
 
-        var returnStatement = tree.Find<CallExpressionNode>();
+        var returnStatement = tree.Find<CallExpression>();
         Assert.That(returnStatement, Is.Not.Null);
-        Assert.That(returnStatement.Member, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(returnStatement.Member, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

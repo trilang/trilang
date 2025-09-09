@@ -1,41 +1,9 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class NullExpressionNode : IExpressionNode, IEquatable<NullExpressionNode>
+public class NullExpressionNode : IExpressionNode
 {
-    public static bool operator ==(NullExpressionNode? left, NullExpressionNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(NullExpressionNode? left, NullExpressionNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(NullExpressionNode? other)
-    {
-        if (other is null)
-            return false;
-
-        return true;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((NullExpressionNode)obj);
-    }
-
-    public override int GetHashCode()
-        => 0;
-
     public override string ToString()
     {
         var formatter = new Formatter();
@@ -44,22 +12,9 @@ public class NullExpressionNode : IExpressionNode, IEquatable<NullExpressionNode
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitNull(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitNull(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformNull(this);
-
-    public IExpressionNode Clone()
-        => new NullExpressionNode
-        {
-        };
-
-    public ISyntaxNode? Parent { get; set; }
-
-    public ITypeMetadata ReturnTypeMetadata
-        => TypeMetadata.Null;
 }

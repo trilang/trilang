@@ -1,12 +1,12 @@
 using Trilang.Metadata;
-using Trilang.Parsing.Ast;
+using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class DiscriminatedUnionGenerator
 {
-    private record Item(DiscriminatedUnionMetadata Metadata, DiscriminatedUnionNode Node);
+    private record Item(DiscriminatedUnionMetadata Metadata, DiscriminatedUnion Node);
 
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
@@ -24,7 +24,7 @@ internal class DiscriminatedUnionGenerator
             if (!symbol.IsDiscriminatedUnion)
                 continue;
 
-            if (symbol.Node is not DiscriminatedUnionNode discriminatedUnionNode)
+            if (symbol.Node is not DiscriminatedUnion discriminatedUnionNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a DiscriminatedUnionNode, but found '{symbol.Node.GetType().Name}' instead.");
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;

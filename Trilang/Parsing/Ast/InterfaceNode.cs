@@ -1,9 +1,8 @@
-using Trilang.Metadata;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
+public class InterfaceNode : IInlineTypeNode
 {
     public InterfaceNode(
         IReadOnlyList<InterfacePropertyNode> properties,
@@ -11,57 +10,7 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
     {
         Properties = properties;
         Methods = methods;
-
-        foreach (var property in properties)
-            property.Parent = this;
-
-        foreach (var method in methods)
-            method.Parent = this;
-
-        var propertyNames = properties.Select(f => $"{f.Name}: {f.Type};");
-        var methodNames = methods.Select(m => $"{m.Name}({string.Join(", ", m.ParameterTypes)}): {m.ReturnType};");
-
-        var combinedSignatures = propertyNames.Concat(methodNames).ToList();
-        Name = combinedSignatures.Any()
-            ? $"{{ {string.Join(" ", combinedSignatures)} }}"
-            : "{ }";
     }
-
-    public static bool operator ==(InterfaceNode? left, InterfaceNode? right)
-        => Equals(left, right);
-
-    public static bool operator !=(InterfaceNode? left, InterfaceNode? right)
-        => !Equals(left, right);
-
-    public bool Equals(InterfaceNode? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Properties.SequenceEqual(other.Properties) &&
-               Methods.SequenceEqual(other.Methods) &&
-               Equals(Metadata, other.Metadata);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((InterfaceNode)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Properties, Methods);
 
     public override string ToString()
     {
@@ -71,31 +20,13 @@ public class InterfaceNode : IInlineTypeNode, IEquatable<InterfaceNode>
         return formatter.ToString();
     }
 
-    public void Accept(IVisitor visitor)
+    public void Accept(INodeVisitor visitor)
         => visitor.VisitInterface(this);
 
-    public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitInterface(this, context);
-
-    public T Transform<T>(ITransformer<T> transformer)
+    public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformInterface(this);
-
-    public IInlineTypeNode Clone()
-        => new InterfaceNode(
-            Properties.Select(x => x.Clone()).ToArray(),
-            Methods.Select(x => x.Clone()).ToArray()
-        )
-        {
-            Metadata = Metadata,
-        };
-
-    public ISyntaxNode? Parent { get; set; }
-
-    public string Name { get; }
 
     public IReadOnlyList<InterfacePropertyNode> Properties { get; }
 
     public IReadOnlyList<InterfaceMethodNode> Methods { get; }
-
-    public ITypeMetadata? Metadata { get; set; }
 }
