@@ -15,7 +15,7 @@ public class Lexer
             {
                 var length = span.IndexOf('\n');
                 if (length == -1)
-                    throw new LexerException("Unterminated comment");
+                    length = span.Length;
 
                 span = span[length..];
                 continue;

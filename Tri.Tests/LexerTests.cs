@@ -298,4 +298,29 @@ public class LexerTests
 
         Assert.That(tokens, Is.EqualTo(expected));
     }
+
+    [Test]
+    public void TokenizeCommentAtTheEndTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(
+            """
+            function main(): void {}
+            // comment
+            """);
+        var expected = new[]
+        {
+            Token.Create(TokenKind.Function),
+            Token.CreateId("main"),
+            Token.Create(TokenKind.OpenParenthesis),
+            Token.Create(TokenKind.CloseParenthesis),
+            Token.Create(TokenKind.Colon),
+            Token.CreateId("void"),
+            Token.Create(TokenKind.OpenBrace),
+            Token.Create(TokenKind.CloseBrace),
+            Token.CreateEof(),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
 }
