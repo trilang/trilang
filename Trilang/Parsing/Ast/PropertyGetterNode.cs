@@ -4,8 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class PropertyGetterNode : ISyntaxNode
 {
-    public PropertyGetterNode(AccessModifier accessModifier, BlockStatementNode? body)
+    public PropertyGetterNode(SourceSpan sourceSpan, AccessModifier accessModifier, BlockStatementNode? body)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Body = body;
     }
@@ -23,6 +24,8 @@ public class PropertyGetterNode : ISyntaxNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformGetter(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

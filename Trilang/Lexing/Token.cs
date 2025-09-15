@@ -2,8 +2,9 @@ namespace Trilang.Lexing;
 
 public class Token : IEquatable<Token>
 {
-    private Token(TokenKind kind, object? value)
+    private Token(SourceSpan sourceSpan, TokenKind kind, object? value)
     {
+        SourceSpan = sourceSpan;
         Kind = kind;
         Value = value;
     }
@@ -22,7 +23,9 @@ public class Token : IEquatable<Token>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Kind == other.Kind && Equals(Value, other.Value);
+        return Kind == other.Kind &&
+               Equals(Value, other.Value) &&
+               SourceSpan.Equals(other.SourceSpan);
     }
 
     public override bool Equals(object? obj)
@@ -42,31 +45,33 @@ public class Token : IEquatable<Token>
         => HashCode.Combine((int)Kind, Value);
 
     public override string ToString()
-        => Value is null ? $"{Kind}" : $"{Kind}: {Value}";
+        => Value is null ? $"{SourceSpan}\t{Kind}" : $"{SourceSpan}\t{Kind}: {Value}";
 
-    public static Token CreateEof()
-        => new Token(TokenKind.EndOfFile, null);
+    public static Token CreateEof(SourceSpan sourceSpan)
+        => new Token(sourceSpan, TokenKind.EndOfFile, null);
 
-    public static Token CreateId(string value)
-        => new Token(TokenKind.Identifier, value);
+    public static Token CreateId(SourceSpan sourceSpan, string value)
+        => new Token(sourceSpan, TokenKind.Identifier, value);
 
-    public static Token CreateInteger(int value)
-        => new Token(TokenKind.Integer, value);
+    public static Token CreateInteger(SourceSpan sourceSpan, int value)
+        => new Token(sourceSpan, TokenKind.Integer, value);
 
-    public static Token CreateFloat(double value)
-        => new Token(TokenKind.Float, value);
+    public static Token CreateFloat(SourceSpan sourceSpan, double value)
+        => new Token(sourceSpan, TokenKind.Float, value);
 
-    public static Token CreateChar(string value)
-        => new Token(TokenKind.Char, value);
+    public static Token CreateChar(SourceSpan sourceSpan, string value)
+        => new Token(sourceSpan, TokenKind.Char, value);
 
-    public static Token CreateString(string value)
-        => new Token(TokenKind.String, value);
+    public static Token CreateString(SourceSpan sourceSpan, string value)
+        => new Token(sourceSpan, TokenKind.String, value);
 
-    public static Token Create(TokenKind kind)
-        => new Token(kind, null);
+    public static Token Create(SourceSpan sourceSpan, TokenKind kind)
+        => new Token(sourceSpan, kind, null);
 
     public bool Is(TokenKind kind)
         => Kind == kind;
+
+    public SourceSpan SourceSpan { get; }
 
     public TokenKind Kind { get; }
 

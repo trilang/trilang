@@ -5,10 +5,14 @@ namespace Trilang.Parsing.Ast;
 
 public class NewObjectExpressionNode : IExpressionNode
 {
-    public NewObjectExpressionNode(IInlineTypeNode type, IReadOnlyList<IExpressionNode> parameters)
+    public NewObjectExpressionNode(
+        SourceSpan sourceSpan,
+        IInlineTypeNode type,
+        IReadOnlyList<IExpressionNode> parameters)
     {
         Debug.Assert(type is TypeNode or GenericTypeNode);
 
+        SourceSpan = sourceSpan;
         Type = type;
         Parameters = parameters;
     }
@@ -26,6 +30,8 @@ public class NewObjectExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformNewObject(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IInlineTypeNode Type { get; }
 

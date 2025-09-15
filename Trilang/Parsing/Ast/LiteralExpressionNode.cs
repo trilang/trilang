@@ -4,29 +4,30 @@ namespace Trilang.Parsing.Ast;
 
 public class LiteralExpressionNode : IExpressionNode
 {
-    public LiteralExpressionNode(LiteralExpressionKind kind, object value)
+    public LiteralExpressionNode(SourceSpan sourceSpan, LiteralExpressionKind kind, object value)
     {
+        SourceSpan = sourceSpan;
         Kind = kind;
         Value = value;
     }
 
-    public static LiteralExpressionNode Integer(int number)
-        => new LiteralExpressionNode(LiteralExpressionKind.Integer, number);
+    public static LiteralExpressionNode Integer(SourceSpan sourceSpan, int number)
+        => new LiteralExpressionNode(sourceSpan, LiteralExpressionKind.Integer, number);
 
-    public static LiteralExpressionNode Float(double number)
-        => new LiteralExpressionNode(LiteralExpressionKind.Float, number);
+    public static LiteralExpressionNode Float(SourceSpan sourceSpan, double number)
+        => new LiteralExpressionNode(sourceSpan, LiteralExpressionKind.Float, number);
 
-    public static LiteralExpressionNode True()
-        => new LiteralExpressionNode(LiteralExpressionKind.Boolean, true);
+    public static LiteralExpressionNode True(SourceSpan sourceSpan)
+        => new LiteralExpressionNode(sourceSpan, LiteralExpressionKind.Boolean, true);
 
-    public static LiteralExpressionNode False()
-        => new LiteralExpressionNode(LiteralExpressionKind.Boolean, false);
+    public static LiteralExpressionNode False(SourceSpan sourceSpan)
+        => new LiteralExpressionNode(sourceSpan, LiteralExpressionKind.Boolean, false);
 
-    public static LiteralExpressionNode String(string str)
-        => new LiteralExpressionNode(LiteralExpressionKind.String, str);
+    public static LiteralExpressionNode String(SourceSpan sourceSpan, string str)
+        => new LiteralExpressionNode(sourceSpan, LiteralExpressionKind.String, str);
 
-    public static LiteralExpressionNode Char(char c)
-        => new LiteralExpressionNode(LiteralExpressionKind.Char, c);
+    public static LiteralExpressionNode Char(SourceSpan sourceSpan, string c)
+        => new LiteralExpressionNode(sourceSpan, LiteralExpressionKind.Char, c);
 
     public override string ToString()
     {
@@ -41,6 +42,8 @@ public class LiteralExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformLiteral(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public LiteralExpressionKind Kind { get; }
 

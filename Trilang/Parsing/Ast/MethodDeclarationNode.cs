@@ -5,6 +5,7 @@ namespace Trilang.Parsing.Ast;
 public class MethodDeclarationNode : ISyntaxNode
 {
     public MethodDeclarationNode(
+        SourceSpan sourceSpan,
         AccessModifier accessModifier,
         bool isStatic,
         string name,
@@ -12,6 +13,7 @@ public class MethodDeclarationNode : ISyntaxNode
         IInlineTypeNode returnType,
         BlockStatementNode body)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         IsStatic = isStatic;
         Name = name;
@@ -33,6 +35,8 @@ public class MethodDeclarationNode : ISyntaxNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformMethod(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

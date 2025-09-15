@@ -4,6 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class BreakNode : IStatementNode
 {
+    public BreakNode(SourceSpan sourceSpan)
+        => SourceSpan = sourceSpan;
+
     public override string ToString()
     {
         var formatter = new Formatter();
@@ -17,4 +20,6 @@ public class BreakNode : IStatementNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformBreak(this);
+
+    public SourceSpan SourceSpan { get; }
 }

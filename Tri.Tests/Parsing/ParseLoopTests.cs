@@ -1,5 +1,6 @@
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
+using Trilang;
 
 namespace Tri.Tests.Parsing;
 
@@ -19,19 +20,44 @@ public class ParseLoopTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(57, 4, 2)),
                 "test",
-                [new ParameterNode("x", new TypeNode("i32"))],
-                new TypeNode("void"),
-                new BlockStatementNode([
-                    new WhileNode(
-                        new BinaryExpressionNode(
-                            BinaryExpressionKind.GreaterThan,
-                            new MemberAccessExpressionNode("x"),
-                            LiteralExpressionNode.Integer(0)
-                        ),
-                        new BlockStatementNode([])
+                [
+                    new ParameterNode(
+                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(20, 1, 21)),
+                        "x",
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            "i32"
+                        )
                     )
-                ])
+                ],
+                new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)), "void"),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(57, 4, 2)),
+                    [
+                        new WhileNode(
+                            new SourceSpan(new SourcePosition(34, 2, 5), new SourcePosition(55, 3, 6)),
+                            new BinaryExpressionNode(
+                                new SourceSpan(
+                                    new SourcePosition(41, 2, 12), new SourcePosition(46, 2, 17)
+                                ),
+                                BinaryExpressionKind.GreaterThan,
+                                new MemberAccessExpressionNode(
+                                    new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(42, 2, 13)),
+                                    "x"
+                                ),
+                                LiteralExpressionNode.Integer(
+                                    new SourceSpan(new SourcePosition(45, 2, 16), new SourcePosition(46, 2, 17)),
+                                    0
+                                )
+                            ),
+                            new BlockStatementNode(
+                                new SourceSpan(new SourcePosition(48, 2, 19), new SourcePosition(55, 3, 6))
+                            )
+                        )
+                    ]
+                )
             ),
         ]);
 
@@ -109,19 +135,49 @@ public class ParseLoopTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(72, 5, 2)),
                 "test",
-                [new ParameterNode("x", new TypeNode("i32"))],
-                new TypeNode("void"),
-                new BlockStatementNode([
-                    new WhileNode(
-                        new BinaryExpressionNode(
-                            BinaryExpressionKind.GreaterThan,
-                            new MemberAccessExpressionNode("x"),
-                            LiteralExpressionNode.Integer(0)
-                        ),
-                        new BlockStatementNode([new BreakNode()])
+                [
+                    new ParameterNode(
+                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(20, 1, 21)),
+                        "x",
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            "i32"
+                        )
                     )
-                ])
+                ],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(72, 5, 2)),
+                    [
+                        new WhileNode(
+                            new SourceSpan(new SourcePosition(34, 2, 5), new SourcePosition(70, 4, 6)),
+                            new BinaryExpressionNode(
+                                new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(46, 2, 17)),
+                                BinaryExpressionKind.GreaterThan,
+                                new MemberAccessExpressionNode(
+                                    new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(42, 2, 13)),
+                                    "x"
+                                ),
+                                LiteralExpressionNode.Integer(
+                                    new SourceSpan(new SourcePosition(45, 2, 16), new SourcePosition(46, 2, 17)),
+                                    0
+                                )
+                            ),
+                            new BlockStatementNode(
+                                new SourceSpan(new SourcePosition(48, 2, 19), new SourcePosition(70, 4, 6)),
+                                [
+                                    new BreakNode(
+                                        new SourceSpan(new SourcePosition(58, 3, 9), new SourcePosition(64, 3, 15))
+                                    )
+                                ]
+                            )
+                        )
+                    ])
             ),
         ]);
 
@@ -143,19 +199,49 @@ public class ParseLoopTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(75, 5, 2)),
                 "test",
-                [new ParameterNode("x", new TypeNode("i32"))],
-                new TypeNode("void"),
-                new BlockStatementNode([
-                    new WhileNode(
-                        new BinaryExpressionNode(
-                            BinaryExpressionKind.GreaterThan,
-                            new MemberAccessExpressionNode("x"),
-                            LiteralExpressionNode.Integer(0)
-                        ),
-                        new BlockStatementNode([new ContinueNode()])
+                [
+                    new ParameterNode(
+                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(20, 1, 21)),
+                        "x",
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            "i32"
+                        )
                     )
-                ])
+                ],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(75, 5, 2)),
+                    [
+                        new WhileNode(
+                            new SourceSpan(new SourcePosition(34, 2, 5), new SourcePosition(73, 4, 6)),
+                            new BinaryExpressionNode(
+                                new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(46, 2, 17)),
+                                BinaryExpressionKind.GreaterThan,
+                                new MemberAccessExpressionNode(
+                                    new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(42, 2, 13)),
+                                    "x"
+                                ),
+                                LiteralExpressionNode.Integer(
+                                    new SourceSpan(new SourcePosition(45, 2, 16), new SourcePosition(46, 2, 17)),
+                                    0
+                                )
+                            ),
+                            new BlockStatementNode(
+                                new SourceSpan(new SourcePosition(48, 2, 19), new SourcePosition(73, 4, 6)),
+                                [
+                                    new ContinueNode(
+                                        new SourceSpan(new SourcePosition(58, 3, 9), new SourcePosition(67, 3, 18))
+                                    )
+                                ]
+                            )
+                        )
+                    ])
             ),
         ]);
 

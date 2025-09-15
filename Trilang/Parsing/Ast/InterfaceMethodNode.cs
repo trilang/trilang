@@ -5,10 +5,12 @@ namespace Trilang.Parsing.Ast;
 public class InterfaceMethodNode : ISyntaxNode
 {
     public InterfaceMethodNode(
+        SourceSpan sourceSpan,
         string name,
         IReadOnlyList<IInlineTypeNode> parameterTypes,
         IInlineTypeNode returnType)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         ParameterTypes = parameterTypes;
         ReturnType = returnType;
@@ -27,6 +29,8 @@ public class InterfaceMethodNode : ISyntaxNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformInterfaceMethod(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public string Name { get; }
 

@@ -5,11 +5,13 @@ namespace Trilang.Parsing.Ast;
 public class TypeAliasDeclarationNode : IDeclarationNode, IHasGenericArguments
 {
     public TypeAliasDeclarationNode(
+        SourceSpan sourceSpan,
         AccessModifier accessModifier,
         string name,
         IReadOnlyList<TypeNode> genericArguments,
         IInlineTypeNode type)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Name = name;
         GenericArguments = genericArguments;
@@ -29,6 +31,8 @@ public class TypeAliasDeclarationNode : IDeclarationNode, IHasGenericArguments
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformTypeAlias(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

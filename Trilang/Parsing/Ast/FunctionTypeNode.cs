@@ -4,8 +4,12 @@ namespace Trilang.Parsing.Ast;
 
 public class FunctionTypeNode : IInlineTypeNode
 {
-    public FunctionTypeNode(IReadOnlyList<IInlineTypeNode> parameterTypes, IInlineTypeNode returnType)
+    public FunctionTypeNode(
+        SourceSpan sourceSpan,
+        IReadOnlyList<IInlineTypeNode> parameterTypes,
+        IInlineTypeNode returnType)
     {
+        SourceSpan = sourceSpan;
         ParameterTypes = parameterTypes;
         ReturnType = returnType;
     }
@@ -23,6 +27,8 @@ public class FunctionTypeNode : IInlineTypeNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformFunctionType(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IReadOnlyList<IInlineTypeNode> ParameterTypes { get; }
 

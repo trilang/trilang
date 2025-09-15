@@ -4,8 +4,13 @@ namespace Trilang.Parsing.Ast;
 
 public class IfStatementNode : IStatementNode
 {
-    public IfStatementNode(IExpressionNode condition, BlockStatementNode then, BlockStatementNode? @else = null)
+    public IfStatementNode(
+        SourceSpan sourceSpan,
+        IExpressionNode condition,
+        BlockStatementNode then,
+        BlockStatementNode? @else = null)
     {
+        SourceSpan = sourceSpan;
         Condition = condition;
         Then = then;
         Else = @else;
@@ -24,6 +29,8 @@ public class IfStatementNode : IStatementNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformIf(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IExpressionNode Condition { get; }
 

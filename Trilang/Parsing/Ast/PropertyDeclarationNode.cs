@@ -5,17 +5,19 @@ namespace Trilang.Parsing.Ast;
 // TODO: don't generate backing field if it's not needed
 public class PropertyDeclarationNode : ISyntaxNode
 {
-    public PropertyDeclarationNode(string name, IInlineTypeNode type)
-        : this(name, type, null, null)
+    public PropertyDeclarationNode(SourceSpan sourceSpan, string name, IInlineTypeNode type)
+        : this(sourceSpan, name, type, null, null)
     {
     }
 
     public PropertyDeclarationNode(
+        SourceSpan sourceSpan,
         string name,
         IInlineTypeNode type,
         PropertyGetterNode? getter,
         PropertySetterNode? setter)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Type = type;
         Getter = getter;
@@ -35,6 +37,8 @@ public class PropertyDeclarationNode : ISyntaxNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformProperty(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public string Name { get; }
 

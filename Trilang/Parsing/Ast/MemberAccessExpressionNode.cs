@@ -4,12 +4,13 @@ namespace Trilang.Parsing.Ast;
 
 public class MemberAccessExpressionNode : IExpressionNode
 {
-    public MemberAccessExpressionNode(string name) : this(null, name)
+    public MemberAccessExpressionNode(SourceSpan sourceSpan, string name) : this(sourceSpan, null, name)
     {
     }
 
-    public MemberAccessExpressionNode(IExpressionNode? member, string name)
+    public MemberAccessExpressionNode(SourceSpan sourceSpan, IExpressionNode? member, string name)
     {
+        SourceSpan = sourceSpan;
         Member = member;
         Name = name;
     }
@@ -27,6 +28,8 @@ public class MemberAccessExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformMemberAccess(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IExpressionNode? Member { get; }
 

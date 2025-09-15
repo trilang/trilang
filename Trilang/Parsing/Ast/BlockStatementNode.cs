@@ -6,13 +6,16 @@ public class BlockStatementNode : IStatementNode
 {
     private readonly List<IStatementNode> statements;
 
-    public BlockStatementNode()
-        : this([])
+    public BlockStatementNode(SourceSpan sourceSpan)
+        : this(sourceSpan, [])
     {
     }
 
-    public BlockStatementNode(IReadOnlyList<IStatementNode> statements)
-        => this.statements = [..statements];
+    public BlockStatementNode(SourceSpan sourceSpan, IReadOnlyList<IStatementNode> statements)
+    {
+        SourceSpan = sourceSpan;
+        this.statements = [..statements];
+    }
 
     public override string ToString()
     {
@@ -27,6 +30,8 @@ public class BlockStatementNode : IStatementNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformBlock(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IReadOnlyList<IStatementNode> Statements
         => statements;

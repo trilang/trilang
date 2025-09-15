@@ -5,11 +5,13 @@ namespace Trilang.Parsing.Ast;
 public class FunctionDeclarationNode : IDeclarationNode
 {
     public FunctionDeclarationNode(
+        SourceSpan sourceSpan,
         string name,
         IReadOnlyList<ParameterNode> parameters,
         IInlineTypeNode returnType,
         BlockStatementNode body)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Parameters = parameters;
         ReturnType = returnType;
@@ -17,11 +19,12 @@ public class FunctionDeclarationNode : IDeclarationNode
     }
 
     public static FunctionDeclarationNode Create(
+        SourceSpan sourceSpan,
         string name,
         IReadOnlyList<ParameterNode> parameters,
         IInlineTypeNode returnType,
         BlockStatementNode body)
-        => new FunctionDeclarationNode(name, parameters, returnType, body);
+        => new FunctionDeclarationNode(sourceSpan, name, parameters, returnType, body);
 
     public override string ToString()
     {
@@ -36,6 +39,8 @@ public class FunctionDeclarationNode : IDeclarationNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformFunction(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public string Name { get; }
 

@@ -4,8 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class CastExpressionNode : IExpressionNode
 {
-    public CastExpressionNode(IInlineTypeNode type, IExpressionNode expression)
+    public CastExpressionNode(SourceSpan sourceSpan, IInlineTypeNode type, IExpressionNode expression)
     {
+        SourceSpan = sourceSpan;
         Type = type;
         Expression = expression;
     }
@@ -23,6 +24,8 @@ public class CastExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformCast(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IInlineTypeNode Type { get; }
 

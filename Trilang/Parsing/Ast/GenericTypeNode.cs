@@ -4,8 +4,12 @@ namespace Trilang.Parsing.Ast;
 
 public class GenericTypeNode : IInlineTypeNode
 {
-    public GenericTypeNode(string prefixName, IReadOnlyList<IInlineTypeNode> typeArguments)
+    public GenericTypeNode(
+        SourceSpan sourceSpan,
+        string prefixName,
+        IReadOnlyList<IInlineTypeNode> typeArguments)
     {
+        SourceSpan = sourceSpan;
         PrefixName = prefixName;
         TypeArguments = typeArguments;
     }
@@ -23,6 +27,8 @@ public class GenericTypeNode : IInlineTypeNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformGenericType(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public string PrefixName { get; }
 

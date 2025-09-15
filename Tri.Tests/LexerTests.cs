@@ -1,3 +1,4 @@
+using Trilang;
 using Trilang.Lexing;
 
 namespace Tri.Tests;
@@ -11,7 +12,7 @@ public class LexerTests
         var tokens = lexer.Tokenize("\n\n");
         var expected = new[]
         {
-            Token.CreateEof(),
+            Token.CreateEof(new SourcePosition(2, 3, 1).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -24,7 +25,20 @@ public class LexerTests
         var tokens = lexer.Tokenize("\r\r");
         var expected = new[]
         {
-            Token.CreateEof(),
+            Token.CreateEof(new SourcePosition(2, 3, 1).ToSpan()),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TokenizeCarriageReturnNewLineTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize("\r\n");
+        var expected = new[]
+        {
+            Token.CreateEof(new SourcePosition(2, 2, 1).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -37,7 +51,7 @@ public class LexerTests
         var tokens = lexer.Tokenize("  ");
         var expected = new[]
         {
-            Token.CreateEof(),
+            Token.CreateEof(new SourcePosition(2, 1, 3).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -53,8 +67,11 @@ public class LexerTests
         var tokens = lexer.Tokenize(code);
         var expected = new[]
         {
-            Token.CreateInteger(number),
-            Token.CreateEof(),
+            Token.CreateInteger(
+                new SourceSpan(new SourcePosition(), new SourcePosition(code.Length, 1, code.Length + 1)),
+                number
+            ),
+            Token.CreateEof(new SourcePosition(code.Length, 1, code.Length + 1).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -72,8 +89,11 @@ public class LexerTests
         var tokens = lexer.Tokenize(code);
         var expected = new[]
         {
-            Token.CreateFloat(number),
-            Token.CreateEof(),
+            Token.CreateFloat(
+                new SourceSpan(new SourcePosition(), new SourcePosition(code.Length, 1, code.Length + 1)),
+                number
+            ),
+            Token.CreateEof(new SourcePosition(code.Length, 1, code.Length + 1).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -86,10 +106,10 @@ public class LexerTests
         var tokens = lexer.Tokenize("1.2.3");
         var expected = new[]
         {
-            Token.CreateFloat(1.2),
-            Token.Create(TokenKind.Dot),
-            Token.CreateInteger(3),
-            Token.CreateEof(),
+            Token.CreateFloat(new SourceSpan(new SourcePosition(), new SourcePosition(3, 1, 4)), 1.2),
+            Token.Create(new SourceSpan(new SourcePosition(3, 1, 4), new SourcePosition(4, 1, 5)), TokenKind.Dot),
+            Token.CreateInteger(new SourceSpan(new SourcePosition(4, 1, 5), new SourcePosition(5, 1, 6)), 3),
+            Token.CreateEof(new SourcePosition(5, 1, 6).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -102,9 +122,9 @@ public class LexerTests
         var tokens = lexer.Tokenize(".3");
         var expected = new[]
         {
-            Token.Create(TokenKind.Dot),
-            Token.CreateInteger(3),
-            Token.CreateEof(),
+            Token.Create(new SourceSpan(new SourcePosition(), new SourcePosition(1, 1, 2)), TokenKind.Dot),
+            Token.CreateInteger(new SourceSpan(new SourcePosition(1, 1, 2), new SourcePosition(2, 1, 3)), 3),
+            Token.CreateEof(new SourcePosition(2, 1, 3).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -117,12 +137,12 @@ public class LexerTests
         var tokens = lexer.Tokenize("1.toString()");
         var expected = new[]
         {
-            Token.CreateInteger(1),
-            Token.Create(TokenKind.Dot),
-            Token.CreateId("toString"),
-            Token.Create(TokenKind.OpenParenthesis),
-            Token.Create(TokenKind.CloseParenthesis),
-            Token.CreateEof(),
+            Token.CreateInteger(new SourceSpan(new SourcePosition(), new SourcePosition(1, 1, 2)), 1),
+            Token.Create(new SourceSpan(new SourcePosition(1, 1, 2), new SourcePosition(2, 1, 3)), TokenKind.Dot),
+            Token.CreateId(new SourceSpan(new SourcePosition(2, 1, 3), new SourcePosition(10, 1, 11)), "toString"),
+            Token.Create(new SourceSpan(new SourcePosition(10, 1, 11), new SourcePosition(11, 1, 12)), TokenKind.OpenParenthesis),
+            Token.Create(new SourceSpan(new SourcePosition(11, 1, 12), new SourcePosition(12, 1, 13)), TokenKind.CloseParenthesis),
+            Token.CreateEof(new SourcePosition(12, 1, 13).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -158,8 +178,11 @@ public class LexerTests
         var tokens = lexer.Tokenize(code);
         var expected = new[]
         {
-            Token.Create(kind),
-            Token.CreateEof(),
+            Token.Create(
+                new SourceSpan(new SourcePosition(), new SourcePosition(code.Length, 1, code.Length + 1)),
+                kind
+            ),
+            Token.CreateEof(new SourcePosition(code.Length, 1, code.Length + 1).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -175,8 +198,10 @@ public class LexerTests
         var tokens = lexer.Tokenize(code);
         var expected = new[]
         {
-            Token.CreateId(code),
-            Token.CreateEof(),
+            Token.CreateId(
+                new SourceSpan(new SourcePosition(), new SourcePosition(code.Length, 1, code.Length + 1)),
+                code),
+            Token.CreateEof(new SourcePosition(code.Length, 1, code.Length + 1).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -226,8 +251,11 @@ public class LexerTests
         var tokens = lexer.Tokenize(code);
         var expected = new[]
         {
-            Token.Create(kind),
-            Token.CreateEof(),
+            Token.Create(
+                new SourceSpan(new SourcePosition(), new SourcePosition(code.Length, 1, code.Length + 1)),
+                kind
+            ),
+            Token.CreateEof(new SourcePosition(code.Length, 1, code.Length + 1).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -242,8 +270,11 @@ public class LexerTests
         var tokens = lexer.Tokenize($"'{code}'");
         var expected = new[]
         {
-            Token.CreateChar(code),
-            Token.CreateEof(),
+            Token.CreateChar(
+                new SourceSpan(new SourcePosition(), new SourcePosition(code.Length + 2, 1, code.Length + 3)),
+                code
+            ),
+            Token.CreateEof(new SourcePosition(code.Length + 2, 1, code.Length + 3).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -258,8 +289,11 @@ public class LexerTests
         var tokens = lexer.Tokenize($"\"{code}\"");
         var expected = new[]
         {
-            Token.CreateString(code),
-            Token.CreateEof(),
+            Token.CreateString(
+                new SourceSpan(new SourcePosition(), new SourcePosition(code.Length + 2, 1, code.Length + 3)),
+                code
+            ),
+            Token.CreateEof(new SourcePosition(code.Length + 2, 1, code.Length + 3).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -285,15 +319,15 @@ public class LexerTests
             """);
         var expected = new[]
         {
-            Token.Create(TokenKind.Function),
-            Token.CreateId("main"),
-            Token.Create(TokenKind.OpenParenthesis),
-            Token.Create(TokenKind.CloseParenthesis),
-            Token.Create(TokenKind.Colon),
-            Token.CreateId("void"),
-            Token.Create(TokenKind.OpenBrace),
-            Token.Create(TokenKind.CloseBrace),
-            Token.CreateEof(),
+            Token.Create(new SourceSpan(new SourcePosition(11, 2, 1), new SourcePosition(19, 2, 9)), TokenKind.Function),
+            Token.CreateId(new SourceSpan(new SourcePosition(20, 2, 10), new SourcePosition(24, 2, 14)), "main"),
+            Token.Create(new SourceSpan(new SourcePosition(24, 2, 14), new SourcePosition(25, 2, 15)), TokenKind.OpenParenthesis),
+            Token.Create(new SourceSpan(new SourcePosition(25, 2, 15), new SourcePosition(26, 2, 16)), TokenKind.CloseParenthesis),
+            Token.Create(new SourceSpan(new SourcePosition(26, 2, 16), new SourcePosition(27, 2, 17)), TokenKind.Colon),
+            Token.CreateId(new SourceSpan(new SourcePosition(28, 2, 18), new SourcePosition(32, 2, 22)), "void"),
+            Token.Create(new SourceSpan(new SourcePosition(33, 2, 23), new SourcePosition(34, 2, 24)), TokenKind.OpenBrace),
+            Token.Create(new SourceSpan(new SourcePosition(34, 2, 24), new SourcePosition(35, 2, 25)), TokenKind.CloseBrace),
+            Token.CreateEof(new SourcePosition(35, 2, 25).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -310,15 +344,15 @@ public class LexerTests
             """);
         var expected = new[]
         {
-            Token.Create(TokenKind.Function),
-            Token.CreateId("main"),
-            Token.Create(TokenKind.OpenParenthesis),
-            Token.Create(TokenKind.CloseParenthesis),
-            Token.Create(TokenKind.Colon),
-            Token.CreateId("void"),
-            Token.Create(TokenKind.OpenBrace),
-            Token.Create(TokenKind.CloseBrace),
-            Token.CreateEof(),
+            Token.Create(new SourceSpan(new SourcePosition(), new SourcePosition(8, 1, 9)), TokenKind.Function),
+            Token.CreateId(new SourceSpan(new SourcePosition(9, 1, 10), new SourcePosition(13, 1, 14)), "main"),
+            Token.Create(new SourceSpan(new SourcePosition(13, 1, 14), new SourcePosition(14, 1, 15)), TokenKind.OpenParenthesis),
+            Token.Create(new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(15, 1, 16)), TokenKind.CloseParenthesis),
+            Token.Create(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(16, 1, 17)), TokenKind.Colon),
+            Token.CreateId(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "void"),
+            Token.Create(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(23, 1, 24)), TokenKind.OpenBrace),
+            Token.Create(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(24, 1, 25)), TokenKind.CloseBrace),
+            Token.CreateEof(new SourcePosition(35, 2, 11).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));

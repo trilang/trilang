@@ -4,58 +4,79 @@ public class Lexer
 {
     public IReadOnlyList<Token> Tokenize(string code)
     {
-        var span = code.AsSpan();
+        var position = new SourceSpanBuilder();
         var tokens = new List<Token>();
 
-        while (span.Length > 0)
+        for (; position.Index < code.Length;)
         {
-            var c = span[0];
-            var next = span.Length > 1 ? span[1] : '\0';
+            var c = code[position.Index];
+            var next = code.Length > position.Index + 1 ? code[position.Index + 1] : '\0';
+
             if (c == '/' && next == '/')
             {
-                var length = span.IndexOf('\n');
+                var length = code.IndexOf('\n', position.Index);
                 if (length == -1)
-                    length = span.Length;
+                    length = code.Length;
 
-                span = span[length..];
+                length -= position.Index;
+                position.Add(length);
+
                 continue;
             }
 
-            if (char.IsWhiteSpace(c) || c is '\n' or '\r')
+            if (c is '\r' && next is '\n')
             {
-                span = span[1..];
+                position.NewLine(2);
+
+                continue;
+            }
+
+            if (c is '\n' or '\r')
+            {
+                position.NewLine();
+
+                continue;
+            }
+
+            if (char.IsWhiteSpace(c))
+            {
+                position.Add(1);
+
                 continue;
             }
 
             if (char.IsDigit(c))
             {
+                var length = 0;
                 var integerPart = 0;
-                while (span.Length > 0 && char.IsDigit(span[0]))
+                while (code.Length > position.Index + length && char.IsDigit(code[position.Index + length]))
                 {
-                    integerPart = integerPart * 10 + (span[0] - '0');
-                    span = span[1..];
+                    integerPart = integerPart * 10 + (code[position.Index + length] - '0');
+                    length++;
                 }
 
-                if (span.Length > 1 && span[0] == '.' && char.IsDigit(span[1]))
+                if (code.Length > position.Index + length + 1 &&
+                    code[position.Index + length] == '.' &&
+                    char.IsDigit(code[position.Index + length + 1]))
                 {
-                    span = span[1..];
+                    length++;
 
                     var fractionalPart = 0.0;
                     var divisor = 10.0;
 
-                    while (span.Length > 0 && char.IsDigit(span[0]))
+                    while (code.Length > position.Index + length && char.IsDigit(code[position.Index + length]))
                     {
-                        fractionalPart += (span[0] - '0') / divisor;
+                        fractionalPart += (code[position.Index + length] - '0') / divisor;
                         divisor *= 10.0;
-                        span = span[1..];
+                        length++;
                     }
 
                     var floatNumber = integerPart + fractionalPart;
-                    tokens.Add(Token.CreateFloat(floatNumber));
+                    tokens.Add(Token.CreateFloat(position.Build(length), floatNumber));
                 }
                 else
                 {
-                    tokens.Add(Token.CreateInteger(integerPart));
+                    tokens.Add(Token.CreateInteger(position.Build(length), integerPart));
                 }
 
                 continue;
@@ -64,138 +85,135 @@ public class Lexer
             if (char.IsLetter(c))
             {
                 var length = 1;
-                while (length < span.Length && char.IsLetterOrDigit(span[length]))
+                while (position.Index + length < code.Length &&
+                       char.IsLetterOrDigit(code[position.Index + length]))
+                {
                     length++;
+                }
 
-                var id = span[..length];
+                var id = code.Substring(position.Index, length);
+                var sourceSpan = position.Build(length);
+
                 tokens.Add(id switch
                 {
-                    "function" => Token.Create(TokenKind.Function),
-                    "var" => Token.Create(TokenKind.Var),
-                    "if" => Token.Create(TokenKind.If),
-                    "else" => Token.Create(TokenKind.Else),
-                    "endif" => Token.Create(TokenKind.EndIf),
-                    "external" => Token.Create(TokenKind.External),
-                    "return" => Token.Create(TokenKind.Return),
-                    "true" => Token.Create(TokenKind.True),
-                    "false" => Token.Create(TokenKind.False),
-                    "for" => Token.Create(TokenKind.For),
-                    "while" => Token.Create(TokenKind.While),
-                    "break" => Token.Create(TokenKind.Break),
-                    "continue" => Token.Create(TokenKind.Continue),
-                    "public" => Token.Create(TokenKind.Public),
-                    "private" => Token.Create(TokenKind.Private),
-                    "type" => Token.Create(TokenKind.Type),
-                    "constructor" => Token.Create(TokenKind.Constructor),
-                    "new" => Token.Create(TokenKind.New),
-                    "null" => Token.Create(TokenKind.Null),
-                    "get" => Token.Create(TokenKind.Get),
-                    "set" => Token.Create(TokenKind.Set),
-                    "static" => Token.Create(TokenKind.Static),
-                    "is" => Token.Create(TokenKind.Is),
+                    "function" => Token.Create(sourceSpan, TokenKind.Function),
+                    "var" => Token.Create(sourceSpan, TokenKind.Var),
+                    "if" => Token.Create(sourceSpan, TokenKind.If),
+                    "else" => Token.Create(sourceSpan, TokenKind.Else),
+                    "endif" => Token.Create(sourceSpan, TokenKind.EndIf),
+                    "external" => Token.Create(sourceSpan, TokenKind.External),
+                    "return" => Token.Create(sourceSpan, TokenKind.Return),
+                    "true" => Token.Create(sourceSpan, TokenKind.True),
+                    "false" => Token.Create(sourceSpan, TokenKind.False),
+                    "for" => Token.Create(sourceSpan, TokenKind.For),
+                    "while" => Token.Create(sourceSpan, TokenKind.While),
+                    "break" => Token.Create(sourceSpan, TokenKind.Break),
+                    "continue" => Token.Create(sourceSpan, TokenKind.Continue),
+                    "public" => Token.Create(sourceSpan, TokenKind.Public),
+                    "private" => Token.Create(sourceSpan, TokenKind.Private),
+                    "type" => Token.Create(sourceSpan, TokenKind.Type),
+                    "constructor" => Token.Create(sourceSpan, TokenKind.Constructor),
+                    "new" => Token.Create(sourceSpan, TokenKind.New),
+                    "null" => Token.Create(sourceSpan, TokenKind.Null),
+                    "get" => Token.Create(sourceSpan, TokenKind.Get),
+                    "set" => Token.Create(sourceSpan, TokenKind.Set),
+                    "static" => Token.Create(sourceSpan, TokenKind.Static),
+                    "is" => Token.Create(sourceSpan, TokenKind.Is),
 
-                    _ => Token.CreateId(id.ToString()),
+                    _ => Token.CreateId(sourceSpan, id),
                 });
 
-                span = span[length..];
                 continue;
             }
 
             if (c is '\'')
             {
-                span = span[1..];
+                var length = 1;
 
-                var length = span.IndexOfAny('\'', '\n');
-                if (length == -1)
+                // TODO: handle multiline
+                var endIndex = code.IndexOf('\'', position.Index + 1);
+                if (endIndex == -1)
                     throw new LexerException("Unterminated string");
 
-                var str = span[..length].ToString();
-                tokens.Add(Token.CreateChar(str));
+                length += endIndex - position.Index;
+                var str = code.Substring(position.Index + 1, length - 2);
 
-                span = span[length..];
+                tokens.Add(Token.CreateChar(position.Build(length), str));
 
-                if (span.Length == 0 || span[0] != '\'')
-                    throw new LexerException("Unterminated string");
-
-                span = span[1..];
                 continue;
             }
 
             if (c is '"')
             {
-                span = span[1..];
+                var length = 1;
 
-                var length = span.IndexOfAny('"', '\n');
-                if (length == -1)
+                // TODO: handle multiline
+                var endIndex = code.IndexOf('"', position.Index + 1);
+                if (endIndex == -1)
                     throw new LexerException("Unterminated string");
 
-                var str = span[..length].ToString();
-                tokens.Add(Token.CreateString(str));
+                length += endIndex - position.Index;
+                var str = code.Substring(position.Index + 1, length - 2);
 
-                span = span[length..];
+                tokens.Add(Token.CreateString(position.Build(length), str));
 
-                if (span.Length == 0 || span[0] != '"')
-                    throw new LexerException("Unterminated string");
-
-                span = span[1..];
                 continue;
             }
 
-            var (token, size) = (c, next) switch
+            var (tokenKind, size) = (c, next) switch
             {
-                ('(', _) => (Token.Create(TokenKind.OpenParenthesis), 1),
-                (')', _) => (Token.Create(TokenKind.CloseParenthesis), 1),
-                ('{', _) => (Token.Create(TokenKind.OpenBrace), 1),
-                ('}', _) => (Token.Create(TokenKind.CloseBrace), 1),
-                ('[', _) => (Token.Create(TokenKind.OpenBracket), 1),
-                (']', _) => (Token.Create(TokenKind.CloseBracket), 1),
+                ('(', _) => (TokenKind.OpenParenthesis, 1),
+                (')', _) => (TokenKind.CloseParenthesis, 1),
+                ('{', _) => (TokenKind.OpenBrace, 1),
+                ('}', _) => (TokenKind.CloseBrace, 1),
+                ('[', _) => (TokenKind.OpenBracket, 1),
+                (']', _) => (TokenKind.CloseBracket, 1),
 
-                (':', _) => (Token.Create(TokenKind.Colon), 1),
-                (';', _) => (Token.Create(TokenKind.SemiColon), 1),
-                (',', _) => (Token.Create(TokenKind.Comma), 1),
+                (':', _) => (TokenKind.Colon, 1),
+                (';', _) => (TokenKind.SemiColon, 1),
+                (',', _) => (TokenKind.Comma, 1),
 
-                ('+', '=') => (Token.Create(TokenKind.PlusEqual), 2),
-                ('+', _) => (Token.Create(TokenKind.Plus), 1),
-                ('-', '=') => (Token.Create(TokenKind.MinusEqual), 2),
-                ('-', _) => (Token.Create(TokenKind.Minus), 1),
-                ('*', '=') => (Token.Create(TokenKind.AsteriskEqual), 2),
-                ('*', _) => (Token.Create(TokenKind.Asterisk), 1),
-                ('/', '=') => (Token.Create(TokenKind.SlashEqual), 2),
-                ('/', _) => (Token.Create(TokenKind.Slash), 1),
+                ('+', '=') => (TokenKind.PlusEqual, 2),
+                ('+', _) => (TokenKind.Plus, 1),
+                ('-', '=') => (TokenKind.MinusEqual, 2),
+                ('-', _) => (TokenKind.Minus, 1),
+                ('*', '=') => (TokenKind.AsteriskEqual, 2),
+                ('*', _) => (TokenKind.Asterisk, 1),
+                ('/', '=') => (TokenKind.SlashEqual, 2),
+                ('/', _) => (TokenKind.Slash, 1),
 
-                ('=', '>') => (Token.Create(TokenKind.EqualGreater), 2),
+                ('=', '>') => (TokenKind.EqualGreater, 2),
 
-                ('=', '=') => (Token.Create(TokenKind.EqualEqual), 2),
-                ('=', _) => (Token.Create(TokenKind.Equal), 1),
-                ('!', '=') => (Token.Create(TokenKind.ExclamationEqual), 2),
-                ('>', '=') => (Token.Create(TokenKind.GreaterEqual), 2),
-                ('<', '=') => (Token.Create(TokenKind.LessEqual), 2),
-                ('<', _) => (Token.Create(TokenKind.Less), 1),
-                ('>', _) => (Token.Create(TokenKind.Greater), 1),
-                ('!', _) => (Token.Create(TokenKind.Exclamation), 1),
+                ('=', '=') => (TokenKind.EqualEqual, 2),
+                ('=', _) => (TokenKind.Equal, 1),
+                ('!', '=') => (TokenKind.ExclamationEqual, 2),
+                ('>', '=') => (TokenKind.GreaterEqual, 2),
+                ('<', '=') => (TokenKind.LessEqual, 2),
+                ('<', _) => (TokenKind.Less, 1),
+                ('>', _) => (TokenKind.Greater, 1),
+                ('!', _) => (TokenKind.Exclamation, 1),
 
-                ('&', '&') => (Token.Create(TokenKind.AmpersandAmpersand), 2),
-                ('|', '|') => (Token.Create(TokenKind.PipePipe), 2),
-                ('&', '=') => (Token.Create(TokenKind.AmpersandEqual), 2),
-                ('&', _) => (Token.Create(TokenKind.Ampersand), 1),
-                ('|', '=') => (Token.Create(TokenKind.PipeEqual), 2),
-                ('|', _) => (Token.Create(TokenKind.Pipe), 1),
-                ('^', '=') => (Token.Create(TokenKind.CaretEqual), 2),
-                ('^', _) => (Token.Create(TokenKind.Caret), 1),
-                ('~', _) => (Token.Create(TokenKind.Tilde), 1),
-                ('%', '=') => (Token.Create(TokenKind.PercentEqual), 2),
-                ('%', _) => (Token.Create(TokenKind.Percent), 1),
+                ('&', '&') => (TokenKind.AmpersandAmpersand, 2),
+                ('|', '|') => (TokenKind.PipePipe, 2),
+                ('&', '=') => (TokenKind.AmpersandEqual, 2),
+                ('&', _) => (TokenKind.Ampersand, 1),
+                ('|', '=') => (TokenKind.PipeEqual, 2),
+                ('|', _) => (TokenKind.Pipe, 1),
+                ('^', '=') => (TokenKind.CaretEqual, 2),
+                ('^', _) => (TokenKind.Caret, 1),
+                ('~', _) => (TokenKind.Tilde, 1),
+                ('%', '=') => (TokenKind.PercentEqual, 2),
+                ('%', _) => (TokenKind.Percent, 1),
 
-                ('.', _) => (Token.Create(TokenKind.Dot), 1),
-                ('#', _) => (Token.Create(TokenKind.Hash), 1),
+                ('.', _) => (TokenKind.Dot, 1),
+                ('#', _) => (TokenKind.Hash, 1),
 
                 _ => throw new LexerException($"Unexpected character '{c}'")
             };
-            tokens.Add(token);
-            span = span[size..];
+            tokens.Add(Token.Create(position.Build(size), tokenKind));
         }
 
-        tokens.Add(Token.CreateEof());
+        tokens.Add(Token.CreateEof(position.Build()));
 
         return tokens;
     }

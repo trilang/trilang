@@ -4,8 +4,11 @@ namespace Trilang.Parsing.Ast;
 
 public class ArrayTypeNode : IInlineTypeNode
 {
-    public ArrayTypeNode(IInlineTypeNode elementType)
-        => ElementType = elementType;
+    public ArrayTypeNode(SourceSpan sourceSpan, IInlineTypeNode elementType)
+    {
+        SourceSpan = sourceSpan;
+        ElementType = elementType;
+    }
 
     public override string ToString()
     {
@@ -20,6 +23,8 @@ public class ArrayTypeNode : IInlineTypeNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformArrayType(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IInlineTypeNode ElementType { get; }
 }

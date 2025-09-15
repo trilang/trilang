@@ -1,3 +1,4 @@
+using System.Text;
 using Trilang.Parsing.Ast;
 
 namespace Tri.Tests;
@@ -8,554 +9,581 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
     public static readonly SyntaxComparer Instance = new SyntaxComparer();
 
     public bool Equals(ISyntaxNode? x, ISyntaxNode? y)
-        => (x, y) switch
+    {
+        var errors = new List<string>();
+        CompareNodes(x, y, errors);
+
+        if (errors.Count == 0)
+            return true;
+
+        var sb = new StringBuilder();
+        sb.AppendLine("Syntax comparison failed with the following mismatches:");
+        foreach (var err in errors)
+            sb.AppendLine(" - " + err);
+
+        throw new Exception(sb.ToString());
+    }
+
+    private void CompareNodes(ISyntaxNode? x, ISyntaxNode? y, List<string> errors)
+    {
+        switch (x, y)
         {
-            (null, null) => true,
-            (null, _) => throw new Exception("x is null"),
-            (_, null) => throw new Exception("y is null"),
+            case (null, null):
+                return;
+            case (null, _):
+                errors.Add("x is null but y is not.");
+                return;
+            case (_, null):
+                errors.Add("y is null but x is not.");
+                return;
 
-            (ArrayAccessExpressionNode x1, ArrayAccessExpressionNode y1)
-                => CompareArrayAccessExpressionNode(x1, y1),
-            (ArrayTypeNode x1, ArrayTypeNode y1)
-                => CompareArrayTypeNode(x1, y1),
-            (BinaryExpressionNode x1, BinaryExpressionNode y1)
-                => CompareBinaryExpressionNode(x1, y1),
-            (BlockStatementNode x1, BlockStatementNode y1)
-                => CompareBlockStatementNode(x1, y1),
-            (BreakNode x1, BreakNode y1)
-                => CompareBreakNode(x1, y1),
-            (CallExpressionNode x1, CallExpressionNode y1)
-                => CompareCallExpressionNode(x1, y1),
-            (CastExpressionNode x1, CastExpressionNode y1)
-                => CompareCastExpressionNode(x1, y1),
-            (ConstructorDeclarationNode x1, ConstructorDeclarationNode y1)
-                => CompareConstructorDeclarationNode(x1, y1),
-            (ContinueNode x1, ContinueNode y1)
-                => CompareContinueNode(x1, y1),
-            (DiscriminatedUnionNode x1, DiscriminatedUnionNode y1)
-                => CompareDiscriminatedUnionNode(x1, y1),
-            (ExpressionStatementNode x1, ExpressionStatementNode y1)
-                => CompareExpressionStatementNode(x1, y1),
-            (FunctionDeclarationNode x1, FunctionDeclarationNode y1)
-                => CompareFunctionDeclarationNode(x1, y1),
-            (FunctionTypeNode x1, FunctionTypeNode y1)
-                => CompareFunctionTypeNode(x1, y1),
-            (GenericTypeNode x1, GenericTypeNode y1)
-                => CompareGenericTypeNode(x1, y1),
-            (IfDirectiveNode x1, IfDirectiveNode y1)
-                => CompareIfDirectiveNode(x1, y1),
-            (IfStatementNode x1, IfStatementNode y1)
-                => CompareIfStatementNode(x1, y1),
-            (InterfaceMethodNode x1, InterfaceMethodNode y1)
-                => CompareInterfaceMethodNode(x1, y1),
-            (InterfaceNode x1, InterfaceNode y1)
-                => CompareInterfaceNode(x1, y1),
-            (InterfacePropertyNode x1, InterfacePropertyNode y1)
-                => CompareInterfacePropertyNode(x1, y1),
-            (IsExpressionNode x1, IsExpressionNode y1)
-                => CompareAsExpressionNode(x1, y1),
-            (LiteralExpressionNode x1, LiteralExpressionNode y1)
-                => CompareLiteralExpressionNode(x1, y1),
-            (MemberAccessExpressionNode x1, MemberAccessExpressionNode y1)
-                => CompareMemberAccessExpressionNode(x1, y1),
-            (MethodDeclarationNode x1, MethodDeclarationNode y1)
-                => CompareMethodDeclarationNode(x1, y1),
-            (NewArrayExpressionNode x1, NewArrayExpressionNode y1)
-                => CompareNewArrayExpressionNode(x1, y1),
-            (NewObjectExpressionNode x1, NewObjectExpressionNode y1)
-                => CompareNewObjectExpressionNode(x1, y1),
-            (NullExpressionNode x1, NullExpressionNode y1)
-                => CompareNullExpressionNode(x1, y1),
-            (ParameterNode x1, ParameterNode y1)
-                => CompareParameterNode(x1, y1),
-            (PropertyDeclarationNode x1, PropertyDeclarationNode y1)
-                => ComparePropertyDeclarationNode(x1, y1),
-            (PropertyGetterNode x1, PropertyGetterNode y1)
-                => ComparePropertyGetterNode(x1, y1),
-            (PropertySetterNode x1, PropertySetterNode y1)
-                => ComparePropertySetterNode(x1, y1),
-            (ReturnStatementNode x1, ReturnStatementNode y1)
-                => CompareReturnStatementNode(x1, y1),
-            (SyntaxTree x1, SyntaxTree y1)
-                => CompareSyntaxTree(x1, y1),
-            (TupleExpressionNode x1, TupleExpressionNode y1)
-                => CompareTupleExpressionNode(x1, y1),
-            (TupleTypeNode x1, TupleTypeNode y1)
-                => CompareTupleTypeNode(x1, y1),
-            (TypeAliasDeclarationNode x1, TypeAliasDeclarationNode y1)
-                => CompareTypeAliasDeclarationNode(x1, y1),
-            (TypeDeclarationNode x1, TypeDeclarationNode y1)
-                => CompareTypeDeclarationNode(x1, y1),
-            (TypeNode x1, TypeNode y1)
-                => CompareTypeNode(x1, y1),
-            (UnaryExpressionNode x1, UnaryExpressionNode y1)
-                => CompareUnaryExpressionNode(x1, y1),
-            (VariableDeclarationNode x1, VariableDeclarationNode y1)
-                => CompareVariableDeclarationStatementNode(x1, y1),
-            (WhileNode x1, WhileNode y1)
-                => CompareWhileNode(x1, y1),
+            case (ArrayAccessExpressionNode x1, ArrayAccessExpressionNode y1):
+                CompareArrayAccessExpressionNode(x1, y1, errors);
+                return;
+            case (ArrayTypeNode x1, ArrayTypeNode y1):
+                CompareArrayTypeNode(x1, y1, errors);
+                return;
+            case (BinaryExpressionNode x1, BinaryExpressionNode y1):
+                CompareBinaryExpressionNode(x1, y1, errors);
+                return;
+            case (BlockStatementNode x1, BlockStatementNode y1):
+                CompareBlockStatementNode(x1, y1, errors);
+                return;
+            case (BreakNode x1, BreakNode y1):
+                CompareBreakNode(x1, y1, errors);
+                return;
+            case (CallExpressionNode x1, CallExpressionNode y1):
+                CompareCallExpressionNode(x1, y1, errors);
+                return;
+            case (CastExpressionNode x1, CastExpressionNode y1):
+                CompareCastExpressionNode(x1, y1, errors);
+                return;
+            case (ConstructorDeclarationNode x1, ConstructorDeclarationNode y1):
+                CompareConstructorDeclarationNode(x1, y1, errors);
+                return;
+            case (ContinueNode x1, ContinueNode y1):
+                CompareContinueNode(x1, y1, errors);
+                return;
+            case (DiscriminatedUnionNode x1, DiscriminatedUnionNode y1):
+                CompareDiscriminatedUnionNode(x1, y1, errors);
+                return;
+            case (ExpressionStatementNode x1, ExpressionStatementNode y1):
+                CompareExpressionStatementNode(x1, y1, errors);
+                return;
+            case (FunctionDeclarationNode x1, FunctionDeclarationNode y1):
+                CompareFunctionDeclarationNode(x1, y1, errors);
+                return;
+            case (FunctionTypeNode x1, FunctionTypeNode y1):
+                CompareFunctionTypeNode(x1, y1, errors);
+                return;
+            case (GenericTypeNode x1, GenericTypeNode y1):
+                CompareGenericTypeNode(x1, y1, errors);
+                return;
+            case (IfDirectiveNode x1, IfDirectiveNode y1):
+                CompareIfDirectiveNode(x1, y1, errors);
+                return;
+            case (IfStatementNode x1, IfStatementNode y1):
+                CompareIfStatementNode(x1, y1, errors);
+                return;
+            case (InterfaceMethodNode x1, InterfaceMethodNode y1):
+                CompareInterfaceMethodNode(x1, y1, errors);
+                return;
+            case (InterfaceNode x1, InterfaceNode y1):
+                CompareInterfaceNode(x1, y1, errors);
+                return;
+            case (InterfacePropertyNode x1, InterfacePropertyNode y1):
+                CompareInterfacePropertyNode(x1, y1, errors);
+                return;
+            case (IsExpressionNode x1, IsExpressionNode y1):
+                CompareAsExpressionNode(x1, y1, errors);
+                return;
+            case (LiteralExpressionNode x1, LiteralExpressionNode y1):
+                CompareLiteralExpressionNode(x1, y1, errors);
+                return;
+            case (MemberAccessExpressionNode x1, MemberAccessExpressionNode y1):
+                CompareMemberAccessExpressionNode(x1, y1, errors);
+                return;
+            case (MethodDeclarationNode x1, MethodDeclarationNode y1):
+                CompareMethodDeclarationNode(x1, y1, errors);
+                return;
+            case (NewArrayExpressionNode x1, NewArrayExpressionNode y1):
+                CompareNewArrayExpressionNode(x1, y1, errors);
+                return;
+            case (NewObjectExpressionNode x1, NewObjectExpressionNode y1):
+                CompareNewObjectExpressionNode(x1, y1, errors);
+                return;
+            case (NullExpressionNode x1, NullExpressionNode y1):
+                CompareNullExpressionNode(x1, y1, errors);
+                return;
+            case (ParameterNode x1, ParameterNode y1):
+                CompareParameterNode(x1, y1, errors);
+                return;
+            case (PropertyDeclarationNode x1, PropertyDeclarationNode y1):
+                ComparePropertyDeclarationNode(x1, y1, errors);
+                return;
+            case (PropertyGetterNode x1, PropertyGetterNode y1):
+                ComparePropertyGetterNode(x1, y1, errors);
+                return;
+            case (PropertySetterNode x1, PropertySetterNode y1):
+                ComparePropertySetterNode(x1, y1, errors);
+                return;
+            case (ReturnStatementNode x1, ReturnStatementNode y1):
+                CompareReturnStatementNode(x1, y1, errors);
+                return;
+            case (SyntaxTree x1, SyntaxTree y1):
+                CompareSyntaxTree(x1, y1, errors);
+                return;
+            case (TupleExpressionNode x1, TupleExpressionNode y1):
+                CompareTupleExpressionNode(x1, y1, errors);
+                return;
+            case (TupleTypeNode x1, TupleTypeNode y1):
+                CompareTupleTypeNode(x1, y1, errors);
+                return;
+            case (TypeAliasDeclarationNode x1, TypeAliasDeclarationNode y1):
+                CompareTypeAliasDeclarationNode(x1, y1, errors);
+                return;
+            case (TypeDeclarationNode x1, TypeDeclarationNode y1):
+                CompareTypeDeclarationNode(x1, y1, errors);
+                return;
+            case (TypeNode x1, TypeNode y1):
+                CompareTypeNode(x1, y1, errors);
+                return;
+            case (UnaryExpressionNode x1, UnaryExpressionNode y1):
+                CompareUnaryExpressionNode(x1, y1, errors);
+                return;
+            case (VariableDeclarationNode x1, VariableDeclarationNode y1):
+                CompareVariableDeclarationStatementNode(x1, y1, errors);
+                return;
+            case (WhileNode x1, WhileNode y1):
+                CompareWhileNode(x1, y1, errors);
+                return;
 
-            _ => throw new Exception($"{x.GetType()} != {y.GetType()}"),
-        };
-
-    private bool CompareArrayAccessExpressionNode(ArrayAccessExpressionNode x, ArrayAccessExpressionNode y)
-    {
-        if (!Equals(x.Member, y.Member))
-            throw new Exception("Expression doesn't match.");
-
-        if (!Equals(x.Index, y.Index))
-            throw new Exception("Index doesn't match.");
-
-        return true;
+            default:
+                errors.Add($"{x.GetType()} != {y.GetType()}");
+                return;
+        }
     }
 
-    private bool CompareArrayTypeNode(ArrayTypeNode x, ArrayTypeNode y)
+    private void CompareArrayAccessExpressionNode(ArrayAccessExpressionNode x, ArrayAccessExpressionNode y, List<string> errors)
     {
-        if (!Equals(x.ElementType, y.ElementType))
-            throw new Exception("ElementType doesn't match.");
+        CompareNodes(x.Member, y.Member, errors);
+        CompareNodes(x.Index, y.Index, errors);
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"ArrayAccessExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareBinaryExpressionNode(BinaryExpressionNode x, BinaryExpressionNode y)
+    private void CompareArrayTypeNode(ArrayTypeNode x, ArrayTypeNode y, List<string> errors)
     {
-        if (!Equals(x.Left, y.Left))
-            throw new Exception("Left doesn't match.");
+        CompareNodes(x.ElementType, y.ElementType, errors);
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"ArrayType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
+    private void CompareBinaryExpressionNode(BinaryExpressionNode x, BinaryExpressionNode y, List<string> errors)
+    {
+        CompareNodes(x.Left, y.Left, errors);
 
         if (x.Kind != y.Kind)
-            throw new Exception($"Operator doesn't match. {x.Kind} != {y.Kind}.");
+            errors.Add($"BinaryExpression: Operator mismatch. {x.Kind} != {y.Kind}.");
 
-        if (!Equals(x.Right, y.Right))
-            throw new Exception("Right doesn't match.");
+        CompareNodes(x.Right, y.Right, errors);
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"BinaryExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareBlockStatementNode(BlockStatementNode x, BlockStatementNode y)
+    private void CompareBlockStatementNode(BlockStatementNode x, BlockStatementNode y, List<string> errors)
     {
-        if (!x.Statements.SequenceEqual(y.Statements, this))
-            throw new Exception("Statements don't match.");
+        CompareSequences(x.Statements, y.Statements, errors, "BlockStatement.Statements");
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"BlockStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareBreakNode(BreakNode x, BreakNode y)
+    private void CompareBreakNode(BreakNode x, BreakNode y, List<string> errors)
     {
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"BreakNode: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareCallExpressionNode(CallExpressionNode x, CallExpressionNode y)
+    private void CompareCallExpressionNode(CallExpressionNode x, CallExpressionNode y, List<string> errors)
     {
-        if (!Equals(x.Member, y.Member))
-            throw new Exception("Expression doesn't match.");
+        CompareNodes(x.Member, y.Member, errors);
+        CompareSequences(x.Parameters, y.Parameters, errors, "CallExpression.Parameters");
 
-        if (!x.Parameters.SequenceEqual(y.Parameters, this))
-            throw new Exception("Arguments don't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"CallExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareCastExpressionNode(CastExpressionNode x, CastExpressionNode y)
+    private void CompareCastExpressionNode(CastExpressionNode x, CastExpressionNode y, List<string> errors)
     {
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("TargetType doesn't match.");
+        CompareNodes(x.Type, y.Type, errors);
+        CompareNodes(x.Expression, y.Expression, errors);
 
-        if (!Equals(x.Expression, y.Expression))
-            throw new Exception("Expression doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"CastExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareConstructorDeclarationNode(ConstructorDeclarationNode x, ConstructorDeclarationNode y)
+    private void CompareConstructorDeclarationNode(ConstructorDeclarationNode x, ConstructorDeclarationNode y, List<string> errors)
     {
         if (x.AccessModifier != y.AccessModifier)
-            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
+            errors.Add($"Constructor: AccessModifier mismatch. {x.AccessModifier} != {y.AccessModifier}.");
 
-        if (!x.Parameters.SequenceEqual(y.Parameters, this))
-            throw new Exception("Parameters don't match.");
+        CompareSequences(x.Parameters, y.Parameters, errors, "Constructor.Parameters");
+        CompareNodes(x.Body, y.Body, errors);
 
-        if (!Equals(x.Body, y.Body))
-            throw new Exception("Body doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"Constructor: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareContinueNode(ContinueNode x, ContinueNode y)
+    private void CompareContinueNode(ContinueNode x, ContinueNode y, List<string> errors)
     {
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"ContinueNode: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareDiscriminatedUnionNode(DiscriminatedUnionNode x, DiscriminatedUnionNode y)
+    private void CompareDiscriminatedUnionNode(DiscriminatedUnionNode x, DiscriminatedUnionNode y, List<string> errors)
     {
-        if (!x.Types.SequenceEqual(y.Types, this))
-            throw new Exception("Cases don't match.");
+        CompareSequences(x.Types, y.Types, errors, "DiscriminatedUnion.Types");
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"DiscriminatedUnion: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareExpressionStatementNode(ExpressionStatementNode x, ExpressionStatementNode y)
+    private void CompareExpressionStatementNode(ExpressionStatementNode x, ExpressionStatementNode y, List<string> errors)
     {
-        if (!Equals(x.Expression, y.Expression))
-            throw new Exception("Expression doesn't match.");
+        CompareNodes(x.Expression, y.Expression, errors);
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"ExpressionStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareFunctionDeclarationNode(FunctionDeclarationNode x, FunctionDeclarationNode y)
+    private void CompareFunctionDeclarationNode(FunctionDeclarationNode x, FunctionDeclarationNode y, List<string> errors)
     {
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"Function: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!x.Parameters.SequenceEqual(y.Parameters, this))
-            throw new Exception("Parameters don't match.");
+        CompareSequences(x.Parameters, y.Parameters, errors, "Function.Parameters");
+        CompareNodes(x.ReturnType, y.ReturnType, errors);
+        CompareNodes(x.Body, y.Body, errors);
 
-        if (!Equals(x.ReturnType, y.ReturnType))
-            throw new Exception("ReturnType doesn't match.");
-
-        if (!Equals(x.Body, y.Body))
-            throw new Exception("Body doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"Function: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareFunctionTypeNode(FunctionTypeNode x, FunctionTypeNode y)
+    private void CompareFunctionTypeNode(FunctionTypeNode x, FunctionTypeNode y, List<string> errors)
     {
-        if (!x.ParameterTypes.SequenceEqual(y.ParameterTypes, this))
-            throw new Exception("Parameters don't match.");
+        CompareSequences(x.ParameterTypes, y.ParameterTypes, errors, "FunctionType.Parameters");
+        CompareNodes(x.ReturnType, y.ReturnType, errors);
 
-        if (!Equals(x.ReturnType, y.ReturnType))
-            throw new Exception("ReturnType doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"FunctionType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareGenericTypeNode(GenericTypeNode x, GenericTypeNode y)
+    private void CompareGenericTypeNode(GenericTypeNode x, GenericTypeNode y, List<string> errors)
     {
-        if (!x.TypeArguments.SequenceEqual(y.TypeArguments, this))
-            throw new Exception("Arguments don't match.");
+        CompareSequences(x.TypeArguments, y.TypeArguments, errors, "GenericType.Arguments");
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"GenericType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareIfDirectiveNode(IfDirectiveNode x, IfDirectiveNode y)
+    private void CompareIfDirectiveNode(IfDirectiveNode x, IfDirectiveNode y, List<string> errors)
     {
         if (x.DirectiveName != y.DirectiveName)
-            throw new Exception($"Condition doesn't match. {x.DirectiveName} != {y.DirectiveName}.");
+            errors.Add($"IfDirective: DirectiveName mismatch. {x.DirectiveName} != {y.DirectiveName}.");
 
-        if (!x.Then.SequenceEqual(y.Then, this))
-            throw new Exception("IfBranch doesn't match.");
+        CompareSequences(x.Then, y.Then, errors, "IfDirective.Then");
+        CompareSequences(x.Else, y.Else, errors, "IfDirective.Else");
 
-        if (!x.Else.SequenceEqual(y.Else, this))
-            throw new Exception("ElseBranch doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"IfDirective: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareIfStatementNode(IfStatementNode x, IfStatementNode y)
+    private void CompareIfStatementNode(IfStatementNode x, IfStatementNode y, List<string> errors)
     {
-        if (!Equals(x.Condition, y.Condition))
-            throw new Exception("Condition doesn't match.");
+        CompareNodes(x.Condition, y.Condition, errors);
+        CompareNodes(x.Then, y.Then, errors);
+        CompareNodes(x.Else, y.Else, errors);
 
-        if (!Equals(x.Then, y.Then))
-            throw new Exception("IfBranch doesn't match.");
-
-        if (!Equals(x.Else, y.Else))
-            throw new Exception("ElseBranch doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"IfStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareInterfaceMethodNode(InterfaceMethodNode x, InterfaceMethodNode y)
+    private void CompareInterfaceMethodNode(InterfaceMethodNode x, InterfaceMethodNode y, List<string> errors)
     {
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"InterfaceMethod: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!x.ParameterTypes.SequenceEqual(y.ParameterTypes, this))
-            throw new Exception("Parameters don't match.");
+        CompareSequences(x.ParameterTypes, y.ParameterTypes, errors, "InterfaceMethod.Parameters");
+        CompareNodes(x.ReturnType, y.ReturnType, errors);
 
-        if (!Equals(x.ReturnType, y.ReturnType))
-            throw new Exception("ReturnType doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"InterfaceMethod: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareInterfaceNode(InterfaceNode x, InterfaceNode y)
+    private void CompareInterfaceNode(InterfaceNode x, InterfaceNode y, List<string> errors)
     {
-        if (!x.Properties.SequenceEqual(y.Properties, this))
-            throw new Exception("Properties don't match.");
+        CompareSequences(x.Properties, y.Properties, errors, "Interface.Properties");
+        CompareSequences(x.Methods, y.Methods, errors, "Interface.Methods");
 
-        if (!x.Methods.SequenceEqual(y.Methods, this))
-            throw new Exception("Methods don't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"Interface: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareInterfacePropertyNode(InterfacePropertyNode x, InterfacePropertyNode y)
+    private void CompareInterfacePropertyNode(InterfacePropertyNode x, InterfacePropertyNode y, List<string> errors)
     {
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"InterfaceProperty: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
+        CompareNodes(x.Type, y.Type, errors);
 
         if (x.GetterModifier != y.GetterModifier)
-            throw new Exception($"HasGetter doesn't match. {x.GetterModifier} != {y.GetterModifier}.");
+            errors.Add($"InterfaceProperty: GetterModifier mismatch. {x.GetterModifier} != {y.GetterModifier}.");
 
         if (x.SetterModifier != y.SetterModifier)
-            throw new Exception($"HasSetter doesn't match. {x.SetterModifier} != {y.SetterModifier}.");
+            errors.Add($"InterfaceProperty: SetterModifier mismatch. {x.SetterModifier} != {y.SetterModifier}.");
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"InterfaceProperty: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareAsExpressionNode(IsExpressionNode x, IsExpressionNode y)
+    private void CompareAsExpressionNode(IsExpressionNode x, IsExpressionNode y, List<string> errors)
     {
-        if (!Equals(x.Expression, y.Expression))
-            throw new Exception("Expression doesn't match.");
+        CompareNodes(x.Expression, y.Expression, errors);
+        CompareNodes(x.Type, y.Type, errors);
 
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("TargetType doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"IsExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareLiteralExpressionNode(LiteralExpressionNode x, LiteralExpressionNode y)
+    private void CompareLiteralExpressionNode(LiteralExpressionNode x, LiteralExpressionNode y, List<string> errors)
     {
         if (x.Kind != y.Kind)
-            throw new Exception($"Literal doesn't match. {x.Kind} != {y.Kind}.");
+            errors.Add($"LiteralExpression: Kind mismatch. {x.Kind} != {y.Kind}.");
 
         if (!x.Value.Equals(y.Value))
-            throw new Exception($"Value doesn't match. {x.Value} != {y.Value}.");
+            errors.Add($"LiteralExpression: Value mismatch. {x.Value} != {y.Value}.");
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"LiteralExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareMemberAccessExpressionNode(MemberAccessExpressionNode x, MemberAccessExpressionNode y)
+    private void CompareMemberAccessExpressionNode(MemberAccessExpressionNode x, MemberAccessExpressionNode y, List<string> errors)
     {
-        if (!Equals(x.Member, y.Member))
-            throw new Exception("Expression doesn't match.");
+        CompareNodes(x.Member, y.Member, errors);
 
         if (x.Name != y.Name)
-            throw new Exception($"Member doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"MemberAccessExpression: Name mismatch. {x.Name} != {y.Name}.");
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"MemberAccessExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareMethodDeclarationNode(MethodDeclarationNode x, MethodDeclarationNode y)
+    private void CompareMethodDeclarationNode(MethodDeclarationNode x, MethodDeclarationNode y, List<string> errors)
     {
         if (x.AccessModifier != y.AccessModifier)
-            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
+            errors.Add($"Method: AccessModifier mismatch. {x.AccessModifier} != {y.AccessModifier}.");
 
         if (x.IsStatic != y.IsStatic)
-            throw new Exception($"IsStatic doesn't match. {x.IsStatic} != {y.IsStatic}.");
+            errors.Add($"Method: IsStatic mismatch. {x.IsStatic} != {y.IsStatic}.");
 
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"Method: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!x.Parameters.SequenceEqual(y.Parameters, this))
-            throw new Exception("Parameters don't match.");
+        CompareSequences(x.Parameters, y.Parameters, errors, "Method.Parameters");
+        CompareNodes(x.ReturnType, y.ReturnType, errors);
+        CompareNodes(x.Body, y.Body, errors);
 
-        if (!Equals(x.ReturnType, y.ReturnType))
-            throw new Exception("ReturnType doesn't match.");
-
-        if (!Equals(x.Body, y.Body))
-            throw new Exception("Body doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"Method: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareNewArrayExpressionNode(NewArrayExpressionNode x, NewArrayExpressionNode y)
+    private void CompareNewArrayExpressionNode(NewArrayExpressionNode x, NewArrayExpressionNode y, List<string> errors)
     {
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
+        CompareNodes(x.Type, y.Type, errors);
+        CompareNodes(x.Size, y.Size, errors);
 
-        if (!Equals(x.Size, y.Size))
-            throw new Exception("Sizes don't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"NewArrayExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareNewObjectExpressionNode(NewObjectExpressionNode x, NewObjectExpressionNode y)
+    private void CompareNewObjectExpressionNode(NewObjectExpressionNode x, NewObjectExpressionNode y, List<string> errors)
     {
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
+        CompareNodes(x.Type, y.Type, errors);
+        CompareSequences(x.Parameters, y.Parameters, errors, "NewObjectExpression.Parameters");
 
-        if (!x.Parameters.SequenceEqual(y.Parameters, this))
-            throw new Exception("Arguments don't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"NewObjectExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareNullExpressionNode(NullExpressionNode x, NullExpressionNode y)
+    private void CompareNullExpressionNode(NullExpressionNode x, NullExpressionNode y, List<string> errors)
     {
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"NullExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareParameterNode(ParameterNode x, ParameterNode y)
+    private void CompareParameterNode(ParameterNode x, ParameterNode y, List<string> errors)
     {
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"Parameter: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
+        CompareNodes(x.Type, y.Type, errors);
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"Parameter: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool ComparePropertyDeclarationNode(PropertyDeclarationNode x, PropertyDeclarationNode y)
+    private void ComparePropertyDeclarationNode(PropertyDeclarationNode x, PropertyDeclarationNode y, List<string> errors)
     {
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"Property: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
+        CompareNodes(x.Type, y.Type, errors);
+        CompareNodes(x.Getter, y.Getter, errors);
+        CompareNodes(x.Setter, y.Setter, errors);
 
-        if (!Equals(x.Getter, y.Getter))
-            throw new Exception("Getter doesn't match.");
-
-        if (!Equals(x.Setter, y.Setter))
-            throw new Exception("Setter doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"Property: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool ComparePropertyGetterNode(PropertyGetterNode x, PropertyGetterNode y)
+    private void ComparePropertyGetterNode(PropertyGetterNode x, PropertyGetterNode y, List<string> errors)
+    {
+        CompareNodes(x.Body, y.Body, errors);
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"PropertyGetter: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
+    private void ComparePropertySetterNode(PropertySetterNode x, PropertySetterNode y, List<string> errors)
+    {
+        CompareNodes(x.Body, y.Body, errors);
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"PropertySetter: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
+    private void CompareReturnStatementNode(ReturnStatementNode x, ReturnStatementNode y, List<string> errors)
+    {
+        CompareNodes(x.Expression, y.Expression, errors);
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"ReturnStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
+    private void CompareSyntaxTree(SyntaxTree x, SyntaxTree y, List<string> errors)
+    {
+        CompareSequences(x.Declarations, y.Declarations, errors, "SyntaxTree.Declarations");
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"SyntaxTree: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
+    private void CompareTupleExpressionNode(TupleExpressionNode x, TupleExpressionNode y, List<string> errors)
+    {
+        CompareSequences(x.Expressions, y.Expressions, errors, "TupleExpression.Elements");
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"TupleExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
+    private void CompareTupleTypeNode(TupleTypeNode x, TupleTypeNode y, List<string> errors)
+    {
+        CompareSequences(x.Types, y.Types, errors, "TupleType.Elements");
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"TupleType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
+    private void CompareTypeAliasDeclarationNode(TypeAliasDeclarationNode x, TypeAliasDeclarationNode y, List<string> errors)
     {
         if (x.AccessModifier != y.AccessModifier)
-            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
-
-        if (!Equals(x.Body, y.Body))
-            throw new Exception("Body doesn't match.");
-
-        return true;
-    }
-
-    private bool ComparePropertySetterNode(PropertySetterNode x, PropertySetterNode y)
-    {
-        if (x.AccessModifier != y.AccessModifier)
-            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
-
-        if (!Equals(x.Body, y.Body))
-            throw new Exception("Body doesn't match.");
-
-        return true;
-    }
-
-    private bool CompareReturnStatementNode(ReturnStatementNode x, ReturnStatementNode y)
-    {
-        if (!Equals(x.Expression, y.Expression))
-            throw new Exception("Expression doesn't match.");
-
-        return true;
-    }
-
-    private bool CompareSyntaxTree(SyntaxTree x, SyntaxTree y)
-    {
-        if (!x.Declarations.SequenceEqual(y.Declarations, this))
-            throw new Exception("Members don't match.");
-
-        return true;
-    }
-
-    private bool CompareTupleExpressionNode(TupleExpressionNode x, TupleExpressionNode y)
-    {
-        if (!x.Expressions.SequenceEqual(y.Expressions, this))
-            throw new Exception("Elements don't match.");
-
-        return true;
-    }
-
-    private bool CompareTupleTypeNode(TupleTypeNode x, TupleTypeNode y)
-    {
-        if (!x.Types.SequenceEqual(y.Types, this))
-            throw new Exception("Elements don't match.");
-
-        return true;
-    }
-
-    private bool CompareTypeAliasDeclarationNode(TypeAliasDeclarationNode x, TypeAliasDeclarationNode y)
-    {
-        if (x.AccessModifier != y.AccessModifier)
-            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
+            errors.Add($"TypeAlias: AccessModifier mismatch. {x.AccessModifier} != {y.AccessModifier}.");
 
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"TypeAlias: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!x.GenericArguments.SequenceEqual(y.GenericArguments, this))
-            throw new Exception("GenericArguments don't match.");
+        CompareNodes(x.Type, y.Type, errors);
+        CompareSequences(x.GenericArguments, y.GenericArguments, errors, "TypeAlias.GenericArguments");
 
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"TypeAlias: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareTypeDeclarationNode(TypeDeclarationNode x, TypeDeclarationNode y)
+    private void CompareTypeDeclarationNode(TypeDeclarationNode x, TypeDeclarationNode y, List<string> errors)
     {
         if (x.AccessModifier != y.AccessModifier)
-            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
+            errors.Add($"TypeDeclaration: AccessModifier mismatch. {x.AccessModifier} != {y.AccessModifier}.");
 
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"TypeDeclaration: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!x.GenericArguments.SequenceEqual(y.GenericArguments, this))
-            throw new Exception("GenericArguments don't match.");
+        CompareSequences(x.GenericArguments, y.GenericArguments, errors, "TypeDeclaration.Members");
+        CompareSequences(x.Interfaces, y.Interfaces, errors, "TypeDeclaration.Members");
+        CompareSequences(x.Properties, y.Properties, errors, "TypeDeclaration.Members");
+        CompareSequences(x.Constructors, y.Constructors, errors, "TypeDeclaration.Members");
+        CompareSequences(x.Methods, y.Methods, errors, "TypeDeclaration.Members");
 
-        if (!x.Properties.SequenceEqual(y.Properties, this))
-            throw new Exception("Properties don't match.");
-
-        if (!x.Constructors.SequenceEqual(y.Constructors, this))
-            throw new Exception("Constructors don't match.");
-
-        if (!x.Methods.SequenceEqual(y.Methods, this))
-            throw new Exception("Methods don't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"TypeDeclaration: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareTypeNode(TypeNode x, TypeNode y)
+    private void CompareTypeNode(TypeNode x, TypeNode y, List<string> errors)
     {
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"TypeNode: Name mismatch. {x.Name} != {y.Name}.");
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"TypeNode: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareUnaryExpressionNode(UnaryExpressionNode x, UnaryExpressionNode y)
+    private void CompareUnaryExpressionNode(UnaryExpressionNode x, UnaryExpressionNode y, List<string> errors)
     {
         if (x.Kind != y.Kind)
-            throw new Exception($"Operator doesn't match. {x.Kind} != {y.Kind}.");
+            errors.Add($"UnaryExpression: Operator mismatch. {x.Kind} != {y.Kind}.");
 
-        if (!Equals(x.Operand, y.Operand))
-            throw new Exception("Operand doesn't match.");
+        CompareNodes(x.Operand, y.Operand, errors);
 
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"UnaryExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareVariableDeclarationStatementNode(VariableDeclarationNode x, VariableDeclarationNode y)
+    private void CompareVariableDeclarationStatementNode(VariableDeclarationNode x, VariableDeclarationNode y, List<string> errors)
     {
         if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+            errors.Add($"VariableDeclaration: Name mismatch. {x.Name} != {y.Name}.");
 
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
+        CompareNodes(x.Type, y.Type, errors);
+        CompareNodes(x.Expression, y.Expression, errors);
 
-        if (!Equals(x.Expression, y.Expression))
-            throw new Exception("Initializer doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"VariableDeclaration: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private bool CompareWhileNode(WhileNode x, WhileNode y)
+    private void CompareWhileNode(WhileNode x, WhileNode y, List<string> errors)
     {
-        if (!Equals(x.Condition, y.Condition))
-            throw new Exception("Condition doesn't match.");
+        CompareNodes(x.Condition, y.Condition, errors);
+        CompareNodes(x.Body, y.Body, errors);
 
-        if (!Equals(x.Body, y.Body))
-            throw new Exception("Body doesn't match.");
-
-        return true;
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"While: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    public int GetHashCode(ISyntaxNode obj)
-        => obj.GetHashCode();
+    private void CompareSequences<T>(IReadOnlyList<T> xs, IReadOnlyList<T> ys, List<string> errors, string context)
+        where T : ISyntaxNode
+    {
+        if (xs.Count != ys.Count)
+        {
+            errors.Add($"{context}: Count mismatch. {xs.Count} != {ys.Count}.");
+        }
+        else
+        {
+            for (var i = 0; i < xs.Count; i++)
+                CompareNodes(xs[i], ys[i], errors);
+        }
+    }
+
+    public int GetHashCode(ISyntaxNode obj) => obj.GetHashCode();
 }

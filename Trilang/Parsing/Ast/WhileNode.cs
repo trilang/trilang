@@ -4,8 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class WhileNode : IStatementNode
 {
-    public WhileNode(IExpressionNode condition, BlockStatementNode body)
+    public WhileNode(SourceSpan sourceSpan, IExpressionNode condition, BlockStatementNode body)
     {
+        SourceSpan = sourceSpan;
         Condition = condition;
         Body = body;
     }
@@ -23,6 +24,8 @@ public class WhileNode : IStatementNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformWhile(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IExpressionNode Condition { get; }
 

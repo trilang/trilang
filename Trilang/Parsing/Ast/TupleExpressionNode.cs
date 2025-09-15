@@ -4,11 +4,12 @@ namespace Trilang.Parsing.Ast;
 
 public class TupleExpressionNode : IExpressionNode
 {
-    public TupleExpressionNode(IReadOnlyList<IExpressionNode> expressions)
+    public TupleExpressionNode(SourceSpan sourceSpan, IReadOnlyList<IExpressionNode> expressions)
     {
         if (expressions.Count <= 1)
             throw new ArgumentException("Tuple must have at least 2 elements", nameof(expressions));
 
+        SourceSpan = sourceSpan;
         Expressions = expressions;
     }
 
@@ -25,6 +26,8 @@ public class TupleExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformTuple(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IReadOnlyList<IExpressionNode> Expressions { get; }
 }

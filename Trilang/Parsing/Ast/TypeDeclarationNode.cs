@@ -5,6 +5,7 @@ namespace Trilang.Parsing.Ast;
 public class TypeDeclarationNode : IDeclarationNode, IHasGenericArguments
 {
     public TypeDeclarationNode(
+        SourceSpan sourceSpan,
         AccessModifier accessModifier,
         string name,
         IReadOnlyList<TypeNode> genericArguments,
@@ -13,6 +14,7 @@ public class TypeDeclarationNode : IDeclarationNode, IHasGenericArguments
         IReadOnlyList<ConstructorDeclarationNode> constructors,
         IReadOnlyList<MethodDeclarationNode> methods)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Name = name;
         GenericArguments = genericArguments;
@@ -35,6 +37,8 @@ public class TypeDeclarationNode : IDeclarationNode, IHasGenericArguments
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformType(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

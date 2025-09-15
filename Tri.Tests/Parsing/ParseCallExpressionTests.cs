@@ -1,3 +1,4 @@
+using Trilang;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -18,17 +19,34 @@ public class ParseCallExpressionTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
                 "main",
                 [],
-                new TypeNode("void"),
-                new BlockStatementNode([
-                    new ExpressionStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode("print"),
-                            [new LiteralExpressionNode(LiteralExpressionKind.String, "Hello, World!")]
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(53, 3, 2)),
+                    [
+                        new ExpressionStatementNode(
+                            new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(51, 2, 28)),
+                            new CallExpressionNode(
+                                new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(50, 2, 27)),
+                                new MemberAccessExpressionNode(
+                                    new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(33, 2, 10)),
+                                    "print"
+                                ),
+                                [
+                                    LiteralExpressionNode.String(
+                                        new SourceSpan(new SourcePosition(34, 2, 11), new SourcePosition(49, 2, 26)),
+                                        "Hello, World!"
+                                    )
+                                ]
+                            )
                         )
-                    )
-                ])
+                    ]
+                )
             )
         ]);
 
@@ -48,20 +66,41 @@ public class ParseCallExpressionTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(43, 3, 2)),
                 "main",
                 [],
-                new TypeNode("void"),
-                new BlockStatementNode([
-                    new ExpressionStatementNode(
-                        new CallExpressionNode(
-                            new MemberAccessExpressionNode("sum"),
-                            [
-                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1),
-                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
-                                new LiteralExpressionNode(LiteralExpressionKind.Integer, 3),
-                            ])
-                    )
-                ])
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(43, 3, 2)),
+                    [
+                        new ExpressionStatementNode(
+                            new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(41, 2, 18)),
+                            new CallExpressionNode(
+                                new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(40, 2, 17)),
+                                new MemberAccessExpressionNode(
+                                    new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(31, 2, 8)),
+                                    "sum"
+                                ),
+                                [
+                                    LiteralExpressionNode.Integer(
+                                        new SourceSpan(new SourcePosition(32, 2, 9), new SourcePosition(33, 2, 10)),
+                                        1
+                                    ),
+                                    LiteralExpressionNode.Integer(
+                                        new SourceSpan(new SourcePosition(35, 2, 12), new SourcePosition(36, 2, 13)),
+                                        2
+                                    ),
+                                    LiteralExpressionNode.Integer(
+                                        new SourceSpan(new SourcePosition(38, 2, 15), new SourcePosition(39, 2, 16)),
+                                        3
+                                    ),
+                                ])
+                        )
+                    ]
+                )
             )
         ]);
 
@@ -79,27 +118,53 @@ public class ParseCallExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationNode(
-            "x",
-            new TypeNode("i32"),
-            new BinaryExpressionNode(
-                BinaryExpressionKind.Addition,
-                new LiteralExpressionNode(LiteralExpressionKind.Integer, 1),
-                new CallExpressionNode(
-                    new MemberAccessExpressionNode("sum"),
-                    [
-                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 1),
-                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 2),
-                        new LiteralExpressionNode(LiteralExpressionKind.Integer, 3),
-                    ])
-            )
-        );
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(60, 3, 2)),
                 "main",
                 [],
-                new TypeNode("void"),
-                new BlockStatementNode([variableDeclarationNode])
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(60, 3, 2)),
+                    [
+                        new VariableDeclarationNode(
+                            new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(58, 2, 35)),
+                            "x",
+                            new TypeNode(new SourceSpan(new SourcePosition(35, 2, 12), new SourcePosition(38, 2, 15)), "i32"),
+                            new BinaryExpressionNode(
+                                new SourceSpan(new SourcePosition(41, 2, 18), new SourcePosition(57, 2, 34)),
+                                BinaryExpressionKind.Addition,
+                                LiteralExpressionNode.Integer(
+                                    new SourceSpan(new SourcePosition(41, 2, 18), new SourcePosition(42, 2, 19)),
+                                    1
+                                ),
+                                new CallExpressionNode(
+                                    new SourceSpan(new SourcePosition(45, 2, 22), new SourcePosition(57, 2, 34)),
+                                    new MemberAccessExpressionNode(
+                                        new SourceSpan(new SourcePosition(45, 2, 22), new SourcePosition(48, 2, 25)),
+                                        "sum"
+                                    ),
+                                    [
+                                        LiteralExpressionNode.Integer(
+                                            new SourceSpan(new SourcePosition(49, 2, 26), new SourcePosition(50, 2, 27)),
+                                            1
+                                        ),
+                                        LiteralExpressionNode.Integer(
+                                            new SourceSpan(new SourcePosition(52, 2, 29), new SourcePosition(53, 2, 30)),
+                                            2
+                                        ),
+                                        LiteralExpressionNode.Integer(
+                                            new SourceSpan(new SourcePosition(55, 2, 32), new SourcePosition(56, 2, 33)),
+                                            3
+                                        ),
+                                    ])
+                            )
+                        )
+                    ]
+                )
             )
         ]);
 

@@ -4,6 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class ContinueNode : IStatementNode
 {
+    public ContinueNode(SourceSpan sourceSpan)
+        => SourceSpan = sourceSpan;
+
     public override string ToString()
     {
         var formatter = new Formatter();
@@ -17,4 +20,6 @@ public class ContinueNode : IStatementNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformContinue(this);
+
+    public SourceSpan SourceSpan { get; }
 }

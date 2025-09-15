@@ -4,8 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class ArrayAccessExpressionNode : IExpressionNode
 {
-    public ArrayAccessExpressionNode(IExpressionNode member, IExpressionNode index)
+    public ArrayAccessExpressionNode(SourceSpan sourceSpan, IExpressionNode member, IExpressionNode index)
     {
+        SourceSpan = sourceSpan;
         Member = member;
         Index = index;
     }
@@ -23,6 +24,8 @@ public class ArrayAccessExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformArrayAccess(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IExpressionNode Member { get; }
 

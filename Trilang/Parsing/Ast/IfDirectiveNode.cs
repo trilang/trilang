@@ -4,8 +4,13 @@ namespace Trilang.Parsing.Ast;
 
 public class IfDirectiveNode : IDeclarationNode, IStatementNode
 {
-    public IfDirectiveNode(string directiveName, IReadOnlyList<ISyntaxNode> then, IReadOnlyList<ISyntaxNode> @else)
+    public IfDirectiveNode(
+        SourceSpan sourceSpan,
+        string directiveName,
+        IReadOnlyList<ISyntaxNode> then,
+        IReadOnlyList<ISyntaxNode> @else)
     {
+        SourceSpan = sourceSpan;
         DirectiveName = directiveName;
         Then = then;
         Else = @else;
@@ -24,6 +29,8 @@ public class IfDirectiveNode : IDeclarationNode, IStatementNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformIfDirective(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public string DirectiveName { get; }
 

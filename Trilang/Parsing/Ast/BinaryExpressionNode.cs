@@ -4,8 +4,13 @@ namespace Trilang.Parsing.Ast;
 
 public class BinaryExpressionNode : IExpressionNode
 {
-    public BinaryExpressionNode(BinaryExpressionKind kind, IExpressionNode left, IExpressionNode right)
+    public BinaryExpressionNode(
+        SourceSpan sourceSpan,
+        BinaryExpressionKind kind,
+        IExpressionNode left,
+        IExpressionNode right)
     {
+        SourceSpan = sourceSpan;
         Kind = kind;
         Left = left;
         Right = right;
@@ -24,6 +29,8 @@ public class BinaryExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformBinaryExpression(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public BinaryExpressionKind Kind { get; }
 

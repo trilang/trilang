@@ -4,8 +4,11 @@ namespace Trilang.Parsing.Ast;
 
 public class ReturnStatementNode : IStatementNode
 {
-    public ReturnStatementNode(IExpressionNode? expression = null)
-        => Expression = expression;
+    public ReturnStatementNode(SourceSpan sourceSpan, IExpressionNode? expression = null)
+    {
+        SourceSpan = sourceSpan;
+        Expression = expression;
+    }
 
     public override string ToString()
     {
@@ -20,6 +23,8 @@ public class ReturnStatementNode : IStatementNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformReturn(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IExpressionNode? Expression { get; }
 }

@@ -7,7 +7,16 @@ public class SyntaxTree : ISyntaxNode
     private readonly List<IDeclarationNode> declarations;
 
     public SyntaxTree(IReadOnlyList<IDeclarationNode> declarations)
-        => this.declarations = [..declarations];
+    {
+        SourceSpan = declarations switch
+        {
+            [] => default,
+            [var single] => single.SourceSpan,
+            [var first, .., var last] => first.SourceSpan.Combine(last.SourceSpan),
+        };
+
+        this.declarations = [..declarations];
+    }
 
     public override string ToString()
     {
@@ -22,6 +31,8 @@ public class SyntaxTree : ISyntaxNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformTree(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IReadOnlyList<IDeclarationNode> Declarations
         => declarations;

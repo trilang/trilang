@@ -4,8 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class ExpressionStatementNode : IStatementNode
 {
-    public ExpressionStatementNode(IExpressionNode expression)
+    public ExpressionStatementNode(SourceSpan sourceSpan, IExpressionNode expression)
     {
+        SourceSpan = sourceSpan;
         Expression = expression;
     }
 
@@ -22,6 +23,8 @@ public class ExpressionStatementNode : IStatementNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformExpressionStatement(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IExpressionNode Expression { get; }
 }

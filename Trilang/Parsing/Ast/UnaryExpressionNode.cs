@@ -4,8 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class UnaryExpressionNode : IExpressionNode
 {
-    public UnaryExpressionNode(UnaryExpressionKind kind, IExpressionNode operand)
+    public UnaryExpressionNode(SourceSpan sourceSpan, UnaryExpressionKind kind, IExpressionNode operand)
     {
+        SourceSpan = sourceSpan;
         Kind = kind;
         Operand = operand;
     }
@@ -23,6 +24,8 @@ public class UnaryExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformUnaryExpression(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public UnaryExpressionKind Kind { get; }
 

@@ -5,11 +5,13 @@ namespace Trilang.Parsing.Ast;
 public class InterfacePropertyNode : ISyntaxNode
 {
     public InterfacePropertyNode(
+        SourceSpan sourceSpan,
         string name,
         IInlineTypeNode type,
         AccessModifier? getterModifier,
         AccessModifier? setterModifier)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Type = type;
         GetterModifier = getterModifier;
@@ -29,6 +31,8 @@ public class InterfacePropertyNode : ISyntaxNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformInterfaceProperty(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public string Name { get; }
 

@@ -7,6 +7,7 @@ public class IsExpressionNode : IExpressionNode
 {
     public IsExpressionNode(IExpressionNode expression, IInlineTypeNode type)
     {
+        SourceSpan = expression.SourceSpan.Combine(type.SourceSpan);
         Expression = expression;
         Type = type;
     }
@@ -24,6 +25,8 @@ public class IsExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformAsExpression(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IExpressionNode Expression { get; }
 

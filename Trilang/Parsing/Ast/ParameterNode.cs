@@ -4,8 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class ParameterNode : ISyntaxNode
 {
-    public ParameterNode(string name, IInlineTypeNode type)
+    public ParameterNode(SourceSpan sourceSpan, string name, IInlineTypeNode type)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Type = type;
     }
@@ -23,6 +24,8 @@ public class ParameterNode : ISyntaxNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformParameter(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public string Name { get; }
 

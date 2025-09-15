@@ -4,6 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class NullExpressionNode : IExpressionNode
 {
+    public NullExpressionNode(SourceSpan sourceSpan)
+        => SourceSpan = sourceSpan;
+
     public override string ToString()
     {
         var formatter = new Formatter();
@@ -17,4 +20,6 @@ public class NullExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformNull(this);
+
+    public SourceSpan SourceSpan { get; }
 }

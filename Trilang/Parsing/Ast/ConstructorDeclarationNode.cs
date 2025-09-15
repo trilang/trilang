@@ -5,10 +5,12 @@ namespace Trilang.Parsing.Ast;
 public class ConstructorDeclarationNode : ISyntaxNode
 {
     public ConstructorDeclarationNode(
+        SourceSpan sourceSpan,
         AccessModifier accessModifier,
         IReadOnlyList<ParameterNode> parameters,
         BlockStatementNode body)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Parameters = parameters;
         Body = body;
@@ -27,6 +29,8 @@ public class ConstructorDeclarationNode : ISyntaxNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformConstructor(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

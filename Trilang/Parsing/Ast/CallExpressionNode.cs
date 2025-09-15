@@ -4,8 +4,12 @@ namespace Trilang.Parsing.Ast;
 
 public class CallExpressionNode : IExpressionNode
 {
-    public CallExpressionNode(IExpressionNode member, IReadOnlyList<IExpressionNode> parameters)
+    public CallExpressionNode(
+        SourceSpan sourceSpan,
+        IExpressionNode member,
+        IReadOnlyList<IExpressionNode> parameters)
     {
+        SourceSpan = sourceSpan;
         Member = member;
         Parameters = parameters;
     }
@@ -23,6 +27,8 @@ public class CallExpressionNode : IExpressionNode
 
     public T Transform<T>(INodeTransformer<T> transformer)
         => transformer.TransformCall(this);
+
+    public SourceSpan SourceSpan { get; }
 
     public IExpressionNode Member { get; }
 
