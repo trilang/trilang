@@ -5,10 +5,12 @@ namespace Trilang.Semantics.Model;
 public class ConstructorDeclaration : ISemanticNode
 {
     public ConstructorDeclaration(
+        SourceSpan? sourceSpan,
         AccessModifier accessModifier,
         IReadOnlyList<Parameter> parameters,
         BlockStatement body)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Parameters = parameters;
         Body = body;
@@ -29,6 +31,8 @@ public class ConstructorDeclaration : ISemanticNode
         => transformer.TransformConstructor(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

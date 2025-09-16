@@ -2,8 +2,9 @@ namespace Trilang.Semantics.Model;
 
 public class ReturnStatement : IStatement
 {
-    public ReturnStatement(IExpression? expression = null)
+    public ReturnStatement(SourceSpan? sourceSpan, IExpression? expression = null)
     {
+        SourceSpan = sourceSpan;
         Expression = expression;
         if (Expression is not null)
             Expression.Parent = this;
@@ -19,6 +20,8 @@ public class ReturnStatement : IStatement
         => transformer.TransformReturn(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public IExpression? Expression { get; }
 }

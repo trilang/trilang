@@ -4,11 +4,12 @@ namespace Trilang.Semantics.Model;
 
 public class TupleExpression : IExpression
 {
-    public TupleExpression(IReadOnlyList<IExpression> expressions)
+    public TupleExpression(SourceSpan? sourceSpan, IReadOnlyList<IExpression> expressions)
     {
         if (expressions.Count <= 1)
             throw new ArgumentException("Tuple must have at least 2 elements", nameof(expressions));
 
+        SourceSpan = sourceSpan;
         Expressions = expressions;
 
         foreach (var expression in expressions)
@@ -25,12 +26,14 @@ public class TupleExpression : IExpression
         => transformer.TransformTuple(this);
 
     public IExpression Clone()
-        => new TupleExpression(Expressions.Select(x => x.Clone()).ToArray())
+        => new TupleExpression(SourceSpan, Expressions.Select(x => x.Clone()).ToArray())
         {
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public IReadOnlyList<IExpression> Expressions { get; }
 

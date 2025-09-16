@@ -4,8 +4,11 @@ namespace Trilang.Semantics.Model;
 
 public class Type : IInlineType
 {
-    public Type(string name)
-        => Name = name;
+    public Type(SourceSpan? sourceSpan, string name)
+    {
+        SourceSpan = sourceSpan;
+        Name = name;
+    }
 
     public void Accept(IVisitor visitor)
         => visitor.VisitTypeNode(this);
@@ -17,12 +20,14 @@ public class Type : IInlineType
         => transformer.TransformTypeNode(this);
 
     public IInlineType Clone()
-        => new Type(Name)
+        => new Type(SourceSpan, Name)
         {
             Metadata = Metadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

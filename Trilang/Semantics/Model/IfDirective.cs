@@ -2,8 +2,13 @@ namespace Trilang.Semantics.Model;
 
 public class IfDirective : IDeclaration, IStatement
 {
-    public IfDirective(string directiveName, IReadOnlyList<ISemanticNode> then, IReadOnlyList<ISemanticNode> @else)
+    public IfDirective(
+        SourceSpan? sourceSpan,
+        string directiveName,
+        IReadOnlyList<ISemanticNode> then,
+        IReadOnlyList<ISemanticNode> @else)
     {
+        SourceSpan = sourceSpan;
         DirectiveName = directiveName;
         Then = then;
         Else = @else;
@@ -25,6 +30,8 @@ public class IfDirective : IDeclaration, IStatement
         => transformer.TransformIfDirective(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string DirectiveName { get; }
 

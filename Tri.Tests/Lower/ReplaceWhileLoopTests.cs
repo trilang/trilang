@@ -36,26 +36,29 @@ public class ReplaceWhileLoopTests
             }
             """);
         var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new ExpressionStatement(
+                        null,
                         new BinaryExpression(
+                            null,
                             BinaryExpressionKind.Assignment,
-                            new MemberAccessExpression("a")
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Write,
                             },
-                            new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
                             }
@@ -64,18 +67,20 @@ public class ReplaceWhileLoopTests
                             ReturnTypeMetadata = TypeMetadata.I32
                         }
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new GoTo("loop_0_start"),
                         new Label("loop_0_start"),
                         new IfStatement(
+                            null,
                             new BinaryExpression(
+                                null,
                                 BinaryExpressionKind.LessThan,
-                                new MemberAccessExpression("a")
+                                new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                new LiteralExpression(LiteralExpressionKind.Integer, 10)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32
                                 }
@@ -83,31 +88,34 @@ public class ReplaceWhileLoopTests
                             {
                                 ReturnTypeMetadata = TypeMetadata.Bool
                             },
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("if_0_then")
                             ]),
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("loop_0_end")
                             ])
                         ),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new Label("if_0_then"),
                             new ExpressionStatement(
+                                null,
                                 new BinaryExpression(
+                                    null,
                                     BinaryExpressionKind.Assignment,
-                                    new MemberAccessExpression("a")
+                                    new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Write,
                                     },
                                     new BinaryExpression(
+                                        null,
                                         BinaryExpressionKind.Addition,
-                                        new MemberAccessExpression("a")
+                                        new MemberAccessExpression(null, "a")
                                         {
                                             Reference = parameterMetadata,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                         {
                                             ReturnTypeMetadata = TypeMetadata.I32
                                         }
@@ -125,7 +133,8 @@ public class ReplaceWhileLoopTests
                         new Label("loop_0_end"),
                     ]),
                     new ReturnStatement(
-                        new MemberAccessExpression("a")
+                        null,
+                        new MemberAccessExpression(null, "a")
                         {
                             Reference = parameterMetadata,
                             AccessKind = MemberAccessKind.Read,
@@ -166,26 +175,29 @@ public class ReplaceWhileLoopTests
             }
             """);
         var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new ExpressionStatement(
+                        null,
                         new BinaryExpression(
+                            null,
                             BinaryExpressionKind.Assignment,
-                            new MemberAccessExpression("a")
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Write,
                             },
-                            new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
                             }
@@ -194,18 +206,20 @@ public class ReplaceWhileLoopTests
                             ReturnTypeMetadata = TypeMetadata.I32
                         }
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new GoTo("loop_0_start"),
                         new Label("loop_0_start"),
                         new IfStatement(
+                            null,
                             new BinaryExpression(
+                                null,
                                 BinaryExpressionKind.LessThan,
-                                new MemberAccessExpression("a")
+                                new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                new LiteralExpression(LiteralExpressionKind.Integer, 10)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32
                                 }
@@ -213,48 +227,52 @@ public class ReplaceWhileLoopTests
                             {
                                 ReturnTypeMetadata = TypeMetadata.Bool
                             },
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("if_0_then"),
                             ]),
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("loop_0_end")
                             ])
                         ),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new Label("if_0_then"),
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("loop_1_start"),
                                 new Label("loop_1_start"),
                                 new IfStatement(
-                                    new LiteralExpression(LiteralExpressionKind.Boolean, true)
+                                    null,
+                                    new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
                                     {
                                         ReturnTypeMetadata = TypeMetadata.Bool
                                     },
-                                    new BlockStatement([
+                                    new BlockStatement(null, [
                                         new GoTo("loop_1_start"),
                                     ]),
-                                    new BlockStatement([
+                                    new BlockStatement(null, [
                                         new GoTo("loop_1_end"),
                                     ])
                                 ),
                                 new Label("loop_1_end"),
                             ]),
                             new ExpressionStatement(
+                                null,
                                 new BinaryExpression(
+                                    null,
                                     BinaryExpressionKind.Assignment,
-                                    new MemberAccessExpression("a")
+                                    new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Write,
                                     },
                                     new BinaryExpression(
+                                        null,
                                         BinaryExpressionKind.Addition,
-                                        new MemberAccessExpression("a")
+                                        new MemberAccessExpression(null, "a")
                                         {
                                             Reference = parameterMetadata,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                         {
                                             ReturnTypeMetadata = TypeMetadata.I32
                                         }
@@ -272,7 +290,8 @@ public class ReplaceWhileLoopTests
                         new Label("loop_0_end"),
                     ]),
                     new ReturnStatement(
-                        new MemberAccessExpression("a")
+                        null,
+                        new MemberAccessExpression(null, "a")
                         {
                             Reference = parameterMetadata,
                             AccessKind = MemberAccessKind.Read,
@@ -315,26 +334,29 @@ public class ReplaceWhileLoopTests
             }
             """);
         var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new ExpressionStatement(
+                        null,
                         new BinaryExpression(
+                            null,
                             BinaryExpressionKind.Assignment,
-                            new MemberAccessExpression("a")
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Write,
                             },
-                            new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
                             }
@@ -343,18 +365,20 @@ public class ReplaceWhileLoopTests
                             ReturnTypeMetadata = TypeMetadata.I32
                         }
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new GoTo("loop_0_start"),
                         new Label("loop_0_start"),
                         new IfStatement(
+                            null,
                             new BinaryExpression(
+                                null,
                                 BinaryExpressionKind.LessThan,
-                                new MemberAccessExpression("a")
+                                new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                new LiteralExpression(LiteralExpressionKind.Integer, 10)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32
                                 }
@@ -362,31 +386,34 @@ public class ReplaceWhileLoopTests
                             {
                                 ReturnTypeMetadata = TypeMetadata.Bool
                             },
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("if_0_then")
                             ]),
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("loop_0_end")
                             ])
                         ),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new Label("if_0_then"),
                             new ExpressionStatement(
+                                null,
                                 new BinaryExpression(
+                                    null,
                                     BinaryExpressionKind.Assignment,
-                                    new MemberAccessExpression("a")
+                                    new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Write,
                                     },
                                     new BinaryExpression(
+                                        null,
                                         BinaryExpressionKind.Addition,
-                                        new MemberAccessExpression("a")
+                                        new MemberAccessExpression(null, "a")
                                         {
                                             Reference = parameterMetadata,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                         {
                                             ReturnTypeMetadata = TypeMetadata.I32
                                         }
@@ -400,14 +427,16 @@ public class ReplaceWhileLoopTests
                                 }
                             ),
                             new IfStatement(
+                                null,
                                 new BinaryExpression(
+                                    null,
                                     BinaryExpressionKind.Equality,
-                                    new MemberAccessExpression("a")
+                                    new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Read,
                                     },
-                                    new LiteralExpression(LiteralExpressionKind.Integer, 5)
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 5)
                                     {
                                         ReturnTypeMetadata = TypeMetadata.I32
                                     }
@@ -415,10 +444,10 @@ public class ReplaceWhileLoopTests
                                 {
                                     ReturnTypeMetadata = TypeMetadata.Bool
                                 },
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("loop_0_end"),
                                 ]),
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("if_1_end"),
                                 ])
                             ),
@@ -428,7 +457,8 @@ public class ReplaceWhileLoopTests
                         new Label("loop_0_end"),
                     ]),
                     new ReturnStatement(
-                        new MemberAccessExpression("a")
+                        null,
+                        new MemberAccessExpression(null, "a")
                         {
                             Reference = parameterMetadata,
                             AccessKind = MemberAccessKind.Read,
@@ -471,26 +501,29 @@ public class ReplaceWhileLoopTests
             }
             """);
         var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new ExpressionStatement(
+                        null,
                         new BinaryExpression(
+                            null,
                             BinaryExpressionKind.Assignment,
-                            new MemberAccessExpression("a")
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Write,
                             },
-                            new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
                             }
@@ -499,18 +532,20 @@ public class ReplaceWhileLoopTests
                             ReturnTypeMetadata = TypeMetadata.I32
                         }
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new GoTo("loop_0_start"),
                         new Label("loop_0_start"),
                         new IfStatement(
+                            null,
                             new BinaryExpression(
+                                null,
                                 BinaryExpressionKind.LessThan,
-                                new MemberAccessExpression("a")
+                                new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                new LiteralExpression(LiteralExpressionKind.Integer, 10)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32
                                 }
@@ -518,31 +553,34 @@ public class ReplaceWhileLoopTests
                             {
                                 ReturnTypeMetadata = TypeMetadata.Bool
                             },
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("if_0_then")
                             ]),
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new GoTo("loop_0_end")
                             ])
                         ),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new Label("if_0_then"),
                             new ExpressionStatement(
+                                null,
                                 new BinaryExpression(
+                                    null,
                                     BinaryExpressionKind.Assignment,
-                                    new MemberAccessExpression("a")
+                                    new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Write,
                                     },
                                     new BinaryExpression(
+                                        null,
                                         BinaryExpressionKind.Addition,
-                                        new MemberAccessExpression("a")
+                                        new MemberAccessExpression(null, "a")
                                         {
                                             Reference = parameterMetadata,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                         {
                                             ReturnTypeMetadata = TypeMetadata.I32
                                         }
@@ -556,14 +594,16 @@ public class ReplaceWhileLoopTests
                                 }
                             ),
                             new IfStatement(
+                                null,
                                 new BinaryExpression(
+                                    null,
                                     BinaryExpressionKind.Equality,
-                                    new MemberAccessExpression("a")
+                                    new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Read,
                                     },
-                                    new LiteralExpression(LiteralExpressionKind.Integer, 5)
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 5)
                                     {
                                         ReturnTypeMetadata = TypeMetadata.I32
                                     }
@@ -571,10 +611,10 @@ public class ReplaceWhileLoopTests
                                 {
                                     ReturnTypeMetadata = TypeMetadata.Bool
                                 },
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("loop_0_start"),
                                 ]),
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("if_1_end"),
                                 ])
                             ),
@@ -584,7 +624,8 @@ public class ReplaceWhileLoopTests
                         new Label("loop_0_end"),
                     ]),
                     new ReturnStatement(
-                        new MemberAccessExpression("a")
+                        null,
+                        new MemberAccessExpression(null, "a")
                         {
                             Reference = parameterMetadata,
                             AccessKind = MemberAccessKind.Read,

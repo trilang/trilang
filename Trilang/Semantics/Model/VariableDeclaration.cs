@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class VariableDeclaration : IStatement
 {
-    public VariableDeclaration(string name, IInlineType type, IExpression expression)
+    public VariableDeclaration(SourceSpan? sourceSpan, string name, IInlineType type, IExpression expression)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Type = type;
         Expression = expression;
@@ -24,6 +25,8 @@ public class VariableDeclaration : IStatement
         => transformer.TransformVariable(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

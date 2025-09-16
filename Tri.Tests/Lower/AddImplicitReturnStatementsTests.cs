@@ -30,7 +30,7 @@ public class AddImplicitReturnStatementsTests
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
         var function = tree.Find<FunctionDeclaration>()!;
-        var expected = new BlockStatement([new ReturnStatement()]);
+        var expected = new BlockStatement(null, [new ReturnStatement(null)]);
 
         Assert.That(function.Body, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -49,25 +49,26 @@ public class AddImplicitReturnStatementsTests
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
         var function = tree.Find<FunctionDeclaration>()!;
-        var expected = new BlockStatement([
-            new BlockStatement([
+        var expected = new BlockStatement(null, [
+            new BlockStatement(null, [
                 new GoTo("loop_0_start"),
                 new Label("loop_0_start"),
                 new IfStatement(
-                    new LiteralExpression(LiteralExpressionKind.Boolean, true)
+                    null,
+                    new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
                     {
                         ReturnTypeMetadata = TypeMetadata.Bool
                     },
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new GoTo("loop_0_start"),
                     ]),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new GoTo("loop_0_end"),
                     ])
                 ),
                 new Label("loop_0_end"),
             ]),
-            new ReturnStatement(),
+            new ReturnStatement(null),
         ]);
 
         Assert.That(function.Body, Is.EqualTo(expected).Using(SemanticComparer.Instance));
@@ -89,25 +90,26 @@ public class AddImplicitReturnStatementsTests
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
         var function = tree.Find<FunctionDeclaration>()!;
-        var expected = new BlockStatement([
+        var expected = new BlockStatement(null, [
             new IfStatement(
-                new LiteralExpression(LiteralExpressionKind.Boolean, true)
+                null,
+                new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
                 {
                     ReturnTypeMetadata = TypeMetadata.Bool,
                 },
-                new BlockStatement([
+                new BlockStatement(null, [
                     new GoTo("if_0_then"),
                 ]),
-                new BlockStatement([
+                new BlockStatement(null, [
                     new GoTo("if_0_end"),
                 ])
             ),
-            new BlockStatement([
+            new BlockStatement(null, [
                 new Label("if_0_then"),
                 new GoTo("if_0_end"),
             ]),
             new Label("if_0_end"),
-            new ReturnStatement(),
+            new ReturnStatement(null),
         ]);
 
         Assert.That(function.Body, Is.EqualTo(expected).Using(SemanticComparer.Instance));
@@ -131,27 +133,28 @@ public class AddImplicitReturnStatementsTests
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
         var function = tree.Find<FunctionDeclaration>()!;
-        var expected = new BlockStatement([
+        var expected = new BlockStatement(null, [
             new IfStatement(
-                new LiteralExpression(LiteralExpressionKind.Boolean, true)
+                null,
+                new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
                 {
                     ReturnTypeMetadata = TypeMetadata.Bool
                 },
-                new BlockStatement([
+                new BlockStatement(null, [
                     new GoTo("if_0_then"),
                 ]),
-                new BlockStatement([
+                new BlockStatement(null, [
                     new GoTo("if_0_else"),
                 ])
             ),
-            new BlockStatement([
+            new BlockStatement(null, [
                 new Label("if_0_then"),
-                new ReturnStatement(),
+                new ReturnStatement(null),
                 new GoTo("if_0_end"),
             ]),
-            new BlockStatement([
+            new BlockStatement(null, [
                 new Label("if_0_else"),
-                new ReturnStatement(),
+                new ReturnStatement(null),
                 new GoTo("if_0_end"),
             ]),
             new Label("if_0_end"),
@@ -176,9 +179,9 @@ public class AddImplicitReturnStatementsTests
         lowering.Lower(tree, new LoweringOptions([], cfgs));
 
         var function = tree.Find<FunctionDeclaration>()!;
-        var expected = new BlockStatement([
-            new BlockStatement([
-                new ReturnStatement(),
+        var expected = new BlockStatement(null, [
+            new BlockStatement(null, [
+                new ReturnStatement(null),
             ]),
         ]);
 

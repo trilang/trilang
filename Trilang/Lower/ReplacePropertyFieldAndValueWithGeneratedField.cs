@@ -18,7 +18,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(member, node.Member) && ReferenceEquals(index, node.Index))
             return node;
 
-        return new ArrayAccessExpression(member, index)
+        return new ArrayAccessExpression(null, member, index)
         {
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
@@ -34,7 +34,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(left, node.Left) && ReferenceEquals(right, node.Right))
             return node;
 
-        return new BinaryExpression(node.Kind, left, right)
+        return new BinaryExpression(null, node.Kind, left, right)
         {
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
@@ -75,7 +75,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(member, node.Member) && !changed)
             return node;
 
-        return new CallExpression(member, parameters);
+        return new CallExpression(null, member, parameters);
     }
 
     public ISemanticNode TransformCast(CastExpression node)
@@ -84,7 +84,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new CastExpression(node.Type, expression);
+        return new CastExpression(null, node.Type, expression);
     }
 
     public ISemanticNode TransformConstructor(ConstructorDeclaration node)
@@ -105,7 +105,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new ExpressionStatement(expression);
+        return new ExpressionStatement(null, expression);
     }
 
     public ISemanticNode TransformFunction(FunctionDeclaration node)
@@ -132,7 +132,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(condition, node.Condition))
             return node;
 
-        return new IfStatement(condition, then, @else);
+        return new IfStatement(null, condition, then, @else);
     }
 
     public ISemanticNode TransformInterface(Interface node)
@@ -150,7 +150,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new IsExpression(expression, node.Type);
+        return new IsExpression(null, expression, node.Type);
     }
 
     public ISemanticNode TransformLabel(Label node)
@@ -168,13 +168,13 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         {
             Debug.Assert(currentField is not null);
 
-            var thisMember = new MemberAccessExpression(MemberAccessExpression.This)
+            var thisMember = new MemberAccessExpression(null, MemberAccessExpression.This)
             {
                 Reference = new ParameterMetadata(MemberAccessExpression.This, currentField.DeclaringType),
                 AccessKind = MemberAccessKind.Read,
             };
 
-            return new MemberAccessExpression(thisMember, currentField.Name)
+            return new MemberAccessExpression(null, thisMember, currentField.Name)
             {
                 Reference = currentField,
                 AccessKind = node.AccessKind,
@@ -187,7 +187,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
 
             var parameter = currentSetter.Parameters.First(x => x.Name == MemberAccessExpression.Value);
 
-            return new MemberAccessExpression(parameter.Name)
+            return new MemberAccessExpression(null, parameter.Name)
             {
                 Reference = parameter,
                 AccessKind = node.AccessKind,
@@ -206,7 +206,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(size, node.Size))
             return node;
 
-        return new NewArrayExpression(node.Type, size)
+        return new NewArrayExpression(null, node.Type, size)
         {
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
@@ -227,7 +227,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (!changed)
             return node;
 
-        return new NewObjectExpression(node.Type, parameters)
+        return new NewObjectExpression(null, node.Type, parameters)
         {
             Metadata = node.Metadata,
         };
@@ -283,7 +283,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new ReturnStatement(expression);
+        return new ReturnStatement(null, expression);
     }
 
     public ISemanticNode TransformTree(SemanticTree node)
@@ -309,7 +309,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (!changed)
             return node;
 
-        return new TupleExpression(expressions)
+        return new TupleExpression(null, expressions)
         {
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
@@ -344,7 +344,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(operand, node.Operand))
             return node;
 
-        return new UnaryExpression(node.Kind, operand)
+        return new UnaryExpression(null, node.Kind, operand)
         {
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
@@ -356,7 +356,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new VariableDeclaration(node.Name, node.Type, expression);
+        return new VariableDeclaration(null, node.Name, node.Type, expression);
     }
 
     public ISemanticNode TransformWhile(While node)
@@ -366,6 +366,6 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(condition, node.Condition))
             return node;
 
-        return new While(condition, body);
+        return new While(null, condition, body);
     }
 }

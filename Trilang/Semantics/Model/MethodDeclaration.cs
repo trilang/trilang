@@ -5,6 +5,7 @@ namespace Trilang.Semantics.Model;
 public class MethodDeclaration : ISemanticNode
 {
     public MethodDeclaration(
+        SourceSpan? sourceSpan,
         AccessModifier accessModifier,
         bool isStatic,
         string name,
@@ -12,6 +13,7 @@ public class MethodDeclaration : ISemanticNode
         IInlineType returnType,
         BlockStatement body)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         IsStatic = isStatic;
         Name = name;
@@ -36,6 +38,8 @@ public class MethodDeclaration : ISemanticNode
         => transformer.TransformMethod(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

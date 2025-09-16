@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class UnaryExpression : IExpression
 {
-    public UnaryExpression(UnaryExpressionKind kind, IExpression operand)
+    public UnaryExpression(SourceSpan? sourceSpan, UnaryExpressionKind kind, IExpression operand)
     {
+        SourceSpan = sourceSpan;
         Kind = kind;
         Operand = operand;
         Operand.Parent = this;
@@ -21,12 +22,14 @@ public class UnaryExpression : IExpression
         => transformer.TransformUnaryExpression(this);
 
     public IExpression Clone()
-        => new UnaryExpression(Kind, Operand.Clone())
+        => new UnaryExpression(SourceSpan, Kind, Operand.Clone())
         {
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public UnaryExpressionKind Kind { get; }
 

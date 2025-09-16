@@ -4,6 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class NullExpression : IExpression
 {
+    public NullExpression(SourceSpan? sourceSpan)
+        => SourceSpan = sourceSpan;
+
     public void Accept(IVisitor visitor)
         => visitor.VisitNull(this);
 
@@ -14,9 +17,11 @@ public class NullExpression : IExpression
         => transformer.TransformNull(this);
 
     public IExpression Clone()
-        => new NullExpression();
+        => new NullExpression(SourceSpan);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public ITypeMetadata ReturnTypeMetadata
         => TypeMetadata.Null;

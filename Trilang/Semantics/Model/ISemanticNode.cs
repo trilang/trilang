@@ -9,4 +9,6 @@ public interface ISemanticNode
     T Transform<T>(ITransformer<T> transformer);
 
     ISemanticNode? Parent { get; set; }
+
+    SourceSpan? SourceSpan { get; }
 }

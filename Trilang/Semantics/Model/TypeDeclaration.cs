@@ -5,6 +5,7 @@ namespace Trilang.Semantics.Model;
 public class TypeDeclaration : IDeclaration
 {
     public TypeDeclaration(
+        SourceSpan? sourceSpan,
         AccessModifier accessModifier,
         string name,
         IReadOnlyList<Type> genericArguments,
@@ -13,6 +14,7 @@ public class TypeDeclaration : IDeclaration
         IReadOnlyList<ConstructorDeclaration> constructors,
         IReadOnlyList<MethodDeclaration> methods)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Name = name;
         GenericArguments = genericArguments;
@@ -51,6 +53,8 @@ public class TypeDeclaration : IDeclaration
         => transformer.TransformType(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

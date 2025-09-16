@@ -34,26 +34,29 @@ public class RewriteIfStatementTests
             }
             """);
         var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new IfStatement(
+                        null,
                         new BinaryExpression(
+                            null,
                             BinaryExpressionKind.GreaterThanOrEqual,
-                            new MemberAccessExpression("a")
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
                             },
-                            new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
                             }
@@ -61,17 +64,18 @@ public class RewriteIfStatementTests
                         {
                             ReturnTypeMetadata = TypeMetadata.Bool
                         },
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_then")
                         ]),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_else")
                         ])
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new Label("if_0_then"),
                         new ReturnStatement(
-                            new MemberAccessExpression("a")
+                            null,
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
@@ -79,12 +83,14 @@ public class RewriteIfStatementTests
                         ),
                         new GoTo("if_0_end"),
                     ]),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new Label("if_0_else"),
                         new ReturnStatement(
+                            null,
                             new UnaryExpression(
+                                null,
                                 UnaryExpressionKind.UnaryMinus,
-                                new MemberAccessExpression("a")
+                                new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Read,
@@ -128,26 +134,29 @@ public class RewriteIfStatementTests
             }
             """);
         var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new IfStatement(
+                        null,
                         new BinaryExpression(
+                            null,
                             BinaryExpressionKind.GreaterThanOrEqual,
-                            new MemberAccessExpression("a")
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
                             },
-                            new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32
                             }
@@ -155,17 +164,18 @@ public class RewriteIfStatementTests
                         {
                             ReturnTypeMetadata = TypeMetadata.Bool
                         },
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_then")
                         ]),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_end")
                         ])
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new Label("if_0_then"),
                         new ReturnStatement(
-                            new MemberAccessExpression("a")
+                            null,
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
@@ -175,9 +185,11 @@ public class RewriteIfStatementTests
                     ]),
                     new Label("if_0_end"),
                     new ReturnStatement(
+                        null,
                         new UnaryExpression(
+                            null,
                             UnaryExpressionKind.UnaryMinus,
-                            new MemberAccessExpression("a")
+                            new MemberAccessExpression(null, "a")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,

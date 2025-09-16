@@ -2,8 +2,9 @@ namespace Trilang.Semantics.Model;
 
 public class While : IStatement
 {
-    public While(IExpression condition, BlockStatement body)
+    public While(SourceSpan? sourceSpan, IExpression condition, BlockStatement body)
     {
+        SourceSpan = sourceSpan;
         Condition = condition;
         Body = body;
 
@@ -21,6 +22,8 @@ public class While : IStatement
         => transformer.TransformWhile(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public IExpression Condition { get; }
 

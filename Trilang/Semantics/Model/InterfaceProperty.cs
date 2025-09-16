@@ -5,11 +5,13 @@ namespace Trilang.Semantics.Model;
 public class InterfaceProperty : ISemanticNode
 {
     public InterfaceProperty(
+        SourceSpan? sourceSpan,
         string name,
         IInlineType type,
         AccessModifier? getterModifier,
         AccessModifier? setterModifier)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Type = type;
         GetterModifier = getterModifier;
@@ -28,12 +30,14 @@ public class InterfaceProperty : ISemanticNode
         => transformer.TransformInterfaceProperty(this);
 
     public InterfaceProperty Clone()
-        => new InterfaceProperty(Name, Type.Clone(), GetterModifier, SetterModifier)
+        => new InterfaceProperty(SourceSpan, Name, Type.Clone(), GetterModifier, SetterModifier)
         {
             Metadata = Metadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

@@ -61,12 +61,12 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata([], type3Metadata)));
 
-        var expected = new SemanticTree([
-            new TypeDeclaration(AccessModifier.Public, "Type1", [], [], [], [], [])
+        var expected = new SemanticTree(null, [
+            new TypeDeclaration(null, AccessModifier.Public, "Type1", [], [], [], [], [])
             {
                 Metadata = type1Metadata,
             },
-            new TypeDeclaration(AccessModifier.Public, "Type3", [], [], [], [], [])
+            new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
             {
                 Metadata = type3Metadata,
             },
@@ -113,12 +113,12 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata([], type3Metadata)));
 
-        var expected = new SemanticTree([
-            new TypeDeclaration(AccessModifier.Public, "Type2", [], [], [], [], [])
+        var expected = new SemanticTree(null, [
+            new TypeDeclaration(null, AccessModifier.Public, "Type2", [], [], [], [], [])
             {
                 Metadata = type2Metadata,
             },
-            new TypeDeclaration(AccessModifier.Public, "Type3", [], [], [], [], [])
+            new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
             {
                 Metadata = type3Metadata,
             },
@@ -153,8 +153,8 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata([], typeMetadata)));
 
-        var expected = new SemanticTree([
-            new TypeDeclaration(AccessModifier.Public, "Type3", [], [], [], [], [])
+        var expected = new SemanticTree(null, [
+            new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
             {
                 Metadata = typeMetadata,
             },
@@ -188,13 +188,15 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata([], TypeMetadata.Void)
         );
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
                     new Parameter(
+                        null,
                         "callback",
-                        new FunctionType([], new Type("void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new Type(null, "void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void),
                         }
@@ -203,11 +205,13 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new ExpressionStatement(
+                        null,
                         new CallExpression(
-                            new MemberAccessExpression("callback")
+                            null,
+                            new MemberAccessExpression(null, "callback")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
@@ -216,7 +220,8 @@ public class ReplaceIfDirectivesTests
                         )
                     ),
                     new ReturnStatement(
-                        new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                        null,
+                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
@@ -262,13 +267,15 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata([], TypeMetadata.Void)
         );
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
                     new Parameter(
+                        null,
                         "callback",
-                        new FunctionType([], new Type("void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new Type(null, "void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void)
                         }
@@ -277,11 +284,13 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new ExpressionStatement(
+                        null,
                         new CallExpression(
-                            new MemberAccessExpression("callback")
+                            null,
+                            new MemberAccessExpression(null, "callback")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
@@ -290,7 +299,8 @@ public class ReplaceIfDirectivesTests
                         )
                     ),
                     new ReturnStatement(
-                        new LiteralExpression(LiteralExpressionKind.Integer, 2)
+                        null,
+                        new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32
                         }
@@ -336,13 +346,15 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata([], TypeMetadata.Void)
         );
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
                     new Parameter(
+                        null,
                         "callback",
-                        new FunctionType([], new Type("void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new Type(null, "void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata([], TypeMetadata.Void),
                         }
@@ -351,11 +363,13 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new ExpressionStatement(
+                        null,
                         new CallExpression(
-                            new MemberAccessExpression("callback")
+                            null,
+                            new MemberAccessExpression(null, "callback")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Read,
@@ -364,7 +378,8 @@ public class ReplaceIfDirectivesTests
                         )
                     ),
                     new ReturnStatement(
-                        new LiteralExpression(LiteralExpressionKind.Integer, 2)
+                        null,
+                        new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }

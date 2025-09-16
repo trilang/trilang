@@ -19,7 +19,7 @@ internal class AddThisInLocalMemberAccess : Visitor
 
         var parent = node.FindInParent<TypeDeclaration>()!;
 
-        node.Member = new MemberAccessExpression(MemberAccessExpression.This)
+        node.Member = new MemberAccessExpression(null, MemberAccessExpression.This)
         {
             Reference = new ParameterMetadata(MemberAccessExpression.This, parent.Metadata!),
             AccessKind = MemberAccessKind.Read,

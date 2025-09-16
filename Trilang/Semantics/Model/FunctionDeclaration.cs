@@ -5,11 +5,13 @@ namespace Trilang.Semantics.Model;
 public class FunctionDeclaration : IDeclaration
 {
     public FunctionDeclaration(
+        SourceSpan? sourceSpan,
         string name,
         IReadOnlyList<Parameter> parameters,
         IInlineType returnType,
         BlockStatement body)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Parameters = parameters;
         ReturnType = returnType;
@@ -32,6 +34,8 @@ public class FunctionDeclaration : IDeclaration
         => transformer.TransformFunction(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

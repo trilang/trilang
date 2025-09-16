@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class ArrayType : IInlineType
 {
-    public ArrayType(IInlineType elementType)
+    public ArrayType(SourceSpan? sourceSpan, IInlineType elementType)
     {
+        SourceSpan = sourceSpan;
         Name = $"{elementType.Name}[]";
         ElementType = elementType;
         ElementType.Parent = this;
@@ -21,12 +22,14 @@ public class ArrayType : IInlineType
         => transformer.TransformArrayType(this);
 
     public IInlineType Clone()
-        => new ArrayType(ElementType.Clone())
+        => new ArrayType(SourceSpan, ElementType.Clone())
         {
             Metadata = Metadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

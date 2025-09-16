@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class Parameter : ISemanticNode
 {
-    public Parameter(string name, IInlineType type)
+    public Parameter(SourceSpan? sourceSpan, string name, IInlineType type)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Type = type;
 
@@ -22,6 +23,8 @@ public class Parameter : ISemanticNode
         => transformer.TransformParameter(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

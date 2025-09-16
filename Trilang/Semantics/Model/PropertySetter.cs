@@ -6,8 +6,9 @@ public class PropertySetter : ISemanticNode
 {
     private BlockStatement? body;
 
-    public PropertySetter(AccessModifier accessModifier, BlockStatement? body)
+    public PropertySetter(SourceSpan? sourceSpan, AccessModifier accessModifier, BlockStatement? body)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Body = body;
 
@@ -25,6 +26,8 @@ public class PropertySetter : ISemanticNode
         => transformer.TransformSetter(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

@@ -38,33 +38,37 @@ public class ReplaceCompoundAssignmentsTests
               }
               """);
         var parameterMetadata = new ParameterMetadata("x", TypeMetadata.I32);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("x", new Type("i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "x", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type("void") { Metadata = TypeMetadata.Void },
-                new BlockStatement([
+                new Type(null, "void") { Metadata = TypeMetadata.Void },
+                new BlockStatement(null, [
                     new ExpressionStatement(
+                        null,
                         new BinaryExpression(
+                            null,
                             Assignment,
-                            new MemberAccessExpression("x")
+                            new MemberAccessExpression(null, "x")
                             {
                                 Reference = parameterMetadata,
                                 AccessKind = MemberAccessKind.Write,
                             },
                             new BinaryExpression(
+                                null,
                                 kind,
-                                new MemberAccessExpression("x")
+                                new MemberAccessExpression(null, "x")
                                 {
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32,
                                 }

@@ -5,10 +5,11 @@ namespace Trilang.Semantics.Model;
 
 public class NewObjectExpression : IExpression
 {
-    public NewObjectExpression(IInlineType type, IReadOnlyList<IExpression> parameters)
+    public NewObjectExpression(SourceSpan? sourceSpan, IInlineType type, IReadOnlyList<IExpression> parameters)
     {
         Debug.Assert(type is Model.Type or GenericType);
 
+        SourceSpan = sourceSpan;
         Type = type;
         Parameters = parameters;
 
@@ -28,12 +29,14 @@ public class NewObjectExpression : IExpression
         => transformer.TransformNewObject(this);
 
     public IExpression Clone()
-        => new NewObjectExpression(Type.Clone(), Parameters.Select(x => x.Clone()).ToArray())
+        => new NewObjectExpression(SourceSpan, Type.Clone(), Parameters.Select(x => x.Clone()).ToArray())
         {
             Metadata = Metadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public IInlineType Type { get; }
 

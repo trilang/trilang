@@ -14,7 +14,9 @@ public class GoTo : IStatement
     public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformGoTo(this);
 
-    public string Label { get; }
-
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan => null;
+
+    public string Label { get; }
 }

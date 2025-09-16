@@ -4,8 +4,13 @@ namespace Trilang.Semantics.Model;
 
 public class BinaryExpression : IExpression
 {
-    public BinaryExpression(BinaryExpressionKind kind, IExpression left, IExpression right)
+    public BinaryExpression(
+        SourceSpan? sourceSpan,
+        BinaryExpressionKind kind,
+        IExpression left,
+        IExpression right)
     {
+        SourceSpan = sourceSpan;
         Kind = kind;
         Left = left;
         Right = right;
@@ -24,12 +29,14 @@ public class BinaryExpression : IExpression
         => transformer.TransformBinaryExpression(this);
 
     public IExpression Clone()
-        => new BinaryExpression(Kind, Left.Clone(), Right.Clone())
+        => new BinaryExpression(SourceSpan, Kind, Left.Clone(), Right.Clone())
         {
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public BinaryExpressionKind Kind { get; }
 

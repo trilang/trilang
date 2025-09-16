@@ -5,11 +5,13 @@ namespace Trilang.Semantics.Model;
 public class TypeAliasDeclaration : IDeclaration
 {
     public TypeAliasDeclaration(
+        SourceSpan? sourceSpan,
         AccessModifier accessModifier,
         string name,
         IReadOnlyList<Type> genericArguments,
         IInlineType type)
     {
+        SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Name = name;
         GenericArguments = genericArguments;
@@ -35,6 +37,8 @@ public class TypeAliasDeclaration : IDeclaration
         => transformer.TransformTypeAlias(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public AccessModifier AccessModifier { get; }
 

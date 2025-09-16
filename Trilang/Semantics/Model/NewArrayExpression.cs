@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class NewArrayExpression : IExpression
 {
-    public NewArrayExpression(ArrayType type, IExpression size)
+    public NewArrayExpression(SourceSpan? sourceSpan, ArrayType type, IExpression size)
     {
+        SourceSpan = sourceSpan;
         Type = type;
         Size = size;
 
@@ -23,12 +24,14 @@ public class NewArrayExpression : IExpression
         => transformer.TransformNewArray(this);
 
     public IExpression Clone()
-        => new NewArrayExpression((ArrayType)Type.Clone(), Size.Clone())
+        => new NewArrayExpression(SourceSpan, (ArrayType)Type.Clone(), Size.Clone())
         {
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public ArrayType Type { get; }
 

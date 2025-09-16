@@ -72,16 +72,17 @@ internal class RewriteIfStatement : Visitor
         }
         else
         {
-            elseBlock = new BlockStatement([
+            elseBlock = new BlockStatement(null, [
                 new GoTo(endBlockName)
             ]);
             generateEndBlock = true;
         }
 
         var newIf = new IfStatement(
+            null,
             node.Condition,
-            generateThenBlock ? new BlockStatement([new GoTo(thenBlockName)]) : thenBlock,
-            generateElseBlock ? new BlockStatement([new GoTo(elseBlockName)]) : elseBlock
+            generateThenBlock ? new BlockStatement(null, [new GoTo(thenBlockName)]) : thenBlock,
+            generateElseBlock ? new BlockStatement(null, [new GoTo(elseBlockName)]) : elseBlock
         );
         parentBlock.Replace(node, newIf);
 

@@ -9,12 +9,13 @@ public class MemberAccessExpression : IExpression
     public const string Field = "field";
     public const string Value = "value";
 
-    public MemberAccessExpression(string name) : this(null, name)
+    public MemberAccessExpression(SourceSpan? sourceSpan, string name) : this(sourceSpan, null, name)
     {
     }
 
-    public MemberAccessExpression(IExpression? member, string name)
+    public MemberAccessExpression(SourceSpan? sourceSpan, IExpression? member, string name)
     {
+        SourceSpan = sourceSpan;
         Member = member;
         Name = name;
 
@@ -32,13 +33,15 @@ public class MemberAccessExpression : IExpression
         => transformer.TransformMemberAccess(this);
 
     public IExpression Clone()
-        => new MemberAccessExpression(Member?.Clone(), Name)
+        => new MemberAccessExpression(SourceSpan, Member?.Clone(), Name)
         {
             Reference = Reference,
             AccessKind = AccessKind,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; set; }
 
     public IExpression? Member { get; set; }
 

@@ -4,11 +4,12 @@ namespace Trilang.Semantics.Model;
 
 public class TupleType : IInlineType
 {
-    public TupleType(IReadOnlyList<IInlineType> types)
+    public TupleType(SourceSpan? sourceSpan, IReadOnlyList<IInlineType> types)
     {
         if (types.Count <= 1)
             throw new ArgumentException("Tuple must have at least 2 elements", nameof(types));
 
+        SourceSpan = sourceSpan;
         Name = $"({string.Join(", ", types.Select(t => t.Name))})";
         Types = types;
 
@@ -26,12 +27,14 @@ public class TupleType : IInlineType
         => transformer.TransformTupleType(this);
 
     public IInlineType Clone()
-        => new TupleType(Types.Select(t => t.Clone()).ToArray())
+        => new TupleType(SourceSpan, Types.Select(t => t.Clone()).ToArray())
         {
             Metadata = Metadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

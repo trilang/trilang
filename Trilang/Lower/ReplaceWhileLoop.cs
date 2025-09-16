@@ -34,17 +34,18 @@ internal class ReplaceWhileLoop : Visitor
         var loopStart = $"{label}_start";
         var loopEnd = $"{label}_end";
 
-        var newBlock = new BlockStatement([
+        var newBlock = new BlockStatement(null, [
             // this 'goto' statement is needed to handle transition from the previous block correctly
             new GoTo(loopStart),
             new Label(loopStart),
             new IfStatement(
+                null,
                 node.Condition,
-                new BlockStatement([
+                new BlockStatement(null, [
                     ..node.Body.Statements,
                     new GoTo(loopStart),
                 ]),
-                new BlockStatement([
+                new BlockStatement(null, [
                     new GoTo(loopEnd),
                 ])
             ),

@@ -26,7 +26,7 @@ internal class AddImplicitReturnStatements
                     continue;
 
                 if (block.Next.Count == 0)
-                    block.BlockNode.Add(new ReturnStatement());
+                    block.BlockNode.Add(new ReturnStatement(null));
 
                 foreach (var next in block.Next)
                     q.Enqueue(next);

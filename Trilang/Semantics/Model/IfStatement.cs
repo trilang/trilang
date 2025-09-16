@@ -2,8 +2,13 @@ namespace Trilang.Semantics.Model;
 
 public class IfStatement : IStatement
 {
-    public IfStatement(IExpression condition, BlockStatement then, BlockStatement? @else = null)
+    public IfStatement(
+        SourceSpan? sourceSpan,
+        IExpression condition,
+        BlockStatement then,
+        BlockStatement? @else = null)
     {
+        SourceSpan = sourceSpan;
         Condition = condition;
         Then = then;
         Else = @else;
@@ -25,6 +30,8 @@ public class IfStatement : IStatement
         => transformer.TransformIf(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public IExpression Condition { get; }
 

@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class GenericType : IInlineType
 {
-    public GenericType(string prefixName, IReadOnlyList<IInlineType> typeArguments)
+    public GenericType(SourceSpan? sourceSpan, string prefixName, IReadOnlyList<IInlineType> typeArguments)
     {
+        SourceSpan = sourceSpan;
         PrefixName = prefixName;
         TypeArguments = typeArguments;
         Name = $"{prefixName}<{string.Join(", ", typeArguments.Select(t => t.Name))}>";
@@ -24,7 +25,7 @@ public class GenericType : IInlineType
         => transformer.TransformGenericType(this);
 
     public IInlineType Clone()
-        => new GenericType(PrefixName, TypeArguments.Select(t => t.Clone()).ToArray())
+        => new GenericType(SourceSpan, PrefixName, TypeArguments.Select(t => t.Clone()).ToArray())
         {
             Metadata = Metadata,
         };
@@ -33,6 +34,8 @@ public class GenericType : IInlineType
         => $"{PrefixName}<{new string(',', TypeArguments.Count - 1)}>";
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string PrefixName { get; }
 

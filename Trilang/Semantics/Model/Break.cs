@@ -2,6 +2,9 @@ namespace Trilang.Semantics.Model;
 
 public class Break : IStatement
 {
+    public Break(SourceSpan? sourceSpan)
+        => SourceSpan = sourceSpan;
+
     public void Accept(IVisitor visitor)
         => visitor.VisitBreak(this);
 
@@ -12,6 +15,8 @@ public class Break : IStatement
         => transformer.TransformBreak(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public While? LoopNode { get; set; }
 }

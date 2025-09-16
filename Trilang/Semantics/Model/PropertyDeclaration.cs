@@ -8,17 +8,14 @@ public class PropertyDeclaration : ISemanticNode
     private PropertyGetter? getter;
     private PropertySetter? setter;
 
-    public PropertyDeclaration(string name, IInlineType type)
-        : this(name, type, null, null)
-    {
-    }
-
     public PropertyDeclaration(
+        SourceSpan? sourceSpan,
         string name,
         IInlineType type,
         PropertyGetter? getter,
         PropertySetter? setter)
     {
+        SourceSpan = sourceSpan;
         Name = name;
         Type = type;
         Getter = getter;
@@ -43,6 +40,8 @@ public class PropertyDeclaration : ISemanticNode
         => transformer.TransformProperty(this);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

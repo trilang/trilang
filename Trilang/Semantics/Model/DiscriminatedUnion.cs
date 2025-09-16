@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class DiscriminatedUnion : IInlineType
 {
-    public DiscriminatedUnion(IReadOnlyList<IInlineType> types)
+    public DiscriminatedUnion(SourceSpan? sourceSpan, IReadOnlyList<IInlineType> types)
     {
+        SourceSpan = sourceSpan;
         Name = string.Join(" | ", types.Select(t => t.Name));
         Types = types;
 
@@ -23,12 +24,14 @@ public class DiscriminatedUnion : IInlineType
         => transformer.TransformDiscriminatedUnion(this);
 
     public IInlineType Clone()
-        => new DiscriminatedUnion(Types.Select(t => t.Clone()).ToArray())
+        => new DiscriminatedUnion(SourceSpan, Types.Select(t => t.Clone()).ToArray())
         {
             Metadata = Metadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

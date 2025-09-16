@@ -4,13 +4,9 @@ public class BlockStatement : IStatement, IBlock
 {
     private readonly List<IStatement> statements;
 
-    public BlockStatement()
-        : this([])
+    public BlockStatement(SourceSpan? sourceSpan, IReadOnlyList<IStatement> statements)
     {
-    }
-
-    public BlockStatement(IReadOnlyList<IStatement> statements)
-    {
+        SourceSpan = sourceSpan;
         this.statements = [..statements];
 
         foreach (var statement in statements)
@@ -57,6 +53,8 @@ public class BlockStatement : IStatement, IBlock
         => statements.Remove(declaration);
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public IReadOnlyList<IStatement> Statements
         => statements;

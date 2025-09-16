@@ -11,14 +11,14 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var member = (IExpression)node.Member.Transform(this);
         var index = (IExpression)node.Index.Transform(this);
 
-        return new ArrayAccessExpression(member, index);
+        return new ArrayAccessExpression(node.SourceSpan, member, index);
     }
 
     public ISemanticNode TransformArrayType(Parsing.Ast.ArrayTypeNode node)
     {
         var elementType = (IInlineType)node.ElementType.Transform(this);
 
-        return new ArrayType(elementType);
+        return new ArrayType(node.SourceSpan, elementType);
     }
 
     public ISemanticNode TransformBinaryExpression(Parsing.Ast.BinaryExpressionNode node)
@@ -27,25 +27,25 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var right = (IExpression)node.Right.Transform(this);
         var kind = (BinaryExpressionKind)node.Kind;
 
-        return new BinaryExpression(kind, left, right);
+        return new BinaryExpression(node.SourceSpan, kind, left, right);
     }
 
     public ISemanticNode TransformBlock(Parsing.Ast.BlockStatementNode node)
     {
         var statements = node.Statements.Select(s => (IStatement)s.Transform(this)).ToList();
 
-        return new BlockStatement(statements);
+        return new BlockStatement(node.SourceSpan, statements);
     }
 
     public ISemanticNode TransformBreak(Parsing.Ast.BreakNode node)
-        => new Break();
+        => new Break(node.SourceSpan);
 
     public ISemanticNode TransformCall(Parsing.Ast.CallExpressionNode node)
     {
         var member = (IExpression)node.Member.Transform(this);
         var arguments = node.Parameters.Select(a => (IExpression)a.Transform(this)).ToList();
 
-        return new CallExpression(member, arguments);
+        return new CallExpression(node.SourceSpan, member, arguments);
     }
 
     public ISemanticNode TransformCast(Parsing.Ast.CastExpressionNode node)
@@ -53,7 +53,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var targetType = (IInlineType)node.Type.Transform(this);
         var expression = (IExpression)node.Expression.Transform(this);
 
-        return new CastExpression(targetType, expression);
+        return new CastExpression(node.SourceSpan, targetType, expression);
     }
 
     public ISemanticNode TransformConstructor(Parsing.Ast.ConstructorDeclarationNode node)
@@ -62,24 +62,24 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var parameters = node.Parameters.Select(p => (Parameter)p.Transform(this)).ToList();
         var body = (BlockStatement)node.Body.Transform(this);
 
-        return new ConstructorDeclaration(accessModifier, parameters, body);
+        return new ConstructorDeclaration(node.SourceSpan, accessModifier, parameters, body);
     }
 
     public ISemanticNode TransformContinue(Parsing.Ast.ContinueNode node)
-        => new Continue();
+        => new Continue(node.SourceSpan);
 
     public ISemanticNode TransformDiscriminatedUnion(Parsing.Ast.DiscriminatedUnionNode node)
     {
         var types = node.Types.Select(t => (IInlineType)t.Transform(this)).ToList();
 
-        return new DiscriminatedUnion(types);
+        return new DiscriminatedUnion(node.SourceSpan, types);
     }
 
     public ISemanticNode TransformExpressionStatement(Parsing.Ast.ExpressionStatementNode node)
     {
         var expression = (IExpression)node.Expression.Transform(this);
 
-        return new ExpressionStatement(expression);
+        return new ExpressionStatement(node.SourceSpan, expression);
     }
 
     public ISemanticNode TransformFunction(Parsing.Ast.FunctionDeclarationNode node)
@@ -88,7 +88,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var returnType = (IInlineType)node.ReturnType.Transform(this);
         var body = (BlockStatement)node.Body.Transform(this);
 
-        return new FunctionDeclaration(node.Name, parameters, returnType, body);
+        return new FunctionDeclaration(node.SourceSpan, node.Name, parameters, returnType, body);
     }
 
     public ISemanticNode TransformFunctionType(Parsing.Ast.FunctionTypeNode node)
@@ -96,14 +96,14 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var parameters = node.ParameterTypes.Select(p => (IInlineType)p.Transform(this)).ToList();
         var returnType = (IInlineType)node.ReturnType.Transform(this);
 
-        return new FunctionType(parameters, returnType);
+        return new FunctionType(node.SourceSpan, parameters, returnType);
     }
 
     public ISemanticNode TransformGenericType(Parsing.Ast.GenericTypeNode node)
     {
         var typeArguments = node.TypeArguments.Select(t => (IInlineType)t.Transform(this)).ToList();
 
-        return new GenericType(node.PrefixName, typeArguments);
+        return new GenericType(node.SourceSpan, node.PrefixName, typeArguments);
     }
 
     public ISemanticNode TransformIfDirective(Parsing.Ast.IfDirectiveNode node)
@@ -111,7 +111,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var statements = node.Then.Select(s => s.Transform(this)).ToList();
         var elseBranch = node.Else.Select(s => s.Transform(this)).ToList();
 
-        return new IfDirective(node.DirectiveName, statements, elseBranch);
+        return new IfDirective(node.SourceSpan, node.DirectiveName, statements, elseBranch);
     }
 
     public ISemanticNode TransformIf(Parsing.Ast.IfStatementNode node)
@@ -120,7 +120,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var thenBranch = (BlockStatement)node.Then.Transform(this);
         var elseBranch = (BlockStatement?)node.Else?.Transform(this);
 
-        return new IfStatement(condition, thenBranch, elseBranch);
+        return new IfStatement(node.SourceSpan, condition, thenBranch, elseBranch);
     }
 
     public ISemanticNode TransformInterface(Parsing.Ast.InterfaceNode node)
@@ -128,7 +128,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var properties = node.Properties.Select(p => (InterfaceProperty)p.Transform(this)).ToList();
         var methods = node.Methods.Select(m => (InterfaceMethod)m.Transform(this)).ToList();
 
-        return new Interface(properties, methods);
+        return new Interface(node.SourceSpan, properties, methods);
     }
 
     public ISemanticNode TransformInterfaceProperty(Parsing.Ast.InterfacePropertyNode node)
@@ -137,7 +137,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var getter = (AccessModifier?)node.GetterModifier;
         var setter = (AccessModifier?)node.GetterModifier;
 
-        return new InterfaceProperty(node.Name, type, getter, setter);
+        return new InterfaceProperty(node.SourceSpan, node.Name, type, getter, setter);
     }
 
     public ISemanticNode TransformInterfaceMethod(Parsing.Ast.InterfaceMethodNode node)
@@ -145,7 +145,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var parameters = node.ParameterTypes.Select(p => (IInlineType)p.Transform(this)).ToList();
         var returnType = (IInlineType)node.ReturnType.Transform(this);
 
-        return new InterfaceMethod(node.Name, parameters, returnType);
+        return new InterfaceMethod(node.SourceSpan, node.Name, parameters, returnType);
     }
 
     public ISemanticNode TransformAsExpression(Parsing.Ast.IsExpressionNode node)
@@ -153,17 +153,17 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var expression = (IExpression)node.Expression.Transform(this);
         var type = (IInlineType)node.Type.Transform(this);
 
-        return new IsExpression(expression, type);
+        return new IsExpression(node.SourceSpan, expression, type);
     }
 
     public ISemanticNode TransformLiteral(Parsing.Ast.LiteralExpressionNode node)
-        => new LiteralExpression((LiteralExpressionKind)node.Kind, node.Value);
+        => new LiteralExpression(node.SourceSpan, (LiteralExpressionKind)node.Kind, node.Value);
 
     public ISemanticNode TransformMemberAccess(Parsing.Ast.MemberAccessExpressionNode node)
     {
         var member = (IExpression?)node.Member?.Transform(this);
 
-        return new MemberAccessExpression(member, node.Name);
+        return new MemberAccessExpression(node.SourceSpan, member, node.Name);
     }
 
     public ISemanticNode TransformMethod(Parsing.Ast.MethodDeclarationNode node)
@@ -173,7 +173,14 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var returnType = (IInlineType)node.ReturnType.Transform(this);
         var body = (BlockStatement)node.Body.Transform(this);
 
-        return new MethodDeclaration(accessModifier, node.IsStatic, node.Name, parameters, returnType, body);
+        return new MethodDeclaration(
+            node.SourceSpan,
+            accessModifier,
+            node.IsStatic,
+            node.Name,
+            parameters,
+            returnType,
+            body);
     }
 
     public ISemanticNode TransformNewArray(Parsing.Ast.NewArrayExpressionNode node)
@@ -181,7 +188,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var type = (ArrayType)node.Type.Transform(this);
         var size = (IExpression)node.Size.Transform(this);
 
-        return new NewArrayExpression(type, size);
+        return new NewArrayExpression(node.SourceSpan, type, size);
     }
 
     public ISemanticNode TransformNewObject(Parsing.Ast.NewObjectExpressionNode node)
@@ -189,17 +196,17 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var type = (IInlineType)node.Type.Transform(this);
         var arguments = node.Parameters.Select(a => (IExpression)a.Transform(this)).ToList();
 
-        return new NewObjectExpression(type, arguments);
+        return new NewObjectExpression(node.SourceSpan, type, arguments);
     }
 
     public ISemanticNode TransformNull(Parsing.Ast.NullExpressionNode node)
-        => new NullExpression();
+        => new NullExpression(node.SourceSpan);
 
     public ISemanticNode TransformParameter(Parsing.Ast.ParameterNode node)
     {
         var type = (IInlineType)node.Type.Transform(this);
 
-        return new Parameter(node.Name, type);
+        return new Parameter(node.SourceSpan, node.Name, type);
     }
 
     public ISemanticNode TransformProperty(Parsing.Ast.PropertyDeclarationNode node)
@@ -208,7 +215,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var getter = (PropertyGetter?)node.Getter?.Transform(this);
         var setter = (PropertySetter?)node.Setter?.Transform(this);
 
-        return new PropertyDeclaration(node.Name, type, getter, setter);
+        return new PropertyDeclaration(node.SourceSpan, node.Name, type, getter, setter);
     }
 
     public ISemanticNode TransformGetter(Parsing.Ast.PropertyGetterNode node)
@@ -216,7 +223,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var accessModifier = (AccessModifier)node.AccessModifier;
         var body = (BlockStatement?)node.Body?.Transform(this);
 
-        return new PropertyGetter(accessModifier, body);
+        return new PropertyGetter(node.SourceSpan, accessModifier, body);
     }
 
     public ISemanticNode TransformSetter(Parsing.Ast.PropertySetterNode node)
@@ -224,35 +231,35 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var accessModifier = (AccessModifier)node.AccessModifier;
         var body = (BlockStatement?)node.Body?.Transform(this);
 
-        return new PropertySetter(accessModifier, body);
+        return new PropertySetter(node.SourceSpan, accessModifier, body);
     }
 
     public ISemanticNode TransformReturn(Parsing.Ast.ReturnStatementNode node)
     {
         var expression = (IExpression?)node.Expression?.Transform(this);
 
-        return new ReturnStatement(expression);
+        return new ReturnStatement(node.SourceSpan, expression);
     }
 
     public ISemanticNode TransformTree(Parsing.Ast.SyntaxTree node)
     {
         var declarations = node.Declarations.Select(d => (IDeclaration)d.Transform(this)).ToList();
 
-        return new SemanticTree(declarations);
+        return new SemanticTree(node.SourceSpan, declarations);
     }
 
     public ISemanticNode TransformTuple(Parsing.Ast.TupleExpressionNode node)
     {
         var elements = node.Expressions.Select(e => (IExpression)e.Transform(this)).ToList();
 
-        return new TupleExpression(elements);
+        return new TupleExpression(node.SourceSpan, elements);
     }
 
     public ISemanticNode TransformTupleType(Parsing.Ast.TupleTypeNode node)
     {
         var types = node.Types.Select(e => (IInlineType)e.Transform(this)).ToList();
 
-        return new TupleType(types);
+        return new TupleType(node.SourceSpan, types);
     }
 
     public ISemanticNode TransformTypeAlias(Parsing.Ast.TypeAliasDeclarationNode node)
@@ -261,7 +268,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var genericArguments = node.GenericArguments.Select(ga => (Type)ga.Transform(this)).ToList();
         var type = (IInlineType)node.Type.Transform(this);
 
-        return new TypeAliasDeclaration(accessModifier, node.Name, genericArguments, type);
+        return new TypeAliasDeclaration(node.SourceSpan, accessModifier, node.Name, genericArguments, type);
     }
 
     public ISemanticNode TransformType(Parsing.Ast.TypeDeclarationNode node)
@@ -273,18 +280,26 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var constructors = node.Constructors.Select(c => (ConstructorDeclaration)c.Transform(this)).ToList();
         var methods = node.Methods.Select(m => (MethodDeclaration)m.Transform(this)).ToList();
 
-        return new TypeDeclaration(accessModifier, node.Name, genericArguments, interfaces, properties, constructors, methods);
+        return new TypeDeclaration(
+            node.SourceSpan,
+            accessModifier,
+            node.Name,
+            genericArguments,
+            interfaces,
+            properties,
+            constructors,
+            methods);
     }
 
     public ISemanticNode TransformTypeNode(Parsing.Ast.TypeNode node)
-        => new Type(node.Name);
+        => new Type(node.SourceSpan, node.Name);
 
     public ISemanticNode TransformUnaryExpression(Parsing.Ast.UnaryExpressionNode node)
     {
         var operand = (IExpression)node.Operand.Transform(this);
         var kind = (UnaryExpressionKind)node.Kind;
 
-        return new UnaryExpression(kind, operand);
+        return new UnaryExpression(node.SourceSpan, kind, operand);
     }
 
     public ISemanticNode TransformVariable(Parsing.Ast.VariableDeclarationNode node)
@@ -292,7 +307,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var type = (IInlineType)node.Type.Transform(this);
         var initializer = (IExpression)node.Expression.Transform(this);
 
-        return new VariableDeclaration(node.Name, type, initializer);
+        return new VariableDeclaration(node.SourceSpan, node.Name, type, initializer);
     }
 
     public ISemanticNode TransformWhile(Parsing.Ast.WhileNode node)
@@ -300,6 +315,6 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var condition = (IExpression)node.Condition.Transform(this);
         var body = (BlockStatement)node.Body.Transform(this);
 
-        return new While(condition, body);
+        return new While(node.SourceSpan, condition, body);
     }
 }

@@ -39,27 +39,30 @@ public class ReplaceConditionalOperatorsTests
 
         var aParameter = new ParameterMetadata("a", TypeMetadata.Bool);
         var bParameter = new ParameterMetadata("b", TypeMetadata.Bool);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = aParameter,
                     },
-                    new Parameter("b", new Type("bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "b", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = bParameter,
                     },
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new IfStatement(
+                        null,
                         new ExpressionBlock([
                             new VariableDeclaration(
+                                null,
                                 "cond_0",
-                                new Type("bool") { Metadata = TypeMetadata.Bool },
-                                new MemberAccessExpression("a")
+                                new Type(null, "bool") { Metadata = TypeMetadata.Bool },
+                                new MemberAccessExpression(null, "a")
                                 {
                                     AccessKind = MemberAccessKind.Read,
                                     Reference = aParameter,
@@ -69,29 +72,32 @@ public class ReplaceConditionalOperatorsTests
                                 Metadata = new VariableMetadata("cond_0", TypeMetadata.Bool),
                             },
                             new IfStatement(
-                                new MemberAccessExpression("cond_0")
+                                null,
+                                new MemberAccessExpression(null, "cond_0")
                                 {
                                     AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                 },
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("if_1_then"),
                                 ]),
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("if_1_end"),
                                 ])
                             ),
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new Label("if_1_then"),
                                 new ExpressionStatement(
+                                    null,
                                     new BinaryExpression(
+                                        null,
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpression("cond_0")
+                                        new MemberAccessExpression(null, "cond_0")
                                         {
                                             AccessKind = MemberAccessKind.Write,
                                             Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                         },
-                                        new MemberAccessExpression("b")
+                                        new MemberAccessExpression(null, "b")
                                         {
                                             AccessKind = MemberAccessKind.Read,
                                             Reference = bParameter,
@@ -102,24 +108,26 @@ public class ReplaceConditionalOperatorsTests
                             ]),
                             new Label("if_1_end"),
                             new ExpressionStatement(
-                                new MemberAccessExpression("cond_0")
+                                null,
+                                new MemberAccessExpression(null, "cond_0")
                                 {
                                     AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                 }
                             )
                         ]),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_then"),
                         ]),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_end"),
                         ])
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new Label("if_0_then"),
                         new ReturnStatement(
-                            new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                            null,
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32,
                             }
@@ -128,7 +136,8 @@ public class ReplaceConditionalOperatorsTests
                     ]),
                     new Label("if_0_end"),
                     new ReturnStatement(
-                        new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                        null,
+                        new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
@@ -166,27 +175,30 @@ public class ReplaceConditionalOperatorsTests
 
         var aParameter = new ParameterMetadata("a", TypeMetadata.Bool);
         var bParameter = new ParameterMetadata("b", TypeMetadata.Bool);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = aParameter,
                     },
-                    new Parameter("b", new Type("bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "b", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = bParameter,
                     },
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new IfStatement(
+                        null,
                         new ExpressionBlock([
                             new VariableDeclaration(
+                                null,
                                 "cond_0",
-                                new Type("bool") { Metadata = TypeMetadata.Bool },
-                                new MemberAccessExpression("a")
+                                new Type(null, "bool") { Metadata = TypeMetadata.Bool },
+                                new MemberAccessExpression(null, "a")
                                 {
                                     AccessKind = MemberAccessKind.Read,
                                     Reference = aParameter,
@@ -196,9 +208,11 @@ public class ReplaceConditionalOperatorsTests
                                 Metadata = new VariableMetadata("cond_0", TypeMetadata.Bool),
                             },
                             new IfStatement(
+                                null,
                                 new UnaryExpression(
+                                    null,
                                     UnaryExpressionKind.LogicalNot,
-                                    new MemberAccessExpression("cond_0")
+                                    new MemberAccessExpression(null, "cond_0")
                                     {
                                         AccessKind = MemberAccessKind.Read,
                                         Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
@@ -207,24 +221,26 @@ public class ReplaceConditionalOperatorsTests
                                 {
                                     ReturnTypeMetadata = TypeMetadata.Bool,
                                 },
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("if_1_then"),
                                 ]),
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("if_1_end"),
                                 ])
                             ),
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new Label("if_1_then"),
                                 new ExpressionStatement(
+                                    null,
                                     new BinaryExpression(
+                                        null,
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpression("cond_0")
+                                        new MemberAccessExpression(null, "cond_0")
                                         {
                                             AccessKind = MemberAccessKind.Write,
                                             Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                         },
-                                        new MemberAccessExpression("b")
+                                        new MemberAccessExpression(null, "b")
                                         {
                                             AccessKind = MemberAccessKind.Read,
                                             Reference = bParameter,
@@ -235,24 +251,26 @@ public class ReplaceConditionalOperatorsTests
                             ]),
                             new Label("if_1_end"),
                             new ExpressionStatement(
-                                new MemberAccessExpression("cond_0")
+                                null,
+                                new MemberAccessExpression(null, "cond_0")
                                 {
                                     AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                 }
                             )
                         ]),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_then"),
                         ]),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_end"),
                         ])
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new Label("if_0_then"),
                         new ReturnStatement(
-                            new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                            null,
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32,
                             }
@@ -261,7 +279,8 @@ public class ReplaceConditionalOperatorsTests
                     ]),
                     new Label("if_0_end"),
                     new ReturnStatement(
-                        new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                        null,
+                        new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }
@@ -300,35 +319,39 @@ public class ReplaceConditionalOperatorsTests
         var aParameter = new ParameterMetadata("a", TypeMetadata.Bool);
         var bParameter = new ParameterMetadata("b", TypeMetadata.Bool);
         var cParameter = new ParameterMetadata("c", TypeMetadata.Bool);
-        var expected = new SemanticTree([
+        var expected = new SemanticTree(null, [
             new FunctionDeclaration(
+                null,
                 "test",
                 [
-                    new Parameter("a", new Type("bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = aParameter,
                     },
-                    new Parameter("b", new Type("bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "b", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = bParameter,
                     },
-                    new Parameter("c", new Type("bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "c", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = cParameter,
                     }
                 ],
-                new Type("i32") { Metadata = TypeMetadata.I32 },
-                new BlockStatement([
+                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new BlockStatement(null, [
                     new IfStatement(
+                        null,
                         new ExpressionBlock([
                             new VariableDeclaration(
+                                null,
                                 "cond_1",
-                                new Type("bool") { Metadata = TypeMetadata.Bool },
+                                new Type(null, "bool") { Metadata = TypeMetadata.Bool },
                                 new ExpressionBlock([
                                     new VariableDeclaration(
+                                        null,
                                         "cond_0",
-                                        new Type("bool") { Metadata = TypeMetadata.Bool },
-                                        new MemberAccessExpression("a")
+                                        new Type(null, "bool") { Metadata = TypeMetadata.Bool },
+                                        new MemberAccessExpression(null, "a")
                                         {
                                             AccessKind = MemberAccessKind.Read,
                                             Reference = aParameter,
@@ -338,29 +361,32 @@ public class ReplaceConditionalOperatorsTests
                                         Metadata = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                     },
                                     new IfStatement(
-                                        new MemberAccessExpression("cond_0")
+                                        null,
+                                        new MemberAccessExpression(null, "cond_0")
                                         {
                                             AccessKind = MemberAccessKind.Read,
                                             Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                         },
-                                        new BlockStatement([
+                                        new BlockStatement(null, [
                                             new GoTo("if_1_then"),
                                         ]),
-                                        new BlockStatement([
+                                        new BlockStatement(null, [
                                             new GoTo("if_1_end"),
                                         ])
                                     ),
-                                    new BlockStatement([
+                                    new BlockStatement(null, [
                                         new Label("if_1_then"),
                                         new ExpressionStatement(
+                                            null,
                                             new BinaryExpression(
+                                                null,
                                                 BinaryExpressionKind.Assignment,
-                                                new MemberAccessExpression("cond_0")
+                                                new MemberAccessExpression(null, "cond_0")
                                                 {
                                                     AccessKind = MemberAccessKind.Write,
                                                     Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
                                                 },
-                                                new MemberAccessExpression("b")
+                                                new MemberAccessExpression(null, "b")
                                                 {
                                                     AccessKind = MemberAccessKind.Read,
                                                     Reference = bParameter,
@@ -371,7 +397,8 @@ public class ReplaceConditionalOperatorsTests
                                     ]),
                                     new Label("if_1_end"),
                                     new ExpressionStatement(
-                                        new MemberAccessExpression("cond_0")
+                                        null,
+                                        new MemberAccessExpression(null, "cond_0")
                                         {
                                             AccessKind = MemberAccessKind.Read,
                                             Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
@@ -383,29 +410,32 @@ public class ReplaceConditionalOperatorsTests
                                 Metadata = new VariableMetadata("cond_1", TypeMetadata.Bool),
                             },
                             new IfStatement(
-                                new MemberAccessExpression("cond_1")
+                                null,
+                                new MemberAccessExpression(null, "cond_1")
                                 {
                                     AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
                                 },
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("if_2_then"),
                                 ]),
-                                new BlockStatement([
+                                new BlockStatement(null, [
                                     new GoTo("if_2_end"),
                                 ])
                             ),
-                            new BlockStatement([
+                            new BlockStatement(null, [
                                 new Label("if_2_then"),
                                 new ExpressionStatement(
+                                    null,
                                     new BinaryExpression(
+                                        null,
                                         BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpression("cond_1")
+                                        new MemberAccessExpression(null, "cond_1")
                                         {
                                             AccessKind = MemberAccessKind.Write,
                                             Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
                                         },
-                                        new MemberAccessExpression("c")
+                                        new MemberAccessExpression(null, "c")
                                         {
                                             AccessKind = MemberAccessKind.Read,
                                             Reference = cParameter,
@@ -416,24 +446,26 @@ public class ReplaceConditionalOperatorsTests
                             ]),
                             new Label("if_2_end"),
                             new ExpressionStatement(
-                                new MemberAccessExpression("cond_1")
+                                null,
+                                new MemberAccessExpression(null, "cond_1")
                                 {
                                     AccessKind = MemberAccessKind.Read,
                                     Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
                                 }
                             )
                         ]),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_then"),
                         ]),
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new GoTo("if_0_end"),
                         ])
                     ),
-                    new BlockStatement([
+                    new BlockStatement(null, [
                         new Label("if_0_then"),
                         new ReturnStatement(
-                            new LiteralExpression(LiteralExpressionKind.Integer, 1)
+                            null,
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                             {
                                 ReturnTypeMetadata = TypeMetadata.I32,
                             }
@@ -442,7 +474,8 @@ public class ReplaceConditionalOperatorsTests
                     ]),
                     new Label("if_0_end"),
                     new ReturnStatement(
-                        new LiteralExpression(LiteralExpressionKind.Integer, 0)
+                        null,
+                        new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                         {
                             ReturnTypeMetadata = TypeMetadata.I32,
                         }

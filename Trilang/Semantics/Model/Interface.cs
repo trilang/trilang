@@ -5,9 +5,11 @@ namespace Trilang.Semantics.Model;
 public class Interface : IInlineType
 {
     public Interface(
+        SourceSpan? sourceSpan,
         IReadOnlyList<InterfaceProperty> properties,
         IReadOnlyList<InterfaceMethod> methods)
     {
+        SourceSpan = sourceSpan;
         Properties = properties;
         Methods = methods;
 
@@ -37,6 +39,7 @@ public class Interface : IInlineType
 
     public IInlineType Clone()
         => new Interface(
+            SourceSpan,
             Properties.Select(x => x.Clone()).ToArray(),
             Methods.Select(x => x.Clone()).ToArray()
         )
@@ -45,6 +48,8 @@ public class Interface : IInlineType
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

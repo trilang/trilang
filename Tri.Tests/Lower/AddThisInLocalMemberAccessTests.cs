@@ -45,8 +45,10 @@ public class AddThisInLocalMemberAccessTests
             TypeMetadata.I32
         );
         var expected = new CallExpression(
+            null,
             new MemberAccessExpression(
-                new MemberAccessExpression(MemberAccessExpression.This)
+                null,
+                new MemberAccessExpression(null, MemberAccessExpression.This)
                 {
                     Reference = new ParameterMetadata(MemberAccessExpression.This, typeMetadata),
                     AccessKind = MemberAccessKind.Read,
@@ -94,7 +96,8 @@ public class AddThisInLocalMemberAccessTests
         );
 
         var expected = new MemberAccessExpression(
-            new MemberAccessExpression(MemberAccessExpression.This)
+            null,
+            new MemberAccessExpression(null, MemberAccessExpression.This)
             {
                 Reference = new ParameterMetadata(MemberAccessExpression.This, typeMetadata),
                 AccessKind = MemberAccessKind.Read,

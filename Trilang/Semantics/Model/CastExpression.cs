@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class CastExpression : IExpression
 {
-    public CastExpression(IInlineType type, IExpression expression)
+    public CastExpression(SourceSpan? sourceSpan, IInlineType type, IExpression expression)
     {
+        SourceSpan = sourceSpan;
         Type = type;
         Expression = expression;
 
@@ -23,9 +24,11 @@ public class CastExpression : IExpression
         => transformer.TransformCast(this);
 
     public IExpression Clone()
-        => new CastExpression(Type.Clone(), Expression.Clone());
+        => new CastExpression(SourceSpan, Type.Clone(), Expression.Clone());
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public ITypeMetadata? ReturnTypeMetadata
         => Type.Metadata;

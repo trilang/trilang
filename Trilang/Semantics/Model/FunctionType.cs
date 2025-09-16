@@ -4,8 +4,12 @@ namespace Trilang.Semantics.Model;
 
 public class FunctionType : IInlineType
 {
-    public FunctionType(IReadOnlyList<IInlineType> parameterTypes, IInlineType returnType)
+    public FunctionType(
+        SourceSpan? sourceSpan,
+        IReadOnlyList<IInlineType> parameterTypes,
+        IInlineType returnType)
     {
+        SourceSpan = sourceSpan;
         ParameterTypes = parameterTypes;
         ReturnType = returnType;
 
@@ -28,12 +32,14 @@ public class FunctionType : IInlineType
         => transformer.TransformFunctionType(this);
 
     public IInlineType Clone()
-        => new FunctionType(ParameterTypes.Select(t => t.Clone()).ToArray(), ReturnType.Clone())
+        => new FunctionType(SourceSpan, ParameterTypes.Select(t => t.Clone()).ToArray(), ReturnType.Clone())
         {
             Metadata = Metadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public string Name { get; }
 

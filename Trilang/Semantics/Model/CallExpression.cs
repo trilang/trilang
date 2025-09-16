@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class CallExpression : IExpression
 {
-    public CallExpression(IExpression member, IReadOnlyList<IExpression> parameters)
+    public CallExpression(SourceSpan? sourceSpan, IExpression member, IReadOnlyList<IExpression> parameters)
     {
+        SourceSpan = sourceSpan;
         Member = member;
         Parameters = parameters;
 
@@ -24,9 +25,11 @@ public class CallExpression : IExpression
         => transformer.TransformCall(this);
 
     public IExpression Clone()
-        => new CallExpression(Member.Clone(), Parameters.Select(x => x.Clone()).ToArray());
+        => new CallExpression(SourceSpan, Member.Clone(), Parameters.Select(x => x.Clone()).ToArray());
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public IExpression Member { get; }
 

@@ -58,6 +58,8 @@ public class ExpressionBlock : IExpression, IBlock
 
     public ISemanticNode? Parent { get; set; }
 
+    public SourceSpan? SourceSpan => null;
+
     public IReadOnlyList<IStatement> Statements
         => statements;
 

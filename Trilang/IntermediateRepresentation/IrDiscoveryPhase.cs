@@ -38,10 +38,12 @@ internal class IrDiscoveryPhase : Visitor
                 {
                     functionsToGenerate.Add(
                         property.Getter,
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new ReturnStatement(
+                                null,
                                 new MemberAccessExpression(
-                                    new MemberAccessExpression(MemberAccessExpression.This)
+                                    null,
+                                    new MemberAccessExpression(null, MemberAccessExpression.This)
                                     {
                                         Reference = new ParameterMetadata(MemberAccessExpression.This, declaringType),
                                         AccessKind = MemberAccessKind.Read,
@@ -63,12 +65,15 @@ internal class IrDiscoveryPhase : Visitor
                         .First(x => x.Name == MemberAccessExpression.Value);
                     functionsToGenerate.Add(
                         property.Setter,
-                        new BlockStatement([
+                        new BlockStatement(null, [
                             new ExpressionStatement(
+                                null,
                                 new BinaryExpression(
+                                    null,
                                     BinaryExpressionKind.Assignment,
                                     new MemberAccessExpression(
-                                        new MemberAccessExpression(MemberAccessExpression.This)
+                                        null,
+                                        new MemberAccessExpression(null, MemberAccessExpression.This)
                                         {
                                             Reference = new ParameterMetadata(MemberAccessExpression.This, declaringType),
                                             AccessKind = MemberAccessKind.Read,
@@ -79,7 +84,7 @@ internal class IrDiscoveryPhase : Visitor
                                         Reference = fieldMetadata,
                                         AccessKind = MemberAccessKind.Write,
                                     },
-                                    new MemberAccessExpression(valueParameter.Name)
+                                    new MemberAccessExpression(null, valueParameter.Name)
                                     {
                                         Reference = valueParameter,
                                         AccessKind = MemberAccessKind.Read,

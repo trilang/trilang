@@ -14,7 +14,9 @@ public class Label : IStatement
     public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformLabel(this);
 
-    public string Name { get; }
-
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan => null;
+
+    public string Name { get; }
 }

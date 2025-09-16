@@ -4,8 +4,9 @@ namespace Trilang.Semantics.Model;
 
 public class ArrayAccessExpression : IExpression
 {
-    public ArrayAccessExpression(IExpression member, IExpression index)
+    public ArrayAccessExpression(SourceSpan? sourceSpan, IExpression member, IExpression index)
     {
+        SourceSpan = sourceSpan;
         Member = member;
         Index = index;
 
@@ -23,12 +24,14 @@ public class ArrayAccessExpression : IExpression
         => transformer.TransformArrayAccess(this);
 
     public IExpression Clone()
-        => new ArrayAccessExpression(Member.Clone(), Index.Clone())
+        => new ArrayAccessExpression(SourceSpan, Member.Clone(), Index.Clone())
         {
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
 
     public ISemanticNode? Parent { get; set; }
+
+    public SourceSpan? SourceSpan { get; }
 
     public IExpression Member { get; }
 
