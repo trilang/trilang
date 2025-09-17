@@ -24,7 +24,7 @@ public class AddImplicitReturnStatementsTests
     [Test]
     public void AddReturnToEmptyVoidMethodTest()
     {
-        var (tree, cfgs) = Parse("function test(): void { }");
+        var (tree, cfgs) = Parse("public test(): void { }");
 
         var lowering = new Lowering();
         lowering.Lower(tree, new LoweringOptions([], cfgs));
@@ -40,7 +40,7 @@ public class AddImplicitReturnStatementsTests
     {
         var (tree, cfgs) = Parse(
             """
-            function test(): void {
+            public test(): void {
                 while (true) { }
             }
             """);
@@ -79,7 +79,7 @@ public class AddImplicitReturnStatementsTests
     {
         var (tree, cfgs) = Parse(
             """
-            function test(): void {
+            public test(): void {
                 if (true) { }
 
                 return;
@@ -120,7 +120,7 @@ public class AddImplicitReturnStatementsTests
     {
         var (tree, cfgs) = Parse(
             """
-            function test(): void {
+            public test(): void {
                 if (true) {
                     return;
                 } else {
@@ -168,7 +168,7 @@ public class AddImplicitReturnStatementsTests
     {
         var (tree, cfgs) = Parse(
             """
-            function test(): void {
+            public test(): void {
                 {
                     return;
                 }

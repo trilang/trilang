@@ -3,10 +3,19 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
+// TODO: validate functions, implement when the package system is ready
+// TODO: validate private types (what does it mean), implement when the package system is ready
 internal class CheckAccessModifiers : Visitor, ISemanticPass
 {
     public void Analyze(SemanticTree tree, SemanticPassContext context)
         => tree.Accept(this);
+
+    protected override void VisitFunctionEnter(FunctionDeclaration node)
+    {
+        // TODO: mark type metadata as invalid
+        if (node.Metadata!.AccessModifier == AccessModifierMetadata.Internal)
+            throw new SemanticAnalysisException($"The '{node.Name}' function can't be internal.");
+    }
 
     protected override void VisitNewObjectEnter(NewObjectExpression node)
     {
@@ -18,6 +27,7 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         if (ctor.DeclaringType.Equals(parentType))
             return;
 
+        // TODO: check internal ctors, implement when the package system is ready
         if (ctor.AccessModifier != AccessModifierMetadata.Public)
             throw new SemanticAnalysisException($"The constructor of '{ctor.DeclaringType}' is not accessible.");
     }

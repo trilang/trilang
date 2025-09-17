@@ -23,7 +23,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function add(a: i32, b: i32): i32 {
+            public add(a: i32, b: i32): i32 {
                 return a + b;
             }
             """;
@@ -38,6 +38,7 @@ public class ControlFlowAnalyzerTests
         ]);
         var expected = new ControlFlowGraph(entry, entry);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "add",
             [new ParameterMetadata("a", TypeMetadata.I32), new ParameterMetadata("b", TypeMetadata.I32)],
             new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32)
@@ -54,7 +55,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 if (true) {
                     return;
                 }
@@ -81,6 +82,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -97,7 +99,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 if (true) {
                     return;
                 } else {
@@ -132,6 +134,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -148,7 +151,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 if (true) {
                     if (false) {
                         return;
@@ -181,6 +184,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -197,7 +201,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     return;
                 }
@@ -226,6 +230,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -242,7 +247,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     while (false) {
                         return;
@@ -279,6 +284,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -295,7 +301,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     break;
                 }
@@ -321,6 +327,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -337,7 +344,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     while (false) {
                         break;
@@ -373,6 +380,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -389,7 +397,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     continue;
                 }
@@ -415,6 +423,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -431,7 +440,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     while (false) {
                         continue;
@@ -467,6 +476,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -483,7 +493,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     if (false) {
                         return;
@@ -517,6 +527,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, loopendBlock);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void)
@@ -533,7 +544,7 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
-            function test(a: i32): i32 {
+            public test(a: i32): i32 {
                 if (a > 0) {
                     if (a > 10) {
                         return 1;
@@ -572,6 +583,7 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, end0Block);
         var function = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [new ParameterMetadata("a", TypeMetadata.I32)],
             new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)

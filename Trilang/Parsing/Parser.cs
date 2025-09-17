@@ -79,32 +79,35 @@ public class Parser
         });
 
     private FunctionDeclarationNode? TryParseFunction(ParserContext context)
-    {
-        if (!context.Reader.Check(TokenKind.Function, out var functionKeyword))
-            return null;
+        => context.Reader.Scoped(context, static c =>
+        {
+            var (accessModifierSpan, accessModifier) = c.Parser.TryParseAccessModifier(c);
+            if (accessModifier is null)
+                return null;
 
-        var (_, name) = TryParseId(context);
-        if (name is null)
-            throw new ParseException("Expected a function name.");
+            var (_, name) = c.Parser.TryParseId(c);
+            if (name is null)
+                return null;
 
-        var parameters = ParseFunctionParameters(context);
+            var parameters = c.Parser.ParseFunctionParameters(c);
 
-        if (!context.Reader.Check(TokenKind.Colon))
-            throw new ParseException("Expected a colon.");
+            if (!c.Reader.Check(TokenKind.Colon))
+                throw new ParseException("Expected a colon.");
 
-        var returnType = TryParseDiscriminatedUnion(context) ??
-                         throw new ParseException("Expected a function return type.");
+            var returnType = c.Parser.TryParseDiscriminatedUnion(c) ??
+                             throw new ParseException("Expected a function return type.");
 
-        var block = TryParseBlock(context) ??
-                    throw new ParseException("Expected a function block.");
+            var block = c.Parser.TryParseBlock(c) ??
+                        throw new ParseException("Expected a function block.");
 
-        return FunctionDeclarationNode.Create(
-            functionKeyword.SourceSpan.Combine(block.SourceSpan),
-            name,
-            parameters,
-            returnType,
-            block);
-    }
+            return FunctionDeclarationNode.Create(
+                accessModifierSpan.Combine(block.SourceSpan),
+                accessModifier.Value,
+                name,
+                parameters,
+                returnType,
+                block);
+        });
 
     private List<ParameterNode> ParseFunctionParameters(ParserContext context)
     {
@@ -171,6 +174,9 @@ public class Parser
         if (context.Reader.Check(TokenKind.Public, out var publicKeyword))
             return (publicKeyword.SourceSpan, AccessModifier.Public);
 
+        if (context.Reader.Check(TokenKind.Internal, out var internalKeyword))
+            return (internalKeyword.SourceSpan, AccessModifier.Internal);
+
         if (context.Reader.Check(TokenKind.Private, out var privateKeyword))
             return (privateKeyword.SourceSpan, AccessModifier.Private);
 
@@ -220,7 +226,7 @@ public class Parser
 
     private TypeDeclarationNode? TryParseTypeDeclarationNode(ParserContext context)
     {
-        var (span, accessModifier) = TryParseAccessModifier(context);
+        var (accessModifierSpan, accessModifier) = TryParseAccessModifier(context);
         if (accessModifier is null)
             return null;
 
@@ -285,7 +291,7 @@ public class Parser
         }
 
         return new TypeDeclarationNode(
-            span.Combine(closeBrace.SourceSpan),
+            accessModifierSpan.Combine(closeBrace.SourceSpan),
             accessModifier.Value,
             name,
             genericArguments,

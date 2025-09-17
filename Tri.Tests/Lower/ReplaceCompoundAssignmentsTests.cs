@@ -33,7 +33,7 @@ public class ReplaceCompoundAssignmentsTests
     {
         var tree = Parse(
             $$"""
-              function test(x: i32): void {
+              public test(x: i32): void {
                   x {{op}} 1;
               }
               """);
@@ -41,6 +41,7 @@ public class ReplaceCompoundAssignmentsTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(null, "x", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
@@ -85,6 +86,7 @@ public class ReplaceCompoundAssignmentsTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.Void)

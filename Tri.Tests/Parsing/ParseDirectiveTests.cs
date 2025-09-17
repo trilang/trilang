@@ -160,7 +160,7 @@ public class ParseDirectiveTests
         var parser = new Parser();
         var tree = parser.Parse(
             """
-            function main(): void {
+            public main(): void {
             #if D1
                 print("D1");
             #else
@@ -170,31 +170,32 @@ public class ParseDirectiveTests
             """);
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(82, 7, 2)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(80, 7, 2)),
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(
-                    new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)),
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
                 new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(82, 7, 2)),
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(80, 7, 2)),
                     [
                         new IfDirectiveNode(
-                            new SourceSpan(new SourcePosition(24, 2, 1), new SourcePosition(80, 6, 7)),
+                            new SourceSpan(new SourcePosition(22, 2, 1), new SourcePosition(78, 6, 7)),
                             "D1",
                             [
                                 new ExpressionStatementNode(
-                                    new SourceSpan(new SourcePosition(35, 3, 5), new SourcePosition(47, 3, 17)),
+                                    new SourceSpan(new SourcePosition(33, 3, 5), new SourcePosition(45, 3, 17)),
                                     new CallExpressionNode(
-                                        new SourceSpan(new SourcePosition(35, 3, 5), new SourcePosition(46, 3, 16)),
+                                        new SourceSpan(new SourcePosition(33, 3, 5), new SourcePosition(44, 3, 16)),
                                         new MemberAccessExpressionNode(
-                                            new SourceSpan(new SourcePosition(35, 3, 5), new SourcePosition(40, 3, 10)),
+                                            new SourceSpan(new SourcePosition(33, 3, 5), new SourcePosition(38, 3, 10)),
                                             "print"
                                         ),
                                         [
                                             LiteralExpressionNode.String(
-                                                new SourceSpan(new SourcePosition(41, 3, 11), new SourcePosition(45, 3, 15)),
+                                                new SourceSpan(new SourcePosition(39, 3, 11), new SourcePosition(43, 3, 15)),
                                                 "D1")
                                         ]
                                     )
@@ -202,16 +203,16 @@ public class ParseDirectiveTests
                             ],
                             [
                                 new ExpressionStatementNode(
-                                    new SourceSpan(new SourcePosition(58, 5, 5), new SourcePosition(73, 5, 20)),
+                                    new SourceSpan(new SourcePosition(56, 5, 5), new SourcePosition(71, 5, 20)),
                                     new CallExpressionNode(
-                                        new SourceSpan(new SourcePosition(58, 5, 5), new SourcePosition(72, 5, 19)),
+                                        new SourceSpan(new SourcePosition(56, 5, 5), new SourcePosition(70, 5, 19)),
                                         new MemberAccessExpressionNode(
-                                            new SourceSpan(new SourcePosition(58, 5, 5), new SourcePosition(63, 5, 10)),
+                                            new SourceSpan(new SourcePosition(56, 5, 5), new SourcePosition(61, 5, 10)),
                                             "print"
                                         ),
                                         [
                                             LiteralExpressionNode.String(
-                                                new SourceSpan(new SourcePosition(64, 5, 11), new SourcePosition(71, 5, 18)),
+                                                new SourceSpan(new SourcePosition(62, 5, 11), new SourcePosition(69, 5, 18)),
                                                 "Empty")
                                         ]
                                     )

@@ -21,7 +21,7 @@ public class BreakContinueWithinLoopTests
     {
         var tree = Parse(
             """
-            function test(): void {
+            public test(): void {
                 break;
             }
             """);
@@ -39,7 +39,7 @@ public class BreakContinueWithinLoopTests
     {
         var tree = Parse(
             """
-            function test(): void {
+            public test(): void {
                 continue;
             }
             """);
@@ -57,7 +57,7 @@ public class BreakContinueWithinLoopTests
     {
         var tree = Parse(
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     while (false) {
                         break;
@@ -80,7 +80,7 @@ public class BreakContinueWithinLoopTests
     {
         var tree = Parse(
             """
-            function test(): void {
+            public test(): void {
                 while (true) {
                     while (false) {
                         continue;

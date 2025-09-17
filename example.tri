@@ -90,11 +90,11 @@ public type List<T> {
     }
 }
 
-function test(callback: () => void): void {
+private test(callback: () => void): void {
     callback();
 }
 
-function main(): i32 {
+public main(): i32 {
     var number: i32 = 2 + 2 * 2;
     if (number == 6) {
         print("2 + 2 * 2 = 6\n");

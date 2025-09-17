@@ -25,7 +25,7 @@ public class ReplaceWhileLoopTests
     {
         var tree = Parse(
             """
-            function test(a: i32): i32 {
+            public test(a: i32): i32 {
                 a = 0;
 
                 while (a < 10) {
@@ -39,6 +39,7 @@ public class ReplaceWhileLoopTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
@@ -144,6 +145,7 @@ public class ReplaceWhileLoopTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
@@ -162,7 +164,7 @@ public class ReplaceWhileLoopTests
     {
         var tree = Parse(
             """
-            function test(a: i32): i32 {
+            public test(a: i32): i32 {
                 a = 0;
 
                 while (a < 10) {
@@ -178,6 +180,7 @@ public class ReplaceWhileLoopTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
@@ -301,6 +304,7 @@ public class ReplaceWhileLoopTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
@@ -319,7 +323,7 @@ public class ReplaceWhileLoopTests
     {
         var tree = Parse(
             """
-            function test(a: i32): i32 {
+            public test(a: i32): i32 {
                 a = 0;
 
                 while (a < 10) {
@@ -337,6 +341,7 @@ public class ReplaceWhileLoopTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
@@ -468,6 +473,7 @@ public class ReplaceWhileLoopTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
@@ -486,7 +492,7 @@ public class ReplaceWhileLoopTests
     {
         var tree = Parse(
             """
-            function test(a: i32): i32 {
+            public test(a: i32): i32 {
                 a = 0;
 
                 while (a < 10) {
@@ -504,6 +510,7 @@ public class ReplaceWhileLoopTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
@@ -635,6 +642,7 @@ public class ReplaceWhileLoopTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
                     new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)

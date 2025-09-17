@@ -23,7 +23,7 @@ public class CheckStaticAndInstanceMembersAccessTests
                 public s(): void { }
             }
 
-            function func(): void {
+            public func(): void {
                 Test.s();
             }
             """);
@@ -45,7 +45,7 @@ public class CheckStaticAndInstanceMembersAccessTests
                 public static s(): void { }
             }
 
-            function func(a: Test): void {
+            public func(a: Test): void {
                 a.s();
             }
             """);
@@ -67,7 +67,7 @@ public class CheckStaticAndInstanceMembersAccessTests
                 s(): void;
             }
 
-            function func(): void {
+            public func(): void {
                 Test.s();
             }
             """);

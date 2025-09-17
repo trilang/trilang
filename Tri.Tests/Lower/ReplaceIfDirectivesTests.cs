@@ -168,7 +168,7 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
-            function test(callback: () => void): i32 {
+            public test(callback: () => void): i32 {
                 callback();
 
             #if D1
@@ -191,6 +191,7 @@ public class ReplaceIfDirectivesTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(
@@ -230,6 +231,7 @@ public class ReplaceIfDirectivesTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
                     new FunctionTypeMetadata(
@@ -248,7 +250,7 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
-            function test(callback: () => void): i32 {
+            public test(callback: () => void): i32 {
                 callback();
 
             #if D1
@@ -270,6 +272,7 @@ public class ReplaceIfDirectivesTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(
@@ -309,6 +312,7 @@ public class ReplaceIfDirectivesTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
                     new FunctionTypeMetadata(
@@ -327,7 +331,7 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
-            function test(callback: () => void): i32 {
+            public test(callback: () => void): i32 {
                 callback();
 
             #if D1
@@ -349,6 +353,7 @@ public class ReplaceIfDirectivesTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(
@@ -388,6 +393,7 @@ public class ReplaceIfDirectivesTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
                     new FunctionTypeMetadata(

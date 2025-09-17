@@ -96,7 +96,6 @@ public class Lexer
 
                 tokens.Add(id switch
                 {
-                    "function" => Token.Create(sourceSpan, TokenKind.Function),
                     "var" => Token.Create(sourceSpan, TokenKind.Var),
                     "if" => Token.Create(sourceSpan, TokenKind.If),
                     "else" => Token.Create(sourceSpan, TokenKind.Else),
@@ -110,6 +109,7 @@ public class Lexer
                     "break" => Token.Create(sourceSpan, TokenKind.Break),
                     "continue" => Token.Create(sourceSpan, TokenKind.Continue),
                     "public" => Token.Create(sourceSpan, TokenKind.Public),
+                    "internal" => Token.Create(sourceSpan, TokenKind.Internal),
                     "private" => Token.Create(sourceSpan, TokenKind.Private),
                     "type" => Token.Create(sourceSpan, TokenKind.Type),
                     "constructor" => Token.Create(sourceSpan, TokenKind.Constructor),

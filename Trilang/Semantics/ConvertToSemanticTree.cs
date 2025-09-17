@@ -88,7 +88,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var returnType = (IInlineType)node.ReturnType.Transform(this);
         var body = (BlockStatement)node.Body.Transform(this);
 
-        return new FunctionDeclaration(node.SourceSpan, node.Name, parameters, returnType, body);
+        return new FunctionDeclaration(node.SourceSpan, (AccessModifier)node.AccessModifier, node.Name, parameters, returnType, body);
     }
 
     public ISemanticNode TransformFunctionType(Parsing.Ast.FunctionTypeNode node)

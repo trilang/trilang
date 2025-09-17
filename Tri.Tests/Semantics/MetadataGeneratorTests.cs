@@ -250,7 +250,7 @@ public class MetadataGeneratorTests
     {
         var tree = Parse(
             """
-            function test(arr: i32[]): void {
+            public test(arr: i32[]): void {
                 return;
             }
             """);
@@ -268,7 +268,7 @@ public class MetadataGeneratorTests
     {
         var tree = Parse(
             """
-            function test(arr: xxx): void {
+            public test(arr: xxx): void {
                 return;
             }
             """);
@@ -286,7 +286,7 @@ public class MetadataGeneratorTests
     {
         var tree = Parse(
             """
-            function test(a: i32, b: i32): i32 {
+            public test(a: i32, b: i32): i32 {
                 return 1;
             }
             """);
@@ -304,7 +304,7 @@ public class MetadataGeneratorTests
     {
         var tree = Parse(
             """
-            function test(a: xxx): void {
+            public test(a: xxx): void {
                 return;
             }
             """);
@@ -322,7 +322,7 @@ public class MetadataGeneratorTests
     {
         var tree = Parse(
             """
-            function test(): xxx {
+            public test(): xxx {
                 return;
             }
             """);
@@ -779,7 +779,7 @@ public class MetadataGeneratorTests
                 prop: T[];
             }
 
-            function test(a: List<i32>): void {
+            public test(a: List<i32>): void {
                 return;
             }
             """);
@@ -802,7 +802,7 @@ public class MetadataGeneratorTests
                 prop: (T, i32);
             }
 
-            function test(a: List<i32>): void {
+            public test(a: List<i32>): void {
                 return;
             }
             """);
@@ -827,7 +827,7 @@ public class MetadataGeneratorTests
                 prop: T | i32;
             }
 
-            function test(a: List<i32>): void {
+            public test(a: List<i32>): void {
                 return;
             }
             """);
@@ -851,7 +851,7 @@ public class MetadataGeneratorTests
                 prop: () => T;
             }
 
-            function test(a: List<i32>): void {
+            public test(a: List<i32>): void {
                 return;
             }
             """);
@@ -876,7 +876,7 @@ public class MetadataGeneratorTests
                 prop: { x: T; };
             }
 
-            function test(a: List<i32>): void {
+            public test(a: List<i32>): void {
                 return;
             }
             """);
@@ -904,7 +904,7 @@ public class MetadataGeneratorTests
     {
         var tree = Parse(
             """
-            function test(a: ((i32) => void) => void): void {
+            public test(a: ((i32) => void) => void): void {
                 return;
             }
             """);
@@ -947,7 +947,7 @@ public class MetadataGeneratorTests
             """
             public type Test<T> = i32 | T;
 
-            function func(x: Test<i32>): void {
+            public func(x: Test<i32>): void {
                 return;
             }
             """);
@@ -970,7 +970,7 @@ public class MetadataGeneratorTests
             """
             public type Test<T> = () => T;
 
-            function func(x: Test<i32>): void {
+            public func(x: Test<i32>): void {
                 return;
             }
             """);
@@ -993,7 +993,7 @@ public class MetadataGeneratorTests
             """
             public type Test<T> = { x: T; }
 
-            function func(x: Test<i32>): void {
+            public func(x: Test<i32>): void {
                 return;
             }
             """);
@@ -1022,7 +1022,7 @@ public class MetadataGeneratorTests
             """
             public type Test<T> = (i32, T);
 
-            function func(x: Test<i32>): void {
+            public func(x: Test<i32>): void {
                 return;
             }
             """);
@@ -1045,7 +1045,7 @@ public class MetadataGeneratorTests
             """
             public type Test<T> = T[];
 
-            function func(x: Test<i32>): void {
+            public func(x: Test<i32>): void {
                 return;
             }
             """);
@@ -1069,7 +1069,7 @@ public class MetadataGeneratorTests
             public type List<T> {}
             public type Test<T> = List<T>;
 
-            function func(x: Test<i32>): void {
+            public func(x: Test<i32>): void {
                 return;
             }
             """);
@@ -1104,7 +1104,7 @@ public class MetadataGeneratorTests
             public type Alias1<T1> = T1 | i32;
             public type Alias2<T1> = Alias1<T1>;
 
-            function test(x: Alias2<i32>): void {
+            public test(x: Alias2<i32>): void {
                 return;
             }
             """);

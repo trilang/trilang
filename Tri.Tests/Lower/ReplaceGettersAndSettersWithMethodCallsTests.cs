@@ -29,7 +29,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 x: i32;
             }
 
-            function test(p: Point): i32 {
+            public test(p: Point): i32 {
                 return p.x;
             }
             """);
@@ -55,6 +55,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.I32));
@@ -86,6 +87,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(
@@ -142,7 +144,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point: Point;
             }
 
-            function test(t: Test): i32 {
+            public test(t: Test): i32 {
                 return t.point.x;
             }
             """);
@@ -189,6 +191,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var tParameter = new ParameterMetadata("t", testType);
         var testFunction = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [tParameter],
             new FunctionTypeMetadata([testType], TypeMetadata.I32)
@@ -259,6 +262,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(
@@ -323,7 +327,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 x: i32 { public get; public set; }
             }
 
-            function test(p: Point): void {
+            public test(p: Point): void {
                 p.x = 1;
             }
             """);
@@ -354,6 +358,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.Void));
@@ -391,6 +396,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(
@@ -448,7 +454,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 x: i32 { public get; public set; }
             }
 
-            function test(p: Point): i32 {
+            public test(p: Point): i32 {
                 return p.x = 1;
             }
             """);
@@ -481,6 +487,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.I32));
@@ -526,6 +533,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(
@@ -609,7 +617,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 x: i32 { public get; public set; }
             }
 
-            function test(p: Point): void {
+            public test(p: Point): void {
                 p.x += 1;
             }
             """);
@@ -640,6 +648,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.Void));
@@ -685,6 +694,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(
@@ -766,7 +776,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 x: i32 { public get; public set; }
             }
 
-            function test(p: Point): i32 {
+            public test(p: Point): i32 {
                 return p.x += 1;
             }
             """);
@@ -799,6 +809,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var pParameter = new ParameterMetadata("p", point);
         var testFunction = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test",
             [pParameter],
             new FunctionTypeMetadata([point], TypeMetadata.I32));
@@ -844,6 +855,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             },
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(

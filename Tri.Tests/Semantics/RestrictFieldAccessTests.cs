@@ -19,7 +19,7 @@ public class RestrictFieldAccessTests
     {
         var tree = Parse(
             """
-            function test(callback: () => void): {} | null {
+            public test(callback: () => void): {} | null {
                 return callback.context;
             }
             """);

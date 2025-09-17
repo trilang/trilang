@@ -20,7 +20,7 @@ public class SymbolFinderTests
     [Test]
     public void FunctionInRootScopeTest()
     {
-        var tree = Parse("function main(): void { }");
+        var tree = Parse("public main(): void { }");
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, map, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -36,8 +36,8 @@ public class SymbolFinderTests
     {
         var tree = Parse(
             """
-            function main(): void { }
-            function add(): void { }
+            public main(): void { }
+            public add(): void { }
             """);
 
         var semantic = new SemanticAnalysis();
@@ -56,8 +56,8 @@ public class SymbolFinderTests
     {
         var tree = Parse(
             """
-            function main(): void { }
-            function main(): void { }
+            public main(): void { }
+            public main(): void { }
             """);
 
         var semantic = new SemanticAnalysis();
@@ -71,7 +71,7 @@ public class SymbolFinderTests
     [Test]
     public void FunctionWithParametersInRootScopeTest()
     {
-        var tree = Parse("function add(a: i32, b: i32): void { }");
+        var tree = Parse("public add(a: i32, b: i32): void { }");
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, map, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -93,7 +93,7 @@ public class SymbolFinderTests
     [Test]
     public void FunctionWithSameParametersInRootScopeTest()
     {
-        var tree = Parse("function add(a: i32, a: i32): void { }");
+        var tree = Parse("public add(a: i32, a: i32): void { }");
 
         var semantic = new SemanticAnalysis();
 
@@ -108,7 +108,7 @@ public class SymbolFinderTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 var a: i32 = 1;
                 var b: i32 = 2;
             }
@@ -137,7 +137,7 @@ public class SymbolFinderTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 var a: i32 = 1;
                 var a: i32 = 2;
             }
@@ -156,7 +156,7 @@ public class SymbolFinderTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 if (true) {
                     var a: i32 = 1;
                 }
@@ -184,7 +184,7 @@ public class SymbolFinderTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 if (true) {
                     var a: i32 = 1;
                 } else {
@@ -220,7 +220,7 @@ public class SymbolFinderTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 var a: i32 = 1;
                 if (true) {
                     var a: i32 = 1;
@@ -260,7 +260,7 @@ public class SymbolFinderTests
     [Test]
     public void ArrayTypeTest()
     {
-        var tree = Parse("function main(): i32[] { return new i32[0]; }");
+        var tree = Parse("public main(): i32[] { return new i32[0]; }");
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, map, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);

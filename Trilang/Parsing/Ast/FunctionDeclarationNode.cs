@@ -6,11 +6,13 @@ public class FunctionDeclarationNode : IDeclarationNode
 {
     public FunctionDeclarationNode(
         SourceSpan sourceSpan,
+        AccessModifier accessModifier,
         string name,
         IReadOnlyList<ParameterNode> parameters,
         IInlineTypeNode returnType,
         BlockStatementNode body)
     {
+        AccessModifier = accessModifier;
         SourceSpan = sourceSpan;
         Name = name;
         Parameters = parameters;
@@ -20,11 +22,12 @@ public class FunctionDeclarationNode : IDeclarationNode
 
     public static FunctionDeclarationNode Create(
         SourceSpan sourceSpan,
+        AccessModifier accessModifier,
         string name,
         IReadOnlyList<ParameterNode> parameters,
         IInlineTypeNode returnType,
         BlockStatementNode body)
-        => new FunctionDeclarationNode(sourceSpan, name, parameters, returnType, body);
+        => new FunctionDeclarationNode(sourceSpan, accessModifier, name, parameters, returnType, body);
 
     public override string ToString()
     {
@@ -41,6 +44,8 @@ public class FunctionDeclarationNode : IDeclarationNode
         => transformer.TransformFunction(this);
 
     public SourceSpan SourceSpan { get; }
+
+    public AccessModifier AccessModifier { get; }
 
     public string Name { get; }
 

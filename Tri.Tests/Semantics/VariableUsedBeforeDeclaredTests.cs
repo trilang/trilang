@@ -19,7 +19,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 var a: i32 = 1;
                 a;
             }
@@ -37,7 +37,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = Parse(
             """
-            function main(a: i32): void {
+            public main(a: i32): void {
                 a;
             }
             """);
@@ -54,7 +54,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 a;
                 var a: i32 = 1;
             }
@@ -73,7 +73,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 {
                     a;
                 }
@@ -94,7 +94,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 {
                     var a: i32 = 1;
                 }
@@ -117,11 +117,11 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = Parse(
             """
-            function test(): void {
+            public test(): void {
                 var a: i32 = 1;
             }
 
-            function main(): void {
+            public main(): void {
                 a;
             }
             """);
@@ -139,7 +139,7 @@ public class VariableUsedBeforeDeclaredTests
     {
         var tree = Parse(
             """
-            function test(): i32 {
+            public test(): i32 {
                 var a: i32 = 1;
                 {
                     return a;

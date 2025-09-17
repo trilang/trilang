@@ -23,7 +23,7 @@ public class CheckAccessModifiersTests
                 private constructor() { }
             }
 
-            function main(): void {
+            public main(): void {
                 var x: Test = new Test();
             }
             """);
@@ -66,7 +66,7 @@ public class CheckAccessModifiersTests
                 x: i32 { private get; private set; }
             }
 
-            function test(): i32 {
+            public test(): i32 {
                 var p: Point = new Point();
 
                 return p.x;
@@ -90,7 +90,7 @@ public class CheckAccessModifiersTests
                 x: i32 { private get; private set; }
             }
 
-            function test(): void {
+            public test(): void {
                 var p: Point = new Point();
 
                 p.x = 1;
@@ -156,7 +156,7 @@ public class CheckAccessModifiersTests
                 x: i32 { public set; }
             }
 
-            function test(p: Point): i32 {
+            public test(p: Point): i32 {
                 return p.x;
             }
             """);
@@ -178,7 +178,7 @@ public class CheckAccessModifiersTests
                 x: i32 { public get; }
             }
 
-            function test(p: Point): void {
+            public test(p: Point): void {
                 p.x = 1;
             }
             """);
@@ -189,5 +189,18 @@ public class CheckAccessModifiersTests
             () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'x' property does not have a setter."));
+    }
+
+    [Test]
+    public void InternalFunctionTest()
+    {
+        var tree = Parse("internal test(): void {}");
+
+        var semantic = new SemanticAnalysis();
+
+        Assert.That(
+            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("The 'test' function can't be internal."));
     }
 }

@@ -6,12 +6,14 @@ public class FunctionDeclaration : IDeclaration
 {
     public FunctionDeclaration(
         SourceSpan? sourceSpan,
+        AccessModifier accessModifier,
         string name,
         IReadOnlyList<Parameter> parameters,
         IInlineType returnType,
         BlockStatement body)
     {
         SourceSpan = sourceSpan;
+        AccessModifier = accessModifier;
         Name = name;
         Parameters = parameters;
         ReturnType = returnType;
@@ -36,6 +38,8 @@ public class FunctionDeclaration : IDeclaration
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public AccessModifier AccessModifier { get; }
 
     public string Name { get; }
 

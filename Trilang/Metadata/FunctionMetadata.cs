@@ -3,10 +3,12 @@ namespace Trilang.Metadata;
 public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 {
     public FunctionMetadata(
+        AccessModifierMetadata accessModifier,
         string name,
         IReadOnlyList<ParameterMetadata> parameters,
         FunctionTypeMetadata type)
     {
+        AccessModifier = accessModifier;
         Name = name;
         Parameters = parameters;
         Type = type;
@@ -26,7 +28,8 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
-        return Name == other.Name &&
+        return AccessModifier == other.AccessModifier &&
+               Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
                Type.Equals(other.Type);
     }
@@ -54,6 +57,8 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
     public ITypeMetadata? DeclaringType => null;
 
     public bool IsStatic => true;
+
+    public AccessModifierMetadata AccessModifier { get; }
 
     public string Name { get; }
 

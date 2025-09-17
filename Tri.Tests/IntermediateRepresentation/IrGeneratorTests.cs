@@ -38,7 +38,7 @@ public class IrGeneratorTests
     {
         var code =
             $$"""
-              function test(): i32 {
+              public test(): i32 {
                   return 1 {{op}} 2;
               }
               """;
@@ -76,7 +76,7 @@ public class IrGeneratorTests
     {
         var code =
             $$"""
-              function test(): bool {
+              public test(): bool {
                   return 1 {{op}} 2;
               }
               """;
@@ -108,7 +108,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(x: i32): void {
+            public test(x: i32): void {
                 x = 1;
             }
             """;
@@ -142,7 +142,7 @@ public class IrGeneratorTests
     {
         var code =
             $$"""
-              function test(x: i32): void {
+              public test(x: i32): void {
                   x {{op}} 1;
               }
               """;
@@ -174,7 +174,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(x: i32): i32 {
+            public test(x: i32): i32 {
                 x += 1;
                 x = 10;
 
@@ -212,7 +212,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: i32, b: i32): i32 {
+            public test(a: i32, b: i32): i32 {
                 return a + b;
             }
             """;
@@ -244,7 +244,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(): i32 {
+            public test(): i32 {
                 var a: i32 = 1;
                 var b: i32 = 2;
 
@@ -281,7 +281,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(): null {
+            public test(): null {
                 return null;
             }
             """;
@@ -306,7 +306,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: i32): i32 {
+            public test(a: i32): i32 {
                 return -a;
             }
             """;
@@ -336,7 +336,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: bool): bool {
+            public test(a: bool): bool {
                 return !a;
             }
             """;
@@ -366,7 +366,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: i32): i32 {
+            public test(a: i32): i32 {
                 return ~a;
             }
             """;
@@ -396,7 +396,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: i32[]): i32 {
+            public test(a: i32[]): i32 {
                 return a[0];
             }
             """;
@@ -448,7 +448,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: i32[], index: i32): i32 {
+            public test(a: i32[], index: i32): i32 {
                 return a[index + 2];
             }
             """;
@@ -507,7 +507,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: i32[]): void {
+            public test(a: i32[]): void {
                 a[0] = 10;
             }
             """;
@@ -559,7 +559,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(): i32[] {
+            public test(): i32[] {
                 var a: i32[] = new i32[10];
 
                 return a;
@@ -614,7 +614,7 @@ public class IrGeneratorTests
                 public constructor(x: i32, y: i32) { }
             }
 
-            function test(): Point {
+            public test(): Point {
                 return new Point(1, 2);
             }
             """;
@@ -666,7 +666,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function max(a: i32, b: i32): i32 {
+            public max(a: i32, b: i32): i32 {
                 if (a >= b) {
                     return a;
                 } else {
@@ -726,7 +726,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function max(a: i32): i32 {
+            public max(a: i32): i32 {
                 var b: i32 = 0;
                 if (a > 0) {
                     b = 10;
@@ -789,7 +789,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function max(a: i32): i32 {
+            public max(a: i32): i32 {
                 if (a > 0) {
                     if (a > 10) {
                         return 1;
@@ -880,7 +880,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: i32): i32 {
+            public test(a: i32): i32 {
                 var b: i32 = 0;
                 if (a > 0) {
                     b = 1;
@@ -956,7 +956,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(): i32 {
+            public test(): i32 {
                 var i: i32 = 0;
                 while (i < 10) {
                     i += 1;
@@ -1205,7 +1205,7 @@ public class IrGeneratorTests
                 x: i32;
             }
 
-            function test(): i32 {
+            public test(): i32 {
                 var p: Point = new Point(1);
 
                 return p.x;
@@ -1309,7 +1309,7 @@ public class IrGeneratorTests
                 x: i32;
             }
 
-            function test(): i32 {
+            public test(): i32 {
                 var p: Point = new Point(1);
 
                 return -p.x;
@@ -1408,7 +1408,7 @@ public class IrGeneratorTests
                 y: i32;
             }
 
-            function test(): i32 {
+            public test(): i32 {
                 var p: Point = new Point(1, 2);
 
                 return p.x + p.y;
@@ -1561,7 +1561,7 @@ public class IrGeneratorTests
                 }
             }
 
-            function test(): i32 {
+            public test(): i32 {
                 var test1: Test1 = new Test1(1);
                 var test2: Test2 = new Test2(test1);
 
@@ -1761,11 +1761,11 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function main(): void {
+            public main(): void {
                 test1();
             }
 
-            function test1(): void { }
+            public test1(): void { }
             """;
         var (tree, typeProvider) = Parse(code);
 
@@ -1781,7 +1781,7 @@ public class IrGeneratorTests
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
-                    new FunctionMetadata("test1", [], functionType)
+                    new FunctionMetadata(AccessModifierMetadata.Public, "test1", [], functionType)
                 ),
                 new Load(new Register(1, functionType), new Register(0, functionPointer)),
                 new Call(
@@ -1806,7 +1806,7 @@ public class IrGeneratorTests
                 public static test(): void { }
             }
 
-            function main(): void {
+            public main(): void {
                 Test.test();
             }
             """;
@@ -1848,9 +1848,9 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(): void {}
+            public test(): void {}
 
-            function main(): void {
+            public main(): void {
                 var f: () => void = test;
                 f();
             }
@@ -1870,7 +1870,7 @@ public class IrGeneratorTests
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
-                    new FunctionMetadata("test", [], functionType)
+                    new FunctionMetadata(AccessModifierMetadata.Public, "test", [], functionType)
                 ),
                 new Load(new Register(1, functionType), new Register(0, functionPointer)),
                 new Move(new Register(2, functionType), new Register(1, functionType)),
@@ -1891,7 +1891,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(callback: () => void): void {
+            public test(callback: () => void): void {
                 callback();
             }
             """;
@@ -1927,7 +1927,7 @@ public class IrGeneratorTests
                 method(): void;
             }
 
-            function test(p: Interface): void {
+            public test(p: Interface): void {
                 p.method();
             }
             """;
@@ -1969,7 +1969,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(obj: {}): bool {
+            public test(obj: {}): bool {
                 return obj is i8;
             }
             """;
@@ -2002,7 +2002,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(obj: {}): i8 {
+            public test(obj: {}): i8 {
                 return (i8)obj;
             }
             """;
@@ -2037,7 +2037,7 @@ public class IrGeneratorTests
             """
             public type Test { }
 
-            function test(obj: {}): Test {
+            public test(obj: {}): Test {
                 return (Test)obj;
             }
             """;
@@ -2073,7 +2073,7 @@ public class IrGeneratorTests
     {
         const string code =
             """
-            function test(a: bool, b: bool): i32 {
+            public test(a: bool, b: bool): i32 {
                 if (a && b) {
                     return 1;
                 }

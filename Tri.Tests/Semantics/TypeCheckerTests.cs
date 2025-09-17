@@ -22,7 +22,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
             }
             """);
 
@@ -30,6 +30,7 @@ public class TypeCheckerTests
         var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expected = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "main",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void));
@@ -42,12 +43,13 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionParameterTypesTest()
     {
-        var tree = Parse("function main(a: i32, b: bool): void { }");
+        var tree = Parse("public main(a: i32, b: bool): void { }");
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expected = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "main",
             [
                 new ParameterMetadata("a", TypeMetadata.I32),
@@ -71,7 +73,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 var a: i32 = 1;
             }
             """);
@@ -89,7 +91,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 var a: xxx = 1;
             }
             """);
@@ -200,7 +202,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function add(a: i32, b: i32): i32 {
+            public add(a: i32, b: i32): i32 {
                 return 0;
             }
             """);
@@ -209,6 +211,7 @@ public class TypeCheckerTests
         var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expected = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "add",
             [
                 new ParameterMetadata("a", TypeMetadata.I32),
@@ -226,17 +229,18 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test1(): void {
+            public test1(): void {
                 test2();
             }
 
-            function test2(): void { }
+            public test2(): void { }
             """);
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
 
         var expected = new FunctionMetadata(
+            AccessModifierMetadata.Public,
             "test2",
             [],
             new FunctionTypeMetadata([], TypeMetadata.Void));
@@ -255,7 +259,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): i32 {
+            public main(): i32 {
                 return 1;
             }
             """);
@@ -276,7 +280,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): f64 {
+            public main(): f64 {
                 return 3.14;
             }
             """);
@@ -297,7 +301,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): bool {
+            public main(): bool {
                 return true;
             }
             """);
@@ -318,7 +322,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): char {
+            public main(): char {
                 return 'x';
             }
             """);
@@ -339,7 +343,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): string {
+            public main(): string {
                 return "xxx";
             }
             """);
@@ -360,7 +364,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): bool {
+            public main(): bool {
                 return 1;
             }
             """);
@@ -378,7 +382,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): i32 {
+            public main(): i32 {
                 return -1;
             }
             """);
@@ -399,7 +403,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): i32 {
+            public main(): i32 {
                 return -1;
             }
             """);
@@ -420,7 +424,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): bool {
+            public main(): bool {
                 return !true;
             }
             """);
@@ -441,7 +445,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): i32 {
+            public main(): i32 {
                 return 1 + 2;
             }
             """);
@@ -461,7 +465,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): i32 {
+            public main(): i32 {
                 return !1;
             }
             """);
@@ -479,7 +483,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(a: i32): i32 {
+            public main(a: i32): i32 {
                 return a;
             }
             """);
@@ -500,7 +504,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 var a: i32 = true;
             }
             """);
@@ -518,7 +522,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 if (1) {
                 }
             }
@@ -537,10 +541,10 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function add(a: i32): i32 {
+            public add(a: i32): i32 {
             }
 
-            function main(): i32 {
+            public main(): i32 {
                 return add(true);
             }
             """);
@@ -558,7 +562,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 while (1) {
                 }
             }
@@ -657,11 +661,11 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function add(a: i32, b: i32): i32 {
+            public add(a: i32, b: i32): i32 {
                 return 1;
             }
 
-            function main(): void {
+            public main(): void {
                 var x: (i32, i32) => i32 = add;
             }
             """);
@@ -680,7 +684,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test(a: i32): void {
+            public test(a: i32): void {
                 a();
             }
             """);
@@ -767,7 +771,7 @@ public class TypeCheckerTests
                 x: i32;
             }
 
-            function test(a: Point): i32 {
+            public test(a: Point): i32 {
                 return a.x;
             }
             """);
@@ -794,7 +798,7 @@ public class TypeCheckerTests
                 x: i32;
             }
 
-            function test(a: Point): i32 {
+            public test(a: Point): i32 {
                 return a.c;
             }
             """);
@@ -818,7 +822,7 @@ public class TypeCheckerTests
                 f: F;
             }
 
-            function test(a: Test): F {
+            public test(a: Test): F {
                 return a.f;
             }
             """);
@@ -847,7 +851,7 @@ public class TypeCheckerTests
                 }
             }
 
-            function test(): void {
+            public test(): void {
                 var a: Point = new Point(1, 2);
             }
             """);
@@ -876,7 +880,7 @@ public class TypeCheckerTests
                 y: i32;
             }
 
-            function test(): void {
+            public test(): void {
                 var a: Point = new Point(1, 2);
             }
             """);
@@ -899,7 +903,7 @@ public class TypeCheckerTests
                 }
             }
 
-            function test(): void {
+            public test(): void {
                 var a: Point = new Point(2);
             }
             """);
@@ -944,7 +948,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test(a: i32[]): i32 {
+            public test(a: i32[]): i32 {
                 return a[1];
             }
             """);
@@ -962,7 +966,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test(a: i32): void {
+            public test(a: i32): void {
                 return a[1];
             }
             """);
@@ -980,7 +984,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test(a: i32[]): void {
+            public test(a: i32[]): void {
                 return a["xxx"];
             }
             """);
@@ -998,7 +1002,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test(): (i32, i32) {
+            public test(): (i32, i32) {
                 return (1, 2);
             }
             """);
@@ -1017,7 +1021,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function main(): i32[] {
+            public main(): i32[] {
                 return new i32[10];
             }
             """);
@@ -1102,7 +1106,7 @@ public class TypeCheckerTests
                 a: T;
             }
 
-            function main(): void {
+            public main(): void {
                 var x: Test<i32> = new Test<i32>();
             }
             """);
@@ -1127,7 +1131,7 @@ public class TypeCheckerTests
                 a: T;
             }
 
-            function main(): i32 {
+            public main(): i32 {
                 var x: Test<i32> = new Test<i32>();
                 return x.a;
             }
@@ -1159,7 +1163,7 @@ public class TypeCheckerTests
                 c: i32;
             }
 
-            function test(a: Test1): i32 {
+            public test(a: Test1): i32 {
                 return a.b().c;
             }
             """);
@@ -1181,7 +1185,7 @@ public class TypeCheckerTests
                 }
             }
 
-            function main(): void {
+            public main(): void {
                 Test.test();
             }
             """);
@@ -1209,7 +1213,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test(a: (i32, string)): string {
+            public test(a: (i32, string)): string {
                 return a.1;
             }
             """);
@@ -1227,7 +1231,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test(a: (i32, string)): string {
+            public test(a: (i32, string)): string {
                 return a.2;
             }
             """);
@@ -1246,7 +1250,7 @@ public class TypeCheckerTests
     {
         var tree = Parse(
             """
-            function test(a: i32): i8 {
+            public test(a: i32): i8 {
                 return (i8)a;
             }
             """);

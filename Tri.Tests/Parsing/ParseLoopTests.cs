@@ -12,7 +12,7 @@ public class ParseLoopTests
         var parser = new Parser();
         var tree = parser.Parse(
             """
-            function test(x: i32): void {
+            public test(x: i32): void {
                 while (x > 0) {
                 }
             }
@@ -20,40 +20,41 @@ public class ParseLoopTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(57, 4, 2)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 4, 2)),
+                AccessModifier.Public,
                 "test",
                 [
                     new ParameterNode(
-                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(20, 1, 21)),
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
                         new TypeNode(
-                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)), "void"),
+                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)), "void"),
                 new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(57, 4, 2)),
+                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(55, 4, 2)),
                     [
                         new WhileNode(
-                            new SourceSpan(new SourcePosition(34, 2, 5), new SourcePosition(55, 3, 6)),
+                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(53, 3, 6)),
                             new BinaryExpressionNode(
                                 new SourceSpan(
-                                    new SourcePosition(41, 2, 12), new SourcePosition(46, 2, 17)
+                                    new SourcePosition(39, 2, 12), new SourcePosition(44, 2, 17)
                                 ),
                                 BinaryExpressionKind.GreaterThan,
                                 new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(42, 2, 13)),
+                                    new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
                                     "x"
                                 ),
                                 LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(45, 2, 16), new SourcePosition(46, 2, 17)),
+                                    new SourceSpan(new SourcePosition(43, 2, 16), new SourcePosition(44, 2, 17)),
                                     0
                                 )
                             ),
                             new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(48, 2, 19), new SourcePosition(55, 3, 6))
+                                new SourceSpan(new SourcePosition(46, 2, 19), new SourcePosition(53, 3, 6))
                             )
                         )
                     ]
@@ -69,7 +70,7 @@ public class ParseLoopTests
     {
         var parser = new Parser();
         var source = """
-                     function test(x: i32): void {
+                     public test(x: i32): void {
                          while x > 0) {
                          }
                      }
@@ -83,7 +84,7 @@ public class ParseLoopTests
     {
         var parser = new Parser();
         var source = """
-                     function test(x: i32): void {
+                     public test(x: i32): void {
                          while (;) {
                          }
                      }
@@ -97,7 +98,7 @@ public class ParseLoopTests
     {
         var parser = new Parser();
         var source = """
-                     function test(x: i32): void {
+                     public test(x: i32): void {
                          while (x > 0 {
                          }
                      }
@@ -111,7 +112,7 @@ public class ParseLoopTests
     {
         var parser = new Parser();
         var source = """
-                     function test(x: i32): void {
+                     public test(x: i32): void {
                          while (x > 0)
                             ;
                      }
@@ -126,7 +127,7 @@ public class ParseLoopTests
         var parser = new Parser();
         var tree = parser.Parse(
             """
-            function test(x: i32): void {
+            public test(x: i32): void {
                 while (x > 0) {
                     break;
                 }
@@ -135,44 +136,45 @@ public class ParseLoopTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(72, 5, 2)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(70, 5, 2)),
+                AccessModifier.Public,
                 "test",
                 [
                     new ParameterNode(
-                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(20, 1, 21)),
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
                         new TypeNode(
-                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
                 new TypeNode(
-                    new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)),
+                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
                     "void"
                 ),
                 new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(72, 5, 2)),
+                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(70, 5, 2)),
                     [
                         new WhileNode(
-                            new SourceSpan(new SourcePosition(34, 2, 5), new SourcePosition(70, 4, 6)),
+                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(68, 4, 6)),
                             new BinaryExpressionNode(
-                                new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(46, 2, 17)),
+                                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(44, 2, 17)),
                                 BinaryExpressionKind.GreaterThan,
                                 new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(42, 2, 13)),
+                                    new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
                                     "x"
                                 ),
                                 LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(45, 2, 16), new SourcePosition(46, 2, 17)),
+                                    new SourceSpan(new SourcePosition(43, 2, 16), new SourcePosition(44, 2, 17)),
                                     0
                                 )
                             ),
                             new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(48, 2, 19), new SourcePosition(70, 4, 6)),
+                                new SourceSpan(new SourcePosition(46, 2, 19), new SourcePosition(68, 4, 6)),
                                 [
                                     new BreakNode(
-                                        new SourceSpan(new SourcePosition(58, 3, 9), new SourcePosition(64, 3, 15))
+                                        new SourceSpan(new SourcePosition(56, 3, 9), new SourcePosition(62, 3, 15))
                                     )
                                 ]
                             )
@@ -190,7 +192,7 @@ public class ParseLoopTests
         var parser = new Parser();
         var tree = parser.Parse(
             """
-            function test(x: i32): void {
+            public test(x: i32): void {
                 while (x > 0) {
                     continue;
                 }
@@ -199,44 +201,45 @@ public class ParseLoopTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(75, 5, 2)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 5, 2)),
+                AccessModifier.Public,
                 "test",
                 [
                     new ParameterNode(
-                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(20, 1, 21)),
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
                         new TypeNode(
-                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
                 new TypeNode(
-                    new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)),
+                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
                     "void"
                 ),
                 new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(75, 5, 2)),
+                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(73, 5, 2)),
                     [
                         new WhileNode(
-                            new SourceSpan(new SourcePosition(34, 2, 5), new SourcePosition(73, 4, 6)),
+                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(71, 4, 6)),
                             new BinaryExpressionNode(
-                                new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(46, 2, 17)),
+                                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(44, 2, 17)),
                                 BinaryExpressionKind.GreaterThan,
                                 new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(42, 2, 13)),
+                                    new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
                                     "x"
                                 ),
                                 LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(45, 2, 16), new SourcePosition(46, 2, 17)),
+                                    new SourceSpan(new SourcePosition(43, 2, 16), new SourcePosition(44, 2, 17)),
                                     0
                                 )
                             ),
                             new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(48, 2, 19), new SourcePosition(73, 4, 6)),
+                                new SourceSpan(new SourcePosition(46, 2, 19), new SourcePosition(71, 4, 6)),
                                 [
                                     new ContinueNode(
-                                        new SourceSpan(new SourcePosition(58, 3, 9), new SourcePosition(67, 3, 18))
+                                        new SourceSpan(new SourcePosition(56, 3, 9), new SourcePosition(65, 3, 18))
                                     )
                                 ]
                             )

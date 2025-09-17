@@ -830,27 +830,26 @@ public class ParseTypeTests
     public void ParseFunctionTypeInParameterTest()
     {
         var parser = new Parser();
-        var tree = parser.Parse(
-            """
-            function test(callback: (i32, i32) => void): void { }
-            """);
+        var tree = parser.Parse("public test(callback: (i32, i32) => void): void { }");
+
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 1, 54)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(51, 1, 52)),
+                AccessModifier.Public,
                 "test",
                 [
                     new ParameterNode(
-                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(34, 1, 35)),
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(32, 1, 33)),
                         "callback",
                         new FunctionTypeNode(
-                            new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(34, 1, 35)),
-                            [new TypeNode(new SourceSpan(new SourcePosition(25, 1, 26), new SourcePosition(28, 1, 29)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(30, 1, 31), new SourcePosition(33, 1, 34)), "i32")],
-                            new TypeNode(new SourceSpan(new SourcePosition(38, 1, 39), new SourcePosition(42, 1, 43)), "void")
+                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(32, 1, 33)),
+                            [new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)), "i32")],
+                            new TypeNode(new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(40, 1, 41)), "void")
                         )
                     )
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(45, 1, 46), new SourcePosition(49, 1, 50)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(50, 1, 51), new SourcePosition(53, 1, 54)), [])
+                new TypeNode(new SourceSpan(new SourcePosition(43, 1, 44), new SourcePosition(47, 1, 48)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(48, 1, 49), new SourcePosition(51, 1, 52)), [])
             )
         ]);
 
@@ -861,18 +860,20 @@ public class ParseTypeTests
     public void ParseFunctionTypeInReturnTypeTest()
     {
         var parser = new Parser();
-        var tree = parser.Parse("function test(): (i32, i32) => void { }");
+        var tree = parser.Parse("public test(): (i32, i32) => void { }");
+
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(39, 1, 40)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(37, 1, 38)),
+                AccessModifier.Public,
                 "test",
                 [],
                 new FunctionTypeNode(
-                    new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(27, 1, 28)),
-                    [new TypeNode(new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(21, 1, 22)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32")],
-                    new TypeNode(new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(35, 1, 36)), "void")
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(25, 1, 26)),
+                    [new TypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32")],
+                    new TypeNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(33, 1, 34)), "void")
                 ),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(39, 1, 40)), [])
+                new BlockStatementNode(new SourceSpan(new SourcePosition(34, 1, 35), new SourcePosition(37, 1, 38)), [])
             )
         ]);
 
@@ -885,26 +886,28 @@ public class ParseTypeTests
         var parser = new Parser();
         var tree = parser.Parse(
             """
-            function main(): void {
+            public main(): void {
                 var x: (i32, i32) => void = 0;
             }
             """);
+
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(60, 3, 2)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(58, 3, 2)),
+                AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(60, 3, 2)), [
+                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(58, 3, 2)), [
                     new VariableDeclarationNode(
-                        new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(58, 2, 35)),
+                        new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(56, 2, 35)),
                         "x",
                         new FunctionTypeNode(
-                            new SourceSpan(new SourcePosition(35, 2, 12), new SourcePosition(45, 2, 22)),
-                            [new TypeNode(new SourceSpan(new SourcePosition(36, 2, 13), new SourcePosition(39, 2, 16)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(41, 2, 18), new SourcePosition(44, 2, 21)), "i32")],
-                            new TypeNode(new SourceSpan(new SourcePosition(49, 2, 26), new SourcePosition(53, 2, 30)), "void")
+                            new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(43, 2, 22)),
+                            [new TypeNode(new SourceSpan(new SourcePosition(34, 2, 13), new SourcePosition(37, 2, 16)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(42, 2, 21)), "i32")],
+                            new TypeNode(new SourceSpan(new SourcePosition(47, 2, 26), new SourcePosition(51, 2, 30)), "void")
                         ),
-                        LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(56, 2, 33), new SourcePosition(57, 2, 34)), 0)
+                        LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(54, 2, 33), new SourcePosition(55, 2, 34)), 0)
                     )
                 ])
             )
@@ -1114,23 +1117,24 @@ public class ParseTypeTests
         var parser = new Parser();
         var tree = parser.Parse(
             """
-            function main(): void {
+            public main(): void {
                 var p: Point = new Point();
             }
             """);
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(57, 3, 2)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 3, 2)),
+                AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(57, 3, 2)), [
+                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(55, 3, 2)), [
                     new VariableDeclarationNode(
-                        new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(55, 2, 32)),
+                        new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(53, 2, 32)),
                         "p",
-                        new TypeNode(new SourceSpan(new SourcePosition(35, 2, 12), new SourcePosition(40, 2, 17)), "Point"),
-                        new NewObjectExpressionNode(new SourceSpan(new SourcePosition(43, 2, 20), new SourcePosition(54, 2, 31)), new TypeNode(new SourceSpan(new SourcePosition(47, 2, 24), new SourcePosition(52, 2, 29)), "Point"), [])
+                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)), "Point"),
+                        new NewObjectExpressionNode(new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(52, 2, 31)), new TypeNode(new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)), "Point"), [])
                     )
                 ])
             )
@@ -1145,28 +1149,29 @@ public class ParseTypeTests
         var parser = new Parser();
         var tree = parser.Parse(
             """
-            function main(): void {
+            public main(): void {
                 var p: Point = new Point(1, 2);
             }
             """);
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(61, 3, 2)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(59, 3, 2)),
+                AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(61, 3, 2)), [
+                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(59, 3, 2)), [
                     new VariableDeclarationNode(
-                        new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(59, 2, 36)),
+                        new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(57, 2, 36)),
                         "p",
-                        new TypeNode(new SourceSpan(new SourcePosition(35, 2, 12), new SourcePosition(40, 2, 17)), "Point"),
+                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)), "Point"),
                         new NewObjectExpressionNode(
-                            new SourceSpan(new SourcePosition(43, 2, 20), new SourcePosition(58, 2, 35)),
-                            new TypeNode(new SourceSpan(new SourcePosition(47, 2, 24), new SourcePosition(52, 2, 29)), "Point"),
+                            new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(56, 2, 35)),
+                            new TypeNode(new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)), "Point"),
                             [
-                                LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(53, 2, 30), new SourcePosition(54, 2, 31)), 1),
-                                LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(56, 2, 33), new SourcePosition(57, 2, 34)), 2)
+                                LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(51, 2, 30), new SourcePosition(52, 2, 31)), 1),
+                                LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(54, 2, 33), new SourcePosition(55, 2, 34)), 2)
                             ]
                         )
                     )
@@ -1177,14 +1182,13 @@ public class ParseTypeTests
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
-
     [Test]
     public void ParseNewOperatorMissingTypeTest()
     {
         var parser = new Parser();
         const string code =
             """
-            function main(): void {
+            public main(): void {
                 var p: Point = new ();
             }
             """;
@@ -1201,7 +1205,7 @@ public class ParseTypeTests
         var parser = new Parser();
         const string code =
             """
-            function main(): void {
+            public main(): void {
                 var p: Point = new Point(1, );
             }
             """;
@@ -1218,7 +1222,7 @@ public class ParseTypeTests
         var parser = new Parser();
         const string code =
             """
-            function main(): void {
+            public main(): void {
                 var p: Point = new Point(;
             }
             """;
@@ -1256,7 +1260,7 @@ public class ParseTypeTests
     {
         const string code =
             """
-            function main(): void {
+            public main(): void {
                 var x: i32 | null = null;
             }
             """;
@@ -1266,21 +1270,23 @@ public class ParseTypeTests
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 3, 2)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
+                AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(55, 3, 2)), [
+                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(53, 3, 2)), [
                     new VariableDeclarationNode(
-                        new SourceSpan(new SourcePosition(28, 2, 5), new SourcePosition(53, 2, 30)),
+                        new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(51, 2, 30)),
                         "x",
                         new DiscriminatedUnionNode([
-                            new TypeNode(new SourceSpan(new SourcePosition(35, 2, 12), new SourcePosition(38, 2, 15)), "i32"),
-                            new TypeNode(new SourceSpan(new SourcePosition(41, 2, 18), new SourcePosition(45, 2, 22)), "null")
+                            new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                            new TypeNode(new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(43, 2, 22)), "null")
                         ]),
-                        new NullExpressionNode(new SourceSpan(new SourcePosition(48, 2, 25), new SourcePosition(52, 2, 29)))
+                        new NullExpressionNode(new SourceSpan(new SourcePosition(46, 2, 25), new SourcePosition(50, 2, 29)))
                     )
-                ]))
+                ])
+            )
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1374,14 +1380,21 @@ public class ParseTypeTests
     public void FunctionWithTupleTest()
     {
         var parser = new Parser();
-        var tree = parser.Parse("function main(): (i32, i32) { }");
+        var tree = parser.Parse("public main(): (i32, i32) { }");
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(29, 1, 30)),
+                AccessModifier.Public,
                 "main",
                 [],
-                new TupleTypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(27, 1, 28)), [new TypeNode(new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(21, 1, 22)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32")]),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)), [])
+                new TupleTypeNode(
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(25, 1, 26)),
+                    [
+                        new TypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), "i32"),
+                        new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32")
+                    ]
+                ),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(29, 1, 30)), [])
             )
         ]);
 
@@ -1476,7 +1489,7 @@ public class ParseTypeTests
                 public static test(): void { }
             }
 
-            function main(): void {
+            public main(): void {
                 Test.test();
             }
             """);
@@ -1503,18 +1516,19 @@ public class ParseTypeTests
                 ]
             ),
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(57, 5, 1), new SourcePosition(99, 7, 2)),
+                new SourceSpan(new SourcePosition(57, 5, 1), new SourcePosition(97, 7, 2)),
+                AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(74, 5, 18), new SourcePosition(78, 5, 22)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(79, 5, 23), new SourcePosition(99, 7, 2)), [
+                new TypeNode(new SourceSpan(new SourcePosition(72, 5, 16), new SourcePosition(76, 5, 20)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(77, 5, 21), new SourcePosition(97, 7, 2)), [
                     new ExpressionStatementNode(
-                        new SourceSpan(new SourcePosition(85, 6, 5), new SourcePosition(97, 6, 17)),
+                        new SourceSpan(new SourcePosition(83, 6, 5), new SourcePosition(95, 6, 17)),
                         new CallExpressionNode(
-                            new SourceSpan(new SourcePosition(85, 6, 5), new SourcePosition(96, 6, 16)),
+                            new SourceSpan(new SourcePosition(83, 6, 5), new SourcePosition(94, 6, 16)),
                             new MemberAccessExpressionNode(
-                                new SourceSpan(new SourcePosition(85, 6, 5), new SourcePosition(94, 6, 14)),
-                                new MemberAccessExpressionNode(new SourceSpan(new SourcePosition(85, 6, 5), new SourcePosition(89, 6, 9)), "Test"),
+                                new SourceSpan(new SourcePosition(83, 6, 5), new SourcePosition(92, 6, 14)),
+                                new MemberAccessExpressionNode(new SourceSpan(new SourcePosition(83, 6, 5), new SourcePosition(87, 6, 9)), "Test"),
                                 "test"
                             ),
                             []

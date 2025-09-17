@@ -57,7 +57,7 @@ public class ThisOutsideOfClassTests
     {
         var tree = Parse(
             """
-            function main(): void {
+            public main(): void {
                 this;
             }
             """);

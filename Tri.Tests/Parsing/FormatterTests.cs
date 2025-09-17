@@ -10,6 +10,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -19,7 +20,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
             }
             """;
 
@@ -32,6 +33,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -41,6 +43,7 @@ public class FormatterTests
                 new BlockStatementNode(default)),
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -50,10 +53,10 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
             }
 
-            function main(): void {
+            public main(): void {
             }
             """;
 
@@ -66,6 +69,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -77,7 +81,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 return;
             }
             """;
@@ -91,6 +95,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -113,7 +118,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x + y;
             }
             """;
@@ -127,6 +132,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -149,7 +155,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x - y;
             }
             """;
@@ -163,6 +169,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -185,7 +192,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x * y;
             }
             """;
@@ -199,6 +206,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -221,7 +229,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x / y;
             }
             """;
@@ -235,6 +243,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -257,7 +266,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x & y;
             }
             """;
@@ -271,6 +280,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -293,7 +303,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x | y;
             }
             """;
@@ -307,6 +317,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -329,7 +340,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x ^ y;
             }
             """;
@@ -343,6 +354,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -365,7 +377,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x && y;
             }
             """;
@@ -379,6 +391,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -401,7 +414,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x || y;
             }
             """;
@@ -415,6 +428,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -437,7 +451,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x == y;
             }
             """;
@@ -451,6 +465,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -473,7 +488,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x != y;
             }
             """;
@@ -487,6 +502,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add", [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
                     new ParameterNode(default, "y", new TypeNode(default, "i32")),
@@ -508,7 +524,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x < y;
             }
             """;
@@ -522,6 +538,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -544,7 +561,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x <= y;
             }
             """;
@@ -558,6 +575,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -580,7 +598,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x > y;
             }
             """;
@@ -594,6 +612,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -616,7 +635,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x >= y;
             }
             """;
@@ -630,6 +649,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -648,7 +668,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 return +x;
             }
             """;
@@ -662,6 +682,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -680,7 +701,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 return -x;
             }
             """;
@@ -694,6 +715,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -712,7 +734,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 return !x;
             }
             """;
@@ -726,6 +748,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -744,7 +767,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 return ~x;
             }
             """;
@@ -758,6 +781,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -791,7 +815,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 if (x < 0) {
                     return -x;
                 }
@@ -808,6 +832,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -843,7 +868,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 if (x < 0) {
                     return -x;
                 } else {
@@ -861,6 +886,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [
                     new ParameterNode(default, "x", new TypeNode(default, "i32")),
@@ -880,6 +906,7 @@ public class FormatterTests
                 ])),
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -900,11 +927,11 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32, y: i32): void {
+            public add(x: i32, y: i32): void {
                 return x + y;
             }
 
-            function main(): void {
+            public main(): void {
                 return add(1, 2);
             }
             """;
@@ -927,6 +954,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -946,7 +974,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         var expected =
             $$"""
-              function add(x: i32): void {
+              public add(x: i32): void {
                   x {{@operator}} 1;
               }
               """;
@@ -960,6 +988,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -980,7 +1009,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 while (x < 0) {
                 }
             }
@@ -995,6 +1024,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -1017,7 +1047,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 while (x < 0) {
                     break;
                 }
@@ -1033,6 +1063,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new TypeNode(default, "i32"))],
                 new TypeNode(default, "void"),
@@ -1055,7 +1086,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32): void {
+            public add(x: i32): void {
                 while (x < 0) {
                     continue;
                 }
@@ -1071,6 +1102,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeNode(default, "i32")))],
                 new TypeNode(default, "void"),
@@ -1085,7 +1117,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32[]): void {
+            public add(x: i32[]): void {
                 return 0;
             }
             """;
@@ -1099,6 +1131,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "add",
                 [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeNode(default, "i32")))],
                 new TypeNode(default, "void"),
@@ -1117,7 +1150,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function add(x: i32[]): void {
+            public add(x: i32[]): void {
                 return x[0];
             }
             """;
@@ -1479,6 +1512,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1494,7 +1528,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 var x: i32 = 0;
             }
             """;
@@ -1508,6 +1542,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1523,7 +1558,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 var x: () => void = 0;
             }
             """;
@@ -1537,6 +1572,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1556,7 +1592,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 var x: (i32, f64) => void = 0;
             }
             """;
@@ -1634,6 +1670,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1657,7 +1694,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 var p: { x: i32; y: i32; } = 0;
             }
             """;
@@ -1671,6 +1708,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1693,7 +1731,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         var expected =
             """
-            function main(): void {
+            public main(): void {
                 return a.b.c;
             }
             """;
@@ -1707,6 +1745,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1721,7 +1760,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 return this;
             }
             """;
@@ -1735,6 +1774,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1757,7 +1797,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 return this.a.b;
             }
             """;
@@ -1771,6 +1811,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1791,7 +1832,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 var p: Point = new Point(1, 2);
             }
             """;
@@ -1893,7 +1934,7 @@ public class FormatterTests
     public void FormatNullTest()
     {
         var tree = new SyntaxTree([
-            FunctionDeclarationNode.Create(default, "main", [], new TypeNode(default, "void"),
+            FunctionDeclarationNode.Create(default, AccessModifier.Public, "main", [], new TypeNode(default, "void"),
                 new BlockStatementNode(default, [
                     new VariableDeclarationNode(
                         default,
@@ -1906,7 +1947,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 var x: i32 | null = null;
             }
             """;
@@ -1960,6 +2001,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -1976,7 +2018,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 return (true, 1);
             }
             """;
@@ -1990,6 +2032,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "main",
                 [],
                 new TypeNode(default, "void"),
@@ -2008,7 +2051,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function main(): void {
+            public main(): void {
                 return new i32[10];
             }
             """;
@@ -2207,6 +2250,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 default,
+                AccessModifier.Public,
                 "test",
                 [new ParameterNode(default, "a", new TypeNode(default, "i32"))],
                 new TypeNode(default, "bool"),
@@ -2224,7 +2268,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function test(a: i32): bool {
+            public test(a: i32): bool {
                 return a is i8;
             }
             """;
@@ -2238,6 +2282,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             new FunctionDeclarationNode(
                 default,
+                AccessModifier.Public,
                 "test",
                 [new ParameterNode(default, "a", new TypeNode(default, "i32"))],
                 new TypeNode(default, "i8"),
@@ -2256,7 +2301,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function test(a: i32): i8 {
+            public test(a: i32): i8 {
                 return (i8)a;
             }
             """;
@@ -2270,6 +2315,7 @@ public class FormatterTests
         var tree = new SyntaxTree([
             new FunctionDeclarationNode(
                 default,
+                AccessModifier.Public,
                 "test",
                 [],
                 new TypeNode(default, "f64"),
@@ -2284,7 +2330,7 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            function test(): f64 {
+            public test(): f64 {
                 return 3.14;
             }
             """;

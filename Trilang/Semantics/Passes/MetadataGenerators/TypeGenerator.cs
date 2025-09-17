@@ -172,6 +172,7 @@ internal class TypeGenerator
         => accessModifier switch
         {
             AccessModifier.Public => AccessModifierMetadata.Public,
+            AccessModifier.Internal => AccessModifierMetadata.Internal,
             AccessModifier.Private => AccessModifierMetadata.Private,
 
             null => null,

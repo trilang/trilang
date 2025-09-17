@@ -2,6 +2,7 @@ using Trilang.Metadata;
 
 namespace Tri.Tests;
 
+// ReSharper disable all UnusedParameter.Local
 internal class MetadataComparer : IEqualityComparer<IMetadata>
 {
     private readonly HashSet<(IMetadata, IMetadata)> seen = [];

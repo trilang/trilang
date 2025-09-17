@@ -234,7 +234,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         functionType = typeProvider.GetType(functionType.ToString()) as FunctionTypeMetadata ??
                        throw new SemanticAnalysisException($"Unknown function type '{functionType}'");
 
-        node.Metadata = new FunctionMetadata(node.Name, parameters, functionType);
+        node.Metadata = new FunctionMetadata(GetAccessModifierMetadata(node.AccessModifier), node.Name, parameters, functionType);
 
         foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
@@ -753,6 +753,16 @@ internal class TypeChecker : IVisitor, ISemanticPass
         if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
             throw new SemanticAnalysisException("Condition must be a boolean");
     }
+
+    private static AccessModifierMetadata GetAccessModifierMetadata(AccessModifier accessModifier)
+        => accessModifier switch
+        {
+            AccessModifier.Public => AccessModifierMetadata.Public,
+            AccessModifier.Internal => AccessModifierMetadata.Internal,
+            AccessModifier.Private => AccessModifierMetadata.Private,
+
+            _ => throw new ArgumentOutOfRangeException(nameof(accessModifier), accessModifier, null)
+        };
 
     public string Name => nameof(TypeChecker);
 

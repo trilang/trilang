@@ -25,7 +25,7 @@ public class ReplaceConditionalOperatorsTests
     {
         var tree = Parse(
             """
-            function test(a: bool, b: bool): i32 {
+            public test(a: bool, b: bool): i32 {
                 if (a && b) {
                     return 1;
                 }
@@ -42,6 +42,7 @@ public class ReplaceConditionalOperatorsTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
@@ -146,6 +147,7 @@ public class ReplaceConditionalOperatorsTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter],
                     new FunctionTypeMetadata([TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
@@ -161,7 +163,7 @@ public class ReplaceConditionalOperatorsTests
     {
         var tree = Parse(
             """
-            function test(a: bool, b: bool): i32 {
+            public test(a: bool, b: bool): i32 {
                 if (a || b) {
                     return 1;
                 }
@@ -178,6 +180,7 @@ public class ReplaceConditionalOperatorsTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
@@ -289,6 +292,7 @@ public class ReplaceConditionalOperatorsTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter],
                     new FunctionTypeMetadata([TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
@@ -304,7 +308,7 @@ public class ReplaceConditionalOperatorsTests
     {
         var tree = Parse(
             """
-            function test(a: bool, b: bool, c: bool): i32 {
+            public test(a: bool, b: bool, c: bool): i32 {
                 if (a && b && c) {
                     return 1;
                 }
@@ -322,6 +326,7 @@ public class ReplaceConditionalOperatorsTests
         var expected = new SemanticTree(null, [
             new FunctionDeclaration(
                 null,
+                AccessModifier.Public,
                 "test",
                 [
                     new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
@@ -484,6 +489,7 @@ public class ReplaceConditionalOperatorsTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter, cParameter],
                     new FunctionTypeMetadata([TypeMetadata.Bool, TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)

@@ -3,6 +3,7 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
+// TODO: split into two steps
 internal class RecursiveTypeAlias : Visitor, ISemanticPass
 {
     private readonly HashSet<ITypeMetadata> visitedTypes;

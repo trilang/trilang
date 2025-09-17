@@ -234,7 +234,9 @@ public partial class Formatter : INodeVisitor
 
     public void VisitFunction(FunctionDeclarationNode node)
     {
-        writer.Write("function ");
+        WriteAccessModifier(node.AccessModifier);
+
+        writer.Write(' ');
         writer.Write(node.Name);
         writer.Write('(');
 

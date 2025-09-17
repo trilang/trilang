@@ -17,7 +17,7 @@ public class MissingReturnStatementTests
     [Test]
     public void MissingReturnInFunctionTest()
     {
-        var tree = Parse("function test(): i32 { }");
+        var tree = Parse("public test(): i32 { }");
 
         var semantic = new SemanticAnalysis();
 
@@ -32,7 +32,7 @@ public class MissingReturnStatementTests
     {
         var tree = Parse(
             """
-            function test(): i32 {
+            public test(): i32 {
                 if (false) {
                     return 1;
                 }
@@ -52,7 +52,7 @@ public class MissingReturnStatementTests
     {
         var tree = Parse(
             """
-            function test(): i32 {
+            public test(): i32 {
                 if (false) {
                     return 1;
                 }
@@ -73,7 +73,7 @@ public class MissingReturnStatementTests
     {
         var tree = Parse(
             """
-            function test(): i32 {
+            public test(): i32 {
                 if (false) {
                     return 1;
                 } else {
@@ -94,7 +94,7 @@ public class MissingReturnStatementTests
     {
         var tree = Parse(
             """
-            function test(): i32 {
+            public test(): i32 {
                 while (false) {
                     return 1;
                 }
@@ -114,7 +114,7 @@ public class MissingReturnStatementTests
     {
         var tree = Parse(
             """
-            function test(): i32 {
+            public test(): i32 {
                 while (false) { }
 
                 return 0;
@@ -131,7 +131,7 @@ public class MissingReturnStatementTests
     [Test]
     public void ValidReturnInVoidFunctionTest()
     {
-        var tree = Parse("function test(): void { }");
+        var tree = Parse("public test(): void { }");
 
         var semantic = new SemanticAnalysis();
 

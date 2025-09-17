@@ -27,7 +27,7 @@ public class ParseFunctionTests
     {
         var parser = new Parser();
 
-        Assert.Throws<ParseException>(() => parser.Parse("function test(x i32) { }"));
+        Assert.Throws<ParseException>(() => parser.Parse("public test(x i32) { }"));
     }
 
     [Test]
@@ -35,7 +35,7 @@ public class ParseFunctionTests
     {
         var parser = new Parser();
 
-        Assert.Throws<ParseException>(() => parser.Parse("function test(x: ) { }"));
+        Assert.Throws<ParseException>(() => parser.Parse("public test(x: ) { }"));
     }
 
     [Test]
@@ -44,7 +44,7 @@ public class ParseFunctionTests
         var parser = new Parser();
 
         Assert.Throws<ParseException>(() => parser.Parse(
-            "function test(x: i32 y: i32): void { }"));
+            "public test(x: i32 y: i32): void { }"));
     }
 
     [Test]
@@ -52,7 +52,7 @@ public class ParseFunctionTests
     {
         var parser = new Parser();
 
-        Assert.Throws<ParseException>(() => parser.Parse("function test( { }"));
+        Assert.Throws<ParseException>(() => parser.Parse("public test( { }"));
     }
 
     [Test]
@@ -60,7 +60,7 @@ public class ParseFunctionTests
     {
         var parser = new Parser();
 
-        Assert.Throws<ParseException>(() => parser.Parse("function test()"));
+        Assert.Throws<ParseException>(() => parser.Parse("public test()"));
     }
 
     [Test]
@@ -68,22 +68,23 @@ public class ParseFunctionTests
     {
         var parser = new Parser();
 
-        Assert.Throws<ParseException>(() => parser.Parse("function test():"));
+        Assert.Throws<ParseException>(() => parser.Parse("public test():"));
     }
 
     [Test]
     public void ParseEmptyFunctionTest()
     {
         var parser = new Parser();
-        var tree = parser.Parse("function test(): void { }");
+        var tree = parser.Parse("public test(): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(25, 1, 26)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
+                AccessModifier.Public,
                 "test",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)))
+                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(23, 1, 24)))
             )
         ]);
 
@@ -94,17 +95,18 @@ public class ParseFunctionTests
     public void ParseSingleParameterFunctionTest()
     {
         var parser = new Parser();
-        var tree = parser.Parse("function test(x: i32): void { }");
+        var tree = parser.Parse("public test(x: i32): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(29, 1, 30)),
+                AccessModifier.Public,
                 "test",
                 [
-                    new ParameterNode(new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(20, 1, 21)), "x", new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)), "i32")),
+                    new ParameterNode(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)), "x", new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")),
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)))
+                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(29, 1, 30)))
             )
         ]);
 
@@ -115,19 +117,20 @@ public class ParseFunctionTests
     public void ParseMultipleParametersFunctionTest()
     {
         var parser = new Parser();
-        var tree = parser.Parse("function test(x: i32, y: i32, z: i32): void { }");
+        var tree = parser.Parse("public test(x: i32, y: i32, z: i32): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(47, 1, 48)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(45, 1, 46)),
+                AccessModifier.Public,
                 "test",
                 [
-                    new ParameterNode(new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(20, 1, 21)), "x", new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)), "i32")),
-                    new ParameterNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(28, 1, 29)), "y", new TypeNode(new SourceSpan(new SourcePosition(25, 1, 26), new SourcePosition(28, 1, 29)), "i32")),
-                    new ParameterNode(new SourceSpan(new SourcePosition(30, 1, 31), new SourcePosition(36, 1, 37)), "z", new TypeNode(new SourceSpan(new SourcePosition(33, 1, 34), new SourcePosition(36, 1, 37)), "i32")),
+                    new ParameterNode(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)), "x", new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")),
+                    new ParameterNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(26, 1, 27)), "y", new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32")),
+                    new ParameterNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(34, 1, 35)), "z", new TypeNode(new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(34, 1, 35)), "i32")),
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(39, 1, 40), new SourcePosition(43, 1, 44)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(44, 1, 45), new SourcePosition(47, 1, 48)))
+                new TypeNode(new SourceSpan(new SourcePosition(37, 1, 38), new SourcePosition(41, 1, 42)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(42, 1, 43), new SourcePosition(45, 1, 46)))
             )
         ]);
 
@@ -138,15 +141,16 @@ public class ParseFunctionTests
     public void ParseArrayTypeTest()
     {
         var parser = new Parser();
-        var tree = parser.Parse("function test(x: i32[]): void { }");
+        var tree = parser.Parse("public test(x: i32[]): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
+                AccessModifier.Public,
                 "test",
-                [new ParameterNode(new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(22, 1, 23)), "x", new ArrayTypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(22, 1, 23)), new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)), "i32")))],
-                new TypeNode(new SourceSpan(new SourcePosition(25, 1, 26), new SourcePosition(29, 1, 30)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(30, 1, 31), new SourcePosition(33, 1, 34)))
+                [new ParameterNode(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(20, 1, 21)), "x", new ArrayTypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(20, 1, 21)), new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")))],
+                new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)), "void"),
+                new BlockStatementNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)))
             )
         ]);
 
