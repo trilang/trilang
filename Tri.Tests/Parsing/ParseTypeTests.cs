@@ -1356,12 +1356,22 @@ public class ParseTypeTests
     public void TupleTypeWithSingleTypeTest()
     {
         var parser = new Parser();
-        const string code = "public type T = (i32);";
+        var tree = parser.Parse("public type T = (i32);");
 
-        Assert.That(
-            () => parser.Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
+                AccessModifier.Public,
+                "T",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                    "i32"
+                )
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
     }
 
     [Test]
@@ -1536,6 +1546,80 @@ public class ParseTypeTests
                     )
                 ])
             )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+    }
+
+    [Test]
+    public void ParseDuWithFunctionTypeAndDuTest()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type T = i32 | (() => i32 | null);");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
+                AccessModifier.Public,
+                "T",
+                [],
+                new DiscriminatedUnionNode([
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
+                        "i32"
+                    ),
+                    new FunctionTypeNode(
+                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(25, 1, 26)),
+                        [],
+                        new DiscriminatedUnionNode([
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
+                                "i32"
+                            ),
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(35, 1, 36), new SourcePosition(39, 1, 40)),
+                                "null"
+                            ),
+                        ])
+                    )
+                ])
+            ),
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+    }
+
+    [Test]
+    public void ParseDuWithFunctionTypeAndDu2Test()
+    {
+        var parser = new Parser();
+        var tree = parser.Parse("public type T = i32 | (() => i32) | null;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
+                AccessModifier.Public,
+                "T",
+                [],
+                new DiscriminatedUnionNode([
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
+                        "i32"
+                    ),
+                    new FunctionTypeNode(
+                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(25, 1, 26)),
+                        [],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
+                            "i32"
+                        )
+                    ),
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(40, 1, 41)),
+                        "null"
+                    ),
+                ])
+            ),
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));

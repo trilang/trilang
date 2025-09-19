@@ -1042,8 +1042,8 @@ public class Parser
            TryParseGenericTypeNode(context) ??
            TryParseTypeNode(context) ??
            TryParseFunctionType(context) ??
-           TryParseTupleType(context) ??
-           TryParseInterface(context) as IInlineTypeNode;
+           TryParseTupleOrParenthesizedType(context) ??
+           TryParseInterface(context);
 
     private IInlineTypeNode? TryParseNull(ParserContext context)
     {
@@ -1077,14 +1077,14 @@ public class Parser
                 return null;
 
             var typeArguments = new List<IInlineTypeNode>();
-            var typeArgument = c.Parser.TryParseInlineTypeNode(c) ??
+            var typeArgument = c.Parser.TryParseDiscriminatedUnion(c) ??
                                throw new ParseException("Expected a type argument.");
 
             typeArguments.Add(typeArgument);
 
             while (c.Reader.Check(TokenKind.Comma))
             {
-                typeArgument = c.Parser.TryParseInlineTypeNode(c) ??
+                typeArgument = c.Parser.TryParseDiscriminatedUnion(c) ??
                                throw new ParseException("Expected a type argument.");
 
                 typeArguments.Add(typeArgument);
@@ -1150,7 +1150,7 @@ public class Parser
         return (openParen.SourceSpan.Combine(closeParen.SourceSpan), parameters);
     }
 
-    private TupleTypeNode? TryParseTupleType(ParserContext context)
+    private IInlineTypeNode? TryParseTupleOrParenthesizedType(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
             if (!c.Reader.Check(TokenKind.OpenParenthesis, out var openParen))
@@ -1169,11 +1169,11 @@ public class Parser
                 types.Add(type);
             }
 
-            if (types.Count <= 1)
-                return null;
-
             if (!c.Reader.Check(TokenKind.CloseParenthesis, out var closeParen))
                 throw new ParseException("Expected a close parenthesis.");
+
+            if (types.Count == 1)
+                return types[0];
 
             return new TupleTypeNode(openParen.SourceSpan.Combine(closeParen.SourceSpan), types);
         });
