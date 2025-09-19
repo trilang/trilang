@@ -19,32 +19,6 @@ public class LexerTests
     }
 
     [Test]
-    public void TokenizeCarriageReturnTest()
-    {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("\r\r");
-        var expected = new[]
-        {
-            Token.CreateEof(new SourcePosition(2, 3, 1).ToSpan()),
-        };
-
-        Assert.That(tokens, Is.EqualTo(expected));
-    }
-
-    [Test]
-    public void TokenizeCarriageReturnNewLineTest()
-    {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("\r\n");
-        var expected = new[]
-        {
-            Token.CreateEof(new SourcePosition(2, 2, 1).ToSpan()),
-        };
-
-        Assert.That(tokens, Is.EqualTo(expected));
-    }
-
-    [Test]
     public void TokenizeWhiteSpaceTest()
     {
         var lexer = new Lexer();
@@ -281,6 +255,40 @@ public class LexerTests
     }
 
     [Test]
+    public void TokenizeMultilineCharTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize("'line\nline\nline'");
+        var expected = new[]
+        {
+            Token.CreateChar(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(16, 3, 6)),
+                "line\nline\nline"
+            ),
+            Token.CreateEof(new SourcePosition(16, 3, 6).ToSpan()),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TokenizeMultilineCharWithoutEndQuoteTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize("'line\nline\nline");
+        var expected = new[]
+        {
+            Token.CreateChar(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(15, 3, 5)),
+                "line\nline\nline"
+            ),
+            Token.CreateEof(new SourcePosition(15, 3, 5).ToSpan()),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
     [TestCase("1")]
     [TestCase("xxx")]
     public void TokenizeStringTest(string code)
@@ -294,6 +302,40 @@ public class LexerTests
                 code
             ),
             Token.CreateEof(new SourcePosition(code.Length + 2, 1, code.Length + 3).ToSpan()),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TokenizeMultilineStringTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize("\"line\nline\nline\"");
+        var expected = new[]
+        {
+            Token.CreateString(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(16, 3, 6)),
+                "line\nline\nline"
+            ),
+            Token.CreateEof(new SourcePosition(16, 3, 6).ToSpan()),
+        };
+
+        Assert.That(tokens, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void TokenizeMultilineStringWithoutEndQuoteTest()
+    {
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize("\"line\nline\nline");
+        var expected = new[]
+        {
+            Token.CreateString(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(15, 3, 5)),
+                "line\nline\nline"
+            ),
+            Token.CreateEof(new SourcePosition(15, 3, 5).ToSpan()),
         };
 
         Assert.That(tokens, Is.EqualTo(expected));

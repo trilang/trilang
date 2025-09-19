@@ -13,7 +13,7 @@ public record struct SourcePosition(int Index, int Line, int Column)
         => new SourcePosition(Index + length, Line, Column + length);
 
     public SourcePosition AddLine(int length = 1)
-        => new SourcePosition(Index + length, Line + 1, 1);
+        => new SourcePosition(Index + length, Line + length, 1);
 
     public SourceSpan ToSpan(SourcePosition end)
         => new SourceSpan(this, end);

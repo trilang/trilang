@@ -24,21 +24,14 @@ public class Lexer
                 continue;
             }
 
-            if (c is '\r' && next is '\n')
-            {
-                position.NewLine(2);
-
-                continue;
-            }
-
-            if (c is '\n' or '\r')
+            if (c is '\n')
             {
                 position.NewLine();
 
                 continue;
             }
 
-            if (char.IsWhiteSpace(c))
+            if (c is ' ')
             {
                 position.Add(1);
 
@@ -128,34 +121,73 @@ public class Lexer
 
             if (c is '\'')
             {
-                var length = 1;
+                // TODO: handle escape sequences
+                var start = position.Current;
+                position.Add(1);
 
-                // TODO: handle multiline
-                var endIndex = code.IndexOf('\'', position.Index + 1);
+                var hasEndQuote = true;
+                var endIndex = code.IndexOf('\'', position.Index);
                 if (endIndex == -1)
-                    throw new LexerException("Unterminated string");
+                {
+                    hasEndQuote = false;
+                    endIndex = code.Length - 1;
 
-                length += endIndex - position.Index;
-                var str = code.Substring(position.Index + 1, length - 2);
+                    // TODO: report error
+                }
 
-                tokens.Add(Token.CreateChar(position.Build(length), str));
+                while (position.Index <= endIndex)
+                {
+                    var currentChar = code[position.Index];
+                    if (currentChar is '\n')
+                        position.NewLine();
+                    else
+                        position.Add(1);
+                }
 
+                var stringLength = position.Index - start.Index - 1;
+                if (hasEndQuote)
+                    stringLength--;
+
+                var str = code.Substring(start.Index + 1, stringLength);
+                var token = Token.CreateChar(start.ToSpan(position.Current), str);
+                tokens.Add(token);
+
+                // TODO: if (unescape(str).Length > 1) report error
                 continue;
             }
 
             if (c is '"')
             {
-                var length = 1;
+                // TODO: handle escape sequences
+                var start = position.Current;
+                position.Add(1);
 
-                // TODO: handle multiline
-                var endIndex = code.IndexOf('"', position.Index + 1);
+                var hasEndQuote = true;
+                var endIndex = code.IndexOf('"', position.Index);
                 if (endIndex == -1)
-                    throw new LexerException("Unterminated string");
+                {
+                    hasEndQuote = false;
+                    endIndex = code.Length - 1;
 
-                length += endIndex - position.Index;
-                var str = code.Substring(position.Index + 1, length - 2);
+                    // TODO: report error
+                }
 
-                tokens.Add(Token.CreateString(position.Build(length), str));
+                while (position.Index <= endIndex)
+                {
+                    var currentChar = code[position.Index];
+                    if (currentChar is '\n')
+                        position.NewLine();
+                    else
+                        position.Add(1);
+                }
+
+                var stringLength = position.Index - start.Index - 1;
+                if (hasEndQuote)
+                    stringLength--;
+
+                var str = code.Substring(start.Index + 1, stringLength);
+                var token = Token.CreateString(start.ToSpan(position.Current), str);
+                tokens.Add(token);
 
                 continue;
             }

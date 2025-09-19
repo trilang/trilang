@@ -24,6 +24,9 @@ internal sealed class SourceSpanBuilder
     public SourceSpan Build()
         => position.ToSpan();
 
+    public SourcePosition Current
+        => position;
+
     public int Index
         => position.Index;
 }

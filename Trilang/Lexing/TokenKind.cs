@@ -3,9 +3,6 @@ namespace Trilang.Lexing;
 public enum TokenKind
 {
     EndOfFile,
-    // NewLine,
-    // CarriageReturn,
-    // WhiteSpace,
 
     Identifier,
     Integer,
