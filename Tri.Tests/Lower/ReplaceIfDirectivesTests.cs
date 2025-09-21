@@ -1,3 +1,5 @@
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.Parsing;
@@ -12,8 +14,13 @@ public class ReplaceIfDirectivesTests
 {
     private static SemanticTree Parse(string code, IEnumerable<string> directives)
     {
+        var diagnostics = new DiagnosticCollection();
+
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
         var parser = new Parser();
-        var tree = parser.Parse(code);
+        var tree = parser.Parse(tokens);
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions(directives));

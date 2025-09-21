@@ -1,4 +1,6 @@
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -6,11 +8,19 @@ namespace Tri.Tests.Parsing;
 
 public class ParseDirectiveTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
+        return new Parser().Parse(tokens);
+    }
+
     [Test]
     public void ParseIfDirectiveTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             #if D1
 
@@ -43,8 +53,7 @@ public class ParseDirectiveTests
     [Test]
     public void ParseIfDirectiveWithElseTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             #if D1
 
@@ -91,8 +100,7 @@ public class ParseDirectiveTests
     [Test]
     public void ParseNestedIfDirectiveTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             #if D1
 
@@ -157,8 +165,7 @@ public class ParseDirectiveTests
     [Test]
     public void ParseIfDirectiveStatementTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
             #if D1

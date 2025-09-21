@@ -1,4 +1,6 @@
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -6,76 +8,68 @@ namespace Tri.Tests.Parsing;
 
 public class ParseFunctionTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
+        return new Parser().Parse(tokens);
+    }
+
     [Test]
     public void ParseMissingIdFunctionTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("function;"));
+        Assert.Throws<ParseException>(() => Parse("function;"));
     }
 
     [Test]
     public void ParseMissingOpenParenFunctionTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("function test { }"));
+        Assert.Throws<ParseException>(() => Parse("function test { }"));
     }
 
     [Test]
     public void ParseMissingParamColonFunctionTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public test(x i32) { }"));
+        Assert.Throws<ParseException>(() => Parse("public test(x i32) { }"));
     }
 
     [Test]
     public void ParseMissingParamTypeFunctionTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public test(x: ) { }"));
+        Assert.Throws<ParseException>(() => Parse("public test(x: ) { }"));
     }
 
     [Test]
     public void ParseMissingCommaFunctionTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse(
+        Assert.Throws<ParseException>(() => Parse(
             "public test(x: i32 y: i32): void { }"));
     }
 
     [Test]
     public void ParseMissingCloseParenFunctionTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public test( { }"));
+        Assert.Throws<ParseException>(() => Parse("public test( { }"));
     }
 
     [Test]
     public void ParseMissingReturnColonFunctionTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public test()"));
+        Assert.Throws<ParseException>(() => Parse("public test()"));
     }
 
     [Test]
     public void ParseMissingReturnTypeFunctionTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public test():"));
+        Assert.Throws<ParseException>(() => Parse("public test():"));
     }
 
     [Test]
     public void ParseEmptyFunctionTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public test(): void { }");
+        var tree = Parse("public test(): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -94,8 +88,7 @@ public class ParseFunctionTests
     [Test]
     public void ParseSingleParameterFunctionTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public test(x: i32): void { }");
+        var tree = Parse("public test(x: i32): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -116,8 +109,7 @@ public class ParseFunctionTests
     [Test]
     public void ParseMultipleParametersFunctionTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public test(x: i32, y: i32, z: i32): void { }");
+        var tree = Parse("public test(x: i32, y: i32, z: i32): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -140,8 +132,7 @@ public class ParseFunctionTests
     [Test]
     public void ParseArrayTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public test(x: i32[]): void { }");
+        var tree = Parse("public test(x: i32[]): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(

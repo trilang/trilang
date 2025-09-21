@@ -1,4 +1,6 @@
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -6,11 +8,19 @@ namespace Tri.Tests.Parsing;
 
 public class ParseGenericTypeTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
+        return new Parser().Parse(tokens);
+    }
+
     [Test]
     public void ParseGenericTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type List<T> { }");
+        var tree = Parse("public type List<T> { }");
         var expected = new SyntaxTree([
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
@@ -30,11 +40,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeMissingTypeTest()
     {
-        var parser = new Parser();
         const string code = "public type List<> { }";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type."));
     }
@@ -42,11 +51,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeMissingSecondTypeTest()
     {
-        var parser = new Parser();
         const string code = "public type List<T,> { }";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type."));
     }
@@ -54,11 +62,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeMissingGreaterTest()
     {
-        var parser = new Parser();
         const string code = "public type List<T { }";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a greater than sign."));
     }
@@ -66,8 +73,7 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseAliasToGenericTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = List<i32, bool>;");
+        var tree = Parse("public type T = List<i32, bool>;");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
@@ -88,8 +94,7 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseNestedGenericTypeAliasTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = List<i32, List<bool>>;");
+        var tree = Parse("public type T = List<i32, List<bool>>;");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(38, 1, 39)),
@@ -113,11 +118,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseAliasToGenericTypeMissingTypeTest()
     {
-        var parser = new Parser();
         const string code = "public type T = List<>;";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type argument."));
     }
@@ -125,11 +129,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseAliasToGenericTypeMissingSecondTypeTest()
     {
-        var parser = new Parser();
         const string code = "public type T = List<i32, >;";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type argument."));
     }
@@ -137,11 +140,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseAliasToGenericTypeMissingCloseAngleBracketTest()
     {
-        var parser = new Parser();
         const string code = "public type T = List<i32;";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a close angle bracket."));
     }
@@ -149,8 +151,7 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeAliasTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T<T1, T2> = T1 | T2;");
+        var tree = Parse("public type T<T1, T2> = T1 | T2;");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
@@ -170,11 +171,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeAliasMissingTypeTest()
     {
-        var parser = new Parser();
         const string code = "public type T<> = T1 | T2;";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type."));
     }
@@ -182,11 +182,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeAliasMissingSecondTypeTest()
     {
-        var parser = new Parser();
         const string code = "public type T<T1, > = T1 | T2;";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type."));
     }
@@ -194,11 +193,10 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeAliasMissingCloseAngleBracketTest()
     {
-        var parser = new Parser();
         const string code = "public type T<T1, T2 = T1 | T2;";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a greater than sign."));
     }

@@ -1,4 +1,6 @@
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
@@ -11,8 +13,13 @@ public class TypeCheckerTests
 {
     private static SyntaxTree Parse(string code)
     {
+        var diagnostics = new DiagnosticCollection();
+
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
         var parser = new Parser();
-        var tree = parser.Parse(code);
+        var tree = parser.Parse(tokens);
 
         return tree;
     }

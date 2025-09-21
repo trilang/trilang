@@ -2,8 +2,9 @@ namespace Trilang.Lexing;
 
 public class Lexer
 {
-    public IReadOnlyList<Token> Tokenize(string code)
+    public IReadOnlyList<Token> Tokenize(string code, LexerOptions options)
     {
+        var diagnostics = options.Diagnostics;
         var position = new SourceSpanBuilder();
         var tokens = new List<Token>();
 
@@ -131,8 +132,6 @@ public class Lexer
                 {
                     hasEndQuote = false;
                     endIndex = code.Length - 1;
-
-                    // TODO: report error
                 }
 
                 while (position.Index <= endIndex)
@@ -152,6 +151,9 @@ public class Lexer
                 var token = Token.CreateChar(start.ToSpan(position.Current), str);
                 tokens.Add(token);
 
+                if (!hasEndQuote)
+                    diagnostics.MissingEndQuoteForStringLiteral(token.SourceSpan.End.ToSpan());
+
                 // TODO: if (unescape(str).Length > 1) report error
                 continue;
             }
@@ -168,8 +170,6 @@ public class Lexer
                 {
                     hasEndQuote = false;
                     endIndex = code.Length - 1;
-
-                    // TODO: report error
                 }
 
                 while (position.Index <= endIndex)
@@ -188,6 +188,9 @@ public class Lexer
                 var str = code.Substring(start.Index + 1, stringLength);
                 var token = Token.CreateString(start.ToSpan(position.Current), str);
                 tokens.Add(token);
+
+                if (!hasEndQuote)
+                    diagnostics.MissingEndQuoteForStringLiteral(token.SourceSpan.End.ToSpan());
 
                 continue;
             }
@@ -240,9 +243,14 @@ public class Lexer
                 ('.', _) => (TokenKind.Dot, 1),
                 ('#', _) => (TokenKind.Hash, 1),
 
-                _ => throw new LexerException($"Unexpected character '{c}'")
+                _ => (TokenKind.Unsupported, 1),
             };
-            tokens.Add(Token.Create(position.Build(size), tokenKind));
+
+            var span = position.Build(size);
+            if (tokenKind == TokenKind.Unsupported)
+                diagnostics.UnsupportedCharacter(span, c);
+            else
+                tokens.Add(Token.Create(span, tokenKind));
         }
 
         tokens.Add(Token.CreateEof(position.Build()));

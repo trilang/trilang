@@ -1,16 +1,26 @@
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseLoopTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
+        return new Parser().Parse(tokens);
+    }
+
     [Test]
     public void ParseWhileTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(x: i32): void {
                 while (x > 0) {
@@ -68,7 +78,6 @@ public class ParseLoopTests
     [Test]
     public void ParseWhileMissingOpenParenTest()
     {
-        var parser = new Parser();
         var source = """
                      public test(x: i32): void {
                          while x > 0) {
@@ -76,13 +85,12 @@ public class ParseLoopTests
                      }
                      """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(source));
+        Assert.Throws<ParseException>(() => Parse(source));
     }
 
     [Test]
     public void ParseWhileMissingConditionTest()
     {
-        var parser = new Parser();
         var source = """
                      public test(x: i32): void {
                          while (;) {
@@ -90,13 +98,12 @@ public class ParseLoopTests
                      }
                      """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(source));
+        Assert.Throws<ParseException>(() => Parse(source));
     }
 
     [Test]
     public void ParseWhileMissingCloseParenTest()
     {
-        var parser = new Parser();
         var source = """
                      public test(x: i32): void {
                          while (x > 0 {
@@ -104,13 +111,12 @@ public class ParseLoopTests
                      }
                      """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(source));
+        Assert.Throws<ParseException>(() => Parse(source));
     }
 
     [Test]
     public void ParseWhileMissingBlockTest()
     {
-        var parser = new Parser();
         var source = """
                      public test(x: i32): void {
                          while (x > 0)
@@ -118,14 +124,13 @@ public class ParseLoopTests
                      }
                      """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(source));
+        Assert.Throws<ParseException>(() => Parse(source));
     }
 
     [Test]
     public void ParseBreakTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(x: i32): void {
                 while (x > 0) {
@@ -189,8 +194,7 @@ public class ParseLoopTests
     [Test]
     public void ParseContinueTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(x: i32): void {
                 while (x > 0) {

@@ -1,4 +1,6 @@
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -6,11 +8,19 @@ namespace Tri.Tests.Parsing;
 
 public class ParseCallExpressionTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
+        return new Parser().Parse(tokens);
+    }
+
     [Test]
     public void ParseCallStatementTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 print("Hello, World!");
@@ -57,8 +67,7 @@ public class ParseCallExpressionTests
     [Test]
     public void ParseCallStatementMultipleParamsTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 sum(1, 2, 3);
@@ -112,8 +121,7 @@ public class ParseCallExpressionTests
     [Test]
     public void ParseCallExpressionMultipleParamsTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = 1 + sum(1, 2, 3);

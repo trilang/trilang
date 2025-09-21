@@ -1,4 +1,6 @@
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -6,11 +8,19 @@ namespace Tri.Tests.Parsing;
 
 public class ParseMemberAccessTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
+        return new Parser().Parse(tokens);
+    }
+
     [Test]
     public void ParseArrayAccessTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public test(x: i32[]): void {
                 var a: i32 = x[0];
@@ -45,7 +55,6 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseArrayAccessMissingCloseTest()
     {
-        var parse = new Parser();
         const string code =
             """
             public test(x: i32[]): void {
@@ -53,14 +62,13 @@ public class ParseMemberAccessTests
             }
             """;
 
-        Assert.Throws<ParseException>(() => parse.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseSetArrayTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(): void {
                 x[0] = 1;
@@ -97,8 +105,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseSetNestedArrayTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(): void {
                 a.b[0].c = 1;
@@ -143,8 +150,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMultipleArrayAccessTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return a[0][1];
@@ -179,8 +185,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMultipleMemberAccessTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return a.b.c;
@@ -217,7 +222,6 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMultipleMemberAccessMissingExpressionTest()
     {
-        var parse = new Parser();
         const string code =
             """
             public main(): void {
@@ -226,7 +230,7 @@ public class ParseMemberAccessTests
             """;
 
         Assert.That(
-            () => parse.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected an identifier."));
     }
@@ -234,8 +238,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMemberAccessNestedCallTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return a.b().c;
@@ -275,8 +278,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMultipleCallsTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 f(1)(2);
@@ -311,8 +313,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMemberAccessAfterCtorTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return new Test().a;
@@ -348,8 +349,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMemberAccessAfterNewArrayTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return new i32[0].size;
@@ -385,8 +385,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseCallExpWithBinaryExpTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return 1.toString();
@@ -422,8 +421,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseCallExpWithParenExpTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return 1 + 2.toString();
@@ -464,8 +462,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseTupleMemberAccessTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(t: (i32, string)): i32 {
                 return t.0;
@@ -506,7 +503,6 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseTupleMemberAccessWithIncorrectIndexTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public test(t: (i32, string)): i32 {
@@ -515,7 +511,7 @@ public class ParseMemberAccessTests
             """;
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
         );
     }

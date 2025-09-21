@@ -1,15 +1,29 @@
 using Trilang;
+using Trilang.Compilation;
+using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 
 namespace Tri.Tests;
 
 public class LexerTests
 {
+    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+
+    private static (DiagnosticCollection, IReadOnlyList<Token>) Tokenize(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        diagnostics.SwitchFile(file);
+
+        var options = new LexerOptions(diagnostics.Lexer);
+        var lexer = new Lexer();
+
+        return (diagnostics, lexer.Tokenize(code, options));
+    }
+
     [Test]
     public void TokenizeNewLineTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("\n\n");
+        var (_, tokens) = Tokenize("\n\n");
         var expected = new[]
         {
             Token.CreateEof(new SourcePosition(2, 3, 1).ToSpan()),
@@ -21,8 +35,7 @@ public class LexerTests
     [Test]
     public void TokenizeWhiteSpaceTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("  ");
+        var (_, tokens) = Tokenize("  ");
         var expected = new[]
         {
             Token.CreateEof(new SourcePosition(2, 1, 3).ToSpan()),
@@ -37,8 +50,7 @@ public class LexerTests
     [TestCase("0123", 123)]
     public void TokenizeNumberTest(string code, int number)
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code);
+        var (_, tokens) = Tokenize(code);
         var expected = new[]
         {
             Token.CreateInteger(
@@ -59,8 +71,7 @@ public class LexerTests
     [TestCase("0.0", 0.0)]
     public void TokenizeFloatNumberTest(string code, double number)
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code);
+        var (_, tokens) = Tokenize(code);
         var expected = new[]
         {
             Token.CreateFloat(
@@ -76,8 +87,7 @@ public class LexerTests
     [Test]
     public void TokenizeFloatNumberWithDoubleDotTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("1.2.3");
+        var (_, tokens) = Tokenize("1.2.3");
         var expected = new[]
         {
             Token.CreateFloat(new SourceSpan(new SourcePosition(), new SourcePosition(3, 1, 4)), 1.2),
@@ -92,8 +102,7 @@ public class LexerTests
     [Test]
     public void TokenizeFloatNumberWithLeadingDotTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(".3");
+        var (_, tokens) = Tokenize(".3");
         var expected = new[]
         {
             Token.Create(new SourceSpan(new SourcePosition(), new SourcePosition(1, 1, 2)), TokenKind.Dot),
@@ -107,8 +116,7 @@ public class LexerTests
     [Test]
     public void TokenizeMethodAfterNumberTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("1.toString()");
+        var (_, tokens) = Tokenize("1.toString()");
         var expected = new[]
         {
             Token.CreateInteger(new SourceSpan(new SourcePosition(), new SourcePosition(1, 1, 2)), 1),
@@ -148,8 +156,7 @@ public class LexerTests
     [TestCase("is", TokenKind.Is)]
     public void TokenizeKeywordTest(string code, TokenKind kind)
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code);
+        var (_, tokens) = Tokenize(code);
         var expected = new[]
         {
             Token.Create(
@@ -168,8 +175,7 @@ public class LexerTests
     [TestCase("x2dfsf")]
     public void TokenizeIdTest(string code)
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code);
+        var (_, tokens) = Tokenize(code);
         var expected = new[]
         {
             Token.CreateId(
@@ -221,8 +227,7 @@ public class LexerTests
     [TestCase("#", TokenKind.Hash)]
     public void TokenizeOperatorTest(string code, TokenKind kind)
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code);
+        var (_, tokens) = Tokenize(code);
         var expected = new[]
         {
             Token.Create(
@@ -240,8 +245,7 @@ public class LexerTests
     [TestCase("xxx")]
     public void TokenizeCharTest(string code)
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize($"'{code}'");
+        var (_, tokens) = Tokenize($"'{code}'");
         var expected = new[]
         {
             Token.CreateChar(
@@ -257,8 +261,7 @@ public class LexerTests
     [Test]
     public void TokenizeMultilineCharTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("'line\nline\nline'");
+        var (_, tokens) = Tokenize("'line\nline\nline'");
         var expected = new[]
         {
             Token.CreateChar(
@@ -274,8 +277,8 @@ public class LexerTests
     [Test]
     public void TokenizeMultilineCharWithoutEndQuoteTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("'line\nline\nline");
+        var (diagnostics, tokens) = Tokenize("'line\nline\nline");
+
         var expected = new[]
         {
             Token.CreateChar(
@@ -285,7 +288,15 @@ public class LexerTests
             Token.CreateEof(new SourcePosition(15, 3, 5).ToSpan()),
         };
 
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.L0002_MissingEndQuoteForStringLiteral,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(15, 3, 5).ToSpan(),
+            "Missing end quote for string literal.");
+
         Assert.That(tokens, Is.EqualTo(expected));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -293,8 +304,7 @@ public class LexerTests
     [TestCase("xxx")]
     public void TokenizeStringTest(string code)
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize($"\"{code}\"");
+        var (_, tokens) = Tokenize($"\"{code}\"");
         var expected = new[]
         {
             Token.CreateString(
@@ -310,8 +320,7 @@ public class LexerTests
     [Test]
     public void TokenizeMultilineStringTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("\"line\nline\nline\"");
+        var (_, tokens) = Tokenize("\"line\nline\nline\"");
         var expected = new[]
         {
             Token.CreateString(
@@ -327,8 +336,8 @@ public class LexerTests
     [Test]
     public void TokenizeMultilineStringWithoutEndQuoteTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize("\"line\nline\nline");
+        var (diagnostics, tokens) = Tokenize("\"line\nline\nline");
+
         var expected = new[]
         {
             Token.CreateString(
@@ -338,23 +347,45 @@ public class LexerTests
             Token.CreateEof(new SourcePosition(15, 3, 5).ToSpan()),
         };
 
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.L0002_MissingEndQuoteForStringLiteral,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(15, 3, 5).ToSpan(),
+            "Missing end quote for string literal.");
+
         Assert.That(tokens, Is.EqualTo(expected));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
+    [TestCase("\r")]
     [TestCase("$")]
     public void TokenizeUnsupportedCharacterTest(string code)
     {
-        var lexer = new Lexer();
+        var (diagnostics, tokens) = Tokenize(code);
 
-        Assert.Throws<LexerException>(() => lexer.Tokenize(code));
+        var expected = new[]
+        {
+            Token.CreateEof(new SourcePosition(1, 1, 2).ToSpan()),
+        };
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.L0001_UnsupportedCharacter,
+            DiagnosticSeverity.Error,
+            file,
+            new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(1, 1, 2)),
+            $"Unsupported character '{code}'."
+        );
+
+        Assert.That(tokens, Is.EqualTo(expected));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void TokenizeCommentTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(
+        var (_, tokens) = Tokenize(
             """
             // comment
             public main(): void {}
@@ -378,8 +409,7 @@ public class LexerTests
     [Test]
     public void TokenizeCommentAtTheEndTest()
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(
+        var (_, tokens) = Tokenize(
             """
             public main(): void {}
             // comment

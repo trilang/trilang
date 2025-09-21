@@ -1,4 +1,6 @@
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -6,11 +8,19 @@ namespace Tri.Tests.Parsing;
 
 public class ParseTypeTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
+        return new Parser().Parse(tokens);
+    }
+
     [Test]
     public void ParseTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type Point { }");
+        var tree = Parse("public type Point { }");
 
         var expected = new SyntaxTree([
             new TypeDeclarationNode(
@@ -31,44 +41,39 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeMissingTypeKeywordTest()
     {
-        var parser = new Parser();
         const string code = "public Point { }";
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseTypeMissingNameTest()
     {
-        var parser = new Parser();
         const string code = "public type { }";
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseTypeMissingOpenBraceTest()
     {
-        var parser = new Parser();
         const string code = "public type Point }";
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseTypeMissingCloseBraceTest()
     {
-        var parser = new Parser();
         const string code = "public type Point {";
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParsePropertiesTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point {
                 x: i32;
@@ -112,8 +117,7 @@ public class ParseTypeTests
     [Test]
     public void ParsePropertiesWithBlocksTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point {
                 x: i32 {
@@ -247,8 +251,7 @@ public class ParseTypeTests
     [Test]
     public void ParseEmptyGetterTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point {
                 x: i32 {
@@ -317,8 +320,7 @@ public class ParseTypeTests
     [Test]
     public void ParseEmptySetterTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point {
                 x: i32 {
@@ -366,60 +368,55 @@ public class ParseTypeTests
     [Test]
     public void ParsePropertyMissingNameTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 private : i32;
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParsePropertyMissingColonTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 private x i32;
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParsePropertyMissingTypeTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 private x: ;
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParsePropertyMissingSemiColonTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 private x: i32
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodsTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point {
                 public toString(): string { }
@@ -466,138 +463,127 @@ public class ParseTypeTests
     [Test]
     public void ParseMethodMissingNameTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public (): string { }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingOpenParenTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString): string { }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingCloseParenTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString(: string { }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingColonTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString() string { }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingReturnTypeTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString(): { }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingOpenBraceTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString(): string }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingCloseBraceTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString(): string {
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingCommaTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString(a: i32 b: i32): string { }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingParameterColonTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString(a i32): string { }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseMethodMissingParameterTypeTest()
     {
-        var parser = new Parser();
         const string code = """
                             public type Point {
                                 public toString(a: ): string { }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseCtorTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point {
                 public constructor(x: i32, y: i32) { }
@@ -633,8 +619,7 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeWithInterfaceTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point : Interface1, Interface2 { }
             """);
@@ -658,26 +643,23 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeWithMissingInterfaceTest()
     {
-        var parser = new Parser();
         const string code = "public type Point : { }";
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseTypeWithMissingSecondInterfaceTest()
     {
-        var parser = new Parser();
         const string code = "public type Point : Interface1, { }";
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseTypeAliasTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type MyType = i32;");
+        var tree = Parse("public type MyType = i32;");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -695,32 +677,25 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeAliasMissingNameTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type = i32;"));
+        Assert.Throws<ParseException>(() => Parse("public type = i32;"));
     }
 
     [Test]
     public void ParseTypeAliasMissingTypeTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type MyType = ;"));
+        Assert.Throws<ParseException>(() => Parse("public type MyType = ;"));
     }
 
     [Test]
     public void ParseTypeAliasMissingSemiColonTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type MyType = i32"));
+        Assert.Throws<ParseException>(() => Parse("public type MyType = i32"));
     }
 
     [Test]
     public void ParseFunctionTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type F = () => void;");
+        var tree = Parse("public type F = () => void;");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -742,8 +717,7 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeWithParametersTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type F = (i32, i32) => i32;");
+        var tree = Parse("public type F = (i32, i32) => i32;");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -765,72 +739,55 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeMissingNameTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type = (i32, i32) => i32;"));
+        Assert.Throws<ParseException>(() => Parse("public type = (i32, i32) => i32;"));
     }
 
     [Test]
     public void ParseFunctionTypeMissingEqualTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type F (i32, i32) => i32;"));
+        Assert.Throws<ParseException>(() => Parse("public type F (i32, i32) => i32;"));
     }
 
     [Test]
     public void ParseFunctionTypeMissingOpenParenTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type F = i32, i32) => i32;"));
+        Assert.Throws<ParseException>(() => Parse("public type F = i32, i32) => i32;"));
     }
 
     [Test]
     public void ParseFunctionTypeMissingCloseParenTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32 => i32;"));
+        Assert.Throws<ParseException>(() => Parse("public type F = (i32, i32 => i32;"));
     }
 
     [Test]
     public void ParseFunctionTypeCommaTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32 i32) => i32;"));
+        Assert.Throws<ParseException>(() => Parse("public type F = (i32 i32) => i32;"));
     }
 
     [Test]
     public void ParseFunctionTypeArrowTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32) i32;"));
+        Assert.Throws<ParseException>(() => Parse("public type F = (i32, i32) i32;"));
     }
 
     [Test]
     public void ParseFunctionTypeReturnTypeTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32) => ;"));
+        Assert.Throws<ParseException>(() => Parse("public type F = (i32, i32) => ;"));
     }
 
     [Test]
     public void ParseFunctionTypeSemiColonTest()
     {
-        var parser = new Parser();
-
-        Assert.Throws<ParseException>(() => parser.Parse("public type F = (i32, i32) => i32"));
+        Assert.Throws<ParseException>(() => Parse("public type F = (i32, i32) => i32"));
     }
 
     [Test]
     public void ParseFunctionTypeInParameterTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public test(callback: (i32, i32) => void): void { }");
+        var tree = Parse("public test(callback: (i32, i32) => void): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -859,8 +816,7 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeInReturnTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public test(): (i32, i32) => void { }");
+        var tree = Parse("public test(): (i32, i32) => void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -883,8 +839,7 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeInVariableTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: (i32, i32) => void = 0;
@@ -919,8 +874,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point = {
                 x: i32;
@@ -960,8 +914,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeWithGettersSettersTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Point = {
                 x: i32 { public get; public set; }
@@ -1011,9 +964,78 @@ public class ParseTypeTests
     }
 
     [Test]
+    public void ParseAliasInterfaceTypeWithGetOnlyTest()
+    {
+        var tree = Parse(
+            """
+            public type Point = {
+                x: i32 { public get; }
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(50, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                new InterfaceNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(50, 3, 2)),
+                    [
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(48, 2, 27)),
+                            "x",
+                            new TypeNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"),
+                            AccessModifier.Public,
+                            null
+                        ),
+                    ],
+                    []
+                )
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+    }
+
+    [Test]
+    public void ParseAliasInterfaceTypeWithSetOnlyTest()
+    {
+        var tree = Parse(
+            """
+            public type Point = {
+                x: i32 { public set; }
+            }
+            """);
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(50, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                new InterfaceNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(50, 3, 2)),
+                    [
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(48, 2, 27)),
+                            "x",
+                            new TypeNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"),
+                            null,
+                            AccessModifier.Public
+                        ),
+                    ],
+                    []
+                )
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+    }
+
+    [Test]
     public void ParseAliasInterfaceTypeMissingCloseBraceTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public type Point = {
@@ -1023,13 +1045,12 @@ public class ParseTypeTests
                 distance(other: Point): f32;
             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingPropertyTypeTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public type Point = {
@@ -1040,13 +1061,12 @@ public class ParseTypeTests
             }
             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingPropertySemiColonTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public type Point = {
@@ -1057,13 +1077,12 @@ public class ParseTypeTests
             }
             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodReturnTypeTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public type Point = {
@@ -1074,13 +1093,12 @@ public class ParseTypeTests
             }
             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodColonTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public type Point = {
@@ -1091,13 +1109,12 @@ public class ParseTypeTests
             }
             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodSemiColonTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public type Point = {
@@ -1108,14 +1125,13 @@ public class ParseTypeTests
             }
             """;
 
-        Assert.Throws<ParseException>(() => parser.Parse(code));
+        Assert.Throws<ParseException>(() => Parse(code));
     }
 
     [Test]
     public void ParseNewOperatorTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var p: Point = new Point();
@@ -1146,8 +1162,7 @@ public class ParseTypeTests
     [Test]
     public void ParseNewOperatorWithParametersTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var p: Point = new Point(1, 2);
@@ -1185,7 +1200,6 @@ public class ParseTypeTests
     [Test]
     public void ParseNewOperatorMissingTypeTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public main(): void {
@@ -1194,7 +1208,7 @@ public class ParseTypeTests
             """;
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type."));
     }
@@ -1202,7 +1216,6 @@ public class ParseTypeTests
     [Test]
     public void ParseNewOperatorMissingArgumentTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public main(): void {
@@ -1211,7 +1224,7 @@ public class ParseTypeTests
             """;
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected an argument."));
     }
@@ -1219,7 +1232,6 @@ public class ParseTypeTests
     [Test]
     public void ParseNewOperatorMissingCloseParenTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public main(): void {
@@ -1228,7 +1240,7 @@ public class ParseTypeTests
             """;
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a close parenthesis."));
     }
@@ -1236,8 +1248,7 @@ public class ParseTypeTests
     [Test]
     public void ParseDiscriminatedUnionTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = { } | i32 | () => void;");
+        var tree = Parse("public type T = { } | i32 | () => void;");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(39, 1, 40)),
@@ -1265,8 +1276,8 @@ public class ParseTypeTests
             }
             """;
 
-        var parser = new Parser();
-        var tree = parser.Parse(code);
+
+        var tree = Parse(code);
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -1295,8 +1306,7 @@ public class ParseTypeTests
     [Test]
     public void TupleTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = (i32, i32);");
+        var tree = Parse("public type T = (i32, i32);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
@@ -1313,8 +1323,7 @@ public class ParseTypeTests
     [Test]
     public void NestedTupleTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = ((i32, i32), i32);");
+        var tree = Parse("public type T = ((i32, i32), i32);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
@@ -1334,8 +1343,7 @@ public class ParseTypeTests
     [Test]
     public void TupleTypeWithDuTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = (bool | i32, () => void);");
+        var tree = Parse("public type T = (bool | i32, () => void);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
@@ -1355,8 +1363,7 @@ public class ParseTypeTests
     [Test]
     public void TupleTypeWithSingleTypeTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = (i32);");
+        var tree = Parse("public type T = (i32);");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -1377,11 +1384,10 @@ public class ParseTypeTests
     [Test]
     public void TupleTypeMissingTest()
     {
-        var parser = new Parser();
         const string code = "public type T = (i32";
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a close parenthesis."));
     }
@@ -1389,8 +1395,7 @@ public class ParseTypeTests
     [Test]
     public void FunctionWithTupleTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public main(): (i32, i32) { }");
+        var tree = Parse("public main(): (i32, i32) { }");
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(29, 1, 30)),
@@ -1414,8 +1419,7 @@ public class ParseTypeTests
     [Test]
     public void ParseTupleInDuTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = i32 | (bool, f64);");
+        var tree = Parse("public type T = i32 | (bool, f64);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
@@ -1435,8 +1439,7 @@ public class ParseTypeTests
     [Test]
     public void ParseDuInTupleTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = (bool, i32 | f64);");
+        var tree = Parse("public type T = (bool, i32 | f64);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
@@ -1456,8 +1459,7 @@ public class ParseTypeTests
     [Test]
     public void ParseStaticMethodTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Test {
                 public static test(): void { }
@@ -1492,8 +1494,7 @@ public class ParseTypeTests
     [Test]
     public void ParseCallStaticMethodTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public type Test {
                 public static test(): void { }
@@ -1554,8 +1555,7 @@ public class ParseTypeTests
     [Test]
     public void ParseDuWithFunctionTypeAndDuTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = i32 | (() => i32 | null);");
+        var tree = Parse("public type T = i32 | (() => i32 | null);");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -1592,8 +1592,7 @@ public class ParseTypeTests
     [Test]
     public void ParseDuWithFunctionTypeAndDu2Test()
     {
-        var parser = new Parser();
-        var tree = parser.Parse("public type T = i32 | (() => i32) | null;");
+        var tree = Parse("public type T = i32 | (() => i32) | null;");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(

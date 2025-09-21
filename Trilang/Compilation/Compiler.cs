@@ -1,4 +1,6 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.IntermediateRepresentation;
+using Trilang.Lexing;
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
@@ -12,6 +14,9 @@ public class Compiler
 {
     public void Compile(CompilerOptions options)
     {
+        var diagnostics = new DiagnosticCollection();
+
+        var lexer = new Lexer();
         var parser = new Parser();
         var rootTypeMetadataProvider = new RootTypeMetadataProvider();
         var semantic = new SemanticAnalysis(rootTypeMetadataProvider);
@@ -22,12 +27,49 @@ public class Compiler
         var project = Project.Load(options.Path);
         foreach (var sourceFile in project.SourceFiles)
         {
+            diagnostics.SwitchFile(sourceFile);
+
             var code = File.ReadAllText(sourceFile.FilePath);
-            var tree = parser.Parse(code);
+            var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+            var tree = parser.Parse(tokens);
             var (semanticTree, _, _, cfgs) = semantic.Analyze(tree, semanticOptions);
             lowering.Lower(semanticTree, new LoweringOptions(options.Directives, cfgs));
 
             semanticTrees.Add(semanticTree);
+        }
+
+        if (diagnostics.Diagnostics.Count > 0)
+        {
+            foreach (var diagnostic in diagnostics.Diagnostics)
+            {
+                var (start, end) = diagnostic.SourceSpan;
+                var span = start != end
+                    ? $"{start.Line}:{start.Column} - {end.Line}:{end.Column}"
+                    : $"{start.Line}:{start.Column}";
+
+                // $"{diagnostic.File}({span}): {diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}";
+                var originalColor = Console.ForegroundColor;
+
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.Write($"{diagnostic.File}({span})");
+
+                Console.ForegroundColor = originalColor;
+                Console.Write(": ");
+
+                Console.ForegroundColor = diagnostic.Severity switch
+                {
+                    DiagnosticSeverity.Info => originalColor,
+                    DiagnosticSeverity.Warning => ConsoleColor.Yellow,
+                    DiagnosticSeverity.Error => ConsoleColor.Red,
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
+                Console.WriteLine($"{diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}");
+                Console.ForegroundColor = originalColor;
+
+                // TODO: print line with error
+            }
+
+            return;
         }
 
         var ir = new IrGenerator();

@@ -1,4 +1,6 @@
 using Trilang;
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 
@@ -6,11 +8,19 @@ namespace Tri.Tests.Parsing;
 
 public class ParseExpressionTests
 {
+    private static SyntaxTree Parse(string code)
+    {
+        var diagnostics = new DiagnosticCollection();
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
+        return new Parser().Parse(tokens);
+    }
+
     [Test]
     public void ParseVariableTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = 5;
@@ -43,8 +53,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseUnaryPlusTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = +2;
@@ -79,8 +88,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseUnaryMinusTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = -2;
@@ -115,8 +123,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseLogicalNotTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = !2;
@@ -151,8 +158,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseBitwiseNotTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = ~2;
@@ -187,8 +193,7 @@ public class ParseExpressionTests
     [Test]
     public void MultipleUnaryOperatorsTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = ~+2;
@@ -240,8 +245,7 @@ public class ParseExpressionTests
     [TestCase("%", BinaryExpressionKind.Modulus)]
     public void ParseBinaryNumberTest(string @operator, BinaryExpressionKind kind)
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             $$"""
               public main(): void {
                   var x: i32 = 2 {{@operator}} 2;
@@ -277,8 +281,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseBitwiseAndTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = 2 & 2;
@@ -322,8 +325,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseBitwiseOrTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = 2 | 2;
@@ -374,8 +376,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseBitwiseXorTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = 2 ^ 2;
@@ -426,8 +427,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseLogicalAndTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: bool = true && true;
@@ -463,8 +463,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseLogicalOrTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: bool = true || true;
@@ -500,8 +499,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseEqualityTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: bool = true == true;
@@ -537,8 +535,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseInequalityTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: bool = true != true;
@@ -574,8 +571,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseLessThanTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: bool = 2 < 2;
@@ -611,8 +607,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseLessThanOrEqualTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: bool = 2 <= 2;
@@ -648,8 +643,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseGreaterThanTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: bool = 2 > 2;
@@ -685,8 +679,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseGreaterThanOrEqualTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: bool = 2 >= 2;
@@ -722,8 +715,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseAssignmentTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 x = 1;
@@ -765,8 +757,7 @@ public class ParseExpressionTests
     [TestCase("^=", BinaryExpressionKind.BitwiseXorAssignment)]
     public void ParseAssignment2Test(string @operator, BinaryExpressionKind kind)
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             $$"""
               public main(): void {
                   x {{@operator}} 1;
@@ -800,8 +791,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseParenTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = (1 + 2) * 3;
@@ -859,8 +849,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseVariableExpressionTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(y: i32): void {
                 var x: i32 = 2 * y;
@@ -896,8 +885,7 @@ public class ParseExpressionTests
     [Test]
     public void ParsePrecedenceTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 var x: i32 = true || true && false | false ^ false & true == 1 + 2 * 3 < 10;
@@ -969,8 +957,7 @@ public class ParseExpressionTests
     [Test]
     public void TupleExpressionTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return (1, 2);
@@ -1001,7 +988,6 @@ public class ParseExpressionTests
     [Test]
     public void TupleExpressionMissingCloseParenTest()
     {
-        var parse = new Parser();
         const string code =
             """
             public main(): void {
@@ -1010,7 +996,7 @@ public class ParseExpressionTests
             """;
 
         Assert.That(
-            () => parse.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a close parenthesis."));
     }
@@ -1018,8 +1004,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseNewArrayTest()
     {
-        var parse = new Parser();
-        var tree = parse.Parse(
+        var tree = Parse(
             """
             public main(): void {
                 return new i32[10];
@@ -1057,8 +1042,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseAsExpressionTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(a: i32): i8 {
                 return a is i8;
@@ -1095,7 +1079,6 @@ public class ParseExpressionTests
     [Test]
     public void ParseAsExpressionMissingTypeTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public test(a: i32): i8 {
@@ -1104,7 +1087,7 @@ public class ParseExpressionTests
             """;
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a type."));
     }
@@ -1112,8 +1095,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseCastExpressionTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(a: i32): i8 {
                 return (i8)a;
@@ -1154,7 +1136,6 @@ public class ParseExpressionTests
     [Test]
     public void ParseCastExpressionMissingCloseParenTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public test(a: i32): i8 {
@@ -1163,7 +1144,7 @@ public class ParseExpressionTests
             """;
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected a close parenthesis."));
     }
@@ -1171,7 +1152,6 @@ public class ParseExpressionTests
     [Test]
     public void ParseCastExpressionMissingExpressionTest()
     {
-        var parser = new Parser();
         const string code =
             """
             public test(a: i32): i8 {
@@ -1180,7 +1160,7 @@ public class ParseExpressionTests
             """;
 
         Assert.That(
-            () => parser.Parse(code),
+            () => Parse(code),
             Throws.TypeOf<ParseException>()
                 .And.Message.EqualTo("Expected an expression."));
     }
@@ -1188,8 +1168,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseFloatingNumberTest()
     {
-        var parser = new Parser();
-        var tree = parser.Parse(
+        var tree = Parse(
             """
             public test(): f64 {
                 return 3.14;

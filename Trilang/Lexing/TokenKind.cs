@@ -2,6 +2,7 @@ namespace Trilang.Lexing;
 
 public enum TokenKind
 {
+    Unsupported,
     EndOfFile,
 
     Identifier,

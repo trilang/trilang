@@ -1,14 +1,7 @@
 namespace Trilang.Compilation;
 
-public class SourceFile
+public record SourceFile(string FilePath, string Name)
 {
-    public SourceFile(string filePath, string name)
-    {
-        FilePath = filePath;
-        Name = name;
-    }
-
-    public string FilePath { get; }
-
-    public string Name { get; }
+    public override string ToString()
+        => Name;
 }

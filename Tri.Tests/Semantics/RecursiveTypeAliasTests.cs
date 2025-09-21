@@ -1,3 +1,5 @@
+using Trilang.Compilation.Diagnostics;
+using Trilang.Lexing;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -8,8 +10,13 @@ public class RecursiveTypeAliasTests
 {
     private static SyntaxTree Parse(string code)
     {
+        var diagnostics = new DiagnosticCollection();
+
+        var lexer = new Lexer();
+        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+
         var parser = new Parser();
-        var tree = parser.Parse(code);
+        var tree = parser.Parse(tokens);
 
         return tree;
     }

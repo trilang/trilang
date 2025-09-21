@@ -5,10 +5,8 @@ namespace Trilang.Parsing;
 
 public class Parser
 {
-    public SyntaxTree Parse(string code)
+    public SyntaxTree Parse(IReadOnlyList<Token> tokens)
     {
-        var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code);
         var context = new ParserContext(tokens, this);
         var functions = new List<IDeclarationNode>();
 
@@ -1253,7 +1251,7 @@ public class Parser
                 return null;
 
             if (!c.Reader.Check(TokenKind.Get))
-                throw new ParseException("Expected a get keyword.");
+                return null;
 
             if (!c.Reader.Check(TokenKind.SemiColon))
                 throw new ParseException("Expected a semi colon.");
@@ -1269,7 +1267,7 @@ public class Parser
                 return null;
 
             if (!c.Reader.Check(TokenKind.Set))
-                throw new ParseException("Expected a get keyword.");
+                return null;
 
             if (!c.Reader.Check(TokenKind.SemiColon))
                 throw new ParseException("Expected a semi colon.");
