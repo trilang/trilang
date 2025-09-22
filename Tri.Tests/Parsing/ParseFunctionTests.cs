@@ -20,50 +20,73 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingIdFunctionTest()
     {
-        Assert.Throws<ParseException>(() => Parse("function;"));
+        Assert.That(
+            () => Parse("public;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type declaration."));
     }
 
     [Test]
     public void ParseMissingOpenParenFunctionTest()
     {
-        Assert.Throws<ParseException>(() => Parse("function test { }"));
+        Assert.That(
+            () => Parse("public test { }"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an open parenthesis."));
     }
 
     [Test]
     public void ParseMissingParamColonFunctionTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public test(x i32) { }"));
+        Assert.That(
+            () => Parse("public test(x i32) { }"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a colon."));
     }
 
     [Test]
     public void ParseMissingParamTypeFunctionTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public test(x: ) { }"));
+        Assert.That(
+            () => Parse("public test(x: ) { }"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
     }
 
     [Test]
     public void ParseMissingCommaFunctionTest()
     {
-        Assert.Throws<ParseException>(() => Parse(
-            "public test(x: i32 y: i32): void { }"));
+        Assert.That(
+            () => Parse("public test(x: i32 y: i32): void { }"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an close parenthesis."));
     }
 
     [Test]
     public void ParseMissingCloseParenFunctionTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public test( { }"));
+        Assert.That(
+            () => Parse("public test( { }"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an close parenthesis."));
     }
 
     [Test]
     public void ParseMissingReturnColonFunctionTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public test()"));
+        Assert.That(
+            () => Parse("public test()"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a colon."));
     }
 
     [Test]
     public void ParseMissingReturnTypeFunctionTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public test():"));
+        Assert.That(
+            () => Parse("public test():"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a function return type."));
     }
 
     [Test]

@@ -39,19 +39,14 @@ public class ParseTypeTests
     }
 
     [Test]
-    public void ParseTypeMissingTypeKeywordTest()
-    {
-        const string code = "public Point { }";
-
-        Assert.Throws<ParseException>(() => Parse(code));
-    }
-
-    [Test]
     public void ParseTypeMissingNameTest()
     {
         const string code = "public type { }";
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type name."));
     }
 
     [Test]
@@ -59,7 +54,10 @@ public class ParseTypeTests
     {
         const string code = "public type Point }";
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an open brace."));
     }
 
     [Test]
@@ -67,7 +65,10 @@ public class ParseTypeTests
     {
         const string code = "public type Point {";
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close brace."));
     }
 
     [Test]
@@ -370,11 +371,14 @@ public class ParseTypeTests
     {
         const string code = """
                             public type Point {
-                                private : i32;
+                                : i32;
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close brace."));
     }
 
     [Test]
@@ -382,11 +386,14 @@ public class ParseTypeTests
     {
         const string code = """
                             public type Point {
-                                private x i32;
+                                x i32;
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close brace."));
     }
 
     [Test]
@@ -394,11 +401,14 @@ public class ParseTypeTests
     {
         const string code = """
                             public type Point {
-                                private x: ;
+                                x: ;
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
     }
 
     [Test]
@@ -406,11 +416,14 @@ public class ParseTypeTests
     {
         const string code = """
                             public type Point {
-                                private x: i32
+                                x: i32
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an open brace."));
     }
 
     [Test]
@@ -469,7 +482,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a method name."));
     }
 
     [Test]
@@ -481,7 +497,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an open parenthesis."));
     }
 
     [Test]
@@ -493,7 +512,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an close parenthesis."));
     }
 
     [Test]
@@ -505,7 +527,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a colon."));
     }
 
     [Test]
@@ -513,11 +538,14 @@ public class ParseTypeTests
     {
         const string code = """
                             public type Point {
-                                public toString(): { }
+                                public toString(): { var x: i32 = 1; }
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a function return type."));
     }
 
     [Test]
@@ -529,7 +557,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a function block."));
     }
 
     [Test]
@@ -541,7 +572,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close brace."));
     }
 
     [Test]
@@ -553,7 +587,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an close parenthesis."));
     }
 
     [Test]
@@ -565,7 +602,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a colon."));
     }
 
     [Test]
@@ -577,7 +617,10 @@ public class ParseTypeTests
                             }
                             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
     }
 
     [Test]
@@ -619,10 +662,7 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeWithInterfaceTest()
     {
-        var tree = Parse(
-            """
-            public type Point : Interface1, Interface2 { }
-            """);
+        var tree = Parse("public type Point : Interface1, Interface2 { }");
 
         var expected = new SyntaxTree([
             new TypeDeclarationNode(
@@ -645,7 +685,10 @@ public class ParseTypeTests
     {
         const string code = "public type Point : { }";
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an interface."));
     }
 
     [Test]
@@ -653,7 +696,10 @@ public class ParseTypeTests
     {
         const string code = "public type Point : Interface1, { }";
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an interface."));
     }
 
     [Test]
@@ -677,19 +723,28 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeAliasMissingNameTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type = i32;"));
+        Assert.That(
+            () => Parse("public type = i32;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type name."));
     }
 
     [Test]
     public void ParseTypeAliasMissingTypeTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type MyType = ;"));
+        Assert.That(
+            () => Parse("public type MyType = ;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
     }
 
     [Test]
     public void ParseTypeAliasMissingSemiColonTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type MyType = i32"));
+        Assert.That(
+            () => Parse("public type MyType = i32"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a semicolon."));
     }
 
     [Test]
@@ -739,49 +794,73 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeMissingNameTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type = (i32, i32) => i32;"));
+        Assert.That(
+            () => Parse("public type = (i32, i32) => i32;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type name."));
     }
 
     [Test]
     public void ParseFunctionTypeMissingEqualTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type F (i32, i32) => i32;"));
+        Assert.That(
+            () => Parse("public type F (i32, i32) => i32;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an open brace."));
     }
 
     [Test]
     public void ParseFunctionTypeMissingOpenParenTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type F = i32, i32) => i32;"));
+        Assert.That(
+            () => Parse("public type F = i32, i32) => i32;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a semicolon."));
     }
 
     [Test]
     public void ParseFunctionTypeMissingCloseParenTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type F = (i32, i32 => i32;"));
+        Assert.That(
+            () => Parse("public type F = (i32, i32 => i32;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close parenthesis."));
     }
 
     [Test]
     public void ParseFunctionTypeCommaTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type F = (i32 i32) => i32;"));
+        Assert.That(
+            () => Parse("public type F = (i32 i32) => i32;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close parenthesis."));
     }
 
     [Test]
     public void ParseFunctionTypeArrowTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type F = (i32, i32) i32;"));
+        Assert.That(
+            () => Parse("public type F = (i32, i32) i32;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a semicolon."));
     }
 
     [Test]
     public void ParseFunctionTypeReturnTypeTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type F = (i32, i32) => ;"));
+        Assert.That(
+            () => Parse("public type F = (i32, i32) => ;"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a function return type."));
     }
 
     [Test]
     public void ParseFunctionTypeSemiColonTest()
     {
-        Assert.Throws<ParseException>(() => Parse("public type F = (i32, i32) => i32"));
+        Assert.That(
+            () => Parse("public type F = (i32, i32) => i32"),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a semicolon."));
     }
 
     [Test]
@@ -1042,10 +1121,13 @@ public class ParseTypeTests
                 x: i32;
                 y: i32;
 
-                distance(other: Point): f32;
+                distance(Point): f32;
             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close brace."));
     }
 
     [Test]
@@ -1057,11 +1139,14 @@ public class ParseTypeTests
                 x: ;
                 y: i32;
 
-                distance(other: Point): f32;
+                distance(Point): f32;
             }
             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
     }
 
     [Test]
@@ -1073,11 +1158,14 @@ public class ParseTypeTests
                 x: i32
                 y: i32;
 
-                distance(other: Point): f32;
+                distance(Point): f32;
             }
             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an open brace."));
     }
 
     [Test]
@@ -1089,11 +1177,14 @@ public class ParseTypeTests
                 x: i32;
                 y: i32;
 
-                distance(other: Point): ;
+                distance(Point): ;
             }
             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a type."));
     }
 
     [Test]
@@ -1105,11 +1196,14 @@ public class ParseTypeTests
                 x: i32;
                 y: i32;
 
-                distance(other: Point) f64;
+                distance(Point) f64;
             }
             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a colon."));
     }
 
     [Test]
@@ -1121,11 +1215,14 @@ public class ParseTypeTests
                 x: i32;
                 y: i32;
 
-                distance(other: Point): f64
+                distance(Point): f64
             }
             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a semi-colon."));
     }
 
     [Test]

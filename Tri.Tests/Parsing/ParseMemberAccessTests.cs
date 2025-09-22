@@ -62,7 +62,10 @@ public class ParseMemberAccessTests
             }
             """;
 
-        Assert.Throws<ParseException>(() => Parse(code));
+        Assert.That(
+            () => Parse(code),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close bracket."));
     }
 
     [Test]
@@ -513,6 +516,7 @@ public class ParseMemberAccessTests
         Assert.That(
             () => Parse(code),
             Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a semicolon.")
         );
     }
 }

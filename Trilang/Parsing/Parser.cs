@@ -193,7 +193,7 @@ public class Parser
 
             var (_, name) = c.Parser.TryParseId(c);
             if (name is null)
-                throw new ParseException("Expected a type alias name.");
+                throw new ParseException("Expected a type name.");
 
             var genericArguments = c.Parser.TryParseGenericTypeArguments(c);
 
@@ -262,7 +262,7 @@ public class Parser
         var methods = new List<MethodDeclarationNode>();
 
         var closeBrace = default(Token);
-        while (!context.Reader.Check(TokenKind.CloseBrace, out closeBrace))
+        while (true)
         {
             var constructor = TryParseConstructor(context);
             if (constructor is not null)
@@ -285,7 +285,10 @@ public class Parser
                 continue;
             }
 
-            throw new ParseException("Expected a property or a method.");
+            if (context.Reader.Check(TokenKind.CloseBrace, out closeBrace))
+                break;
+
+            throw new ParseException("Expected a close brace.");
         }
 
         return new TypeDeclarationNode(
@@ -1186,7 +1189,12 @@ public class Parser
             var methods = c.Parser.TryParseInterfaceMethods(c);
 
             if (!c.Reader.Check(TokenKind.CloseBrace, out var closeBrace))
+            {
+                if (properties.Count == 0 && methods.Count == 0)
+                    return null;
+
                 throw new ParseException("Expected a close brace.");
+            }
 
             return new InterfaceNode(
                 openBrace.SourceSpan.Combine(closeBrace.SourceSpan),

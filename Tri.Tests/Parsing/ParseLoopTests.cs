@@ -85,7 +85,10 @@ public class ParseLoopTests
                      }
                      """;
 
-        Assert.Throws<ParseException>(() => Parse(source));
+        Assert.That(
+            () => Parse(source),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected an open parenthesis."));
     }
 
     [Test]
@@ -98,7 +101,10 @@ public class ParseLoopTests
                      }
                      """;
 
-        Assert.Throws<ParseException>(() => Parse(source));
+        Assert.That(
+            () => Parse(source),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a condition."));
     }
 
     [Test]
@@ -111,7 +117,10 @@ public class ParseLoopTests
                      }
                      """;
 
-        Assert.Throws<ParseException>(() => Parse(source));
+        Assert.That(
+            () => Parse(source),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a close parenthesis."));
     }
 
     [Test]
@@ -124,7 +133,10 @@ public class ParseLoopTests
                      }
                      """;
 
-        Assert.Throws<ParseException>(() => Parse(source));
+        Assert.That(
+            () => Parse(source),
+            Throws.TypeOf<ParseException>()
+                .And.Message.EqualTo("Expected a block."));
     }
 
     [Test]
