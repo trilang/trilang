@@ -94,7 +94,6 @@ public class Lexer
                     "if" => Token.Create(sourceSpan, TokenKind.If),
                     "else" => Token.Create(sourceSpan, TokenKind.Else),
                     "endif" => Token.Create(sourceSpan, TokenKind.EndIf),
-                    "external" => Token.Create(sourceSpan, TokenKind.External),
                     "return" => Token.Create(sourceSpan, TokenKind.Return),
                     "true" => Token.Create(sourceSpan, TokenKind.True),
                     "false" => Token.Create(sourceSpan, TokenKind.False),

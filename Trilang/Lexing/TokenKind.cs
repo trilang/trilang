@@ -59,7 +59,6 @@ public enum TokenKind
     If,
     Else,
     EndIf,
-    External,
     Return,
     True,
     False,

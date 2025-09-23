@@ -135,7 +135,6 @@ public class LexerTests
     [TestCase("if", TokenKind.If)]
     [TestCase("else", TokenKind.Else)]
     [TestCase("endif", TokenKind.EndIf)]
-    [TestCase("external", TokenKind.External)]
     [TestCase("return", TokenKind.Return)]
     [TestCase("true", TokenKind.True)]
     [TestCase("false", TokenKind.False)]
