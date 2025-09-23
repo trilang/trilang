@@ -6,9 +6,9 @@ namespace Trilang.Parsing;
 
 public class Parser
 {
-    public SyntaxTree Parse(IReadOnlyList<Token> tokens)
+    public SyntaxTree Parse(IReadOnlyList<Token> tokens, ParserOptions options)
     {
-        var context = new ParserContext(tokens, this);
+        var context = new ParserContext(tokens, options.Diagnostics, this);
         var functions = new List<IDeclarationNode>();
 
         while (!context.Reader.HasEnded)

@@ -15,6 +15,8 @@ public class Compiler
     public void Compile(CompilerOptions options)
     {
         var diagnostics = new DiagnosticCollection();
+        var lexerOptions = new LexerOptions(diagnostics.Lexer);
+        var parserOptions = new ParserOptions(diagnostics.Parser);
 
         var lexer = new Lexer();
         var parser = new Parser();
@@ -30,8 +32,8 @@ public class Compiler
             diagnostics.SwitchFile(sourceFile);
 
             var code = File.ReadAllText(sourceFile.FilePath);
-            var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
-            var tree = parser.Parse(tokens);
+            var tokens = lexer.Tokenize(code, lexerOptions);
+            var tree = parser.Parse(tokens, parserOptions);
             var (semanticTree, _, _, cfgs) = semantic.Analyze(tree, semanticOptions);
             lowering.Lower(semanticTree, new LoweringOptions(options.Directives, cfgs));
 

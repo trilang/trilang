@@ -1,15 +1,18 @@
 using System.Diagnostics.CodeAnalysis;
+using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 
 namespace Trilang.Parsing;
 
 internal sealed class TokenReader
 {
+    private readonly ParserDiagnosticCollection diagnostics;
     private readonly IReadOnlyList<Token> tokens;
     private int index;
 
-    public TokenReader(IReadOnlyList<Token> tokens)
+    public TokenReader(ParserDiagnosticCollection diagnostics, IReadOnlyList<Token> tokens)
     {
+        this.diagnostics = diagnostics;
         this.tokens = tokens;
         index = 0;
     }

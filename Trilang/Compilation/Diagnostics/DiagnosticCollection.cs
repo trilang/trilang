@@ -11,6 +11,7 @@ public class DiagnosticCollection
         file = null!;
 
         Lexer = new LexerDiagnosticCollection(this);
+        Parser = new ParserDiagnosticCollection(this);
     }
 
     public void SwitchFile(SourceFile file)
@@ -35,4 +36,6 @@ public class DiagnosticCollection
         => diagnostics;
 
     public LexerDiagnosticCollection Lexer { get; }
+
+    public ParserDiagnosticCollection Parser { get; }
 }

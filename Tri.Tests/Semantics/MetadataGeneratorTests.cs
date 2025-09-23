@@ -17,7 +17,7 @@ public class MetadataGeneratorTests
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
 
         var parser = new Parser();
-        var tree = parser.Parse(tokens);
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
         return tree;
     }

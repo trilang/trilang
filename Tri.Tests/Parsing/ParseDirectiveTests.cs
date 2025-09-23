@@ -13,8 +13,9 @@ public class ParseDirectiveTests
         var diagnostics = new DiagnosticCollection();
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var parser = new Parser();
 
-        return new Parser().Parse(tokens);
+        return parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
     }
 
     [Test]

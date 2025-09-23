@@ -1,4 +1,5 @@
 using Trilang;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -8,13 +9,19 @@ namespace Tri.Tests.Parsing;
 
 public class ParseFunctionTests
 {
-    private static SyntaxTree Parse(string code)
+    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
+        diagnostics.SwitchFile(file);
+
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var parser = new Parser();
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
-        return new Parser().Parse(tokens);
+        return (tree, diagnostics);
     }
 
     [Test]
@@ -92,7 +99,7 @@ public class ParseFunctionTests
     [Test]
     public void ParseEmptyFunctionTest()
     {
-        var tree = Parse("public test(): void { }");
+        var (tree, _) = Parse("public test(): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -111,7 +118,7 @@ public class ParseFunctionTests
     [Test]
     public void ParseSingleParameterFunctionTest()
     {
-        var tree = Parse("public test(x: i32): void { }");
+        var (tree, _) = Parse("public test(x: i32): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -132,7 +139,7 @@ public class ParseFunctionTests
     [Test]
     public void ParseMultipleParametersFunctionTest()
     {
-        var tree = Parse("public test(x: i32, y: i32, z: i32): void { }");
+        var (tree, _) = Parse("public test(x: i32, y: i32, z: i32): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -155,7 +162,7 @@ public class ParseFunctionTests
     [Test]
     public void ParseArrayTypeTest()
     {
-        var tree = Parse("public test(x: i32[]): void { }");
+        var (tree, _) = Parse("public test(x: i32[]): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(

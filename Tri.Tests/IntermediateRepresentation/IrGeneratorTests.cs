@@ -21,7 +21,7 @@ public class IrGeneratorTests
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
 
         var parser = new Parser();
-        var tree = parser.Parse(tokens);
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
