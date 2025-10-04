@@ -8,7 +8,7 @@ public class TypeDeclarationNode : IDeclarationNode, IHasGenericArguments
         SourceSpan sourceSpan,
         AccessModifier accessModifier,
         string name,
-        IReadOnlyList<TypeNode> genericArguments,
+        IReadOnlyList<IInlineTypeNode> genericArguments,
         IReadOnlyList<TypeNode> interfaces,
         IReadOnlyList<PropertyDeclarationNode> properties,
         IReadOnlyList<ConstructorDeclarationNode> constructors,
@@ -44,7 +44,7 @@ public class TypeDeclarationNode : IDeclarationNode, IHasGenericArguments
 
     public string Name { get; }
 
-    public IReadOnlyList<TypeNode> GenericArguments { get; }
+    public IReadOnlyList<IInlineTypeNode> GenericArguments { get; }
 
     public IReadOnlyList<TypeNode> Interfaces { get; }
 

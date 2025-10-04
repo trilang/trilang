@@ -6,7 +6,6 @@ using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
 using Trilang.Semantics;
-using Trilang.Semantics.Model;
 
 namespace Trilang.Compilation;
 
@@ -25,7 +24,7 @@ public class Compiler
         var semanticOptions = new SemanticAnalysisOptions(options.Directives);
         var lowering = new Lowering();
 
-        var semanticTrees = new List<SemanticTree>();
+        var semanticResults = new List<SemanticAnalysisResult>();
         var project = Project.Load(options.Path);
         foreach (var sourceFile in project.SourceFiles)
         {
@@ -34,10 +33,9 @@ public class Compiler
             var code = File.ReadAllText(sourceFile.FilePath);
             var tokens = lexer.Tokenize(code, lexerOptions);
             var tree = parser.Parse(tokens, parserOptions);
-            var (semanticTree, _, _, cfgs) = semantic.Analyze(tree, semanticOptions);
-            lowering.Lower(semanticTree, new LoweringOptions(options.Directives, cfgs));
+            var semanticResult = semantic.Analyze(tree, semanticOptions);
 
-            semanticTrees.Add(semanticTree);
+            semanticResults.Add(semanticResult);
         }
 
         if (diagnostics.Diagnostics.Count > 0)
@@ -49,7 +47,7 @@ public class Compiler
                     ? $"{start.Line}:{start.Column} - {end.Line}:{end.Column}"
                     : $"{start.Line}:{start.Column}";
 
-                // $"{diagnostic.File}({span}): {diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}";
+                // $"{diagnostic.File}({span}): {diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}"
                 var originalColor = Console.ForegroundColor;
 
                 Console.ForegroundColor = ConsoleColor.Blue;
@@ -68,14 +66,20 @@ public class Compiler
                 Console.WriteLine($"{diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}");
                 Console.ForegroundColor = originalColor;
 
-                // TODO: print line with error
+                // TODO: print source code with error
             }
 
             return;
         }
 
+        foreach (var (semanticTree, _, _, cfgs) in semanticResults)
+            lowering.Lower(semanticTree, new LoweringOptions(options.Directives, cfgs));
+
         var ir = new IrGenerator();
-        var functions = ir.Generate(rootTypeMetadataProvider.Types, semanticTrees);
+        var functions = ir.Generate(
+            rootTypeMetadataProvider.Types,
+            semanticResults.Select(x => x.SemanticTree));
+
         if (options.PrintIr)
             foreach (var function in functions)
                 Console.WriteLine(function);

@@ -10,7 +10,7 @@ public class NewObjectExpressionNode : IExpressionNode
         IInlineTypeNode type,
         IReadOnlyList<IExpressionNode> parameters)
     {
-        Debug.Assert(type is TypeNode or GenericTypeNode);
+        Debug.Assert(type is TypeNode or GenericTypeNode or FakeTypeNode);
 
         SourceSpan = sourceSpan;
         Type = type;

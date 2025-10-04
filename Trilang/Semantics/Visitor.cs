@@ -215,6 +215,62 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public virtual void VisitFakeDeclaration(FakeDeclaration node)
+    {
+        VisitFakeDeclarationEnter(node);
+        VisitFakeDeclarationExit(node);
+    }
+
+    protected virtual void VisitFakeDeclarationEnter(FakeDeclaration node)
+    {
+    }
+
+    protected virtual void VisitFakeDeclarationExit(FakeDeclaration node)
+    {
+    }
+
+    public virtual void VisitFakeExpression(FakeExpression node)
+    {
+        VisitFakeExpressionEnter(node);
+        VisitFakeExpressionExit(node);
+    }
+
+    protected virtual void VisitFakeExpressionEnter(FakeExpression node)
+    {
+    }
+
+    protected virtual void VisitFakeExpressionExit(FakeExpression node)
+    {
+    }
+
+    public virtual void VisitFakeStatement(FakeStatement node)
+    {
+        VisitFakeStatementEnter(node);
+        VisitFakeStatementExit(node);
+    }
+
+    protected virtual void VisitFakeStatementEnter(FakeStatement node)
+    {
+    }
+
+    protected virtual void VisitFakeStatementExit(FakeStatement node)
+    {
+    }
+
+    public virtual void VisitFakeType(FakeType node)
+    {
+        VisitFakeTypeEnter(node);
+        VisitFakeTypeExit(node);
+    }
+
+    protected virtual void VisitFakeTypeEnter(FakeType node)
+    {
+    }
+
+    protected virtual void VisitFakeTypeExit(FakeType node)
+    {
+    }
+
     public virtual void VisitFunction(FunctionDeclaration node)
     {
         VisitFunctionEnter(node);

@@ -8,7 +8,7 @@ public class TypeAliasDeclarationNode : IDeclarationNode, IHasGenericArguments
         SourceSpan sourceSpan,
         AccessModifier accessModifier,
         string name,
-        IReadOnlyList<TypeNode> genericArguments,
+        IReadOnlyList<IInlineTypeNode> genericArguments,
         IInlineTypeNode type)
     {
         SourceSpan = sourceSpan;
@@ -38,7 +38,7 @@ public class TypeAliasDeclarationNode : IDeclarationNode, IHasGenericArguments
 
     public string Name { get; }
 
-    public IReadOnlyList<TypeNode> GenericArguments { get; }
+    public IReadOnlyList<IInlineTypeNode> GenericArguments { get; }
 
     public IInlineTypeNode Type { get; }
 }

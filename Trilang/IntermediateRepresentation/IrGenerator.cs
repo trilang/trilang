@@ -20,7 +20,7 @@ public class IrGenerator
 
     public IReadOnlyList<IrFunction> Generate(
         IEnumerable<ITypeMetadata> types,
-        IReadOnlyList<SemanticTree> semanticTrees)
+        IEnumerable<SemanticTree> semanticTrees)
     {
         var typeMetadata = types as ITypeMetadata[] ?? types.ToArray();
         layoutGenerator.Generate(typeMetadata);

@@ -1,4 +1,5 @@
 using Trilang;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -8,20 +9,25 @@ namespace Tri.Tests.Parsing;
 
 public class ParseTypeTests
 {
-    private static SyntaxTree Parse(string code)
+    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
+        diagnostics.SwitchFile(file);
+
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
         var parser = new Parser();
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
-        return parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        return (tree, diagnostics);
     }
 
     [Test]
     public void ParseTypeTest()
     {
-        var tree = Parse("public type Point { }");
+        var (tree, diagnostics) = Parse("public type Point { }");
 
         var expected = new SyntaxTree([
             new TypeDeclarationNode(
@@ -37,45 +43,100 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseTypeMissingNameTest()
     {
-        const string code = "public type { }";
+        var (tree, diagnostics) = Parse("public type { }");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type name."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(15, 1, 16)),
+                AccessModifier.Public,
+                "<>_0",
+                [],
+                [],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0005_ExpectedTypeName,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(12, 1, 13).ToSpan(),
+            "Expected a type name.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseTypeMissingOpenBraceTest()
     {
-        const string code = "public type Point }";
+        var (tree, diagnostics) = Parse("public type Point }");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an open brace."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 1, 20)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(18, 1, 19).ToSpan(),
+            "Expected '{'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseTypeMissingCloseBraceTest()
     {
-        const string code = "public type Point {";
+        var (tree, diagnostics) = Parse("public type Point {");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close brace."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 1, 20)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0014_ExpectedTypeMember,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(19, 1, 20).ToSpan(),
+            "Expected a type member (a property, a method or a constructor).");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParsePropertiesTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32;
@@ -114,12 +175,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParsePropertiesWithBlocksTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 {
@@ -248,12 +310,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseEmptyGetterTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 {
@@ -317,12 +380,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseEmptySetterTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 {
@@ -365,72 +429,176 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParsePropertyMissingNameTest()
     {
-        const string code = """
-                            public type Point {
-                                : i32;
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                : i32;
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close brace."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0014_ExpectedTypeMember,
+            DiagnosticSeverity.Error,
+            file,
+            new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(31, 3, 1)),
+            "Expected a type member (a property, a method or a constructor).");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParsePropertyMissingColonTest()
     {
-        const string code = """
-                            public type Point {
-                                x i32;
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                x i32;
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close brace."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(30, 2, 11)),
+                        "x",
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(26, 2, 7), new SourcePosition(29, 2, 10)),
+                            "i32"
+                        )
+                    ),
+                ],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(26, 2, 7).ToSpan(),
+            "Expected ':'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParsePropertyMissingTypeTest()
     {
-        const string code = """
-                            public type Point {
-                                x: ;
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                x: ;
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(30, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(28, 2, 9)),
+                        "x",
+                        new FakeTypeNode(
+                            new SourcePosition(27, 2, 8).ToSpan(),
+                            "<>_0"
+                        )
+                    ),
+                ],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(27, 2, 8).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParsePropertyMissingSemiColonTest()
     {
-        const string code = """
-                            public type Point {
-                                x: i32
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                x: i32
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an open brace."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [
+                    new PropertyDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(31, 3, 1)),
+                        "x",
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11)),
+                            "i32"
+                        )
+                    ),
+                ],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(31, 3, 1).ToSpan(),
+            "Expected ';'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMethodsTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 public toString(): string { }
@@ -472,162 +640,571 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseMethodMissingNameTest()
     {
-        const string code = """
-                            public type Point {
-                                public (): string { }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public (): string { }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a method name."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(47, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(45, 2, 26)),
+                        AccessModifier.Public,
+                        false,
+                        "<>_0",
+                        [],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(35, 2, 16), new SourcePosition(41, 2, 22)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(45, 2, 26))
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0007_ExpectedMethodName,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(31, 2, 12).ToSpan(),
+            "Expected a method name.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMethodMissingOpenParenTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString): string { }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString): string { }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an open parenthesis."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(52, 2, 33)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(48, 2, 29)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(52, 2, 33))
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(39, 2, 20).ToSpan(),
+            "Expected '('.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMethodMissingCloseParenTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString(: string { }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString(: string { return; }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an close parenthesis."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(62, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(60, 2, 41)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(48, 2, 29)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(60, 2, 41)),
+                            [
+                                new ReturnStatementNode(
+                                    new SourceSpan(new SourcePosition(51, 2, 32), new SourcePosition(58, 2, 39))
+                                )
+                            ]
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(40, 2, 21).ToSpan(),
+                "Expected ')'.")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseMethodMissingColonTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString() string { }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString() string { }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a colon."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(52, 2, 33)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(48, 2, 29)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(52, 2, 33))
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(42, 2, 23).ToSpan(),
+            "Expected ':'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMethodMissingReturnTypeTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString(): { var x: i32 = 1; }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString(): { var x: i32 = 1; }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a function return type."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(64, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(62, 2, 43)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [],
+                        new InterfaceNode(
+                            new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(45, 2, 26)),
+                            [],
+                            []
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(45, 2, 26), new SourcePosition(62, 2, 43)),
+                            [
+                                new VariableDeclarationNode(
+                                    new SourceSpan(new SourcePosition(45, 2, 26), new SourcePosition(60, 2, 41)),
+                                    "x",
+                                    new TypeNode(
+                                        new SourceSpan(new SourcePosition(52, 2, 33), new SourcePosition(55, 2, 36)),
+                                        "i32"
+                                    ),
+                                    new LiteralExpressionNode(
+                                        new SourceSpan(new SourcePosition(58, 2, 39), new SourcePosition(59, 2, 40)),
+                                        LiteralExpressionKind.Integer,
+                                        1
+                                    )
+                                )
+                            ]
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(45, 2, 26).ToSpan(),
+                "Expected '}'."),
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(45, 2, 26).ToSpan(),
+                "Expected '{'."),
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseMethodMissingOpenBraceTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString(): string }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString(): string }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a function block."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(51, 2, 32)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(49, 2, 30)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(50, 2, 31), new SourcePosition(51, 2, 32))
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(50, 2, 31).ToSpan(),
+            "Expected '{'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMethodMissingCloseBraceTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString(): string {
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString(): string {
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close brace."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(53, 3, 2)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(49, 2, 30)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(50, 2, 31), new SourcePosition(53, 3, 2))
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0014_ExpectedTypeMember,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(53, 3, 2).ToSpan(),
+            "Expected a type member (a property, a method or a constructor).");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMethodMissingCommaTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString(a: i32 b: i32): string { }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString(a: i32 b: i32): string { }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an close parenthesis."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(68, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(66, 2, 47)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [
+                            new ParameterNode(
+                                new SourceSpan(new SourcePosition(40, 2, 21), new SourcePosition(46, 2, 27)),
+                                "a",
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(46, 2, 27)),
+                                    "i32"
+                                )
+                            ),
+                            new ParameterNode(
+                                new SourceSpan(new SourcePosition(47, 2, 28), new SourcePosition(53, 2, 34)),
+                                "b",
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(50, 2, 31), new SourcePosition(53, 2, 34)),
+                                    "i32"
+                                )
+                            ),
+                        ],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(56, 2, 37), new SourcePosition(62, 2, 43)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(63, 2, 44), new SourcePosition(66, 2, 47))
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourceSpan(new SourcePosition(47, 2, 28), new SourcePosition(47, 2, 28)),
+            "Expected ','.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMethodMissingParameterColonTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString(a i32): string { }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString(a i32): string { }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a colon."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(60, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(58, 2, 39)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [
+                            new ParameterNode(
+                                new SourceSpan(new SourcePosition(40, 2, 21), new SourcePosition(45, 2, 26)),
+                                "a",
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(45, 2, 26)),
+                                    "i32"
+                                )
+                            ),
+                        ],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(48, 2, 29), new SourcePosition(54, 2, 35)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(55, 2, 36), new SourcePosition(58, 2, 39))
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(42, 2, 23).ToSpan(),
+            "Expected ':'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMethodMissingParameterTypeTest()
     {
-        const string code = """
-                            public type Point {
-                                public toString(a: ): string { }
-                            }
-                            """;
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString(a: ): string { }
+            }
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(58, 3, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                [
+                    new MethodDeclarationNode(
+                        new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(56, 2, 37)),
+                        AccessModifier.Public,
+                        false,
+                        "toString",
+                        [
+                            new ParameterNode(
+                                new SourceSpan(new SourcePosition(40, 2, 21), new SourcePosition(43, 2, 24)),
+                                "a",
+                                new FakeTypeNode(
+                                    new SourcePosition(43, 2, 24).ToSpan(),
+                                    "<>_0"
+                                )
+                            ),
+                        ],
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(46, 2, 27), new SourcePosition(52, 2, 33)),
+                            "string"
+                        ),
+                        new BlockStatementNode(
+                            new SourceSpan(new SourcePosition(53, 2, 34), new SourcePosition(56, 2, 37))
+                        )
+                    )
+                ]
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(43, 2, 24).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseCtorTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 public constructor(x: i32, y: i32) { }
@@ -658,12 +1235,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseTypeWithInterfaceTest()
     {
-        var tree = Parse("public type Point : Interface1, Interface2 { }");
+        var (tree, diagnostics) = Parse("public type Point : Interface1, Interface2 { }");
 
         var expected = new SyntaxTree([
             new TypeDeclarationNode(
@@ -679,34 +1257,115 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseTypeWithMissingInterfaceTest()
     {
-        const string code = "public type Point : { }";
+        var (tree, diagnostics) = Parse("public type Point : { }");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an interface."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0006_ExpectedInterface,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(20, 1, 21).ToSpan(),
+            "Expected an interface.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void ParseTypeWithMissingCommaInInterfacesTest()
+    {
+        var (tree, diagnostics) = Parse("public type Point : Interface1 Interface2 { }");
+
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(45, 1, 46)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(30, 1, 31)),
+                        "Interface1"
+                    ),
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(41, 1, 42)),
+                        "Interface2"
+                    )
+                ],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(31, 1, 32).ToSpan(),
+            "Expected ','."
+        );
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseTypeWithMissingSecondInterfaceTest()
     {
-        const string code = "public type Point : Interface1, { }";
+        var (tree, diagnostics) = Parse("public type Point : Interface1, { }");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an interface."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(35, 1, 36)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                [
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(30, 1, 31)),
+                        "Interface1"
+                    ),
+                ],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0006_ExpectedInterface,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(32, 1, 33).ToSpan(),
+            "Expected an interface.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseTypeAliasTest()
     {
-        var tree = Parse("public type MyType = i32;");
+        var (tree, diagnostics) = Parse("public type MyType = i32;");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -724,34 +1383,94 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeAliasMissingNameTest()
     {
-        Assert.That(
-            () => Parse("public type = i32;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type name."));
+        var (tree, diagnostics) = Parse("public type = i32;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(18, 1, 19)),
+                AccessModifier.Public,
+                "<>_0",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(17, 1, 18)),
+                    "i32"
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0005_ExpectedTypeName,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(12, 1, 13).ToSpan(),
+            "Expected a type name.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseTypeAliasMissingTypeTest()
     {
-        Assert.That(
-            () => Parse("public type MyType = ;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var (tree, diagnostics) = Parse("public type MyType = ;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
+                AccessModifier.Public,
+                "MyType",
+                [],
+                new FakeTypeNode(
+                    new SourcePosition(21, 1, 22).ToSpan(),
+                    "<>_0"
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(21, 1, 22).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseTypeAliasMissingSemiColonTest()
     {
-        Assert.That(
-            () => Parse("public type MyType = i32"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a semicolon."));
+        var (tree, diagnostics) = Parse("public type MyType = i32");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25)),
+                AccessModifier.Public,
+                "MyType",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
+                    "i32"
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(24, 1, 25).ToSpan(),
+            "Expected ';'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseFunctionTypeTest()
     {
-        var tree = Parse("public type F = () => void;");
+        var (tree, diagnostics) = Parse("public type F = () => void;");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -760,7 +1479,7 @@ public class ParseTypeTests
                 "F",
                 [],
                 new FunctionTypeNode(
-                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(18, 1, 19)),
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(26, 1, 27)),
                     [],
                     new TypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(26, 1, 27)), "void")
                 )
@@ -768,12 +1487,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseFunctionTypeWithParametersTest()
     {
-        var tree = Parse("public type F = (i32, i32) => i32;");
+        var (tree, diagnostics) = Parse("public type F = (i32, i32) => i32;");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -782,7 +1502,7 @@ public class ParseTypeTests
                 "F",
                 [],
                 new FunctionTypeNode(
-                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(26, 1, 27)),
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(33, 1, 34)),
                     [new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)), "i32")],
                     new TypeNode(new SourceSpan(new SourcePosition(30, 1, 31), new SourcePosition(33, 1, 34)), "i32")
                 )
@@ -790,84 +1510,360 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseFunctionTypeMissingNameTest()
     {
-        Assert.That(
-            () => Parse("public type = (i32, i32) => i32;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type name."));
+        var (tree, diagnostics) = Parse("public type = (i32, i32) => i32;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
+                AccessModifier.Public,
+                "<>_0",
+                [],
+                new FunctionTypeNode(
+                    new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(31, 1, 32)),
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
+                            "i32"
+                        ),
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(23, 1, 24)),
+                            "i32"
+                        )
+                    ],
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)),
+                        "i32"
+                    )
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0005_ExpectedTypeName,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(12, 1, 13).ToSpan(),
+            "Expected a type name.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseFunctionTypeMissingEqualTest()
     {
-        Assert.That(
-            () => Parse("public type F (i32, i32) => i32;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an open brace."));
+        var (tree, diagnostics) = Parse("public type F (i32, i32) => i32;");
+
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
+                AccessModifier.Public,
+                "F",
+                [],
+                [],
+                [],
+                [],
+                [])
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(14, 1, 15).ToSpan(),
+                "Expected '{'."),
+            new Diagnostic(
+                DiagnosticIds.P0014_ExpectedTypeMember,
+                DiagnosticSeverity.Error,
+                file,
+                new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(32, 1, 33)),
+                "Expected a type member (a property, a method or a constructor).")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseFunctionTypeMissingOpenParenTest()
     {
-        Assert.That(
-            () => Parse("public type F = i32, i32) => i32;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a semicolon."));
+        var (tree, diagnostics) = Parse("public type F = i32, i32) => i32;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 1, 20)),
+                AccessModifier.Public,
+                "F",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
+                    "i32"
+                )
+            ),
+            new FakeDeclarationNode(
+                new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(33, 1, 34))
+            )
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(19, 1, 20).ToSpan(),
+                "Expected ';'."),
+            new Diagnostic(
+                DiagnosticIds.P0010_ExpectedDeclaration,
+                DiagnosticSeverity.Error,
+                file,
+                new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(33, 1, 34)),
+                "Expected a type or a function.")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseFunctionTypeMissingCloseParenTest()
     {
-        Assert.That(
-            () => Parse("public type F = (i32, i32 => i32;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close parenthesis."));
+        var (tree, diagnostics) = Parse("public type F = (i32, i32 => i32;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
+                AccessModifier.Public,
+                "F",
+                [],
+                new FunctionTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(32, 1, 33)),
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            "i32"
+                        ),
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
+                            "i32"
+                        )
+                    ],
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
+                        "i32"
+                    )
+                )
+            )
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(26, 1, 27).ToSpan(),
+                "Expected ')'.")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseFunctionTypeCommaTest()
     {
-        Assert.That(
-            () => Parse("public type F = (i32 i32) => i32;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close parenthesis."));
+        var (tree, diagnostics) = Parse("public type F = (i32 i32) => i32;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
+                AccessModifier.Public,
+                "F",
+                [],
+                new FunctionTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(32, 1, 33)),
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            "i32"
+                        ),
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
+                            "i32"
+                        )
+                    ],
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
+                        "i32"
+                    )
+                )
+            )
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(21, 1, 22).ToSpan(),
+                "Expected ','.")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseFunctionTypeArrowTest()
     {
-        Assert.That(
-            () => Parse("public type F = (i32, i32) i32;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a semicolon."));
+        var (tree, diagnostics) = Parse("public type F = (i32, i32) i32;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
+                AccessModifier.Public,
+                "F",
+                [],
+                new TupleTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(26, 1, 27)),
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            "i32"
+                        ),
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
+                            "i32"
+                        ),
+                    ]
+                )
+            ),
+            new FakeDeclarationNode(
+                new SourceSpan(new SourcePosition(27, 1, 28), new SourcePosition(31, 1, 32))
+            ),
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(27, 1, 28).ToSpan(),
+                "Expected ';'."),
+            new Diagnostic(
+                DiagnosticIds.P0010_ExpectedDeclaration,
+                DiagnosticSeverity.Error,
+                file,
+                new SourceSpan(new SourcePosition(27, 1, 28), new SourcePosition(31, 1, 32)),
+                "Expected a type or a function.")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseFunctionTypeReturnTypeTest()
     {
-        Assert.That(
-            () => Parse("public type F = (i32, i32) => ;"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a function return type."));
+        var (tree, diagnostics) = Parse("public type F = (i32, i32) => ;");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
+                AccessModifier.Public,
+                "F",
+                [],
+                new FunctionTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(30, 1, 31)),
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            "i32"
+                        ),
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
+                            "i32"
+                        )
+                    ],
+                    new FakeTypeNode(
+                        new SourcePosition(30, 1, 31).ToSpan(),
+                        "<>_0"
+                    )
+                )
+            )
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0003_ExpectedType,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(30, 1, 31).ToSpan(),
+                "Expected a type.")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseFunctionTypeSemiColonTest()
     {
-        Assert.That(
-            () => Parse("public type F = (i32, i32) => i32"),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a semicolon."));
+        var (tree, diagnostics) = Parse("public type F = (i32, i32) => i32");
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
+                AccessModifier.Public,
+                "F",
+                [],
+                new FunctionTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(33, 1, 34)),
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                            "i32"
+                        ),
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
+                            "i32"
+                        )
+                    ],
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(30, 1, 31), new SourcePosition(33, 1, 34)),
+                        "i32"
+                    )
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(33, 1, 34).ToSpan(),
+            "Expected ';'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseFunctionTypeInParameterTest()
     {
-        var tree = Parse("public test(callback: (i32, i32) => void): void { }");
+        var (tree, diagnostics) = Parse("public test(callback: (i32, i32) => void): void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -876,11 +1872,14 @@ public class ParseTypeTests
                 "test",
                 [
                     new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(32, 1, 33)),
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(40, 1, 41)),
                         "callback",
                         new FunctionTypeNode(
-                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(32, 1, 33)),
-                            [new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)), "i32")],
+                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(40, 1, 41)),
+                            [
+                                new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32"),
+                                new TypeNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)), "i32")
+                            ],
                             new TypeNode(new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(40, 1, 41)), "void")
                         )
                     )
@@ -891,12 +1890,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseFunctionTypeInReturnTypeTest()
     {
-        var tree = Parse("public test(): (i32, i32) => void { }");
+        var (tree, diagnostics) = Parse("public test(): (i32, i32) => void { }");
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -905,21 +1905,34 @@ public class ParseTypeTests
                 "test",
                 [],
                 new FunctionTypeNode(
-                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(25, 1, 26)),
-                    [new TypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32")],
-                    new TypeNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(33, 1, 34)), "void")
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(33, 1, 34)),
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
+                            "i32"
+                        ),
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
+                            "i32"
+                        )
+                    ],
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(33, 1, 34)),
+                        "void"
+                    )
                 ),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(34, 1, 35), new SourcePosition(37, 1, 38)), [])
             )
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseFunctionTypeInVariableTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: (i32, i32) => void = 0;
@@ -938,7 +1951,7 @@ public class ParseTypeTests
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(56, 2, 35)),
                         "x",
                         new FunctionTypeNode(
-                            new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(43, 2, 22)),
+                            new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(51, 2, 30)),
                             [new TypeNode(new SourceSpan(new SourcePosition(34, 2, 13), new SourcePosition(37, 2, 16)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(42, 2, 21)), "i32")],
                             new TypeNode(new SourceSpan(new SourcePosition(47, 2, 26), new SourcePosition(51, 2, 30)), "void")
                         ),
@@ -949,12 +1962,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseAliasInterfaceTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32;
@@ -989,12 +2003,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseAliasInterfaceTypeWithGettersSettersTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32 { public get; public set; }
@@ -1041,12 +2056,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseAliasInterfaceTypeWithGetOnlyTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32 { public get; }
@@ -1076,12 +2092,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseAliasInterfaceTypeWithSetOnlyTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32 { public set; }
@@ -1111,30 +2128,86 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingCloseBraceTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32;
                 y: i32;
 
                 distance(Point): f32;
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close brace."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(72, 5, 26)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                new InterfaceNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(72, 5, 26)),
+                    [
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
+                            "x",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)),
+                            "y",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(72, 5, 26)),
+                            "distance",
+                            [
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)),
+                                    "Point"
+                                )
+                            ],
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(68, 5, 22), new SourcePosition(71, 5, 25)),
+                                "f32"
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(72, 5, 26).ToSpan(),
+            "Expected '}'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingPropertyTypeTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: ;
@@ -1142,18 +2215,73 @@ public class ParseTypeTests
 
                 distance(Point): f32;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(71, 6, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                new InterfaceNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(71, 6, 2)),
+                    [
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(30, 2, 9)),
+                            "x",
+                            new FakeTypeNode(
+                                new SourcePosition(29, 2, 8).ToSpan(),
+                                "<>_0"
+                            ),
+                            null,
+                            null
+                        ),
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(35, 3, 5), new SourcePosition(42, 3, 12)),
+                            "y",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(38, 3, 8), new SourcePosition(41, 3, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            new SourceSpan(new SourcePosition(48, 5, 5), new SourcePosition(69, 5, 26)),
+                            "distance",
+                            [
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(57, 5, 14), new SourcePosition(62, 5, 19)),
+                                    "Point"
+                                )
+                            ],
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(65, 5, 22), new SourcePosition(68, 5, 25)),
+                                "f32"
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(29, 2, 8).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingPropertySemiColonTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32
@@ -1161,18 +2289,82 @@ public class ParseTypeTests
 
                 distance(Point): f32;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an open brace."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                new InterfaceNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(73, 6, 2)),
+                    [
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(37, 3, 5)),
+                            "x",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(37, 3, 5), new SourcePosition(44, 3, 12)),
+                            "y",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(40, 3, 8), new SourcePosition(43, 3, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            new SourceSpan(new SourcePosition(50, 5, 5), new SourcePosition(71, 5, 26)),
+                            "distance",
+                            [
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(59, 5, 14), new SourcePosition(64, 5, 19)),
+                                    "Point"
+                                )
+                            ],
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(67, 5, 22), new SourcePosition(70, 5, 25)),
+                                "f32"
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(37, 3, 5).ToSpan(),
+                "Expected '{'."),
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(37, 3, 5).ToSpan(),
+                "Expected '}'.")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodReturnTypeTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32;
@@ -1180,18 +2372,73 @@ public class ParseTypeTests
 
                 distance(Point): ;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(71, 6, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                new InterfaceNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(71, 6, 2)),
+                    [
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
+                            "x",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)),
+                            "y",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(69, 5, 23)),
+                            "distance",
+                            [
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)),
+                                    "Point"
+                                )
+                            ],
+                            new FakeTypeNode(
+                                new SourcePosition(68, 5, 22).ToSpan(),
+                                "<>_0"
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(68, 5, 22).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodColonTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32;
@@ -1199,18 +2446,73 @@ public class ParseTypeTests
 
                 distance(Point) f64;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a colon."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                new InterfaceNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(73, 6, 2)),
+                    [
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
+                            "x",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)),
+                            "y",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(71, 5, 25)),
+                            "distance",
+                            [
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)),
+                                    "Point"
+                                )
+                            ],
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(67, 5, 21), new SourcePosition(70, 5, 24)),
+                                "f64"
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(67, 5, 21).ToSpan(),
+            "Expected ':'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodSemiColonTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32;
@@ -1218,18 +2520,73 @@ public class ParseTypeTests
 
                 distance(Point): f64
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a semi-colon."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
+                AccessModifier.Public,
+                "Point",
+                [],
+                new InterfaceNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(73, 6, 2)),
+                    [
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
+                            "x",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                        new InterfacePropertyNode(
+                            new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)),
+                            "y",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)),
+                                "i32"
+                            ),
+                            null,
+                            null
+                        ),
+                    ],
+                    [
+                        new InterfaceMethodNode(
+                            new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(72, 6, 1)),
+                            "distance",
+                            [
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)),
+                                    "Point"
+                                )
+                            ],
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(68, 5, 22), new SourcePosition(71, 5, 25)),
+                                "f64"
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(72, 6, 1).ToSpan(),
+            "Expected ';'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseNewOperatorTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var p: Point = new Point();
@@ -1255,12 +2612,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseNewOperatorWithParametersTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var p: Point = new Point(1, 2);
@@ -1293,60 +2651,186 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseNewOperatorMissingTypeTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var p: Point = new ();
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(50, 3, 2)),
+                AccessModifier.Public,
+                "main",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(50, 3, 2)),
+                    [
+                        new VariableDeclarationNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(48, 2, 27)),
+                            "p",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)),
+                                "Point"
+                            ),
+                            new NewObjectExpressionNode(
+                                new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(47, 2, 26)),
+                                new FakeTypeNode(
+                                    new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(45, 2, 24)),
+                                    "<>_0"
+                                ),
+                                []
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(45, 2, 24).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseNewOperatorMissingArgumentTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var p: Point = new Point(1, );
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an argument."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(58, 3, 2)),
+                AccessModifier.Public,
+                "main",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(58, 3, 2)),
+                    [
+                        new VariableDeclarationNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(56, 2, 35)),
+                            "p",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)),
+                                "Point"
+                            ),
+                            new NewObjectExpressionNode(
+                                new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(55, 2, 34)),
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)),
+                                    "Point"
+                                ),
+                                [
+                                    LiteralExpressionNode.Integer(
+                                        new SourceSpan(new SourcePosition(51, 2, 30), new SourcePosition(52, 2, 31)),
+                                        1
+                                    ),
+                                    new FakeExpressionNode(
+                                        new SourcePosition(54, 2, 33).ToSpan()
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0009_ExpectedExpression,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(54, 2, 33).ToSpan(),
+            "Expected an expression.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseNewOperatorMissingCloseParenTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var p: Point = new Point(;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close parenthesis."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 3, 2)),
+                AccessModifier.Public,
+                "main",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(54, 3, 2)),
+                    [
+                        new VariableDeclarationNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(52, 2, 31)),
+                            "p",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)),
+                                "Point"
+                            ),
+                            new NewObjectExpressionNode(
+                                new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(51, 2, 30)),
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)),
+                                    "Point"
+                                ),
+                                []
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(51, 2, 30).ToSpan(),
+            "Expected ')'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseDiscriminatedUnionTest()
     {
-        var tree = Parse("public type T = { } | i32 | () => void;");
+        var (tree, diagnostics) = Parse("public type T = { } | i32 | () => void;");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(39, 1, 40)),
@@ -1356,26 +2840,24 @@ public class ParseTypeTests
                 new DiscriminatedUnionNode([
                     new InterfaceNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), [], []),
                     new TypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)), "i32"),
-                    new FunctionTypeNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(30, 1, 31)), [], new TypeNode(new SourceSpan(new SourcePosition(34, 1, 35), new SourcePosition(38, 1, 39)), "void")),
+                    new FunctionTypeNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(38, 1, 39)), [], new TypeNode(new SourceSpan(new SourcePosition(34, 1, 35), new SourcePosition(38, 1, 39)), "void")),
                 ])
             )
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseNullTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 | null = null;
             }
-            """;
-
-
-        var tree = Parse(code);
+            """);
 
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
@@ -1399,12 +2881,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void TupleTypeTest()
     {
-        var tree = Parse("public type T = (i32, i32);");
+        var (tree, diagnostics) = Parse("public type T = (i32, i32);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
@@ -1416,12 +2899,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void NestedTupleTypeTest()
     {
-        var tree = Parse("public type T = ((i32, i32), i32);");
+        var (tree, diagnostics) = Parse("public type T = ((i32, i32), i32);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
@@ -1436,32 +2920,43 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void TupleTypeWithDuTest()
     {
-        var tree = Parse("public type T = (bool | i32, () => void);");
+        var (tree, diagnostics) = Parse("public type T = (bool | i32, () => void);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
                 AccessModifier.Public,
                 "T",
                 [],
-                new TupleTypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(40, 1, 41)), [
-                    new DiscriminatedUnionNode([new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "bool"), new TypeNode(new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(27, 1, 28)), "i32")]),
-                    new FunctionTypeNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(31, 1, 32)), [], new TypeNode(new SourceSpan(new SourcePosition(35, 1, 36), new SourcePosition(39, 1, 40)), "void"))
-                ])
+                new TupleTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(40, 1, 41)),
+                    [
+                        new DiscriminatedUnionNode([
+                            new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "bool"),
+                            new TypeNode(new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(27, 1, 28)), "i32")
+                        ]),
+                        new FunctionTypeNode(
+                            new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(39, 1, 40)),
+                            [],
+                            new TypeNode(new SourceSpan(new SourcePosition(35, 1, 36), new SourcePosition(39, 1, 40)), "void")
+                        )
+                    ])
             )
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void TupleTypeWithSingleTypeTest()
     {
-        var tree = Parse("public type T = (i32);");
+        var (tree, diagnostics) = Parse("public type T = (i32);");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -1477,6 +2972,7 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
@@ -1484,16 +2980,45 @@ public class ParseTypeTests
     {
         const string code = "public type T = (i32";
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close parenthesis."));
+        var (tree, diagnostics) = Parse(code);
+
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(20, 1, 21)),
+                AccessModifier.Public,
+                "T",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
+                    "i32"
+                )
+            )
+        ]);
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(20, 1, 21).ToSpan(),
+                "Expected ')'."),
+            new Diagnostic(
+                DiagnosticIds.P0001_MissingToken,
+                DiagnosticSeverity.Error,
+                file,
+                new SourcePosition(20, 1, 21).ToSpan(),
+                "Expected ';'.")
+        };
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
     public void FunctionWithTupleTest()
     {
-        var tree = Parse("public main(): (i32, i32) { }");
+        var (tree, diagnostics) = Parse("public main(): (i32, i32) { }");
         var expected = new SyntaxTree([
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(29, 1, 30)),
@@ -1512,12 +3037,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseTupleInDuTest()
     {
-        var tree = Parse("public type T = i32 | (bool, f64);");
+        var (tree, diagnostics) = Parse("public type T = i32 | (bool, f64);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
@@ -1532,12 +3058,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseDuInTupleTest()
     {
-        var tree = Parse("public type T = (bool, i32 | f64);");
+        var (tree, diagnostics) = Parse("public type T = (bool, i32 | f64);");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
@@ -1552,12 +3079,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseStaticMethodTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 public static test(): void { }
@@ -1587,12 +3115,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseCallStaticMethodTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 public static test(): void { }
@@ -1648,12 +3177,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseDuWithFunctionTypeAndDuTest()
     {
-        var tree = Parse("public type T = i32 | (() => i32 | null);");
+        var (tree, diagnostics) = Parse("public type T = i32 | (() => i32 | null);");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -1667,7 +3197,7 @@ public class ParseTypeTests
                         "i32"
                     ),
                     new FunctionTypeNode(
-                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(25, 1, 26)),
+                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(39, 1, 40)),
                         [],
                         new DiscriminatedUnionNode([
                             new TypeNode(
@@ -1685,12 +3215,13 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseDuWithFunctionTypeAndDu2Test()
     {
-        var tree = Parse("public type T = i32 | (() => i32) | null;");
+        var (tree, diagnostics) = Parse("public type T = i32 | (() => i32) | null;");
 
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
@@ -1704,7 +3235,7 @@ public class ParseTypeTests
                         "i32"
                     ),
                     new FunctionTypeNode(
-                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(25, 1, 26)),
+                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(32, 1, 33)),
                         [],
                         new TypeNode(
                             new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
@@ -1720,5 +3251,6 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

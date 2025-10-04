@@ -196,8 +196,8 @@ public class Lexer
 
             var (tokenKind, size) = (c, next) switch
             {
-                ('(', _) => (TokenKind.OpenParenthesis, 1),
-                (')', _) => (TokenKind.CloseParenthesis, 1),
+                ('(', _) => (TokenKind.OpenParen, 1),
+                (')', _) => (TokenKind.CloseParen, 1),
                 ('{', _) => (TokenKind.OpenBrace, 1),
                 ('}', _) => (TokenKind.CloseBrace, 1),
                 ('[', _) => (TokenKind.OpenBracket, 1),

@@ -122,8 +122,8 @@ public class LexerTests
             Token.CreateInteger(new SourceSpan(new SourcePosition(), new SourcePosition(1, 1, 2)), 1),
             Token.Create(new SourceSpan(new SourcePosition(1, 1, 2), new SourcePosition(2, 1, 3)), TokenKind.Dot),
             Token.CreateId(new SourceSpan(new SourcePosition(2, 1, 3), new SourcePosition(10, 1, 11)), "toString"),
-            Token.Create(new SourceSpan(new SourcePosition(10, 1, 11), new SourcePosition(11, 1, 12)), TokenKind.OpenParenthesis),
-            Token.Create(new SourceSpan(new SourcePosition(11, 1, 12), new SourcePosition(12, 1, 13)), TokenKind.CloseParenthesis),
+            Token.Create(new SourceSpan(new SourcePosition(10, 1, 11), new SourcePosition(11, 1, 12)), TokenKind.OpenParen),
+            Token.Create(new SourceSpan(new SourcePosition(11, 1, 12), new SourcePosition(12, 1, 13)), TokenKind.CloseParen),
             Token.CreateEof(new SourcePosition(12, 1, 13).ToSpan()),
         };
 
@@ -187,8 +187,8 @@ public class LexerTests
     }
 
     [Test]
-    [TestCase("(", TokenKind.OpenParenthesis)]
-    [TestCase(")", TokenKind.CloseParenthesis)]
+    [TestCase("(", TokenKind.OpenParen)]
+    [TestCase(")", TokenKind.CloseParen)]
     [TestCase("{", TokenKind.OpenBrace)]
     [TestCase("}", TokenKind.CloseBrace)]
     [TestCase("[", TokenKind.OpenBracket)]
@@ -393,8 +393,8 @@ public class LexerTests
         {
             Token.Create(new SourceSpan(new SourcePosition(11, 2, 1), new SourcePosition(17, 2, 7)), TokenKind.Public),
             Token.CreateId(new SourceSpan(new SourcePosition(18, 2, 8), new SourcePosition(22, 2, 12)), "main"),
-            Token.Create(new SourceSpan(new SourcePosition(22, 2, 12), new SourcePosition(23, 2, 13)), TokenKind.OpenParenthesis),
-            Token.Create(new SourceSpan(new SourcePosition(23, 2, 13), new SourcePosition(24, 2, 14)), TokenKind.CloseParenthesis),
+            Token.Create(new SourceSpan(new SourcePosition(22, 2, 12), new SourcePosition(23, 2, 13)), TokenKind.OpenParen),
+            Token.Create(new SourceSpan(new SourcePosition(23, 2, 13), new SourcePosition(24, 2, 14)), TokenKind.CloseParen),
             Token.Create(new SourceSpan(new SourcePosition(24, 2, 14), new SourcePosition(25, 2, 15)), TokenKind.Colon),
             Token.CreateId(new SourceSpan(new SourcePosition(26, 2, 16), new SourcePosition(30, 2, 20)), "void"),
             Token.Create(new SourceSpan(new SourcePosition(31, 2, 21), new SourcePosition(32, 2, 22)), TokenKind.OpenBrace),
@@ -417,8 +417,8 @@ public class LexerTests
         {
             Token.Create(new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(6, 1, 7)), TokenKind.Public),
             Token.CreateId(new SourceSpan(new SourcePosition(7, 1, 8), new SourcePosition(11, 1, 12)), "main"),
-            Token.Create(new SourceSpan(new SourcePosition(11, 1, 12), new SourcePosition(12, 1, 13)), TokenKind.OpenParenthesis),
-            Token.Create(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(13, 1, 14)), TokenKind.CloseParenthesis),
+            Token.Create(new SourceSpan(new SourcePosition(11, 1, 12), new SourcePosition(12, 1, 13)), TokenKind.OpenParen),
+            Token.Create(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(13, 1, 14)), TokenKind.CloseParen),
             Token.Create(new SourceSpan(new SourcePosition(13, 1, 14), new SourcePosition(14, 1, 15)), TokenKind.Colon),
             Token.CreateId(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
             Token.Create(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(21, 1, 22)), TokenKind.OpenBrace),

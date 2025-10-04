@@ -1,4 +1,5 @@
 using Trilang;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -8,20 +9,25 @@ namespace Tri.Tests.Parsing;
 
 public class ParseDirectiveTests
 {
-    private static SyntaxTree Parse(string code)
+    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
+        diagnostics.SwitchFile(file);
+
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
         var parser = new Parser();
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
-        return parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        return (tree, diagnostics);
     }
 
     [Test]
     public void ParseIfDirectiveTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             #if D1
 
@@ -49,12 +55,13 @@ public class ParseDirectiveTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseIfDirectiveWithElseTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             #if D1
 
@@ -96,12 +103,13 @@ public class ParseDirectiveTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseNestedIfDirectiveTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             #if D1
 
@@ -161,12 +169,13 @@ public class ParseDirectiveTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseIfDirectiveStatementTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
             #if D1
@@ -232,5 +241,29 @@ public class ParseDirectiveTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void ParseEmptyIfDirectiveTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            #if D1
+            #else
+            #endif
+            """);
+
+        var expected = new SyntaxTree([
+            new IfDirectiveNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 3, 7)),
+                "D1",
+                [],
+                []
+            )
+        ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

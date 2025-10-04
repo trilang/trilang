@@ -26,6 +26,14 @@ public interface INodeTransformer<out TResult>
 
     TResult TransformExpressionStatement(ExpressionStatementNode node);
 
+    TResult TransformFakeDeclaration(FakeDeclarationNode node);
+
+    TResult TransformFakeExpression(FakeExpressionNode node);
+
+    TResult TransformFakeStatement(FakeStatementNode node);
+
+    TResult TransformFakeType(FakeTypeNode node);
+
     TResult TransformFunction(FunctionDeclarationNode node);
 
     TResult TransformFunctionType(FunctionTypeNode node);

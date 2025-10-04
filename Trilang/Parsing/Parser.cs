@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing.Ast;
 using static Trilang.Lexing.TokenKind;
@@ -6,6 +7,11 @@ namespace Trilang.Parsing;
 
 public class Parser
 {
+    private int nameCounter;
+
+    public Parser()
+        => nameCounter = 0;
+
     public SyntaxTree Parse(IReadOnlyList<Token> tokens, ParserOptions options)
     {
         var context = new ParserContext(tokens, options.Diagnostics, this);
@@ -14,7 +20,7 @@ public class Parser
         while (!context.Reader.HasEnded)
         {
             var declaration = TryParseDeclaration(context) ??
-                              throw new ParseException("Expected a type or a function.");
+                              ParseFakeDeclaration(context, Public, Internal, Private);
 
             functions.Add(declaration);
         }
@@ -22,60 +28,83 @@ public class Parser
         return new SyntaxTree(functions);
     }
 
+    private string GetGeneratedName()
+        => $"<>_{nameCounter++}";
+
     private IDeclarationNode? TryParseDeclaration(ParserContext context)
         => TryParseFunction(context) ??
-           TryParseTypeAlias(context) ??
-           TryParseTypeDeclarationNode(context) ??
-           TryParseTopLevelIfDirective(context) as IDeclarationNode;
+           TryParseTypeDeclarationOrTypeAliasNode(context) ??
+           TryParseTopLevelIfDirective(context);
 
     private IfDirectiveNode? TryParseTopLevelIfDirective(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
+    {
+        var (hasHash, hash) = context.Reader.Check(Hash);
+        if (!hasHash)
+            return null;
+
+        context.Reader.Expect(If);
+
+        var (_, name) = TryParseId(context);
+        if (name is null)
         {
-            if (!c.Reader.Check(Hash, out var hash))
-                return null;
+            name = GetGeneratedName();
+            context.Diagnostics.ExpectedDirectiveName(context.Reader.Span.Start);
+        }
 
-            if (!c.Reader.Check(If))
-                return null;
+        var then = new List<IDeclarationNode>();
+        var @else = new List<IDeclarationNode>();
 
-            var (_, name) = c.Parser.TryParseId(c);
-            if (name is null)
-                throw new ParseException("Expected a directive name.");
+        while (!context.Reader.HasEnded && !IsEndDirective(context, Else, EndIf))
+        {
+            var declaration = TryParseDeclaration(context) ??
+                              ParseFakeDeclaration(context, Public, Internal, Private, Hash);
 
-            var then = new List<IDeclarationNode>();
-            var @else = new List<IDeclarationNode>();
+            then.Add(declaration);
+        }
 
-            while (true)
+        context.Reader.Expect(Hash);
+
+        if (context.Reader.Check(Else))
+        {
+            while (!context.Reader.HasEnded && !IsEndDirective(context, EndIf))
             {
-                var declaration = c.Parser.TryParseDeclaration(c);
-                if (declaration is null)
-                    break;
+                var declaration = TryParseDeclaration(context) ??
+                                  ParseFakeDeclaration(context, Public, Internal, Private, Hash);
 
-                then.Add(declaration);
+                @else.Add(declaration);
             }
 
-            if (!c.Reader.Check(Hash))
-                throw new ParseException("Expected a hash symbol.");
+            context.Reader.Expect(Hash);
+        }
 
-            if (c.Reader.Check(Else))
-            {
-                while (true)
-                {
-                    var declaration = c.Parser.TryParseDeclaration(c);
-                    if (declaration is null)
-                        break;
+        var endIfSpan = context.Reader.Expect(EndIf);
 
-                    @else.Add(declaration);
-                }
+        return new IfDirectiveNode(hash.SourceSpan.Combine(endIfSpan), name, then, @else);
+    }
 
-                if (!c.Reader.Check(Hash))
-                    throw new ParseException("Expected a hash symbol.");
-            }
+    private bool IsEndDirective(ParserContext context, params Span<TokenKind> keywords)
+    {
+        Debug.Assert(keywords.Length > 0, "At least one keyword must be provided");
 
-            if (!c.Reader.Check(EndIf, out var endif))
-                throw new ParseException("Expected an 'endif' directive.");
+        if (!context.Reader.Token.Is(Hash))
+            return false;
 
-            return new IfDirectiveNode(hash.SourceSpan.Combine(endif.SourceSpan), name, then, @else);
-        });
+        foreach (var keyword in keywords)
+            if (context.Reader.Peek().Is(keyword))
+                return true;
+
+        return false;
+    }
+
+    private FakeDeclarationNode ParseFakeDeclaration(
+        ParserContext context,
+        params Span<TokenKind> tokenKinds)
+    {
+        var span = context.Reader.SkipTo(tokenKinds);
+        context.Diagnostics.ExpectedDeclaration(span);
+
+        return new FakeDeclarationNode(span);
+    }
 
     private FunctionDeclarationNode? TryParseFunction(ParserContext context)
         => context.Reader.Scoped(context, static c =>
@@ -90,14 +119,12 @@ public class Parser
 
             var parameters = c.Parser.ParseFunctionParameters(c);
 
-            if (!c.Reader.Check(Colon))
-                throw new ParseException("Expected a colon.");
+            c.Reader.Expect(Colon);
 
             var returnType = c.Parser.TryParseDiscriminatedUnion(c) ??
-                             throw new ParseException("Expected a function return type.");
+                             c.Parser.ParseFakeType(c, OpenBrace, CloseBrace);
 
-            var block = c.Parser.TryParseBlock(c) ??
-                        throw new ParseException("Expected a function block.");
+            var block = c.Parser.ParseBlock(c);
 
             return FunctionDeclarationNode.Create(
                 accessModifierSpan.Combine(block.SourceSpan),
@@ -110,27 +137,39 @@ public class Parser
 
     private List<ParameterNode> ParseFunctionParameters(ParserContext context)
     {
-        if (!context.Reader.Check(OpenParenthesis))
-            throw new ParseException("Expected an open parenthesis.");
+        context.Reader.Expect(OpenParen);
 
         var parameters = new List<ParameterNode>();
-
         var parameter = TryParseFunctionParameter(context);
         if (parameter is not null)
         {
             parameters.Add(parameter);
 
-            while (context.Reader.Check(Comma))
+            while (true)
             {
-                parameter = TryParseFunctionParameter(context) ??
-                            throw new ParseException("Expected a parameter.");
+                var hasComma = context.Reader.Check(Comma);
+                var comma = context.Reader.Token;
+
+                parameter = TryParseFunctionParameter(context);
+                if (parameter is null)
+                {
+                    if (hasComma)
+                    {
+                        var span = context.Reader.SkipTo(CloseParen, OpenBrace);
+                        context.Diagnostics.ExpectedParameter(span);
+                    }
+
+                    break;
+                }
+
+                if (!hasComma)
+                    context.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
 
                 parameters.Add(parameter);
             }
         }
 
-        if (!context.Reader.Check(CloseParenthesis))
-            throw new ParseException("Expected an close parenthesis.");
+        context.Reader.Expect(CloseParen);
 
         return parameters;
     }
@@ -141,128 +180,157 @@ public class Parser
         if (name is null)
             return null;
 
-        if (!context.Reader.Check(Colon))
-            throw new ParseException("Expected a colon.");
+        context.Reader.Expect(Colon);
 
         var type = TryParseDiscriminatedUnion(context) ??
-                   throw new ParseException("Expected a type.");
+                   ParseFakeType(context, Comma, CloseParen);
 
         return new ParameterNode(span.Combine(type.SourceSpan), name, type);
     }
 
+    private BlockStatementNode ParseBlock(ParserContext context)
+    {
+        var openBraceSpan = context.Reader.Expect(OpenBrace);
+
+        return ParseBlockInternal(context, openBraceSpan);
+    }
+
     private BlockStatementNode? TryParseBlock(ParserContext context)
     {
-        if (!context.Reader.Check(OpenBrace, out var openBrace))
+        var (hasOpenBrace, openBrace) = context.Reader.Check(OpenBrace);
+        if (!hasOpenBrace)
             return null;
 
+        return ParseBlockInternal(context, openBrace.SourceSpan);
+    }
+
+    private BlockStatementNode ParseBlockInternal(ParserContext context, SourceSpan openBraceSpan)
+    {
+        var closeBraceSpan = default(SourcePosition);
+
         var statements = new List<IStatementNode>();
-        var closeBrace = default(Token);
-        while (!context.Reader.Check(CloseBrace, out closeBrace))
+        while (true)
         {
+            if (context.Reader.HasEnded)
+            {
+                closeBraceSpan = context.Reader.Span.Start;
+                context.Diagnostics.MissingToken(closeBraceSpan, CloseBrace);
+                break;
+            }
+
+            var (hasCloseBrace, closeBrace) = context.Reader.Check(CloseBrace);
+            if (hasCloseBrace)
+            {
+                closeBraceSpan = closeBrace.SourceSpan.End;
+                break;
+            }
+
             var statement = TryParseStatement(context) ??
-                            throw new ParseException("Expected a statement.");
+                            ParseFakeStatement(context, CloseBrace);
 
             statements.Add(statement);
         }
 
-        return new BlockStatementNode(openBrace.SourceSpan.Combine(closeBrace.SourceSpan), statements);
+        return new BlockStatementNode(openBraceSpan.Combine(closeBraceSpan), statements);
     }
 
     private (SourceSpan, AccessModifier?) TryParseAccessModifier(ParserContext context)
     {
-        if (context.Reader.Check(Public, out var publicKeyword))
+        var (hasPublic, publicKeyword) = context.Reader.Check(Public);
+        if (hasPublic)
             return (publicKeyword.SourceSpan, AccessModifier.Public);
 
-        if (context.Reader.Check(Internal, out var internalKeyword))
+        var (hasInternal, internalKeyword) = context.Reader.Check(Internal);
+        if (hasInternal)
             return (internalKeyword.SourceSpan, AccessModifier.Internal);
 
-        if (context.Reader.Check(Private, out var privateKeyword))
+        var (hasPrivate, privateKeyword) = context.Reader.Check(Private);
+        if (hasPrivate)
             return (privateKeyword.SourceSpan, AccessModifier.Private);
 
         return (default, null);
     }
 
-    private TypeAliasDeclarationNode? TryParseTypeAlias(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var (span, accessModifier) = c.Parser.TryParseAccessModifier(c);
-            if (accessModifier is null)
-                return null;
-
-            if (!c.Reader.Check(TokenKind.Type))
-                return null;
-
-            var (_, name) = c.Parser.TryParseId(c);
-            if (name is null)
-                throw new ParseException("Expected a type name.");
-
-            var genericArguments = c.Parser.TryParseGenericTypeArguments(c);
-
-            if (!c.Reader.Check(Equal))
-                return null;
-
-            var type = c.Parser.TryParseDiscriminatedUnion(c) ??
-                       throw new ParseException("Expected a type.");
-
-            if (type is InterfaceNode)
-                return new TypeAliasDeclarationNode(
-                    span.Combine(type.SourceSpan),
-                    accessModifier.Value,
-                    name,
-                    genericArguments,
-                    type);
-
-            if (!c.Reader.Check(SemiColon, out var semiColon))
-                throw new ParseException("Expected a semicolon.");
-
-            return new TypeAliasDeclarationNode(
-                span.Combine(semiColon.SourceSpan),
-                accessModifier.Value,
-                name,
-                genericArguments,
-                type);
-        });
-
-    private TypeDeclarationNode? TryParseTypeDeclarationNode(ParserContext context)
+    private IDeclarationNode? TryParseTypeDeclarationOrTypeAliasNode(ParserContext context)
     {
         var (accessModifierSpan, accessModifier) = TryParseAccessModifier(context);
         if (accessModifier is null)
             return null;
 
-        if (!context.Reader.Check(TokenKind.Type))
-            throw new ParseException("Expected a type declaration.");
+        context.Reader.Expect(TokenKind.Type);
 
         var (_, name) = TryParseId(context);
         if (name is null)
-            throw new ParseException("Expected a type name.");
+        {
+            name = GetGeneratedName();
+            context.Diagnostics.ExpectedTypeName(context.Reader.Span.Start);
+        }
 
         var genericArguments = TryParseGenericTypeArguments(context);
+        if (context.Reader.Check(Equal))
+        {
+            var type = TryParseDiscriminatedUnion(context) ??
+                       ParseFakeType(context, SemiColon);
+
+            if (type is InterfaceNode)
+                return new TypeAliasDeclarationNode(
+                    accessModifierSpan.Combine(type.SourceSpan),
+                    accessModifier.Value,
+                    name,
+                    genericArguments,
+                    type);
+
+            var endSpan = context.Reader.Expect(SemiColon);
+
+            return new TypeAliasDeclarationNode(
+                accessModifierSpan.Combine(endSpan),
+                accessModifier.Value,
+                name,
+                genericArguments,
+                type);
+        }
 
         var interfaces = new List<TypeNode>();
         if (context.Reader.Check(Colon))
         {
-            var @interface = TryParseTypeNode(context) ??
-                             throw new ParseException("Expected an interface.");
-
-            interfaces.Add(@interface);
-
-            while (context.Reader.Check(Comma))
+            var @interface = TryParseTypeNode(context);
+            if (@interface is null)
             {
-                @interface = TryParseTypeNode(context) ??
-                             throw new ParseException("Expected an interface.");
+                context.Diagnostics.ExpectedInterface(context.Reader.Span.Start);
+            }
+            else
+            {
+                interfaces.Add(@interface);
+            }
+
+            while (true)
+            {
+                var hasComma = context.Reader.Check(Comma);
+                var comma = context.Reader.Token;
+
+                @interface = TryParseTypeNode(context);
+                if (@interface is null)
+                {
+                    if (hasComma)
+                        context.Diagnostics.ExpectedInterface(context.Reader.Span.Start);
+
+                    break;
+                }
+
+                if (!hasComma)
+                    context.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
 
                 interfaces.Add(@interface);
             }
         }
 
-        if (!context.Reader.Check(OpenBrace))
-            throw new ParseException("Expected an open brace.");
+        context.Reader.Expect(OpenBrace);
 
         var properties = new List<PropertyDeclarationNode>();
         var constructors = new List<ConstructorDeclarationNode>();
         var methods = new List<MethodDeclarationNode>();
 
-        var closeBrace = default(Token);
+        var closeBraceSpan = default(SourceSpan);
         while (true)
         {
             var constructor = TryParseConstructor(context);
@@ -286,14 +354,25 @@ public class Parser
                 continue;
             }
 
-            if (context.Reader.Check(CloseBrace, out closeBrace))
-                break;
+            var (hasCloseBrace, closeBrace) = context.Reader.Check(CloseBrace);
+            if (!hasCloseBrace)
+            {
+                var span = context.Reader.SkipTo(CloseBrace);
+                context.Diagnostics.ExpectedTypeMember(span);
 
-            throw new ParseException("Expected a close brace.");
+                context.Reader.Advance();
+                closeBraceSpan = context.Reader.Token.SourceSpan;
+            }
+            else
+            {
+                closeBraceSpan = closeBrace.SourceSpan;
+            }
+
+            break;
         }
 
         return new TypeDeclarationNode(
-            accessModifierSpan.Combine(closeBrace.SourceSpan),
+            accessModifierSpan.Combine(closeBraceSpan),
             accessModifier.Value,
             name,
             genericArguments,
@@ -303,28 +382,39 @@ public class Parser
             methods);
     }
 
-    private List<TypeNode> TryParseGenericTypeArguments(ParserContext context)
+    private List<IInlineTypeNode> TryParseGenericTypeArguments(ParserContext context)
     {
-        var arguments = new List<TypeNode>();
+        var arguments = new List<IInlineTypeNode>();
 
         if (!context.Reader.Check(Less))
             return arguments;
 
-        var type = TryParseTypeNode(context) ??
-                   throw new ParseException("Expected a type.");
+        var type = TryParseTypeNode(context) as IInlineTypeNode ??
+                   ParseFakeType(context, Comma, Greater);
 
         arguments.Add(type);
 
-        while (context.Reader.Check(Comma))
+        while (true)
         {
-            type = TryParseTypeNode(context) ??
-                   throw new ParseException("Expected a type.");
+            var hasComma = context.Reader.Check(Comma);
+            var comma = context.Reader.Token;
+
+            type = TryParseTypeNode(context);
+            if (type is null)
+            {
+                if (!hasComma)
+                    break;
+
+                type = ParseFakeType(context, Comma, Greater);
+            }
+
+            if (!hasComma)
+                context.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
 
             arguments.Add(type);
         }
 
-        if (!context.Reader.Check(Greater))
-            throw new ParseException("Expected a greater than sign.");
+        context.Reader.Expect(Greater);
 
         return arguments;
     }
@@ -341,8 +431,7 @@ public class Parser
 
             var parameters = c.Parser.ParseFunctionParameters(c);
 
-            var block = c.Parser.TryParseBlock(c) ??
-                        throw new ParseException("Expected a constructor block.");
+            var block = c.Parser.ParseBlock(c);
 
             return new ConstructorDeclarationNode(
                 span.Combine(block.SourceSpan),
@@ -352,32 +441,40 @@ public class Parser
         });
 
     private PropertyDeclarationNode? TryParseProperty(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
+    {
+        var (span, name) = TryParseId(context);
+        if (name is null)
+            return null;
+
+        context.Reader.Expect(Colon);
+
+        var type = TryParseDiscriminatedUnion(context) ??
+                   ParseFakeType(context, SemiColon, OpenBrace);
+
+        var (hasSemicolon, semiColon) = context.Reader.Check(SemiColon);
+        if (hasSemicolon)
+            return new PropertyDeclarationNode(span.Combine(semiColon.SourceSpan), name, type);
+
+        if (!context.Reader.Check(OpenBrace))
         {
-            var (span, name) = c.Parser.TryParseId(c);
-            if (name is null)
-                return null;
+            var semiColonSpan = context.Reader.Span.Start;
+            context.Diagnostics.MissingToken(semiColonSpan, SemiColon);
 
-            if (!c.Reader.Check(Colon))
-                return null;
+            return new PropertyDeclarationNode(span.Combine(semiColonSpan), name, type);
+        }
 
-            var type = c.Parser.TryParseDiscriminatedUnion(c) ??
-                       throw new ParseException("Expected a type.");
+        var getter = TryParsePropertyGetter(context);
+        var setter = TryParsePropertySetter(context);
 
-            if (c.Reader.Check(SemiColon, out var semiColon))
-                return new PropertyDeclarationNode(span.Combine(semiColon.SourceSpan), name, type);
+        var closeBraceSpan = context.Reader.Expect(CloseBrace);
 
-            if (!c.Reader.Check(OpenBrace))
-                throw new ParseException("Expected an open brace.");
-
-            var getter = c.Parser.TryParsePropertyGetter(c);
-            var setter = c.Parser.TryParsePropertySetter(c);
-
-            if (!c.Reader.Check(CloseBrace, out var closeBrace))
-                throw new ParseException("Expected a close brace.");
-
-            return new PropertyDeclarationNode(span.Combine(closeBrace.SourceSpan), name, type, getter, setter);
-        });
+        return new PropertyDeclarationNode(
+            span.Combine(closeBraceSpan),
+            name,
+            type,
+            getter,
+            setter);
+    }
 
     private PropertyGetterNode? TryParsePropertyGetter(ParserContext context)
         => context.Reader.Scoped(context, static c =>
@@ -389,14 +486,14 @@ public class Parser
             if (!c.Reader.Check(Get))
                 return null;
 
-            if (c.Reader.Check(SemiColon, out var semiColon))
+            var (hasSemicolon, semiColon) = c.Reader.Check(SemiColon);
+            if (hasSemicolon)
                 return new PropertyGetterNode(
                     span.Combine(semiColon.SourceSpan),
                     accessModifier.Value,
                     null);
 
-            var body = c.Parser.TryParseBlock(c) ??
-                       throw new ParseException("Expected a getter block.");
+            var body = c.Parser.ParseBlock(c);
 
             return new PropertyGetterNode(
                 span.Combine(body.SourceSpan),
@@ -414,14 +511,14 @@ public class Parser
             if (!c.Reader.Check(Set))
                 return null;
 
-            if (c.Reader.Check(SemiColon, out var semiColon))
+            var (hasSemicolon, semiColon) = c.Reader.Check(SemiColon);
+            if (hasSemicolon)
                 return new PropertySetterNode(
                     span.Combine(semiColon.SourceSpan),
                     accessModifier.Value,
                     null);
 
-            var body = c.Parser.TryParseBlock(c) ??
-                       throw new ParseException("Expected a setter block.");
+            var body = c.Parser.ParseBlock(c);
 
             return new PropertySetterNode(
                 span.Combine(body.SourceSpan),
@@ -439,18 +536,19 @@ public class Parser
 
         var (_, name) = TryParseId(context);
         if (name is null)
-            throw new ParseException("Expected a method name.");
+        {
+            name = GetGeneratedName();
+            context.Diagnostics.ExpectedMethodName(context.Reader.Span.Start);
+        }
 
         var parameters = ParseFunctionParameters(context);
 
-        if (!context.Reader.Check(Colon))
-            throw new ParseException("Expected a colon.");
+        context.Reader.Expect(Colon);
 
         var returnType = TryParseDiscriminatedUnion(context) ??
-                         throw new ParseException("Expected a function return type.");
+                         ParseFakeType(context, OpenBrace);
 
-        var block = TryParseBlock(context) ??
-                    throw new ParseException("Expected a function block.");
+        var block = ParseBlock(context);
 
         return new MethodDeclarationNode(
             span.Combine(block.SourceSpan),
@@ -467,16 +565,17 @@ public class Parser
            TryParseVariableStatement(context) ??
            TryParseIfStatement(context) ??
            TryParseReturnStatement(context) ??
-           TryParseExpressionStatement(context) ??
            TryParseWhileStatement(context) ??
            TryParseBreakStatement(context) ??
            TryParseContinueStatement(context) ??
-           TryParseStatementLevelIfDirective(context) as IStatementNode;
+           TryParseStatementLevelIfDirective(context) ??
+           TryParseExpressionStatement(context) as IStatementNode;
 
     private IfDirectiveNode? TryParseStatementLevelIfDirective(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(Hash, out var hash))
+            var (hasHash, hash) = c.Reader.Check(Hash);
+            if (!hasHash)
                 return null;
 
             if (!c.Reader.Check(If))
@@ -484,70 +583,65 @@ public class Parser
 
             var (_, name) = c.Parser.TryParseId(c);
             if (name is null)
-                throw new ParseException("Expected a directive name.");
+            {
+                name = c.Parser.GetGeneratedName();
+                c.Diagnostics.ExpectedDirectiveName(c.Reader.Span.Start);
+            }
 
             var then = new List<IStatementNode>();
             var @else = new List<IStatementNode>();
 
-            while (true)
+            while (!c.Reader.HasEnded && !c.Reader.Check(Hash))
             {
-                var declaration = c.Parser.TryParseStatement(c);
-                if (declaration is null)
-                    break;
+                var declaration = c.Parser.TryParseStatement(c) ??
+                                  c.Parser.ParseFakeStatement(c, Hash);
 
                 then.Add(declaration);
             }
 
-            if (!c.Reader.Check(Hash))
-                throw new ParseException("Expected a hash symbol.");
-
             if (c.Reader.Check(Else))
             {
-                while (true)
+                while (!c.Reader.HasEnded && !c.Reader.Check(Hash))
                 {
-                    var declaration = c.Parser.TryParseStatement(c);
-                    if (declaration is null)
-                        break;
+                    var declaration = c.Parser.TryParseStatement(c) ??
+                                      c.Parser.ParseFakeStatement(c, Hash);
 
                     @else.Add(declaration);
                 }
-
-                if (!c.Reader.Check(Hash))
-                    throw new ParseException("Expected a hash symbol.");
             }
 
-            if (!c.Reader.Check(EndIf, out var endif))
-                throw new ParseException("Expected an 'endif' directive.");
+            var endIfSpan = c.Reader.Expect(EndIf);
 
-            return new IfDirectiveNode(hash.SourceSpan.Combine(endif.SourceSpan), name, then, @else);
+            return new IfDirectiveNode(hash.SourceSpan.Combine(endIfSpan), name, then, @else);
         });
 
     private VariableDeclarationNode? TryParseVariableStatement(ParserContext context)
     {
-        if (!context.Reader.Check(Var, out var varKeyword))
+        var (hasVar, varKeyword) = context.Reader.Check(Var);
+        if (!hasVar)
             return null;
 
         var (_, name) = TryParseId(context);
         if (name is null)
-            throw new ParseException("Expected a variable name.");
+        {
+            name = GetGeneratedName();
+            context.Diagnostics.ExpectedVariableName(context.Reader.Span.Start);
+        }
 
-        if (!context.Reader.Check(Colon))
-            throw new ParseException("Expected a colon.");
+        context.Reader.Expect(Colon);
 
         var type = TryParseDiscriminatedUnion(context) ??
-                   throw new ParseException("Expected a type.");
+                   ParseFakeType(context, Equal, SemiColon);
 
-        if (!context.Reader.Check(Equal))
-            throw new ParseException("Expected an equal sign.");
+        context.Reader.Expect(Equal);
 
         var expression = TryParseExpression(context) ??
-                         throw new ParseException("Expected an expression.");
+                         ParseFakeExpression(context, SemiColon);
 
-        if (!context.Reader.Check(SemiColon, out var semiColon))
-            throw new ParseException("Expected a semicolon.");
+        var semiColonSpan = context.Reader.Expect(SemiColon);
 
         return new VariableDeclarationNode(
-            varKeyword.SourceSpan.Combine(semiColon.SourceSpan),
+            varKeyword.SourceSpan.Combine(semiColonSpan),
             name,
             type,
             expression);
@@ -555,83 +649,83 @@ public class Parser
 
     private IfStatementNode? TryParseIfStatement(ParserContext context)
     {
-        if (!context.Reader.Check(If, out var ifKeyword))
+        var (hasIf, ifKeyword) = context.Reader.Check(If);
+        if (!hasIf)
             return null;
 
-        if (!context.Reader.Check(OpenParenthesis))
-            throw new ParseException("Expected an open parenthesis.");
+        context.Reader.Expect(OpenParen);
 
         var condition = TryParseExpression(context) ??
-                        throw new ParseException("Expected an expression.");
+                        ParseFakeExpression(context, CloseParen, OpenBrace);
 
-        if (!context.Reader.Check(CloseParenthesis))
-            throw new ParseException("Expected a close parenthesis.");
+        context.Reader.Expect(CloseParen);
 
-        var then = TryParseBlock(context) ??
-                   throw new ParseException("Expected a 'then' block.");
+        var then = ParseBlock(context);
 
         if (!context.Reader.Check(Else))
             return new IfStatementNode(ifKeyword.SourceSpan.Combine(then.SourceSpan), condition, then);
 
-        var @else = TryParseBlock(context) ??
-                    throw new ParseException("Expected a 'else' block.");
+        var @else = ParseBlock(context);
 
-        return new IfStatementNode(ifKeyword.SourceSpan.Combine(@else.SourceSpan), condition, then, @else);
+        return new IfStatementNode(
+            ifKeyword.SourceSpan.Combine(@else.SourceSpan),
+            condition,
+            then,
+            @else);
     }
 
     private ReturnStatementNode? TryParseReturnStatement(ParserContext context)
     {
-        if (!context.Reader.Check(Return, out var returnToken))
+        var (hasReturn, returnToken) = context.Reader.Check(Return);
+        if (!hasReturn)
             return null;
 
         var expression = TryParseExpression(context);
+        var semiColonSpan = context.Reader.Expect(SemiColon);
 
-        if (!context.Reader.Check(SemiColon, out var semiColon))
-            throw new ParseException("Expected a semicolon.");
-
-        return new ReturnStatementNode(returnToken.SourceSpan.Combine(semiColon.SourceSpan), expression);
+        return new ReturnStatementNode(
+            returnToken.SourceSpan.Combine(semiColonSpan),
+            expression);
     }
 
     private WhileNode? TryParseWhileStatement(ParserContext context)
     {
-        if (!context.Reader.Check(While, out var whileToken))
+        var (hasWhile, whileToken) = context.Reader.Check(While);
+        if (!hasWhile)
             return null;
 
-        if (!context.Reader.Check(OpenParenthesis))
-            throw new ParseException("Expected an open parenthesis.");
+        context.Reader.Expect(OpenParen);
 
         var condition = TryParseExpression(context) ??
-                        throw new ParseException("Expected a condition.");
+                        ParseFakeExpression(context, CloseParen, OpenBrace);
 
-        if (!context.Reader.Check(CloseParenthesis))
-            throw new ParseException("Expected a close parenthesis.");
+        context.Reader.Expect(CloseParen);
 
-        var block = TryParseBlock(context) ??
-                    throw new ParseException("Expected a block.");
+        var block = ParseBlock(context);
 
         return new WhileNode(whileToken.SourceSpan.Combine(block.SourceSpan), condition, block);
     }
 
     private BreakNode? TryParseBreakStatement(ParserContext context)
     {
-        if (!context.Reader.Check(Break, out var breakToken))
+        var (hasBreak, breakToken) = context.Reader.Check(Break);
+        if (!hasBreak)
             return null;
 
-        if (!context.Reader.Check(SemiColon, out var semiColon))
-            throw new ParseException("Expected a semicolon.");
+        var semiColonSpan = context.Reader.Expect(SemiColon);
 
-        return new BreakNode(breakToken.SourceSpan.Combine(semiColon.SourceSpan));
+        return new BreakNode(breakToken.SourceSpan.Combine(semiColonSpan));
     }
 
     private ContinueNode? TryParseContinueStatement(ParserContext context)
     {
-        if (!context.Reader.Check(Continue, out var continueToken))
+        var (hasContinue, continueToken) = context.Reader.Check(Continue);
+        if (!hasContinue)
             return null;
 
-        if (!context.Reader.Check(SemiColon, out var semiColon))
-            throw new ParseException("Expected a semicolon.");
+        var semiColonSpan = context.Reader.Expect(SemiColon);
 
-        return new ContinueNode(continueToken.SourceSpan.Combine(semiColon.SourceSpan));
+        return new ContinueNode(continueToken.SourceSpan.Combine(semiColonSpan));
     }
 
     private ExpressionStatementNode? TryParseExpressionStatement(ParserContext context)
@@ -640,14 +734,36 @@ public class Parser
         if (expression is null)
             return null;
 
-        if (!context.Reader.Check(SemiColon, out var semiColon))
-            throw new ParseException("Expected a semicolon.");
+        var semiColonSpan = context.Reader.Expect(SemiColon);
 
-        return new ExpressionStatementNode(expression.SourceSpan.Combine(semiColon.SourceSpan), expression);
+        return new ExpressionStatementNode(
+            expression.SourceSpan.Combine(semiColonSpan),
+            expression);
+    }
+
+    private FakeStatementNode ParseFakeStatement(
+        ParserContext context,
+        params Span<TokenKind> tokenKinds)
+    {
+        var span = context.Reader.SkipTo([SemiColon, .. tokenKinds]);
+        context.Reader.Check(SemiColon);
+        context.Diagnostics.ExpectedStatement(span);
+
+        return new FakeStatementNode(span);
     }
 
     private IExpressionNode? TryParseExpression(ParserContext context)
         => TryParseBinaryExpression(context);
+
+    private FakeExpressionNode ParseFakeExpression(
+        ParserContext context,
+        params Span<TokenKind> tokenKinds)
+    {
+        var span = context.Reader.SkipTo(tokenKinds);
+        context.Diagnostics.ExpectedExpression(span);
+
+        return new FakeExpressionNode(span);
+    }
 
     private IExpressionNode? TryParseBinaryExpression(ParserContext context, int parentPrecedence = 0)
     {
@@ -658,55 +774,55 @@ public class Parser
         while (true)
         {
             var kind = BinaryExpressionKind.Unknown;
-            if (context.Reader.Current.Is(Plus))
+            if (context.Reader.Token.Is(Plus))
                 kind = BinaryExpressionKind.Addition;
-            else if (context.Reader.Current.Is(Minus))
+            else if (context.Reader.Token.Is(Minus))
                 kind = BinaryExpressionKind.Subtraction;
-            else if (context.Reader.Current.Is(Asterisk))
+            else if (context.Reader.Token.Is(Asterisk))
                 kind = BinaryExpressionKind.Multiplication;
-            else if (context.Reader.Current.Is(Slash))
+            else if (context.Reader.Token.Is(Slash))
                 kind = BinaryExpressionKind.Division;
-            else if (context.Reader.Current.Is(Ampersand))
+            else if (context.Reader.Token.Is(Ampersand))
                 kind = BinaryExpressionKind.BitwiseAnd;
-            else if (context.Reader.Current.Is(Percent))
+            else if (context.Reader.Token.Is(Percent))
                 kind = BinaryExpressionKind.Modulus;
-            else if (context.Reader.Current.Is(Pipe))
+            else if (context.Reader.Token.Is(Pipe))
                 kind = BinaryExpressionKind.BitwiseOr;
-            else if (context.Reader.Current.Is(Caret))
+            else if (context.Reader.Token.Is(Caret))
                 kind = BinaryExpressionKind.BitwiseXor;
-            else if (context.Reader.Current.Is(AmpersandAmpersand))
+            else if (context.Reader.Token.Is(AmpersandAmpersand))
                 kind = BinaryExpressionKind.ConditionalAnd;
-            else if (context.Reader.Current.Is(PipePipe))
+            else if (context.Reader.Token.Is(PipePipe))
                 kind = BinaryExpressionKind.ConditionalOr;
-            else if (context.Reader.Current.Is(EqualEqual))
+            else if (context.Reader.Token.Is(EqualEqual))
                 kind = BinaryExpressionKind.Equality;
-            else if (context.Reader.Current.Is(ExclamationEqual))
+            else if (context.Reader.Token.Is(ExclamationEqual))
                 kind = BinaryExpressionKind.Inequality;
-            else if (context.Reader.Current.Is(Less))
+            else if (context.Reader.Token.Is(Less))
                 kind = BinaryExpressionKind.LessThan;
-            else if (context.Reader.Current.Is(LessEqual))
+            else if (context.Reader.Token.Is(LessEqual))
                 kind = BinaryExpressionKind.LessThanOrEqual;
-            else if (context.Reader.Current.Is(Greater))
+            else if (context.Reader.Token.Is(Greater))
                 kind = BinaryExpressionKind.GreaterThan;
-            else if (context.Reader.Current.Is(GreaterEqual))
+            else if (context.Reader.Token.Is(GreaterEqual))
                 kind = BinaryExpressionKind.GreaterThanOrEqual;
-            else if (context.Reader.Current.Is(Equal))
+            else if (context.Reader.Token.Is(Equal))
                 kind = BinaryExpressionKind.Assignment;
-            else if (context.Reader.Current.Is(PlusEqual))
+            else if (context.Reader.Token.Is(PlusEqual))
                 kind = BinaryExpressionKind.AdditionAssignment;
-            else if (context.Reader.Current.Is(MinusEqual))
+            else if (context.Reader.Token.Is(MinusEqual))
                 kind = BinaryExpressionKind.SubtractionAssignment;
-            else if (context.Reader.Current.Is(AsteriskEqual))
+            else if (context.Reader.Token.Is(AsteriskEqual))
                 kind = BinaryExpressionKind.MultiplicationAssignment;
-            else if (context.Reader.Current.Is(SlashEqual))
+            else if (context.Reader.Token.Is(SlashEqual))
                 kind = BinaryExpressionKind.DivisionAssignment;
-            else if (context.Reader.Current.Is(PercentEqual))
+            else if (context.Reader.Token.Is(PercentEqual))
                 kind = BinaryExpressionKind.ModulusAssignment;
-            else if (context.Reader.Current.Is(AmpersandEqual))
+            else if (context.Reader.Token.Is(AmpersandEqual))
                 kind = BinaryExpressionKind.BitwiseAndAssignment;
-            else if (context.Reader.Current.Is(PipeEqual))
+            else if (context.Reader.Token.Is(PipeEqual))
                 kind = BinaryExpressionKind.BitwiseOrAssignment;
-            else if (context.Reader.Current.Is(CaretEqual))
+            else if (context.Reader.Token.Is(CaretEqual))
                 kind = BinaryExpressionKind.BitwiseXorAssignment;
             else
                 break;
@@ -717,7 +833,7 @@ public class Parser
 
             context.Reader.Advance();
             var right = TryParseBinaryExpression(context, precedence) ??
-                        throw new Exception("Expected right operand.");
+                        ParseFakeExpression(context, Comma, CloseParen, CloseBracket, SemiColon);
 
             left = new BinaryExpressionNode(
                 left.SourceSpan.Combine(right.SourceSpan),
@@ -740,7 +856,7 @@ public class Parser
             return expression;
 
         var type = TryParseDiscriminatedUnion(context) ??
-                   throw new ParseException("Expected a type.");
+                   ParseFakeType(context, Comma, CloseParen, SemiColon);
 
         return new IsExpressionNode(expression, type);
     }
@@ -748,18 +864,18 @@ public class Parser
     private IExpressionNode? TryParseCastExpression(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(OpenParenthesis, out var openParen))
+            var (hasOpenParen, openParen) = c.Reader.Check(OpenParen);
+            if (!hasOpenParen)
                 return null;
 
             var type = c.Parser.TryParseDiscriminatedUnion(c);
             if (type is null)
                 return null;
 
-            if (!c.Reader.Check(CloseParenthesis))
-                throw new ParseException("Expected a close parenthesis.");
+            c.Reader.Expect(CloseParen);
 
             var expression = c.Parser.TryParseUnaryExpression(c) ??
-                             throw new ParseException("Expected an expression.");
+                             c.Parser.ParseFakeExpression(c, Comma, CloseParen, CloseBracket, SemiColon);
 
             return new CastExpressionNode(
                 openParen.SourceSpan.Combine(expression.SourceSpan),
@@ -769,7 +885,7 @@ public class Parser
 
     private IExpressionNode? TryParseUnaryExpression(ParserContext context)
     {
-        var token = context.Reader.Current;
+        var token = context.Reader.Token;
         var kind = UnaryExpressionKind.Unknown;
         if (token.Is(Minus))
             kind = UnaryExpressionKind.UnaryMinus;
@@ -785,7 +901,7 @@ public class Parser
             context.Reader.Advance();
 
             var operand = TryParseUnaryExpression(context) ??
-                          throw new ParseException("Expected an operand.");
+                          ParseFakeExpression(context, Comma, CloseParen, CloseBracket, SemiColon);
 
             return new UnaryExpressionNode(token.SourceSpan.Combine(operand.SourceSpan), kind, operand);
         }
@@ -803,47 +919,50 @@ public class Parser
         {
             if (context.Reader.Check(Dot))
             {
-                if (context.Reader.Check(Identifier, out var id))
+                var (hasId, id) = context.Reader.Check(Identifier);
+                if (hasId)
                 {
                     member = new MemberAccessExpressionNode(
                         member.SourceSpan.Combine(id.SourceSpan),
                         member,
                         id.Identifier);
                 }
-                else if (context.Reader.Check(Integer, out var number))
-                {
-                    member = new MemberAccessExpressionNode(
-                        member.SourceSpan.Combine(number.SourceSpan),
-                        member,
-                        number.Integer.ToString());
-                }
                 else
                 {
-                    throw new ParseException("Expected an identifier.");
+                    var (hasInteger, number) = context.Reader.Check(Integer);
+                    if (hasInteger)
+                    {
+                        member = new MemberAccessExpressionNode(
+                            member.SourceSpan.Combine(number.SourceSpan),
+                            member,
+                            number.Integer.ToString());
+                    }
+                    else
+                    {
+                        member = new FakeExpressionNode(context.Reader.Token.SourceSpan);
+                        context.Diagnostics.ExpectedIdentifier(member.SourceSpan);
+                    }
                 }
             }
             else if (context.Reader.Check(OpenBracket))
             {
                 var index = TryParseExpression(context) ??
-                            throw new ParseException("Expected an index.");
+                            ParseFakeExpression(context, CloseBracket);
 
-                if (!context.Reader.Check(CloseBracket, out var closeBracket))
-                    throw new ParseException("Expected a close bracket.");
+                var closeBracketSpan = context.Reader.Expect(CloseBracket);
 
                 member = new ArrayAccessExpressionNode(
-                    member.SourceSpan.Combine(closeBracket.SourceSpan),
+                    member.SourceSpan.Combine(closeBracketSpan),
                     member,
                     index);
             }
-            else if (context.Reader.Check(OpenParenthesis))
+            else if (context.Reader.Check(OpenParen))
             {
                 var arguments = TryParseCallArguments(context);
-
-                if (!context.Reader.Check(CloseParenthesis, out var closeParen))
-                    throw new ParseException("Expected a close parenthesis.");
+                var closeParenSpan = context.Reader.Expect(CloseParen);
 
                 member = new CallExpressionNode(
-                    member.SourceSpan.Combine(closeParen.SourceSpan),
+                    member.SourceSpan.Combine(closeParenSpan),
                     member,
                     arguments);
             }
@@ -864,10 +983,22 @@ public class Parser
         {
             arguments.Add(argument);
 
-            while (context.Reader.Check(Comma))
+            while (true)
             {
-                argument = TryParseExpression(context) ??
-                           throw new ParseException("Expected an argument.");
+                var hasComma = context.Reader.Check(Comma);
+                var comma = context.Reader.Token;
+
+                argument = TryParseExpression(context);
+                if (argument is null)
+                {
+                    if (!hasComma)
+                        break;
+
+                    argument = ParseFakeExpression(context, Comma, CloseParen);
+                }
+
+                if (!hasComma)
+                    context.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
 
                 arguments.Add(argument);
             }
@@ -888,7 +1019,8 @@ public class Parser
     private IExpressionNode? TryParseTupleExpression(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(OpenParenthesis, out var openParen))
+            var (hasOpenParen, openParen) = c.Reader.Check(OpenParen);
+            if (!hasOpenParen)
                 return null;
 
             var expression = c.Parser.TryParseExpression(c);
@@ -896,10 +1028,22 @@ public class Parser
                 return null;
 
             var expressions = new List<IExpressionNode> { expression };
-            while (c.Reader.Check(Comma))
+            while (true)
             {
-                expression = c.Parser.TryParseExpression(c) ??
-                             throw new ParseException("Expected an expression.");
+                var hasComma = c.Reader.Check(Comma);
+                var comma = c.Reader.Token;
+
+                expression = c.Parser.TryParseExpression(c);
+                if (expression is null)
+                {
+                    if (!hasComma)
+                        break;
+
+                    expression = c.Parser.ParseFakeExpression(c, Comma, CloseParen);
+                }
+
+                if (!hasComma)
+                    c.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
 
                 expressions.Add(expression);
             }
@@ -907,24 +1051,22 @@ public class Parser
             if (expressions.Count <= 1)
                 return null;
 
-            if (!c.Reader.Check(CloseParenthesis, out var closeParen))
-                throw new ParseException("Expected a close parenthesis.");
+            var closeParenSpan = c.Reader.Expect(CloseParen);
 
             return new TupleExpressionNode(
-                openParen.SourceSpan.Combine(closeParen.SourceSpan),
+                openParen.SourceSpan.Combine(closeParenSpan),
                 expressions);
         });
 
     private IExpressionNode? TryParseParenExpression(ParserContext context)
     {
-        if (!context.Reader.Check(OpenParenthesis))
+        if (!context.Reader.Check(OpenParen))
             return null;
 
         var expression = TryParseExpression(context) ??
-                         throw new ParseException("Expected an expression.");
+                         ParseFakeExpression(context, CloseParen);
 
-        if (!context.Reader.Check(CloseParenthesis))
-            throw new ParseException("Expected a close parenthesis.");
+        context.Reader.Expect(CloseParen);
 
         return expression;
     }
@@ -940,7 +1082,8 @@ public class Parser
 
     private NullExpressionNode? TryParseNullExpression(ParserContext context)
     {
-        if (!context.Reader.Check(Null, out var nullKeyword))
+        var (hasNull, nullKeyword) = context.Reader.Check(Null);
+        if (!hasNull)
             return null;
 
         return new NullExpressionNode(nullKeyword.SourceSpan);
@@ -949,23 +1092,22 @@ public class Parser
     private NewObjectExpressionNode? TryParseNewObjectExpression(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(New, out var newKeyword))
+            var (hasNew, newKeyword) = c.Reader.Check(New);
+            if (!hasNew)
                 return null;
 
             var type = c.Parser.TryParseGenericTypeNode(c) ??
-                       c.Parser.TryParseTypeNode(c) as IInlineTypeNode ??
-                       throw new ParseException("Expected a type.");
+                       c.Parser.TryParseTypeNode(c) ??
+                       c.Parser.ParseFakeType(c, OpenParen) as IInlineTypeNode;
 
-            if (!c.Reader.Check(OpenParenthesis))
+            if (!c.Reader.Check(OpenParen))
                 return null;
 
             var arguments = c.Parser.TryParseCallArguments(c);
-
-            if (!c.Reader.Check(CloseParenthesis, out var closeParen))
-                throw new ParseException("Expected a close parenthesis.");
+            var closeParenSpan = c.Reader.Expect(CloseParen);
 
             return new NewObjectExpressionNode(
-                newKeyword.SourceSpan.Combine(closeParen.SourceSpan),
+                newKeyword.SourceSpan.Combine(closeParenSpan),
                 type,
                 arguments);
         });
@@ -973,64 +1115,86 @@ public class Parser
     private NewArrayExpressionNode? TryParseNewArrayExpression(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(New, out var newKeyword))
+            var (hasNew, newKeyword) = c.Reader.Check(New);
+            if (!hasNew)
                 return null;
 
-            var type = c.Parser.TryParseTypeNode(c) ??
-                       throw new ParseException("Expected a type.");
+            var type = c.Parser.TryParseTypeNode(c) as IInlineTypeNode ??
+                       c.Parser.ParseFakeType(c, OpenBracket, CloseBracket);
 
             if (!c.Reader.Check(OpenBracket))
                 return null;
 
             var size = c.Parser.TryParseExpression(c) ??
-                       throw new ParseException("Expected a size.");
+                       c.Parser.ParseFakeExpression(c, CloseBracket);
 
-            if (!c.Reader.Check(CloseBracket, out var closeBracket))
-                throw new ParseException("Expected a close bracket.");
+            var closeBraceSpan = c.Reader.Expect(CloseBracket);
 
             return new NewArrayExpressionNode(
-                newKeyword.SourceSpan.Combine(closeBracket.SourceSpan),
+                newKeyword.SourceSpan.Combine(closeBraceSpan),
                 new ArrayTypeNode(type.SourceSpan, type),
                 size);
         });
 
     private LiteralExpressionNode? TryParseLiteral(ParserContext context)
     {
-        if (context.Reader.Check(Integer, out var token))
+        var (hasInteger, token) = context.Reader.Check(Integer);
+        if (hasInteger)
             return LiteralExpressionNode.Integer(token.SourceSpan, token.Integer);
 
-        if (context.Reader.Check(Float, out token))
-            return LiteralExpressionNode.Float(token.SourceSpan, token.Float);
+        var (hasFloat, floatToken) = context.Reader.Check(Float);
+        if (hasFloat)
+            return LiteralExpressionNode.Float(floatToken.SourceSpan, floatToken.Float);
 
-        if (context.Reader.Check(True, out token))
-            return LiteralExpressionNode.True(token.SourceSpan);
+        var (hasTrue, trueToken) = context.Reader.Check(True);
+        if (hasTrue)
+            return LiteralExpressionNode.True(trueToken.SourceSpan);
 
-        if (context.Reader.Check(False, out token))
-            return LiteralExpressionNode.False(token.SourceSpan);
+        var (hasFalse, falseToken) = context.Reader.Check(False);
+        if (hasFalse)
+            return LiteralExpressionNode.False(falseToken.SourceSpan);
 
-        if (context.Reader.Check(TokenKind.String, out token))
-            return LiteralExpressionNode.String(token.SourceSpan, token.String);
+        var (hasString, stringToken) = context.Reader.Check(TokenKind.String);
+        if (hasString)
+            return LiteralExpressionNode.String(stringToken.SourceSpan, stringToken.String);
 
-        if (context.Reader.Check(TokenKind.Char, out token))
-            return LiteralExpressionNode.Char(token.SourceSpan, token.Char);
+        var (hasChar, charToken) = context.Reader.Check(TokenKind.Char);
+        if (hasChar)
+            return LiteralExpressionNode.Char(charToken.SourceSpan, charToken.Char);
 
         return null;
     }
 
+    private FakeTypeNode ParseFakeType(ParserContext context, params Span<TokenKind> tokenKinds)
+    {
+        var span = context.Reader.SkipTo(tokenKinds);
+        context.Diagnostics.ExpectedType(span);
+
+        var name = GetGeneratedName();
+
+        return new FakeTypeNode(span, name);
+    }
+
     private IInlineTypeNode? TryParseDiscriminatedUnion(ParserContext context)
     {
+        var hasFirstPipe = context.Reader.Check(Pipe);
         var type = TryParseInlineTypeNode(context);
         if (type is null)
-            return null;
+        {
+            if (!hasFirstPipe)
+                return null;
 
-        if (!context.Reader.Current.Is(Pipe))
+            type = ParseFakeType(context, Pipe, SemiColon);
+        }
+
+        if (!context.Reader.Token.Is(Pipe))
             return type;
 
         var types = new List<IInlineTypeNode> { type };
         while (context.Reader.Check(Pipe))
         {
             type = TryParseInlineTypeNode(context) ??
-                   throw new ParseException("Expected a type.");
+                   ParseFakeType(context, Pipe, SemiColon);
 
             types.Add(type);
         }
@@ -1043,13 +1207,13 @@ public class Parser
            TryParseArrayType(context) ??
            TryParseGenericTypeNode(context) ??
            TryParseTypeNode(context) ??
-           TryParseFunctionType(context) ??
-           TryParseTupleOrParenthesizedType(context) ??
+           TryParseTupleOrFunctionType(context) ??
            TryParseInterface(context);
 
     private IInlineTypeNode? TryParseNull(ParserContext context)
     {
-        if (!context.Reader.Check(Null, out var token))
+        var (hasNull, token) = context.Reader.Check(Null);
+        if (!hasNull)
             return null;
 
         return new TypeNode(token.SourceSpan, "null");
@@ -1058,21 +1222,25 @@ public class Parser
     private IInlineTypeNode? TryParseArrayType(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(Identifier, out var id))
+            var (hasId, id) = c.Reader.Check(Identifier);
+            if (!hasId)
                 return null;
 
-            if (!c.Reader.Check(OpenBracket) ||
-                !c.Reader.Check(CloseBracket, out var closeBracket))
+            if (!c.Reader.Check(OpenBracket))
                 return null;
 
-            var typeNode = new TypeNode(id.SourceSpan, id.Identifier);
-            return new ArrayTypeNode(id.SourceSpan.Combine(closeBracket.SourceSpan), typeNode);
+            var closeBracketSpan = c.Reader.Expect(CloseBracket);
+
+            return new ArrayTypeNode(
+                id.SourceSpan.Combine(closeBracketSpan),
+                new TypeNode(id.SourceSpan, id.Identifier));
         });
 
     private GenericTypeNode? TryParseGenericTypeNode(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(Identifier, out var token))
+            var (hasToken, token) = c.Reader.Check(Identifier);
+            if (!hasToken)
                 return null;
 
             if (!c.Reader.Check(Less))
@@ -1080,23 +1248,34 @@ public class Parser
 
             var typeArguments = new List<IInlineTypeNode>();
             var typeArgument = c.Parser.TryParseDiscriminatedUnion(c) ??
-                               throw new ParseException("Expected a type argument.");
+                               c.Parser.ParseFakeType(c, Comma, Greater);
 
             typeArguments.Add(typeArgument);
 
-            while (c.Reader.Check(Comma))
+            while (true)
             {
-                typeArgument = c.Parser.TryParseDiscriminatedUnion(c) ??
-                               throw new ParseException("Expected a type argument.");
+                var hasComma = c.Reader.Check(Comma);
+                var comma = c.Reader.Token;
+
+                typeArgument = c.Parser.TryParseDiscriminatedUnion(c);
+                if (typeArgument is null)
+                {
+                    if (!hasComma)
+                        break;
+
+                    typeArgument = c.Parser.ParseFakeType(c, Comma, Greater);
+                }
+
+                if (!hasComma)
+                    c.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
 
                 typeArguments.Add(typeArgument);
             }
 
-            if (!c.Reader.Check(Greater, out var greaterSign))
-                throw new ParseException("Expected a close angle bracket.");
+            var greaterSignSpan = c.Reader.Expect(Greater);
 
             return new GenericTypeNode(
-                token.SourceSpan.Combine(greaterSign.SourceSpan),
+                token.SourceSpan.Combine(greaterSignSpan),
                 token.Identifier,
                 typeArguments);
         });
@@ -1104,101 +1283,97 @@ public class Parser
     private TypeNode? TryParseTypeNode(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(Identifier, out var token))
+            var (hasToken, token) = c.Reader.Check(Identifier);
+            if (!hasToken)
                 return null;
 
             return new TypeNode(token.SourceSpan, token.Identifier);
         });
 
-    private FunctionTypeNode? TryParseFunctionType(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var (span, parameters) = c.Parser.TryParseFunctionTypeParameters(c);
-            if (parameters is null)
-                return null;
-
-            if (!c.Reader.Check(EqualGreater))
-                return null;
-
-            var returnType = c.Parser.TryParseDiscriminatedUnion(c) ??
-                             throw new ParseException("Expected a function return type.");
-
-            return new FunctionTypeNode(span, parameters, returnType);
-        });
-
-    private (SourceSpan, IReadOnlyList<IInlineTypeNode>?) TryParseFunctionTypeParameters(ParserContext context)
+    private (SourceSpan, IReadOnlyList<IInlineTypeNode>?) TryParseParenTypes(
+        ParserContext context)
     {
-        if (!context.Reader.Check(OpenParenthesis, out var openParen))
+        var (hasOpenParen, openParen) = context.Reader.Check(OpenParen);
+        if (!hasOpenParen)
             return (default, null);
 
-        var parameters = new List<IInlineTypeNode>();
-        var parameter = TryParseDiscriminatedUnion(context);
-        if (parameter is not null)
+        var types = new List<IInlineTypeNode>();
+        var type = TryParseDiscriminatedUnion(context);
+        if (type is not null)
         {
-            parameters.Add(parameter);
+            types.Add(type);
 
-            while (context.Reader.Check(Comma))
+            while (true)
             {
-                parameter = TryParseDiscriminatedUnion(context) ??
-                            throw new ParseException("Expected a parameter.");
+                var hasComma = context.Reader.Check(Comma);
+                var comma = context.Reader.Token;
 
-                parameters.Add(parameter);
-            }
-        }
+                type = TryParseDiscriminatedUnion(context);
+                if (type is null)
+                {
+                    if (!hasComma)
+                        break;
 
-        if (!context.Reader.Check(CloseParenthesis, out var closeParen))
-            throw new ParseException("Expected a close parenthesis.");
+                    type = ParseFakeType(context, Comma, CloseParen);
+                }
 
-        return (openParen.SourceSpan.Combine(closeParen.SourceSpan), parameters);
-    }
-
-    private IInlineTypeNode? TryParseTupleOrParenthesizedType(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            if (!c.Reader.Check(OpenParenthesis, out var openParen))
-                return null;
-
-            var type = c.Parser.TryParseDiscriminatedUnion(c);
-            if (type is null)
-                return null;
-
-            var types = new List<IInlineTypeNode> { type };
-            while (c.Reader.Check(Comma))
-            {
-                type = c.Parser.TryParseDiscriminatedUnion(c) ??
-                       throw new ParseException("Expected a type.");
+                if (!hasComma)
+                    context.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
 
                 types.Add(type);
             }
+        }
 
-            if (!c.Reader.Check(CloseParenthesis, out var closeParen))
-                throw new ParseException("Expected a close parenthesis.");
+        var closeParenSpan = context.Reader.Expect(CloseParen);
+
+        return (openParen.SourceSpan.Combine(closeParenSpan), types);
+    }
+
+    private IInlineTypeNode? TryParseTupleOrFunctionType(ParserContext context)
+        => context.Reader.Scoped(context, static c =>
+        {
+            var (typesSpan, types) = c.Parser.TryParseParenTypes(c);
+            if (types is null)
+                return null;
+
+            var isFunctionType = c.Reader.Check(EqualGreater).Result;
+            if (!isFunctionType && types.Count == 0)
+            {
+                c.Diagnostics.MissingToken(c.Reader.Span.Start, EqualGreater);
+                isFunctionType = true;
+            }
+
+            if (isFunctionType)
+            {
+                var returnType = c.Parser.TryParseDiscriminatedUnion(c) ??
+                                 c.Parser.ParseFakeType(c, Comma, CloseParen, SemiColon, CloseBrace);
+
+                return new FunctionTypeNode(
+                    typesSpan.Combine(returnType.SourceSpan),
+                    types,
+                    returnType);
+            }
 
             if (types.Count == 1)
                 return types[0];
 
-            return new TupleTypeNode(openParen.SourceSpan.Combine(closeParen.SourceSpan), types);
+            return new TupleTypeNode(typesSpan, types);
         });
 
     private InterfaceNode? TryParseInterface(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            if (!c.Reader.Check(OpenBrace, out var openBrace))
+            var (hasOpenBrace, openBrace) = c.Reader.Check(OpenBrace);
+            if (!hasOpenBrace)
                 return null;
 
+            // TODO: relax ordering
             var properties = c.Parser.TryParseInterfaceProperties(c);
             var methods = c.Parser.TryParseInterfaceMethods(c);
-
-            if (!c.Reader.Check(CloseBrace, out var closeBrace))
-            {
-                if (properties.Count == 0 && methods.Count == 0)
-                    return null;
-
-                throw new ParseException("Expected a close brace.");
-            }
+            var closeBraceSpan = c.Reader.Expect(CloseBrace);
 
             return new InterfaceNode(
-                openBrace.SourceSpan.Combine(closeBrace.SourceSpan),
+                openBrace.SourceSpan.Combine(closeBraceSpan),
                 properties,
                 methods);
         });
@@ -1230,22 +1405,25 @@ public class Parser
                 return null;
 
             var type = c.Parser.TryParseDiscriminatedUnion(c) ??
-                       throw new ParseException("Expected a type.");
+                       c.Parser.ParseFakeType(c, SemiColon, OpenBrace, CloseBrace);
 
-            if (c.Reader.Check(SemiColon, out var semiColon))
-                return new InterfacePropertyNode(span.Combine(semiColon.SourceSpan), name, type, null, null);
+            var (hasSemiColon, semiColon) = c.Reader.Check(SemiColon);
+            if (hasSemiColon)
+                return new InterfacePropertyNode(
+                    span.Combine(semiColon.SourceSpan),
+                    name,
+                    type,
+                    null,
+                    null);
 
-            if (!c.Reader.Check(OpenBrace))
-                throw new ParseException("Expected an open brace.");
+            c.Reader.Expect(OpenBrace);
 
             var getter = c.Parser.TryParseInterfacePropertyGetter(c);
             var setter = c.Parser.TryParseInterfacePropertySetter(c);
-
-            if (!c.Reader.Check(CloseBrace, out var closeBrace))
-                throw new ParseException("Expected a close brace.");
+            var closeBraceSpan = c.Reader.Expect(CloseBrace);
 
             return new InterfacePropertyNode(
-                span.Combine(closeBrace.SourceSpan),
+                span.Combine(closeBraceSpan),
                 name,
                 type,
                 getter,
@@ -1262,8 +1440,7 @@ public class Parser
             if (!c.Reader.Check(Get))
                 return null;
 
-            if (!c.Reader.Check(SemiColon))
-                throw new ParseException("Expected a semi colon.");
+            c.Reader.Expect(SemiColon);
 
             return accessModifier;
         });
@@ -1278,8 +1455,7 @@ public class Parser
             if (!c.Reader.Check(Set))
                 return null;
 
-            if (!c.Reader.Check(SemiColon))
-                throw new ParseException("Expected a semi colon.");
+            c.Reader.Expect(SemiColon);
 
             return accessModifier;
         });
@@ -1303,29 +1479,36 @@ public class Parser
     private InterfaceMethodNode? TryParseInterfaceMethod(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            var (span, name) = c.Parser.TryParseId(c);
+            var (nameSpan, name) = c.Parser.TryParseId(c);
             if (name is null)
                 return null;
 
-            var (_, parameters) = c.Parser.TryParseFunctionTypeParameters(c);
+            var (_, parameters) = c.Parser.TryParseParenTypes(c);
             if (parameters is null)
-                throw new ParseException("Expected a function parameter list.");
+            {
+                parameters = [];
+                var span = c.Reader.SkipTo(Colon, SemiColon);
+                c.Diagnostics.ExpectedInterfaceParameters(span);
+            }
 
-            if (!c.Reader.Check(Colon))
-                throw new ParseException("Expected a colon.");
+            c.Reader.Expect(Colon);
 
             var returnType = c.Parser.TryParseDiscriminatedUnion(c) ??
-                             throw new ParseException("Expected a type.");
+                             c.Parser.ParseFakeType(c, SemiColon, CloseBrace);
 
-            if (!c.Reader.Check(SemiColon, out var semiColon))
-                throw new ParseException("Expected a semi-colon.");
+            var semiColonSpan = c.Reader.Expect(SemiColon);
 
-            return new InterfaceMethodNode(span.Combine(semiColon.SourceSpan), name, parameters, returnType);
+            return new InterfaceMethodNode(
+                nameSpan.Combine(semiColonSpan),
+                name,
+                parameters,
+                returnType);
         });
 
     private (SourceSpan, string?) TryParseId(ParserContext context)
     {
-        if (!context.Reader.Check(Identifier, out var token))
+        var (hasToken, token) = context.Reader.Check(Identifier);
+        if (!hasToken)
             return default;
 
         return (token.SourceSpan, token.Identifier);

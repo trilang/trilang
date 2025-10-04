@@ -1,4 +1,5 @@
 using Trilang;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -8,20 +9,25 @@ namespace Tri.Tests.Parsing;
 
 public class ParseExpressionTests
 {
-    private static SyntaxTree Parse(string code)
+    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
+        diagnostics.SwitchFile(file);
+
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
         var parser = new Parser();
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
-        return parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        return (tree, diagnostics);
     }
 
     [Test]
     public void ParseVariableTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = 5;
@@ -34,7 +40,10 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
+                    "void"
+                ),
                 new BlockStatementNode(
                     new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(43, 3, 2)),
                     [
@@ -49,12 +58,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseUnaryPlusTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = +2;
@@ -84,12 +94,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseUnaryMinusTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = -2;
@@ -119,12 +130,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseLogicalNotTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = !2;
@@ -154,12 +166,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseBitwiseNotTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = ~2;
@@ -189,12 +202,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void MultipleUnaryOperatorsTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = ~+2;
@@ -236,6 +250,7 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
@@ -246,7 +261,7 @@ public class ParseExpressionTests
     [TestCase("%", BinaryExpressionKind.Modulus)]
     public void ParseBinaryNumberTest(string @operator, BinaryExpressionKind kind)
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             $$"""
               public main(): void {
                   var x: i32 = 2 {{@operator}} 2;
@@ -277,12 +292,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseBitwiseAndTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = 2 & 2;
@@ -321,12 +337,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseBitwiseOrTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = 2 | 2;
@@ -372,12 +389,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseBitwiseXorTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = 2 ^ 2;
@@ -423,12 +441,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseLogicalAndTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: bool = true && true;
@@ -459,12 +478,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseLogicalOrTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: bool = true || true;
@@ -495,12 +515,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseEqualityTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: bool = true == true;
@@ -531,12 +552,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseInequalityTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: bool = true != true;
@@ -567,12 +589,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseLessThanTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: bool = 2 < 2;
@@ -603,12 +626,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseLessThanOrEqualTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: bool = 2 <= 2;
@@ -639,12 +663,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseGreaterThanTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: bool = 2 > 2;
@@ -675,12 +700,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseGreaterThanOrEqualTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: bool = 2 >= 2;
@@ -711,12 +737,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseAssignmentTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 x = 1;
@@ -745,6 +772,7 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
@@ -758,7 +786,7 @@ public class ParseExpressionTests
     [TestCase("^=", BinaryExpressionKind.BitwiseXorAssignment)]
     public void ParseAssignment2Test(string @operator, BinaryExpressionKind kind)
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             $$"""
               public main(): void {
                   x {{@operator}} 1;
@@ -787,12 +815,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseParenTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = (1 + 2) * 3;
@@ -845,12 +874,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseVariableExpressionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(y: i32): void {
                 var x: i32 = 2 * y;
@@ -881,12 +911,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParsePrecedenceTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = true || true && false | false ^ false & true == 1 + 2 * 3 < 10;
@@ -953,12 +984,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void TupleExpressionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return (1, 2);
@@ -984,28 +1016,69 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void TupleExpressionMissingCloseParenTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return (1, 2;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close parenthesis."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 3, 2)),
+                AccessModifier.Public,
+                "main",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(41, 3, 2)),
+                    [
+                        new ReturnStatementNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(39, 2, 18)),
+                            new TupleExpressionNode(
+                                new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)),
+                                [
+                                    LiteralExpressionNode.Integer(
+                                        new SourceSpan(new SourcePosition(34, 2, 13), new SourcePosition(35, 2, 14)),
+                                        1
+                                    ),
+                                    LiteralExpressionNode.Integer(
+                                        new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(38, 2, 17)),
+                                        2
+                                    ),
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(38, 2, 17).ToSpan(),
+            "Expected ')'."
+        );
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseNewArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return new i32[10];
@@ -1038,12 +1111,13 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseAsExpressionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(a: i32): i8 {
                 return a is i8;
@@ -1075,6 +1149,7 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
@@ -1086,17 +1161,63 @@ public class ParseExpressionTests
                 return a is;
             }
             """;
+        var (tree, diagnostics) = Parse(code);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(44, 3, 2)),
+                AccessModifier.Public,
+                "test",
+                [
+                    new ParameterNode(
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
+                        "a",
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
+                            "i32"
+                        )
+                    )
+                ],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)),
+                    "i8"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(44, 3, 2)),
+                    [
+                        new ReturnStatementNode(
+                            new SourceSpan(new SourcePosition(30, 2, 5), new SourcePosition(42, 2, 17)),
+                            new IsExpressionNode(
+                                new MemberAccessExpressionNode(
+                                    new SourceSpan(new SourcePosition(37, 2, 12), new SourcePosition(38, 2, 13)),
+                                    "a"
+                                ),
+                                new FakeTypeNode(
+                                    new SourcePosition(41, 2, 16).ToSpan(),
+                                    "<>_0"
+                                )
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(41, 2, 16).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseCastExpressionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(a: i32): i8 {
                 return (i8)a;
@@ -1132,44 +1253,120 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseCastExpressionMissingCloseParenTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public test(a: i32): i8 {
                 return (i8 a;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close parenthesis."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(45, 3, 2)),
+                AccessModifier.Public,
+                "test",
+                [
+                    new ParameterNode(
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
+                        "a",
+                        new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
+                    )
+                ],
+                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(45, 3, 2)),
+                    [
+                        new ReturnStatementNode(
+                            new SourceSpan(new SourcePosition(30, 2, 5), new SourcePosition(43, 2, 18)),
+                            new CastExpressionNode(
+                                new SourceSpan(new SourcePosition(37, 2, 12), new SourcePosition(42, 2, 17)),
+                                new TypeNode(new SourceSpan(new SourcePosition(38, 2, 13), new SourcePosition(40, 2, 15)), "i8"),
+                                new MemberAccessExpressionNode(new SourceSpan(new SourcePosition(41, 2, 16), new SourcePosition(42, 2, 17)), "a")
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(41, 2, 16).ToSpan(),
+            "Expected ')'."
+        );
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseCastExpressionMissingExpressionTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public test(a: i32): i8 {
                 return (i8);
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an expression."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(44, 3, 2)),
+                AccessModifier.Public,
+                "test",
+                [
+                    new ParameterNode(
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
+                        "a",
+                        new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
+                    )
+                ],
+                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(44, 3, 2)),
+                    [
+                        new ReturnStatementNode(
+                            new SourceSpan(new SourcePosition(30, 2, 5), new SourcePosition(42, 2, 17)),
+                            new CastExpressionNode(
+                                new SourceSpan(new SourcePosition(37, 2, 12), new SourcePosition(41, 2, 16)),
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(38, 2, 13), new SourcePosition(40, 2, 15)),
+                                    "i8"
+                                ),
+                                new FakeExpressionNode(
+                                    new SourcePosition(41, 2, 16).ToSpan()
+                                )
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0009_ExpectedExpression,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(41, 2, 16).ToSpan(),
+            "Expected an expression."
+        );
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseFloatingNumberTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): f64 {
                 return 3.14;
@@ -1192,5 +1389,6 @@ public class ParseExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

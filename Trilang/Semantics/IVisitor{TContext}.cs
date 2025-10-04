@@ -29,6 +29,14 @@ public interface IVisitor<in TContext>
 
     void VisitExpressionStatement(ExpressionStatement node, TContext context);
 
+    void VisitFakeDeclaration(FakeDeclaration node, TContext context);
+
+    void VisitFakeExpression(FakeExpression node, TContext context);
+
+    void VisitFakeStatement(FakeStatement node, TContext context);
+
+    void VisitFakeType(FakeType node, TContext context);
+
     void VisitFunction(FunctionDeclaration node, TContext context);
 
     void VisitFunctionType(FunctionType node, TContext context);

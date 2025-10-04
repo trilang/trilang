@@ -1,4 +1,5 @@
 using Trilang;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -8,20 +9,25 @@ namespace Tri.Tests.Parsing;
 
 public class ParseCallExpressionTests
 {
-    private static SyntaxTree Parse(string code)
+    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
+        diagnostics.SwitchFile(file);
+
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
         var parser = new Parser();
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
-        return parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        return (tree, diagnostics);
     }
 
     [Test]
     public void ParseCallStatementTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 print("Hello, World!");
@@ -63,12 +69,13 @@ public class ParseCallExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseCallStatementMultipleParamsTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 sum(1, 2, 3);
@@ -117,12 +124,13 @@ public class ParseCallExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseCallExpressionMultipleParamsTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var x: i32 = 1 + sum(1, 2, 3);
@@ -181,5 +189,6 @@ public class ParseCallExpressionTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

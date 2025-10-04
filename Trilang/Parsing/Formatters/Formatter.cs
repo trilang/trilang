@@ -232,6 +232,18 @@ public partial class Formatter : INodeVisitor
         }
     }
 
+    public void VisitFakeDeclaration(FakeDeclarationNode node)
+        => writer.Write("<fake declaration>");
+
+    public void VisitFakeExpression(FakeExpressionNode node)
+        => writer.Write("<fake expression>");
+
+    public void VisitFakeStatement(FakeStatementNode node)
+        => writer.WriteLine("<fake statement>;");
+
+    public void VisitFakeType(FakeTypeNode node)
+        => writer.Write($"<fake type {node.Name}>");
+
     public void VisitFunction(FunctionDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);

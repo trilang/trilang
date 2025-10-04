@@ -39,6 +39,14 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
                 => CompareExpressionBlockNode(x1, y1),
             (ExpressionStatement x1, ExpressionStatement y1)
                 => CompareExpressionStatementNode(x1, y1),
+            (FakeDeclaration, FakeDeclaration)
+                => true,
+            (FakeExpression, FakeExpression)
+                => true,
+            (FakeStatement, FakeStatement)
+                => true,
+            (FakeType, FakeType)
+                => true,
             (FunctionDeclaration x1, FunctionDeclaration y1)
                 => CompareFunctionDeclarationNode(x1, y1),
             (FunctionType x1, FunctionType y1)

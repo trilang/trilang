@@ -3,7 +3,7 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
-// TODO: split into two steps
+// TODO: split into two steps, detect loops in metadata generator, report them here
 internal class RecursiveTypeAlias : Visitor, ISemanticPass
 {
     private readonly HashSet<ITypeMetadata> visitedTypes;

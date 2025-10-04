@@ -82,6 +82,18 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         return new ExpressionStatement(node.SourceSpan, expression);
     }
 
+    public ISemanticNode TransformFakeDeclaration(Parsing.Ast.FakeDeclarationNode node)
+        => new FakeDeclaration(node.SourceSpan);
+
+    public ISemanticNode TransformFakeExpression(Parsing.Ast.FakeExpressionNode node)
+        => new FakeExpression(node.SourceSpan);
+
+    public ISemanticNode TransformFakeStatement(Parsing.Ast.FakeStatementNode node)
+        => new FakeStatement(node.SourceSpan);
+
+    public ISemanticNode TransformFakeType(Parsing.Ast.FakeTypeNode node)
+        => new FakeType(node.SourceSpan, node.Name);
+
     public ISemanticNode TransformFunction(Parsing.Ast.FunctionDeclarationNode node)
     {
         var parameters = node.Parameters.Select(p => (Parameter)p.Transform(this)).ToList();

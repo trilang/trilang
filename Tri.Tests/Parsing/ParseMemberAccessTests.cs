@@ -1,4 +1,5 @@
 using Trilang;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -8,20 +9,25 @@ namespace Tri.Tests.Parsing;
 
 public class ParseMemberAccessTests
 {
-    private static SyntaxTree Parse(string code)
+    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
+        diagnostics.SwitchFile(file);
+
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
         var parser = new Parser();
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
-        return parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        return (tree, diagnostics);
     }
 
     [Test]
     public void ParseArrayAccessTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(x: i32[]): void {
                 var a: i32 = x[0];
@@ -51,6 +57,7 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
@@ -62,17 +69,72 @@ public class ParseMemberAccessTests
                 var a: i32 = x[0;
             }
             """;
+        var (tree, diagnostics) = Parse(code);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close bracket."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
+                AccessModifier.Public,
+                "test",
+                [
+                    new ParameterNode(
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(20, 1, 21)),
+                        "x",
+                        new ArrayTypeNode(
+                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(20, 1, 21)),
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
+                                "i32"
+                            )
+                        )
+                    )
+                ],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(53, 3, 2)),
+                    [
+                        new VariableDeclarationNode(
+                            new SourceSpan(new SourcePosition(34, 2, 5), new SourcePosition(51, 2, 22)),
+                            "a",
+                            new TypeNode(
+                                new SourceSpan(new SourcePosition(41, 2, 12), new SourcePosition(44, 2, 15)),
+                                "i32"
+                            ),
+                            new ArrayAccessExpressionNode(
+                                new SourceSpan(new SourcePosition(47, 2, 18), new SourcePosition(50, 2, 21)),
+                                new MemberAccessExpressionNode(
+                                    new SourceSpan(new SourcePosition(47, 2, 18), new SourcePosition(48, 2, 19)),
+                                    "x"
+                                ),
+                                LiteralExpressionNode.Integer(
+                                    new SourceSpan(new SourcePosition(49, 2, 20), new SourcePosition(50, 2, 21)),
+                                    0
+                                )
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(50, 2, 21).ToSpan(),
+            "Expected ']'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseSetArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): void {
                 x[0] = 1;
@@ -104,12 +166,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseSetNestedArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): void {
                 a.b[0].c = 1;
@@ -149,12 +212,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseMultipleArrayAccessTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return a[0][1];
@@ -184,12 +248,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseMultipleMemberAccessTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return a.b.c;
@@ -221,28 +286,58 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseMultipleMemberAccessMissingExpressionTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return a.b.;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected an identifier."));
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(40, 3, 2)),
+                AccessModifier.Public,
+                "main",
+                [],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
+                    "void"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(40, 3, 2)),
+                    [
+                        new ReturnStatementNode(
+                            new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(38, 2, 17)),
+                            new FakeExpressionNode(
+                                new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(38, 2, 17))
+                            )
+                        ),
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0013_ExpectedIdentifier,
+            DiagnosticSeverity.Error,
+            file,
+            new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(38, 2, 17)),
+            "Expected an identifier.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseMemberAccessNestedCallTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return a.b().c;
@@ -277,12 +372,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseMultipleCallsTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 f(1)(2);
@@ -312,12 +408,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseMemberAccessAfterCtorTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return new Test().a;
@@ -348,12 +445,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseMemberAccessAfterNewArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return new i32[0].size;
@@ -384,12 +482,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseCallExpWithBinaryExpTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return 1.toString();
@@ -420,12 +519,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseCallExpWithParenExpTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 return 1 + 2.toString();
@@ -461,12 +561,13 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseTupleMemberAccessTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(t: (i32, string)): i32 {
                 return t.0;
@@ -502,22 +603,81 @@ public class ParseMemberAccessTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseTupleMemberAccessWithIncorrectIndexTest()
     {
-        const string code =
+        var (tree, diagnostics) = Parse(
             """
             public test(t: (i32, string)): i32 {
                 return t.0x;
             }
-            """;
+            """);
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a semicolon.")
-        );
+        var expected = new SyntaxTree([
+            new FunctionDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 3, 2)),
+                AccessModifier.Public,
+                "test",
+                [
+                    new ParameterNode(
+                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(28, 1, 29)),
+                        "t",
+                        new TupleTypeNode(
+                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(28, 1, 29)),
+                            [
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
+                                    "i32"
+                                ),
+                                new TypeNode(
+                                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(27, 1, 28)),
+                                    "string"
+                                ),
+                            ]
+                        )
+                    )
+                ],
+                new TypeNode(
+                    new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(34, 1, 35)),
+                    "i32"
+                ),
+                new BlockStatementNode(
+                    new SourceSpan(new SourcePosition(35, 1, 36), new SourcePosition(55, 3, 2)),
+                    [
+                        new ReturnStatementNode(
+                            new SourceSpan(new SourcePosition(41, 2, 5), new SourcePosition(51, 2, 15)),
+                            new MemberAccessExpressionNode(
+                                new SourceSpan(new SourcePosition(48, 2, 12), new SourcePosition(51, 2, 15)),
+                                new MemberAccessExpressionNode(
+                                    new SourceSpan(new SourcePosition(48, 2, 12), new SourcePosition(49, 2, 13)),
+                                    "t"
+                                ),
+                                "0"
+                            )
+                        ),
+                        new ExpressionStatementNode(
+                            new SourceSpan(new SourcePosition(51, 2, 15), new SourcePosition(53, 2, 17)),
+                            new MemberAccessExpressionNode(
+                                new SourceSpan(new SourcePosition(51, 2, 15), new SourcePosition(52, 2, 16)),
+                                "x"
+                            )
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(51, 2, 15).ToSpan(),
+            "Expected ';'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

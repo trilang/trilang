@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 
@@ -23,21 +23,44 @@ internal sealed class TokenReader
             index++;
     }
 
-    public bool Check(TokenKind kind)
-        => Check(kind, out _);
-
-    public bool Check(TokenKind kind, [NotNullWhen(true)] out Token? token)
+    public CheckResult Check(TokenKind kind)
     {
-        token = null;
-
-        var result = Current.Is(kind);
+        var token = Token;
+        var result = token.Is(kind);
         if (result)
+            Advance();
+
+        return new CheckResult(result, token);
+    }
+
+    public SourceSpan SkipTo(params Span<TokenKind> tokenKinds)
+    {
+        Debug.Assert(tokenKinds.Length > 0, "There should be at least one token kind to skip to.");
+
+        var start = Token.SourceSpan.Start;
+
+        while (true)
         {
-            token = Current;
+            if (HasEnded)
+                break;
+
+            var found = false;
+            foreach (var tokenKind in tokenKinds)
+            {
+                if (Token.Is(tokenKind))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+                break;
+
             Advance();
         }
 
-        return result;
+        return start.ToSpan(Token.SourceSpan.Start);
     }
 
     public Token Peek()
@@ -51,6 +74,20 @@ internal sealed class TokenReader
         return tokens[index + 1];
     }
 
+    public SourceSpan Expect(TokenKind kind)
+    {
+        var (result, token) = Check(kind);
+        if (!result)
+        {
+            var position = Token.SourceSpan.Start;
+            diagnostics.MissingToken(position, kind);
+
+            return position.ToSpan();
+        }
+
+        return token.SourceSpan;
+    }
+
     public TResult Scoped<TResult>(ParserContext context, Func<ParserContext, TResult> action)
     {
         var savedIndex = index;
@@ -62,8 +99,11 @@ internal sealed class TokenReader
         return result;
     }
 
-    public Token Current
+    public Token Token
         => tokens[index];
+
+    public SourceSpan Span
+        => Token.SourceSpan;
 
     public bool HasEnded
         => index >= tokens.Count || tokens[index].Is(TokenKind.EndOfFile);

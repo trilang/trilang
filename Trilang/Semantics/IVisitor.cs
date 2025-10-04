@@ -29,6 +29,14 @@ public interface IVisitor
 
     void VisitExpressionStatement(ExpressionStatement node);
 
+    void VisitFakeDeclaration(FakeDeclaration node);
+
+    void VisitFakeExpression(FakeExpression node);
+
+    void VisitFakeStatement(FakeStatement node);
+
+    void VisitFakeType(FakeType node);
+
     void VisitFunction(FunctionDeclaration node);
 
     void VisitFunctionType(FunctionType node);

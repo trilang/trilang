@@ -11,7 +11,7 @@ public class SemanticAnalysis
 {
     private readonly ITypeMetadataProvider typeMetadataProvider;
 
-    // TODO: reflection
+    // TODO: reflection?
     private readonly ISemanticPass[] semanticPasses =
     [
         new BreakContinueWithinLoop(),

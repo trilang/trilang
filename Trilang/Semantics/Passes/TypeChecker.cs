@@ -212,6 +212,26 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Expression.Accept(this);
     }
 
+    public void VisitFakeDeclaration(FakeDeclaration node)
+    {
+        // FakeDeclaration is used to recover from parsing errors, so we just skip it here.
+    }
+
+    public void VisitFakeExpression(FakeExpression node)
+    {
+        // FakeExpression is used to recover from parsing errors, so we just skip it here.
+    }
+
+    public void VisitFakeStatement(FakeStatement node)
+    {
+        // FakeStatement is used to recover from parsing errors, so we just skip it here.
+    }
+
+    public void VisitFakeType(FakeType node)
+    {
+        // FakeType is used to recover from parsing errors, so we just skip it here.
+    }
+
     public void VisitFunctionSignature(FunctionDeclaration node)
     {
         var parameters = new ParameterMetadata[node.Parameters.Count];

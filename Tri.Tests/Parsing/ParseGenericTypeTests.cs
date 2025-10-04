@@ -1,4 +1,5 @@
 using Trilang;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -8,20 +9,26 @@ namespace Tri.Tests.Parsing;
 
 public class ParseGenericTypeTests
 {
-    private static SyntaxTree Parse(string code)
+    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
+        diagnostics.SwitchFile(file);
+
         var lexer = new Lexer();
         var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
         var parser = new Parser();
+        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
 
-        return parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        return (tree, diagnostics);
     }
 
     [Test]
     public void ParseGenericTypeTest()
     {
-        var tree = Parse("public type List<T> { }");
+        var (tree, diagnostics) = Parse("public type List<T> { }");
+
         var expected = new SyntaxTree([
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
@@ -36,45 +43,120 @@ public class ParseGenericTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseGenericTypeMissingTypeTest()
     {
-        const string code = "public type List<> { }";
+        var (tree, diagnostics) = Parse("public type List<> { }");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
+                AccessModifier.Public,
+                "List",
+                [
+                    new FakeTypeNode(
+                        new SourcePosition(17, 1, 18).ToSpan(),
+                        "<>_0"
+                    )
+                ],
+                [],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(17, 1, 18).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseGenericTypeMissingSecondTypeTest()
     {
-        const string code = "public type List<T,> { }";
+        var (tree, diagnostics) = Parse("public type List<T,> { }");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25)),
+                AccessModifier.Public,
+                "List",
+                [
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(18, 1, 19)),
+                        "T"
+                    ),
+                    new FakeTypeNode(
+                        new SourcePosition(19, 1, 20).ToSpan(),
+                        "<>_0"
+                    )
+                ],
+                [],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(19, 1, 20).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseGenericTypeMissingGreaterTest()
     {
-        const string code = "public type List<T { }";
+        var (tree, diagnostics) = Parse("public type List<T { }");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a greater than sign."));
+        var expected = new SyntaxTree([
+            new TypeDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
+                AccessModifier.Public,
+                "List",
+                [
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(18, 1, 19)),
+                        "T"
+                    )
+                ],
+                [],
+                [],
+                [],
+                []
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(19, 1, 20).ToSpan(),
+            "Expected '>'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseAliasToGenericTypeTest()
     {
-        var tree = Parse("public type T = List<i32, bool>;");
+        var (tree, diagnostics) = Parse("public type T = List<i32, bool>;");
+
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
@@ -90,12 +172,13 @@ public class ParseGenericTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseNestedGenericTypeAliasTest()
     {
-        var tree = Parse("public type T = List<i32, List<bool>>;");
+        var (tree, diagnostics) = Parse("public type T = List<i32, List<bool>>;");
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(38, 1, 39)),
@@ -114,45 +197,123 @@ public class ParseGenericTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseAliasToGenericTypeMissingTypeTest()
     {
-        const string code = "public type T = List<>;";
+        var (tree, diagnostics) = Parse("public type T = List<>;");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type argument."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
+                AccessModifier.Public,
+                "T",
+                [],
+                new GenericTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(22, 1, 23)),
+                    "List",
+                    [
+                        new FakeTypeNode(
+                            new SourcePosition(21, 1, 22).ToSpan(),
+                            "<>_0"
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(21, 1, 22).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseAliasToGenericTypeMissingSecondTypeTest()
     {
-        const string code = "public type T = List<i32, >;";
+        var (tree, diagnostics) = Parse("public type T = List<i32, >;");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type argument."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(28, 1, 29)),
+                AccessModifier.Public,
+                "T",
+                [],
+                new GenericTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(27, 1, 28)),
+                    "List",
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
+                            "i32"
+                        ),
+                        new FakeTypeNode(
+                            new SourcePosition(26, 1, 27).ToSpan(),
+                            "<>_0"
+                        )
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(26, 1, 27).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseAliasToGenericTypeMissingCloseAngleBracketTest()
     {
-        const string code = "public type T = List<i32;";
+        var (tree, diagnostics) = Parse("public type T = List<i32;");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a close angle bracket."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(25, 1, 26)),
+                AccessModifier.Public,
+                "T",
+                [],
+                new GenericTypeNode(
+                    new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(24, 1, 25)),
+                    "List",
+                    [
+                        new TypeNode(
+                            new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
+                            "i32"
+                        ),
+                    ]
+                )
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(24, 1, 25).ToSpan(),
+            "Expected '>'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseGenericTypeAliasTest()
     {
-        var tree = Parse("public type T<T1, T2> = T1 | T2;");
+        var (tree, diagnostics) = Parse("public type T<T1, T2> = T1 | T2;");
+
         var expected = new SyntaxTree([
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
@@ -167,38 +328,134 @@ public class ParseGenericTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
     public void ParseGenericTypeAliasMissingTypeTest()
     {
-        const string code = "public type T<> = T1 | T2;";
+        var (tree, diagnostics) = Parse("public type T<> = T1 | T2;");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(26, 1, 27)),
+                AccessModifier.Public,
+                "T",
+                [
+                    new FakeTypeNode(
+                        new SourcePosition(14, 1, 15).ToSpan(),
+                        "<>_0"
+                    )
+                ],
+                new DiscriminatedUnionNode([
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(20, 1, 21)),
+                        "T1"
+                    ),
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(25, 1, 26)),
+                        "T2"
+                    )
+                ])
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(14, 1, 15).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseGenericTypeAliasMissingSecondTypeTest()
     {
-        const string code = "public type T<T1, > = T1 | T2;";
+        var (tree, diagnostics) = Parse("public type T<T1, > = T1 | T2;");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a type."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(30, 1, 31)),
+                AccessModifier.Public,
+                "T",
+                [
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(16, 1, 17)),
+                        "T1"
+                    ),
+                    new FakeTypeNode(
+                        new SourcePosition(18, 1, 19).ToSpan(),
+                        "<>_0"
+                    )
+                ],
+                new DiscriminatedUnionNode([
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(24, 1, 25)),
+                        "T1"
+                    ),
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(27, 1, 28), new SourcePosition(29, 1, 30)),
+                        "T2"
+                    )
+                ])
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(18, 1, 19).ToSpan(),
+            "Expected a type.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
     public void ParseGenericTypeAliasMissingCloseAngleBracketTest()
     {
-        const string code = "public type T<T1, T2 = T1 | T2;";
+        var (tree, diagnostics) = Parse("public type T<T1, T2 = T1 | T2;");
 
-        Assert.That(
-            () => Parse(code),
-            Throws.TypeOf<ParseException>()
-                .And.Message.EqualTo("Expected a greater than sign."));
+        var expected = new SyntaxTree([
+            new TypeAliasDeclarationNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
+                AccessModifier.Public,
+                "T",
+                [
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(16, 1, 17)),
+                        "T1"
+                    ),
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(20, 1, 21)),
+                        "T2"
+                    )
+                ],
+                new DiscriminatedUnionNode([
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(25, 1, 26)),
+                        "T1"
+                    ),
+                    new TypeNode(
+                        new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(30, 1, 31)),
+                        "T2"
+                    )
+                ])
+            )
+        ]);
+
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.P0001_MissingToken,
+            DiagnosticSeverity.Error,
+            file,
+            new SourcePosition(21, 1, 22).ToSpan(),
+            "Expected '>'.");
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

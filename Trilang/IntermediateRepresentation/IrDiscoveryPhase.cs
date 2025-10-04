@@ -13,7 +13,7 @@ internal class IrDiscoveryPhase : Visitor
 
     public IReadOnlyDictionary<IFunctionMetadata, BlockStatement> Discover(
         IEnumerable<ITypeMetadata> types,
-        IReadOnlyList<SemanticTree> syntaxTrees)
+        IEnumerable<SemanticTree> syntaxTrees)
     {
         foreach (var tree in syntaxTrees)
             VisitTree(tree);

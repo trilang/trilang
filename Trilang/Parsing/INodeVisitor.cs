@@ -26,6 +26,14 @@ public interface INodeVisitor
 
     void VisitExpressionStatement(ExpressionStatementNode node);
 
+    void VisitFakeDeclaration(FakeDeclarationNode node);
+
+    void VisitFakeExpression(FakeExpressionNode node);
+
+    void VisitFakeStatement(FakeStatementNode node);
+
+    void VisitFakeType(FakeTypeNode node);
+
     void VisitFunction(FunctionDeclarationNode node);
 
     void VisitFunctionType(FunctionTypeNode node);

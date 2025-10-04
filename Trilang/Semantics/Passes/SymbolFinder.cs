@@ -116,6 +116,18 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Expression.Accept(this, context);
     }
 
+    public void VisitFakeDeclaration(FakeDeclaration node, ISymbolTable context)
+        => map.Add(node, context);
+
+    public void VisitFakeExpression(FakeExpression node, ISymbolTable context)
+        => map.Add(node, context);
+
+    public void VisitFakeStatement(FakeStatement node, ISymbolTable context)
+        => map.Add(node, context);
+
+    public void VisitFakeType(FakeType node, ISymbolTable context)
+        => map.Add(node, context);
+
     public void VisitFunction(FunctionDeclaration node, ISymbolTable context)
     {
         map.Add(node, context);

@@ -29,6 +29,14 @@ public interface ITransformer<out TResult>
 
     TResult TransformExpressionStatement(ExpressionStatement node);
 
+    TResult TransformFakeDeclaration(FakeDeclaration node);
+
+    TResult TransformFakeExpression(FakeExpression node);
+
+    TResult TransformFakeStatement(FakeStatement node);
+
+    TResult TransformFakeType(FakeType node);
+
     TResult TransformFunction(FunctionDeclaration node);
 
     TResult TransformFunctionType(FunctionType node);

@@ -174,6 +174,18 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
         return new ExpressionStatement(null, expression);
     }
 
+    public ISemanticNode TransformFakeDeclaration(FakeDeclaration node)
+        => node;
+
+    public ISemanticNode TransformFakeExpression(FakeExpression node)
+        => node;
+
+    public ISemanticNode TransformFakeStatement(FakeStatement node)
+        => node;
+
+    public ISemanticNode TransformFakeType(FakeType node)
+        => node;
+
     public ISemanticNode TransformFunction(FunctionDeclaration node)
     {
         node.Body.Transform(this);
