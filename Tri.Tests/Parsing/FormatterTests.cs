@@ -1,13 +1,16 @@
+using Trilang;
 using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Parsing;
 
 public class FormatterTests
 {
+    private static readonly SourceFile file = new SourceFile("test.tri");
+
     [Test]
     public void FormatEmptyFunctionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -30,7 +33,7 @@ public class FormatterTests
     [Test]
     public void FormatTwoFunctionsWithParametersTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -66,7 +69,7 @@ public class FormatterTests
     [Test]
     public void FormatEmptyReturnTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -92,7 +95,7 @@ public class FormatterTests
     [Test]
     public void FormatAdditionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -129,7 +132,7 @@ public class FormatterTests
     [Test]
     public void FormatSubtractionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -166,7 +169,7 @@ public class FormatterTests
     [Test]
     public void FormatMultiplicationTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -203,7 +206,7 @@ public class FormatterTests
     [Test]
     public void FormatDivisionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -240,7 +243,7 @@ public class FormatterTests
     [Test]
     public void FormatBitwiseAndTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -277,7 +280,7 @@ public class FormatterTests
     [Test]
     public void FormatBitwiseOrTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -314,7 +317,7 @@ public class FormatterTests
     [Test]
     public void FormatBitwiseXorTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -351,7 +354,7 @@ public class FormatterTests
     [Test]
     public void FormatConditionalAndTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -388,7 +391,7 @@ public class FormatterTests
     [Test]
     public void FormatConditionalOrTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -425,7 +428,7 @@ public class FormatterTests
     [Test]
     public void FormatEqualityTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -462,7 +465,7 @@ public class FormatterTests
     [Test]
     public void FormatInequalityTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -499,7 +502,7 @@ public class FormatterTests
     [Test]
     public void FormatLessThanTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -535,7 +538,7 @@ public class FormatterTests
     [Test]
     public void FormatLessThanOrEqualTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -572,7 +575,7 @@ public class FormatterTests
     [Test]
     public void FormatGreaterThanTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -609,7 +612,7 @@ public class FormatterTests
     [Test]
     public void FormatGreaterThanOrEqualTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -646,7 +649,7 @@ public class FormatterTests
     [Test]
     public void FormatUnaryPlusTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -679,7 +682,7 @@ public class FormatterTests
     [Test]
     public void FormatUnaryMinusTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -712,7 +715,7 @@ public class FormatterTests
     [Test]
     public void FormatLogicalNotTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -745,7 +748,7 @@ public class FormatterTests
     [Test]
     public void FormatBitwiseNotTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -778,7 +781,7 @@ public class FormatterTests
     [Test]
     public void FormatIfTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -829,7 +832,7 @@ public class FormatterTests
     [Test]
     public void FormatIfElseTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -883,7 +886,7 @@ public class FormatterTests
     [Test]
     public void FormatFunctionCallTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -951,7 +954,7 @@ public class FormatterTests
     [TestCase(BinaryExpressionKind.BitwiseXorAssignment, "^=")]
     public void FormatAssignmentTest(BinaryExpressionKind kind, string @operator)
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -985,7 +988,7 @@ public class FormatterTests
     [Test]
     public void FormatWhileTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1021,7 +1024,7 @@ public class FormatterTests
     [Test]
     public void FormatBreakTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1060,7 +1063,7 @@ public class FormatterTests
     [Test]
     public void FormatContinueTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1099,7 +1102,7 @@ public class FormatterTests
     [Test]
     public void FormatArrayTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1128,7 +1131,7 @@ public class FormatterTests
     [Test]
     public void FormatArrayAccessTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1161,7 +1164,7 @@ public class FormatterTests
     [Test]
     public void FormatPrivateTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(default, AccessModifier.Private, "MyType", [], [], [], [], [])
         ]);
         var formatted = tree.ToString();
@@ -1177,7 +1180,7 @@ public class FormatterTests
     [Test]
     public void FormatPublicTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(default, AccessModifier.Public, "MyType", [], [], [], [], [])
         ]);
         var formatted = tree.ToString();
@@ -1193,7 +1196,7 @@ public class FormatterTests
     [Test]
     public void FormatTwoTypesTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(default, AccessModifier.Private, "MyType1", [], [], [], [], []),
             new TypeDeclarationNode(default, AccessModifier.Public, "MyType2", [], [], [], [], []),
         ]);
@@ -1213,7 +1216,7 @@ public class FormatterTests
     [Test]
     public void FormatPointTypeWithPropertiesTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1243,7 +1246,7 @@ public class FormatterTests
     [Test]
     public void FormatPropertyWithGetterSetterTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1303,7 +1306,7 @@ public class FormatterTests
     [Test]
     public void FormatPropertyWithEmptyGetterTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1356,7 +1359,7 @@ public class FormatterTests
     [Test]
     public void FormatPropertyWithEmptySetterTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1400,7 +1403,7 @@ public class FormatterTests
     [Test]
     public void FormatPointTypeWithEverythingTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1450,7 +1453,7 @@ public class FormatterTests
     [Test]
     public void FormatTypeWithInterfacesTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1475,7 +1478,7 @@ public class FormatterTests
     [Test]
     public void FormatTypeAliasTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(default, AccessModifier.Public, "MyType", [], new TypeNode(default, "i32"))
         ]);
         var formatted = tree.ToString();
@@ -1487,7 +1490,7 @@ public class FormatterTests
     [Test]
     public void FormatFunctionTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1509,7 +1512,7 @@ public class FormatterTests
     [Test]
     public void FormatVariableDeclarationTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1539,7 +1542,7 @@ public class FormatterTests
     [Test]
     public void FormatVariableDeclarationWithInlineTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1569,7 +1572,7 @@ public class FormatterTests
     [Test]
     public void FormatVariableDeclarationWithInlineTypeAndParametersTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1603,7 +1606,7 @@ public class FormatterTests
     [Test]
     public void FormatAliasInterfaceTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1635,7 +1638,7 @@ public class FormatterTests
     [Test]
     public void FormatAliasInterfaceTypeWithGettersSettersTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1667,7 +1670,7 @@ public class FormatterTests
     [Test]
     public void FormatInlineInterfaceTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1705,7 +1708,7 @@ public class FormatterTests
     [Test]
     public void FormatMultipleMemberAccessTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1742,7 +1745,7 @@ public class FormatterTests
     [Test]
     public void FormatThisExpressionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1771,7 +1774,7 @@ public class FormatterTests
     [Test]
     public void FormatThisExpressionWithMemberAccessTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1808,7 +1811,7 @@ public class FormatterTests
     [Test]
     public void FormatNewOperatorTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -1843,7 +1846,7 @@ public class FormatterTests
     [Test]
     public void FormatDiscriminatedUnionOfTypesTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1865,7 +1868,7 @@ public class FormatterTests
     [Test]
     public void FormatDiscriminatedUnionOfFunctionsTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1885,7 +1888,7 @@ public class FormatterTests
     [Test]
     public void FormatDiscriminatedUnionOfInterfacesTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1912,7 +1915,7 @@ public class FormatterTests
     [Test]
     public void FormatDiscriminatedUnionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1933,7 +1936,7 @@ public class FormatterTests
     [Test]
     public void FormatNullTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(default, AccessModifier.Public, "main", [], new TypeNode(default, "void"),
                 new BlockStatementNode(default, [
                     new VariableDeclarationNode(
@@ -1958,7 +1961,7 @@ public class FormatterTests
     [Test]
     public void FormatTupleTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1978,7 +1981,7 @@ public class FormatterTests
     [Test]
     public void FormatNestedTupleTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -1998,7 +2001,7 @@ public class FormatterTests
     [Test]
     public void FormatTupleExpressionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -2029,7 +2032,7 @@ public class FormatterTests
     [Test]
     public void FormatNewArrayTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -2062,7 +2065,7 @@ public class FormatterTests
     [Test]
     public void FormatGenericTypeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -2087,7 +2090,7 @@ public class FormatterTests
     [Test]
     public void FormatGenericTypeNodeTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -2105,7 +2108,7 @@ public class FormatterTests
     [Test]
     public void FormatGenericTypeAliasTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -2123,7 +2126,7 @@ public class FormatterTests
     [Test]
     public void FormatStaticMethodTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -2160,7 +2163,7 @@ public class FormatterTests
     [Test]
     public void FormatIfDirectiveTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(default, AccessModifier.Public, "Type1", [], [], [], [], []),
             new IfDirectiveNode(
                 default,
@@ -2198,7 +2201,7 @@ public class FormatterTests
     [Test]
     public void FormatIfDirectiveWithElseTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new TypeDeclarationNode(default, AccessModifier.Public, "Type1", [], [], [], [], []),
             new IfDirectiveNode(
                 default,
@@ -2247,7 +2250,7 @@ public class FormatterTests
     [Test]
     public void FormatAsExpressionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 default,
                 AccessModifier.Public,
@@ -2279,7 +2282,7 @@ public class FormatterTests
     [Test]
     public void FormatCastExpressionTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new FunctionDeclarationNode(
                 default,
                 AccessModifier.Public,
@@ -2312,7 +2315,7 @@ public class FormatterTests
     [Test]
     public void FormatFloatingNumberTest()
     {
-        var tree = new SyntaxTree([
+        var tree = new SyntaxTree(file, [
             new FunctionDeclarationNode(
                 default,
                 AccessModifier.Public,

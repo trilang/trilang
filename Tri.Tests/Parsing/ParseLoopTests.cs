@@ -1,25 +1,24 @@
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
-using Trilang.Compilation;
+using Trilang.Parsing;
+using Trilang.Parsing.Ast;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseLoopTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+    private static readonly SourceFile file = new SourceFile("test.tri");
 
     private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
-        diagnostics.SwitchFile(file);
-
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         return (tree, diagnostics);
     }
@@ -35,7 +34,7 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 4, 2)),
                 AccessModifier.Public,
@@ -94,7 +93,7 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 4, 2)),
                 AccessModifier.Public,
@@ -142,8 +141,7 @@ public class ParseLoopTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(38, 2, 11).ToSpan(),
+            new SourceLocation(file, new SourcePosition(38, 2, 11).ToSpan()),
             "Expected '('.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -161,7 +159,7 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(51, 4, 2)),
                 AccessModifier.Public,
@@ -200,8 +198,7 @@ public class ParseLoopTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0009_ExpectedExpression,
             DiagnosticSeverity.Error,
-            file,
-            new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
+            new SourceLocation(file, new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13))),
             "Expected an expression.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -219,7 +216,7 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 4, 2)),
                 AccessModifier.Public,
@@ -267,8 +264,7 @@ public class ParseLoopTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(45, 2, 18).ToSpan(),
+            new SourceLocation(file, new SourcePosition(45, 2, 18).ToSpan()),
             "Expected ')'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -287,7 +283,7 @@ public class ParseLoopTests
 
         var (tree, diagnostics) = Parse(source);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(56, 4, 2)),
                 AccessModifier.Public,
@@ -342,20 +338,17 @@ public class ParseLoopTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(53, 3, 8).ToSpan(),
+                new SourceLocation(file, new SourcePosition(53, 3, 8).ToSpan()),
                 "Expected '{'."),
             new Diagnostic(
                 DiagnosticIds.P0004_ExpectedStatement,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(53, 3, 8).ToSpan(),
+                new SourceLocation(file, new SourcePosition(53, 3, 8).ToSpan()),
                 "Expected a statement."),
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(56, 4, 2).ToSpan(),
+                new SourceLocation(file, new SourcePosition(56, 4, 2).ToSpan()),
                 "Expected '}'."),
         };
 
@@ -375,7 +368,7 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(70, 5, 2)),
                 AccessModifier.Public,
@@ -440,7 +433,7 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 5, 2)),
                 AccessModifier.Public,

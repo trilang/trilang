@@ -1,5 +1,4 @@
 using Trilang;
-using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 
@@ -7,14 +6,12 @@ namespace Tri.Tests;
 
 public class LexerTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+    private static readonly SourceFile file = new SourceFile("test.tri");
 
     private static (DiagnosticCollection, IReadOnlyList<Token>) Tokenize(string code)
     {
         var diagnostics = new DiagnosticCollection();
-        diagnostics.SwitchFile(file);
-
-        var options = new LexerOptions(diagnostics.Lexer);
+        var options = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
         var lexer = new Lexer();
 
         return (diagnostics, lexer.Tokenize(code, options));
@@ -290,8 +287,7 @@ public class LexerTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.L0002_MissingEndQuoteForStringLiteral,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(15, 3, 5).ToSpan(),
+            new SourceLocation(file, new SourcePosition(15, 3, 5).ToSpan()),
             "Missing end quote for string literal.");
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -349,8 +345,7 @@ public class LexerTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.L0002_MissingEndQuoteForStringLiteral,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(15, 3, 5).ToSpan(),
+            new SourceLocation(file, new SourcePosition(15, 3, 5).ToSpan()),
             "Missing end quote for string literal.");
 
         Assert.That(tokens, Is.EqualTo(expected));
@@ -372,8 +367,7 @@ public class LexerTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.L0001_UnsupportedCharacter,
             DiagnosticSeverity.Error,
-            file,
-            new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(1, 1, 2)),
+            new SourceLocation(file, new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(1, 1, 2))),
             $"Unsupported character '{code}'."
         );
 

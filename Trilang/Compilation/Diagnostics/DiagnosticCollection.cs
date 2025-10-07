@@ -3,39 +3,25 @@ namespace Trilang.Compilation.Diagnostics;
 public class DiagnosticCollection
 {
     private readonly List<Diagnostic> diagnostics;
-    private SourceFile file;
 
     public DiagnosticCollection()
-    {
-        diagnostics = [];
-        file = null!;
-
-        Lexer = new LexerDiagnosticCollection(this);
-        Parser = new ParserDiagnosticCollection(this);
-    }
-
-    public void SwitchFile(SourceFile file)
-        => this.file = file;
+        => diagnostics = [];
 
     public void Add(Diagnostic diagnostic)
         => diagnostics.Add(diagnostic);
 
-    public void Report(string id, DiagnosticSeverity severity, SourceSpan span, string message)
-        => Add(new Diagnostic(id, severity, file, span, message));
+    public void Report(string id, DiagnosticSeverity severity, SourceLocation location, string message)
+        => Add(new Diagnostic(id, severity, location, message));
 
-    public void Info(string id, SourceSpan span, string message)
-        => Report(id, DiagnosticSeverity.Info, span, message);
+    public void Info(string id, SourceLocation location, string message)
+        => Report(id, DiagnosticSeverity.Info, location, message);
 
-    public void Warning(string id, SourceSpan span, string message)
-        => Report(id, DiagnosticSeverity.Warning, span, message);
+    public void Warning(string id, SourceLocation location, string message)
+        => Report(id, DiagnosticSeverity.Warning, location, message);
 
-    public void Error(string id, SourceSpan span, string message)
-        => Report(id, DiagnosticSeverity.Error, span, message);
+    public void Error(string id, SourceLocation location, string message)
+        => Report(id, DiagnosticSeverity.Error, location, message);
 
     public IReadOnlyList<Diagnostic> Diagnostics
         => diagnostics;
-
-    public LexerDiagnosticCollection Lexer { get; }
-
-    public ParserDiagnosticCollection Parser { get; }
 }

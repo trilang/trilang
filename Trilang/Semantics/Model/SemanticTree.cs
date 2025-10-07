@@ -4,10 +4,14 @@ public class SemanticTree : ISemanticNode
 {
     private readonly List<IDeclaration> declarations;
 
-    public SemanticTree(SourceSpan? sourceSpan, IReadOnlyList<IDeclaration> declarations)
+    public SemanticTree(
+        SourceFile sourceFile,
+        SourceSpan? sourceSpan,
+        IReadOnlyList<IDeclaration> declarations)
     {
+        SourceFile = sourceFile;
         SourceSpan = sourceSpan;
-        this.declarations = [..declarations];
+        this.declarations = [.. declarations];
 
         foreach (var function in declarations)
             function.Parent = this;
@@ -30,6 +34,8 @@ public class SemanticTree : ISemanticNode
 
     public void Remove(IDeclaration declaration)
         => declarations.Remove(declaration);
+
+    public SourceFile SourceFile { get; }
 
     public ISemanticNode? Parent { get; set; }
 

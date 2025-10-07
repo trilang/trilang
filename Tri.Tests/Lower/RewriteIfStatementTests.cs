@@ -1,3 +1,4 @@
+using Trilang;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Lower;
@@ -11,15 +12,19 @@ namespace Tri.Tests.Lower;
 
 public class RewriteIfStatementTests
 {
+    private static readonly SourceFile file = new SourceFile("test.tri");
+
     private static SemanticTree Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
 
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
@@ -41,7 +46,7 @@ public class RewriteIfStatementTests
             }
             """);
         var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
-        var expected = new SemanticTree(null, [
+        var expected = new SemanticTree(file, null, [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -143,7 +148,7 @@ public class RewriteIfStatementTests
             }
             """);
         var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
-        var expected = new SemanticTree(null, [
+        var expected = new SemanticTree(file, null, [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,

@@ -1,5 +1,4 @@
 using Trilang;
-using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -9,17 +8,17 @@ namespace Tri.Tests.Parsing;
 
 public class ParseCallExpressionTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+    private static readonly SourceFile file = new SourceFile("test.tri");
 
     private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
-        diagnostics.SwitchFile(file);
-
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         return (tree, diagnostics);
     }
@@ -34,7 +33,7 @@ public class ParseCallExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(51, 3, 2)),
                 AccessModifier.Public,
@@ -82,7 +81,7 @@ public class ParseCallExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 3, 2)),
                 AccessModifier.Public,
@@ -137,7 +136,7 @@ public class ParseCallExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(58, 3, 2)),
                 AccessModifier.Public,

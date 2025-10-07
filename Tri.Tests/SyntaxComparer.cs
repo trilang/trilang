@@ -513,6 +513,9 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
     {
         CompareSequences(x.Declarations, y.Declarations, errors, "SyntaxTree.Declarations");
 
+        if (!x.SourceFile.Equals(y.SourceFile))
+            errors.Add($"SyntaxTree: SourceFile mismatch. Expected {x.SourceFile}, got {y.SourceFile}.");
+
         if (!x.SourceSpan.Equals(y.SourceSpan))
             errors.Add($"SyntaxTree: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }

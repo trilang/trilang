@@ -1,5 +1,4 @@
 using Trilang;
-using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -9,17 +8,17 @@ namespace Tri.Tests.Parsing;
 
 public class ParseTypeTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+    private static readonly SourceFile file = new SourceFile("test.tri");
 
     private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
-        diagnostics.SwitchFile(file);
-
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         return (tree, diagnostics);
     }
@@ -29,7 +28,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type Point { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(21, 1, 22)),
                 AccessModifier.Public,
@@ -51,7 +50,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(15, 1, 16)),
                 AccessModifier.Public,
@@ -67,8 +66,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0005_ExpectedTypeName,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(12, 1, 13).ToSpan(),
+            new SourceLocation(file, new SourcePosition(12, 1, 13).ToSpan()),
             "Expected a type name.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -80,7 +78,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type Point }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 1, 20)),
                 AccessModifier.Public,
@@ -96,8 +94,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(18, 1, 19).ToSpan(),
+            new SourceLocation(file, new SourcePosition(18, 1, 19).ToSpan()),
             "Expected '{'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -109,7 +106,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type Point {");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 1, 20)),
                 AccessModifier.Public,
@@ -125,8 +122,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0014_ExpectedTypeMember,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(19, 1, 20).ToSpan(),
+            new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
             "Expected a type member (a property, a method or a constructor).");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -144,7 +140,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(45, 4, 2)),
                 AccessModifier.Public,
@@ -203,7 +199,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(292, 18, 2)),
                 AccessModifier.Public,
@@ -328,7 +324,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(120, 8, 2)),
                 AccessModifier.Public,
@@ -398,7 +394,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(119, 8, 2)),
                 AccessModifier.Public,
@@ -442,7 +438,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 3, 2)),
                 AccessModifier.Public,
@@ -458,8 +454,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0014_ExpectedTypeMember,
             DiagnosticSeverity.Error,
-            file,
-            new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(31, 3, 1)),
+            new SourceLocation(file, new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(31, 3, 1))),
             "Expected a type member (a property, a method or a constructor).");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -476,7 +471,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 3, 2)),
                 AccessModifier.Public,
@@ -501,8 +496,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(26, 2, 7).ToSpan(),
+            new SourceLocation(file, new SourcePosition(26, 2, 7).ToSpan()),
             "Expected ':'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -519,7 +513,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(30, 3, 2)),
                 AccessModifier.Public,
@@ -544,8 +538,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(27, 2, 8).ToSpan(),
+            new SourceLocation(file, new SourcePosition(27, 2, 8).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -562,7 +555,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 3, 2)),
                 AccessModifier.Public,
@@ -587,8 +580,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(31, 3, 1).ToSpan(),
+            new SourceLocation(file, new SourcePosition(31, 3, 1).ToSpan()),
             "Expected ';'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -607,7 +599,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(99, 5, 2)),
                 AccessModifier.Public,
@@ -653,7 +645,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(47, 3, 2)),
                 AccessModifier.Public,
@@ -684,8 +676,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0007_ExpectedMethodName,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(31, 2, 12).ToSpan(),
+            new SourceLocation(file, new SourcePosition(31, 2, 12).ToSpan()),
             "Expected a method name.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -702,7 +693,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 3, 2)),
                 AccessModifier.Public,
@@ -733,8 +724,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(39, 2, 20).ToSpan(),
+            new SourceLocation(file, new SourcePosition(39, 2, 20).ToSpan()),
             "Expected '('.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -751,7 +741,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(62, 3, 2)),
                 AccessModifier.Public,
@@ -789,8 +779,7 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(40, 2, 21).ToSpan(),
+                new SourceLocation(file, new SourcePosition(40, 2, 21).ToSpan()),
                 "Expected ')'.")
         };
 
@@ -808,7 +797,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 3, 2)),
                 AccessModifier.Public,
@@ -839,8 +828,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(42, 2, 23).ToSpan(),
+            new SourceLocation(file, new SourcePosition(42, 2, 23).ToSpan()),
             "Expected ':'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -857,7 +845,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(64, 3, 2)),
                 AccessModifier.Public,
@@ -906,14 +894,12 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(45, 2, 26).ToSpan(),
+                new SourceLocation(file, new SourcePosition(45, 2, 26).ToSpan()),
                 "Expected '}'."),
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(45, 2, 26).ToSpan(),
+                new SourceLocation(file, new SourcePosition(45, 2, 26).ToSpan()),
                 "Expected '{'."),
         };
 
@@ -931,7 +917,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
                 AccessModifier.Public,
@@ -962,8 +948,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(50, 2, 31).ToSpan(),
+            new SourceLocation(file, new SourcePosition(50, 2, 31).ToSpan()),
             "Expected '{'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -980,7 +965,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
                 AccessModifier.Public,
@@ -1011,8 +996,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0014_ExpectedTypeMember,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(53, 3, 2).ToSpan(),
+            new SourceLocation(file, new SourcePosition(53, 3, 2).ToSpan()),
             "Expected a type member (a property, a method or a constructor).");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1029,7 +1013,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(68, 3, 2)),
                 AccessModifier.Public,
@@ -1077,8 +1061,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourceSpan(new SourcePosition(47, 2, 28), new SourcePosition(47, 2, 28)),
+            new SourceLocation(file, new SourceSpan(new SourcePosition(47, 2, 28), new SourcePosition(47, 2, 28))),
             "Expected ','.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1095,7 +1078,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(60, 3, 2)),
                 AccessModifier.Public,
@@ -1135,8 +1118,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(42, 2, 23).ToSpan(),
+            new SourceLocation(file, new SourcePosition(42, 2, 23).ToSpan()),
             "Expected ':'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1153,7 +1135,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(58, 3, 2)),
                 AccessModifier.Public,
@@ -1193,8 +1175,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(43, 2, 24).ToSpan(),
+            new SourceLocation(file, new SourcePosition(43, 2, 24).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1211,7 +1192,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(64, 3, 2)),
                 AccessModifier.Public,
@@ -1243,7 +1224,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type Point : Interface1, Interface2 { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(46, 1, 47)),
                 AccessModifier.Public,
@@ -1265,7 +1246,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type Point : { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
                 AccessModifier.Public,
@@ -1281,8 +1262,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0006_ExpectedInterface,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(20, 1, 21).ToSpan(),
+            new SourceLocation(file, new SourcePosition(20, 1, 21).ToSpan()),
             "Expected an interface.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1294,7 +1274,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type Point : Interface1 Interface2 { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(45, 1, 46)),
                 AccessModifier.Public,
@@ -1319,8 +1299,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(31, 1, 32).ToSpan(),
+            new SourceLocation(file, new SourcePosition(31, 1, 32).ToSpan()),
             "Expected ','."
         );
 
@@ -1333,7 +1312,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type Point : Interface1, { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(35, 1, 36)),
                 AccessModifier.Public,
@@ -1354,8 +1333,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0006_ExpectedInterface,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(32, 1, 33).ToSpan(),
+            new SourceLocation(file, new SourcePosition(32, 1, 33).ToSpan()),
             "Expected an interface.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1367,7 +1345,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type MyType = i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(25, 1, 26)),
                 AccessModifier.Public,
@@ -1385,7 +1363,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type = i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(18, 1, 19)),
                 AccessModifier.Public,
@@ -1401,8 +1379,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0005_ExpectedTypeName,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(12, 1, 13).ToSpan(),
+            new SourceLocation(file, new SourcePosition(12, 1, 13).ToSpan()),
             "Expected a type name.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1414,7 +1391,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type MyType = ;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
                 AccessModifier.Public,
@@ -1430,8 +1407,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(21, 1, 22).ToSpan(),
+            new SourceLocation(file, new SourcePosition(21, 1, 22).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1443,7 +1419,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type MyType = i32");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25)),
                 AccessModifier.Public,
@@ -1459,8 +1435,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(24, 1, 25).ToSpan(),
+            new SourceLocation(file, new SourcePosition(24, 1, 25).ToSpan()),
             "Expected ';'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1472,7 +1447,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F = () => void;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
                 AccessModifier.Public,
@@ -1495,7 +1470,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F = (i32, i32) => i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
                 AccessModifier.Public,
@@ -1518,7 +1493,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type = (i32, i32) => i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
                 AccessModifier.Public,
@@ -1547,8 +1522,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0005_ExpectedTypeName,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(12, 1, 13).ToSpan(),
+            new SourceLocation(file, new SourcePosition(12, 1, 13).ToSpan()),
             "Expected a type name.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1560,7 +1534,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F (i32, i32) => i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
                 AccessModifier.Public,
@@ -1577,14 +1551,12 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(14, 1, 15).ToSpan(),
+                new SourceLocation(file, new SourcePosition(14, 1, 15).ToSpan()),
                 "Expected '{'."),
             new Diagnostic(
                 DiagnosticIds.P0014_ExpectedTypeMember,
                 DiagnosticSeverity.Error,
-                file,
-                new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(32, 1, 33)),
+                new SourceLocation(file, new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(32, 1, 33))),
                 "Expected a type member (a property, a method or a constructor).")
         };
 
@@ -1597,7 +1569,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F = i32, i32) => i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 1, 20)),
                 AccessModifier.Public,
@@ -1618,14 +1590,12 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(19, 1, 20).ToSpan(),
+                new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
                 "Expected ';'."),
             new Diagnostic(
                 DiagnosticIds.P0010_ExpectedDeclaration,
                 DiagnosticSeverity.Error,
-                file,
-                new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(33, 1, 34)),
+                new SourceLocation(file, new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(33, 1, 34))),
                 "Expected a type or a function.")
         };
 
@@ -1638,7 +1608,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F = (i32, i32 => i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
                 AccessModifier.Public,
@@ -1669,8 +1639,7 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(26, 1, 27).ToSpan(),
+                new SourceLocation(file, new SourcePosition(26, 1, 27).ToSpan()),
                 "Expected ')'.")
         };
 
@@ -1683,7 +1652,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F = (i32 i32) => i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
                 AccessModifier.Public,
@@ -1714,8 +1683,7 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(21, 1, 22).ToSpan(),
+                new SourceLocation(file, new SourcePosition(21, 1, 22).ToSpan()),
                 "Expected ','.")
         };
 
@@ -1728,7 +1696,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F = (i32, i32) i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
                 AccessModifier.Public,
@@ -1758,14 +1726,12 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(27, 1, 28).ToSpan(),
+                new SourceLocation(file, new SourcePosition(27, 1, 28).ToSpan()),
                 "Expected ';'."),
             new Diagnostic(
                 DiagnosticIds.P0010_ExpectedDeclaration,
                 DiagnosticSeverity.Error,
-                file,
-                new SourceSpan(new SourcePosition(27, 1, 28), new SourcePosition(31, 1, 32)),
+                new SourceLocation(file, new SourceSpan(new SourcePosition(27, 1, 28), new SourcePosition(31, 1, 32))),
                 "Expected a type or a function.")
         };
 
@@ -1778,7 +1744,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F = (i32, i32) => ;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
                 AccessModifier.Public,
@@ -1809,8 +1775,7 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0003_ExpectedType,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(30, 1, 31).ToSpan(),
+                new SourceLocation(file, new SourcePosition(30, 1, 31).ToSpan()),
                 "Expected a type.")
         };
 
@@ -1823,7 +1788,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type F = (i32, i32) => i32");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
                 AccessModifier.Public,
@@ -1852,8 +1817,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(33, 1, 34).ToSpan(),
+            new SourceLocation(file, new SourcePosition(33, 1, 34).ToSpan()),
             "Expected ';'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -1865,7 +1829,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public test(callback: (i32, i32) => void): void { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(51, 1, 52)),
                 AccessModifier.Public,
@@ -1898,7 +1862,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public test(): (i32, i32) => void { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(37, 1, 38)),
                 AccessModifier.Public,
@@ -1939,7 +1903,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(58, 3, 2)),
                 AccessModifier.Public,
@@ -1978,7 +1942,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(74, 6, 2)),
                 AccessModifier.Public,
@@ -2019,7 +1983,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(130, 6, 2)),
                 AccessModifier.Public,
@@ -2069,7 +2033,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(50, 3, 2)),
                 AccessModifier.Public,
@@ -2105,7 +2069,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(50, 3, 2)),
                 AccessModifier.Public,
@@ -2143,7 +2107,7 @@ public class ParseTypeTests
                 distance(Point): f32;
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(72, 5, 26)),
                 AccessModifier.Public,
@@ -2196,8 +2160,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(72, 5, 26).ToSpan(),
+            new SourceLocation(file, new SourcePosition(72, 5, 26).ToSpan()),
             "Expected '}'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -2217,7 +2180,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(71, 6, 2)),
                 AccessModifier.Public,
@@ -2270,8 +2233,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(29, 2, 8).ToSpan(),
+            new SourceLocation(file, new SourcePosition(29, 2, 8).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -2291,7 +2253,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
                 AccessModifier.Public,
@@ -2346,14 +2308,12 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(37, 3, 5).ToSpan(),
+                new SourceLocation(file, new SourcePosition(37, 3, 5).ToSpan()),
                 "Expected '{'."),
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(37, 3, 5).ToSpan(),
+                new SourceLocation(file, new SourcePosition(37, 3, 5).ToSpan()),
                 "Expected '}'.")
         };
 
@@ -2374,7 +2334,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(71, 6, 2)),
                 AccessModifier.Public,
@@ -2427,8 +2387,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(68, 5, 22).ToSpan(),
+            new SourceLocation(file, new SourcePosition(68, 5, 22).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -2448,7 +2407,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
                 AccessModifier.Public,
@@ -2501,8 +2460,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(67, 5, 21).ToSpan(),
+            new SourceLocation(file, new SourcePosition(67, 5, 21).ToSpan()),
             "Expected ':'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -2522,7 +2480,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
                 AccessModifier.Public,
@@ -2575,8 +2533,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(72, 6, 1).ToSpan(),
+            new SourceLocation(file, new SourcePosition(72, 6, 1).ToSpan()),
             "Expected ';'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -2593,7 +2550,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 3, 2)),
                 AccessModifier.Public,
@@ -2625,7 +2582,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(59, 3, 2)),
                 AccessModifier.Public,
@@ -2664,7 +2621,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new FunctionDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(50, 3, 2)),
                 AccessModifier.Public,
@@ -2701,8 +2658,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(45, 2, 24).ToSpan(),
+            new SourceLocation(file, new SourcePosition(45, 2, 24).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -2719,7 +2675,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new FunctionDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(58, 3, 2)),
                 AccessModifier.Public,
@@ -2764,8 +2720,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0009_ExpectedExpression,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(54, 2, 33).ToSpan(),
+            new SourceLocation(file, new SourcePosition(54, 2, 33).ToSpan()),
             "Expected an expression.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -2782,7 +2737,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new FunctionDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 3, 2)),
                 AccessModifier.Public,
@@ -2819,8 +2774,7 @@ public class ParseTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(51, 2, 30).ToSpan(),
+            new SourceLocation(file, new SourcePosition(51, 2, 30).ToSpan()),
             "Expected ')'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -2831,7 +2785,7 @@ public class ParseTypeTests
     public void ParseDiscriminatedUnionTest()
     {
         var (tree, diagnostics) = Parse("public type T = { } | i32 | () => void;");
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(39, 1, 40)),
                 AccessModifier.Public,
@@ -2859,7 +2813,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
                 AccessModifier.Public,
@@ -2888,7 +2842,7 @@ public class ParseTypeTests
     public void TupleTypeTest()
     {
         var (tree, diagnostics) = Parse("public type T = (i32, i32);");
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
                 AccessModifier.Public,
@@ -2906,7 +2860,7 @@ public class ParseTypeTests
     public void NestedTupleTypeTest()
     {
         var (tree, diagnostics) = Parse("public type T = ((i32, i32), i32);");
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
                 AccessModifier.Public,
@@ -2927,7 +2881,7 @@ public class ParseTypeTests
     public void TupleTypeWithDuTest()
     {
         var (tree, diagnostics) = Parse("public type T = (bool | i32, () => void);");
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
                 AccessModifier.Public,
@@ -2958,7 +2912,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = (i32);");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
                 AccessModifier.Public,
@@ -2982,7 +2936,7 @@ public class ParseTypeTests
 
         var (tree, diagnostics) = Parse(code);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(20, 1, 21)),
                 AccessModifier.Public,
@@ -3000,14 +2954,12 @@ public class ParseTypeTests
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(20, 1, 21).ToSpan(),
+                new SourceLocation(file, new SourcePosition(20, 1, 21).ToSpan()),
                 "Expected ')'."),
             new Diagnostic(
                 DiagnosticIds.P0001_MissingToken,
                 DiagnosticSeverity.Error,
-                file,
-                new SourcePosition(20, 1, 21).ToSpan(),
+                new SourceLocation(file, new SourcePosition(20, 1, 21).ToSpan()),
                 "Expected ';'.")
         };
 
@@ -3019,7 +2971,7 @@ public class ParseTypeTests
     public void FunctionWithTupleTest()
     {
         var (tree, diagnostics) = Parse("public main(): (i32, i32) { }");
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(29, 1, 30)),
                 AccessModifier.Public,
@@ -3044,7 +2996,7 @@ public class ParseTypeTests
     public void ParseTupleInDuTest()
     {
         var (tree, diagnostics) = Parse("public type T = i32 | (bool, f64);");
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
                 AccessModifier.Public,
@@ -3065,7 +3017,7 @@ public class ParseTypeTests
     public void ParseDuInTupleTest()
     {
         var (tree, diagnostics) = Parse("public type T = (bool, i32 | f64);");
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
                 AccessModifier.Public,
@@ -3091,7 +3043,7 @@ public class ParseTypeTests
                 public static test(): void { }
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 3, 2)),
                 AccessModifier.Public,
@@ -3132,7 +3084,7 @@ public class ParseTypeTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 3, 2)),
                 AccessModifier.Public,
@@ -3185,7 +3137,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = i32 | (() => i32 | null);");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
                 AccessModifier.Public,
@@ -3223,7 +3175,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = i32 | (() => i32) | null;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
                 AccessModifier.Public,

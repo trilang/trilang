@@ -1,5 +1,4 @@
 using Trilang;
-using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -9,17 +8,17 @@ namespace Tri.Tests.Parsing;
 
 public class ParseGenericTypeTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+    private static readonly SourceFile file = new SourceFile("test.tri");
 
     private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
-        diagnostics.SwitchFile(file);
-
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         return (tree, diagnostics);
     }
@@ -29,7 +28,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type List<T> { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
                 AccessModifier.Public,
@@ -51,7 +50,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type List<> { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
                 AccessModifier.Public,
@@ -72,8 +71,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(17, 1, 18).ToSpan(),
+            new SourceLocation(file, new SourcePosition(17, 1, 18).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -85,7 +83,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type List<T,> { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25)),
                 AccessModifier.Public,
@@ -110,8 +108,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(19, 1, 20).ToSpan(),
+            new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -123,7 +120,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type List<T { }");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
                 AccessModifier.Public,
@@ -144,8 +141,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(19, 1, 20).ToSpan(),
+            new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
             "Expected '>'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -157,7 +153,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = List<i32, bool>;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
                 AccessModifier.Public,
@@ -179,7 +175,7 @@ public class ParseGenericTypeTests
     public void ParseNestedGenericTypeAliasTest()
     {
         var (tree, diagnostics) = Parse("public type T = List<i32, List<bool>>;");
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(38, 1, 39)),
                 AccessModifier.Public,
@@ -205,7 +201,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = List<>;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
                 AccessModifier.Public,
@@ -227,8 +223,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(21, 1, 22).ToSpan(),
+            new SourceLocation(file, new SourcePosition(21, 1, 22).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -240,7 +235,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = List<i32, >;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(28, 1, 29)),
                 AccessModifier.Public,
@@ -266,8 +261,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(26, 1, 27).ToSpan(),
+            new SourceLocation(file, new SourcePosition(26, 1, 27).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -279,7 +273,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = List<i32;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(25, 1, 26)),
                 AccessModifier.Public,
@@ -301,8 +295,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(24, 1, 25).ToSpan(),
+            new SourceLocation(file, new SourcePosition(24, 1, 25).ToSpan()),
             "Expected '>'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -314,7 +307,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T<T1, T2> = T1 | T2;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
                 AccessModifier.Public,
@@ -336,7 +329,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T<> = T1 | T2;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(26, 1, 27)),
                 AccessModifier.Public,
@@ -363,8 +356,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(14, 1, 15).ToSpan(),
+            new SourceLocation(file, new SourcePosition(14, 1, 15).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -376,7 +368,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T<T1, > = T1 | T2;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(30, 1, 31)),
                 AccessModifier.Public,
@@ -407,8 +399,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0003_ExpectedType,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(18, 1, 19).ToSpan(),
+            new SourceLocation(file, new SourcePosition(18, 1, 19).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -420,7 +411,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T<T1, T2 = T1 | T2;");
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new TypeAliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
                 AccessModifier.Public,
@@ -451,8 +442,7 @@ public class ParseGenericTypeTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(21, 1, 22).ToSpan(),
+            new SourceLocation(file, new SourcePosition(21, 1, 22).ToSpan()),
             "Expected '>'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));

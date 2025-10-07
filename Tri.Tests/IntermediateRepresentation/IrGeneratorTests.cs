@@ -1,3 +1,4 @@
+using Trilang;
 using Trilang.Compilation.Diagnostics;
 using Trilang.IntermediateRepresentation;
 using Trilang.IntermediateRepresentation.Instructions;
@@ -13,15 +14,19 @@ namespace Tri.Tests.IntermediateRepresentation;
 
 public class IrGeneratorTests
 {
+    private static readonly SourceFile file = new SourceFile("test.tri");
+
     private static (SemanticTree, ITypeMetadataProvider) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
 
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
         var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);

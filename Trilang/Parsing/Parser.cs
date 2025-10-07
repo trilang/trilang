@@ -25,7 +25,7 @@ public class Parser
             functions.Add(declaration);
         }
 
-        return new SyntaxTree(functions);
+        return new SyntaxTree(options.SourceFile, functions);
     }
 
     private string GetGeneratedName()

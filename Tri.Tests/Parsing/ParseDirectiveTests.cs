@@ -1,5 +1,4 @@
 using Trilang;
-using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -9,17 +8,17 @@ namespace Tri.Tests.Parsing;
 
 public class ParseDirectiveTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+    private static readonly SourceFile file = new SourceFile("test.tri");
 
     private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
-        diagnostics.SwitchFile(file);
-
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         return (tree, diagnostics);
     }
@@ -35,7 +34,7 @@ public class ParseDirectiveTests
 
             #endif
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new IfDirectiveNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(37, 5, 7)),
                 "D1",
@@ -73,7 +72,7 @@ public class ParseDirectiveTests
 
             #endif
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new IfDirectiveNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(67, 9, 7)),
                 "D1",
@@ -125,7 +124,7 @@ public class ParseDirectiveTests
 
             #endif
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new IfDirectiveNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(99, 13, 7)),
                 "D1",
@@ -185,7 +184,7 @@ public class ParseDirectiveTests
             #endif
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(80, 7, 2)),
                 AccessModifier.Public,
@@ -254,7 +253,7 @@ public class ParseDirectiveTests
             #endif
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new IfDirectiveNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 3, 7)),
                 "D1",

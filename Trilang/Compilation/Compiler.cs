@@ -14,9 +14,6 @@ public class Compiler
     public void Compile(CompilerOptions options)
     {
         var diagnostics = new DiagnosticCollection();
-        var lexerOptions = new LexerOptions(diagnostics.Lexer);
-        var parserOptions = new ParserOptions(diagnostics.Parser);
-
         var lexer = new Lexer();
         var parser = new Parser();
         var rootTypeMetadataProvider = new RootTypeMetadataProvider();
@@ -28,7 +25,10 @@ public class Compiler
         var project = Project.Load(options.Path);
         foreach (var sourceFile in project.SourceFiles)
         {
-            diagnostics.SwitchFile(sourceFile);
+            var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, sourceFile));
+            var parserOptions = new ParserOptions(
+                sourceFile,
+                new ParserDiagnosticReporter(diagnostics, sourceFile));
 
             var code = File.ReadAllText(sourceFile.FilePath);
             var tokens = lexer.Tokenize(code, lexerOptions);
@@ -42,7 +42,7 @@ public class Compiler
         {
             foreach (var diagnostic in diagnostics.Diagnostics)
             {
-                var (start, end) = diagnostic.SourceSpan;
+                var (start, end) = diagnostic.Location.Span;
                 var span = start != end
                     ? $"{start.Line}:{start.Column} - {end.Line}:{end.Column}"
                     : $"{start.Line}:{start.Column}";
@@ -51,7 +51,7 @@ public class Compiler
                 var originalColor = Console.ForegroundColor;
 
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Write($"{diagnostic.File}({span})");
+                Console.Write($"{diagnostic.Location.File}({span})");
 
                 Console.ForegroundColor = originalColor;
                 Console.Write(": ");

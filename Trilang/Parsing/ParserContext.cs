@@ -7,7 +7,7 @@ internal class ParserContext
 {
     public ParserContext(
         IReadOnlyList<Token> tokens,
-        ParserDiagnosticCollection diagnostics,
+        ParserDiagnosticReporter diagnostics,
         Parser parser)
     {
         Reader = new TokenReader(diagnostics, tokens);
@@ -17,7 +17,7 @@ internal class ParserContext
 
     public TokenReader Reader { get; }
 
-    public ParserDiagnosticCollection Diagnostics { get; }
+    public ParserDiagnosticReporter Diagnostics { get; }
 
     public Parser Parser { get; }
 }

@@ -1,5 +1,4 @@
 using Trilang;
-using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -9,17 +8,17 @@ namespace Tri.Tests.Parsing;
 
 public class ParseMemberAccessTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri", "test.tri");
+    private static readonly SourceFile file = new SourceFile("test.tri");
 
     private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
-        diagnostics.SwitchFile(file);
-
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         return (tree, diagnostics);
     }
@@ -34,7 +33,7 @@ public class ParseMemberAccessTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 3, 2)),
                 AccessModifier.Public,
@@ -71,7 +70,7 @@ public class ParseMemberAccessTests
             """;
         var (tree, diagnostics) = Parse(code);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new FunctionDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
                 AccessModifier.Public,
@@ -123,8 +122,7 @@ public class ParseMemberAccessTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(50, 2, 21).ToSpan(),
+            new SourceLocation(file, new SourcePosition(50, 2, 21).ToSpan()),
             "Expected ']'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -140,7 +138,7 @@ public class ParseMemberAccessTests
                 x[0] = 1;
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(37, 3, 2)),
                 AccessModifier.Public,
@@ -178,7 +176,7 @@ public class ParseMemberAccessTests
                 a.b[0].c = 1;
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 3, 2)),
                 AccessModifier.Public,
@@ -224,7 +222,7 @@ public class ParseMemberAccessTests
                 return a[0][1];
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(43, 3, 2)),
                 AccessModifier.Public,
@@ -261,7 +259,7 @@ public class ParseMemberAccessTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 3, 2)),
                 AccessModifier.Public,
@@ -299,7 +297,7 @@ public class ParseMemberAccessTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new FunctionDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(40, 3, 2)),
                 AccessModifier.Public,
@@ -326,8 +324,7 @@ public class ParseMemberAccessTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0013_ExpectedIdentifier,
             DiagnosticSeverity.Error,
-            file,
-            new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(38, 2, 17)),
+            new SourceLocation(file, new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(38, 2, 17))),
             "Expected an identifier.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -343,7 +340,7 @@ public class ParseMemberAccessTests
                 return a.b().c;
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(43, 3, 2)),
                 AccessModifier.Public,
@@ -384,7 +381,7 @@ public class ParseMemberAccessTests
                 f(1)(2);
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(36, 3, 2)),
                 AccessModifier.Public,
@@ -420,7 +417,7 @@ public class ParseMemberAccessTests
                 return new Test().a;
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(48, 3, 2)),
                 AccessModifier.Public,
@@ -457,7 +454,7 @@ public class ParseMemberAccessTests
                 return new i32[0].size;
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(51, 3, 2)),
                 AccessModifier.Public,
@@ -494,7 +491,7 @@ public class ParseMemberAccessTests
                 return 1.toString();
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(48, 3, 2)),
                 AccessModifier.Public,
@@ -531,7 +528,7 @@ public class ParseMemberAccessTests
                 return 1 + 2.toString();
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(52, 3, 2)),
                 AccessModifier.Public,
@@ -573,7 +570,7 @@ public class ParseMemberAccessTests
                 return t.0;
             }
             """);
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 3, 2)),
                 AccessModifier.Public,
@@ -616,7 +613,7 @@ public class ParseMemberAccessTests
             }
             """);
 
-        var expected = new SyntaxTree([
+        var expected = new SyntaxTree(file, [
             new FunctionDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 3, 2)),
                 AccessModifier.Public,
@@ -673,8 +670,7 @@ public class ParseMemberAccessTests
         var diagnostic = new Diagnostic(
             DiagnosticIds.P0001_MissingToken,
             DiagnosticSeverity.Error,
-            file,
-            new SourcePosition(51, 2, 15).ToSpan(),
+            new SourceLocation(file, new SourcePosition(51, 2, 15).ToSpan()),
             "Expected ';'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));

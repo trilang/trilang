@@ -9,7 +9,7 @@ public class Project
     private Project(string projectPath, IEnumerable<SourceFile> files)
     {
         ProjectPath = projectPath;
-        sourceFiles = [..files];
+        sourceFiles = [.. files];
     }
 
     public static Project Load(string path)
@@ -21,7 +21,7 @@ public class Project
         if (ext == ".tri")
         {
             name = Path.GetFileNameWithoutExtension(path);
-            files.Add(new SourceFile(path, Path.GetFileName(path)));
+            files.Add(new SourceFile(path));
         }
         else if (ext == ".project")
         {
@@ -37,7 +37,7 @@ public class Project
             name = projectJson.Name;
             files.AddRange(Directory
                 .GetFiles(Path.GetDirectoryName(path)!, "*.tri", SearchOption.AllDirectories)
-                .Select(file => new SourceFile(file, Path.GetFileName(file))));
+                .Select(file => new SourceFile(file)));
         }
         else
         {

@@ -1,3 +1,4 @@
+using Trilang;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
 using Trilang.Parsing;
@@ -8,15 +9,19 @@ namespace Tri.Tests.Semantics;
 
 public class CheckStaticAndInstanceMembersAccessTests
 {
+    private static readonly SourceFile file = new SourceFile("test.tri");
+
     private static SyntaxTree Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
         var lexer = new Lexer();
-        var tokens = lexer.Tokenize(code, new LexerOptions(diagnostics.Lexer));
+        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
+        var tokens = lexer.Tokenize(code, lexerOptions);
 
         var parser = new Parser();
-        var tree = parser.Parse(tokens, new ParserOptions(diagnostics.Parser));
+        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
+        var tree = parser.Parse(tokens, parserOptions);
 
         return tree;
     }
