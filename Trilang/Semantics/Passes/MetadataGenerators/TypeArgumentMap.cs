@@ -72,7 +72,7 @@ internal class TypeArgumentMap
         for (var i = 0; i < discriminatedUnion.Types.Count; i++)
             types[i] = Map(discriminatedUnion.Types[i]);
 
-        var metadata = new DiscriminatedUnionMetadata(types);
+        var metadata = new DiscriminatedUnionMetadata(discriminatedUnion.Definition, types);
 
         return typeProvider.GetOrDefine(metadata);
     }
@@ -81,7 +81,10 @@ internal class TypeArgumentMap
     {
         var parameterTypes = functionType.ParameterTypes.Select(Map).ToList();
         var returnType = Map(functionType.ReturnType);
-        var functionTypeMetadata = new FunctionTypeMetadata(parameterTypes, returnType);
+        var functionTypeMetadata = new FunctionTypeMetadata(
+            functionType.Definition,
+            parameterTypes,
+            returnType);
 
         return typeProvider.GetOrDefine(functionTypeMetadata);
     }
@@ -90,6 +93,7 @@ internal class TypeArgumentMap
     {
         var properties = interfaceMetadata.Properties
             .Select(x => new InterfacePropertyMetadata(
+                x.Definition,
                 interfaceMetadata,
                 x.Name,
                 Map(x.Type),
@@ -97,9 +101,16 @@ internal class TypeArgumentMap
                 x.SetterModifier));
 
         var methods = interfaceMetadata.Methods
-            .Select(x => new InterfaceMethodMetadata(interfaceMetadata, x.Name, Map(x.Type)));
+            .Select(x => new InterfaceMethodMetadata(
+                x.Definition,
+                interfaceMetadata,
+                x.Name,
+                Map(x.Type)));
 
-        var metadata = new InterfaceMetadata(properties, methods);
+        var metadata = new InterfaceMetadata(
+            interfaceMetadata.Definition,
+            properties,
+            methods);
 
         return typeProvider.GetOrDefine(metadata);
     }
@@ -107,14 +118,21 @@ internal class TypeArgumentMap
     private TupleMetadata Map(TupleMetadata tuple)
     {
         var types = tuple.Types.Select(Map);
-        var tupleMetadata = new TupleMetadata(types);
+        var tupleMetadata = new TupleMetadata(tuple.Definition, types);
 
         return typeProvider.GetOrDefine(tupleMetadata);
     }
 
     private ITypeMetadata Map(TypeAliasMetadata type)
     {
-        var alias = new TypeAliasMetadata(type.Name, type.GenericArguments.Select(Map), Map(type.Type!));
+        var alias = new TypeAliasMetadata(
+            type.Definition,
+            type.Name,
+            type.GenericArguments.Select(Map),
+            Map(type.Type!));
+
+        if (type.IsInvalid)
+            alias.MarkAsInvalid();
 
         return typeProvider.GetOrDefine(alias);
     }
@@ -125,7 +143,7 @@ internal class TypeArgumentMap
     private TypeArrayMetadata Map(TypeArrayMetadata type)
     {
         var itemType = Map(type.ItemMetadata!);
-        var typeArrayMetadata = new TypeArrayMetadata(itemType);
+        var typeArrayMetadata = new TypeArrayMetadata(type.Definition, itemType);
 
         return typeProvider.GetOrDefine(typeArrayMetadata);
     }
@@ -133,6 +151,7 @@ internal class TypeArgumentMap
     private TypeMetadata Map(TypeMetadata type)
     {
         var closed = new TypeMetadata(
+            type.Definition,
             type.Name,
             type.GenericArguments.Select(Map).ToList(),
             [],
@@ -171,6 +190,7 @@ internal class TypeArgumentMap
         foreach (var constructor in type.Constructors)
             closed.AddConstructor(
                 new ConstructorMetadata(
+                    constructor.Definition,
                     closed,
                     constructor.AccessModifier,
                     constructor.Parameters.Select(Map).ToList(),
@@ -183,10 +203,11 @@ internal class TypeArgumentMap
     }
 
     private ParameterMetadata Map(ParameterMetadata parameter)
-        => new ParameterMetadata(parameter.Name, Map(parameter.Type));
+        => new ParameterMetadata(parameter.Definition, parameter.Name, Map(parameter.Type));
 
     private MethodMetadata Map(TypeMetadata closed, MethodMetadata method)
         => new MethodMetadata(
+            method.Definition,
             closed,
             method.AccessModifier,
             method.IsStatic,

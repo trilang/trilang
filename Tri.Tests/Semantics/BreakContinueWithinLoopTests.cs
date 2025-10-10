@@ -12,7 +12,7 @@ public class BreakContinueWithinLoopTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -24,13 +24,13 @@ public class BreakContinueWithinLoopTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void BreakIsNotInLoopTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): void {
                 break;
@@ -40,7 +40,7 @@ public class BreakContinueWithinLoopTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'break' keyword can only be used within a loop."));
     }
@@ -48,7 +48,7 @@ public class BreakContinueWithinLoopTests
     [Test]
     public void ContinueIsNotInLoopTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): void {
                 continue;
@@ -58,7 +58,7 @@ public class BreakContinueWithinLoopTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'continue' keyword can only be used within a loop."));
     }
@@ -66,7 +66,7 @@ public class BreakContinueWithinLoopTests
     [Test]
     public void BreakInNestedLoopTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): void {
                 while (true) {
@@ -78,7 +78,7 @@ public class BreakContinueWithinLoopTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var breakNode = semanticTree.Find<Break>();
         var loop = semanticTree.Where<While>().Last();
@@ -89,7 +89,7 @@ public class BreakContinueWithinLoopTests
     [Test]
     public void ContinueInNestedLoopTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): void {
                 while (true) {
@@ -101,7 +101,7 @@ public class BreakContinueWithinLoopTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var continueNode = semanticTree.Find<Continue>();
         var loop = semanticTree.Where<While>().Last();

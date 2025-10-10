@@ -2,8 +2,11 @@ namespace Trilang.Metadata;
 
 public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetadata>
 {
-    public TypeArgumentMetadata(string name)
-        => Name = name;
+    public TypeArgumentMetadata(SourceLocation? definition, string name)
+    {
+        Definition = definition;
+        Name = name;
+    }
 
     public static bool operator ==(TypeArgumentMetadata? left, TypeArgumentMetadata? right)
         => Equals(left, right);
@@ -45,10 +48,14 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
     public IMetadata? GetMember(string name)
         => null;
 
-    public string Name { get; }
+    public bool IsInvalid => false;
+
+    public SourceLocation? Definition { get; }
 
     public bool IsValueType
-        => throw new NotSupportedException();
+       => throw new NotSupportedException();
 
     public TypeLayout? Layout { get; set; }
+
+    public string Name { get; }
 }

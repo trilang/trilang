@@ -4,12 +4,15 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
 {
     private readonly List<ITypeMetadata> types;
 
-    public DiscriminatedUnionMetadata() : this([])
+    public DiscriminatedUnionMetadata(SourceLocation definition) : this(definition, [])
     {
     }
 
-    public DiscriminatedUnionMetadata(IEnumerable<ITypeMetadata> types)
-        => this.types = [..types];
+    public DiscriminatedUnionMetadata(SourceLocation? definition, IEnumerable<ITypeMetadata> types)
+    {
+        Definition = definition;
+        this.types = [.. types];
+    }
 
     public static bool operator ==(DiscriminatedUnionMetadata? left, DiscriminatedUnionMetadata? right)
         => Equals(left, right);
@@ -57,10 +60,14 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
     public IMetadata? GetMember(string name)
         => null;
 
-    public IReadOnlyList<ITypeMetadata> Types => types;
+    public bool IsInvalid { get; }
+
+    public SourceLocation? Definition { get; }
 
     public bool IsValueType
         => true;
 
     public TypeLayout? Layout { get; set; }
+
+    public IReadOnlyList<ITypeMetadata> Types => types;
 }

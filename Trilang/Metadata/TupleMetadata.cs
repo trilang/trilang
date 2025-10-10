@@ -7,12 +7,13 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     private readonly List<PropertyMetadata> properties;
     private readonly List<MethodMetadata> methods;
 
-    public TupleMetadata() : this([])
+    public TupleMetadata(SourceLocation? definition) : this(definition, [])
     {
     }
 
-    public TupleMetadata(IEnumerable<ITypeMetadata> types)
+    public TupleMetadata(SourceLocation? definition, IEnumerable<ITypeMetadata> types)
     {
+        Definition = definition;
         this.types = [];
         this.fields = [];
         this.properties = [];
@@ -67,7 +68,7 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         fields.Add(new FieldMetadata(this, $"<>_{name}", type));
 
         // TODO: add in ctor?
-        var propertyMetadata = new PropertyMetadata(this, name, type, AccessModifierMetadata.Public);
+        var propertyMetadata = new PropertyMetadata(null, this, name, type, AccessModifierMetadata.Public);
         properties.Add(propertyMetadata);
         methods.Add(propertyMetadata.Getter!);
     }
@@ -86,6 +87,15 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     public MethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(f => f.Name == name);
 
+    public bool IsInvalid { get; }
+
+    public SourceLocation? Definition { get; }
+
+    public bool IsValueType
+        => true;
+
+    public TypeLayout? Layout { get; set; }
+
     public IReadOnlyList<ITypeMetadata> Types
         => types;
 
@@ -97,9 +107,4 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
 
     public IReadOnlyList<MethodMetadata> Methods
         => methods;
-
-    public bool IsValueType
-        => true;
-
-    public TypeLayout? Layout { get; set; }
 }

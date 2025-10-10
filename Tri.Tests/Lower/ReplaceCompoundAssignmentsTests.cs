@@ -28,7 +28,9 @@ public class ReplaceCompoundAssignmentsTests
         var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         return semanticTree;
     }
@@ -49,7 +51,7 @@ public class ReplaceCompoundAssignmentsTests
                   x {{op}} 1;
               }
               """);
-        var parameterMetadata = new ParameterMetadata("x", TypeMetadata.I32);
+        var parameterMetadata = new ParameterMetadata(null, "x", TypeMetadata.I32);
         var expected = new SemanticTree(file, null, [
             new FunctionDeclaration(
                 null,
@@ -98,10 +100,11 @@ public class ReplaceCompoundAssignmentsTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    null,
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.Void)
+                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void)
                 )
             }
         ]);

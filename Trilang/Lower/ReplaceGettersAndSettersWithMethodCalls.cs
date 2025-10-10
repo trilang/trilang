@@ -50,7 +50,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
             }
 
             var name = $"<>_tmp_set{tempVariableCounter++}";
-            var variableMetadata = new VariableMetadata(name, right.ReturnTypeMetadata!);
+            var variableMetadata = new VariableMetadata(null, name, right.ReturnTypeMetadata!);
 
             return new ExpressionBlock([
                 new VariableDeclaration(

@@ -27,12 +27,18 @@ internal class AliasGenerator
             if (symbol.Node is not TypeAliasDeclaration typeAliasNode)
                 throw new SemanticAnalysisException("The type alias declaration is not valid.");
 
+            var root = typeAliasNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var alias = new TypeAliasMetadata(typeAliasNode.Name);
+            var alias = new TypeAliasMetadata(
+                new SourceLocation(root.SourceFile, typeAliasNode.SourceSpan.GetValueOrDefault()),
+                typeAliasNode.Name);
 
             foreach (var genericArgument in typeAliasNode.GenericArguments)
             {
-                var argumentMetadata = new TypeArgumentMetadata(genericArgument.Name);
+                var argumentMetadata = new TypeArgumentMetadata(
+                      new SourceLocation(root.SourceFile, genericArgument.SourceSpan.GetValueOrDefault()),
+                      genericArgument.Name);
+
                 if (!typeProvider.DefineType(genericArgument.Name, argumentMetadata))
                     throw new SemanticAnalysisException($"The '{genericArgument.Name}' type argument is already defined.");
 
@@ -51,12 +57,12 @@ internal class AliasGenerator
         foreach (var (aliasMetadata, typeAliasNode) in typesToProcess)
         {
             var typeProvider = symbolTableMap.Get(typeAliasNode).TypeProvider;
-            var aliasedMetadata = typeProvider.GetType(typeAliasNode.Type.Name);
-            if (aliasedMetadata is null && typeAliasNode.Type is GenericType genericTypeNode)
-                aliasedMetadata = typeProvider.GetType(genericTypeNode.GetOpenGenericName());
+            var aliasedMetadataName = typeAliasNode.Type is GenericType genericTypeNode
+                ? genericTypeNode.GetOpenGenericName()
+                : typeAliasNode.Type.Name;
 
-            if (aliasedMetadata is null)
-                throw new SemanticAnalysisException($"The '{typeAliasNode.Type.Name}' aliased type is not defined.");
+            var aliasedMetadata = typeProvider.GetType(aliasedMetadataName) ??
+                                  throw new SemanticAnalysisException($"The '{typeAliasNode.Type.Name}' aliased type is not defined.");
 
             aliasMetadata.Type = aliasedMetadata;
         }

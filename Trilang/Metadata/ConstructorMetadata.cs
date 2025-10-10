@@ -3,11 +3,13 @@ namespace Trilang.Metadata;
 public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMetadata>
 {
     public ConstructorMetadata(
+        SourceLocation? definition,
         ITypeMetadata declaringType,
         AccessModifierMetadata accessModifier,
         IReadOnlyList<ParameterMetadata> parameters,
         FunctionTypeMetadata type)
     {
+        Definition = definition;
         DeclaringType = declaringType;
         AccessModifier = accessModifier;
         Parameters = parameters;
@@ -53,6 +55,8 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
 
     public override string ToString()
         => $"ctor: {Type}";
+
+    public SourceLocation? Definition { get; }
 
     public ITypeMetadata DeclaringType { get; }
 

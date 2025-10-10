@@ -14,7 +14,7 @@ public class ControlFlowAnalyzerTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -26,7 +26,7 @@ public class ControlFlowAnalyzerTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
@@ -38,10 +38,10 @@ public class ControlFlowAnalyzerTests
                 return a + b;
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
         var entry = new SemanticBlock("entry", (BlockStatement)returnStatement.Parent!, [
@@ -49,10 +49,11 @@ public class ControlFlowAnalyzerTests
         ]);
         var expected = new ControlFlowGraph(entry, entry);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "add",
-            [new ParameterMetadata("a", TypeMetadata.I32), new ParameterMetadata("b", TypeMetadata.I32)],
-            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32)
+            [new ParameterMetadata(null, "a", TypeMetadata.I32), new ParameterMetadata(null, "b", TypeMetadata.I32)],
+            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -72,10 +73,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var block = semanticTree.Find<BlockStatement>()!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
@@ -93,10 +94,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -118,10 +120,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var returnStatements = semanticTree.Where<ReturnStatement>().ToList();
         var ifStatement = semanticTree.Find<IfStatement>()!;
@@ -145,10 +147,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -170,10 +173,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var ifs = semanticTree.Where<IfStatement>().ToList();
         var outerIf = ifs[0];
@@ -195,10 +198,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -218,10 +222,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var block = semanticTree.Find<BlockStatement>()!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
@@ -241,10 +245,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -266,10 +271,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var whileNodes = semanticTree.Where<While>().ToArray();
         var outerWhile = whileNodes[0];
@@ -295,10 +300,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -318,10 +324,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var whileStatement = semanticTree.Find<While>()!;
         var breakStatement = semanticTree.Find<Break>()!;
@@ -338,10 +344,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -363,10 +370,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var outerWhile = semanticTree.Find<While>()!;
         var innerWhile = semanticTree.Where<While>().Skip(1).First();
@@ -391,10 +398,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -414,10 +422,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var whileStatement = semanticTree.Find<While>()!;
         var continueStatement = semanticTree.Find<Continue>()!;
@@ -434,10 +442,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -459,10 +468,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var outerWhile = semanticTree.Find<While>()!;
         var innerWhile = semanticTree.Where<While>().Skip(1).First();
@@ -487,10 +496,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -512,10 +522,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var whileStatement = semanticTree.Find<While>()!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
@@ -538,10 +548,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, loopendBlock);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -567,10 +578,10 @@ public class ControlFlowAnalyzerTests
                 }
             }
             """;
-        var tree = Parse(code);
+        var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var ifs = semanticTree.Where<IfStatement>().ToList();
         var returns = semanticTree.Where<ReturnStatement>().ToList();
@@ -594,10 +605,11 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, end0Block);
         var function = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
-            [new ParameterMetadata("a", TypeMetadata.I32)],
-            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
+            [new ParameterMetadata(null, "a", TypeMetadata.I32)],
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));

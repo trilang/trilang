@@ -3,12 +3,14 @@ namespace Trilang.Metadata;
 public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfacePropertyMetadata>
 {
     public InterfacePropertyMetadata(
+        SourceLocation? definition,
         InterfaceMetadata declaringType,
         string name,
         ITypeMetadata type,
         AccessModifierMetadata? getterModifier,
         AccessModifierMetadata? setterModifier)
     {
+        Definition = definition;
         DeclaringType = declaringType;
         Name = name;
         Type = type;
@@ -56,6 +58,8 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
 
     public override string ToString()
         => $"{Name}: {Type}";
+
+    public SourceLocation? Definition { get; }
 
     public InterfaceMetadata DeclaringType { get; }
 

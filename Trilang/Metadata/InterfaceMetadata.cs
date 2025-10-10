@@ -5,14 +5,16 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     private readonly HashSet<InterfacePropertyMetadata> properties;
     private readonly HashSet<InterfaceMethodMetadata> methods;
 
-    public InterfaceMetadata() : this([], [])
+    public InterfaceMetadata(SourceLocation? definition) : this(definition, [], [])
     {
     }
 
     public InterfaceMetadata(
+        SourceLocation? definition,
         IEnumerable<InterfacePropertyMetadata> properties,
         IEnumerable<InterfaceMethodMetadata> methods)
     {
+        Definition = definition;
         this.properties = new HashSet<InterfacePropertyMetadata>(properties);
         this.methods = new HashSet<InterfaceMethodMetadata>(methods);
     }
@@ -97,14 +99,18 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
         => GetProperty(name) ??
            GetMethod(name) as IMetadata;
 
-    public IReadOnlyCollection<InterfacePropertyMetadata> Properties
-        => properties;
+    public bool IsInvalid { get; }
 
-    public IReadOnlyCollection<InterfaceMethodMetadata> Methods
-        => methods;
+    public SourceLocation? Definition { get; }
 
     public bool IsValueType
         => false;
 
     public TypeLayout? Layout { get; set; }
+
+    public IReadOnlyCollection<InterfacePropertyMetadata> Properties
+        => properties;
+
+    public IReadOnlyCollection<InterfaceMethodMetadata> Methods
+        => methods;
 }

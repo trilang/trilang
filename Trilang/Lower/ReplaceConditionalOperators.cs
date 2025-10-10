@@ -36,7 +36,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
         if (node.Kind == BinaryExpressionKind.ConditionalAnd)
         {
             var variableName = $"cond_{conditionCounter++}";
-            var variableMetadata = new VariableMetadata(variableName, TypeMetadata.Bool);
+            var variableMetadata = new VariableMetadata(null, variableName, TypeMetadata.Bool);
             var result = new ExpressionBlock([
                 new VariableDeclaration(
                     null,
@@ -89,7 +89,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
         if (node.Kind == BinaryExpressionKind.ConditionalOr)
         {
             var variableName = $"cond_{conditionCounter++}";
-            var variableMetadata = new VariableMetadata(variableName, TypeMetadata.Bool);
+            var variableMetadata = new VariableMetadata(null, variableName, TypeMetadata.Bool);
             var result = new ExpressionBlock([
                 new VariableDeclaration(
                     null,

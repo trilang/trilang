@@ -1,19 +1,21 @@
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
+using static Trilang.Metadata.TypeMetadata;
 using static Trilang.Semantics.Model.BinaryExpressionKind;
 using static Trilang.Semantics.Model.UnaryExpressionKind;
-using static Trilang.Metadata.TypeMetadata;
 using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics.Passes;
 
 internal class TypeChecker : IVisitor, ISemanticPass
 {
+    private SourceFile file = default!;
     private IEnumerable<string> directives = null!;
     private SymbolTableMap symbolTableMap = null!;
 
     public void Analyze(SemanticTree tree, SemanticPassContext context)
     {
+        file = tree.SourceFile;
         directives = context.Directives;
         symbolTableMap = context.SymbolTableMap!;
 
@@ -240,7 +242,10 @@ internal class TypeChecker : IVisitor, ISemanticPass
             var parameter = node.Parameters[i];
             parameter.Accept(this);
 
-            parameters[i] = new ParameterMetadata(parameter.Name, parameter.Type.Metadata!);
+            parameters[i] = new ParameterMetadata(
+                new SourceLocation(file, parameter.SourceSpan.GetValueOrDefault()),
+                parameter.Name,
+                parameter.Type.Metadata!);
         }
 
         node.ReturnType.Accept(this);
@@ -250,11 +255,16 @@ internal class TypeChecker : IVisitor, ISemanticPass
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var parameterTypes = node.Parameters.Select(x => x.Type.Metadata!);
         var returnType = node.ReturnType.Metadata!;
-        var functionType = new FunctionTypeMetadata(parameterTypes, returnType);
+        var functionType = new FunctionTypeMetadata(null, parameterTypes, returnType);
         functionType = typeProvider.GetType(functionType.ToString()) as FunctionTypeMetadata ??
                        throw new SemanticAnalysisException($"Unknown function type '{functionType}'");
 
-        node.Metadata = new FunctionMetadata(GetAccessModifierMetadata(node.AccessModifier), node.Name, parameters, functionType);
+        node.Metadata = new FunctionMetadata(
+            new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
+            GetAccessModifierMetadata(node.AccessModifier),
+            node.Name,
+            parameters,
+            functionType);
 
         foreach (var parameter in node.Parameters)
             parameter.Metadata = node.Metadata!.Parameters.FirstOrDefault(x => x.Name == parameter.Name);
@@ -273,7 +283,11 @@ internal class TypeChecker : IVisitor, ISemanticPass
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var parameters = node.ParameterTypes.Select(x => x.Metadata!);
         var returnType = node.ReturnType.Metadata!;
-        var functionType = new FunctionTypeMetadata(parameters, returnType);
+        var functionType = new FunctionTypeMetadata(
+            new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
+            parameters,
+            returnType);
+
         functionType = typeProvider.GetType(functionType.ToString()) as FunctionTypeMetadata ??
                        throw new SemanticAnalysisException($"Unknown function type '{functionType}'");
 
@@ -419,7 +433,10 @@ internal class TypeChecker : IVisitor, ISemanticPass
                     => methodNode.Metadata,
 
                 TypeDeclaration typeDeclarationNode when node.IsThis
-                    => new ParameterMetadata(MemberAccessExpression.This, typeDeclarationNode.Metadata!),
+                    => new ParameterMetadata(
+                        null,
+                        MemberAccessExpression.This,
+                        typeDeclarationNode.Metadata!),
 
                 _ => throw new SemanticAnalysisException("Unknown symbol"),
             };
@@ -437,6 +454,9 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Member!.Accept(this);
 
         var returnTypeMetadata = node.Member.ReturnTypeMetadata!;
+        if (returnTypeMetadata.IsInvalid)
+            return;
+
         node.Reference = returnTypeMetadata.GetMember(node.Name) ??
                          throw new SemanticAnalysisException($"Cannot find member '{node.Name}' in '{returnTypeMetadata}'");
     }
@@ -582,7 +602,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         // we can't generate metadata for this tuple in GenerateMetadata
         // because we don't know the types of the expressions yet
         var types = node.Expressions.Select(x => x.ReturnTypeMetadata!);
-        var tuple = new TupleMetadata(types);
+        var tuple = new TupleMetadata(null, types);
         var existingTuple = typeProvider.GetType(tuple.ToString());
         if (existingTuple is null)
         {
@@ -601,7 +621,9 @@ internal class TypeChecker : IVisitor, ISemanticPass
 
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
         var types = node.Types.Select(x => x.Metadata!);
-        var tuple = new TupleMetadata(types);
+        var tuple = new TupleMetadata(
+            new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
+            types);
         tuple = typeProvider.GetType(tuple.ToString()) as TupleMetadata ??
                 throw new SemanticAnalysisException($"Unknown tuple type '{tuple}'");
 
@@ -762,7 +784,10 @@ internal class TypeChecker : IVisitor, ISemanticPass
         if (!node.Expression.ReturnTypeMetadata.Equals(node.Type.Metadata))
             throw new SemanticAnalysisException($"Type mismatch in variable declaration '{node.Name}': expected '{node.Type.Metadata}', got '{node.Expression.ReturnTypeMetadata}'");
 
-        node.Metadata = new VariableMetadata(node.Name, node.Type.Metadata);
+        node.Metadata = new VariableMetadata(
+            new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
+            node.Name,
+            node.Type.Metadata);
     }
 
     public void VisitWhile(While node)

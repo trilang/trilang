@@ -26,7 +26,9 @@ public class AddThisInLocalMemberAccessTests
         var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         return semanticTree;
     }
@@ -49,8 +51,9 @@ public class AddThisInLocalMemberAccessTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var typeMetadata = new TypeMetadata("Test");
+        var typeMetadata = new TypeMetadata(null, "Test");
         var propertyMetadata = new PropertyMetadata(
+            null,
             typeMetadata,
             "count",
             TypeMetadata.I32
@@ -61,7 +64,7 @@ public class AddThisInLocalMemberAccessTests
                 null,
                 new MemberAccessExpression(null, MemberAccessExpression.This)
                 {
-                    Reference = new ParameterMetadata(MemberAccessExpression.This, typeMetadata),
+                    Reference = new ParameterMetadata(null, MemberAccessExpression.This, typeMetadata),
                     AccessKind = MemberAccessKind.Read,
                 },
                 "<>_get_count")
@@ -96,21 +99,22 @@ public class AddThisInLocalMemberAccessTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var typeMetadata = new TypeMetadata("Test");
+        var typeMetadata = new TypeMetadata(null, "Test");
         var methodMetadata = new MethodMetadata(
+            null,
             typeMetadata,
             AccessModifierMetadata.Public,
             false,
             "print",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
 
         var expected = new MemberAccessExpression(
             null,
             new MemberAccessExpression(null, MemberAccessExpression.This)
             {
-                Reference = new ParameterMetadata(MemberAccessExpression.This, typeMetadata),
+                Reference = new ParameterMetadata(null, MemberAccessExpression.This, typeMetadata),
                 AccessKind = MemberAccessKind.Read,
             },
             "print")

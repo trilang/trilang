@@ -27,8 +27,11 @@ internal class InterfaceGenerator
             if (symbol.Node is not Interface interfaceNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an InterfaceNode, but found '{symbol.Node.GetType().Name}' instead.");
 
+            var root = interfaceNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var metadata = new InterfaceMetadata();
+            var metadata = new InterfaceMetadata(
+                new SourceLocation(root.SourceFile, interfaceNode.SourceSpan.GetValueOrDefault()));
+
             if (typeProvider.DefineType(symbol.Name, metadata))
                 typesToProcess.Add(new Item(metadata, interfaceNode));
         }
@@ -46,6 +49,7 @@ internal class InterfaceGenerator
                                    throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
 
                 var propertyMetadata = new InterfacePropertyMetadata(
+                    metadata.Definition! with { Span = property.SourceSpan.GetValueOrDefault() },
                     metadata,
                     property.Name,
                     propertyType,
@@ -68,7 +72,7 @@ internal class InterfaceGenerator
                 var returnType = typeProvider.GetType(method.ReturnType.Name) ??
                                  throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
 
-                var functionType = new FunctionTypeMetadata(parameters, returnType);
+                var functionType = new FunctionTypeMetadata(null, parameters, returnType);
 
                 if (typeProvider.GetType(functionType.ToString()) is not FunctionTypeMetadata existingFunctionType)
                 {
@@ -77,7 +81,11 @@ internal class InterfaceGenerator
                 }
 
                 // TODO: generic?
-                var methodMetadata = new InterfaceMethodMetadata(metadata, method.Name, existingFunctionType);
+                var methodMetadata = new InterfaceMethodMetadata(
+                    metadata.Definition! with { Span = method.SourceSpan.GetValueOrDefault() },
+                    metadata,
+                    method.Name,
+                    existingFunctionType);
                 metadata.AddMethod(methodMetadata);
             }
         }

@@ -22,6 +22,9 @@ internal class CheckStaticAndInstanceMembersAccess : Visitor, ISemanticPass
 
         if (parentRef is ITypeMetadata type)
         {
+            if (type.IsInvalid)
+                return;
+
             if (type.UnpackAlias() is TypeMetadata)
             {
                 if (node.Reference is MethodMetadata { IsStatic: false } method)

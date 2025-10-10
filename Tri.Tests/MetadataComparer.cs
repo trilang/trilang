@@ -2,6 +2,7 @@ using Trilang.Metadata;
 
 namespace Tri.Tests;
 
+// TODO: compare `definition`
 // ReSharper disable all UnusedParameter.Local
 internal class MetadataComparer : IEqualityComparer<IMetadata>
 {

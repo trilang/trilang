@@ -11,7 +11,7 @@ public class ThisOutsideOfClassTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -23,13 +23,13 @@ public class ThisOutsideOfClassTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void ThisInConstructorTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 public constructor() {
@@ -41,14 +41,14 @@ public class ThisOutsideOfClassTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void ThisInMethodTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 public toString(): void {
@@ -60,14 +60,14 @@ public class ThisOutsideOfClassTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void ThisInFunctionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 this;
@@ -77,7 +77,7 @@ public class ThisOutsideOfClassTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'this' keyword is only allowed inside a type."));
     }

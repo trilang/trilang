@@ -2,8 +2,13 @@ namespace Trilang.Metadata;
 
 public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMetadata>
 {
-    public InterfaceMethodMetadata(InterfaceMetadata declaringType, string name, FunctionTypeMetadata type)
+    public InterfaceMethodMetadata(
+        SourceLocation? definition,
+        InterfaceMetadata declaringType,
+        string name,
+        FunctionTypeMetadata type)
     {
+        Definition = definition;
         DeclaringType = declaringType;
         Name = name;
         Type = type;
@@ -47,6 +52,8 @@ public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMeta
 
     public override string ToString()
         => $"{Name}: {Type}";
+
+    public SourceLocation? Definition { get; }
 
     public InterfaceMetadata DeclaringType { get; }
 

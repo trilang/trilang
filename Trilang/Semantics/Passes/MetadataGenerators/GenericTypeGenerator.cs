@@ -37,8 +37,12 @@ internal class GenericTypeGenerator
             var openGenericType = typeProvider.GetType(openName);
             var closedType = openGenericType switch
             {
-                TypeMetadata type => (ITypeMetadata)new TypeMetadata(type.Name),
-                TypeAliasMetadata alias => new TypeAliasMetadata(alias.Name),
+                TypeMetadata type
+                    => (ITypeMetadata)new TypeMetadata(openGenericType.Definition, type.Name),
+
+                TypeAliasMetadata alias
+                    => new TypeAliasMetadata(openGenericType.Definition, alias.Name),
+
                 _ => throw new SemanticAnalysisException($"The '{openName}' generic type is not defined."),
             };
 
@@ -117,10 +121,11 @@ internal class GenericTypeGenerator
         {
             var parameters = GetParameters(typeArgumentsMap, constructor.Parameters);
 
-            var functionType = new FunctionTypeMetadata(parameters.Select(x => x.Type), closed);
+            var functionType = new FunctionTypeMetadata(null, parameters.Select(x => x.Type), closed);
             functionType = typeProvider.GetOrDefine(functionType);
 
             var constructorMetadata = new ConstructorMetadata(
+                constructor.Definition,
                 closed,
                 constructor.AccessModifier,
                 parameters,
@@ -148,10 +153,11 @@ internal class GenericTypeGenerator
         var methodType = method.Type;
         var parameterTypes = methodType.ParameterTypes.Select(typeArgumentsMap.Map);
         var returnType = typeArgumentsMap.Map(methodType.ReturnType);
-        var functionType = new FunctionTypeMetadata(parameterTypes, returnType);
+        var functionType = new FunctionTypeMetadata(null, parameterTypes, returnType);
         functionType = typeProvider.GetOrDefine(functionType);
 
         return new MethodMetadata(
+            method.Definition,
             closed,
             method.AccessModifier,
             method.IsStatic,
@@ -175,6 +181,12 @@ internal class GenericTypeGenerator
             closed.AddGenericArgument(typeArgument);
         }
 
+        if (open.IsInvalid)
+        {
+            closed.MarkAsInvalid();
+            return;
+        }
+
         var typeArgumentsMap = TypeArgumentMap.Create(
             typeProvider,
             closed.GenericArguments,
@@ -183,14 +195,21 @@ internal class GenericTypeGenerator
         closed.Type = typeArgumentsMap.Map(open.Type!);
     }
 
-    private ParameterMetadata[] GetParameters(TypeArgumentMap map, IReadOnlyList<ParameterMetadata> parameters)
+    private ParameterMetadata[] GetParameters(
+        TypeArgumentMap map,
+        IReadOnlyList<ParameterMetadata> parameters)
     {
         var parametersMetadata = new ParameterMetadata[parameters.Count];
         for (var i = 0; i < parametersMetadata.Length; i++)
+        {
+            var parameterMetadata = parameters[i];
+
             parametersMetadata[i] = new ParameterMetadata(
-                parameters[i].Name,
-                map.Map(parameters[i].Type)
+                parameterMetadata.Definition,
+                parameterMetadata.Name,
+                map.Map(parameterMetadata.Type)
             );
+        }
 
         return parametersMetadata;
     }

@@ -2,8 +2,12 @@ namespace Trilang.Metadata;
 
 public class VariableMetadata : IMetadata, IEquatable<VariableMetadata>
 {
-    public VariableMetadata(string name, ITypeMetadata type)
+    public VariableMetadata(
+        SourceLocation? definition,
+        string name,
+        ITypeMetadata type)
     {
+        Definition = definition;
         Name = name;
         Type = type;
     }
@@ -45,6 +49,8 @@ public class VariableMetadata : IMetadata, IEquatable<VariableMetadata>
 
     public override string ToString()
         => $"{Name}: {Type}";
+
+    public SourceLocation? Definition { get; }
 
     public string Name { get; }
 

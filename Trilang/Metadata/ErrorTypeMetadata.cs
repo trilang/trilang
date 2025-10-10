@@ -11,4 +11,8 @@ public class ErrorTypeMetadata : ITypeMetadata
 
     public IMetadata? GetMember(string name)
         => throw new NotImplementedException();
+
+    public bool IsInvalid { get; }
+
+    public SourceLocation? Definition => null;
 }

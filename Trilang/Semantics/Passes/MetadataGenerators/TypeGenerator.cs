@@ -27,12 +27,18 @@ internal class TypeGenerator
             if (symbol.Node is not TypeDeclaration typeDeclarationNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a TypeDeclarationNode, but found '{symbol.Node.GetType().Name}' instead.");
 
+            var root = typeDeclarationNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var metadata = new TypeMetadata(typeDeclarationNode.Name);
+            var metadata = new TypeMetadata(
+                new SourceLocation(root.SourceFile, typeDeclarationNode.SourceSpan.GetValueOrDefault()),
+                typeDeclarationNode.Name);
 
             foreach (var genericArgument in typeDeclarationNode.GenericArguments)
             {
-                var argumentMetadata = new TypeArgumentMetadata(genericArgument.Name);
+                var argumentMetadata = new TypeArgumentMetadata(
+                    new SourceLocation(root.SourceFile, genericArgument.SourceSpan.GetValueOrDefault()),
+                    genericArgument.Name);
+
                 if (!typeProvider.DefineType(genericArgument.Name, argumentMetadata))
                     throw new SemanticAnalysisException($"The '{genericArgument.Name}' type argument is already defined.");
 
@@ -50,6 +56,7 @@ internal class TypeGenerator
     {
         foreach (var (type, typeDeclarationNode) in typesToProcess)
         {
+            var root = typeDeclarationNode.GetRoot();
             var typeProvider = symbolTableMap.Get(typeDeclarationNode).TypeProvider;
 
             foreach (var @interface in typeDeclarationNode.Interfaces)
@@ -70,6 +77,7 @@ internal class TypeGenerator
                                    throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
 
                 var propertyMetadata = new PropertyMetadata(
+                    new SourceLocation(root.SourceFile, property.SourceSpan.GetValueOrDefault()),
                     type,
                     property.Name,
                     propertyType,
@@ -99,11 +107,12 @@ internal class TypeGenerator
                     var parameters = constructor.Parameters
                         .Select(x => typeProvider.GetType(x.Type.Name) ??
                                      throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
-                    var functionType = new FunctionTypeMetadata(parameters, type);
+                    var functionType = new FunctionTypeMetadata(null, parameters, type);
                     functionType = typeProvider.GetOrDefine(functionType);
 
-                    var parametersMetadata = GetParameters(typeProvider, constructor.Parameters);
+                    var parametersMetadata = GetParameters(root, typeProvider, constructor.Parameters);
                     var constructorMetadata = new ConstructorMetadata(
+                        new SourceLocation(root.SourceFile, constructor.SourceSpan.GetValueOrDefault()),
                         type,
                         GetAccessModifierMetadata(constructor.AccessModifier) ?? AccessModifierMetadata.Public,
                         parametersMetadata,
@@ -114,10 +123,11 @@ internal class TypeGenerator
             }
             else
             {
-                var functionType = new FunctionTypeMetadata([], type);
+                var functionType = new FunctionTypeMetadata(null, [], type);
                 functionType = typeProvider.GetOrDefine(functionType);
 
                 type.AddConstructor(new ConstructorMetadata(
+                    null,
                     type,
                     AccessModifierMetadata.Public,
                     [],
@@ -127,7 +137,7 @@ internal class TypeGenerator
 
             foreach (var method in typeDeclarationNode.Methods)
             {
-                var parameters = GetParameters(typeProvider, method.Parameters);
+                var parameters = GetParameters(root, typeProvider, method.Parameters);
                 var parameterTypes = method.Parameters
                     .Select(x => typeProvider.GetType(x.Type.Name) ??
                                  throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
@@ -135,10 +145,11 @@ internal class TypeGenerator
                 var returnType = typeProvider.GetType(method.ReturnType.Name) ??
                                  throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
 
-                var functionType = new FunctionTypeMetadata(parameterTypes, returnType);
+                var functionType = new FunctionTypeMetadata(null, parameterTypes, returnType);
                 functionType = typeProvider.GetOrDefine(functionType);
 
                 var methodMetadata = new MethodMetadata(
+                    new SourceLocation(root.SourceFile, method.SourceSpan.GetValueOrDefault()),
                     type,
                     GetAccessModifierMetadata(method.AccessModifier) ?? AccessModifierMetadata.Public,
                     method.IsStatic,
@@ -152,6 +163,7 @@ internal class TypeGenerator
     }
 
     private ParameterMetadata[] GetParameters(
+        SemanticTree root,
         ITypeMetadataProvider typeProvider,
         IReadOnlyList<Parameter> parameters)
     {
@@ -162,7 +174,10 @@ internal class TypeGenerator
             var parameterType = typeProvider.GetType(parameter.Type.Name) ??
                                 throw new SemanticAnalysisException($"The '{parameter.Name}' parameter has unknown type: '{parameter.Type.Name}'.");
 
-            result[i] = new ParameterMetadata(parameter.Name, parameterType);
+            result[i] = new ParameterMetadata(
+                new SourceLocation(root.SourceFile, parameter.SourceSpan.GetValueOrDefault()),
+                parameter.Name,
+                parameterType);
         }
 
         return result;

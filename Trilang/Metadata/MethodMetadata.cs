@@ -3,6 +3,7 @@ namespace Trilang.Metadata;
 public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
 {
     public MethodMetadata(
+        SourceLocation? definition,
         ITypeMetadata declaringType,
         AccessModifierMetadata accessModifier,
         bool isStatic,
@@ -10,6 +11,7 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
         IReadOnlyList<ParameterMetadata> parameters,
         FunctionTypeMetadata type)
     {
+        Definition = definition;
         DeclaringType = declaringType;
         AccessModifier = accessModifier;
         IsStatic = isStatic;
@@ -59,6 +61,8 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
 
     public override string ToString()
         => $"{Name}: {Type}";
+
+    public SourceLocation? Definition { get; }
 
     public ITypeMetadata DeclaringType { get; }
 

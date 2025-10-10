@@ -27,7 +27,9 @@ public class RewriteIfStatementTests
         var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         return semanticTree;
     }
@@ -45,7 +47,7 @@ public class RewriteIfStatementTests
                 }
             }
             """);
-        var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
+        var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
         var expected = new SemanticTree(file, null, [
             new FunctionDeclaration(
                 null,
@@ -120,10 +122,11 @@ public class RewriteIfStatementTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    null,
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
         ]);
@@ -147,7 +150,7 @@ public class RewriteIfStatementTests
                 return -a;
             }
             """);
-        var parameterMetadata = new ParameterMetadata("a", TypeMetadata.I32);
+        var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
         var expected = new SemanticTree(file, null, [
             new FunctionDeclaration(
                 null,
@@ -218,10 +221,11 @@ public class RewriteIfStatementTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    null,
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)
                 )
             }
         ]);

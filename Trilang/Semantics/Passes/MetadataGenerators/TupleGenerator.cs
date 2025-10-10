@@ -27,8 +27,11 @@ internal class TupleGenerator
             if (symbol.Node is not TupleType tupleNode)
                 throw new SemanticAnalysisException();
 
+            var root = tupleNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var tuple = new TupleMetadata();
+            var tuple = new TupleMetadata(
+                new SourceLocation(root.SourceFile, tupleNode.SourceSpan.GetValueOrDefault()));
+
             if (typeProvider.DefineType(symbol.Name, tuple))
                 typesToProcess.Add(new Item(tuple, tupleNode));
         }

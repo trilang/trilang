@@ -24,11 +24,14 @@ internal class FunctionGenerator
             if (symbol.Node is not FunctionDeclaration function)
                 continue;
 
+            var root = function.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
 
             var parameters = string.Join(", ", function.Parameters.Select(p => p.Type.Name));
             var name = $"({parameters}) => {function.ReturnType.Name}";
-            var functionTypeMetadata = new FunctionTypeMetadata();
+            var functionTypeMetadata = new FunctionTypeMetadata(
+                new SourceLocation(root.SourceFile, function.SourceSpan.GetValueOrDefault()));
+
             if (typeProvider.DefineType(name, functionTypeMetadata))
                 typesToProcess.Add(new Item(functionTypeMetadata, function));
         }

@@ -3,6 +3,7 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes;
 
+// TODO: add only unique tables?
 public class SymbolTableMap
 {
     private readonly Dictionary<ISemanticNode, ISymbolTable> tables;

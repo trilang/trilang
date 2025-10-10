@@ -5,21 +5,21 @@ namespace Trilang.Metadata;
 // TODO: immutable metadata
 public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 {
-    public static readonly TypeMetadata Void = new TypeMetadata("void", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata Null = new TypeMetadata("null", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata I8 = new TypeMetadata("i8", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata I16 = new TypeMetadata("i16", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata I32 = new TypeMetadata("i32", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata I64 = new TypeMetadata("i64", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata U8 = new TypeMetadata("u8", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata U16 = new TypeMetadata("u16", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata U32 = new TypeMetadata("u32", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata U64 = new TypeMetadata("u64", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata F32 = new TypeMetadata("f32", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata F64 = new TypeMetadata("f64", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata Char = new TypeMetadata("char", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata Bool = new TypeMetadata("bool", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata String = new TypeMetadata("string", [], [], [], [], [], [], false);
+    public static readonly TypeMetadata Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata Null = new TypeMetadata(null, "null", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata I8 = new TypeMetadata(null, "i8", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata I16 = new TypeMetadata(null, "i16", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata I32 = new TypeMetadata(null, "i32", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata I64 = new TypeMetadata(null, "i64", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata U8 = new TypeMetadata(null, "u8", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata U16 = new TypeMetadata(null, "u16", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata U32 = new TypeMetadata(null, "u32", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata U64 = new TypeMetadata(null, "u64", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata F32 = new TypeMetadata(null, "f32", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata F64 = new TypeMetadata(null, "f64", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata Char = new TypeMetadata(null, "char", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata Bool = new TypeMetadata(null, "bool", [], [], [], [], [], [], true);
+    public static readonly TypeMetadata String = new TypeMetadata(null, "string", [], [], [], [], [], [], false);
 
     private readonly List<ITypeMetadata> genericArguments;
     private readonly HashSet<InterfaceMetadata> interfaces;
@@ -29,6 +29,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     private readonly HashSet<MethodMetadata> methods;
 
     private TypeMetadata(
+        SourceLocation? definition,
         string name,
         IEnumerable<ITypeMetadata> genericArguments,
         IEnumerable<InterfaceMetadata> interfaces,
@@ -38,28 +39,31 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         IEnumerable<MethodMetadata> methods,
         bool isValueType)
     {
+        Definition = definition;
         Name = name;
-        this.genericArguments = [..genericArguments];
-        this.interfaces = [..interfaces];
-        this.fields = [..fields];
-        this.properties = [..properties];
-        this.constructors = [..constructors];
-        this.methods = [..methods];
+        this.genericArguments = [.. genericArguments];
+        this.interfaces = [.. interfaces];
+        this.fields = [.. fields];
+        this.properties = [.. properties];
+        this.constructors = [.. constructors];
+        this.methods = [.. methods];
         IsValueType = isValueType;
     }
 
-    public TypeMetadata(string name) : this(name, [], [], [], [], [], [], false)
+    public TypeMetadata(SourceLocation? definition, string name)
+        : this(definition, name, [], [], [], [], [], [], false)
     {
     }
 
     public TypeMetadata(
+        SourceLocation? definition,
         string name,
         IEnumerable<ITypeMetadata> genericArguments,
         IEnumerable<InterfaceMetadata> interfaces,
         IEnumerable<FieldMetadata> fields,
         IEnumerable<PropertyMetadata> properties,
         IEnumerable<ConstructorMetadata> constructors,
-        IEnumerable<MethodMetadata> methods) : this(name, genericArguments, interfaces, fields, properties, constructors, methods, false)
+        IEnumerable<MethodMetadata> methods) : this(definition, name, genericArguments, interfaces, fields, properties, constructors, methods, false)
     {
     }
 
@@ -166,6 +170,14 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
            GetMethod(name) ??
            GetField(name) as IMetadata;
 
+    public bool IsInvalid { get; }
+
+    public SourceLocation? Definition { get; }
+
+    public bool IsValueType { get; }
+
+    public TypeLayout? Layout { get; set; }
+
     public string Name { get; }
 
     public IReadOnlyCollection<ITypeMetadata> GenericArguments => genericArguments;
@@ -179,8 +191,4 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public IReadOnlyCollection<ConstructorMetadata> Constructors => constructors;
 
     public IReadOnlyCollection<MethodMetadata> Methods => methods;
-
-    public bool IsValueType { get; }
-
-    public TypeLayout? Layout { get; set; }
 }

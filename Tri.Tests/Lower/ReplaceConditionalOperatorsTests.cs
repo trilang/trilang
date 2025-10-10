@@ -27,7 +27,9 @@ public class ReplaceConditionalOperatorsTests
         var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         return semanticTree;
     }
@@ -49,8 +51,8 @@ public class ReplaceConditionalOperatorsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var aParameter = new ParameterMetadata("a", TypeMetadata.Bool);
-        var bParameter = new ParameterMetadata("b", TypeMetadata.Bool);
+        var aParameter = new ParameterMetadata(null, "a", TypeMetadata.Bool);
+        var bParameter = new ParameterMetadata(null, "b", TypeMetadata.Bool);
         var expected = new SemanticTree(file, null, [
             new FunctionDeclaration(
                 null,
@@ -82,14 +84,14 @@ public class ReplaceConditionalOperatorsTests
                                 }
                             )
                             {
-                                Metadata = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                Metadata = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                             },
                             new IfStatement(
                                 null,
                                 new MemberAccessExpression(null, "cond_0")
                                 {
                                     AccessKind = MemberAccessKind.Read,
-                                    Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                    Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                 },
                                 new BlockStatement(null, [
                                     new GoTo("if_1_then"),
@@ -108,7 +110,7 @@ public class ReplaceConditionalOperatorsTests
                                         new MemberAccessExpression(null, "cond_0")
                                         {
                                             AccessKind = MemberAccessKind.Write,
-                                            Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                            Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                         },
                                         new MemberAccessExpression(null, "b")
                                         {
@@ -125,7 +127,7 @@ public class ReplaceConditionalOperatorsTests
                                 new MemberAccessExpression(null, "cond_0")
                                 {
                                     AccessKind = MemberAccessKind.Read,
-                                    Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                    Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                 }
                             )
                         ]),
@@ -159,10 +161,11 @@ public class ReplaceConditionalOperatorsTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    null,
                     AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter],
-                    new FunctionTypeMetadata([TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
                 ),
             }
         ]);
@@ -187,8 +190,8 @@ public class ReplaceConditionalOperatorsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var aParameter = new ParameterMetadata("a", TypeMetadata.Bool);
-        var bParameter = new ParameterMetadata("b", TypeMetadata.Bool);
+        var aParameter = new ParameterMetadata(null, "a", TypeMetadata.Bool);
+        var bParameter = new ParameterMetadata(null, "b", TypeMetadata.Bool);
         var expected = new SemanticTree(file, null, [
             new FunctionDeclaration(
                 null,
@@ -220,7 +223,7 @@ public class ReplaceConditionalOperatorsTests
                                 }
                             )
                             {
-                                Metadata = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                Metadata = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                             },
                             new IfStatement(
                                 null,
@@ -230,7 +233,7 @@ public class ReplaceConditionalOperatorsTests
                                     new MemberAccessExpression(null, "cond_0")
                                     {
                                         AccessKind = MemberAccessKind.Read,
-                                        Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                        Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                     }
                                 )
                                 {
@@ -253,7 +256,7 @@ public class ReplaceConditionalOperatorsTests
                                         new MemberAccessExpression(null, "cond_0")
                                         {
                                             AccessKind = MemberAccessKind.Write,
-                                            Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                            Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                         },
                                         new MemberAccessExpression(null, "b")
                                         {
@@ -270,7 +273,7 @@ public class ReplaceConditionalOperatorsTests
                                 new MemberAccessExpression(null, "cond_0")
                                 {
                                     AccessKind = MemberAccessKind.Read,
-                                    Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                    Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                 }
                             )
                         ]),
@@ -304,10 +307,11 @@ public class ReplaceConditionalOperatorsTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    null,
                     AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter],
-                    new FunctionTypeMetadata([TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
                 ),
             }
         ]);
@@ -332,9 +336,9 @@ public class ReplaceConditionalOperatorsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var aParameter = new ParameterMetadata("a", TypeMetadata.Bool);
-        var bParameter = new ParameterMetadata("b", TypeMetadata.Bool);
-        var cParameter = new ParameterMetadata("c", TypeMetadata.Bool);
+        var aParameter = new ParameterMetadata(null, "a", TypeMetadata.Bool);
+        var bParameter = new ParameterMetadata(null, "b", TypeMetadata.Bool);
+        var cParameter = new ParameterMetadata(null, "c", TypeMetadata.Bool);
         var expected = new SemanticTree(file, null, [
             new FunctionDeclaration(
                 null,
@@ -375,14 +379,14 @@ public class ReplaceConditionalOperatorsTests
                                         }
                                     )
                                     {
-                                        Metadata = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                        Metadata = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                     },
                                     new IfStatement(
                                         null,
                                         new MemberAccessExpression(null, "cond_0")
                                         {
                                             AccessKind = MemberAccessKind.Read,
-                                            Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                            Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                         },
                                         new BlockStatement(null, [
                                             new GoTo("if_1_then"),
@@ -401,7 +405,7 @@ public class ReplaceConditionalOperatorsTests
                                                 new MemberAccessExpression(null, "cond_0")
                                                 {
                                                     AccessKind = MemberAccessKind.Write,
-                                                    Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                                    Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                                 },
                                                 new MemberAccessExpression(null, "b")
                                                 {
@@ -418,20 +422,20 @@ public class ReplaceConditionalOperatorsTests
                                         new MemberAccessExpression(null, "cond_0")
                                         {
                                             AccessKind = MemberAccessKind.Read,
-                                            Reference = new VariableMetadata("cond_0", TypeMetadata.Bool),
+                                            Reference = new VariableMetadata(null, "cond_0", TypeMetadata.Bool),
                                         }
                                     )
                                 ])
                             )
                             {
-                                Metadata = new VariableMetadata("cond_1", TypeMetadata.Bool),
+                                Metadata = new VariableMetadata(null, "cond_1", TypeMetadata.Bool),
                             },
                             new IfStatement(
                                 null,
                                 new MemberAccessExpression(null, "cond_1")
                                 {
                                     AccessKind = MemberAccessKind.Read,
-                                    Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
+                                    Reference = new VariableMetadata(null, "cond_1", TypeMetadata.Bool),
                                 },
                                 new BlockStatement(null, [
                                     new GoTo("if_2_then"),
@@ -450,7 +454,7 @@ public class ReplaceConditionalOperatorsTests
                                         new MemberAccessExpression(null, "cond_1")
                                         {
                                             AccessKind = MemberAccessKind.Write,
-                                            Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
+                                            Reference = new VariableMetadata(null, "cond_1", TypeMetadata.Bool),
                                         },
                                         new MemberAccessExpression(null, "c")
                                         {
@@ -467,7 +471,7 @@ public class ReplaceConditionalOperatorsTests
                                 new MemberAccessExpression(null, "cond_1")
                                 {
                                     AccessKind = MemberAccessKind.Read,
-                                    Reference = new VariableMetadata("cond_1", TypeMetadata.Bool),
+                                    Reference = new VariableMetadata(null, "cond_1", TypeMetadata.Bool),
                                 }
                             )
                         ]),
@@ -501,10 +505,11 @@ public class ReplaceConditionalOperatorsTests
             )
             {
                 Metadata = new FunctionMetadata(
+                    null,
                     AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter, cParameter],
-                    new FunctionTypeMetadata([TypeMetadata.Bool, TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
                 ),
             }
         ]);

@@ -4,12 +4,15 @@ namespace Trilang.Metadata;
 
 public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 {
-    public PropertyMetadata(ITypeMetadata declaringType,
+    public PropertyMetadata(
+        SourceLocation? definition,
+        ITypeMetadata declaringType,
         string name,
         ITypeMetadata type,
         AccessModifierMetadata? getterModifier = null,
         AccessModifierMetadata? setterModifier = null)
     {
+        Definition = definition;
         DeclaringType = declaringType;
         Name = name;
         Type = type;
@@ -89,23 +92,27 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 
     private MethodMetadata GenerateGetter(AccessModifierMetadata getterModifier)
         => new MethodMetadata(
+            null,
             DeclaringType,
             getterModifier,
             false,
             $"<>_get_{Name}",
             [],
-            new FunctionTypeMetadata([], Type)
+            new FunctionTypeMetadata(null, [], Type)
         );
 
     private MethodMetadata GenerateSetter(AccessModifierMetadata setterModifier)
         => new MethodMetadata(
+            null,
             DeclaringType,
             setterModifier,
             false,
             $"<>_set_{Name}",
-            [new ParameterMetadata(MemberAccessExpression.Value, Type)],
-            new FunctionTypeMetadata([Type], TypeMetadata.Void)
+            [new ParameterMetadata(null, MemberAccessExpression.Value, Type)],
+            new FunctionTypeMetadata(null, [Type], TypeMetadata.Void)
         );
+
+    public SourceLocation? Definition { get; }
 
     public ITypeMetadata DeclaringType { get; }
 

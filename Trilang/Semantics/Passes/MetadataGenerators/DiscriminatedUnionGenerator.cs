@@ -27,8 +27,11 @@ internal class DiscriminatedUnionGenerator
             if (symbol.Node is not DiscriminatedUnion discriminatedUnionNode)
                 throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a DiscriminatedUnionNode, but found '{symbol.Node.GetType().Name}' instead.");
 
+            var root = discriminatedUnionNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var metadata = new DiscriminatedUnionMetadata();
+            var metadata = new DiscriminatedUnionMetadata(
+                new SourceLocation(root.SourceFile, discriminatedUnionNode.SourceSpan.GetValueOrDefault()));
+
             if (typeProvider.DefineType(symbol.Name, metadata))
                 typesToProcess.Add(new Item(metadata, discriminatedUnionNode));
         }

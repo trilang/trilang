@@ -224,18 +224,20 @@ public static class SemanticNodeExtensions
         }
     }
 
-    public static T? FindInParent<T>(this ISemanticNode node)
+    public static T? FindInParent<T>(this ISemanticNode? node)
         where T : ISemanticNode
     {
-        var parent = node.Parent;
-        while (parent is not null)
+        while (node is not null)
         {
-            if (parent is T result)
+            if (node is T result)
                 return result;
 
-            parent = parent.Parent;
+            node = node.Parent;
         }
 
         return default;
     }
+
+    public static SemanticTree GetRoot(this ISemanticNode node)
+        => node.FindInParent<SemanticTree>() ?? throw new Exception();
 }

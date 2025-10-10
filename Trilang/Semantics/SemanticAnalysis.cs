@@ -22,7 +22,7 @@ public class SemanticAnalysis
         new MetadataGenerator(),
         new MissingReturnStatement(),
         new NotImplementedInterface(),
-        new RecursiveTypeAlias(),
+        new CyclicTypeAlias(),
         new RestrictFieldAccess(),
         new SymbolFinder(),
         new ThisInStaticMethods(),
@@ -44,7 +44,10 @@ public class SemanticAnalysis
         var semanticTree = (SemanticTree)tree.Transform(new ConvertToSemanticTree());
 
         var rootSymbolTable = new RootSymbolTable(typeMetadataProvider);
-        var context = new SemanticPassContext([..options.Directives], rootSymbolTable);
+        var context = new SemanticPassContext(
+            [.. options.Directives],
+            options.Diagnostics,
+            rootSymbolTable);
 
         foreach (var pass in GetSortedPasses())
             pass.Analyze(semanticTree, context);

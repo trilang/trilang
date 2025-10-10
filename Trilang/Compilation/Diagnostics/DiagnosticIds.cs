@@ -20,4 +20,6 @@ public static class DiagnosticIds
     public const string P0012_ExpectedInterfaceParameters = "P0012";
     public const string P0013_ExpectedIdentifier = "P0013";
     public const string P0014_ExpectedTypeMember = "P0014";
+
+    public const string S0001_RcursiveTypeAlias = "S0001";
 }

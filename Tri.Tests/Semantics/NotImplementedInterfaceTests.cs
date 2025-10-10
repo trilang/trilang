@@ -11,7 +11,7 @@ public class NotImplementedInterfaceTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -23,13 +23,13 @@ public class NotImplementedInterfaceTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void EverythingIsImplementedInTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 x: i32;
@@ -47,14 +47,14 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void NotImplementedPropertyTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 x: i32;
@@ -71,7 +71,7 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'x' property is not implemented."));
     }
@@ -79,7 +79,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementPropertyWithIncorrectTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 x: i32;
@@ -97,7 +97,7 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'x' property is not of the correct type."));
     }
@@ -105,7 +105,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void NotImplementedMethodTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 x: i32;
@@ -120,7 +120,7 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'toString' method is not implemented."));
     }
@@ -128,7 +128,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementMethodWithIncorrectReturnTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 x: i32;
@@ -146,7 +146,7 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'toString' method is not of the correct type."));
     }
@@ -154,7 +154,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementMethodWithIncorrectParametersTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 x: i32;
@@ -172,7 +172,7 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'toString' method is not of the correct type."));
     }
@@ -180,7 +180,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsMethodAsPrivateTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 method(): void;
@@ -195,7 +195,7 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The implementation of an interface method 'method' cannot be private."));
     }
@@ -203,7 +203,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsGetterAsPrivateTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 x: i32 { public get; public set; }
@@ -217,7 +217,7 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The implementation of an interface property getter 'x' cannot be private."));
     }
@@ -225,7 +225,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsSetterAsPrivateTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = {
                 x: i32 { public get; public set; }
@@ -239,7 +239,7 @@ public class NotImplementedInterfaceTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The implementation of an interface property setter 'x' cannot be private."));
     }

@@ -12,7 +12,7 @@ public class MetadataGeneratorTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -24,13 +24,13 @@ public class MetadataGeneratorTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void GenerateMetadataForTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32;
@@ -49,11 +49,12 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new TypeMetadata("Point");
+        var expected = new TypeMetadata(null, "Point");
 
         var xProperty = new PropertyMetadata(
+            null,
             expected,
             "x",
             TypeMetadata.I32);
@@ -62,6 +63,7 @@ public class MetadataGeneratorTests
         expected.AddMethod(xProperty.Setter!);
 
         var yProperty = new PropertyMetadata(
+            null,
             expected,
             "y",
             TypeMetadata.I32);
@@ -70,44 +72,47 @@ public class MetadataGeneratorTests
         expected.AddMethod(yProperty.Setter!);
 
         expected.AddConstructor(new ConstructorMetadata(
+            null,
             expected,
             AccessModifierMetadata.Public,
             [
-                new ParameterMetadata("x", TypeMetadata.I32),
-                new ParameterMetadata("y", TypeMetadata.I32)
+                new ParameterMetadata(null, "x", TypeMetadata.I32),
+                new ParameterMetadata(null, "y", TypeMetadata.I32)
             ],
-            new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], expected)));
+            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], expected)));
         expected.AddMethod(new MethodMetadata(
+            null,
             expected,
             AccessModifierMetadata.Public,
             false,
             "toString",
             [],
-            new FunctionTypeMetadata([], TypeMetadata.String)));
+            new FunctionTypeMetadata(null, [], TypeMetadata.String)));
         expected.AddMethod(new MethodMetadata(
+            null,
             expected,
             AccessModifierMetadata.Private,
             false,
             "distance",
-            [new ParameterMetadata("other", TypeMetadata.I32)],
-            new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32)));
+            [new ParameterMetadata(null, "other", TypeMetadata.I32)],
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)));
 
         var actual = typeProvider.GetType("Point");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
 
         var toStringType = typeProvider.GetType("() => string");
-        var expectedToStringType = new FunctionTypeMetadata([], TypeMetadata.String);
+        var expectedToStringType = new FunctionTypeMetadata(null, [], TypeMetadata.String);
         Assert.That(toStringType, Is.EqualTo(expectedToStringType).Using(new MetadataComparer()));
 
         var distanceType = typeProvider.GetType("(i32) => i32");
-        var expectedDistanceType = new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.I32);
+        var expectedDistanceType = new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32);
         Assert.That(distanceType, Is.EqualTo(expectedDistanceType).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateMetadataForPropertyTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 x: i32 { public get; public set; }
@@ -115,16 +120,18 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var typeMetadata = new TypeMetadata("Test");
+        var typeMetadata = new TypeMetadata(null, "Test");
         typeMetadata.AddConstructor(
             new ConstructorMetadata(
+                null,
                 typeMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], typeMetadata)));
+                new FunctionTypeMetadata(null, [], typeMetadata)));
         var propertyMetadata = new PropertyMetadata(
+            null,
             typeMetadata,
             "x",
             TypeMetadata.I32,
@@ -144,7 +151,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeWithInterfaceTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Interface1 = { }
             public type Interface2 = { }
@@ -152,10 +159,11 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var interfaceMetadata = new InterfaceMetadata();
+        var interfaceMetadata = new InterfaceMetadata(null);
         var expected = new TypeMetadata(
+            null,
             "Point",
             [],
             [interfaceMetadata],
@@ -165,10 +173,11 @@ public class MetadataGeneratorTests
             []);
         expected.AddConstructor(
             new ConstructorMetadata(
+                null,
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], expected)));
+                new FunctionTypeMetadata(null, [], expected)));
         var actual = typeProvider.GetType("Point");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -176,7 +185,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeMissingPropertyTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: xxx;
@@ -186,7 +195,7 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'x' property has unknown type: 'xxx'."));
     }
@@ -194,7 +203,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeMissingParameterTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 public distance(other: xxx): f64 {
@@ -206,7 +215,7 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'other' parameter has unknown type: 'xxx'."));
     }
@@ -214,7 +223,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeMissingReturnTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 public toString(): xxx {
@@ -226,7 +235,7 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'toString' method has unknown return type: 'xxx'."));
     }
@@ -234,12 +243,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeAliasTest()
     {
-        var tree = Parse("public type MyInt = i32;");
+        var (tree, diagnostics) = Parse("public type MyInt = i32;");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new TypeAliasMetadata("MyInt", [], TypeMetadata.I32);
+        var expected = new TypeAliasMetadata(null, "MyInt", [], TypeMetadata.I32);
         var actual = typeProvider.GetType("MyInt");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -247,12 +256,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeAliasMissingTypeTest()
     {
-        var tree = Parse("public type MyInt = xxx;");
+        var (tree, diagnostics) = Parse("public type MyInt = xxx;");
 
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'xxx' aliased type is not defined."));
     }
@@ -260,7 +269,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(arr: i32[]): void {
                 return;
@@ -268,9 +277,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new TypeArrayMetadata(TypeMetadata.I32);
+        var expected = new TypeArrayMetadata(null, TypeMetadata.I32);
         var actual = typeProvider.GetType("i32[]");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -278,7 +287,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeArrayMissingTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(arr: xxx): void {
                 return;
@@ -288,7 +297,7 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The function has unknown parameter type: 'xxx'."));
     }
@@ -296,7 +305,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForFunctionTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(a: i32, b: i32): i32 {
                 return 1;
@@ -304,9 +313,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new FunctionTypeMetadata([TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
+        var expected = new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
         var actual = typeProvider.GetType("(i32, i32) => i32");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -314,7 +323,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForFunctionTypeMissingParameterTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(a: xxx): void {
                 return;
@@ -324,7 +333,7 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The function has unknown parameter type: 'xxx'."));
     }
@@ -332,7 +341,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForFunctionTypeMissingReturnTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): xxx {
                 return;
@@ -342,7 +351,7 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The function has unknown return type: 'xxx'."));
     }
@@ -350,24 +359,25 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForAliasAndTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {}
             public type MyPoint = Point;
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expectedType = new TypeMetadata("Point");
+        var expectedType = new TypeMetadata(null, "Point");
         expectedType.AddConstructor(
             new ConstructorMetadata(
+                null,
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], expectedType)));
+                new FunctionTypeMetadata(null, [], expectedType)));
 
-        var expectedAlias = new TypeAliasMetadata("MyPoint", [], expectedType);
+        var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedType);
         var actualType = typeProvider.GetType("Point");
         var actualAlias = typeProvider.GetType("MyPoint");
 
@@ -378,24 +388,25 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForForwardRefAliasAndTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type MyPoint = Point;
             public type Point {}
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expectedType = new TypeMetadata("Point");
+        var expectedType = new TypeMetadata(null, "Point");
         expectedType.AddConstructor(
             new ConstructorMetadata(
+                null,
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], expectedType)));
+                new FunctionTypeMetadata(null, [], expectedType)));
 
-        var expectedAlias = new TypeAliasMetadata("MyPoint", [], expectedType);
+        var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedType);
         var actualType = typeProvider.GetType("Point");
         var actualAlias = typeProvider.GetType("MyPoint");
 
@@ -406,25 +417,26 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForAliasAndArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {}
             public type MyPoint = Point[];
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expectedType = new TypeMetadata("Point");
+        var expectedType = new TypeMetadata(null, "Point");
         expectedType.AddConstructor(
             new ConstructorMetadata(
+                null,
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], expectedType)));
+                new FunctionTypeMetadata(null, [], expectedType)));
 
-        var expectedArrayType = new TypeArrayMetadata(expectedType);
-        var expectedAlias = new TypeAliasMetadata("MyPoint", [], expectedArrayType);
+        var expectedArrayType = new TypeArrayMetadata(null, expectedType);
+        var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedArrayType);
         var actualType = typeProvider.GetType("Point");
         var actualArrayType = typeProvider.GetType("Point[]");
         var actualAlias = typeProvider.GetType("MyPoint");
@@ -437,25 +449,26 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForForwardRefAliasAndArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type MyPoint = Point[];
             public type Point {}
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expectedType = new TypeMetadata("Point");
+        var expectedType = new TypeMetadata(null, "Point");
         expectedType.AddConstructor(
             new ConstructorMetadata(
+                null,
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], expectedType)));
+                new FunctionTypeMetadata(null, [], expectedType)));
 
-        var expectedArrayType = new TypeArrayMetadata(expectedType);
-        var expectedAlias = new TypeAliasMetadata("MyPoint", [], expectedArrayType);
+        var expectedArrayType = new TypeArrayMetadata(null, expectedType);
+        var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedArrayType);
         var actualType = typeProvider.GetType("Point");
         var actualArrayType = typeProvider.GetType("Point[]");
         var actualAlias = typeProvider.GetType("MyPoint");
@@ -468,7 +481,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForInterfaceType()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point = {
                 x: i32;
@@ -478,11 +491,12 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expectedInterface = new InterfaceMetadata();
+        var expectedInterface = new InterfaceMetadata(null);
         expectedInterface.AddProperty(
             new InterfacePropertyMetadata(
+                null,
                 expectedInterface,
                 "x",
                 TypeMetadata.I32,
@@ -490,17 +504,19 @@ public class MetadataGeneratorTests
                 AccessModifierMetadata.Private));
         expectedInterface.AddProperty(
             new InterfacePropertyMetadata(
+                null,
                 expectedInterface,
                 "y",
                 TypeMetadata.I32,
                 AccessModifierMetadata.Public,
                 AccessModifierMetadata.Private));
 
-        var expectedAlias = new TypeAliasMetadata("Point", [], expectedInterface);
+        var expectedAlias = new TypeAliasMetadata(null, "Point", [], expectedInterface);
         expectedInterface.AddMethod(new InterfaceMethodMetadata(
+            null,
             expectedInterface,
             "distance",
-            new FunctionTypeMetadata([expectedAlias], TypeMetadata.F64)));
+            new FunctionTypeMetadata(null, [expectedAlias], TypeMetadata.F64)));
         var actualInterface = typeProvider.GetType(expectedInterface.ToString());
         Assert.That(actualInterface, Is.EqualTo(expectedInterface).Using(new MetadataComparer()));
 
@@ -511,20 +527,20 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForDiscriminatedUnionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type DU = {} | i32 | () => void;
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var du = new DiscriminatedUnionMetadata([
-            new InterfaceMetadata(),
+        var du = new DiscriminatedUnionMetadata(null, [
+            new InterfaceMetadata(null),
             TypeMetadata.I32,
-            new FunctionTypeMetadata([], TypeMetadata.Void),
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
         ]);
-        var alias = new TypeAliasMetadata("DU", [], du);
+        var alias = new TypeAliasMetadata(null, "DU", [], du);
         var actualAlias = typeProvider.GetType("DU");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
@@ -535,16 +551,16 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTupleTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Tuple = (i32, f64);
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var tuple = new TupleMetadata([TypeMetadata.I32, TypeMetadata.F64]);
-        var alias = new TypeAliasMetadata("Tuple", [], tuple);
+        var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.F64]);
+        var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
         var actualAlias = typeProvider.GetType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
@@ -555,17 +571,17 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForNestedTupleTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Tuple = (i32, (f64, bool));
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var nestedTuple = new TupleMetadata([TypeMetadata.F64, TypeMetadata.Bool]);
-        var tuple = new TupleMetadata([TypeMetadata.I32, nestedTuple]);
-        var alias = new TypeAliasMetadata("Tuple", [], tuple);
+        var nestedTuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
+        var tuple = new TupleMetadata(null, [TypeMetadata.I32, nestedTuple]);
+        var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
 
         var actualAlias = typeProvider.GetType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
@@ -580,17 +596,17 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForDuInTupleTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Tuple = (i32, bool | i8);
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var du = new DiscriminatedUnionMetadata([TypeMetadata.Bool, TypeMetadata.I8]);
-        var tuple = new TupleMetadata([TypeMetadata.I32, du]);
-        var alias = new TypeAliasMetadata("Tuple", [], tuple);
+        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.Bool, TypeMetadata.I8]);
+        var tuple = new TupleMetadata(null, [TypeMetadata.I32, du]);
+        var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
 
         var actualAlias = typeProvider.GetType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
@@ -605,17 +621,17 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTupleInDuTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Tuple = i32 | (f64, bool);
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var tuple = new TupleMetadata([TypeMetadata.F64, TypeMetadata.Bool]);
-        var du = new DiscriminatedUnionMetadata([TypeMetadata.I32, tuple]);
-        var alias = new TypeAliasMetadata("Tuple", [], du);
+        var tuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
+        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, tuple]);
+        var alias = new TypeAliasMetadata(null, "Tuple", [], du);
 
         var actualAlias = typeProvider.GetType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
@@ -630,23 +646,24 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T1, T2> {}
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new TypeMetadata("Test");
-        expected.AddGenericArgument(new TypeArgumentMetadata("T1"));
-        expected.AddGenericArgument(new TypeArgumentMetadata("T2"));
+        var expected = new TypeMetadata(null, "Test");
+        expected.AddGenericArgument(new TypeArgumentMetadata(null, "T1"));
+        expected.AddGenericArgument(new TypeArgumentMetadata(null, "T2"));
         expected.AddConstructor(
             new ConstructorMetadata(
+                null,
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], expected)));
+                new FunctionTypeMetadata(null, [], expected)));
 
         var actual = typeProvider.GetType("Test<,>");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -655,7 +672,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericPropertyTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T> {
                 x: T;
@@ -663,20 +680,20 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
         var property = type.GetProperty("x");
         Assert.That(property, Is.Not.Null);
-        Assert.That(property.Type, Is.EqualTo(new TypeArgumentMetadata("T")).Using(new MetadataComparer()));
+        Assert.That(property.Type, Is.EqualTo(new TypeArgumentMetadata(null, "T")).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateMetadataForGenericPropertyInWrongTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test1<T> {}
             public type Test2 {
@@ -687,7 +704,7 @@ public class MetadataGeneratorTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'x' property has unknown type: 'T'."));
     }
@@ -695,7 +712,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericArrayPropertyTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T> {
                 x: T[];
@@ -703,7 +720,7 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -711,32 +728,33 @@ public class MetadataGeneratorTests
         var property = type.GetProperty("x");
         Assert.That(property, Is.Not.Null);
 
-        var typeArrayMetadata = new TypeArrayMetadata(new TypeArgumentMetadata("T"));
+        var typeArrayMetadata = new TypeArrayMetadata(null, new TypeArgumentMetadata(null, "T"));
         Assert.That(property.Type, Is.EqualTo(typeArrayMetadata).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateMetadataForClosedGenericTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type List<T> {}
             public type Test = List<i32>;
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var closedType = typeProvider.GetType("List<i32>");
 
-        var expected = new TypeMetadata("List");
+        var expected = new TypeMetadata(null, "List");
         expected.AddGenericArgument(TypeMetadata.I32);
         expected.AddConstructor(
             new ConstructorMetadata(
+                null,
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], expected)));
+                new FunctionTypeMetadata(null, [], expected)));
 
         Assert.That(closedType, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -744,7 +762,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericPropertyTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type List<T> {
                 Prop: T;
@@ -753,7 +771,7 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var closedType = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = closedType!.GetProperty("Prop");
@@ -765,13 +783,13 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateDefaultCtorTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {}
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -785,7 +803,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateInlineClosedGenericArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type List<T> {
                 prop: T[];
@@ -797,18 +815,18 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
         Assert.That(property, Is.Not.Null);
-        Assert.That(property.Type, Is.EqualTo(new TypeArrayMetadata(TypeMetadata.I32)).Using(new MetadataComparer()));
+        Assert.That(property.Type, Is.EqualTo(new TypeArrayMetadata(null, TypeMetadata.I32)).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateInlineClosedGenericTupleTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type List<T> {
                 prop: (T, i32);
@@ -820,20 +838,20 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
         Assert.That(property, Is.Not.Null);
         Assert.That(
             property.Type,
-            Is.EqualTo(new TupleMetadata([TypeMetadata.I32, TypeMetadata.I32])).Using(new MetadataComparer()));
+            Is.EqualTo(new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateInlineClosedGenericDuTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type List<T> {
                 prop: T | i32;
@@ -845,11 +863,11 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
-        var expected = new DiscriminatedUnionMetadata([TypeMetadata.I32, TypeMetadata.I32]);
+        var expected = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -857,7 +875,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateInlineClosedGenericFunctionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type List<T> {
                 prop: () => T;
@@ -869,20 +887,20 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
         Assert.That(property, Is.Not.Null);
         Assert.That(
             property.Type,
-            Is.EqualTo(new FunctionTypeMetadata([], TypeMetadata.I32)).Using(new MetadataComparer()));
+            Is.EqualTo(new FunctionTypeMetadata(null, [], TypeMetadata.I32)).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateInlineClosedGenericInterfaceTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type List<T> {
                 prop: { x: T; };
@@ -894,13 +912,14 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
-        var expected = new InterfaceMetadata();
+        var expected = new InterfaceMetadata(null);
         expected.AddProperty(
             new InterfacePropertyMetadata(
+                null,
                 expected,
                 "x",
                 TypeMetadata.I32,
@@ -914,7 +933,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateHighOrderFunctionTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(a: ((i32) => void) => void): void {
                 return;
@@ -922,11 +941,12 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("((i32) => void) => void");
         var expected = new FunctionTypeMetadata(
-            [new FunctionTypeMetadata([TypeMetadata.I32], TypeMetadata.Void)],
+            null,
+            [new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void)],
             TypeMetadata.Void);
 
         Assert.That(type, Is.Not.Null);
@@ -936,17 +956,17 @@ public class MetadataGeneratorTests
     [Test]
     public void GenericAliasToDiscriminatedUnionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T> = i32 | T;
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<>");
-        var du = new DiscriminatedUnionMetadata([TypeMetadata.I32, new TypeArgumentMetadata("T")]);
-        var expected = new TypeAliasMetadata("Test", [new TypeArgumentMetadata("T")], du);
+        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")]);
+        var expected = new TypeAliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], du);
 
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -955,7 +975,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToDiscriminatedUnionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T> = i32 | T;
 
@@ -965,11 +985,11 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var du = new DiscriminatedUnionMetadata([TypeMetadata.I32, TypeMetadata.I32]);
-        var expected = new TypeAliasMetadata("Test", [TypeMetadata.I32], du);
+        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
+        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], du);
 
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -978,7 +998,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToFunctionTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T> = () => T;
 
@@ -988,11 +1008,11 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var functionType = new FunctionTypeMetadata([], TypeMetadata.I32);
-        var expected = new TypeAliasMetadata("Test", [TypeMetadata.I32], functionType);
+        var functionType = new FunctionTypeMetadata(null, [], TypeMetadata.I32);
+        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], functionType);
 
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1001,7 +1021,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToInterfaceTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T> = { x: T; }
 
@@ -1011,17 +1031,18 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var interfaceType = new InterfaceMetadata();
+        var interfaceType = new InterfaceMetadata(null);
         interfaceType.AddProperty(new InterfacePropertyMetadata(
+            null,
             interfaceType,
             "x",
             TypeMetadata.I32,
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Private));
-        var expected = new TypeAliasMetadata("Test", [TypeMetadata.I32], interfaceType);
+        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], interfaceType);
 
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1030,7 +1051,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToTupleTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T> = (i32, T);
 
@@ -1040,11 +1061,11 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var tuple = new TupleMetadata([TypeMetadata.I32, TypeMetadata.I32]);
-        var expected = new TypeAliasMetadata("Test", [TypeMetadata.I32], tuple);
+        var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
+        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], tuple);
 
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1053,7 +1074,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToArrayTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test<T> = T[];
 
@@ -1063,11 +1084,11 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var array = new TypeArrayMetadata(TypeMetadata.I32);
-        var expected = new TypeAliasMetadata("Test", [TypeMetadata.I32], array);
+        var array = new TypeArrayMetadata(null, TypeMetadata.I32);
+        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], array);
 
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1076,7 +1097,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedGenericAliasToTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type List<T> {}
             public type Test<T> = List<T>;
@@ -1087,19 +1108,21 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
 
-        var listMetadata = new TypeMetadata("List", [TypeMetadata.I32], [], [], [], [], []);
+        var listMetadata = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
         listMetadata.AddConstructor(
             new ConstructorMetadata(
+                null,
                 listMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], listMetadata)));
+                new FunctionTypeMetadata(null, [], listMetadata)));
 
         var expected = new TypeAliasMetadata(
+            null,
             "Test",
             [TypeMetadata.I32],
             listMetadata);
@@ -1111,7 +1134,7 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForClosedAliasOnAliasTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Alias1<T1> = T1 | i32;
             public type Alias2<T1> = Alias1<T1>;
@@ -1122,16 +1145,18 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Alias2<i32>");
         var expected = new TypeAliasMetadata(
+            null,
             "Alias2",
             [TypeMetadata.I32],
             new TypeAliasMetadata(
+                null,
                 "Alias1",
                 [TypeMetadata.I32],
-                new DiscriminatedUnionMetadata([TypeMetadata.I32, TypeMetadata.I32])));
+                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])));
 
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));

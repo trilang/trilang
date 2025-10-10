@@ -11,7 +11,7 @@ public class VariableUsedBeforeDeclaredTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -23,13 +23,13 @@ public class VariableUsedBeforeDeclaredTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void VariableUsedAfterDeclarationTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 var a: i32 = 1;
@@ -40,14 +40,14 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void ParameterUsedAfterDeclarationTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(a: i32): void {
                 a;
@@ -57,14 +57,14 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void VariableUsedBeforeDeclarationTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 a;
@@ -75,7 +75,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'a' variable used before declaration."));
     }
@@ -83,7 +83,7 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableInBlockUsedBeforeDeclarationTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 {
@@ -96,7 +96,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'a' variable used before declaration."));
     }
@@ -104,7 +104,7 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableInDifferentBlocksTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public main(): void {
                 {
@@ -119,7 +119,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("Unknown symbol: a"));
     }
@@ -127,7 +127,7 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableInDeclaredInDifferentFunctionTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): void {
                 var a: i32 = 1;
@@ -141,7 +141,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("Unknown symbol: a"));
     }
@@ -149,7 +149,7 @@ public class VariableUsedBeforeDeclaredTests
     [Test]
     public void VariableInParentScopeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): i32 {
                 var a: i32 = 1;
@@ -162,7 +162,7 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 }

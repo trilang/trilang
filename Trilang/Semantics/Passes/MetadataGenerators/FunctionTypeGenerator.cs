@@ -27,8 +27,11 @@ internal class FunctionTypeGenerator
             if (symbol.Node is not FunctionType function)
                 throw new SemanticAnalysisException($"The '{symbol.Name}' symbol is not a function.");
 
+            var root = function.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var functionTypeMetadata = new FunctionTypeMetadata();
+            var functionTypeMetadata = new FunctionTypeMetadata(
+                new SourceLocation(root.SourceFile, function.SourceSpan.GetValueOrDefault()));
+
             if (typeProvider.DefineType(symbol.Name, functionTypeMetadata))
                 typesToProcess.Add(new Item(functionTypeMetadata, function));
         }

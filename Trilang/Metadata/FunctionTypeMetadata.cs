@@ -8,21 +8,31 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     private readonly List<FieldMetadata> fields;
     private readonly List<ITypeMetadata> parameterTypes;
 
-    public FunctionTypeMetadata() : this([], null!)
+    public FunctionTypeMetadata(SourceLocation definition) : this(definition, [], null!)
     {
     }
 
-    public FunctionTypeMetadata(IEnumerable<ITypeMetadata> parameterTypes, ITypeMetadata returnType)
+    public FunctionTypeMetadata(
+        SourceLocation? definition,
+        IEnumerable<ITypeMetadata> parameterTypes,
+        ITypeMetadata returnType)
     {
         fields =
         [
             // TODO: replace pointer with something else? introduce delegate type?
             new FieldMetadata(this, FunctionField, new TypePointerMetadata(TypeMetadata.Void)),
-            new FieldMetadata(this, ContextField,
-                new DiscriminatedUnionMetadata([new InterfaceMetadata(), TypeMetadata.Null])),
+            new FieldMetadata(
+                this,
+                ContextField,
+                new DiscriminatedUnionMetadata(null, [
+                    new InterfaceMetadata(null, [], []),
+                    TypeMetadata.Null
+                ])
+            ),
         ];
 
-        this.parameterTypes = [..parameterTypes];
+        Definition = definition;
+        this.parameterTypes = [.. parameterTypes];
         ReturnType = returnType;
     }
 
@@ -70,6 +80,15 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     public IMetadata? GetMember(string name)
         => fields.FirstOrDefault(f => f.Name == name);
 
+    public bool IsInvalid { get; }
+
+    public SourceLocation? Definition { get; }
+
+    public bool IsValueType
+        => true;
+
+    public TypeLayout? Layout { get; set; }
+
     public IReadOnlyList<FieldMetadata> Fields => fields;
 
     public FieldMetadata Function => fields[0];
@@ -79,9 +98,4 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     public IReadOnlyList<ITypeMetadata> ParameterTypes => parameterTypes;
 
     public ITypeMetadata ReturnType { get; set; }
-
-    public bool IsValueType
-        => true;
-
-    public TypeLayout? Layout { get; set; }
 }

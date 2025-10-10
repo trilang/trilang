@@ -29,7 +29,11 @@ public class IrGeneratorTests
         var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, typeProvider, _) = semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var lowering = new Lowering();
         lowering.Lower(semanticTree, LoweringOptions.Default);
@@ -1793,7 +1797,7 @@ public class IrGeneratorTests
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
-                    new FunctionMetadata(AccessModifierMetadata.Public, "test1", [], functionType)
+                    new FunctionMetadata(null, AccessModifierMetadata.Public, "test1", [], functionType)
                 ),
                 new Load(new Register(1, functionType), new Register(0, functionPointer)),
                 new Call(
@@ -1882,7 +1886,7 @@ public class IrGeneratorTests
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
-                    new FunctionMetadata(AccessModifierMetadata.Public, "test", [], functionType)
+                    new FunctionMetadata(null, AccessModifierMetadata.Public, "test", [], functionType)
                 ),
                 new Load(new Register(1, functionType), new Register(0, functionPointer)),
                 new Move(new Register(2, functionType), new Register(1, functionType)),

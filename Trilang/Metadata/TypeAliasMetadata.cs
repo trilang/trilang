@@ -6,14 +6,19 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
 {
     private readonly List<ITypeMetadata> genericArguments;
 
-    public TypeAliasMetadata(string name) : this(name, [], null)
+    public TypeAliasMetadata(SourceLocation? definition, string name) : this(definition, name, [], null)
     {
     }
 
-    public TypeAliasMetadata(string name, IEnumerable<ITypeMetadata> genericArguments, ITypeMetadata? type)
+    public TypeAliasMetadata(
+        SourceLocation? definition,
+        string name,
+        IEnumerable<ITypeMetadata> genericArguments,
+        ITypeMetadata? type)
     {
+        Definition = definition;
         Name = name;
-        this.genericArguments = [..genericArguments];
+        this.genericArguments = [.. genericArguments];
         Type = type;
     }
 
@@ -82,15 +87,22 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
     public IMetadata? GetMember(string name)
         => Type?.GetMember(name);
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
+    public bool IsInvalid { get; private set; }
+
+    public SourceLocation? Definition { get; }
+
+    public bool IsValueType
+        => Type?.IsValueType ?? false;
+
+    public TypeLayout? Layout { get; set; }
+
     public string Name { get; }
 
     public IReadOnlyCollection<ITypeMetadata> GenericArguments
         => genericArguments;
 
     public ITypeMetadata? Type { get; set; }
-
-    public bool IsValueType
-        => Type?.IsValueType ?? false;
-
-    public TypeLayout? Layout { get; set; }
 }

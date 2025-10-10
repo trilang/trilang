@@ -11,7 +11,7 @@ public class ThisInStaticMethodsTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -23,13 +23,13 @@ public class ThisInStaticMethodsTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void ThisInStaticMethodsTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 public static test(): Test {
@@ -41,7 +41,7 @@ public class ThisInStaticMethodsTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'this' keyword is not allowed in static methods."));
     }

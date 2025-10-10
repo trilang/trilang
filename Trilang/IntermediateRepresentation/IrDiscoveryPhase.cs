@@ -45,7 +45,7 @@ internal class IrDiscoveryPhase : Visitor
                                     null,
                                     new MemberAccessExpression(null, MemberAccessExpression.This)
                                     {
-                                        Reference = new ParameterMetadata(MemberAccessExpression.This, declaringType),
+                                        Reference = new ParameterMetadata(null,MemberAccessExpression.This, declaringType),
                                         AccessKind = MemberAccessKind.Read,
                                     },
                                     fieldMetadata.Name
@@ -75,7 +75,7 @@ internal class IrDiscoveryPhase : Visitor
                                         null,
                                         new MemberAccessExpression(null, MemberAccessExpression.This)
                                         {
-                                            Reference = new ParameterMetadata(MemberAccessExpression.This, declaringType),
+                                            Reference = new ParameterMetadata(null, MemberAccessExpression.This, declaringType),
                                             AccessKind = MemberAccessKind.Read,
                                         },
                                         fieldMetadata.Name

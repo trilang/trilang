@@ -6,12 +6,13 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
     private readonly List<PropertyMetadata> properties;
     private readonly List<MethodMetadata> methods;
 
-    public TypeArrayMetadata() : this(null)
+    public TypeArrayMetadata(SourceLocation? definition) : this(definition, null)
     {
     }
 
-    public TypeArrayMetadata(ITypeMetadata? itemMetadata)
+    public TypeArrayMetadata(SourceLocation? definition, ITypeMetadata? itemMetadata)
     {
+        Definition = definition;
         this.fields = [];
         this.properties = [];
         this.methods = [];
@@ -20,7 +21,7 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
 
         fields.Add(new FieldMetadata(this, "<>_size", TypeMetadata.I64));
 
-        var sizeProperty = new PropertyMetadata(this, "size", TypeMetadata.I64, AccessModifierMetadata.Public);
+        var sizeProperty = new PropertyMetadata(null, this, "size", TypeMetadata.I64, AccessModifierMetadata.Public);
         properties.Add(sizeProperty);
         methods.Add(sizeProperty.Getter!);
     }
@@ -76,6 +77,15 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
     public MethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(f => f.Name == name);
 
+    public bool IsInvalid { get; }
+
+    public SourceLocation? Definition { get; }
+
+    public bool IsValueType
+        => false;
+
+    public TypeLayout? Layout { get; set; }
+
     public IReadOnlyList<FieldMetadata> Fields
         => fields;
 
@@ -86,9 +96,4 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         => methods;
 
     public ITypeMetadata? ItemMetadata { get; set; }
-
-    public bool IsValueType
-        => false;
-
-    public TypeLayout? Layout { get; set; }
 }

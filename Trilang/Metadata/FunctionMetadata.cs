@@ -3,11 +3,13 @@ namespace Trilang.Metadata;
 public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 {
     public FunctionMetadata(
+        SourceLocation? definition,
         AccessModifierMetadata accessModifier,
         string name,
         IReadOnlyList<ParameterMetadata> parameters,
         FunctionTypeMetadata type)
     {
+        Definition = definition;
         AccessModifier = accessModifier;
         Name = name;
         Parameters = parameters;
@@ -53,6 +55,8 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 
     public override string ToString()
         => $"{Name}: {Type}";
+
+    public SourceLocation? Definition { get; }
 
     public ITypeMetadata? DeclaringType => null;
 

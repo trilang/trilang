@@ -18,7 +18,9 @@ public class Compiler
         var parser = new Parser();
         var rootTypeMetadataProvider = new RootTypeMetadataProvider();
         var semantic = new SemanticAnalysis(rootTypeMetadataProvider);
-        var semanticOptions = new SemanticAnalysisOptions(options.Directives);
+        var semanticOptions = new SemanticAnalysisOptions(
+            options.Directives,
+            new SemanticDiagnosticReporter(diagnostics));
         var lowering = new Lowering();
 
         var semanticResults = new List<SemanticAnalysisResult>();

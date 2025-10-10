@@ -27,7 +27,9 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, SemanticAnalysisOptions.Default);
+        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         return semanticTree;
     }
@@ -49,15 +51,16 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var point = new TypeMetadata("Point");
+        var point = new TypeMetadata(null, "Point");
         point.AddConstructor(
             new ConstructorMetadata(
+                null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], point)));
+                new FunctionTypeMetadata(null, [], point)));
 
-        var count = new PropertyMetadata(point, "x", TypeMetadata.I32);
+        var count = new PropertyMetadata(null, point, "x", TypeMetadata.I32);
         point.AddProperty(count);
         point.AddMethod(count.Getter!);
         point.AddMethod(count.Setter!);
@@ -65,12 +68,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var backingField = new FieldMetadata(point, $"<>_{count.Name}", count.Type);
         point.AddField(backingField);
 
-        var pParameter = new ParameterMetadata("p", point);
+        var pParameter = new ParameterMetadata(null, "p", point);
         var testFunction = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata([point], TypeMetadata.I32));
+            new FunctionTypeMetadata(null, [point], TypeMetadata.I32));
 
         var expected = new SemanticTree(file, null, [
             new TypeDeclaration(
@@ -164,15 +168,17 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var pointType = new TypeMetadata("Point");
+        var pointType = new TypeMetadata(null, "Point");
         pointType.AddConstructor(
             new ConstructorMetadata(
+                null,
                 pointType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], pointType)));
+                new FunctionTypeMetadata(null, [], pointType)));
 
         var xProperty = new PropertyMetadata(
+            null,
             pointType,
             "x",
             TypeMetadata.I32,
@@ -185,15 +191,16 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(pointType, $"<>_{xProperty.Name}", xProperty.Type);
         pointType.AddField(xBackingField);
 
-        var testType = new TypeMetadata("Test");
+        var testType = new TypeMetadata(null, "Test");
         testType.AddConstructor(
             new ConstructorMetadata(
+                null,
                 testType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], testType)));
+                new FunctionTypeMetadata(null, [], testType)));
 
-        var pointProperty = new PropertyMetadata(testType, "point", pointType);
+        var pointProperty = new PropertyMetadata(null, testType, "point", pointType);
         testType.AddProperty(pointProperty);
         testType.AddMethod(pointProperty.Getter!);
         testType.AddMethod(pointProperty.Setter!);
@@ -201,12 +208,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var pointBackingField = new FieldMetadata(testType, $"<>_{pointProperty.Name}", pointProperty.Type);
         testType.AddField(pointBackingField);
 
-        var tParameter = new ParameterMetadata("t", testType);
+        var tParameter = new ParameterMetadata(null, "t", testType);
         var testFunction = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [tParameter],
-            new FunctionTypeMetadata([testType], TypeMetadata.I32)
+            new FunctionTypeMetadata(null, [testType], TypeMetadata.I32)
         );
 
         var expected = new SemanticTree(file, null, [
@@ -347,15 +355,17 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var point = new TypeMetadata("Point");
+        var point = new TypeMetadata(null, "Point");
         point.AddConstructor(
             new ConstructorMetadata(
+                null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], point)));
+                new FunctionTypeMetadata(null, [], point)));
 
         var xProperty = new PropertyMetadata(
+            null,
             point,
             "x",
             TypeMetadata.I32,
@@ -368,12 +378,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var pParameter = new ParameterMetadata("p", point);
+        var pParameter = new ParameterMetadata(null, "p", point);
         var testFunction = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata([point], TypeMetadata.Void));
+            new FunctionTypeMetadata(null, [point], TypeMetadata.Void));
 
         var expected = new SemanticTree(file, null, [
             new TypeDeclaration(
@@ -474,15 +485,17 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var point = new TypeMetadata("Point");
+        var point = new TypeMetadata(null, "Point");
         point.AddConstructor(
             new ConstructorMetadata(
+                null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], point)));
+                new FunctionTypeMetadata(null, [], point)));
 
         var xProperty = new PropertyMetadata(
+            null,
             point,
             "x",
             TypeMetadata.I32,
@@ -495,14 +508,15 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var tmpVariable = new VariableMetadata("<>_tmp_set0", xProperty.Type);
+        var tmpVariable = new VariableMetadata(null, "<>_tmp_set0", xProperty.Type);
 
-        var pParameter = new ParameterMetadata("p", point);
+        var pParameter = new ParameterMetadata(null, "p", point);
         var testFunction = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata([point], TypeMetadata.I32));
+            new FunctionTypeMetadata(null, [point], TypeMetadata.I32));
 
         var expected = new SemanticTree(file, null, [
             new TypeDeclaration(
@@ -637,15 +651,17 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var point = new TypeMetadata("Point");
+        var point = new TypeMetadata(null, "Point");
         point.AddConstructor(
             new ConstructorMetadata(
+                null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], point)));
+                new FunctionTypeMetadata(null, [], point)));
 
         var xProperty = new PropertyMetadata(
+            null,
             point,
             "x",
             TypeMetadata.I32,
@@ -658,12 +674,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var pParameter = new ParameterMetadata("p", point);
+        var pParameter = new ParameterMetadata(null, "p", point);
         var testFunction = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata([point], TypeMetadata.Void));
+            new FunctionTypeMetadata(null, [point], TypeMetadata.Void));
 
         var expected = new SemanticTree(file, null, [
             new TypeDeclaration(
@@ -796,15 +813,17 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var lowering = new Lowering();
         lowering.Lower(tree, LoweringOptions.Default);
 
-        var point = new TypeMetadata("Point");
+        var point = new TypeMetadata(null, "Point");
         point.AddConstructor(
             new ConstructorMetadata(
+                null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata([], point)));
+                new FunctionTypeMetadata(null, [], point)));
 
         var xProperty = new PropertyMetadata(
+            null,
             point,
             "x",
             TypeMetadata.I32,
@@ -817,14 +836,15 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(point, $"<>_{xProperty.Name}", xProperty.Type);
         point.AddField(xBackingField);
 
-        var tmpVariable = new VariableMetadata("<>_tmp_set0", xProperty.Type);
+        var tmpVariable = new VariableMetadata(null, "<>_tmp_set0", xProperty.Type);
 
-        var pParameter = new ParameterMetadata("p", point);
+        var pParameter = new ParameterMetadata(null, "p", point);
         var testFunction = new FunctionMetadata(
+            null,
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata([point], TypeMetadata.I32));
+            new FunctionTypeMetadata(null, [point], TypeMetadata.I32));
 
         var expected = new SemanticTree(file, null, [
             new TypeDeclaration(

@@ -11,7 +11,7 @@ public class CheckStaticAndInstanceMembersAccessTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -23,13 +23,13 @@ public class CheckStaticAndInstanceMembersAccessTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void AccessNotStaticMethodOnTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 public s(): void { }
@@ -43,7 +43,7 @@ public class CheckStaticAndInstanceMembersAccessTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The instance method 's' cannot be called on a static one."));
     }
@@ -51,7 +51,7 @@ public class CheckStaticAndInstanceMembersAccessTests
     [Test]
     public void AccessStaticMethodOnInstanceTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 public static s(): void { }
@@ -65,7 +65,7 @@ public class CheckStaticAndInstanceMembersAccessTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The static method 's' cannot be called on an instance one."));
     }
@@ -73,7 +73,7 @@ public class CheckStaticAndInstanceMembersAccessTests
     [Test]
     public void AccessMemberOnInterfaceTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test = {
                 s(): void;
@@ -87,7 +87,7 @@ public class CheckStaticAndInstanceMembersAccessTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("'Test' can't be used to call static members."));
     }
@@ -95,7 +95,7 @@ public class CheckStaticAndInstanceMembersAccessTests
     [Test]
     public void AccessInstanceMethodWithThisTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 public method1(): void { }
@@ -109,7 +109,32 @@ public class CheckStaticAndInstanceMembersAccessTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(
+                tree,
+                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
+    }
+
+    [Test]
+    public void AccessStaticOnInvalidTypeTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Test = Test;
+
+            public func(): void {
+                Test.s();
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+
+        // TODO: Throws.Nothing
+        Assert.That(
+            () => semantic.Analyze(
+                tree,
+                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+            Throws.TypeOf<SemanticAnalysisException>()
+                .And.Message.EqualTo("Cannot determine return type for member 's'"));
     }
 }

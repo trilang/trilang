@@ -11,7 +11,7 @@ public class MissingReturnStatementTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -23,18 +23,18 @@ public class MissingReturnStatementTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void MissingReturnInFunctionTest()
     {
-        var tree = Parse("public test(): i32 { }");
+        var (tree, diagnostics) = Parse("public test(): i32 { }");
 
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("test: () => i32. Not all paths return a value."));
     }
@@ -42,7 +42,7 @@ public class MissingReturnStatementTests
     [Test]
     public void MissingReturnInFunctionWithIfTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): i32 {
                 if (false) {
@@ -54,7 +54,7 @@ public class MissingReturnStatementTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("test: () => i32. Not all paths return a value."));
     }
@@ -62,7 +62,7 @@ public class MissingReturnStatementTests
     [Test]
     public void ValidReturnInFunctionWithIfTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): i32 {
                 if (false) {
@@ -76,14 +76,14 @@ public class MissingReturnStatementTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void ValidReturnInFunctionWithIfElseTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): i32 {
                 if (false) {
@@ -97,14 +97,14 @@ public class MissingReturnStatementTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void MissingReturnInFunctionWithWhileTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): i32 {
                 while (false) {
@@ -116,7 +116,7 @@ public class MissingReturnStatementTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("test: () => i32. Not all paths return a value."));
     }
@@ -124,7 +124,7 @@ public class MissingReturnStatementTests
     [Test]
     public void ValidReturnInFunctionWithWhileTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public test(): i32 {
                 while (false) { }
@@ -136,19 +136,19 @@ public class MissingReturnStatementTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void ValidReturnInVoidFunctionTest()
     {
-        var tree = Parse("public test(): void { }");
+        var (tree, diagnostics) = Parse("public test(): void { }");
 
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 }

@@ -2,8 +2,9 @@ namespace Trilang.Metadata;
 
 public class ParameterMetadata : IMetadata, IEquatable<ParameterMetadata>
 {
-    public ParameterMetadata(string name, ITypeMetadata type)
+    public ParameterMetadata(SourceLocation? definition, string name, ITypeMetadata type)
     {
+        Definition = definition;
         Name = name;
         Type = type;
     }
@@ -44,6 +45,8 @@ public class ParameterMetadata : IMetadata, IEquatable<ParameterMetadata>
 
     public override string ToString()
         => $"{Name}: {Type}";
+
+    public SourceLocation? Definition { get; }
 
     public string Name { get; }
 

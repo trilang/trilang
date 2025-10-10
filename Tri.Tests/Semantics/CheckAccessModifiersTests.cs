@@ -11,7 +11,7 @@ public class CheckAccessModifiersTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SyntaxTree Parse(string code)
+    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -23,13 +23,13 @@ public class CheckAccessModifiersTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return tree;
+        return (tree, diagnostics);
     }
 
     [Test]
     public void PrivateCtorTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 private constructor() { }
@@ -43,7 +43,7 @@ public class CheckAccessModifiersTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The constructor of 'Test' is not accessible."));
     }
@@ -51,7 +51,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void IgnorePrivateCtorInTheSameTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Test {
                 private constructor() { }
@@ -65,14 +65,14 @@ public class CheckAccessModifiersTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void PrivateGetterTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 { private get; private set; }
@@ -88,7 +88,7 @@ public class CheckAccessModifiersTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo($"The getter of 'x' is private."));
     }
@@ -96,7 +96,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void PrivateSetterTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 { private get; private set; }
@@ -112,7 +112,7 @@ public class CheckAccessModifiersTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo($"The setter of 'x' is private."));
     }
@@ -120,7 +120,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void PrivateGetterInTheSameTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 { private get; private set; }
@@ -134,14 +134,14 @@ public class CheckAccessModifiersTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void PrivateSetterInTheSameTypeTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 { private get; private set; }
@@ -155,14 +155,14 @@ public class CheckAccessModifiersTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
     [Test]
     public void MissingGetterTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 { public set; }
@@ -176,7 +176,7 @@ public class CheckAccessModifiersTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'x' property does not have a getter."));
     }
@@ -184,7 +184,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void MissingSetterTest()
     {
-        var tree = Parse(
+        var (tree, diagnostics) = Parse(
             """
             public type Point {
                 x: i32 { public get; }
@@ -198,7 +198,7 @@ public class CheckAccessModifiersTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'x' property does not have a setter."));
     }
@@ -206,12 +206,12 @@ public class CheckAccessModifiersTests
     [Test]
     public void InternalFunctionTest()
     {
-        var tree = Parse("internal test(): void {}");
+        var (tree, diagnostics) = Parse("internal test(): void {}");
 
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, SemanticAnalysisOptions.Default),
+            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.TypeOf<SemanticAnalysisException>()
                 .And.Message.EqualTo("The 'test' function can't be internal."));
     }
