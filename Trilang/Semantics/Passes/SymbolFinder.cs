@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Trilang.Compilation.Diagnostics;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
 using Type = Trilang.Semantics.Model.Type;
@@ -8,6 +10,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 {
     private readonly SymbolTableMap map;
     private HashSet<string> directives = null!;
+    private SemanticDiagnosticReporter diagnostics = null!;
 
     public SymbolFinder()
         => map = new SymbolTableMap();
@@ -15,6 +18,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     public void Analyze(SemanticTree tree, SemanticPassContext context)
     {
         directives = context.Directives;
+        diagnostics = context.Diagnostics;
 
         tree.Accept(this, context.RootSymbolTable);
 
@@ -107,7 +111,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     }
 
     public void VisitExpressionBlock(ExpressionBlock node, ISymbolTable context)
-        => throw new SemanticAnalysisException("Expression blocks are not supported");
+        => Debug.Fail("Expression blocks are the compiler's internal feature and are not directly supported in the programming language.");
 
     public void VisitExpressionStatement(ExpressionStatement node, ISymbolTable context)
     {
@@ -134,7 +138,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
         var symbol = new IdSymbol(node);
         if (!context.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' function is already defined.");
+            diagnostics.FunctionAlreadyDefined(node);
 
         node.ReturnType.Accept(this, context);
 
@@ -219,7 +223,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
         var symbol = new IdSymbol(node);
         if (!context.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' property is already defined.");
+            diagnostics.InterfacePropertyAlreadyDefined(node);
     }
 
     public void VisitInterfaceMethod(InterfaceMethod node, ISymbolTable context)
@@ -228,7 +232,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
         var symbol = new IdSymbol(node);
         if (!context.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' method is already defined.");
+            diagnostics.InterfaceMethodAlreadyDefined(node);
 
         var child = context.CreateChild();
         foreach (var parameter in node.ParameterTypes)
@@ -265,7 +269,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     {
         var symbol = new IdSymbol(node);
         if (!context.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' method is already defined.");
+            diagnostics.MethodAlreadyDefined(node);
 
         map.Add(node, context);
 
@@ -314,7 +318,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
         var symbol = new IdSymbol(node);
         if (!context.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' parameter is already defined.");
+            diagnostics.ParameterAlreadyDefined(node);
 
         node.Type.Accept(this, context);
     }
@@ -325,7 +329,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
         var symbol = new IdSymbol(node);
         if (!context.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' property is already defined.");
+            diagnostics.PropertyAlreadyDefined(node);
 
         node.Type.Accept(this, context);
         node.Getter?.Accept(this, context);
@@ -339,7 +343,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         var child = context.CreateChild();
         var fieldSymbol = new IdSymbol(MemberAccessExpression.Field, node.Parent);
         if (!child.TryAddId(fieldSymbol))
-            throw new SemanticAnalysisException();
+            diagnostics.ParameterAlreadyDefined(node, MemberAccessExpression.Field);
 
         if (node.Body is not null)
             VisitBlockWithoutScope(node.Body, child);
@@ -352,11 +356,11 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         var child = context.CreateChild();
         var fieldSymbol = new IdSymbol(MemberAccessExpression.Field, node.Parent);
         if (!child.TryAddId(fieldSymbol))
-            throw new SemanticAnalysisException();
+            diagnostics.ParameterAlreadyDefined(node, MemberAccessExpression.Field);
 
         var valueSymbol = new IdSymbol(MemberAccessExpression.Value, node.Parent);
         if (!child.TryAddId(valueSymbol))
-            throw new SemanticAnalysisException();
+            diagnostics.ParameterAlreadyDefined(node, MemberAccessExpression.Value);
 
         if (node.Body is not null)
             VisitBlockWithoutScope(node.Body, child);
@@ -392,7 +396,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     public void VisitTypeAlias(TypeAliasDeclaration node, ISymbolTable context)
     {
         if (!context.TryAddType(TypeSymbol.Alias(node)))
-            throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
+            diagnostics.TypeAlreadyDefined(node);
 
         var child = context.CreateChild();
         map.Add(node, child);
@@ -409,7 +413,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             ? TypeSymbol.OpenGenericType(node)
             : TypeSymbol.Type(node);
         if (!context.TryAddType(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' type is already defined.");
+            diagnostics.TypeAlreadyDefined(node);
 
         var child = context.CreateChild();
         map.Add(node, child);
@@ -449,7 +453,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
         var symbol = new IdSymbol(node);
         if (!context.TryAddId(symbol))
-            throw new SemanticAnalysisException($"The '{node.Name}' variable is already defined.");
+            diagnostics.VariableAlreadyDefined(node);
 
         map.Add(node, context);
     }

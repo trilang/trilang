@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Compilation.Diagnostics;
 
@@ -14,4 +15,64 @@ public class SemanticDiagnosticReporter
             DiagnosticIds.S0001_RcursiveTypeAlias,
             alias.Definition ?? new SourceLocation(default, default),
             $"The cyclic type alias detected: '{alias.Name}'.");
+
+    public void FunctionAlreadyDefined(FunctionDeclaration function)
+        => diagnostics.Error(
+            DiagnosticIds.S0002_FunctionAlreadyDefined,
+            new SourceLocation(function.GetRoot().SourceFile, function.SourceSpan ?? default),
+            $"The '{function.Name}' function is already defined.");
+
+    public void InterfacePropertyAlreadyDefined(InterfaceProperty property)
+        => diagnostics.Error(
+            DiagnosticIds.S0003_PropertyAlreadyDefined,
+            new SourceLocation(property.GetRoot().SourceFile, property.SourceSpan ?? default),
+            $"The '{property.Name}' property is already defined.");
+
+    public void InterfaceMethodAlreadyDefined(InterfaceMethod method)
+        => diagnostics.Error(
+            DiagnosticIds.S0004_MethodAlreadyDefined,
+            new SourceLocation(method.GetRoot().SourceFile, method.SourceSpan ?? default),
+            $"The '{method.Name}' method is already defined.");
+
+    public void PropertyAlreadyDefined(PropertyDeclaration property)
+        => diagnostics.Error(
+            DiagnosticIds.S0003_PropertyAlreadyDefined,
+            new SourceLocation(property.GetRoot().SourceFile, property.SourceSpan ?? default),
+            $"The '{property.Name}' property is already defined.");
+
+    public void MethodAlreadyDefined(MethodDeclaration method)
+        => diagnostics.Error(
+            DiagnosticIds.S0004_MethodAlreadyDefined,
+            new SourceLocation(method.GetRoot().SourceFile, method.SourceSpan ?? default),
+            $"The '{method.Name}' method is already defined.");
+
+    public void ParameterAlreadyDefined(Parameter parameter)
+        => diagnostics.Error(
+            DiagnosticIds.S0005_ParameterAlreadyDefined,
+            new SourceLocation(parameter.GetRoot().SourceFile, parameter.SourceSpan ?? default),
+            $"The '{parameter.Name}' parameter is already defined.");
+
+    public void ParameterAlreadyDefined(ISemanticNode parameter, string name)
+        => diagnostics.Error(
+            DiagnosticIds.S0005_ParameterAlreadyDefined,
+            new SourceLocation(parameter.GetRoot().SourceFile, parameter.SourceSpan ?? default),
+            $"The '{name}' parameter is already defined.");
+
+    public void TypeAlreadyDefined(TypeDeclaration type)
+        => diagnostics.Error(
+            DiagnosticIds.S0006_TypeAlreadyDefined,
+            new SourceLocation(type.GetRoot().SourceFile, type.SourceSpan ?? default),
+            $"The '{type.Name}' type is already defined.");
+
+    public void TypeAlreadyDefined(TypeAliasDeclaration type)
+        => diagnostics.Error(
+            DiagnosticIds.S0006_TypeAlreadyDefined,
+            new SourceLocation(type.GetRoot().SourceFile, type.SourceSpan ?? default),
+            $"The '{type.Name}' type is already defined.");
+
+    public void VariableAlreadyDefined(VariableDeclaration variable)
+        => diagnostics.Error(
+            DiagnosticIds.S0007_VariableAlreadyDefined,
+            new SourceLocation(variable.GetRoot().SourceFile, variable.SourceSpan ?? default),
+            $"The '{variable.Name}' variable is already defined.");
 }

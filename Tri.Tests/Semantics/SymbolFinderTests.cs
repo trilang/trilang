@@ -72,11 +72,19 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'main' function is already defined."));
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.S0002_FunctionAlreadyDefined,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(24, 2, 1), new SourcePosition(47, 2, 24))),
+            "The 'main' function is already defined.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -107,11 +115,19 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public add(a: i32, a: i32): void { }");
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'a' parameter is already defined."));
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.S0005_ParameterAlreadyDefined,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(25, 1, 26))),
+            "The 'a' parameter is already defined.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -155,11 +171,19 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'a' variable is already defined."));
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.S0007_VariableAlreadyDefined,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(46, 3, 5), new SourcePosition(61, 3, 20))),
+            "The 'a' variable is already defined.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -310,11 +334,19 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'Point' type is already defined."));
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.S0006_TypeAlreadyDefined,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(22, 2, 1), new SourcePosition(43, 2, 22))),
+            "The 'Point' type is already defined.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -388,11 +420,19 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'MyInt' type is already defined."));
+        var diagnostic = new Diagnostic(
+            DiagnosticIds.S0006_TypeAlreadyDefined,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(25, 2, 1), new SourcePosition(49, 2, 25))),
+            "The 'MyInt' type is already defined.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]

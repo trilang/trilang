@@ -22,4 +22,10 @@ public static class DiagnosticIds
     public const string P0014_ExpectedTypeMember = "P0014";
 
     public const string S0001_RcursiveTypeAlias = "S0001";
+    public const string S0002_FunctionAlreadyDefined = "S0002";
+    public const string S0003_PropertyAlreadyDefined = "S0003";
+    public const string S0004_MethodAlreadyDefined = "S0004";
+    public const string S0005_ParameterAlreadyDefined = "S0005";
+    public const string S0006_TypeAlreadyDefined = "S0006";
+    public const string S0007_VariableAlreadyDefined = "S0007";
 }
