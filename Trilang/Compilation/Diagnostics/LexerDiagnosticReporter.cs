@@ -13,13 +13,13 @@ public class LexerDiagnosticReporter
 
     public void UnsupportedCharacter(SourceSpan span, char character)
         => diagnostics.Error(
-            DiagnosticIds.L0001_UnsupportedCharacter,
+            DiagnosticId.L0001UnsupportedCharacter,
             new SourceLocation(file, span),
             $"Unsupported character '{character}'.");
 
     public void MissingEndQuoteForStringLiteral(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.L0002_MissingEndQuoteForStringLiteral,
+            DiagnosticId.L0002MissingEndQuoteForStringLiteral,
             new SourceLocation(file, span),
             "Missing end quote for string literal.");
 }

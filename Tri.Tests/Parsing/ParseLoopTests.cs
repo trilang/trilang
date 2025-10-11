@@ -139,7 +139,7 @@ public class ParseLoopTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(38, 2, 11).ToSpan()),
             "Expected '('.");
@@ -196,7 +196,7 @@ public class ParseLoopTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0009_ExpectedExpression,
+            DiagnosticId.P0009ExpectedExpression,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13))),
             "Expected an expression.");
@@ -262,7 +262,7 @@ public class ParseLoopTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(45, 2, 18).ToSpan()),
             "Expected ')'.");
@@ -336,17 +336,17 @@ public class ParseLoopTests
         var diagnostic = new[]
         {
             new Diagnostic(
-                DiagnosticIds.P0001_MissingToken,
+                DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
                 new SourceLocation(file, new SourcePosition(53, 3, 8).ToSpan()),
                 "Expected '{'."),
             new Diagnostic(
-                DiagnosticIds.P0004_ExpectedStatement,
+                DiagnosticId.P0004ExpectedStatement,
                 DiagnosticSeverity.Error,
                 new SourceLocation(file, new SourcePosition(53, 3, 8).ToSpan()),
                 "Expected a statement."),
             new Diagnostic(
-                DiagnosticIds.P0001_MissingToken,
+                DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
                 new SourceLocation(file, new SourcePosition(56, 4, 2).ToSpan()),
                 "Expected '}'."),

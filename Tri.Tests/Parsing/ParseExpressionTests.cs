@@ -1063,7 +1063,7 @@ public class ParseExpressionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(38, 2, 17).ToSpan()),
             "Expected ')'."
@@ -1202,7 +1202,7 @@ public class ParseExpressionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(41, 2, 16).ToSpan()),
             "Expected a type.");
@@ -1293,7 +1293,7 @@ public class ParseExpressionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(41, 2, 16).ToSpan()),
             "Expected ')'."
@@ -1348,7 +1348,7 @@ public class ParseExpressionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0009_ExpectedExpression,
+            DiagnosticId.P0009ExpectedExpression,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(41, 2, 16).ToSpan()),
             "Expected an expression."

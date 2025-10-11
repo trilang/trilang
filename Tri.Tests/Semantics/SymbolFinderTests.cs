@@ -77,7 +77,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.S0002_FunctionAlreadyDefined,
+            DiagnosticId.S0002FunctionAlreadyDefined,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -120,7 +120,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.S0005_ParameterAlreadyDefined,
+            DiagnosticId.S0005ParameterAlreadyDefined,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -176,7 +176,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.S0007_VariableAlreadyDefined,
+            DiagnosticId.S0007VariableAlreadyDefined,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -339,7 +339,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.S0006_TypeAlreadyDefined,
+            DiagnosticId.S0006TypeAlreadyDefined,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -425,7 +425,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.S0006_TypeAlreadyDefined,
+            DiagnosticId.S0006TypeAlreadyDefined,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

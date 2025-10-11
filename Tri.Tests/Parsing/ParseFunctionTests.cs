@@ -45,7 +45,7 @@ public class ParseFunctionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourceSpan(new SourcePosition(11, 1, 12), new SourcePosition(11, 1, 12))),
             "Expected '('."
@@ -86,7 +86,7 @@ public class ParseFunctionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(14, 1, 15).ToSpan()),
             "Expected ':'.");
@@ -126,7 +126,7 @@ public class ParseFunctionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(15, 1, 16).ToSpan()),
             "Expected a type.");
@@ -174,7 +174,7 @@ public class ParseFunctionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
             "Expected ','."
@@ -213,7 +213,7 @@ public class ParseFunctionTests
         var diagnostic = new[]
         {
             new Diagnostic(
-                DiagnosticIds.P0001_MissingToken,
+                DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
                 new SourceLocation(file, new SourcePosition(13, 1, 14).ToSpan()),
                 "Expected ')'."),
@@ -250,7 +250,7 @@ public class ParseFunctionTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(14, 1, 15).ToSpan()),
             "Expected ':'."
@@ -290,13 +290,13 @@ public class ParseFunctionTests
         var diagnostic = new[]
         {
             new Diagnostic(
-                DiagnosticIds.P0001_MissingToken,
+                DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
                 new SourceLocation(file, new SourcePosition(17, 1, 18).ToSpan()),
                 "Expected '}'."
             ),
             new Diagnostic(
-                DiagnosticIds.P0001_MissingToken,
+                DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
                 new SourceLocation(file, new SourcePosition(17, 1, 18).ToSpan()),
                 "Expected '{'."
@@ -331,13 +331,13 @@ public class ParseFunctionTests
         var diagnostic = new[]
         {
             new Diagnostic(
-                DiagnosticIds.P0001_MissingToken,
+                DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
                 new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
                 "Expected '{'."
             ),
             new Diagnostic(
-                DiagnosticIds.P0001_MissingToken,
+                DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
                 new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
                 "Expected '}'."

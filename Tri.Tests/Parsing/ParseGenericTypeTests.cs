@@ -69,7 +69,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(17, 1, 18).ToSpan()),
             "Expected a type.");
@@ -106,7 +106,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
             "Expected a type.");
@@ -139,7 +139,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
             "Expected '>'.");
@@ -221,7 +221,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(21, 1, 22).ToSpan()),
             "Expected a type.");
@@ -259,7 +259,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(26, 1, 27).ToSpan()),
             "Expected a type.");
@@ -293,7 +293,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(24, 1, 25).ToSpan()),
             "Expected '>'.");
@@ -354,7 +354,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(14, 1, 15).ToSpan()),
             "Expected a type.");
@@ -397,7 +397,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(18, 1, 19).ToSpan()),
             "Expected a type.");
@@ -440,7 +440,7 @@ public class ParseGenericTypeTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(21, 1, 22).ToSpan()),
             "Expected '>'.");

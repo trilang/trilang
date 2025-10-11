@@ -285,7 +285,7 @@ public class LexerTests
         };
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.L0002_MissingEndQuoteForStringLiteral,
+            DiagnosticId.L0002MissingEndQuoteForStringLiteral,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(15, 3, 5).ToSpan()),
             "Missing end quote for string literal.");
@@ -343,7 +343,7 @@ public class LexerTests
         };
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.L0002_MissingEndQuoteForStringLiteral,
+            DiagnosticId.L0002MissingEndQuoteForStringLiteral,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(15, 3, 5).ToSpan()),
             "Missing end quote for string literal.");
@@ -365,7 +365,7 @@ public class LexerTests
         };
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.L0001_UnsupportedCharacter,
+            DiagnosticId.L0001UnsupportedCharacter,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(1, 1, 2))),
             $"Unsupported character '{code}'."

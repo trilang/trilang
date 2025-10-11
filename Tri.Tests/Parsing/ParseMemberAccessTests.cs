@@ -120,7 +120,7 @@ public class ParseMemberAccessTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(50, 2, 21).ToSpan()),
             "Expected ']'.");
@@ -322,7 +322,7 @@ public class ParseMemberAccessTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0013_ExpectedIdentifier,
+            DiagnosticId.P0013ExpectedIdentifier,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(38, 2, 17))),
             "Expected an identifier.");
@@ -668,7 +668,7 @@ public class ParseMemberAccessTests
         ]);
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(51, 2, 15).ToSpan()),
             "Expected ';'.");

@@ -16,85 +16,85 @@ public class ParserDiagnosticReporter
 
     public void MissingToken(SourcePosition position, TokenKind expected)
         => diagnostics.Error(
-            DiagnosticIds.P0001_MissingToken,
+            DiagnosticId.P0001MissingToken,
             new SourceLocation(file, position.ToSpan()),
             $"Expected '{expected.ToDisplayString()}'.");
 
     public void ExpectedParameter(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.P0002_ExpectedParameter,
+            DiagnosticId.P0002ExpectedParameter,
             new SourceLocation(file, span),
             "Expected a parameter.");
 
     public void ExpectedType(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.P0003_ExpectedType,
+            DiagnosticId.P0003ExpectedType,
             new SourceLocation(file, span),
             "Expected a type.");
 
     public void ExpectedStatement(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.P0004_ExpectedStatement,
+            DiagnosticId.P0004ExpectedStatement,
             new SourceLocation(file, span),
             "Expected a statement.");
 
     public void ExpectedTypeName(SourcePosition position)
         => diagnostics.Error(
-            DiagnosticIds.P0005_ExpectedTypeName,
+            DiagnosticId.P0005ExpectedTypeName,
             new SourceLocation(file, position.ToSpan()),
             "Expected a type name.");
 
     public void ExpectedInterface(SourcePosition position)
         => diagnostics.Error(
-            DiagnosticIds.P0006_ExpectedInterface,
+            DiagnosticId.P0006ExpectedInterface,
             new SourceLocation(file, position.ToSpan()),
             "Expected an interface.");
 
     public void ExpectedMethodName(SourcePosition position)
         => diagnostics.Error(
-            DiagnosticIds.P0007_ExpectedMethodName,
+            DiagnosticId.P0007ExpectedMethodName,
             new SourceLocation(file, position.ToSpan()),
             "Expected a method name.");
 
     public void ExpectedVariableName(SourcePosition position)
         => diagnostics.Error(
-            DiagnosticIds.P0008_ExpectedVariableName,
+            DiagnosticId.P0008ExpectedVariableName,
             new SourceLocation(file, position.ToSpan()),
             "Expected a variable name.");
 
     public void ExpectedExpression(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.P0009_ExpectedExpression,
+            DiagnosticId.P0009ExpectedExpression,
             new SourceLocation(file, span),
             "Expected an expression.");
 
     public void ExpectedDeclaration(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.P0010_ExpectedDeclaration,
+            DiagnosticId.P0010ExpectedDeclaration,
             new SourceLocation(file, span),
             "Expected a type or a function.");
 
     public void ExpectedDirectiveName(SourcePosition position)
         => diagnostics.Error(
-            DiagnosticIds.P0011_ExpectedDirectiveName,
+            DiagnosticId.P0011ExpectedDirectiveName,
             new SourceLocation(file, position.ToSpan()),
             "Expected a directive name.");
 
     public void ExpectedInterfaceParameters(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.P0012_ExpectedInterfaceParameters,
+            DiagnosticId.P0012ExpectedInterfaceParameters,
             new SourceLocation(file, span),
             "Expected interface parameters.");
 
     public void ExpectedIdentifier(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.P0013_ExpectedIdentifier,
+            DiagnosticId.P0013ExpectedIdentifier,
             new SourceLocation(file, span),
             "Expected an identifier.");
 
     public void ExpectedTypeMember(SourceSpan span)
         => diagnostics.Error(
-            DiagnosticIds.P0014_ExpectedTypeMember,
+            DiagnosticId.P0014ExpectedTypeMember,
             new SourceLocation(file, span),
             "Expected a type member (a property, a method or a constructor).");
 }

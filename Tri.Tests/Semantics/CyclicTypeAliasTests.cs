@@ -39,7 +39,7 @@ public class CyclicTypeAliasTests
         var testAlias = typeProvider.GetType("Test");
 
         var diagnostic = new Diagnostic(
-            DiagnosticIds.S0001_RcursiveTypeAlias,
+            DiagnosticId.S0001CyclicTypeAlias,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -71,14 +71,14 @@ public class CyclicTypeAliasTests
         var diagnostic = new[]
         {
             new Diagnostic(
-                DiagnosticIds.S0001_RcursiveTypeAlias,
+                DiagnosticId.S0001CyclicTypeAlias,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
                     new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(26, 1, 27))),
                 "The cyclic type alias detected: 'Test1'."),
             new Diagnostic(
-                DiagnosticIds.S0001_RcursiveTypeAlias,
+                DiagnosticId.S0001CyclicTypeAlias,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
