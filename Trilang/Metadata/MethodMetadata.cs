@@ -34,6 +34,9 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return DeclaringType.Equals(other.DeclaringType) &&
                AccessModifier == other.AccessModifier &&
                IsStatic == other.IsStatic &&
@@ -63,6 +66,8 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
         => $"{Name}: {Type}";
 
     public SourceLocation? Definition { get; }
+
+    public bool IsInvalid => false;
 
     public ITypeMetadata DeclaringType { get; }
 

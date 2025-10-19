@@ -39,10 +39,18 @@ public class ThisInStaticMethodsTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'this' keyword is not allowed in static methods."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0021ThisInStaticMethod,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(67, 3, 16), new SourcePosition(71, 3, 20))),
+            "The 'this' keyword cannot be used in a static method.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

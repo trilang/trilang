@@ -110,11 +110,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Referenced unknown type 'xxx'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15))),
+            "Unknown type: 'xxx'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -380,7 +388,7 @@ public class TypeCheckerTests
     }
 
     [Test]
-    public void ReturnStatementDoesntTest()
+    public void ReturnStatementTypeDoesntMatchTest()
     {
         var (tree, diagnostics) = Parse(
             """
@@ -390,11 +398,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Function return type mismatch: expected 'bool', got 'i32'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0009ReturnTypeMismatch,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(35, 2, 14))),
+            "Return type mismatch: expected 'bool', got 'i32'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -491,11 +507,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Invalid unary expression: incompatible operand type 'i32' for operator 'LogicalNot'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0015IncompatibleUnaryOperator,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(32, 2, 12), new SourcePosition(34, 2, 14))),
+            "Incompatible operand type 'i32' for operator 'LogicalNot'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -530,11 +554,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Type mismatch in variable declaration 'a': expected 'i32', got 'bool'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0010TypeMismatch,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(43, 2, 22))),
+            "Type mismatch: expected 'i32', got 'bool'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -549,11 +581,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The condition returns non-boolean type."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0010TypeMismatch,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(30, 2, 9), new SourcePosition(31, 2, 10))),
+            "Type mismatch: expected 'bool', got 'i32'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -562,6 +602,7 @@ public class TypeCheckerTests
         var (tree, diagnostics) = Parse(
             """
             public add(a: i32): i32 {
+                return 0;
             }
 
             public main(): i32 {
@@ -570,11 +611,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Expected 'i32' but got 'bool'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0010TypeMismatch,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(79, 6, 16), new SourcePosition(83, 6, 20))),
+            "Type mismatch: expected 'i32', got 'bool'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -589,11 +638,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Condition must be a boolean"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0010TypeMismatch,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(34, 2, 13))),
+            "Type mismatch: expected 'bool', got 'i32'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -626,11 +683,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Constructor return type mismatch: expected 'void', got 'i32'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0009ReturnTypeMismatch,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(55, 3, 9), new SourcePosition(64, 3, 18))),
+            "Return type mismatch: expected 'void', got 'i32'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -658,7 +723,7 @@ public class TypeCheckerTests
                 "x",
                 TypeMetadata.I32,
                 AccessModifierMetadata.Public,
-                AccessModifierMetadata.Private));
+                null));
         interfaceType.AddProperty(
             new InterfacePropertyMetadata(
                 null,
@@ -666,7 +731,7 @@ public class TypeCheckerTests
                 "y",
                 TypeMetadata.I32,
                 AccessModifierMetadata.Public,
-                AccessModifierMetadata.Private));
+                null));
         interfaceType.AddMethod(
             new InterfaceMethodMetadata(
                 null,
@@ -713,11 +778,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Cannot call a non-function member"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0012ExpectedFunction,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(33, 2, 6))),
+            "Expected a function, got 'i32'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -778,11 +851,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Cannot find member 'x' in 'Point'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0013UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(71, 5, 9), new SourcePosition(77, 5, 15))),
+            "The 'Point' type doesn't have 'x'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -827,11 +908,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Cannot find member 'c' in 'Point'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0013UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(77, 6, 12), new SourcePosition(80, 6, 15))),
+            "The 'Point' type doesn't have 'c'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -909,11 +998,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Cannot create an instance of type 'Point'"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0014CantCreateObject,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(90, 7, 20), new SourcePosition(105, 7, 35))),
+            "Cannot create an instance of type 'Point'");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -932,11 +1029,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'Point' type doesn't have 'i32' constructor."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0013UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(111, 7, 20), new SourcePosition(123, 7, 32))),
+            "The 'Point' type doesn't have 'i32' constructor.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -995,11 +1100,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Array access must be of type array"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0011ExpectedArray,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13))),
+            "Expected an array, got 'i32'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -1007,17 +1120,25 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
-            public test(a: i32[]): void {
+            public test(a: i32[]): i32 {
                 return a["xxx"];
             }
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Array index must be of type i32"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0010TypeMismatch,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(42, 2, 14), new SourcePosition(47, 2, 19))),
+            "Type mismatch: expected 'i32', got 'string'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -1260,12 +1381,19 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Cannot find member '2' in '(i32, string)'")
-        );
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0013UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(51, 2, 12), new SourcePosition(54, 2, 15))),
+            "The '(i32, string)' type doesn't have '2'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]

@@ -69,11 +69,19 @@ public class NotImplementedInterfaceTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' property is not implemented."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(66, 6, 1), new SourcePosition(169, 10, 2))),
+            "The 'x' property is not implemented.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -95,11 +103,19 @@ public class NotImplementedInterfaceTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' property is not of the correct type."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(102, 7, 5), new SourcePosition(108, 7, 11))),
+            "The 'x' property is not of the correct type. Expected 'i8', got 'i32'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -118,11 +134,19 @@ public class NotImplementedInterfaceTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'toString' method is not implemented."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(66, 6, 1), new SourcePosition(111, 8, 2))),
+            "The 'toString' method is not implemented.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -144,11 +168,19 @@ public class NotImplementedInterfaceTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'toString' method is not of the correct type."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(114, 8, 5), new SourcePosition(162, 10, 6))),
+            "The 'toString' method is not of the correct type. Expected '() => string', got '() => i32'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -170,11 +202,19 @@ public class NotImplementedInterfaceTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'toString' method is not of the correct type."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(114, 8, 5), new SourcePosition(185, 10, 6))),
+            "The 'toString' method is not of the correct type. Expected '() => string', got '(i32) => string'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -193,11 +233,19 @@ public class NotImplementedInterfaceTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The implementation of an interface method 'method' cannot be private."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(86, 6, 5), new SourcePosition(116, 7, 6))),
+            "The implementation of the interface method 'method' is not public.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -215,11 +263,19 @@ public class NotImplementedInterfaceTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The implementation of an interface property getter 'x' cannot be private."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(105, 6, 5), new SourcePosition(140, 6, 40))),
+            "The implementation of an interface property getter 'x' cannot be private.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -237,10 +293,18 @@ public class NotImplementedInterfaceTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The implementation of an interface property setter 'x' cannot be private."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(105, 6, 5), new SourcePosition(140, 6, 40))),
+            "The implementation of an interface property setter 'x' cannot be private.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

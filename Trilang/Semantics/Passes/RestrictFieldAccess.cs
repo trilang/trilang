@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 
@@ -5,8 +6,14 @@ namespace Trilang.Semantics.Passes;
 
 internal class RestrictFieldAccess : Visitor, ISemanticPass
 {
+    private SemanticDiagnosticReporter diagnostics = null!;
+
     public void Analyze(SemanticTree tree, SemanticPassContext context)
-        => tree.Accept(this);
+    {
+        diagnostics = context.Diagnostics;
+
+        tree.Accept(this);
+    }
 
     protected override void VisitMemberAccessExit(MemberAccessExpression node)
     {
@@ -14,7 +21,7 @@ internal class RestrictFieldAccess : Visitor, ISemanticPass
             return;
 
         if (node.Reference is FieldMetadata)
-            throw new SemanticAnalysisException($"The '{node.Name}' field is not accessible.");
+            diagnostics.FieldNotAccessible(node);
     }
 
     public string Name => nameof(RestrictFieldAccess);

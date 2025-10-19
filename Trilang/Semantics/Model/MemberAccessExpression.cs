@@ -79,6 +79,9 @@ public class MemberAccessExpression : IExpression
             ITypeMetadata type
                 => type,
 
+            InvalidMemberMetadata invalidMember
+                => invalidMember.Type,
+
             null => null,
             _ => throw new InvalidOperationException(),
         };

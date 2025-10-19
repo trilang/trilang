@@ -32,6 +32,9 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return DeclaringType.Equals(other.DeclaringType) &&
                Name == other.Name &&
                Type.Equals(other.Type) &&
@@ -59,7 +62,12 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
     public override string ToString()
         => $"{Name}: {Type}";
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     public SourceLocation? Definition { get; }
+
+    public bool IsInvalid { get; private set; }
 
     public InterfaceMetadata DeclaringType { get; }
 

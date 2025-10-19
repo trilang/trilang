@@ -36,6 +36,9 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return Name == other.Name &&
                genericArguments.SequenceEqual(genericArguments);
     }
@@ -95,7 +98,15 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
     public SourceLocation? Definition { get; }
 
     public bool IsValueType
-        => Type?.IsValueType ?? false;
+    {
+        get
+        {
+            if (IsInvalid)
+                return false;
+
+            return Type?.IsValueType ?? false;
+        }
+    }
 
     public TypeLayout? Layout { get; set; }
 

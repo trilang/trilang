@@ -28,5 +28,5 @@ public class FakeType : IInlineType
 
     public string Name { get; }
 
-    public ITypeMetadata? Metadata => ErrorTypeMetadata.Instance;
+    public ITypeMetadata? Metadata => TypeMetadata.InvalidType;
 }

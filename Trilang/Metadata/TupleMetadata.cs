@@ -37,6 +37,9 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return types.SequenceEqual(other.types);
     }
 

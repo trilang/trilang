@@ -1,11 +1,18 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class ThisInStaticMethods : Visitor, ISemanticPass
 {
+    private SemanticDiagnosticReporter diagnostics = null!;
+
     public void Analyze(SemanticTree tree, SemanticPassContext context)
-        => tree.Accept(this);
+    {
+        diagnostics = context.Diagnostics;
+
+        tree.Accept(this);
+    }
 
     protected override void VisitMemberAccessEnter(MemberAccessExpression node)
     {
@@ -16,7 +23,7 @@ internal class ThisInStaticMethods : Visitor, ISemanticPass
         if (method is null || !method.IsStatic)
             return;
 
-        throw new SemanticAnalysisException("The 'this' keyword is not allowed in static methods.");
+        diagnostics.ThisInStaticMethod(node);
     }
 
     public string Name => nameof(ThisInStaticMethods);

@@ -240,4 +240,7 @@ public static class SemanticNodeExtensions
 
     public static SemanticTree GetRoot(this ISemanticNode node)
         => node.FindInParent<SemanticTree>() ?? throw new Exception();
+
+    public static SourceLocation GetLocation(this ISemanticNode node)
+        => new SourceLocation(node.GetRoot().SourceFile, node.SourceSpan ?? default);
 }

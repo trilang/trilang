@@ -8,7 +8,7 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     private readonly List<FieldMetadata> fields;
     private readonly List<ITypeMetadata> parameterTypes;
 
-    public FunctionTypeMetadata(SourceLocation definition) : this(definition, [], null!)
+    public FunctionTypeMetadata(SourceLocation? definition) : this(definition, [], null!)
     {
     }
 
@@ -36,6 +36,9 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
         ReturnType = returnType;
     }
 
+    public static FunctionTypeMetadata Invalid()
+        => new FunctionTypeMetadata(null, [], null!) { IsInvalid = true };
+
     public static bool operator ==(FunctionTypeMetadata? left, FunctionTypeMetadata? right)
         => Equals(left, right);
 
@@ -49,6 +52,9 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
 
         if (ReferenceEquals(this, other))
             return true;
+
+        if (IsInvalid || other.IsInvalid)
+            return false;
 
         return parameterTypes.SequenceEqual(other.parameterTypes) &&
                ReturnType.Equals(other.ReturnType);
@@ -80,7 +86,7 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     public IMetadata? GetMember(string name)
         => fields.FirstOrDefault(f => f.Name == name);
 
-    public bool IsInvalid { get; }
+    public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }
 

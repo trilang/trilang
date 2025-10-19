@@ -73,11 +73,19 @@ public class VariableUsedBeforeDeclaredTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'a' variable used before declaration."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0025VariableUsedBeforeDeclaration,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(27, 2, 6))),
+            "The 'a' variable is used before its declaration.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -94,11 +102,19 @@ public class VariableUsedBeforeDeclaredTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'a' variable used before declaration."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0025VariableUsedBeforeDeclaration,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(36, 3, 9), new SourcePosition(37, 3, 10))),
+            "The 'a' variable is used before its declaration.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -117,11 +133,19 @@ public class VariableUsedBeforeDeclaredTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Unknown symbol: a"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0013UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(72, 6, 9), new SourcePosition(73, 6, 10))),
+            "Unknown symbol: 'a'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -139,11 +163,19 @@ public class VariableUsedBeforeDeclaredTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("Unknown symbol: a"));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0013UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(71, 6, 5), new SourcePosition(72, 6, 6))),
+            "Unknown symbol: 'a'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]

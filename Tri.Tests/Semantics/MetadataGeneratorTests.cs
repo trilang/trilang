@@ -193,11 +193,19 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' property has unknown type: 'xxx'."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11))),
+            "Unknown type: 'xxx'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -213,11 +221,29 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'other' parameter has unknown type: 'xxx'."));
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticId.S0008UnknownType,
+                DiagnosticSeverity.Error,
+                new SourceLocation(
+                    file,
+                    new SourceSpan(new SourcePosition(47, 2, 28), new SourcePosition(50, 2, 31))),
+                "Unknown type: 'xxx'."),
+            new Diagnostic(
+                DiagnosticId.S0009ReturnTypeMismatch,
+                DiagnosticSeverity.Error,
+                new SourceLocation(
+                    file,
+                    new SourceSpan(new SourcePosition(67, 3, 9), new SourcePosition(74, 3, 16))),
+                "Return type mismatch: expected 'f64', got 'void'.")
+        };
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
@@ -233,11 +259,19 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'toString' method has unknown return type: 'xxx'."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(46, 2, 27))),
+            "Unknown type: 'xxx'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -259,11 +293,19 @@ public class MetadataGeneratorTests
         var (tree, diagnostics) = Parse("public type MyInt = xxx;");
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'xxx' aliased type is not defined."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(23, 1, 24))),
+            "Unknown type: 'xxx'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -295,11 +337,19 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The function has unknown parameter type: 'xxx'."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21))),
+            "Unknown type: 'xxx'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -331,11 +381,19 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The function has unknown parameter type: 'xxx'."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19))),
+            "Unknown type: 'xxx'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -349,11 +407,19 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The function has unknown return type: 'xxx'."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19))),
+            "Unknown type: 'xxx'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -501,7 +567,7 @@ public class MetadataGeneratorTests
                 "x",
                 TypeMetadata.I32,
                 AccessModifierMetadata.Public,
-                AccessModifierMetadata.Private));
+                null));
         expectedInterface.AddProperty(
             new InterfacePropertyMetadata(
                 null,
@@ -509,7 +575,7 @@ public class MetadataGeneratorTests
                 "y",
                 TypeMetadata.I32,
                 AccessModifierMetadata.Public,
-                AccessModifierMetadata.Private));
+                null));
 
         var expectedAlias = new TypeAliasMetadata(null, "Point", [], expectedInterface);
         expectedInterface.AddMethod(new InterfaceMethodMetadata(
@@ -702,11 +768,19 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' property has unknown type: 'T'."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(51, 3, 8), new SourcePosition(52, 3, 9))),
+            "Unknown type: 'T'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -924,7 +998,7 @@ public class MetadataGeneratorTests
                 "x",
                 TypeMetadata.I32,
                 AccessModifierMetadata.Public,
-                AccessModifierMetadata.Private));
+                null));
 
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1041,7 +1115,7 @@ public class MetadataGeneratorTests
             "x",
             TypeMetadata.I32,
             AccessModifierMetadata.Public,
-            AccessModifierMetadata.Private));
+            null));
         var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], interfaceType);
 
         Assert.That(type, Is.Not.Null);

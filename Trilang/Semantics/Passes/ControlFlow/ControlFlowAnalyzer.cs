@@ -121,7 +121,7 @@ internal class ControlFlowAnalyzer : ISemanticPass
             builder.CurrentBlock = endBlock;
             whileLoops.Pop();
         }
-        else if (statement is Break breakNode)
+        else if (statement is Break { LoopNode: not null } breakNode)
         {
             Debug.Assert(whileLoops.Count > 0, "While loop is not found.");
 
@@ -130,7 +130,7 @@ internal class ControlFlowAnalyzer : ISemanticPass
             var (_, endBlock) = whileLoops.Peek();
             builder.CurrentBlock.AddNext(endBlock);
         }
-        else if (statement is Continue continueNode)
+        else if (statement is Continue { LoopNode: not null } continueNode)
         {
             Debug.Assert(whileLoops.Count > 0, "While loop is not found.");
 

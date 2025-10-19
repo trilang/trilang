@@ -23,5 +23,5 @@ public class FakeExpression : IExpression
 
     public SourceSpan? SourceSpan { get; }
 
-    public ITypeMetadata? ReturnTypeMetadata => ErrorTypeMetadata.Instance;
+    public ITypeMetadata? ReturnTypeMetadata => TypeMetadata.InvalidType;
 }

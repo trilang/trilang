@@ -38,11 +38,19 @@ public class BreakContinueWithinLoopTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'break' keyword can only be used within a loop."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0017BreakOutsideLoop,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(32, 2, 11))),
+            "The 'break' keyword can only be used within a loop.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -56,11 +64,19 @@ public class BreakContinueWithinLoopTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'continue' keyword can only be used within a loop."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0018ContinueOutsideLoop,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(35, 2, 14))),
+            "The 'continue' keyword can only be used within a loop.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]

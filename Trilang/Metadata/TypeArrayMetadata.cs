@@ -26,6 +26,9 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         methods.Add(sizeProperty.Getter!);
     }
 
+    public static TypeArrayMetadata Invalid()
+        => new TypeArrayMetadata(null, null) { IsInvalid = true };
+
     public static bool operator ==(TypeArrayMetadata? left, TypeArrayMetadata? right)
         => Equals(left, right);
 
@@ -39,6 +42,9 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
 
         if (ReferenceEquals(this, other))
             return true;
+
+        if (IsInvalid || other.IsInvalid)
+            return false;
 
         return Equals(ItemMetadata, other.ItemMetadata);
     }
@@ -77,7 +83,7 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
     public MethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(f => f.Name == name);
 
-    public bool IsInvalid { get; }
+    public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }
 

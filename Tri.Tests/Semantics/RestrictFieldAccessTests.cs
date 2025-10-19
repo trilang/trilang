@@ -37,10 +37,18 @@ public class RestrictFieldAccessTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo($"The 'context' field is not accessible."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(58, 2, 12), new SourcePosition(74, 2, 28))),
+            "The 'context' field is not accessible.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

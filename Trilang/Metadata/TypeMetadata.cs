@@ -5,6 +5,7 @@ namespace Trilang.Metadata;
 // TODO: immutable metadata
 public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 {
+    public static readonly TypeMetadata InvalidType = TypeMetadata.Invalid("<>_invalid_type");
     public static readonly TypeMetadata Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true);
     public static readonly TypeMetadata Null = new TypeMetadata(null, "null", [], [], [], [], [], [], true);
     public static readonly TypeMetadata I8 = new TypeMetadata(null, "i8", [], [], [], [], [], [], true);
@@ -67,6 +68,9 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     {
     }
 
+    public static TypeMetadata Invalid(string name)
+        => new TypeMetadata(null, name) { IsInvalid = true };
+
     public static bool operator ==(TypeMetadata? left, TypeMetadata? right)
         => Equals(left, right);
 
@@ -80,6 +84,9 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 
         if (ReferenceEquals(this, other))
             return true;
+
+        if (IsInvalid || other.IsInvalid)
+            return false;
 
         return Name == other.Name &&
                genericArguments.SequenceEqual(other.genericArguments);
@@ -170,7 +177,7 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
            GetMethod(name) ??
            GetField(name) as IMetadata;
 
-    public bool IsInvalid { get; }
+    public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }
 

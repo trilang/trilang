@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
@@ -8,11 +9,13 @@ internal class AliasGenerator
 {
     private record Item(TypeAliasMetadata Metadata, TypeAliasDeclaration Node);
 
+    private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public AliasGenerator(SymbolTableMap symbolTableMap)
+    public AliasGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
     {
+        this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
         typesToProcess = [];
     }
@@ -24,9 +27,7 @@ internal class AliasGenerator
             if (!symbol.IsAlias)
                 continue;
 
-            if (symbol.Node is not TypeAliasDeclaration typeAliasNode)
-                throw new SemanticAnalysisException("The type alias declaration is not valid.");
-
+            var typeAliasNode = (TypeAliasDeclaration)symbol.Node;
             var root = typeAliasNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var alias = new TypeAliasMetadata(
@@ -36,19 +37,22 @@ internal class AliasGenerator
             foreach (var genericArgument in typeAliasNode.GenericArguments)
             {
                 var argumentMetadata = new TypeArgumentMetadata(
-                      new SourceLocation(root.SourceFile, genericArgument.SourceSpan.GetValueOrDefault()),
-                      genericArgument.Name);
+                    new SourceLocation(root.SourceFile, genericArgument.SourceSpan.GetValueOrDefault()),
+                    genericArgument.Name) as ITypeMetadata;
 
                 if (!typeProvider.DefineType(genericArgument.Name, argumentMetadata))
-                    throw new SemanticAnalysisException($"The '{genericArgument.Name}' type argument is already defined.");
+                {
+                    argumentMetadata = TypeArgumentMetadata.Invalid(genericArgument.Name);
+                    diagnostics.TypeArgumentAlreadyDefined(genericArgument);
+                }
 
                 alias.AddGenericArgument(argumentMetadata);
             }
 
-            if (!typeProvider.DefineType(symbol.Name, alias))
-                throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
-
-            typesToProcess.Add(new Item(alias, typeAliasNode));
+            if (typeProvider.DefineType(symbol.Name, alias))
+                typesToProcess.Add(new Item(alias, typeAliasNode));
+            else
+                diagnostics.TypeAlreadyDefined(typeAliasNode);
         }
     }
 
@@ -62,7 +66,7 @@ internal class AliasGenerator
                 : typeAliasNode.Type.Name;
 
             var aliasedMetadata = typeProvider.GetType(aliasedMetadataName) ??
-                                  throw new SemanticAnalysisException($"The '{typeAliasNode.Type.Name}' aliased type is not defined.");
+                                  TypeMetadata.Invalid(aliasedMetadataName);
 
             aliasMetadata.Type = aliasedMetadata;
         }

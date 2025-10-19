@@ -19,6 +19,9 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
         this.methods = new HashSet<InterfaceMethodMetadata>(methods);
     }
 
+    public static InterfaceMetadata Invalid()
+        => new InterfaceMetadata(null, [], []) { IsInvalid = true };
+
     public static bool operator ==(InterfaceMetadata? left, InterfaceMetadata? right)
         => Equals(left, right);
 
@@ -32,6 +35,9 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
 
         if (ReferenceEquals(this, other))
             return true;
+
+        if (IsInvalid || other.IsInvalid)
+            return false;
 
         foreach (var (p1, p2) in properties.Zip(other.properties))
         {
@@ -99,7 +105,7 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
         => GetProperty(name) ??
            GetMethod(name) as IMetadata;
 
-    public bool IsInvalid { get; }
+    public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }
 

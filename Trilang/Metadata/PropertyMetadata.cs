@@ -63,6 +63,9 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return Equals(DeclaringType, other.DeclaringType) &&
                Name == other.Name &&
                Type.Equals(other.Type) &&
@@ -113,6 +116,8 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
         );
 
     public SourceLocation? Definition { get; }
+
+    public bool IsInvalid => false;
 
     public ITypeMetadata DeclaringType { get; }
 

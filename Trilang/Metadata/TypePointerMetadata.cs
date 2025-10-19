@@ -19,6 +19,9 @@ public class TypePointerMetadata : ITypeMetadata, IEquatable<TypePointerMetadata
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return Type.Equals(other.Type);
     }
 

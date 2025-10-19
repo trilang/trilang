@@ -13,13 +13,16 @@ internal class MissingReturnStatement : ISemanticPass
         if (cfgs is null)
             return;
 
+        var visited = new HashSet<SemanticBlock>();
+        var q = new Queue<SemanticBlock>();
+
         foreach (var (function, cfg) in cfgs.Functions)
         {
             if (function is ConstructorMetadata || function.Type.ReturnType.Equals(TypeMetadata.Void))
                 continue;
 
-            var visited = new HashSet<SemanticBlock>();
-            var q = new Queue<SemanticBlock>();
+            visited.Clear();
+            q.Clear();
             q.Enqueue(cfg.Entry);
 
             while (q.TryDequeue(out var block))
@@ -31,7 +34,10 @@ internal class MissingReturnStatement : ISemanticPass
                     continue;
 
                 if (block.Next.Count == 0)
-                    throw new SemanticAnalysisException($"{function}. Not all paths return a value.");
+                {
+                    context.Diagnostics.NotAllPathsReturnValue(function);
+                    continue;
+                }
 
                 foreach (var next in block.Next)
                     q.Enqueue(next);

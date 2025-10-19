@@ -41,11 +41,19 @@ public class CheckAccessModifiersTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The constructor of 'Test' is not accessible."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(92, 6, 19), new SourcePosition(102, 6, 29))),
+            "The constructor of 'Test' is not accessible.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -86,11 +94,19 @@ public class CheckAccessModifiersTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo($"The getter of 'x' is private."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(129, 8, 12), new SourcePosition(132, 8, 15))),
+            "The getter of 'x' is not accessible.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -110,11 +126,19 @@ public class CheckAccessModifiersTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo($"The setter of 'x' is private."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(123, 8, 5), new SourcePosition(126, 8, 8))),
+            "The setter of 'x' is not accessible.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -174,11 +198,19 @@ public class CheckAccessModifiersTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' property does not have a getter."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0013UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(90, 6, 12), new SourcePosition(93, 6, 15))),
+            "The 'x' property doesn't have a getter.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -196,23 +228,18 @@ public class CheckAccessModifiersTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'x' property does not have a setter."));
-    }
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0013UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(84, 6, 5), new SourcePosition(87, 6, 8))),
+            "The 'x' property doesn't have a setter.");
 
-    [Test]
-    public void InternalFunctionTest()
-    {
-        var (tree, diagnostics) = Parse("internal test(): void {}");
-
-        var semantic = new SemanticAnalysis();
-
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'test' function can't be internal."));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

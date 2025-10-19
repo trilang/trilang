@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 
@@ -5,49 +6,77 @@ namespace Trilang.Semantics.Passes;
 
 internal class NotImplementedInterface : Visitor, ISemanticPass
 {
+    private SemanticDiagnosticReporter diagnostics = null!;
+
     public void Analyze(SemanticTree tree, SemanticPassContext context)
-        => tree.Accept(this);
+    {
+        diagnostics = context.Diagnostics;
+
+        tree.Accept(this);
+    }
 
     protected override void VisitTypeEnter(TypeDeclaration node)
     {
         var type = node.Metadata;
-        if (node.Interfaces.Count == 0 || type is null)
+        if (node.Interfaces.Count == 0 || type is null || type.IsInvalid)
             return;
 
         foreach (var @interface in type.Interfaces)
         {
+            if (@interface.IsInvalid)
+                continue;
+
             foreach (var interfaceProperty in @interface.Properties)
             {
-                var propertyType = type.GetProperty(interfaceProperty.Name) ??
-                                   throw new SemanticAnalysisException($"The '{interfaceProperty.Name}' property is not implemented.");
+                if (interfaceProperty.IsInvalid)
+                    continue;
 
-                if (!interfaceProperty.Type.Equals(propertyType.Type))
-                    throw new SemanticAnalysisException($"The '{interfaceProperty.Name}' property is not of the correct type.");
+                var propertyMetadata = type.GetProperty(interfaceProperty.Name);
+                if (propertyMetadata is null)
+                {
+                    diagnostics.PropertyIsNotImplemented(node, interfaceProperty);
+                    continue;
+                }
 
-                if (interfaceProperty.GetterModifier == AccessModifierMetadata.Public &&
-                    propertyType.Getter?.AccessModifier != AccessModifierMetadata.Public)
-                    throw new SemanticAnalysisException($"The implementation of an interface property getter '{interfaceProperty.Name}' cannot be private.");
+                if (!interfaceProperty.Type.Equals(propertyMetadata.Type))
+                    diagnostics.PropertyImplementationHasIncorrectType(propertyMetadata, interfaceProperty);
 
-                if (interfaceProperty.SetterModifier == AccessModifierMetadata.Public &&
-                    propertyType.Setter?.AccessModifier != AccessModifierMetadata.Public)
-                    throw new SemanticAnalysisException($"The implementation of an interface property setter '{interfaceProperty.Name}' cannot be private.");
+                // TODO: allow to implement with higher access modifier?
+                if (interfaceProperty.GetterModifier is not null &&
+                    propertyMetadata.Getter?.AccessModifier != interfaceProperty.GetterModifier)
+                    diagnostics.PropertyGetterIncorrectAccessModifier(propertyMetadata);
+
+                if (interfaceProperty.SetterModifier is not null &&
+                    propertyMetadata.Setter?.AccessModifier != interfaceProperty.SetterModifier)
+                    diagnostics.PropertySetterIncorrectAccessModifier(propertyMetadata);
             }
 
             foreach (var interfaceMethod in @interface.Methods)
             {
-                var method = type.GetMethod(interfaceMethod.Name) ??
-                             throw new SemanticAnalysisException($"The '{interfaceMethod.Name}' method is not implemented.");
+                if (interfaceMethod.IsInvalid)
+                    continue;
+
+                var method = type.GetMethod(interfaceMethod.Name);
+                if (method is null)
+                {
+                    diagnostics.MethodIsNotImplemented(node, interfaceMethod);
+                    continue;
+                }
 
                 if (!interfaceMethod.Type.Equals(method.Type))
-                    throw new SemanticAnalysisException($"The '{interfaceMethod.Name}' method is not of the correct type.");
+                    diagnostics.MethodImplementationHasIncorrectType(method, interfaceMethod);
 
-                if (method.AccessModifier == AccessModifierMetadata.Private)
-                    throw new SemanticAnalysisException($"The implementation of an interface method '{interfaceMethod.Name}' cannot be private.");
+                if (method.AccessModifier != AccessModifierMetadata.Public)
+                    diagnostics.MethodImplementationIsNotPublic(method);
             }
         }
     }
 
     public string Name => nameof(NotImplementedInterface);
 
-    public IEnumerable<string> DependsOn => [nameof(TypeChecker)];
+    public IEnumerable<string> DependsOn =>
+    [
+        nameof(TypeChecker),
+        nameof(PrivateInterfaceProperties),
+    ];
 }

@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
@@ -6,6 +7,7 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
 {
     private readonly List<HashSet<string>> scopes;
     private SymbolTableMap symbolFinderMap = null!;
+    private SemanticDiagnosticReporter diagnostics = null!;
 
     public VariableUsedBeforeDeclared()
         => scopes = [];
@@ -13,6 +15,7 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
     public void Analyze(SemanticTree tree, SemanticPassContext context)
     {
         symbolFinderMap = context.SymbolTableMap!;
+        diagnostics = context.Diagnostics;
 
         tree.Accept(this);
     }
@@ -45,14 +48,15 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
                 if (scopes[i].Contains(node.Name))
                     return;
 
-            throw new SemanticAnalysisException($"The '{node.Name}' variable used before declaration.");
+            diagnostics.VariableUsedBeforeDeclaration(node);
+            return;
         }
 
         // access static member
         var typeProvider = symbolTable.TypeProvider;
         var type = typeProvider.GetType(node.Name);
         if (type is null)
-            throw new SemanticAnalysisException($"Unknown symbol: {node.Name}");
+            diagnostics.UnknownSymbol(node);
     }
 
     public string Name => nameof(VariableUsedBeforeDeclared);

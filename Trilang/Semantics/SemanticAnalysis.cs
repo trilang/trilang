@@ -7,6 +7,7 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics;
 
+// TODO: multifile support
 public class SemanticAnalysis
 {
     private readonly ITypeMetadataProvider typeMetadataProvider;
@@ -23,10 +24,11 @@ public class SemanticAnalysis
         new MissingReturnStatement(),
         new NotImplementedInterface(),
         new CyclicTypeAlias(),
+        new PrivateInterfaceProperties(),
         new RestrictFieldAccess(),
         new SymbolFinder(),
         new ThisInStaticMethods(),
-        new ThisOutsideOfClass(),
+        new ThisOutsideOfType(),
         new TypeChecker(),
         new VariableUsedBeforeDeclared()
     ];

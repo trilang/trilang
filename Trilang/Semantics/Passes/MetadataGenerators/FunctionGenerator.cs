@@ -46,15 +46,13 @@ internal class FunctionGenerator
             foreach (var functionParameter in function.Parameters)
             {
                 var parameter = typeProvider.GetType(functionParameter.Type.Name) ??
-                                throw new SemanticAnalysisException($"The function has unknown parameter type: '{functionParameter.Type.Name}'.");
+                                TypeMetadata.Invalid(functionParameter.Type.Name);
 
                 functionTypeMetadata.AddParameter(parameter);
             }
 
-            var returnType = typeProvider.GetType(function.ReturnType.Name) ??
-                             throw new SemanticAnalysisException($"The function has unknown return type: '{function.ReturnType.Name}'.");
-
-            functionTypeMetadata.ReturnType = returnType;
+            functionTypeMetadata.ReturnType = typeProvider.GetType(function.ReturnType.Name) ??
+                                              TypeMetadata.Invalid(function.ReturnType.Name);
         }
     }
 }

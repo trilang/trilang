@@ -7,7 +7,7 @@ using Trilang.Semantics;
 
 namespace Tri.Tests.Semantics;
 
-public class ThisOutsideOfClassTests
+public class ThisOutsideOfTypeTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
@@ -75,10 +75,18 @@ public class ThisOutsideOfClassTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("The 'this' keyword is only allowed inside a type."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0022ThisOutsideOfType,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(30, 2, 9))),
+            "The 'this' keyword can only be used within a type.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

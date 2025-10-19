@@ -24,9 +24,7 @@ internal class ArrayGenerator
             if (!symbol.IsArray)
                 continue;
 
-            if (symbol.Node is not ArrayType arrayTypeNode)
-                throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an ArrayTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
-
+            var arrayTypeNode = (ArrayType)symbol.Node;
             var root = arrayTypeNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var metadata = new TypeArrayMetadata(
@@ -43,7 +41,7 @@ internal class ArrayGenerator
         {
             var typeProvider = symbolTableMap.Get(arrayTypeNode).TypeProvider;
             var itemMetadata = typeProvider.GetType(arrayTypeNode.ElementType.Name) ??
-                               throw new SemanticAnalysisException($"The '{arrayTypeNode.ElementType.Name}' array item type is not defined.");
+                               TypeMetadata.Invalid(arrayTypeNode.ElementType.Name);
 
             arrayMetadata.ItemMetadata = itemMetadata;
         }

@@ -32,11 +32,19 @@ public class MissingReturnStatementTests
         var (tree, diagnostics) = Parse("public test(): i32 { }");
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("test: () => i32. Not all paths return a value."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0020NotAllPathsReturnValue,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23))),
+            "Not all paths return a value in 'test'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -52,11 +60,19 @@ public class MissingReturnStatementTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("test: () => i32. Not all paths return a value."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0020NotAllPathsReturnValue,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(63, 5, 2))),
+            "Not all paths return a value in 'test'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
@@ -114,11 +130,19 @@ public class MissingReturnStatementTests
             """);
 
         var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            tree,
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.TypeOf<SemanticAnalysisException>()
-                .And.Message.EqualTo("test: () => i32. Not all paths return a value."));
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0020NotAllPathsReturnValue,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(66, 5, 2))),
+            "Not all paths return a value in 'test'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]

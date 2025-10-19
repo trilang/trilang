@@ -4,7 +4,7 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
 {
     private readonly List<ITypeMetadata> types;
 
-    public DiscriminatedUnionMetadata(SourceLocation definition) : this(definition, [])
+    public DiscriminatedUnionMetadata(SourceLocation? definition) : this(definition, [])
     {
     }
 
@@ -13,6 +13,9 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
         Definition = definition;
         this.types = [.. types];
     }
+
+    public static DiscriminatedUnionMetadata Invalid()
+        => new DiscriminatedUnionMetadata(null, []) { IsInvalid = true };
 
     public static bool operator ==(DiscriminatedUnionMetadata? left, DiscriminatedUnionMetadata? right)
         => Equals(left, right);
@@ -27,6 +30,9 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
 
         if (ReferenceEquals(this, other))
             return true;
+
+        if (IsInvalid || other.IsInvalid)
+            return false;
 
         return types.SequenceEqual(other.types);
     }
@@ -60,7 +66,7 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
     public IMetadata? GetMember(string name)
         => null;
 
-    public bool IsInvalid { get; }
+    public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }
 

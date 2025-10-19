@@ -24,9 +24,7 @@ internal class TupleGenerator
             if (!symbol.IsTuple)
                 continue;
 
-            if (symbol.Node is not TupleType tupleNode)
-                throw new SemanticAnalysisException();
-
+            var tupleNode = (TupleType)symbol.Node;
             var root = tupleNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var tuple = new TupleMetadata(
@@ -46,7 +44,7 @@ internal class TupleGenerator
             foreach (var typeNode in tupleNode.Types)
             {
                 var type = typeProvider.GetType(typeNode.Name) ??
-                           throw new SemanticAnalysisException($"The '{typeNode.Name}' type is not defined.");
+                           TypeMetadata.Invalid(typeNode.Name);
 
                 tuple.AddType(type);
             }

@@ -24,9 +24,7 @@ internal class InterfaceGenerator
             if (!symbol.IsInterface)
                 continue;
 
-            if (symbol.Node is not Interface interfaceNode)
-                throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have an InterfaceNode, but found '{symbol.Node.GetType().Name}' instead.");
-
+            var interfaceNode = (Interface)symbol.Node;
             var root = interfaceNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var metadata = new InterfaceMetadata(
@@ -46,7 +44,7 @@ internal class InterfaceGenerator
             foreach (var property in interfaceNode.Properties)
             {
                 var propertyType = typeProvider.GetType(property.Type.Name) ??
-                                   throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
+                                   TypeMetadata.Invalid(property.Type.Name);
 
                 var propertyMetadata = new InterfacePropertyMetadata(
                     metadata.Definition! with { Span = property.SourceSpan.GetValueOrDefault() },
@@ -58,7 +56,7 @@ internal class InterfaceGenerator
                         : AccessModifierMetadata.Public,
                     property.SetterModifier.HasValue
                         ? GetAccessModifierMetadata(property.SetterModifier.Value)
-                        : AccessModifierMetadata.Private);
+                        : null);
 
                 metadata.AddProperty(propertyMetadata);
             }
@@ -67,10 +65,10 @@ internal class InterfaceGenerator
             {
                 var parameters = method.ParameterTypes
                     .Select(x => typeProvider.GetType(x.Name) ??
-                                 throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Name}'."));
+                                 TypeMetadata.Invalid(x.Name));
 
                 var returnType = typeProvider.GetType(method.ReturnType.Name) ??
-                                 throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
+                                 TypeMetadata.Invalid(method.ReturnType.Name);
 
                 var functionType = new FunctionTypeMetadata(null, parameters, returnType);
 

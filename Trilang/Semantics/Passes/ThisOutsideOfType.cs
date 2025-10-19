@@ -1,11 +1,18 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
-internal class ThisOutsideOfClass : Visitor, ISemanticPass
+internal class ThisOutsideOfType : Visitor, ISemanticPass
 {
+    private SemanticDiagnosticReporter diagnostics = null!;
+
     public void Analyze(SemanticTree tree, SemanticPassContext context)
-        => tree.Accept(this);
+    {
+        diagnostics = context.Diagnostics;
+
+        tree.Accept(this);
+    }
 
     protected override void VisitMemberAccessEnter(MemberAccessExpression node)
     {
@@ -16,10 +23,10 @@ internal class ThisOutsideOfClass : Visitor, ISemanticPass
         if (type is not null)
             return;
 
-        throw new SemanticAnalysisException("The 'this' keyword is only allowed inside a type.");
+        diagnostics.ThisOutsideOfType(node);
     }
 
-    public string Name => nameof(ThisOutsideOfClass);
+    public string Name => nameof(ThisOutsideOfType);
 
     public IEnumerable<string> DependsOn => [];
 }

@@ -16,6 +16,14 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
         Type = type;
     }
 
+    public static ConstructorMetadata Invalid()
+        => new ConstructorMetadata(
+            null,
+            TypeMetadata.InvalidType,
+            AccessModifierMetadata.Public,
+            [],
+            FunctionTypeMetadata.Invalid());
+
     public static bool operator ==(ConstructorMetadata? left, ConstructorMetadata? right)
         => Equals(left, right);
 
@@ -29,6 +37,9 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
 
         if (ReferenceEquals(this, other))
             return true;
+
+        if (IsInvalid || other.IsInvalid)
+            return false;
 
         return DeclaringType.Equals(other.DeclaringType) &&
                AccessModifier == other.AccessModifier &&
@@ -57,6 +68,8 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
         => $"ctor: {Type}";
 
     public SourceLocation? Definition { get; }
+
+    public bool IsInvalid => false;
 
     public ITypeMetadata DeclaringType { get; }
 

@@ -28,6 +28,9 @@ public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMeta
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return DeclaringType.Equals(other.DeclaringType) &&
                Name == other.Name &&
                Type.Equals(other.Type);
@@ -54,6 +57,8 @@ public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMeta
         => $"{Name}: {Type}";
 
     public SourceLocation? Definition { get; }
+
+    public bool IsInvalid => false;
 
     public InterfaceMetadata DeclaringType { get; }
 

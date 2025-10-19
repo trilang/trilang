@@ -7,7 +7,7 @@ using Trilang.Semantics;
 
 namespace Tri.Tests.Semantics;
 
-public class CheckStaticAndInstanceMembersAccessTests
+public class PrivateInterfacePropertiesTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
@@ -27,16 +27,12 @@ public class CheckStaticAndInstanceMembersAccessTests
     }
 
     [Test]
-    public void AccessNotStaticMethodOnTypeTest()
+    public void PrivateGetterTest()
     {
         var (tree, diagnostics) = Parse(
             """
-            public type Test {
-                public s(): void { }
-            }
-
-            public func(): void {
-                Test.s();
+            public type Test = {
+                x: i32 { private get; }
             }
             """);
 
@@ -46,27 +42,23 @@ public class CheckStaticAndInstanceMembersAccessTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0024InstanceMethodAsStatic,
+            DiagnosticId.S0027InterfacePropertyCantBePrivate,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(73, 6, 5), new SourcePosition(79, 6, 11))),
-            "The instance method 's' cannot be called as a static one.");
+                new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(48, 2, 28))),
+            "The getter of the interface property 'x' cannot be private.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
-    public void AccessStaticMethodOnInstanceTest()
+    public void PrivateSetterTest()
     {
         var (tree, diagnostics) = Parse(
             """
-            public type Test {
-                public static s(): void { }
-            }
-
-            public func(a: Test): void {
-                a.s();
+            public type Test = {
+                x: i32 { private set; }
             }
             """);
 
@@ -76,48 +68,23 @@ public class CheckStaticAndInstanceMembersAccessTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0023StaticMethodAsInstance,
+            DiagnosticId.S0027InterfacePropertyCantBePrivate,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(87, 6, 5), new SourcePosition(90, 6, 8))),
-            "The static method 's' cannot be called as an instance one.");
+                new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(48, 2, 28))),
+            "The setter of the interface property 'x' cannot be private.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
     [Test]
-    public void AccessInstanceMethodWithThisTest()
+    public void PrivateGetterAndSetterTest()
     {
         var (tree, diagnostics) = Parse(
             """
-            public type Test {
-                public method1(): void { }
-
-                public method2(): void {
-                    this.method1();
-                }
-            }
-            """);
-
-        var semantic = new SemanticAnalysis();
-
-        Assert.That(
-            () => semantic.Analyze(
-                tree,
-                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
-            Throws.Nothing);
-    }
-
-    [Test]
-    public void AccessStaticOnInvalidTypeTest()
-    {
-        var (tree, diagnostics) = Parse(
-            """
-            public type Test = Test;
-
-            public func(): void {
-                Test.s();
+            public type Test = {
+                x: i32 { private get; private set; }
             }
             """);
 
@@ -126,14 +93,24 @@ public class CheckStaticAndInstanceMembersAccessTests
             tree,
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var diagnostic = new Diagnostic(
-            DiagnosticId.S0001CyclicTypeAlias,
-            DiagnosticSeverity.Error,
-            new SourceLocation(
-                file,
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25))),
-            "The cyclic type alias detected: 'Test'.");
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticId.S0027InterfacePropertyCantBePrivate,
+                DiagnosticSeverity.Error,
+                new SourceLocation(
+                    file,
+                    new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(61, 2, 41))),
+                "The getter of the interface property 'x' cannot be private."),
+            new Diagnostic(
+                DiagnosticId.S0027InterfacePropertyCantBePrivate,
+                DiagnosticSeverity.Error,
+                new SourceLocation(
+                    file,
+                    new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(61, 2, 41))),
+                "The setter of the interface property 'x' cannot be private.")
+        };
 
-        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 }

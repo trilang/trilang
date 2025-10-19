@@ -26,6 +26,9 @@ public class VariableMetadata : IMetadata, IEquatable<VariableMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return Name == other.Name &&
                Type.Equals(other.Type);
     }
@@ -51,6 +54,8 @@ public class VariableMetadata : IMetadata, IEquatable<VariableMetadata>
         => $"{Name}: {Type}";
 
     public SourceLocation? Definition { get; }
+
+    public bool IsInvalid => false;
 
     public string Name { get; }
 

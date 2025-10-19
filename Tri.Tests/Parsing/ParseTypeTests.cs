@@ -1356,6 +1356,7 @@ public class ParseTypeTests
         ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]

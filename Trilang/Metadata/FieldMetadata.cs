@@ -26,6 +26,9 @@ public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return DeclaringType.Equals(other.DeclaringType) &&
                Name == other.Name &&
                Type.Equals(other.Type);
@@ -52,6 +55,8 @@ public class FieldMetadata : IMetadata, IEquatable<FieldMetadata>
         => $"{Name}: {Type}";
 
     public SourceLocation? Definition => null;
+
+    public bool IsInvalid => false;
 
     public ITypeMetadata DeclaringType { get; }
 

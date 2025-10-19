@@ -147,7 +147,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
     {
         var type = (IInlineType)node.Type.Transform(this);
         var getter = (AccessModifier?)node.GetterModifier;
-        var setter = (AccessModifier?)node.GetterModifier;
+        var setter = (AccessModifier?)node.SetterModifier;
 
         return new InterfaceProperty(node.SourceSpan, node.Name, type, getter, setter);
     }
@@ -169,7 +169,21 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
     }
 
     public ISemanticNode TransformLiteral(Parsing.Ast.LiteralExpressionNode node)
-        => new LiteralExpression(node.SourceSpan, (LiteralExpressionKind)node.Kind, node.Value);
+    {
+        var kind = node.Kind switch
+        {
+            Parsing.Ast.LiteralExpressionKind.Unknown => LiteralExpressionKind.Unknown,
+            Parsing.Ast.LiteralExpressionKind.Integer => LiteralExpressionKind.Integer,
+            Parsing.Ast.LiteralExpressionKind.Float => LiteralExpressionKind.Float,
+            Parsing.Ast.LiteralExpressionKind.Boolean => LiteralExpressionKind.Boolean,
+            Parsing.Ast.LiteralExpressionKind.String => LiteralExpressionKind.String,
+            Parsing.Ast.LiteralExpressionKind.Char => LiteralExpressionKind.Char,
+
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+        return new LiteralExpression(node.SourceSpan, kind, node.Value);
+    }
 
     public ISemanticNode TransformMemberAccess(Parsing.Ast.MemberAccessExpressionNode node)
     {

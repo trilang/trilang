@@ -24,9 +24,7 @@ internal class FunctionTypeGenerator
             if (!symbol.IsFunction)
                 continue;
 
-            if (symbol.Node is not FunctionType function)
-                throw new SemanticAnalysisException($"The '{symbol.Name}' symbol is not a function.");
-
+            var function = (FunctionType)symbol.Node;
             var root = function.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var functionTypeMetadata = new FunctionTypeMetadata(
@@ -47,13 +45,13 @@ internal class FunctionTypeGenerator
             foreach (var parameterType in functionTypeNode.ParameterTypes)
             {
                 var parameter = typeProvider.GetType(parameterType.Name) ??
-                                throw new SemanticAnalysisException($"The function has unknown parameter type: '{parameterType.Name}'.");
+                                TypeMetadata.Invalid(parameterType.Name);
 
                 functionTypeMetadata.AddParameter(parameter);
             }
 
             var returnType = typeProvider.GetType(functionTypeNode.ReturnType.Name) ??
-                             throw new SemanticAnalysisException($"The function has unknown return type: '{functionTypeNode.ReturnType.Name}'.");
+                             TypeMetadata.Invalid(functionTypeNode.ReturnType.Name);
 
             functionTypeMetadata.ReturnType = returnType;
         }

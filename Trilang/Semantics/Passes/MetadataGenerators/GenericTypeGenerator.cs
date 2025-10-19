@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
@@ -24,9 +25,7 @@ internal class GenericTypeGenerator
             if (!symbol.IsClosedGenericType)
                 continue;
 
-            if (symbol.Node is not GenericType genericTypeNode)
-                throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a GenericTypeNode, but found '{symbol.Node.GetType().Name}' instead.");
-
+            var genericTypeNode = (GenericType)symbol.Node;
             var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
 
             // ignore open generic types
@@ -35,16 +34,13 @@ internal class GenericTypeGenerator
 
             var openName = genericTypeNode.GetOpenGenericName();
             var openGenericType = typeProvider.GetType(openName);
-            var closedType = openGenericType switch
-            {
-                TypeMetadata type
-                    => (ITypeMetadata)new TypeMetadata(openGenericType.Definition, type.Name),
-
-                TypeAliasMetadata alias
-                    => new TypeAliasMetadata(openGenericType.Definition, alias.Name),
-
-                _ => throw new SemanticAnalysisException($"The '{openName}' generic type is not defined."),
-            };
+            var closedType = default(ITypeMetadata);
+            if (openGenericType is TypeMetadata type)
+                closedType = new TypeMetadata(openGenericType.Definition, type.Name);
+            else if (openGenericType is TypeAliasMetadata alias)
+                closedType = new TypeAliasMetadata(openGenericType.Definition, alias.Name);
+            else
+                continue;
 
             if (typeProvider.DefineType(symbol.Name, closedType))
                 typesToProcess.Add(new Item(closedType, openGenericType, genericTypeNode));
@@ -60,7 +56,7 @@ internal class GenericTypeGenerator
             else if (closed is TypeAliasMetadata closedAlias && open is TypeAliasMetadata openAlias)
                 PopulateClosedTypes(genericTypeNode, closedAlias, openAlias);
             else
-                throw new SemanticAnalysisException($"The '{genericTypeNode.Name}' generic type is not defined.");
+                Debug.Fail($"The '{genericTypeNode.Name}' generic type is not defined.");
         }
     }
 
@@ -74,7 +70,7 @@ internal class GenericTypeGenerator
         foreach (var argumentNode in genericTypeNode.TypeArguments)
         {
             var typeArgument = typeProvider.GetType(argumentNode.Name) ??
-                               throw new SemanticAnalysisException($"The '{argumentNode.Name}' type argument is not defined.");
+                               TypeArgumentMetadata.Invalid(argumentNode.Name);
 
             closed.AddGenericArgument(typeArgument);
         }
@@ -87,11 +83,12 @@ internal class GenericTypeGenerator
         foreach (var @interface in open.Interfaces)
         {
             // TODO: support generic interfaces
-            var aliasMetadata = typeProvider.GetType(@interface.ToString()) as TypeAliasMetadata ??
-                                throw new SemanticAnalysisException($"The '{@interface}' interface is not defined.");
+            var interfaceMetadata = default(InterfaceMetadata);
+            var aliasMetadata = typeProvider.GetType(@interface.ToString()) as TypeAliasMetadata;
+            if (aliasMetadata is not null)
+                interfaceMetadata = aliasMetadata.Type as InterfaceMetadata;
 
-            var interfaceMetadata = aliasMetadata.Type as InterfaceMetadata ??
-                                    throw new SemanticAnalysisException($"The '{@interface}' interface is not an interface.");
+            interfaceMetadata ??= InterfaceMetadata.Invalid();
 
             closed.AddInterface(interfaceMetadata);
         }
@@ -176,7 +173,7 @@ internal class GenericTypeGenerator
         foreach (var argumentNode in genericTypeNode.TypeArguments)
         {
             var typeArgument = typeProvider.GetType(argumentNode.Name) ??
-                               throw new SemanticAnalysisException($"The '{argumentNode.Name}' type argument is not defined.");
+                               TypeArgumentMetadata.Invalid(argumentNode.Name);
 
             closed.AddGenericArgument(typeArgument);
         }
@@ -219,11 +216,12 @@ internal class GenericTypeGenerator
         var isOpenGeneric = true;
         foreach (var argumentNode in genericTypeNode.TypeArguments)
         {
-            var typeArgument = typeProvider.GetType(argumentNode.Name) ??
-                               throw new SemanticAnalysisException($"The '{argumentNode.Name}' type argument is not defined.");
-
-            if (typeArgument is not TypeArgumentMetadata)
+            var typeArgument = typeProvider.GetType(argumentNode.Name);
+            if (typeArgument is null or not TypeArgumentMetadata)
+            {
                 isOpenGeneric = false;
+                break;
+            }
         }
 
         return isOpenGeneric;

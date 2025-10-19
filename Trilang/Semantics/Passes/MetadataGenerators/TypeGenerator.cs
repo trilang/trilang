@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
@@ -8,11 +9,13 @@ internal class TypeGenerator
 {
     private record Item(TypeMetadata Metadata, TypeDeclaration Node);
 
+    private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public TypeGenerator(SymbolTableMap symbolTableMap)
+    public TypeGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
     {
+        this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
         typesToProcess = [];
     }
@@ -24,9 +27,7 @@ internal class TypeGenerator
             if (symbol is { IsType: false, IsGenericType: false })
                 continue;
 
-            if (symbol.Node is not TypeDeclaration typeDeclarationNode)
-                throw new SemanticAnalysisException($"Expected '{symbol.Name}' to have a TypeDeclarationNode, but found '{symbol.Node.GetType().Name}' instead.");
-
+            var typeDeclarationNode = (TypeDeclaration)symbol.Node;
             var root = typeDeclarationNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var metadata = new TypeMetadata(
@@ -37,18 +38,21 @@ internal class TypeGenerator
             {
                 var argumentMetadata = new TypeArgumentMetadata(
                     new SourceLocation(root.SourceFile, genericArgument.SourceSpan.GetValueOrDefault()),
-                    genericArgument.Name);
+                    genericArgument.Name) as ITypeMetadata;
 
                 if (!typeProvider.DefineType(genericArgument.Name, argumentMetadata))
-                    throw new SemanticAnalysisException($"The '{genericArgument.Name}' type argument is already defined.");
+                {
+                    argumentMetadata = TypeArgumentMetadata.Invalid(genericArgument.Name);
+                    diagnostics.TypeArgumentAlreadyDefined(genericArgument);
+                }
 
                 metadata.AddGenericArgument(argumentMetadata);
             }
 
-            if (!typeProvider.DefineType(symbol.Name, metadata))
-                throw new SemanticAnalysisException($"The '{symbol.Name}' type is already defined.");
-
-            typesToProcess.Add(new Item(metadata, typeDeclarationNode));
+            if (typeProvider.DefineType(symbol.Name, metadata))
+                typesToProcess.Add(new Item(metadata, typeDeclarationNode));
+            else
+                diagnostics.TypeAlreadyDefined(typeDeclarationNode);
         }
     }
 
@@ -62,11 +66,12 @@ internal class TypeGenerator
             foreach (var @interface in typeDeclarationNode.Interfaces)
             {
                 // TODO: support generic interfaces
-                var aliasMetadata = typeProvider.GetType(@interface.Name) as TypeAliasMetadata ??
-                                    throw new SemanticAnalysisException($"The '{@interface.Name}' interface is not defined.");
+                var interfaceMetadata = default(InterfaceMetadata);
+                var aliasMetadata = typeProvider.GetType(@interface.Name) as TypeAliasMetadata;
+                if (aliasMetadata is not null)
+                    interfaceMetadata = aliasMetadata.Type as InterfaceMetadata;
 
-                var interfaceMetadata = aliasMetadata.Type as InterfaceMetadata ??
-                                        throw new SemanticAnalysisException($"The '{@interface.Name}' interface is not an interface.");
+                interfaceMetadata ??= InterfaceMetadata.Invalid();
 
                 type.AddInterface(interfaceMetadata);
             }
@@ -74,7 +79,7 @@ internal class TypeGenerator
             foreach (var property in typeDeclarationNode.Properties)
             {
                 var propertyType = typeProvider.GetType(property.Type.Name) ??
-                                   throw new SemanticAnalysisException($"The '{property.Name}' property has unknown type: '{property.Type.Name}'.");
+                                   TypeMetadata.Invalid(property.Type.Name);
 
                 var propertyMetadata = new PropertyMetadata(
                     new SourceLocation(root.SourceFile, property.SourceSpan.GetValueOrDefault()),
@@ -106,7 +111,7 @@ internal class TypeGenerator
                 {
                     var parameters = constructor.Parameters
                         .Select(x => typeProvider.GetType(x.Type.Name) ??
-                                     throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
+                                     TypeMetadata.Invalid(x.Type.Name));
                     var functionType = new FunctionTypeMetadata(null, parameters, type);
                     functionType = typeProvider.GetOrDefine(functionType);
 
@@ -140,10 +145,10 @@ internal class TypeGenerator
                 var parameters = GetParameters(root, typeProvider, method.Parameters);
                 var parameterTypes = method.Parameters
                     .Select(x => typeProvider.GetType(x.Type.Name) ??
-                                 throw new SemanticAnalysisException($"The '{x.Name}' parameter has unknown type: '{x.Type.Name}'."));
+                                 TypeMetadata.Invalid(x.Type.Name));
 
                 var returnType = typeProvider.GetType(method.ReturnType.Name) ??
-                                 throw new SemanticAnalysisException($"The '{method.Name}' method has unknown return type: '{method.ReturnType.Name}'.");
+                                 TypeMetadata.Invalid(method.ReturnType.Name);
 
                 var functionType = new FunctionTypeMetadata(null, parameterTypes, returnType);
                 functionType = typeProvider.GetOrDefine(functionType);
@@ -172,7 +177,7 @@ internal class TypeGenerator
         {
             var parameter = parameters[i];
             var parameterType = typeProvider.GetType(parameter.Type.Name) ??
-                                throw new SemanticAnalysisException($"The '{parameter.Name}' parameter has unknown type: '{parameter.Type.Name}'.");
+                                TypeMetadata.Invalid(parameter.Type.Name);
 
             result[i] = new ParameterMetadata(
                 new SourceLocation(root.SourceFile, parameter.SourceSpan.GetValueOrDefault()),

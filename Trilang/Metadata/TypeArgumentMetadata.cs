@@ -8,6 +8,9 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
         Name = name;
     }
 
+    public static TypeArgumentMetadata Invalid(string name)
+        => new TypeArgumentMetadata(null, name) { IsInvalid = true };
+
     public static bool operator ==(TypeArgumentMetadata? left, TypeArgumentMetadata? right)
         => Equals(left, right);
 
@@ -21,6 +24,9 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
 
         if (ReferenceEquals(this, other))
             return true;
+
+        if (IsInvalid || other.IsInvalid)
+            return false;
 
         return Name == other.Name;
     }
@@ -48,12 +54,12 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
     public IMetadata? GetMember(string name)
         => null;
 
-    public bool IsInvalid => false;
+    public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }
 
     public bool IsValueType
-       => throw new NotSupportedException();
+        => throw new NotSupportedException();
 
     public TypeLayout? Layout { get; set; }
 

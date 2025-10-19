@@ -27,6 +27,26 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
     public static readonly DiagnosticId S0005ParameterAlreadyDefined = ForSemantic(5);
     public static readonly DiagnosticId S0006TypeAlreadyDefined = ForSemantic(6);
     public static readonly DiagnosticId S0007VariableAlreadyDefined = ForSemantic(7);
+    public static readonly DiagnosticId S0008UnknownType = ForSemantic(8);
+    public static readonly DiagnosticId S0009ReturnTypeMismatch = ForSemantic(9);
+    public static readonly DiagnosticId S0010TypeMismatch = ForSemantic(10);
+    public static readonly DiagnosticId S0011ExpectedArray = ForSemantic(11);
+    public static readonly DiagnosticId S0012ExpectedFunction = ForSemantic(12);
+    public static readonly DiagnosticId S0013UnknownMember = ForSemantic(13);
+    public static readonly DiagnosticId S0014CantCreateObject = ForSemantic(14);
+    public static readonly DiagnosticId S0015IncompatibleUnaryOperator = ForSemantic(15);
+    public static readonly DiagnosticId S0016IncompatibleBinaryOperator = ForSemantic(16);
+    public static readonly DiagnosticId S0017BreakOutsideLoop = ForSemantic(17);
+    public static readonly DiagnosticId S0018ContinueOutsideLoop = ForSemantic(18);
+    public static readonly DiagnosticId S0019MemberNotAccessible = ForSemantic(19);
+    public static readonly DiagnosticId S0020NotAllPathsReturnValue = ForSemantic(20);
+    public static readonly DiagnosticId S0021ThisInStaticMethod = ForSemantic(21);
+    public static readonly DiagnosticId S0022ThisOutsideOfType = ForSemantic(22);
+    public static readonly DiagnosticId S0023StaticMethodAsInstance = ForSemantic(23);
+    public static readonly DiagnosticId S0024InstanceMethodAsStatic = ForSemantic(24);
+    public static readonly DiagnosticId S0025VariableUsedBeforeDeclaration = ForSemantic(25);
+    public static readonly DiagnosticId S0026MemberIsNotImplemented = ForSemantic(26);
+    public static readonly DiagnosticId S0027InterfacePropertyCantBePrivate = ForSemantic(27);
 
     public static DiagnosticId ForLexer(int id)
         => new DiagnosticId(DiagnosticCategory.Lexer, id);
@@ -47,6 +67,6 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
             _ => throw new ArgumentOutOfRangeException(nameof(Category)),
         };
 
-        return $"{category}{Id}";
+        return $"{category}{Id:0000}";
     }
 }

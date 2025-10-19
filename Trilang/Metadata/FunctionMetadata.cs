@@ -30,6 +30,9 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
         if (ReferenceEquals(this, other))
             return true;
 
+        if (IsInvalid || other.IsInvalid)
+            return false;
+
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
                Parameters.SequenceEqual(other.Parameters) &&
@@ -57,6 +60,8 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
         => $"{Name}: {Type}";
 
     public SourceLocation? Definition { get; }
+
+    public bool IsInvalid => false;
 
     public ITypeMetadata? DeclaringType => null;
 
