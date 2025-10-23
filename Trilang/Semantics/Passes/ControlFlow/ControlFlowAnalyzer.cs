@@ -20,19 +20,22 @@ internal class ControlFlowAnalyzer : ISemanticPass
         loopCounter = 0;
     }
 
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
         directives = context.Directives;
         graph = new ControlFlowGraphMap();
 
-        foreach (var function in GetFunctions(tree))
-            BuildControlFlowGraph(function.Metadata!, function.Body);
+        foreach (var tree in semanticTrees)
+        {
+            foreach (var function in GetFunctions(tree))
+                BuildControlFlowGraph(function.Metadata!, function.Body);
 
-        foreach (var method in GetMethods(tree))
-            BuildControlFlowGraph(method.Metadata!, method.Body);
+            foreach (var method in GetMethods(tree))
+                BuildControlFlowGraph(method.Metadata!, method.Body);
 
-        foreach (var constructor in GetConstructors(tree))
-            BuildControlFlowGraph(constructor.Metadata!, constructor.Body);
+            foreach (var constructor in GetConstructors(tree))
+                BuildControlFlowGraph(constructor.Metadata!, constructor.Body);
+        }
 
         context.ControlFlowGraphs = graph;
     }

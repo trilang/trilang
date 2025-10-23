@@ -40,7 +40,7 @@ public class ThisInStaticMethodsTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(

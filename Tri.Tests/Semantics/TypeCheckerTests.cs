@@ -38,7 +38,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new FunctionMetadata(
             null,
@@ -47,6 +49,7 @@ public class TypeCheckerTests
             [],
             new FunctionTypeMetadata(null, [], TypeMetadata.Void));
 
+        var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>();
         Assert.That(function, Is.Not.Null);
         Assert.That(function.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -58,7 +61,9 @@ public class TypeCheckerTests
         var (tree, diagnostics) = Parse("public main(a: i32, b: bool): void { }");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new FunctionMetadata(
             null,
@@ -70,6 +75,7 @@ public class TypeCheckerTests
             ],
             new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void));
 
+        var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>();
         Assert.That(function, Is.Not.Null);
         Assert.That(function.Metadata, Is.EqualTo(expected));
@@ -92,8 +98,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var variable = semanticTree.Find<VariableDeclaration>();
         Assert.That(variable, Is.Not.Null);
         Assert.That(variable.Type.Metadata, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
@@ -111,7 +120,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -144,7 +153,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new TypeMetadata(null, "Point");
         expected.AddConstructor(
@@ -190,6 +201,7 @@ public class TypeCheckerTests
             [new ParameterMetadata(null, "other", TypeMetadata.I32)],
             new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeDeclaration>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -201,9 +213,12 @@ public class TypeCheckerTests
         var (tree, diagnostics) = Parse("public type MyInt = i32;");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new TypeAliasMetadata(null, "MyInt", [], TypeMetadata.I32);
+        var semanticTree = semanticTrees.Single();
         var node = semanticTree.Find<TypeAliasDeclaration>();
         Assert.That(node, Is.Not.Null);
         Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -215,9 +230,15 @@ public class TypeCheckerTests
         var (tree, diagnostics) = Parse("public type MyF = (i32, bool) => f64;");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.F64);
+        var expected = new FunctionTypeMetadata(
+            null,
+            [TypeMetadata.I32, TypeMetadata.Bool],
+            TypeMetadata.F64);
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<FunctionType>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -234,7 +255,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new FunctionMetadata(
             null,
@@ -246,6 +269,7 @@ public class TypeCheckerTests
             ],
             new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32));
 
+        var semanticTree = semanticTrees.Single();
         var node = semanticTree.Find<FunctionDeclaration>();
         Assert.That(node, Is.Not.Null);
         Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -264,7 +288,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new FunctionMetadata(
             null,
@@ -273,6 +299,7 @@ public class TypeCheckerTests
             [],
             new FunctionTypeMetadata(null, [], TypeMetadata.Void));
 
+        var semanticTree = semanticTrees.Single();
         var node = semanticTree.Find<FunctionDeclaration>(x => x.Name == "test2");
         Assert.That(node, Is.Not.Null);
         Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -293,8 +320,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -314,8 +344,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -335,8 +368,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -356,8 +392,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -377,8 +416,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -399,7 +441,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -424,8 +466,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -445,8 +490,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -466,8 +514,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -487,8 +538,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var binaryNode = semanticTree.Find<BinaryExpression>();
         Assert.That(binaryNode, Is.Not.Null);
         Assert.That(
@@ -508,7 +562,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -533,8 +587,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
@@ -555,7 +612,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -582,7 +639,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -612,7 +669,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -639,7 +696,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -667,7 +724,11 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
 
-        Assert.That(() => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))), Throws.Nothing);
+        Assert.That(
+            () => semantic.Analyze(
+                [tree],
+                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+            Throws.Nothing);
     }
 
     [Test]
@@ -684,7 +745,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -711,7 +772,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var interfaceType = new InterfaceMetadata(null);
         var expected = new TypeAliasMetadata(null, "Point", [], interfaceType);
@@ -739,6 +802,7 @@ public class TypeCheckerTests
                 "distance",
                 new FunctionTypeMetadata(null, [expected], TypeMetadata.F64)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeAliasDeclaration>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -759,9 +823,15 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
+        var expected = new FunctionTypeMetadata(
+            null,
+            [TypeMetadata.I32, TypeMetadata.I32],
+            TypeMetadata.I32);
+        var semanticTree = semanticTrees.Single();
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.ReturnTypeMetadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -779,7 +849,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -806,8 +876,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var thisNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "this");
         var pointType = typeProvider.GetType("Point");
         Assert.That(thisNode, Is.Not.Null);
@@ -829,8 +902,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var thisNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "a");
         Assert.That(thisNode, Is.Not.Null);
         Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
@@ -852,7 +928,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -881,8 +957,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var aNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "a");
         var pointType = typeProvider.GetType("Point");
         Assert.That(aNode, Is.Not.Null);
@@ -909,7 +988,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -940,8 +1019,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var aNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "a");
         var pointType = typeProvider.GetType("Test");
         Assert.That(aNode, Is.Not.Null);
@@ -969,7 +1051,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Point") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -977,6 +1061,7 @@ public class TypeCheckerTests
         var ctor = type.GetConstructor([TypeMetadata.I32, TypeMetadata.I32]);
         Assert.That(ctor, Is.Not.Null);
 
+        var semanticTree = semanticTrees.Single();
         var newOp = semanticTree.Find<NewObjectExpression>();
         Assert.That(newOp, Is.Not.Null);
         Assert.That(newOp.Metadata, Is.EqualTo(ctor));
@@ -999,7 +1084,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -1030,7 +1115,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -1053,7 +1138,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var du = new DiscriminatedUnionMetadata(null, [
             new InterfaceMetadata(null),
@@ -1062,6 +1149,7 @@ public class TypeCheckerTests
         ]);
         var alias = new TypeAliasMetadata(null, "DU", [], du);
 
+        var semanticTree = semanticTrees.Single();
         var aliasNode = semanticTree.Find<TypeAliasDeclaration>();
         Assert.That(aliasNode, Is.Not.Null);
         Assert.That(aliasNode.Metadata, Is.EqualTo(alias).Using(new MetadataComparer()));
@@ -1082,8 +1170,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var arrayAccess = semanticTree.Find<ArrayAccessExpression>();
         Assert.That(arrayAccess, Is.Not.Null);
         Assert.That(arrayAccess.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
@@ -1101,7 +1192,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -1127,7 +1218,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -1152,7 +1243,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
 
@@ -1171,10 +1264,12 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new TypeArrayMetadata(null, TypeMetadata.I32);
-
+        var semanticTree = semanticTrees.Single();
         var newArray = semanticTree.Find<NewArrayExpression>();
         Assert.That(newArray, Is.Not.Null);
         Assert.That(newArray.ReturnTypeMetadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1191,8 +1286,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var property = semanticTree.Find<PropertyDeclaration>();
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Metadata, Is.Not.Null);
@@ -1212,8 +1310,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var property = semanticTree.Find<PropertyDeclaration>();
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Metadata, Is.Not.Null);
@@ -1232,9 +1333,12 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var closedType = typeProvider.GetType("List<i32>");
+        var semanticTree = semanticTrees.Single();
         var genericTypeNode = semanticTree.Find<GenericType>();
         Assert.That(closedType, Is.Not.Null);
         Assert.That(genericTypeNode, Is.Not.Null);
@@ -1256,11 +1360,14 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var closedType = typeProvider.GetType("Test<i32>") as TypeMetadata;
         var ctor = closedType!.GetConstructor([]);
 
+        var semanticTree = semanticTrees.Single();
         var newObj = semanticTree.Find<NewObjectExpression>();
         Assert.That(newObj, Is.Not.Null);
         Assert.That(newObj.Metadata, Is.EqualTo(ctor));
@@ -1282,8 +1389,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnStmt = semanticTree.Find<ReturnStatement>();
         Assert.That(returnStmt, Is.Not.Null);
         Assert.That(returnStmt.Expression, Is.Not.Null);
@@ -1315,7 +1425,9 @@ public class TypeCheckerTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+            () => semantic.Analyze(
+                [tree],
+                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
@@ -1335,7 +1447,9 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test");
         Assert.That(type, Is.Not.Null);
@@ -1343,6 +1457,7 @@ public class TypeCheckerTests
         var functionType = typeProvider.GetType("() => void");
         Assert.That(functionType, Is.Not.Null);
 
+        var semanticTree = semanticTrees.Single();
         var staticTypeMember = semanticTree.Find<MemberAccessExpression>(x => x.Name == "Test");
         Assert.That(staticTypeMember, Is.Not.Null);
         Assert.That(staticTypeMember.ReturnTypeMetadata, Is.EqualTo(type));
@@ -1363,8 +1478,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var tupleMember = semanticTree.Find<MemberAccessExpression>();
         Assert.That(tupleMember, Is.Not.Null);
         Assert.That(tupleMember.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.String).Using(new MetadataComparer()));
@@ -1382,7 +1500,7 @@ public class TypeCheckerTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -1407,8 +1525,11 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var castExp = semanticTree.Find<CastExpression>();
         Assert.That(castExp, Is.Not.Null);
         Assert.That(castExp.ReturnTypeMetadata, Is.EqualTo(TypeMetadata.I8).Using(new MetadataComparer()));
@@ -1429,11 +1550,14 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test")!;
         var method = type.GetMember("method2")!;
 
+        var semanticTree = semanticTrees.Single();
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
@@ -1454,11 +1578,14 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test")!;
         var method = type.GetMember("method2")!;
 
+        var semanticTree = semanticTrees.Single();
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
@@ -1479,11 +1606,14 @@ public class TypeCheckerTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test")!;
         var method = type.GetMember("prop")!;
 
+        var semanticTree = semanticTrees.Single();
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));

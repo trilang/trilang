@@ -6,7 +6,7 @@ using Trilang.Semantics.Passes.ControlFlow;
 namespace Trilang.Semantics;
 
 public record SemanticAnalysisResult(
-    SemanticTree SemanticTree,
+    IReadOnlyList<SemanticTree> SemanticTrees,
     SymbolTableMap SymbolTableMap,
     ITypeMetadataProvider TypeMetadataProvider,
     ControlFlowGraphMap ControlFlowGraphs);

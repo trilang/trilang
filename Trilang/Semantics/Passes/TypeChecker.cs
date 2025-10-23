@@ -16,14 +16,17 @@ internal class TypeChecker : IVisitor, ISemanticPass
     private IEnumerable<string> directives = null!;
     private SymbolTableMap symbolTableMap = null!;
 
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
-        file = tree.SourceFile;
         diagnostics = context.Diagnostics;
         directives = context.Directives;
         symbolTableMap = context.SymbolTableMap!;
 
-        tree.Accept(this);
+        foreach (var tree in semanticTrees)
+        {
+            file = tree.SourceFile;
+            tree.Accept(this);
+        }
     }
 
     public void VisitArrayAccess(ArrayAccessExpression node)

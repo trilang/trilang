@@ -4,8 +4,11 @@ namespace Trilang.Semantics.Passes;
 
 internal class MemberAccessKindAnalyser : Visitor, ISemanticPass
 {
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
-        => tree.Accept(this);
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext _)
+    {
+        foreach (var tree in semanticTrees)
+            tree.Accept(this);
+    }
 
     private static MemberAccessKind FindParentAssignment(MemberAccessExpression node)
     {

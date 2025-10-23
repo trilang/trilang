@@ -26,11 +26,13 @@ public class AddThisInLocalMemberAccessTests
         var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        return semanticTree;
+        return semanticTrees.Single();
     }
 
     [Test]

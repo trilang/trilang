@@ -34,8 +34,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public main(): void { }");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var treeSymbolTable = map.Get(semanticTree);
         var function = semanticTree.Find<FunctionDeclaration>()!;
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
@@ -52,14 +55,21 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var treeSymbolTable = map.Get(semanticTree);
         var function1 = semanticTree.Find<FunctionDeclaration>(x => x.Name == "main")!;
         var function2 = semanticTree.Find<FunctionDeclaration>(x => x.Name == "add")!;
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(treeSymbolTable.Ids, Contains.Key(function1.Name).WithValue(new IdSymbol(function1)));
-        Assert.That(treeSymbolTable.Ids, Contains.Key(function2.Name).WithValue(new IdSymbol(function2)));
+        Assert.That(
+            treeSymbolTable.Ids,
+            Contains.Key(function1.Name).WithValue(new IdSymbol(function1)));
+        Assert.That(
+            treeSymbolTable.Ids,
+            Contains.Key(function2.Name).WithValue(new IdSymbol(function2)));
     }
 
     [Test]
@@ -73,7 +83,7 @@ public class SymbolFinderTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -93,8 +103,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public add(a: i32, b: i32): void { }");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>()!;
         var a = function.Parameters[0];
         var b = function.Parameters[1];
@@ -116,7 +129,7 @@ public class SymbolFinderTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -142,8 +155,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>()!;
         var variables = semanticTree.Where<VariableDeclaration>().ToArray();
         var a = variables[0];
@@ -172,7 +188,7 @@ public class SymbolFinderTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -199,8 +215,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>()!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var a = semanticTree.Find<VariableDeclaration>()!;
@@ -229,8 +248,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>()!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var variables = semanticTree.Where<VariableDeclaration>().ToArray();
@@ -266,8 +288,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>()!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var variables = semanticTree.Where<VariableDeclaration>().ToArray();
@@ -298,8 +323,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public main(): i32[] { return new i32[0]; }");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var arrayTypeNode = semanticTree.Find<ArrayType>();
         Assert.That(arrayTypeNode, Is.Not.Null);
 
@@ -315,8 +343,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public type Point { }");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeDeclaration>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
@@ -335,7 +366,7 @@ public class SymbolFinderTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -360,8 +391,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeDeclaration>()!;
         var ctor = semanticTree.Find<ConstructorDeclaration>()!;
         var parameter = ctor.Parameters[0];
@@ -383,8 +417,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeDeclaration>()!;
         var method = semanticTree.Find<MethodDeclaration>()!;
         var parameter = method.Parameters[0];
@@ -401,8 +438,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public type MyInt = i32;");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeAliasDeclaration>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
@@ -421,7 +461,7 @@ public class SymbolFinderTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -441,8 +481,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public type F = (i32, i32) => i32;");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var aliasType = semanticTree.Find<TypeAliasDeclaration>()!;
         var type = semanticTree.Find<FunctionType>()!;
 
@@ -476,8 +519,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeDeclaration>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
@@ -506,8 +552,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var alias = semanticTree.Find<TypeAliasDeclaration>()!;
         var @interface = semanticTree.Find<Interface>()!;
 
@@ -536,8 +585,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var alias = semanticTree.Find<TypeAliasDeclaration>()!;
         var @interface = semanticTree.Find<Interface>()!;
 
@@ -553,8 +605,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public type T = {} | i32 | () => void;");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var alias = semanticTree.Find<TypeAliasDeclaration>()!;
         var discriminatedUnionNode = semanticTree.Find<DiscriminatedUnion>()!;
 
@@ -575,8 +630,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public type T = (i32, bool);");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var aliasNode = semanticTree.Find<TypeAliasDeclaration>();
         var tupleNode = semanticTree.Find<TupleType>();
         Assert.That(aliasNode, Is.Not.Null);
@@ -598,8 +656,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public type T = ((i32, i32), bool);");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var aliasNode = semanticTree.Find<TypeAliasDeclaration>();
         var tupleNode = semanticTree.Find<TupleType>(x => x.Name == "((i32, i32), bool)");
         var nestedTupleNode = semanticTree.Find<TupleType>(x => x.Name == "(i32, i32)");
@@ -640,8 +701,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var property = semanticTree.Find<PropertyDeclaration>();
         var getter = semanticTree.Find<PropertyGetter>();
         Assert.That(getter, Is.Not.Null);
@@ -665,8 +729,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public type List<T> { }");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeDeclaration>();
         Assert.That(type, Is.Not.Null);
 
@@ -681,8 +748,11 @@ public class SymbolFinderTests
         var (tree, diagnostics) = Parse("public type Test<T1, T2> { }");
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeDeclaration>();
         Assert.That(type, Is.Not.Null);
 
@@ -703,8 +773,11 @@ public class SymbolFinderTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, map, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, map, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var alias = semanticTree.Find<TypeAliasDeclaration>();
         Assert.That(alias, Is.Not.Null);
 

@@ -27,11 +27,13 @@ public class AddImplicitReturnStatementsTests
         var tree = parser.Parse(tokens, parserOptions);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, cfgs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, cfgs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        return (semanticTree, cfgs);
+        return (semanticTrees.Single(), cfgs);
     }
 
     [Test]

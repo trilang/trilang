@@ -33,7 +33,7 @@ public class CyclicTypeAliasTests
 
         var semantic = new SemanticAnalysis();
         var (_, _, typeProvider, _) = semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var testAlias = typeProvider.GetType("Test");
@@ -62,7 +62,7 @@ public class CyclicTypeAliasTests
 
         var semantic = new SemanticAnalysis();
         var (_, _, typeProvider, _) = semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var test1Alias = typeProvider.GetType("Test1");

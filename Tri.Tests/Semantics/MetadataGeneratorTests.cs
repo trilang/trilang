@@ -49,7 +49,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new TypeMetadata(null, "Point");
 
@@ -120,7 +122,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var typeMetadata = new TypeMetadata(null, "Test");
         typeMetadata.AddConstructor(
@@ -159,7 +163,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var interfaceMetadata = new InterfaceMetadata(null);
         var expected = new TypeMetadata(
@@ -194,7 +200,7 @@ public class MetadataGeneratorTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -222,7 +228,7 @@ public class MetadataGeneratorTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new[]
@@ -260,7 +266,7 @@ public class MetadataGeneratorTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -280,7 +286,9 @@ public class MetadataGeneratorTests
         var (tree, diagnostics) = Parse("public type MyInt = i32;");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new TypeAliasMetadata(null, "MyInt", [], TypeMetadata.I32);
         var actual = typeProvider.GetType("MyInt");
@@ -294,7 +302,7 @@ public class MetadataGeneratorTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -319,7 +327,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new TypeArrayMetadata(null, TypeMetadata.I32);
         var actual = typeProvider.GetType("i32[]");
@@ -338,7 +348,7 @@ public class MetadataGeneratorTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -363,7 +373,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
         var actual = typeProvider.GetType("(i32, i32) => i32");
@@ -382,7 +394,7 @@ public class MetadataGeneratorTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -408,7 +420,7 @@ public class MetadataGeneratorTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -432,7 +444,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expectedType = new TypeMetadata(null, "Point");
         expectedType.AddConstructor(
@@ -461,7 +475,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expectedType = new TypeMetadata(null, "Point");
         expectedType.AddConstructor(
@@ -490,7 +506,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expectedType = new TypeMetadata(null, "Point");
         expectedType.AddConstructor(
@@ -522,7 +540,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expectedType = new TypeMetadata(null, "Point");
         expectedType.AddConstructor(
@@ -557,7 +577,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expectedInterface = new InterfaceMetadata(null);
         expectedInterface.AddProperty(
@@ -599,7 +621,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var du = new DiscriminatedUnionMetadata(null, [
             new InterfaceMetadata(null),
@@ -617,13 +641,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTupleTypeTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            public type Tuple = (i32, f64);
-            """);
+        var (tree, diagnostics) = Parse("public type Tuple = (i32, f64);");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.F64]);
         var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
@@ -637,13 +660,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForNestedTupleTypeTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            public type Tuple = (i32, (f64, bool));
-            """);
+        var (tree, diagnostics) = Parse("public type Tuple = (i32, (f64, bool));");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var nestedTuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, nestedTuple]);
@@ -662,13 +684,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForDuInTupleTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            public type Tuple = (i32, bool | i8);
-            """);
+        var (tree, diagnostics) = Parse("public type Tuple = (i32, bool | i8);");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.Bool, TypeMetadata.I8]);
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, du]);
@@ -687,13 +708,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTupleInDuTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            public type Tuple = i32 | (f64, bool);
-            """);
+        var (tree, diagnostics) = Parse("public type Tuple = i32 | (f64, bool);");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var tuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, tuple]);
@@ -712,13 +732,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericTypeTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            public type Test<T1, T2> {}
-            """);
+        var (tree, diagnostics) = Parse("public type Test<T1, T2> {}");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var expected = new TypeMetadata(null, "Test");
         expected.AddGenericArgument(new TypeArgumentMetadata(null, "T1"));
@@ -746,7 +765,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -769,7 +790,7 @@ public class MetadataGeneratorTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -794,7 +815,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -816,7 +839,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var closedType = typeProvider.GetType("List<i32>");
 
@@ -845,7 +870,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var closedType = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = closedType!.GetProperty("Prop");
@@ -863,7 +890,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -889,7 +918,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
@@ -912,7 +943,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
@@ -937,7 +970,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
@@ -961,7 +996,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
@@ -986,7 +1023,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
@@ -1015,7 +1054,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("((i32) => void) => void");
         var expected = new FunctionTypeMetadata(
@@ -1030,13 +1071,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenericAliasToDiscriminatedUnionTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            public type Test<T> = i32 | T;
-            """);
+        var (tree, diagnostics) = Parse("public type Test<T> = i32 | T;");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<>");
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")]);
@@ -1059,7 +1099,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
@@ -1082,7 +1124,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
         var functionType = new FunctionTypeMetadata(null, [], TypeMetadata.I32);
@@ -1105,7 +1149,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
         var interfaceType = new InterfaceMetadata(null);
@@ -1135,7 +1181,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
@@ -1158,7 +1206,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
         var array = new TypeArrayMetadata(null, TypeMetadata.I32);
@@ -1182,7 +1232,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
 
@@ -1219,7 +1271,9 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Alias2<i32>");
         var expected = new TypeAliasMetadata(

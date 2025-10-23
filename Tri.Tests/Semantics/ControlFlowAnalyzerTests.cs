@@ -41,8 +41,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
         var entry = new SemanticBlock("entry", (BlockStatement)returnStatement.Parent!, [
             returnStatement
@@ -76,8 +79,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var block = semanticTree.Find<BlockStatement>()!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
         var entry = new SemanticBlock("entry", block, [
@@ -123,8 +129,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var returnStatements = semanticTree.Where<ReturnStatement>().ToList();
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var entry = new SemanticBlock("entry", (BlockStatement)ifStatement.Parent!, [ifStatement]);
@@ -176,8 +185,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var ifs = semanticTree.Where<IfStatement>().ToList();
         var outerIf = ifs[0];
         var innerIf = ifs[1];
@@ -225,8 +237,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var block = semanticTree.Find<BlockStatement>()!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
         var entry = new SemanticBlock("entry", block);
@@ -274,8 +289,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var whileNodes = semanticTree.Where<While>().ToArray();
         var outerWhile = whileNodes[0];
         var innerWhile = whileNodes[1];
@@ -327,8 +345,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var whileStatement = semanticTree.Find<While>()!;
         var breakStatement = semanticTree.Find<Break>()!;
 
@@ -373,8 +394,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var outerWhile = semanticTree.Find<While>()!;
         var innerWhile = semanticTree.Where<While>().Skip(1).First();
         var breakStatement = semanticTree.Find<Break>()!;
@@ -425,8 +449,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var whileStatement = semanticTree.Find<While>()!;
         var continueStatement = semanticTree.Find<Continue>()!;
 
@@ -471,8 +498,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var outerWhile = semanticTree.Find<While>()!;
         var innerWhile = semanticTree.Where<While>().Skip(1).First();
         var continueStatement = semanticTree.Find<Continue>()!;
@@ -525,8 +555,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var whileStatement = semanticTree.Find<While>()!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
@@ -581,8 +614,11 @@ public class ControlFlowAnalyzerTests
         var (tree, diagnostics) = Parse(code);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, graphs) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, graphs) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var ifs = semanticTree.Where<IfStatement>().ToList();
         var returns = semanticTree.Where<ReturnStatement>().ToList();
 

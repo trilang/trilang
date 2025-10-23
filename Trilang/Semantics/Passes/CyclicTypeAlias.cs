@@ -11,7 +11,7 @@ internal class CyclicTypeAlias : ISemanticPass
     public CyclicTypeAlias()
         => visitedTypes = [];
 
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
     {
         var typeProvider = context.RootSymbolTable.TypeProvider;
         foreach (var aliasType in typeProvider.Types.OfType<TypeAliasMetadata>())

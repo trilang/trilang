@@ -5,7 +5,7 @@ namespace Trilang.Semantics.Passes;
 
 internal class PrivateInterfaceProperties : ISemanticPass
 {
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
     {
         var diagnostics = context.Diagnostics;
         var typeProvider = context.RootSymbolTable.TypeProvider;

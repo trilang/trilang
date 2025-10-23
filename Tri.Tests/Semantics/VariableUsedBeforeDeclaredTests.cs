@@ -40,7 +40,9 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+            () => semantic.Analyze(
+                [tree],
+                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
@@ -57,7 +59,9 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+            () => semantic.Analyze(
+                [tree],
+                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 
@@ -74,7 +78,7 @@ public class VariableUsedBeforeDeclaredTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -103,7 +107,7 @@ public class VariableUsedBeforeDeclaredTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -134,7 +138,7 @@ public class VariableUsedBeforeDeclaredTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -164,7 +168,7 @@ public class VariableUsedBeforeDeclaredTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -194,7 +198,9 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
 
         Assert.That(
-            () => semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+            () => semantic.Analyze(
+                [tree],
+                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
 }

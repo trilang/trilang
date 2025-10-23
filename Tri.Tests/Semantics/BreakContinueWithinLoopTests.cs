@@ -39,7 +39,7 @@ public class BreakContinueWithinLoopTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -65,7 +65,7 @@ public class BreakContinueWithinLoopTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -94,8 +94,11 @@ public class BreakContinueWithinLoopTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var breakNode = semanticTree.Find<Break>();
         var loop = semanticTree.Where<While>().Last();
         Assert.That(breakNode, Is.Not.Null);
@@ -117,8 +120,11 @@ public class BreakContinueWithinLoopTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (semanticTree, _, _, _) = semantic.Analyze(tree, new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        var semanticTree = semanticTrees.Single();
         var continueNode = semanticTree.Find<Continue>();
         var loop = semanticTree.Where<While>().Last();
         Assert.That(continueNode, Is.Not.Null);

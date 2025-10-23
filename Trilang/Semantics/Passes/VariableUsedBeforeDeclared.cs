@@ -12,12 +12,13 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
     public VariableUsedBeforeDeclared()
         => scopes = [];
 
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
         symbolFinderMap = context.SymbolTableMap!;
         diagnostics = context.Diagnostics;
 
-        tree.Accept(this);
+        foreach (var tree in semanticTrees)
+            tree.Accept(this);
     }
 
     protected override void VisitBlockEnter(BlockStatement node)

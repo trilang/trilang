@@ -7,7 +7,7 @@ namespace Trilang.Semantics.Passes;
 // TODO: handle endless loops
 internal class MissingReturnStatement : ISemanticPass
 {
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
     {
         var cfgs = context.ControlFlowGraphs;
         if (cfgs is null)

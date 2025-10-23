@@ -7,7 +7,6 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics;
 
-// TODO: multifile support
 public class SemanticAnalysis
 {
     private readonly ITypeMetadataProvider typeMetadataProvider;
@@ -30,7 +29,7 @@ public class SemanticAnalysis
         new ThisInStaticMethods(),
         new ThisOutsideOfType(),
         new TypeChecker(),
-        new VariableUsedBeforeDeclared()
+        new VariableUsedBeforeDeclared(),
     ];
 
     public SemanticAnalysis()
@@ -41,21 +40,27 @@ public class SemanticAnalysis
     public SemanticAnalysis(ITypeMetadataProvider typeMetadataProvider)
         => this.typeMetadataProvider = typeMetadataProvider;
 
-    public SemanticAnalysisResult Analyze(Parsing.Ast.SyntaxTree tree, SemanticAnalysisOptions options)
+    public SemanticAnalysisResult Analyze(
+        IEnumerable<Parsing.Ast.SyntaxTree> syntaxTrees,
+        SemanticAnalysisOptions options)
     {
-        var semanticTree = (SemanticTree)tree.Transform(new ConvertToSemanticTree());
-
         var rootSymbolTable = new RootSymbolTable(typeMetadataProvider);
         var context = new SemanticPassContext(
             [.. options.Directives],
             options.Diagnostics,
             rootSymbolTable);
 
+        var converter = new ConvertToSemanticTree();
+        var semanticTrees = syntaxTrees
+            .Select(x => x.Transform(converter))
+            .Cast<SemanticTree>()
+            .ToArray();
+
         foreach (var pass in GetSortedPasses())
-            pass.Analyze(semanticTree, context);
+            pass.Analyze(semanticTrees, context);
 
         return new SemanticAnalysisResult(
-            semanticTree,
+            semanticTrees,
             context.SymbolTableMap!,
             typeMetadataProvider,
             context.ControlFlowGraphs!);

@@ -15,12 +15,13 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     public SymbolFinder()
         => map = new SymbolTableMap();
 
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
         directives = context.Directives;
         diagnostics = context.Diagnostics;
 
-        tree.Accept(this, context.RootSymbolTable);
+        foreach (var tree in semanticTrees)
+            tree.Accept(this, context.RootSymbolTable);
 
         context.SymbolTableMap = map;
     }

@@ -7,11 +7,12 @@ internal class BreakContinueWithinLoop : Visitor, ISemanticPass
 {
     private SemanticDiagnosticReporter diagnostics = null!;
 
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
         diagnostics = context.Diagnostics;
 
-        tree.Accept(this);
+        foreach (var tree in semanticTrees)
+            tree.Accept(this);
     }
 
     protected override void VisitBreakEnter(Break node)

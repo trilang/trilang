@@ -5,6 +5,7 @@ using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
+using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 
 namespace Trilang.Compilation;
@@ -23,11 +24,12 @@ public class Compiler
             new SemanticDiagnosticReporter(diagnostics));
         var lowering = new Lowering();
 
-        var semanticResults = new List<SemanticAnalysisResult>();
+        var syntaxTrees = new List<SyntaxTree>();
         var project = Project.Load(options.Path);
         foreach (var sourceFile in project.SourceFiles)
         {
-            var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, sourceFile));
+            var lexerOptions = new LexerOptions(
+                new LexerDiagnosticReporter(diagnostics, sourceFile));
             var parserOptions = new ParserOptions(
                 sourceFile,
                 new ParserDiagnosticReporter(diagnostics, sourceFile));
@@ -35,10 +37,11 @@ public class Compiler
             var code = File.ReadAllText(sourceFile.FilePath);
             var tokens = lexer.Tokenize(code, lexerOptions);
             var tree = parser.Parse(tokens, parserOptions);
-            var semanticResult = semantic.Analyze(tree, semanticOptions);
 
-            semanticResults.Add(semanticResult);
+            syntaxTrees.Add(tree);
         }
+
+        var semanticResult = semantic.Analyze(syntaxTrees, semanticOptions);
 
         if (diagnostics.Diagnostics.Count > 0)
         {
@@ -74,13 +77,15 @@ public class Compiler
             return;
         }
 
-        foreach (var (semanticTree, _, _, cfgs) in semanticResults)
-            lowering.Lower(semanticTree, new LoweringOptions(options.Directives, cfgs));
+        foreach (var semanticTree in semanticResult.SemanticTrees)
+            lowering.Lower(
+                semanticTree,
+                new LoweringOptions(options.Directives, semanticResult.ControlFlowGraphs));
 
         var ir = new IrGenerator();
         var functions = ir.Generate(
             rootTypeMetadataProvider.Types,
-            semanticResults.Select(x => x.SemanticTree));
+            semanticResult.SemanticTrees);
 
         if (options.PrintIr)
             foreach (var function in functions)

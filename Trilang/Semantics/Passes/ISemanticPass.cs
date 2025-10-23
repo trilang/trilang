@@ -8,5 +8,5 @@ internal interface ISemanticPass
 
     IEnumerable<string> DependsOn { get; }
 
-    void Analyze(SemanticTree tree, SemanticPassContext context);
+    void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context);
 }

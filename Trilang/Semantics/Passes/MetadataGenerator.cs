@@ -5,7 +5,7 @@ namespace Trilang.Semantics.Passes;
 
 internal class MetadataGenerator : ISemanticPass
 {
-    public void Analyze(SemanticTree tree, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
     {
         var rootSymbolTable = context.RootSymbolTable;
         var types = rootSymbolTable.Types;

@@ -42,7 +42,7 @@ public class CheckStaticAndInstanceMembersAccessTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -72,7 +72,7 @@ public class CheckStaticAndInstanceMembersAccessTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
@@ -104,7 +104,7 @@ public class CheckStaticAndInstanceMembersAccessTests
 
         Assert.That(
             () => semantic.Analyze(
-                tree,
+                [tree],
                 new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
             Throws.Nothing);
     }
@@ -123,7 +123,7 @@ public class CheckStaticAndInstanceMembersAccessTests
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
-            tree,
+            [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
