@@ -4,10 +4,9 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
-// TODO: validate functions, implement when the package system is ready
-// TODO: validate private types (what does it mean), implement when the package system is ready
 internal class CheckAccessModifiers : Visitor, ISemanticPass
 {
+    private SourceFile file;
     private SemanticDiagnosticReporter diagnostics = null!;
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
@@ -15,7 +14,10 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         diagnostics = context.Diagnostics;
 
         foreach (var tree in semanticTrees)
+        {
+            file = tree.SourceFile;
             tree.Accept(this);
+        }
     }
 
     protected override void VisitNewObjectEnter(NewObjectExpression node)
@@ -29,6 +31,7 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         if (type.Equals(parentType))
             return;
 
+        // TODO: implement and check type accessor
         // TODO: check internal ctors, implement when the package system is ready
         if (ctor.AccessModifier != AccessModifierMetadata.Public)
             diagnostics.ConstructorNotAccessible(node, type);
@@ -39,11 +42,18 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         if (node.AccessKind is null)
             return;
 
-        // TODO: check method access
-        // TODO: check functions
-        if (node.Reference is not PropertyMetadata property)
-            return;
+        if (node.Reference is PropertyMetadata property)
+            CheckProperty(node, property);
+        else if (node.Reference is MethodMetadata method)
+            CheckMethod(node, method);
+        else if (node.Reference is FunctionMetadata type)
+            CheckFunction(node, type);
+        else if (node.Reference is TypeMetadata typeMetadata)
+            CheckType(node, typeMetadata);
+    }
 
+    private void CheckProperty(MemberAccessExpression node, PropertyMetadata property)
+    {
         var type = node.FindInParent<TypeDeclaration>()?.Metadata;
         if (property.DeclaringType.Equals(type))
             return;
@@ -62,6 +72,52 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
             else if (property.Setter.AccessModifier == AccessModifierMetadata.Private)
                 diagnostics.SetterNotAccessible(node, property);
         }
+    }
+
+    private void CheckMethod(MemberAccessExpression node, MethodMetadata method)
+    {
+        var type = node.FindInParent<TypeDeclaration>()?.Metadata;
+        if (method.DeclaringType.Equals(type))
+            return;
+
+        switch (method.AccessModifier)
+        {
+            case AccessModifierMetadata.Public:
+                break;
+            case AccessModifierMetadata.Internal:
+                // TODO: check internal methods, implement when the package system is ready
+                break;
+            case AccessModifierMetadata.Private:
+                diagnostics.MethodNotAccessible(node, method);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void CheckFunction(MemberAccessExpression node, FunctionMetadata function)
+    {
+        if (function.Definition?.File == file)
+            return;
+
+        switch (function.AccessModifier)
+        {
+            case AccessModifierMetadata.Public:
+                break;
+            case AccessModifierMetadata.Internal:
+                // TODO: check internal functions, implement when the package system is ready
+                break;
+            case AccessModifierMetadata.Private:
+                diagnostics.FunctionNotAccessible(node, function);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private void CheckType(MemberAccessExpression node, TypeMetadata type)
+    {
+        // TODO: check static access
     }
 
     public string Name => nameof(CheckAccessModifiers);

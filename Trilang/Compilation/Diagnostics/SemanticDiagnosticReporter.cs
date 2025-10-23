@@ -200,6 +200,18 @@ public class SemanticDiagnosticReporter
             node.GetLocation(),
             $"The '{node.Name}' field is not accessible.");
 
+    public void MethodNotAccessible(MemberAccessExpression node, MethodMetadata method)
+        => diagnostics.Error(
+            DiagnosticId.S0019MemberNotAccessible,
+            node.GetLocation(),
+            $"The '{method.Name}' method is not accessible.");
+
+    public void FunctionNotAccessible(MemberAccessExpression node, FunctionMetadata function)
+        => diagnostics.Error(
+            DiagnosticId.S0019MemberNotAccessible,
+            node.GetLocation(),
+            $"The '{function.Name}' function is not accessible.");
+
     // TODO: highlight not a function name
     public void NotAllPathsReturnValue(IFunctionMetadata function)
         => diagnostics.Error(

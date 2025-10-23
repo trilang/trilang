@@ -248,4 +248,104 @@ public class CheckAccessModifiersTests
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
+
+    [Test]
+    public void PublicMethodTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                public toString(): string {
+                    return "xxx";
+                }
+            }
+
+            public test(p: Point): void {
+                var s: string = p.toString();
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void PrivateMethodTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                private toString(): string {
+                    return "xxx";
+                }
+            }
+
+            public test(p: Point): void {
+                var s: string = p.toString();
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(134, 8, 21), new SourcePosition(144, 8, 31))),
+            "The 'toString' method is not accessible.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void PrivateMethodInTheSameTypeTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Point {
+                private toString(): string {
+                    return "xxx";
+                }
+
+                public test(): void {
+                    var s: string = toString();
+                }
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void PrivateFunctionInTheSameFileTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            private test(): void { }
+
+            public main(): void {
+                test();
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
 }
