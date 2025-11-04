@@ -28,13 +28,16 @@ internal class ControlFlowAnalyzer : ISemanticPass
         foreach (var tree in semanticTrees)
         {
             foreach (var function in GetFunctions(tree))
-                BuildControlFlowGraph(function.Metadata!, function.Body);
+                if (function.Metadata is not null)
+                    BuildControlFlowGraph(function.Metadata!, function.Body);
 
             foreach (var method in GetMethods(tree))
-                BuildControlFlowGraph(method.Metadata!, method.Body);
+                if (method.Metadata is not null)
+                    BuildControlFlowGraph(method.Metadata!, method.Body);
 
             foreach (var constructor in GetConstructors(tree))
-                BuildControlFlowGraph(constructor.Metadata!, constructor.Body);
+                if (constructor.Metadata is not null)
+                    BuildControlFlowGraph(constructor.Metadata!, constructor.Body);
         }
 
         context.ControlFlowGraphs = graph;

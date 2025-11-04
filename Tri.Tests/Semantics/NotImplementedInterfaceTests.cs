@@ -76,7 +76,7 @@ public class NotImplementedInterfaceTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -110,7 +110,7 @@ public class NotImplementedInterfaceTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -141,7 +141,7 @@ public class NotImplementedInterfaceTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -175,7 +175,7 @@ public class NotImplementedInterfaceTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -209,7 +209,7 @@ public class NotImplementedInterfaceTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -240,7 +240,7 @@ public class NotImplementedInterfaceTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -270,7 +270,7 @@ public class NotImplementedInterfaceTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -300,7 +300,7 @@ public class NotImplementedInterfaceTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0026MemberIsNotImplemented,
+            DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

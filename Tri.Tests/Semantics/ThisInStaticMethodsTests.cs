@@ -44,7 +44,7 @@ public class ThisInStaticMethodsTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0021ThisInStaticMethod,
+            DiagnosticId.S0016ThisInStaticMethod,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

@@ -84,7 +84,7 @@ public class ThisOutsideOfTypeTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0022ThisOutsideOfType,
+            DiagnosticId.S0017ThisOutsideOfType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

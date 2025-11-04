@@ -42,7 +42,7 @@ public class RestrictFieldAccessTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticId.S0014MemberNotAccessible,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

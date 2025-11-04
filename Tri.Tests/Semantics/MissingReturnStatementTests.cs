@@ -37,7 +37,7 @@ public class MissingReturnStatementTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0020NotAllPathsReturnValue,
+            DiagnosticId.S0015NotAllPathsReturnValue,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -65,7 +65,7 @@ public class MissingReturnStatementTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0020NotAllPathsReturnValue,
+            DiagnosticId.S0015NotAllPathsReturnValue,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -139,7 +139,7 @@ public class MissingReturnStatementTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0020NotAllPathsReturnValue,
+            DiagnosticId.S0015NotAllPathsReturnValue,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

@@ -37,7 +37,7 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     }
 
     public static FunctionTypeMetadata Invalid()
-        => new FunctionTypeMetadata(null, [], null!) { IsInvalid = true };
+        => new FunctionTypeMetadata(null, [], TypeMetadata.InvalidType) { IsInvalid = true };
 
     public static bool operator ==(FunctionTypeMetadata? left, FunctionTypeMetadata? right)
         => Equals(left, right);

@@ -46,7 +46,7 @@ public class CheckAccessModifiersTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticId.S0014MemberNotAccessible,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -101,7 +101,7 @@ public class CheckAccessModifiersTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticId.S0014MemberNotAccessible,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -133,7 +133,7 @@ public class CheckAccessModifiersTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticId.S0014MemberNotAccessible,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -209,7 +209,7 @@ public class CheckAccessModifiersTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0013UnknownMember,
+            DiagnosticId.S0008UnknownMember,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -239,7 +239,7 @@ public class CheckAccessModifiersTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0013UnknownMember,
+            DiagnosticId.S0008UnknownMember,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -295,7 +295,7 @@ public class CheckAccessModifiersTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0019MemberNotAccessible,
+            DiagnosticId.S0014MemberNotAccessible,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

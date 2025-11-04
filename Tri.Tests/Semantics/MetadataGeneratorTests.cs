@@ -99,6 +99,8 @@ public class MetadataGeneratorTests
             [new ParameterMetadata(null, "other", TypeMetadata.I32)],
             new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)));
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var actual = typeProvider.GetType("Point");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
 
@@ -144,6 +146,9 @@ public class MetadataGeneratorTests
         typeMetadata.AddProperty(propertyMetadata);
         typeMetadata.AddMethod(propertyMetadata.Getter!);
         typeMetadata.AddMethod(propertyMetadata.Setter!);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var actual = typeProvider.GetType("Test") as TypeMetadata;
         Assert.That(actual, Is.EqualTo(typeMetadata).Using(new MetadataComparer()));
 
@@ -185,6 +190,8 @@ public class MetadataGeneratorTests
                 [],
                 new FunctionTypeMetadata(null, [], expected)));
         var actual = typeProvider.GetType("Point");
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
@@ -204,7 +211,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0008UnknownType,
+            DiagnosticId.S0003UnknownType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -234,14 +241,14 @@ public class MetadataGeneratorTests
         var diagnostic = new[]
         {
             new Diagnostic(
-                DiagnosticId.S0008UnknownType,
+                DiagnosticId.S0003UnknownType,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
                     new SourceSpan(new SourcePosition(47, 2, 28), new SourcePosition(50, 2, 31))),
                 "Unknown type: 'xxx'."),
             new Diagnostic(
-                DiagnosticId.S0009ReturnTypeMismatch,
+                DiagnosticId.S0004ReturnTypeMismatch,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
@@ -270,7 +277,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0008UnknownType,
+            DiagnosticId.S0003UnknownType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -306,7 +313,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0008UnknownType,
+            DiagnosticId.S0003UnknownType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -333,6 +340,8 @@ public class MetadataGeneratorTests
 
         var expected = new TypeArrayMetadata(null, TypeMetadata.I32);
         var actual = typeProvider.GetType("i32[]");
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
@@ -352,7 +361,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0008UnknownType,
+            DiagnosticId.S0003UnknownType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -379,6 +388,8 @@ public class MetadataGeneratorTests
 
         var expected = new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
         var actual = typeProvider.GetType("(i32, i32) => i32");
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
@@ -398,7 +409,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0008UnknownType,
+            DiagnosticId.S0003UnknownType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -424,7 +435,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0008UnknownType,
+            DiagnosticId.S0003UnknownType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -461,6 +472,7 @@ public class MetadataGeneratorTests
         var actualType = typeProvider.GetType("Point");
         var actualAlias = typeProvider.GetType("MyPoint");
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
         Assert.That(actualAlias, Is.EqualTo(expectedAlias).Using(new MetadataComparer()));
     }
@@ -492,6 +504,7 @@ public class MetadataGeneratorTests
         var actualType = typeProvider.GetType("Point");
         var actualAlias = typeProvider.GetType("MyPoint");
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
         Assert.That(actualAlias, Is.EqualTo(expectedAlias).Using(new MetadataComparer()));
     }
@@ -525,6 +538,7 @@ public class MetadataGeneratorTests
         var actualArrayType = typeProvider.GetType("Point[]");
         var actualAlias = typeProvider.GetType("MyPoint");
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
         Assert.That(actualArrayType, Is.EqualTo(expectedArrayType).Using(new MetadataComparer()));
         Assert.That(actualAlias, Is.EqualTo(expectedAlias).Using(new MetadataComparer()));
@@ -559,6 +573,7 @@ public class MetadataGeneratorTests
         var actualArrayType = typeProvider.GetType("Point[]");
         var actualAlias = typeProvider.GetType("MyPoint");
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
         Assert.That(actualArrayType, Is.EqualTo(expectedArrayType).Using(new MetadataComparer()));
         Assert.That(actualAlias, Is.EqualTo(expectedAlias).Using(new MetadataComparer()));
@@ -605,6 +620,9 @@ public class MetadataGeneratorTests
             expectedInterface,
             "distance",
             new FunctionTypeMetadata(null, [expectedAlias], TypeMetadata.F64)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var actualInterface = typeProvider.GetType(expectedInterface.ToString());
         Assert.That(actualInterface, Is.EqualTo(expectedInterface).Using(new MetadataComparer()));
 
@@ -631,6 +649,9 @@ public class MetadataGeneratorTests
             new FunctionTypeMetadata(null, [], TypeMetadata.Void),
         ]);
         var alias = new TypeAliasMetadata(null, "DU", [], du);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var actualAlias = typeProvider.GetType("DU");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
@@ -650,6 +671,9 @@ public class MetadataGeneratorTests
 
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.F64]);
         var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var actualAlias = typeProvider.GetType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
@@ -670,6 +694,8 @@ public class MetadataGeneratorTests
         var nestedTuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, nestedTuple]);
         var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var actualAlias = typeProvider.GetType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
@@ -695,6 +721,8 @@ public class MetadataGeneratorTests
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, du]);
         var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var actualAlias = typeProvider.GetType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
@@ -718,6 +746,8 @@ public class MetadataGeneratorTests
         var tuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, tuple]);
         var alias = new TypeAliasMetadata(null, "Tuple", [], du);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var actualAlias = typeProvider.GetType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
@@ -750,6 +780,8 @@ public class MetadataGeneratorTests
                 [],
                 new FunctionTypeMetadata(null, [], expected)));
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var actual = typeProvider.GetType("Test<,>");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -768,6 +800,8 @@ public class MetadataGeneratorTests
         var (_, _, typeProvider, _) = semantic.Analyze(
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var type = typeProvider.GetType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -794,7 +828,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0008UnknownType,
+            DiagnosticId.S0003UnknownType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -818,6 +852,8 @@ public class MetadataGeneratorTests
         var (_, _, typeProvider, _) = semantic.Analyze(
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var type = typeProvider.GetType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -855,6 +891,7 @@ public class MetadataGeneratorTests
                 [],
                 new FunctionTypeMetadata(null, [], expected)));
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(closedType, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
@@ -877,6 +914,7 @@ public class MetadataGeneratorTests
         var closedType = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = closedType!.GetProperty("Prop");
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
     }
@@ -893,6 +931,8 @@ public class MetadataGeneratorTests
         var (_, _, typeProvider, _) = semantic.Analyze(
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var type = typeProvider.GetType("Test") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
@@ -947,6 +987,8 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
         Assert.That(property, Is.Not.Null);
@@ -974,6 +1016,8 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
         var expected = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
@@ -999,6 +1043,8 @@ public class MetadataGeneratorTests
         var (_, _, typeProvider, _) = semantic.Analyze(
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
@@ -1039,6 +1085,7 @@ public class MetadataGeneratorTests
                 AccessModifierMetadata.Public,
                 null));
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1064,6 +1111,7 @@ public class MetadataGeneratorTests
             [new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void)],
             TypeMetadata.Void);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1082,6 +1130,7 @@ public class MetadataGeneratorTests
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")]);
         var expected = new TypeAliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], du);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1107,6 +1156,7 @@ public class MetadataGeneratorTests
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
         var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], du);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1132,6 +1182,7 @@ public class MetadataGeneratorTests
         var functionType = new FunctionTypeMetadata(null, [], TypeMetadata.I32);
         var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], functionType);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1164,6 +1215,7 @@ public class MetadataGeneratorTests
             null));
         var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], interfaceType);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1189,6 +1241,7 @@ public class MetadataGeneratorTests
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
         var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], tuple);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1214,6 +1267,7 @@ public class MetadataGeneratorTests
         var array = new TypeArrayMetadata(null, TypeMetadata.I32);
         var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], array);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1253,6 +1307,7 @@ public class MetadataGeneratorTests
             [TypeMetadata.I32],
             listMetadata);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1286,6 +1341,7 @@ public class MetadataGeneratorTests
                 [TypeMetadata.I32],
                 new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])));
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }

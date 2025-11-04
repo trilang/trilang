@@ -43,7 +43,7 @@ public class BreakContinueWithinLoopTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0017BreakOutsideLoop,
+            DiagnosticId.S0012BreakOutsideLoop,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -69,7 +69,7 @@ public class BreakContinueWithinLoopTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0018ContinueOutsideLoop,
+            DiagnosticId.S0013ContinueOutsideLoop,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

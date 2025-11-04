@@ -46,7 +46,7 @@ public class CheckStaticAndInstanceMembersAccessTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0024InstanceMethodAsStatic,
+            DiagnosticId.S0019InstanceMethodAsStatic,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -76,7 +76,7 @@ public class CheckStaticAndInstanceMembersAccessTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0023StaticMethodAsInstance,
+            DiagnosticId.S0018StaticMethodAsInstance,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

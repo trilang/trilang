@@ -79,7 +79,7 @@ public class MultifileSemanticTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0006TypeAlreadyDefined,
+            DiagnosticId.S0002AlreadyDefined,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 new SourceFile("point2.tri"),

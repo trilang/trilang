@@ -42,7 +42,7 @@ public class PrivateInterfacePropertiesTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0027InterfacePropertyCantBePrivate,
+            DiagnosticId.S0022InterfacePropertyCantBePrivate,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -68,7 +68,7 @@ public class PrivateInterfacePropertiesTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0027InterfacePropertyCantBePrivate,
+            DiagnosticId.S0022InterfacePropertyCantBePrivate,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -96,14 +96,14 @@ public class PrivateInterfacePropertiesTests
         var diagnostic = new[]
         {
             new Diagnostic(
-                DiagnosticId.S0027InterfacePropertyCantBePrivate,
+                DiagnosticId.S0022InterfacePropertyCantBePrivate,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
                     new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(61, 2, 41))),
                 "The getter of the interface property 'x' cannot be private."),
             new Diagnostic(
-                DiagnosticId.S0027InterfacePropertyCantBePrivate,
+                DiagnosticId.S0022InterfacePropertyCantBePrivate,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,

@@ -124,7 +124,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0008UnknownType,
+            DiagnosticId.S0003UnknownType,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -445,7 +445,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0009ReturnTypeMismatch,
+            DiagnosticId.S0004ReturnTypeMismatch,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -566,7 +566,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0015IncompatibleUnaryOperator,
+            DiagnosticId.S0010IncompatibleUnaryOperator,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -616,7 +616,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0010TypeMismatch,
+            DiagnosticId.S0005TypeMismatch,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -643,7 +643,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0010TypeMismatch,
+            DiagnosticId.S0005TypeMismatch,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -673,7 +673,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0010TypeMismatch,
+            DiagnosticId.S0005TypeMismatch,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -700,7 +700,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0010TypeMismatch,
+            DiagnosticId.S0005TypeMismatch,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -749,7 +749,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0009ReturnTypeMismatch,
+            DiagnosticId.S0004ReturnTypeMismatch,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -853,7 +853,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0012ExpectedFunction,
+            DiagnosticId.S0007ExpectedFunction,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -932,7 +932,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0013UnknownMember,
+            DiagnosticId.S0008UnknownMember,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -992,7 +992,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0013UnknownMember,
+            DiagnosticId.S0008UnknownMember,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -1088,7 +1088,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0014CantCreateObject,
+            DiagnosticId.S0009CantCreateObject,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -1119,7 +1119,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0013UnknownMember,
+            DiagnosticId.S0008UnknownMember,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -1196,7 +1196,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0011ExpectedArray,
+            DiagnosticId.S0006ExpectedArray,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -1222,7 +1222,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0010TypeMismatch,
+            DiagnosticId.S0005TypeMismatch,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -1504,7 +1504,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0013UnknownMember,
+            DiagnosticId.S0008UnknownMember,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,

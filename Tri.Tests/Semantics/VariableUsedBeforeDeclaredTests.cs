@@ -82,7 +82,7 @@ public class VariableUsedBeforeDeclaredTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0025VariableUsedBeforeDeclaration,
+            DiagnosticId.S0020VariableUsedBeforeDeclaration,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -111,7 +111,7 @@ public class VariableUsedBeforeDeclaredTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0025VariableUsedBeforeDeclaration,
+            DiagnosticId.S0020VariableUsedBeforeDeclaration,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -142,7 +142,7 @@ public class VariableUsedBeforeDeclaredTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0013UnknownMember,
+            DiagnosticId.S0008UnknownMember,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
@@ -172,7 +172,7 @@ public class VariableUsedBeforeDeclaredTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.S0013UnknownMember,
+            DiagnosticId.S0008UnknownMember,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
