@@ -52,7 +52,7 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
                 => CompareTypeAliasMetadata(x1, y1),
             (TypeArgumentMetadata x1, TypeArgumentMetadata y1)
                 => CompareTypeArgumentMetadata(x1, y1),
-            (TypeArrayMetadata x1, TypeArrayMetadata y1)
+            (ArrayMetadata x1, ArrayMetadata y1)
                 => CompareTypeArrayMetadata(x1, y1),
             (TypeMetadata x1, TypeMetadata y1)
                 => CompareTypeMetadata(x1, y1),
@@ -238,7 +238,7 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         return true;
     }
 
-    private bool CompareTypeArrayMetadata(TypeArrayMetadata x, TypeArrayMetadata y)
+    private bool CompareTypeArrayMetadata(ArrayMetadata x, ArrayMetadata y)
     {
         if (!Equals(x.ItemMetadata, y.ItemMetadata))
             throw new Exception("ItemMetadata doesn't match.");

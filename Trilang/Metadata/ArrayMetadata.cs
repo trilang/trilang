@@ -1,16 +1,16 @@
 namespace Trilang.Metadata;
 
-public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
+public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
 {
     private readonly List<FieldMetadata> fields;
     private readonly List<PropertyMetadata> properties;
     private readonly List<MethodMetadata> methods;
 
-    public TypeArrayMetadata(SourceLocation? definition) : this(definition, null)
+    public ArrayMetadata(SourceLocation? definition) : this(definition, null)
     {
     }
 
-    public TypeArrayMetadata(SourceLocation? definition, ITypeMetadata? itemMetadata)
+    public ArrayMetadata(SourceLocation? definition, ITypeMetadata? itemMetadata)
     {
         Definition = definition;
         this.fields = [];
@@ -26,16 +26,16 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         methods.Add(sizeProperty.Getter!);
     }
 
-    public static TypeArrayMetadata Invalid()
-        => new TypeArrayMetadata(null, null) { IsInvalid = true };
+    public static ArrayMetadata Invalid()
+        => new ArrayMetadata(null, null) { IsInvalid = true };
 
-    public static bool operator ==(TypeArrayMetadata? left, TypeArrayMetadata? right)
+    public static bool operator ==(ArrayMetadata? left, ArrayMetadata? right)
         => Equals(left, right);
 
-    public static bool operator !=(TypeArrayMetadata? left, TypeArrayMetadata? right)
+    public static bool operator !=(ArrayMetadata? left, ArrayMetadata? right)
         => !Equals(left, right);
 
-    public bool Equals(TypeArrayMetadata? other)
+    public bool Equals(ArrayMetadata? other)
     {
         if (other is null)
             return false;
@@ -60,7 +60,7 @@ public class TypeArrayMetadata : ITypeMetadata, IEquatable<TypeArrayMetadata>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((TypeArrayMetadata)obj);
+        return Equals((ArrayMetadata)obj);
     }
 
     public override int GetHashCode()

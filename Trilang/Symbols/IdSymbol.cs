@@ -2,7 +2,7 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;
 
-public class IdSymbol : ISymbol, IEquatable<IdSymbol>
+public class IdSymbol : IEquatable<IdSymbol>
 {
     public IdSymbol(FunctionDeclaration node) : this(node.Name, node)
     {

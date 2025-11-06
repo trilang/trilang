@@ -53,7 +53,7 @@ public record IrFunction(string Name, IrCode Code)
             TupleMetadata tuple
                 => $"_{string.Join("_", tuple.Types.Select(MangleTypeName))}_",
 
-            TypeArrayMetadata array
+            ArrayMetadata array
                 => $"array_{MangleTypeName(array.ItemMetadata!)}_",
 
             TypeMetadata type

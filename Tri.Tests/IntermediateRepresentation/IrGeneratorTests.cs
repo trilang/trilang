@@ -419,7 +419,7 @@ public class IrGeneratorTests
             """;
         var (tree, typeProvider) = Parse(code);
 
-        var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayType = (ArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
@@ -471,7 +471,7 @@ public class IrGeneratorTests
             """;
         var (tree, typeProvider) = Parse(code);
 
-        var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayType = (ArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
@@ -530,7 +530,7 @@ public class IrGeneratorTests
             """;
         var (tree, typeProvider) = Parse(code);
 
-        var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayType = (ArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
@@ -584,7 +584,7 @@ public class IrGeneratorTests
             """;
         var (tree, typeProvider) = Parse(code);
 
-        var arrayType = (TypeArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayType = (ArrayMetadata)typeProvider.GetType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 

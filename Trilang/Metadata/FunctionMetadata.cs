@@ -2,6 +2,8 @@ namespace Trilang.Metadata;
 
 public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 {
+    private readonly List<ParameterMetadata> parameters;
+
     public FunctionMetadata(
         SourceLocation? definition,
         AccessModifierMetadata accessModifier,
@@ -12,7 +14,7 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
         Definition = definition;
         AccessModifier = accessModifier;
         Name = name;
-        Parameters = parameters;
+        this.parameters = [..parameters];
         Type = type;
     }
 
@@ -35,7 +37,7 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 
         return AccessModifier == other.AccessModifier &&
                Name == other.Name &&
-               Parameters.SequenceEqual(other.Parameters) &&
+               parameters.SequenceEqual(other.parameters) &&
                Type.Equals(other.Type);
     }
 
@@ -54,10 +56,13 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, Parameters, Type);
+        => HashCode.Combine(Name, parameters, Type);
 
     public override string ToString()
         => $"{Name}: {Type}";
+
+    public void AddParameter(ParameterMetadata parameter)
+        => parameters.Add(parameter);
 
     public SourceLocation? Definition { get; }
 
@@ -71,7 +76,7 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 
     public string Name { get; }
 
-    public IReadOnlyList<ParameterMetadata> Parameters { get; }
+    public IReadOnlyList<ParameterMetadata> Parameters => parameters;
 
     public FunctionTypeMetadata Type { get; }
 }

@@ -23,7 +23,7 @@ internal class IrDiscoveryPhase : Visitor
             var properties = metadata switch
             {
                 TupleMetadata tuple => tuple.Properties,
-                TypeArrayMetadata array => array.Properties,
+                ArrayMetadata array => array.Properties,
                 TypeMetadata type => type.Properties,
                 _ => [],
             };

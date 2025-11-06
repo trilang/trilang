@@ -425,7 +425,7 @@ public class IrGenerator
         var size = GenerateExpression(builder, node.Size)!.Value;
         size = builder.Deref(size, node.Size.ReturnTypeMetadata!);
 
-        return builder.ArrayAlloc((TypeArrayMetadata)node.Type.Metadata!, size);
+        return builder.ArrayAlloc((ArrayMetadata)node.Type.Metadata!, size);
     }
 
     private Register GenerateNewObject(IrBuilder builder, NewObjectExpression node)

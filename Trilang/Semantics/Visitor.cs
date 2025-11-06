@@ -180,7 +180,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public void VisitExpressionBlock(ExpressionBlock node)
+    public virtual void VisitExpressionBlock(ExpressionBlock node)
     {
         VisitExpressionBlockEnter(node);
 
@@ -740,14 +740,20 @@ public abstract class Visitor : IVisitor
     {
         VisitTypeEnter(node);
 
+        for (var i = 0; i < node.GenericArguments.Count; i++)
+            node.GenericArguments[i].Accept(this);
+
+        for (var i = 0; i < node.Interfaces.Count; i++)
+            node.Interfaces[i].Accept(this);
+
         for (var i = 0; i < node.Properties.Count; i++)
             node.Properties[i].Accept(this);
 
-        for (var i = 0; i < node.Methods.Count; i++)
-            node.Methods[i].Accept(this);
-
         for (var i = 0; i < node.Constructors.Count; i++)
             node.Constructors[i].Accept(this);
+
+        for (var i = 0; i < node.Methods.Count; i++)
+            node.Methods[i].Accept(this);
 
         VisitTypeExit(node);
     }

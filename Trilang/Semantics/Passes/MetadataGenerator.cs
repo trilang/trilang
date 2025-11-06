@@ -13,14 +13,14 @@ internal class MetadataGenerator : ISemanticPass
         var symbolTableMap = context.SymbolTableMap!;
 
         var typeGenerator = new TypeGenerator(context.Diagnostics, symbolTableMap);
-        var interfaceGenerator = new InterfaceGenerator(symbolTableMap);
-        var discriminatedUnionGenerator = new DiscriminatedUnionGenerator(symbolTableMap);
+        var interfaceGenerator = new InterfaceGenerator(context.Diagnostics, symbolTableMap);
+        var discriminatedUnionGenerator = new DiscriminatedUnionGenerator(context.Diagnostics, symbolTableMap);
         var aliasGenerator = new AliasGenerator(context.Diagnostics, symbolTableMap);
-        var tupleGenerator = new TupleGenerator(symbolTableMap);
-        var arrayGenerator = new ArrayGenerator(symbolTableMap);
-        var genericTypeGenerator = new GenericTypeGenerator(symbolTableMap);
-        var functionTypeGenerator = new FunctionTypeGenerator(symbolTableMap);
-        var functionGenerator = new FunctionGenerator(symbolTableMap);
+        var tupleGenerator = new TupleGenerator(context.Diagnostics, symbolTableMap);
+        var arrayGenerator = new ArrayGenerator(context.Diagnostics, symbolTableMap);
+        var genericTypeGenerator = new GenericTypeGenerator(context.Diagnostics, symbolTableMap);
+        var functionTypeGenerator = new FunctionTypeGenerator(context.Diagnostics, symbolTableMap);
+        var functionGenerator = new FunctionGenerator(context.Diagnostics, symbolTableMap);
 
         typeGenerator.CreateTypes(types);
         interfaceGenerator.CreateInterfaces(types);

@@ -4,15 +4,13 @@ namespace Trilang.Symbols;
 
 public interface ISymbolTable
 {
-    TypeSymbol? GetType(string name);
-    bool TryAddType(TypeSymbol symbol);
-
     IdSymbol? GetId(string name);
     bool TryAddId(IdSymbol symbol);
+    void AddType(TypeSymbol symbol);
 
     ISymbolTable CreateChild();
 
-    IReadOnlyDictionary<string, TypeSymbol> Types { get; }
+    IReadOnlyList<TypeSymbol> Types { get; }
     IReadOnlyDictionary<string, IdSymbol> Ids { get; }
     ITypeMetadataProvider TypeProvider { get; }
 }

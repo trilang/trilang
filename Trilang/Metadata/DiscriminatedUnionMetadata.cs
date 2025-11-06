@@ -14,9 +14,6 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
         this.types = [.. types];
     }
 
-    public static DiscriminatedUnionMetadata Invalid()
-        => new DiscriminatedUnionMetadata(null, []) { IsInvalid = true };
-
     public static bool operator ==(DiscriminatedUnionMetadata? left, DiscriminatedUnionMetadata? right)
         => Equals(left, right);
 
@@ -66,7 +63,7 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
     public IMetadata? GetMember(string name)
         => null;
 
-    public bool IsInvalid { get; private set; }
+    public bool IsInvalid => false;
 
     public SourceLocation? Definition { get; }
 

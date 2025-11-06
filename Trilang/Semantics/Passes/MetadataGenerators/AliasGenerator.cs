@@ -7,11 +7,9 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class AliasGenerator
 {
-    private record Item(TypeAliasMetadata Metadata, TypeAliasDeclaration Node);
-
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
-    private readonly HashSet<Item> typesToProcess;
+    private readonly HashSet<TypeAliasDeclaration> typesToProcess;
 
     public AliasGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
     {
@@ -20,21 +18,21 @@ internal class AliasGenerator
         typesToProcess = [];
     }
 
-    public void CreateAliases(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void CreateAliases(IReadOnlyList<TypeSymbol> types)
     {
-        foreach (var (_, symbol) in types)
+        foreach (var symbol in types)
         {
             if (!symbol.IsAlias)
                 continue;
 
-            var typeAliasNode = (TypeAliasDeclaration)symbol.Node;
-            var root = typeAliasNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var alias = new TypeAliasMetadata(
-                new SourceLocation(root.SourceFile, typeAliasNode.SourceSpan.GetValueOrDefault()),
-                typeAliasNode.Name);
+            var node = (TypeAliasDeclaration)symbol.Node;
+            var root = node.GetRoot();
+            var metadata = new TypeAliasMetadata(
+                new SourceLocation(root.SourceFile, node.SourceSpan.GetValueOrDefault()),
+                node.Name);
 
-            foreach (var genericArgument in typeAliasNode.GenericArguments)
+            foreach (var genericArgument in node.GenericArguments)
             {
                 var argumentMetadata = new TypeArgumentMetadata(
                     new SourceLocation(root.SourceFile, genericArgument.SourceSpan.GetValueOrDefault()),
@@ -46,29 +44,41 @@ internal class AliasGenerator
                     diagnostics.TypeArgumentAlreadyDefined(genericArgument);
                 }
 
-                alias.AddGenericArgument(argumentMetadata);
+                metadata.AddGenericArgument(argumentMetadata);
+                genericArgument.Metadata = argumentMetadata;
             }
 
-            if (typeProvider.DefineType(symbol.Name, alias))
-                typesToProcess.Add(new Item(alias, typeAliasNode));
-            else
-                diagnostics.TypeAlreadyDefined(typeAliasNode);
+            if (!typeProvider.DefineType(symbol.Name, metadata))
+            {
+                diagnostics.TypeAlreadyDefined(node);
+                metadata.MarkAsInvalid();
+            }
+
+            node.Metadata = metadata;
+
+            typesToProcess.Add(node);
         }
     }
 
     public void PopulateAliases()
     {
-        foreach (var (aliasMetadata, typeAliasNode) in typesToProcess)
+        foreach (var typeAliasNode in typesToProcess)
         {
+            var metadata = (TypeAliasMetadata)typeAliasNode.Metadata!;
             var typeProvider = symbolTableMap.Get(typeAliasNode).TypeProvider;
-            var aliasedMetadataName = typeAliasNode.Type is GenericType genericTypeNode
-                ? genericTypeNode.GetOpenGenericName()
-                : typeAliasNode.Type.Name;
+            var aliasedType = typeAliasNode.Type;
+            var aliasedMetadata = typeProvider.GetType(aliasedType.Name);
+            if (aliasedMetadata is null && aliasedType is GenericType genericType)
+                aliasedMetadata = typeProvider.GetType(genericType.GetOpenGenericName());
 
-            var aliasedMetadata = typeProvider.GetType(aliasedMetadataName) ??
-                                  TypeMetadata.Invalid(aliasedMetadataName);
+            if (aliasedMetadata is null)
+            {
+                aliasedMetadata = TypeMetadata.Invalid(aliasedType.Name);
+                diagnostics.UnknownType(aliasedType);
+            }
 
-            aliasMetadata.Type = aliasedMetadata;
+            metadata.Type = aliasedMetadata;
+            aliasedType.Metadata = aliasedMetadata;
         }
     }
 }

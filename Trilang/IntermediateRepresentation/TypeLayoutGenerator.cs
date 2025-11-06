@@ -99,7 +99,7 @@ internal class TypeLayoutGenerator
             TypeArgumentMetadata typeArgumentMetadata
                 => Generate(typeArgumentMetadata),
 
-            TypeArrayMetadata typeArrayMetadata
+            ArrayMetadata typeArrayMetadata
                 => Generate(typeArrayMetadata),
 
             TypeMetadata typeMetadata
@@ -157,7 +157,7 @@ internal class TypeLayoutGenerator
     private TypeLayout Generate(TypeArgumentMetadata type)
         => throw new NotSupportedException($"Can't calculate a type layout for the type argument ({type}).");
 
-    private TypeLayout Generate(TypeArrayMetadata type)
+    private TypeLayout Generate(ArrayMetadata type)
     {
         var layout = new TypeLayout();
         foreach (var field in type.Fields)

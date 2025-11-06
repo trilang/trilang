@@ -9,9 +9,9 @@ using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics.Passes;
 
-internal class TypeChecker : IVisitor, ISemanticPass
+internal class TypeChecker : Visitor, ISemanticPass
 {
-    private SourceFile file = default!;
+    private SourceFile file;
     private SemanticDiagnosticReporter diagnostics = null!;
     private IEnumerable<string> directives = null!;
     private SymbolTableMap symbolTableMap = null!;
@@ -29,12 +29,9 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitArrayAccess(ArrayAccessExpression node)
+    protected override void VisitArrayAccessExit(ArrayAccessExpression node)
     {
-        node.Member.Accept(this);
-        node.Index.Accept(this);
-
-        if (node.Member.ReturnTypeMetadata is TypeArrayMetadata { IsInvalid: false } typeArray)
+        if (node.Member.ReturnTypeMetadata is ArrayMetadata { IsInvalid: false } typeArray)
         {
             Debug.Assert(typeArray.ItemMetadata is not null);
             node.ReturnTypeMetadata = typeArray.ItemMetadata;
@@ -42,33 +39,15 @@ internal class TypeChecker : IVisitor, ISemanticPass
         else
         {
             diagnostics.ExpectedArray(node.Member);
-            node.ReturnTypeMetadata = TypeArrayMetadata.Invalid();
+            node.ReturnTypeMetadata = ArrayMetadata.Invalid();
         }
 
         if (!Equals(node.Index.ReturnTypeMetadata, I32))
             diagnostics.TypeMismatch(node.Index, I32, node.Index.ReturnTypeMetadata);
     }
 
-    public void VisitArrayType(ArrayType node)
+    protected override void VisitBinaryExpressionExit(BinaryExpression node)
     {
-        node.ElementType.Accept(this);
-
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var metadata = typeProvider.GetType(node.Name);
-        if (metadata is not TypeArrayMetadata)
-        {
-            metadata = TypeArrayMetadata.Invalid();
-            diagnostics.UnknownType(node);
-        }
-
-        node.Metadata = metadata;
-    }
-
-    public void VisitBinaryExpression(BinaryExpression node)
-    {
-        node.Left.Accept(this);
-        node.Right.Accept(this);
-
         Debug.Assert(node.Kind != BinaryExpressionKind.Unknown);
         Debug.Assert(node.Left.ReturnTypeMetadata is not null);
         Debug.Assert(node.Right.ReturnTypeMetadata is not null);
@@ -162,24 +141,8 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitBlock(BlockStatement node)
+    protected override void VisitCallExit(CallExpression node)
     {
-        foreach (var statement in node.Statements)
-            statement.Accept(this);
-    }
-
-    public void VisitBreak(Break node)
-    {
-    }
-
-    public void VisitCall(CallExpression node)
-    {
-        // TODO: unused return value
-        node.Member.Accept(this);
-
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this);
-
         Debug.Assert(node.Member.ReturnTypeMetadata is not null);
         if (node.Member.ReturnTypeMetadata is FunctionTypeMetadata function)
         {
@@ -198,170 +161,10 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitCast(CastExpression node)
-    {
-        node.Type.Accept(this);
-        node.Expression.Accept(this);
-    }
-
-    public void VisitConstructor(ConstructorDeclaration node)
-    {
-        foreach (var parameter in node.Parameters)
-        {
-            var parameterMetadata = node.Metadata!.Parameters
-                .FirstOrDefault(x => x.Name == parameter.Name);
-
-            Debug.Assert(parameterMetadata is not null);
-            parameter.Metadata = parameterMetadata;
-        }
-
-        node.Body.Accept(this);
-    }
-
-    public void VisitContinue(Continue node)
-    {
-    }
-
-    public void VisitDiscriminatedUnion(DiscriminatedUnion node)
-    {
-        // TODO: eliminate duplicates
-        // TODO: restrict recursive types
-        foreach (var type in node.Types)
-            type.Accept(this);
-
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var metadata = typeProvider.GetType(node.Name);
-        if (metadata is not DiscriminatedUnionMetadata)
-        {
-            metadata = DiscriminatedUnionMetadata.Invalid();
-            diagnostics.UnknownType(node);
-        }
-
-        node.Metadata = metadata;
-    }
-
-    public void VisitExpressionBlock(ExpressionBlock node)
+    public override void VisitExpressionBlock(ExpressionBlock node)
         => Debug.Fail("Expression blocks are not supported");
 
-    public void VisitExpressionStatement(ExpressionStatement node)
-    {
-        // TODO: check whether the result of expression is used
-        node.Expression.Accept(this);
-    }
-
-    public void VisitFakeDeclaration(FakeDeclaration node)
-    {
-        // FakeDeclaration is used to recover from parsing errors, so we just skip it here.
-    }
-
-    public void VisitFakeExpression(FakeExpression node)
-    {
-        // FakeExpression is used to recover from parsing errors, so we just skip it here.
-    }
-
-    public void VisitFakeStatement(FakeStatement node)
-    {
-        // FakeStatement is used to recover from parsing errors, so we just skip it here.
-    }
-
-    public void VisitFakeType(FakeType node)
-    {
-        // FakeType is used to recover from parsing errors, so we just skip it here.
-    }
-
-    public void VisitFunctionSignature(FunctionDeclaration node)
-    {
-        var parameters = new ParameterMetadata[node.Parameters.Count];
-        for (var i = 0; i < node.Parameters.Count; i++)
-        {
-            var parameter = node.Parameters[i];
-            parameter.Accept(this);
-
-            parameters[i] = new ParameterMetadata(
-                new SourceLocation(file, parameter.SourceSpan.GetValueOrDefault()),
-                parameter.Name,
-                parameter.Type.Metadata!);
-        }
-
-        node.ReturnType.Accept(this);
-
-        // we can be sure that node.Metadata is not null here
-        // because it is set as a part of TypeNode
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var parameterTypes = node.Parameters.Select(x => x.Type.Metadata!);
-        var returnType = node.ReturnType.Metadata!;
-        var functionType = new FunctionTypeMetadata(null, parameterTypes, returnType);
-        functionType = typeProvider.GetType(functionType.ToString()) as FunctionTypeMetadata;
-
-        Debug.Assert(functionType is not null);
-        node.Metadata = new FunctionMetadata(
-            new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
-            GetAccessModifierMetadata(node.AccessModifier),
-            node.Name,
-            parameters,
-            functionType);
-
-        foreach (var parameter in node.Parameters)
-        {
-            var parameterMetadata = node.Metadata!.Parameters
-                .FirstOrDefault(x => x.Name == parameter.Name);
-
-            Debug.Assert(parameterMetadata is not null);
-            parameter.Metadata = parameterMetadata;
-        }
-    }
-
-    public void VisitFunction(FunctionDeclaration node)
-        => node.Body.Accept(this);
-
-    public void VisitFunctionType(FunctionType node)
-    {
-        foreach (var parameterType in node.ParameterTypes)
-            parameterType.Accept(this);
-
-        node.ReturnType.Accept(this);
-
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var parameters = node.ParameterTypes.Select(x => x.Metadata!);
-        var returnType = node.ReturnType.Metadata!;
-        var functionType = new FunctionTypeMetadata(
-            new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
-            parameters,
-            returnType);
-
-        functionType = typeProvider.GetType(functionType.ToString()) as FunctionTypeMetadata;
-        if (functionType is null)
-        {
-            functionType = FunctionTypeMetadata.Invalid();
-            diagnostics.UnknownType(node);
-        }
-
-        node.Metadata = functionType;
-    }
-
-    public void VisitGenericType(GenericType node)
-    {
-        foreach (var typeArgument in node.TypeArguments)
-            typeArgument.Accept(this);
-
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var metadata = typeProvider.GetType(node.Name) ??
-                       typeProvider.GetType(node.GetOpenGenericName());
-
-        if (metadata is null)
-        {
-            metadata = TypeMetadata.Invalid(node.Name);
-            diagnostics.UnknownType(node);
-        }
-
-        node.Metadata = metadata;
-    }
-
-    public void VisitGoTo(GoTo node)
-    {
-    }
-
-    public void VisitIfDirective(IfDirective node)
+    public override void VisitIfDirective(IfDirective node)
     {
         if (directives.Contains(node.DirectiveName))
         {
@@ -375,68 +178,13 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitIf(IfStatement node)
+    protected override void VisitIfExit(IfStatement node)
     {
-        // TODO: data flow
-        node.Condition.Accept(this);
-        node.Then.Accept(this);
-        node.Else?.Accept(this);
-
         if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
             diagnostics.TypeMismatch(node.Condition, Bool, node.Condition.ReturnTypeMetadata);
     }
 
-    public void VisitInterface(Interface node)
-    {
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var metadata = typeProvider.GetType(node.Name) as InterfaceMetadata;
-
-        Debug.Assert(metadata is not null);
-        node.Metadata = metadata;
-
-        foreach (var property in node.Properties)
-            property.Accept(this);
-
-        foreach (var method in node.Methods)
-            method.Accept(this);
-    }
-
-    public void VisitInterfaceProperty(InterfaceProperty node)
-    {
-        node.Type.Accept(this);
-
-        var type = (InterfaceMetadata)((Interface)node.Parent!).Metadata!;
-        var propertyMetadata = type.GetProperty(node.Name);
-
-        Debug.Assert(propertyMetadata is not null);
-        node.Metadata = propertyMetadata;
-    }
-
-    public void VisitInterfaceMethod(InterfaceMethod node)
-    {
-        foreach (var parameter in node.ParameterTypes)
-            parameter.Accept(this);
-
-        node.ReturnType.Accept(this);
-
-        var type = (InterfaceMetadata)((Interface)node.Parent!).Metadata!;
-        var methodMetadata = type.GetMethod(node.Name);
-
-        Debug.Assert(methodMetadata is not null);
-        node.Metadata = methodMetadata;
-    }
-
-    public void VisitIsExpression(IsExpression node)
-    {
-        node.Expression.Accept(this);
-        node.Type.Accept(this);
-    }
-
-    public void VisitLabel(Label node)
-    {
-    }
-
-    public void VisitLiteral(LiteralExpression node)
+    protected override void VisitLiteralExit(LiteralExpression node)
     {
         node.ReturnTypeMetadata = node.Kind switch
         {
@@ -451,7 +199,7 @@ internal class TypeChecker : IVisitor, ISemanticPass
         };
     }
 
-    public void VisitMemberAccess(MemberAccessExpression node)
+    public override void VisitMemberAccess(MemberAccessExpression node)
     {
         if (node.IsFirstMember)
         {
@@ -509,51 +257,23 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.Member!.Accept(this);
 
         var returnTypeMetadata = node.Member.ReturnTypeMetadata!;
-        if (returnTypeMetadata.IsInvalid)
-        {
-            node.Reference = new InvalidMemberMetadata(node.Name);
-            return;
-        }
-
         var memberMetadata = returnTypeMetadata.GetMember(node.Name);
         if (memberMetadata is null)
         {
             memberMetadata = new InvalidMemberMetadata(node.Name);
-            diagnostics.UnknownMember(node, returnTypeMetadata);
+
+            if (!returnTypeMetadata.IsInvalid)
+                diagnostics.UnknownMember(node, returnTypeMetadata);
         }
 
         node.Reference = memberMetadata;
     }
 
-    public void VisitMethod(MethodDeclaration node)
+    protected override void VisitNewArrayExit(NewArrayExpression node)
+        => node.ReturnTypeMetadata = node.Type.Metadata;
+
+    protected override void VisitNewObjectExit(NewObjectExpression node)
     {
-        foreach (var parameter in node.Parameters)
-        {
-            var parameterMetadata = node.Metadata!.Parameters
-                .FirstOrDefault(x => x.Name == parameter.Name);
-
-            Debug.Assert(parameterMetadata is not null);
-            parameter.Metadata = parameterMetadata;
-        }
-
-        node.Body.Accept(this);
-    }
-
-    public void VisitNewArray(NewArrayExpression node)
-    {
-        node.Type.Accept(this);
-        node.Size.Accept(this);
-
-        node.ReturnTypeMetadata = node.Type.Metadata;
-    }
-
-    public void VisitNewObject(NewObjectExpression node)
-    {
-        node.Type.Accept(this);
-
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this);
-
         if (node.Type.Metadata is not TypeMetadata type || type.IsValueType)
         {
             node.Metadata = ConstructorMetadata.Invalid();
@@ -573,14 +293,8 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitNull(NullExpression node)
+    protected override void VisitReturnExit(ReturnStatement node)
     {
-    }
-
-    public void VisitReturn(ReturnStatement node)
-    {
-        node.Expression?.Accept(this);
-
         var expressionType = node.Expression?.ReturnTypeMetadata ?? TypeMetadata.Void;
         if (expressionType.IsInvalid)
             return;
@@ -635,50 +349,8 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitParameter(Parameter node)
-        => node.Type.Accept(this);
-
-    public void VisitProperty(PropertyDeclaration node)
+    protected override void VisitTupleExit(TupleExpression node)
     {
-        node.Type.Accept(this);
-        node.Getter?.Accept(this);
-        node.Setter?.Accept(this);
-    }
-
-    public void VisitGetter(PropertyGetter node)
-    {
-        var property = (PropertyDeclaration)node.Parent!;
-        var propertyMetadata = property.Metadata!;
-        node.Metadata = propertyMetadata.Getter;
-
-        node.Body?.Accept(this);
-    }
-
-    public void VisitSetter(PropertySetter node)
-    {
-        var property = (PropertyDeclaration)node.Parent!;
-        var propertyMetadata = property.Metadata!;
-        node.Metadata = propertyMetadata.Setter;
-
-        // TODO: check the backing field is set?
-        node.Body?.Accept(this);
-    }
-
-    public void VisitTree(SemanticTree node)
-    {
-        // preprocess function to generate correct metadata before processing bodies/other types
-        foreach (var function in node.Declarations.OfType<FunctionDeclaration>())
-            VisitFunctionSignature(function);
-
-        foreach (var statement in node.Declarations)
-            statement.Accept(this);
-    }
-
-    public void VisitTuple(TupleExpression node)
-    {
-        foreach (var expression in node.Expressions)
-            expression.Accept(this);
-
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
         // we can't generate metadata for this tuple in GenerateMetadata
@@ -695,124 +367,19 @@ internal class TypeChecker : IVisitor, ISemanticPass
         node.ReturnTypeMetadata = existingTuple;
     }
 
-    public void VisitTupleType(TupleType node)
+    protected override void VisitTypeNodeExit(Type node)
     {
-        // TODO: restrict recursive types
-        foreach (var type in node.Types)
-            type.Accept(this);
+        if (node.Metadata is not null)
+            return;
 
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var types = node.Types.Select(x => x.Metadata!);
-        var tuple = new TupleMetadata(
-            new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
-            types);
-        tuple = typeProvider.GetType(tuple.ToString()) as TupleMetadata;
 
-        Debug.Assert(tuple is not null);
-        node.Metadata = tuple;
+        // TODO: move to MetadataGenerator?
+        node.Metadata = node.PopulateMetadata(typeProvider, diagnostics);
     }
 
-    public void VisitTypeAlias(TypeAliasDeclaration node)
+    protected override void VisitUnaryExpressionExit(UnaryExpression node)
     {
-        foreach (var genericArgument in node.GenericArguments)
-            genericArgument.Accept(this);
-
-        node.Type.Accept(this);
-
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var alias = typeProvider.GetType(node.FullName) as TypeAliasMetadata;
-
-        Debug.Assert(alias is not null);
-        node.Metadata = alias;
-    }
-
-    public void VisitType(TypeDeclaration node)
-    {
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var type = typeProvider.GetType(node.FullName) as TypeMetadata;
-
-        Debug.Assert(type is not null);
-        node.Metadata = type;
-
-        foreach (var genericArgument in node.GenericArguments)
-            genericArgument.Accept(this);
-
-        foreach (var @interface in node.Interfaces)
-            @interface.Accept(this);
-
-        // visit signatures first
-        foreach (var property in node.Properties)
-            VisitPropertySignature(property);
-
-        foreach (var constructor in node.Constructors)
-            VisitConstructorSignature(constructor);
-
-        foreach (var method in node.Methods)
-            VisitMethodSignature(method);
-
-        // visit bodies later to support forward references
-        foreach (var property in node.Properties)
-            property.Accept(this);
-
-        foreach (var constructor in node.Constructors)
-            constructor.Accept(this);
-
-        foreach (var method in node.Methods)
-            method.Accept(this);
-    }
-
-    private void VisitPropertySignature(PropertyDeclaration node)
-    {
-        var type = ((TypeDeclaration)node.Parent!).Metadata!;
-        var propertyMetadata = type.GetProperty(node.Name);
-
-        Debug.Assert(propertyMetadata is not null);
-        node.Metadata = propertyMetadata;
-    }
-
-    private void VisitConstructorSignature(ConstructorDeclaration node)
-    {
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this);
-
-        var type = ((TypeDeclaration)node.Parent!).Metadata!;
-        var constructorMetadata = type.GetConstructor(node.Parameters.Select(x => x.Type.Metadata!));
-
-        Debug.Assert(constructorMetadata is not null);
-        node.Metadata = constructorMetadata;
-    }
-
-    private void VisitMethodSignature(MethodDeclaration node)
-    {
-        foreach (var parameter in node.Parameters)
-            parameter.Accept(this);
-
-        node.ReturnType.Accept(this);
-
-        var type = ((TypeDeclaration)node.Parent!).Metadata!;
-        var methodMetadata = type.GetMethod(node.Name);
-
-        Debug.Assert(methodMetadata is not null);
-        node.Metadata = methodMetadata;
-    }
-
-    public void VisitTypeNode(Type node)
-    {
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
-        var type = typeProvider.GetType(node.Name);
-        if (type is null)
-        {
-            type = TypeMetadata.Invalid(node.Name);
-            diagnostics.UnknownType(node);
-        }
-
-        node.Metadata = type;
-    }
-
-    public void VisitUnaryExpression(UnaryExpression node)
-    {
-        node.Operand.Accept(this);
-
         Debug.Assert(node.Kind != UnaryExpressionKind.Unknown);
         Debug.Assert(node.Operand.ReturnTypeMetadata is not null);
 
@@ -868,13 +435,8 @@ internal class TypeChecker : IVisitor, ISemanticPass
         }
     }
 
-    public void VisitVariable(VariableDeclaration node)
+    protected override void VisitVariableExit(VariableDeclaration node)
     {
-        // TODO: infer type
-        // TODO: unused variable
-        node.Type.Accept(this);
-        node.Expression.Accept(this);
-
         Debug.Assert(node.Expression.ReturnTypeMetadata is not null);
         Debug.Assert(node.Type.Metadata is not null);
 
@@ -883,30 +445,18 @@ internal class TypeChecker : IVisitor, ISemanticPass
             !node.Expression.ReturnTypeMetadata.Equals(node.Type.Metadata))
             diagnostics.TypeMismatch(node.Expression, node.Type.Metadata, node.Expression.ReturnTypeMetadata);
 
+        // TODO: move to MetadataGenerator?
         node.Metadata = new VariableMetadata(
             new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
             node.Name,
             node.Type.Metadata);
     }
 
-    public void VisitWhile(While node)
+    protected override void VisitWhileExit(While node)
     {
-        node.Condition.Accept(this);
-        node.Body.Accept(this);
-
         if (!Equals(node.Condition.ReturnTypeMetadata, Bool))
             diagnostics.TypeMismatch(node.Condition, Bool, node.Condition.ReturnTypeMetadata);
     }
-
-    private static AccessModifierMetadata GetAccessModifierMetadata(AccessModifier accessModifier)
-        => accessModifier switch
-        {
-            AccessModifier.Public => AccessModifierMetadata.Public,
-            AccessModifier.Internal => AccessModifierMetadata.Internal,
-            AccessModifier.Private => AccessModifierMetadata.Private,
-
-            _ => throw new ArgumentOutOfRangeException(nameof(accessModifier), accessModifier, null)
-        };
 
     public string Name => nameof(TypeChecker);
 

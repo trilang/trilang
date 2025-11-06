@@ -2,7 +2,7 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;
 
-public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
+public class TypeSymbol : IEquatable<TypeSymbol>
 {
     private TypeSymbol(TypeSymbolKind typeKind, string name, ISemanticNode node)
     {
@@ -11,8 +11,8 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
         Node = node;
     }
 
-    public static TypeSymbol Type(TypeDeclaration node)
-        => new TypeSymbol(TypeSymbolKind.Type, node.Name, node);
+    public static TypeSymbol TypeDeclaration(TypeDeclaration node)
+        => new TypeSymbol(TypeSymbolKind.TypeDeclaration, node.Name, node);
 
     public static TypeSymbol Array(ArrayType node)
         => new TypeSymbol(TypeSymbolKind.Array, node.Name, node);
@@ -32,8 +32,8 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
     public static TypeSymbol Tuple(TupleType node)
         => new TypeSymbol(TypeSymbolKind.Tuple, node.Name, node);
 
-    public static TypeSymbol OpenGenericType(TypeDeclaration node)
-        => new TypeSymbol(TypeSymbolKind.OpenGenericType, node.FullName, node);
+    public static TypeSymbol GenericTypeDeclaration(TypeDeclaration node)
+        => new TypeSymbol(TypeSymbolKind.GenericTypeDeclaration, node.FullName, node);
 
     public static TypeSymbol GenericType(GenericType node)
         => new TypeSymbol(TypeSymbolKind.GenericType, node.Name, node);
@@ -83,7 +83,7 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
 
     public ISemanticNode Node { get; }
 
-    public bool IsType => TypeKind == TypeSymbolKind.Type;
+    public bool IsTypeDeclaration => TypeKind == TypeSymbolKind.TypeDeclaration;
 
     public bool IsArray => TypeKind == TypeSymbolKind.Array;
 
@@ -97,7 +97,7 @@ public class TypeSymbol : ISymbol, IEquatable<TypeSymbol>
 
     public bool IsTuple => TypeKind == TypeSymbolKind.Tuple;
 
-    public bool IsGenericType => TypeKind == TypeSymbolKind.OpenGenericType;
+    public bool IsGenericTypeDeclaration => TypeKind == TypeSymbolKind.GenericTypeDeclaration;
 
-    public bool IsClosedGenericType => TypeKind == TypeSymbolKind.GenericType;
+    public bool IsGenericType => TypeKind == TypeSymbolKind.GenericType;
 }

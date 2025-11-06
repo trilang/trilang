@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
@@ -6,48 +7,50 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class DiscriminatedUnionGenerator
 {
-    private record Item(DiscriminatedUnionMetadata Metadata, DiscriminatedUnion Node);
-
+    private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
-    private readonly HashSet<Item> typesToProcess;
+    private readonly HashSet<DiscriminatedUnion> typesToProcess;
 
-    public DiscriminatedUnionGenerator(SymbolTableMap symbolTableMap)
+    public DiscriminatedUnionGenerator(
+        SemanticDiagnosticReporter diagnostics,
+        SymbolTableMap symbolTableMap)
     {
+        this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
         typesToProcess = [];
     }
 
-    public void CreateDiscriminatedUnion(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void CreateDiscriminatedUnion(IReadOnlyList<TypeSymbol> types)
     {
-        foreach (var (_, symbol) in types)
+        foreach (var symbol in types)
         {
             if (!symbol.IsDiscriminatedUnion)
                 continue;
 
-            var discriminatedUnionNode = (DiscriminatedUnion)symbol.Node;
-            var root = discriminatedUnionNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var metadata = new DiscriminatedUnionMetadata(
-                new SourceLocation(root.SourceFile, discriminatedUnionNode.SourceSpan.GetValueOrDefault()));
+            var node = (DiscriminatedUnion)symbol.Node;
 
-            if (typeProvider.DefineType(symbol.Name, metadata))
-                typesToProcess.Add(new Item(metadata, discriminatedUnionNode));
+            if (typeProvider.GetType(symbol.Name) is not DiscriminatedUnionMetadata metadata)
+            {
+                metadata = new DiscriminatedUnionMetadata(node.GetLocation());
+
+                if (typeProvider.DefineType(symbol.Name, metadata))
+                    typesToProcess.Add(node);
+            }
+
+            node.Metadata = metadata;
         }
     }
 
     public void PopulateDiscriminatedUnion()
     {
-        foreach (var (metadata, node) in typesToProcess)
+        foreach (var node in typesToProcess)
         {
+            var metadata = (DiscriminatedUnionMetadata)node.Metadata!;
             var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
             foreach (var typeNode in node.Types)
-            {
-                var type = typeProvider.GetType(typeNode.Name) ??
-                           TypeMetadata.Invalid(typeNode.Name);
-
-                metadata.AddType(type);
-            }
+                metadata.AddType(typeNode.PopulateMetadata(typeProvider, diagnostics));
         }
     }
 }

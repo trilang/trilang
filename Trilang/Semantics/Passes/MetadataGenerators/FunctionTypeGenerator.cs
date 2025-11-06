@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
@@ -6,54 +7,51 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class FunctionTypeGenerator
 {
-    private record Item(FunctionTypeMetadata Metadata, FunctionType Node);
-
+    private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
-    private readonly HashSet<Item> typesToProcess;
+    private readonly HashSet<FunctionType> typesToProcess;
 
-    public FunctionTypeGenerator(SymbolTableMap symbolTableMap)
+    public FunctionTypeGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
     {
+        this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
         typesToProcess = [];
     }
 
-    public void CreateFunctionTypes(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void CreateFunctionTypes(IReadOnlyList<TypeSymbol> types)
     {
-        foreach (var (_, symbol) in types)
+        foreach (var symbol in types)
         {
             if (!symbol.IsFunction)
                 continue;
 
-            var function = (FunctionType)symbol.Node;
-            var root = function.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var functionTypeMetadata = new FunctionTypeMetadata(
-                new SourceLocation(root.SourceFile, function.SourceSpan.GetValueOrDefault()));
+            var node = (FunctionType)symbol.Node;
 
-            if (typeProvider.DefineType(symbol.Name, functionTypeMetadata))
-                typesToProcess.Add(new Item(functionTypeMetadata, function));
+            if (typeProvider.GetType(symbol.Name) is not FunctionTypeMetadata metadata)
+            {
+                metadata = new FunctionTypeMetadata(node.GetLocation());
+
+                if (typeProvider.DefineType(symbol.Name, metadata))
+                    typesToProcess.Add(node);
+            }
+
+            node.Metadata = metadata;
         }
     }
 
     public void PopulateFunctionTypes()
     {
-        foreach (var (functionTypeMetadata, functionTypeNode) in typesToProcess)
+        foreach (var functionTypeNode in typesToProcess)
         {
             // TODO: generic?
+            var metadata = (FunctionTypeMetadata)functionTypeNode.Metadata!;
             var typeProvider = symbolTableMap.Get(functionTypeNode).TypeProvider;
 
             foreach (var parameterType in functionTypeNode.ParameterTypes)
-            {
-                var parameter = typeProvider.GetType(parameterType.Name) ??
-                                TypeMetadata.Invalid(parameterType.Name);
+                metadata.AddParameter(parameterType.PopulateMetadata(typeProvider, diagnostics));
 
-                functionTypeMetadata.AddParameter(parameter);
-            }
-
-            var returnType = typeProvider.GetType(functionTypeNode.ReturnType.Name) ??
-                             TypeMetadata.Invalid(functionTypeNode.ReturnType.Name);
-
-            functionTypeMetadata.ReturnType = returnType;
+            metadata.ReturnType = functionTypeNode.ReturnType.PopulateMetadata(typeProvider, diagnostics);
         }
     }
 }

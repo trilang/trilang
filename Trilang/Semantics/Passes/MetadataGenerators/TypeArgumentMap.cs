@@ -56,7 +56,7 @@ internal class TypeArgumentMap
             TypeArgumentMetadata typeArgumentMetadata
                 => Map(typeArgumentMetadata),
 
-            TypeArrayMetadata typeArrayMetadata
+            ArrayMetadata typeArrayMetadata
                 => Map(typeArrayMetadata),
 
             TypeMetadata typeMetadata
@@ -140,10 +140,10 @@ internal class TypeArgumentMap
     private ITypeMetadata Map(TypeArgumentMetadata type)
         => map.GetValueOrDefault(type.Name, type);
 
-    private TypeArrayMetadata Map(TypeArrayMetadata type)
+    private ArrayMetadata Map(ArrayMetadata type)
     {
         var itemType = Map(type.ItemMetadata!);
-        var typeArrayMetadata = new TypeArrayMetadata(type.Definition, itemType);
+        var typeArrayMetadata = new ArrayMetadata(type.Definition, itemType);
 
         return typeProvider.GetOrDefine(typeArrayMetadata);
     }
@@ -238,7 +238,7 @@ internal class TypeArgumentMap
             TypeArgumentMetadata
                 => true,
 
-            TypeArrayMetadata typeArrayMetadata
+            ArrayMetadata typeArrayMetadata
                 => HasTypeArgument(typeArrayMetadata.ItemMetadata!),
 
             TypeMetadata typeMetadata

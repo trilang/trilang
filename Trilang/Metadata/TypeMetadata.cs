@@ -177,6 +177,9 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
            GetMethod(name) ??
            GetField(name) as IMetadata;
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }

@@ -38,7 +38,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     {
         map.Add(node, context);
 
-        context.TryAddType(TypeSymbol.Array(node));
+        context.AddType(TypeSymbol.Array(node));
 
         node.ElementType.Accept(this, context);
     }
@@ -102,7 +102,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     public void VisitDiscriminatedUnion(DiscriminatedUnion node, ISymbolTable context)
     {
         var symbol = TypeSymbol.DiscriminatedUnion(node);
-        context.TryAddType(symbol);
+        context.AddType(symbol);
 
         var child = context.CreateChild();
         map.Add(node, child);
@@ -153,7 +153,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     public void VisitFunctionType(FunctionType node, ISymbolTable context)
     {
         var symbol = TypeSymbol.FunctionType(node);
-        context.TryAddType(symbol);
+        context.AddType(symbol);
 
         map.Add(node, context);
 
@@ -171,7 +171,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             typeArgument.Accept(this, context);
 
         var symbol = TypeSymbol.GenericType(node);
-        context.TryAddType(symbol);
+        context.AddType(symbol);
     }
 
     public void VisitGoTo(GoTo node, ISymbolTable context)
@@ -204,7 +204,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     public void VisitInterface(Interface node, ISymbolTable context)
     {
         var symbol = TypeSymbol.Interface(node);
-        context.TryAddType(symbol);
+        context.AddType(symbol);
 
         var child = context.CreateChild();
         map.Add(node, child);
@@ -391,13 +391,12 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             type.Accept(this, context);
 
         var symbol = TypeSymbol.Tuple(node);
-        context.TryAddType(symbol);
+        context.AddType(symbol);
     }
 
     public void VisitTypeAlias(TypeAliasDeclaration node, ISymbolTable context)
     {
-        if (!context.TryAddType(TypeSymbol.Alias(node)))
-            diagnostics.TypeAlreadyDefined(node);
+        context.AddType(TypeSymbol.Alias(node));
 
         var child = context.CreateChild();
         map.Add(node, child);
@@ -411,10 +410,9 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     public void VisitType(TypeDeclaration node, ISymbolTable context)
     {
         var symbol = node.GenericArguments.Count > 0
-            ? TypeSymbol.OpenGenericType(node)
-            : TypeSymbol.Type(node);
-        if (!context.TryAddType(symbol))
-            diagnostics.TypeAlreadyDefined(node);
+            ? TypeSymbol.GenericTypeDeclaration(node)
+            : TypeSymbol.TypeDeclaration(node);
+        context.AddType(symbol);
 
         var child = context.CreateChild();
         map.Add(node, child);

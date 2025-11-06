@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
@@ -6,48 +7,48 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class TupleGenerator
 {
-    private record Item(TupleMetadata Metadata, TupleType Node);
-
+    private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
-    private readonly HashSet<Item> typesToProcess;
+    private readonly HashSet<TupleType> typesToProcess;
 
-    public TupleGenerator(SymbolTableMap symbolTableMap)
+    public TupleGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
     {
+        this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
         typesToProcess = [];
     }
 
-    public void CreateTuples(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void CreateTuples(IReadOnlyList<TypeSymbol> types)
     {
-        foreach (var (_, symbol) in types)
+        foreach (var symbol in types)
         {
             if (!symbol.IsTuple)
                 continue;
 
-            var tupleNode = (TupleType)symbol.Node;
-            var root = tupleNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var tuple = new TupleMetadata(
-                new SourceLocation(root.SourceFile, tupleNode.SourceSpan.GetValueOrDefault()));
+            var node = (TupleType)symbol.Node;
 
-            if (typeProvider.DefineType(symbol.Name, tuple))
-                typesToProcess.Add(new Item(tuple, tupleNode));
+            if (typeProvider.GetType(symbol.Name) is not TupleMetadata metadata)
+            {
+                metadata = new TupleMetadata(node.GetLocation());
+
+                if (typeProvider.DefineType(symbol.Name, metadata))
+                    typesToProcess.Add(node);
+            }
+
+            node.Metadata = metadata;
         }
     }
 
     public void PopulateTuples()
     {
-        foreach (var (tuple, tupleNode) in typesToProcess)
+        foreach (var node in typesToProcess)
         {
-            var typeProvider = symbolTableMap.Get(tupleNode).TypeProvider;
+            var tuple = (TupleMetadata)node.Metadata!;
+            var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
-            foreach (var typeNode in tupleNode.Types)
-            {
-                var type = typeProvider.GetType(typeNode.Name) ??
-                           TypeMetadata.Invalid(typeNode.Name);
-
-                tuple.AddType(type);
-            }
+            foreach (var typeNode in node.Types)
+                tuple.AddType(typeNode.PopulateMetadata(typeProvider, diagnostics));
         }
     }
 }

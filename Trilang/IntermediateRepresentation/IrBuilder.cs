@@ -205,7 +205,7 @@ internal class IrBuilder
     public Register GetElementPointer(Register array, Register index)
     {
         var pointer = (TypePointerMetadata)array.Type;
-        var type = ((TypeArrayMetadata)pointer.Type).ItemMetadata!;
+        var type = ((ArrayMetadata)pointer.Type).ItemMetadata!;
         var register = CreateRegister(new TypePointerMetadata(type));
         var element = new GetElementPointer(register, array, index);
         currentBlock.AddInstruction(element);
@@ -252,7 +252,7 @@ internal class IrBuilder
         return register;
     }
 
-    public Register ArrayAlloc(TypeArrayMetadata type, Register size)
+    public Register ArrayAlloc(ArrayMetadata type, Register size)
     {
         var register = CreateRegister(MapToIrType(type));
         var allocate = new ArrayAlloc(register, type.Layout!.Size, type.ItemMetadata!.Layout!.Size, size);

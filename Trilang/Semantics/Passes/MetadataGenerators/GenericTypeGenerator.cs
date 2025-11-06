@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
@@ -7,50 +8,58 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class GenericTypeGenerator
 {
-    private record Item(ITypeMetadata Closed, ITypeMetadata Open, GenericType Node);
+    private record Item(ITypeMetadata Open, GenericType Node);
 
+    private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public GenericTypeGenerator(SymbolTableMap symbolTableMap)
+    public GenericTypeGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
     {
+        this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
         typesToProcess = [];
     }
 
-    public void CreateGenericTypes(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void CreateGenericTypes(IReadOnlyList<TypeSymbol> types)
     {
-        foreach (var (_, symbol) in types)
+        foreach (var symbol in types)
         {
-            if (!symbol.IsClosedGenericType)
+            if (!symbol.IsGenericType)
                 continue;
 
-            var genericTypeNode = (GenericType)symbol.Node;
-            var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
+            var node = (GenericType)symbol.Node;
+            var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
             // ignore open generic types
-            if (IsOpenGeneric(typeProvider, genericTypeNode))
+            if (IsOpenGeneric(typeProvider, node))
                 continue;
 
-            var openName = genericTypeNode.GetOpenGenericName();
-            var openGenericType = typeProvider.GetType(openName);
-            var closedType = default(ITypeMetadata);
-            if (openGenericType is TypeMetadata type)
-                closedType = new TypeMetadata(openGenericType.Definition, type.Name);
-            else if (openGenericType is TypeAliasMetadata alias)
-                closedType = new TypeAliasMetadata(openGenericType.Definition, alias.Name);
-            else
-                continue;
+            var closedType = typeProvider.GetType(symbol.Name);
+            if (closedType is null)
+            {
+                var openName = node.GetOpenGenericName();
+                var openGenericType = typeProvider.GetType(openName);
+                if (openGenericType is TypeMetadata type)
+                    closedType = new TypeMetadata(openGenericType.Definition, type.Name);
+                else if (openGenericType is TypeAliasMetadata alias)
+                    closedType = new TypeAliasMetadata(openGenericType.Definition, alias.Name);
+                else
+                    Debug.Fail($"The '{openName}' generic type is not supported.");
 
-            if (typeProvider.DefineType(symbol.Name, closedType))
-                typesToProcess.Add(new Item(closedType, openGenericType, genericTypeNode));
+                if (typeProvider.DefineType(symbol.Name, closedType))
+                    typesToProcess.Add(new Item(openGenericType, node));
+            }
+
+            node.Metadata = closedType;
         }
     }
 
     public void PopulateGenericTypes()
     {
-        foreach (var (closed, open, genericTypeNode) in typesToProcess)
+        foreach (var (open, genericTypeNode) in typesToProcess)
         {
+            var closed = genericTypeNode.Metadata!;
             if (closed is TypeMetadata closedType && open is TypeMetadata openType)
                 PopulateClosedTypes(genericTypeNode, closedType, openType);
             else if (closed is TypeAliasMetadata closedAlias && open is TypeAliasMetadata openAlias)
@@ -68,12 +77,7 @@ internal class GenericTypeGenerator
         var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
 
         foreach (var argumentNode in genericTypeNode.TypeArguments)
-        {
-            var typeArgument = typeProvider.GetType(argumentNode.Name) ??
-                               TypeArgumentMetadata.Invalid(argumentNode.Name);
-
-            closed.AddGenericArgument(typeArgument);
-        }
+            closed.AddGenericArgument(argumentNode.PopulateMetadata(typeProvider, diagnostics));
 
         var typeArgumentsMap = TypeArgumentMap.Create(
             typeProvider,
@@ -171,12 +175,7 @@ internal class GenericTypeGenerator
         var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
 
         foreach (var argumentNode in genericTypeNode.TypeArguments)
-        {
-            var typeArgument = typeProvider.GetType(argumentNode.Name) ??
-                               TypeArgumentMetadata.Invalid(argumentNode.Name);
-
-            closed.AddGenericArgument(typeArgument);
-        }
+            closed.AddGenericArgument(argumentNode.PopulateMetadata(typeProvider, diagnostics));
 
         if (open.IsInvalid)
         {

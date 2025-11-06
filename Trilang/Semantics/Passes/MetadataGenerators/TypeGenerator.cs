@@ -2,16 +2,15 @@ using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
+using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class TypeGenerator
 {
-    private record Item(TypeMetadata Metadata, TypeDeclaration Node);
-
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
-    private readonly HashSet<Item> typesToProcess;
+    private readonly HashSet<TypeDeclaration> typesToProcess;
 
     public TypeGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
     {
@@ -20,24 +19,24 @@ internal class TypeGenerator
         typesToProcess = [];
     }
 
-    public void CreateTypes(IReadOnlyDictionary<string, TypeSymbol> types)
+    public void CreateTypes(IReadOnlyList<TypeSymbol> types)
     {
-        foreach (var (_, symbol) in types)
+        foreach (var symbol in types)
         {
-            if (symbol is { IsType: false, IsGenericType: false })
+            if (symbol is { IsTypeDeclaration: false, IsGenericTypeDeclaration: false })
                 continue;
 
-            var typeDeclarationNode = (TypeDeclaration)symbol.Node;
-            var root = typeDeclarationNode.GetRoot();
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
+            var node = (TypeDeclaration)symbol.Node;
+            var root = node.GetRoot();
             var metadata = new TypeMetadata(
-                new SourceLocation(root.SourceFile, typeDeclarationNode.SourceSpan.GetValueOrDefault()),
-                typeDeclarationNode.Name);
+                new SourceLocation(root.SourceFile, node.SourceSpan ?? default),
+                node.Name);
 
-            foreach (var genericArgument in typeDeclarationNode.GenericArguments)
+            foreach (var genericArgument in node.GenericArguments)
             {
                 var argumentMetadata = new TypeArgumentMetadata(
-                    new SourceLocation(root.SourceFile, genericArgument.SourceSpan.GetValueOrDefault()),
+                    new SourceLocation(root.SourceFile, genericArgument.SourceSpan ?? default),
                     genericArgument.Name) as ITypeMetadata;
 
                 if (!typeProvider.DefineType(genericArgument.Name, argumentMetadata))
@@ -47,84 +46,39 @@ internal class TypeGenerator
                 }
 
                 metadata.AddGenericArgument(argumentMetadata);
+                genericArgument.Metadata = argumentMetadata;
             }
 
-            if (typeProvider.DefineType(symbol.Name, metadata))
-                typesToProcess.Add(new Item(metadata, typeDeclarationNode));
-            else
-                diagnostics.TypeAlreadyDefined(typeDeclarationNode);
+            if (!typeProvider.DefineType(symbol.Name, metadata))
+            {
+                diagnostics.TypeAlreadyDefined(node);
+                metadata.MarkAsInvalid();
+            }
+
+            node.Metadata = metadata;
+
+            typesToProcess.Add(node);
         }
     }
 
     public void PopulateTypes()
     {
-        foreach (var (type, typeDeclarationNode) in typesToProcess)
+        foreach (var node in typesToProcess)
         {
-            var root = typeDeclarationNode.GetRoot();
-            var typeProvider = symbolTableMap.Get(typeDeclarationNode).TypeProvider;
+            var type = node.Metadata!;
+            var root = node.GetRoot();
+            var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
-            foreach (var @interface in typeDeclarationNode.Interfaces)
+            foreach (var @interface in node.Interfaces)
+                PopulateInterface(typeProvider, type, @interface);
+
+            foreach (var property in node.Properties)
+                PopulateProperty(typeProvider, root, type, property);
+
+            if (node.Constructors.Count > 0)
             {
-                // TODO: support generic interfaces
-                var interfaceMetadata = default(InterfaceMetadata);
-                var aliasMetadata = typeProvider.GetType(@interface.Name) as TypeAliasMetadata;
-                if (aliasMetadata is not null)
-                    interfaceMetadata = aliasMetadata.Type as InterfaceMetadata;
-
-                interfaceMetadata ??= InterfaceMetadata.Invalid();
-
-                type.AddInterface(interfaceMetadata);
-            }
-
-            foreach (var property in typeDeclarationNode.Properties)
-            {
-                var propertyType = typeProvider.GetType(property.Type.Name) ??
-                                   TypeMetadata.Invalid(property.Type.Name);
-
-                var propertyMetadata = new PropertyMetadata(
-                    new SourceLocation(root.SourceFile, property.SourceSpan.GetValueOrDefault()),
-                    type,
-                    property.Name,
-                    propertyType,
-                    GetAccessModifierMetadata(property.Getter?.AccessModifier),
-                    GetAccessModifierMetadata(property.Setter?.AccessModifier));
-
-                // TODO: add in a constructor?
-                type.AddProperty(propertyMetadata);
-
-                if (propertyMetadata.Getter is not null)
-                {
-                    type.AddMethod(propertyMetadata.Getter);
-                    typeProvider.DefineType(propertyMetadata.Getter.Type);
-                }
-
-                if (propertyMetadata.Setter is not null)
-                {
-                    type.AddMethod(propertyMetadata.Setter);
-                    typeProvider.DefineType(propertyMetadata.Setter.Type);
-                }
-            }
-
-            if (typeDeclarationNode.Constructors.Count > 0)
-            {
-                foreach (var constructor in typeDeclarationNode.Constructors)
-                {
-                    var parameters = constructor.Parameters
-                        .Select(x => typeProvider.GetType(x.Type.Name) ??
-                                     TypeMetadata.Invalid(x.Type.Name));
-                    var functionType = new FunctionTypeMetadata(null, parameters, type);
-                    functionType = typeProvider.GetOrDefine(functionType);
-
-                    var parametersMetadata = GetParameters(root, typeProvider, constructor.Parameters);
-                    var constructorMetadata = new ConstructorMetadata(
-                        new SourceLocation(root.SourceFile, constructor.SourceSpan.GetValueOrDefault()),
-                        type,
-                        GetAccessModifierMetadata(constructor.AccessModifier) ?? AccessModifierMetadata.Public,
-                        parametersMetadata,
-                        functionType);
-
-                    type.AddConstructor(constructorMetadata);
-                }
+                foreach (var constructor in node.Constructors)
+                    PopulateConstructor(typeProvider, root, type, constructor);
             }
             else
             {
@@ -140,31 +94,116 @@ internal class TypeGenerator
                 ));
             }
 
-            foreach (var method in typeDeclarationNode.Methods)
-            {
-                var parameters = GetParameters(root, typeProvider, method.Parameters);
-                var parameterTypes = method.Parameters
-                    .Select(x => typeProvider.GetType(x.Type.Name) ??
-                                 TypeMetadata.Invalid(x.Type.Name));
-
-                var returnType = typeProvider.GetType(method.ReturnType.Name) ??
-                                 TypeMetadata.Invalid(method.ReturnType.Name);
-
-                var functionType = new FunctionTypeMetadata(null, parameterTypes, returnType);
-                functionType = typeProvider.GetOrDefine(functionType);
-
-                var methodMetadata = new MethodMetadata(
-                    new SourceLocation(root.SourceFile, method.SourceSpan.GetValueOrDefault()),
-                    type,
-                    GetAccessModifierMetadata(method.AccessModifier) ?? AccessModifierMetadata.Public,
-                    method.IsStatic,
-                    method.Name,
-                    parameters,
-                    functionType);
-
-                type.AddMethod(methodMetadata);
-            }
+            foreach (var method in node.Methods)
+                PopulateMethod(typeProvider, root, type, method);
         }
+    }
+
+    private void PopulateInterface(
+        ITypeMetadataProvider typeProvider,
+        TypeMetadata type,
+        Type @interface)
+    {
+        // TODO: support generic interfaces
+        var interfaceMetadata = default(InterfaceMetadata);
+        if (typeProvider.GetType(@interface.Name) is TypeAliasMetadata aliasMetadata)
+            interfaceMetadata = aliasMetadata.Type as InterfaceMetadata;
+
+        if (interfaceMetadata is null)
+        {
+            interfaceMetadata = InterfaceMetadata.Invalid();
+            diagnostics.UnknownType(@interface);
+        }
+
+        type.AddInterface(interfaceMetadata);
+        @interface.Metadata = interfaceMetadata;
+    }
+
+    private void PopulateProperty(
+        ITypeMetadataProvider typeProvider,
+        SemanticTree root,
+        TypeMetadata type,
+        PropertyDeclaration property)
+    {
+        var propertyTypeMetadata = property.Type.PopulateMetadata(typeProvider, diagnostics);
+        var propertyMetadata = new PropertyMetadata(
+            new SourceLocation(root.SourceFile, property.SourceSpan.GetValueOrDefault()),
+            type,
+            property.Name,
+            propertyTypeMetadata,
+            property.Getter?.AccessModifier.ToMetadata(),
+            property.Setter?.AccessModifier.ToMetadata());
+
+        // TODO: add in a constructor?
+        type.AddProperty(propertyMetadata);
+        property.Metadata = propertyMetadata;
+
+        if (propertyMetadata.Getter is not null)
+        {
+            type.AddMethod(propertyMetadata.Getter);
+            typeProvider.DefineType(propertyMetadata.Getter.Type);
+
+            if (property.Getter is not null)
+                property.Getter.Metadata = propertyMetadata.Getter;
+        }
+
+        if (propertyMetadata.Setter is not null)
+        {
+            type.AddMethod(propertyMetadata.Setter);
+            typeProvider.DefineType(propertyMetadata.Setter.Type);
+
+            if (property.Setter is not null)
+                property.Setter.Metadata = propertyMetadata.Setter;
+        }
+    }
+
+    private void PopulateConstructor(
+        ITypeMetadataProvider typeProvider,
+        SemanticTree root,
+        TypeMetadata type,
+        ConstructorDeclaration constructor)
+    {
+        var parameters = GetParameters(root, typeProvider, constructor.Parameters);
+        var functionType = new FunctionTypeMetadata(null, parameters.Select(x => x.Type), type);
+        functionType = typeProvider.GetOrDefine(functionType);
+
+        var constructorMetadata = new ConstructorMetadata(
+            new SourceLocation(root.SourceFile, constructor.SourceSpan.GetValueOrDefault()),
+            type,
+            constructor.AccessModifier.ToMetadata(),
+            parameters,
+            functionType);
+
+        type.AddConstructor(constructorMetadata);
+        constructor.Metadata = constructorMetadata;
+    }
+
+    private void PopulateMethod(
+        ITypeMetadataProvider typeProvider,
+        SemanticTree root,
+        TypeMetadata type,
+        MethodDeclaration method)
+    {
+        var parameters = GetParameters(root, typeProvider, method.Parameters);
+        var returnTypeMetadata = method.ReturnType.PopulateMetadata(typeProvider, diagnostics);
+
+        var functionType = new FunctionTypeMetadata(
+            null,
+            parameters.Select(x => x.Type),
+            returnTypeMetadata);
+        functionType = typeProvider.GetOrDefine(functionType);
+
+        var methodMetadata = new MethodMetadata(
+            new SourceLocation(root.SourceFile, method.SourceSpan.GetValueOrDefault()),
+            type,
+            method.AccessModifier.ToMetadata(),
+            method.IsStatic,
+            method.Name,
+            parameters,
+            functionType);
+
+        type.AddMethod(methodMetadata);
+        method.Metadata = methodMetadata;
     }
 
     private ParameterMetadata[] GetParameters(
@@ -176,26 +215,16 @@ internal class TypeGenerator
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
-            var parameterType = typeProvider.GetType(parameter.Type.Name) ??
-                                TypeMetadata.Invalid(parameter.Type.Name);
-
-            result[i] = new ParameterMetadata(
+            var parameterTypeMetadata = parameter.Type.PopulateMetadata(typeProvider, diagnostics);
+            var parameterMetadata = new ParameterMetadata(
                 new SourceLocation(root.SourceFile, parameter.SourceSpan.GetValueOrDefault()),
                 parameter.Name,
-                parameterType);
+                parameterTypeMetadata);
+
+            result[i] = parameterMetadata;
+            parameter.Metadata = parameterMetadata;
         }
 
         return result;
     }
-
-    private static AccessModifierMetadata? GetAccessModifierMetadata(AccessModifier? accessModifier)
-        => accessModifier switch
-        {
-            AccessModifier.Public => AccessModifierMetadata.Public,
-            AccessModifier.Internal => AccessModifierMetadata.Internal,
-            AccessModifier.Private => AccessModifierMetadata.Private,
-
-            null => null,
-            _ => throw new ArgumentOutOfRangeException(nameof(accessModifier), accessModifier, null)
-        };
 }

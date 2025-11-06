@@ -49,12 +49,6 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
     public override int GetHashCode()
         => HashCode.Combine(parent, variables);
 
-    public TypeSymbol? GetType(string name)
-        => parent.GetType(name);
-
-    public bool TryAddType(TypeSymbol symbol)
-        => parent.TryAddType(symbol);
-
     public IdSymbol? GetId(string name)
         => variables.TryGetValue(name, out var symbol)
             ? symbol
@@ -63,10 +57,13 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
     public bool TryAddId(IdSymbol symbol)
         => variables.TryAdd(symbol.Name, symbol);
 
+    public void AddType(TypeSymbol symbol)
+        => parent.AddType(symbol);
+
     public ISymbolTable CreateChild()
         => new SymbolTable(this, typeMetadataProvider.CreateChild());
 
-    public IReadOnlyDictionary<string, TypeSymbol> Types
+    public IReadOnlyList<TypeSymbol> Types
         => parent.Types;
 
     public IReadOnlyDictionary<string, IdSymbol> Ids

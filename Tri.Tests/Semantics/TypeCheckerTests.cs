@@ -1268,7 +1268,7 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new TypeArrayMetadata(null, TypeMetadata.I32);
+        var expected = new ArrayMetadata(null, TypeMetadata.I32);
         var semanticTree = semanticTrees.Single();
         var newArray = semanticTree.Find<NewArrayExpression>();
         Assert.That(newArray, Is.Not.Null);
@@ -1319,7 +1319,7 @@ public class TypeCheckerTests
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Metadata, Is.Not.Null);
 
-        var typeArrayMetadata = new TypeArrayMetadata(null, new TypeArgumentMetadata(null, "T"));
+        var typeArrayMetadata = new ArrayMetadata(null, new TypeArgumentMetadata(null, "T"));
         Assert.That(property.Metadata.Type, Is.EqualTo(typeArrayMetadata).Using(new MetadataComparer()));
     }
 

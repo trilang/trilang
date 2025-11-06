@@ -88,7 +88,12 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
         => genericArguments.Add(genericArgument);
 
     public IMetadata? GetMember(string name)
-        => Type?.GetMember(name);
+    {
+        if (IsInvalid)
+            return null;
+
+        return Type?.GetMember(name);
+    }
 
     public void MarkAsInvalid()
         => IsInvalid = true;

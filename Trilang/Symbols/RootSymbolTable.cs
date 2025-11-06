@@ -4,15 +4,14 @@ namespace Trilang.Symbols;
 
 public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
 {
-    private readonly ITypeMetadataProvider typeMetadataProvider;
-    private readonly Dictionary<string, TypeSymbol> types;
-    private readonly Dictionary<string, IdSymbol> variables;
+    private readonly List<TypeSymbol> types;
+    private readonly Dictionary<string, IdSymbol> ids;
 
     public RootSymbolTable(ITypeMetadataProvider typeMetadataProvider)
     {
-        this.typeMetadataProvider = typeMetadataProvider;
-        types = new Dictionary<string, TypeSymbol>();
-        variables = new Dictionary<string, IdSymbol>();
+        TypeProvider = typeMetadataProvider;
+        types = [];
+        ids = [];
     }
 
     public static bool operator ==(RootSymbolTable? left, RootSymbolTable? right)
@@ -29,8 +28,8 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
         if (ReferenceEquals(this, other))
             return true;
 
-        return types.DictionaryEquals(other.types) &&
-               variables.DictionaryEquals(other.variables);
+        return types.SequenceEqual(other.types) &&
+               ids.DictionaryEquals(other.ids);
     }
 
     public override bool Equals(object? obj)
@@ -48,29 +47,25 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(types, variables);
-
-    public TypeSymbol? GetType(string name)
-        => types.GetValueOrDefault(name);
-
-    public bool TryAddType(TypeSymbol symbol)
-        => types.TryAdd(symbol.Name, symbol);
+        => HashCode.Combine(types, ids);
 
     public IdSymbol? GetId(string name)
-        => variables.GetValueOrDefault(name);
+        => ids.GetValueOrDefault(name);
 
     public bool TryAddId(IdSymbol symbol)
-        => variables.TryAdd(symbol.Name, symbol);
+        => ids.TryAdd(symbol.Name, symbol);
+
+    public void AddType(TypeSymbol symbol)
+        => types.Add(symbol);
 
     public ISymbolTable CreateChild()
-        => new SymbolTable(this, typeMetadataProvider.CreateChild());
+        => new SymbolTable(this, TypeProvider.CreateChild());
 
-    public IReadOnlyDictionary<string, TypeSymbol> Types
+    public IReadOnlyList<TypeSymbol> Types
         => types;
 
     public IReadOnlyDictionary<string, IdSymbol> Ids
-        => variables;
+        => ids;
 
-    public ITypeMetadataProvider TypeProvider
-        => typeMetadataProvider;
+    public ITypeMetadataProvider TypeProvider { get; }
 }

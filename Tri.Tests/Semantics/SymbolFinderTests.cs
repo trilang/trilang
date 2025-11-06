@@ -328,13 +328,12 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var arrayTypeNode = semanticTree.Find<ArrayType>();
-        Assert.That(arrayTypeNode, Is.Not.Null);
-
+        var arrayTypeNodes = semanticTree.Where<ArrayType>().ToArray();
         var treeSymbolTable = map.Get(semanticTree);
-        var symbol = TypeSymbol.Array(arrayTypeNode);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Types, Contains.Key("i32[]").WithValue(symbol));
+        Assert.That(treeSymbolTable.Types, Is.EqualTo([
+            TypeSymbol.Array(arrayTypeNodes[0]),
+            TypeSymbol.Array(arrayTypeNodes[1]),
+        ]));
     }
 
     [Test]
@@ -351,8 +350,7 @@ public class SymbolFinderTests
         var type = semanticTree.Find<TypeDeclaration>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Types, Contains.Key("Point").WithValue(TypeSymbol.Type(type)));
+        Assert.That(treeSymbolTable.Types, Is.EqualTo([TypeSymbol.TypeDeclaration(type)]));
     }
 
     [Test]
@@ -446,8 +444,7 @@ public class SymbolFinderTests
         var type = semanticTree.Find<TypeAliasDeclaration>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Alias(type)));
+        Assert.That(treeSymbolTable.Types, Is.EqualTo([TypeSymbol.Alias(type)]));
     }
 
     [Test]
@@ -490,13 +487,10 @@ public class SymbolFinderTests
         var type = semanticTree.Find<FunctionType>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(2));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Key(type.Name).WithValue(TypeSymbol.FunctionType(type)));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Key(aliasType.Name).WithValue(TypeSymbol.Alias(aliasType)));
+        Assert.That(treeSymbolTable.Types, Is.EqualTo([
+            TypeSymbol.Alias(aliasType),
+            TypeSymbol.FunctionType(type),
+        ]));
     }
 
     [Test]
@@ -527,8 +521,7 @@ public class SymbolFinderTests
         var type = semanticTree.Find<TypeDeclaration>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Types, Contains.Key(type.Name).WithValue(TypeSymbol.Type(type)));
+        Assert.That(treeSymbolTable.Types, Is.EqualTo([TypeSymbol.TypeDeclaration(type)]));
 
         var typeSymbolTable = map.Get(type);
         Assert.That(typeSymbolTable.Ids, Has.Count.EqualTo(4));
@@ -561,9 +554,10 @@ public class SymbolFinderTests
         var @interface = semanticTree.Find<Interface>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(2));
-        Assert.That(treeSymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
-        Assert.That(treeSymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+        Assert.That(treeSymbolTable.Types, Is.EqualTo([
+            TypeSymbol.Alias(alias),
+            TypeSymbol.Interface(@interface),
+        ]));
 
         var interfaceSymbolTable = map.Get(@interface);
         Assert.That(interfaceSymbolTable, Is.Not.Null);
@@ -595,8 +589,8 @@ public class SymbolFinderTests
 
         var treeSymbolTable = map.Get(semanticTree);
         Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(3));
-        Assert.That(treeSymbolTable.Types, Contains.Key(@interface.Name).WithValue(TypeSymbol.Interface(@interface)));
-        Assert.That(treeSymbolTable.Types, Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+        Assert.That(treeSymbolTable.Types, Contains.Item(TypeSymbol.Interface(@interface)));
+        Assert.That(treeSymbolTable.Types, Contains.Item(TypeSymbol.Alias(alias)));
     }
 
     [Test]
@@ -617,11 +611,10 @@ public class SymbolFinderTests
         Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(4));
         Assert.That(
             treeSymbolTable.Types,
-            Contains.Key(discriminatedUnionNode.Name)
-                .WithValue(TypeSymbol.DiscriminatedUnion(discriminatedUnionNode)));
+            Contains.Item(TypeSymbol.DiscriminatedUnion(discriminatedUnionNode)));
         Assert.That(
             treeSymbolTable.Types,
-            Contains.Key(alias.Name).WithValue(TypeSymbol.Alias(alias)));
+            Contains.Item(TypeSymbol.Alias(alias)));
     }
 
     [Test]
@@ -641,13 +634,10 @@ public class SymbolFinderTests
         Assert.That(tupleNode, Is.Not.Null);
 
         var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(2));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Key("(i32, bool)").WithValue(TypeSymbol.Tuple(tupleNode)));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Key("T").WithValue(TypeSymbol.Alias(aliasNode)));
+        Assert.That(treeSymbolTable.Types, Is.EqualTo([
+            TypeSymbol.Alias(aliasNode),
+            TypeSymbol.Tuple(tupleNode),
+        ]));
     }
 
     [Test]
@@ -670,16 +660,11 @@ public class SymbolFinderTests
         Assert.That(nestedTupleNode, Is.Not.Null);
 
         var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(3));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Key("(i32, i32)").WithValue(TypeSymbol.Tuple(nestedTupleNode)));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Key("((i32, i32), bool)").WithValue(TypeSymbol.Tuple(tupleNode)));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Key("T").WithValue(TypeSymbol.Alias(aliasNode)));
+        Assert.That(treeSymbolTable.Types, Is.EqualTo([
+            TypeSymbol.Alias(aliasNode),
+            TypeSymbol.Tuple(nestedTupleNode),
+            TypeSymbol.Tuple(tupleNode),
+        ]));
     }
 
     [Test]
@@ -738,8 +723,7 @@ public class SymbolFinderTests
         Assert.That(type, Is.Not.Null);
 
         var typeSymbolTable = map.Get(type);
-        Assert.That(typeSymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(typeSymbolTable.Types, Contains.Key("List<>").WithValue(TypeSymbol.OpenGenericType(type)));
+        Assert.That(typeSymbolTable.Types, Is.EqualTo([TypeSymbol.GenericTypeDeclaration(type)]));
     }
 
     [Test]
@@ -758,8 +742,7 @@ public class SymbolFinderTests
 
         var typeSymbolTable = map.Get(type);
         Assert.That(typeSymbolTable, Is.Not.Null);
-        Assert.That(typeSymbolTable.Types, Has.Count.EqualTo(1));
-        Assert.That(typeSymbolTable.Types, Contains.Key("Test<,>").WithValue(TypeSymbol.OpenGenericType(type)));
+        Assert.That(typeSymbolTable.Types, Is.EqualTo([TypeSymbol.GenericTypeDeclaration(type)]));
     }
 
     [Test]
@@ -788,9 +771,9 @@ public class SymbolFinderTests
         Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(3));
         Assert.That(
             treeSymbolTable.Types,
-            Contains.Key("Test").WithValue(TypeSymbol.Alias(alias)));
+            Contains.Item(TypeSymbol.Alias(alias)));
         Assert.That(
             treeSymbolTable.Types,
-            Contains.Key("List<i32>").WithValue(TypeSymbol.GenericType(closedGeneric)));
+            Contains.Item(TypeSymbol.GenericType(closedGeneric)));
     }
 }

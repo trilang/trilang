@@ -6,7 +6,7 @@ public interface IInlineType : ISemanticNode
 {
     string Name { get; }
 
-    ITypeMetadata? Metadata { get; }
+    ITypeMetadata? Metadata { get; set; }
 
     IInlineType Clone();
 }

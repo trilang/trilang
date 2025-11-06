@@ -338,7 +338,7 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new TypeArrayMetadata(null, TypeMetadata.I32);
+        var expected = new ArrayMetadata(null, TypeMetadata.I32);
         var actual = typeProvider.GetType("i32[]");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -532,7 +532,7 @@ public class MetadataGeneratorTests
                 [],
                 new FunctionTypeMetadata(null, [], expectedType)));
 
-        var expectedArrayType = new TypeArrayMetadata(null, expectedType);
+        var expectedArrayType = new ArrayMetadata(null, expectedType);
         var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedArrayType);
         var actualType = typeProvider.GetType("Point");
         var actualArrayType = typeProvider.GetType("Point[]");
@@ -567,7 +567,7 @@ public class MetadataGeneratorTests
                 [],
                 new FunctionTypeMetadata(null, [], expectedType)));
 
-        var expectedArrayType = new TypeArrayMetadata(null, expectedType);
+        var expectedArrayType = new ArrayMetadata(null, expectedType);
         var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedArrayType);
         var actualType = typeProvider.GetType("Point");
         var actualArrayType = typeProvider.GetType("Point[]");
@@ -861,7 +861,7 @@ public class MetadataGeneratorTests
         var property = type.GetProperty("x");
         Assert.That(property, Is.Not.Null);
 
-        var typeArrayMetadata = new TypeArrayMetadata(null, new TypeArgumentMetadata(null, "T"));
+        var typeArrayMetadata = new ArrayMetadata(null, new TypeArgumentMetadata(null, "T"));
         Assert.That(property.Type, Is.EqualTo(typeArrayMetadata).Using(new MetadataComparer()));
     }
 
@@ -965,7 +965,7 @@ public class MetadataGeneratorTests
         var type = typeProvider.GetType("List<i32>") as TypeMetadata;
         var property = type!.GetProperty("prop");
         Assert.That(property, Is.Not.Null);
-        Assert.That(property.Type, Is.EqualTo(new TypeArrayMetadata(null, TypeMetadata.I32)).Using(new MetadataComparer()));
+        Assert.That(property.Type, Is.EqualTo(new ArrayMetadata(null, TypeMetadata.I32)).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -1264,7 +1264,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var array = new TypeArrayMetadata(null, TypeMetadata.I32);
+        var array = new ArrayMetadata(null, TypeMetadata.I32);
         var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], array);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
