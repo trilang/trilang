@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;
 
@@ -54,8 +55,8 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
             ? symbol
             : parent.GetId(name);
 
-    public bool TryAddId(IdSymbol symbol)
-        => variables.TryAdd(symbol.Name, symbol);
+    public bool TryAddId(string name, ISemanticNode node)
+        => variables.TryAdd(name, new IdSymbol(name, node));
 
     public void AddType(TypeSymbol symbol)
         => parent.AddType(symbol);

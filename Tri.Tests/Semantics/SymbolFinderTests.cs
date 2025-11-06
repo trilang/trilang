@@ -42,7 +42,9 @@ public class SymbolFinderTests
         var treeSymbolTable = map.Get(semanticTree);
         var function = semanticTree.Find<FunctionDeclaration>()!;
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        Assert.That(
+            treeSymbolTable.Ids,
+            Contains.Key(function.Name).WithValue(new IdSymbol(function.Name, function)));
     }
 
     [Test]
@@ -66,10 +68,10 @@ public class SymbolFinderTests
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(
             treeSymbolTable.Ids,
-            Contains.Key(function1.Name).WithValue(new IdSymbol(function1)));
+            Contains.Key(function1.Name).WithValue(new IdSymbol(function1.Name, function1)));
         Assert.That(
             treeSymbolTable.Ids,
-            Contains.Key(function2.Name).WithValue(new IdSymbol(function2)));
+            Contains.Key(function2.Name).WithValue(new IdSymbol(function2.Name, function2)));
     }
 
     [Test]
@@ -114,12 +116,16 @@ public class SymbolFinderTests
 
         var treeSymbolTable = map.Get(semanticTree);
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Ids, Contains.Key("add").WithValue(new IdSymbol(function)));
+        Assert.That(treeSymbolTable.Ids, Contains.Key("add").WithValue(new IdSymbol("add", function)));
 
         var functionBodySymbolTable = map.Get(function.Body);
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(functionBodySymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
-        Assert.That(functionBodySymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
+        Assert.That(
+            functionBodySymbolTable.Ids,
+            Contains.Key(a.Name).WithValue(new IdSymbol(a.Name, a)));
+        Assert.That(
+            functionBodySymbolTable.Ids,
+            Contains.Key(b.Name).WithValue(new IdSymbol(b.Name, b)));
     }
 
     [Test]
@@ -167,12 +173,18 @@ public class SymbolFinderTests
 
         var treeSymbolTable = map.Get(semanticTree);
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        Assert.That(
+            treeSymbolTable.Ids,
+            Contains.Key(function.Name).WithValue(new IdSymbol(function.Name, function)));
 
         var functionBodySymbolTable = map.Get(function.Body);
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(functionBodySymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
-        Assert.That(functionBodySymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
+        Assert.That(
+            functionBodySymbolTable.Ids,
+            Contains.Key(a.Name).WithValue(new IdSymbol(a.Name, a)));
+        Assert.That(
+            functionBodySymbolTable.Ids,
+            Contains.Key(b.Name).WithValue(new IdSymbol(b.Name, b)));
     }
 
     [Test]
@@ -226,11 +238,15 @@ public class SymbolFinderTests
 
         var treeSymbolTable = map.Get(semanticTree);
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        Assert.That(
+            treeSymbolTable.Ids,
+            Contains.Key(function.Name).WithValue(new IdSymbol(function.Name, function)));
 
         var thenSymbolTable = map.Get(ifStatement.Then);
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(thenSymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
+        Assert.That(
+            thenSymbolTable.Ids,
+            Contains.Key(a.Name).WithValue(new IdSymbol(a.Name, a)));
     }
 
     [Test]
@@ -261,15 +277,21 @@ public class SymbolFinderTests
 
         var treeSymbolTable = map.Get(semanticTree);
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        Assert.That(
+            treeSymbolTable.Ids,
+            Contains.Key(function.Name).WithValue(new IdSymbol(function.Name, function)));
 
         var thenSymbolTable = map.Get(ifStatement.Then);
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(thenSymbolTable.Ids, Contains.Key(a.Name).WithValue(new IdSymbol(a)));
+        Assert.That(
+            thenSymbolTable.Ids,
+            Contains.Key(a.Name).WithValue(new IdSymbol(a.Name, a)));
 
         var elseSymbolTable = map.Get(ifStatement.Else!);
         Assert.That(elseSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(elseSymbolTable.Ids, Contains.Key(b.Name).WithValue(new IdSymbol(b)));
+        Assert.That(
+            elseSymbolTable.Ids,
+            Contains.Key(b.Name).WithValue(new IdSymbol(b.Name, b)));
     }
 
     [Test]
@@ -302,19 +324,27 @@ public class SymbolFinderTests
 
         var treeSymbolTable = map.Get(semanticTree);
         Assert.That(treeSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(treeSymbolTable.Ids, Contains.Key(function.Name).WithValue(new IdSymbol(function)));
+        Assert.That(
+            treeSymbolTable.Ids,
+            Contains.Key(function.Name).WithValue(new IdSymbol(function.Name, function)));
 
         var functionBodySymbolTable = map.Get(function.Body);
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(functionBodySymbolTable.Ids, Contains.Key(a1.Name).WithValue(new IdSymbol(a1)));
+        Assert.That(
+            functionBodySymbolTable.Ids,
+            Contains.Key(a1.Name).WithValue(new IdSymbol(a1.Name, a1)));
 
         var thenSymbolTable = map.Get(ifStatement.Then);
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(thenSymbolTable.Ids, Contains.Key(a2.Name).WithValue(new IdSymbol(a2)));
+        Assert.That(
+            thenSymbolTable.Ids,
+            Contains.Key(a2.Name).WithValue(new IdSymbol(a2.Name, a2)));
 
         var elseSymbolTable = map.Get(ifStatement.Else!);
         Assert.That(elseSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(elseSymbolTable.Ids, Contains.Key(a3.Name).WithValue(new IdSymbol(a3)));
+        Assert.That(
+            elseSymbolTable.Ids,
+            Contains.Key(a3.Name).WithValue(new IdSymbol(a3.Name, a3)));
     }
 
     [Test]
@@ -401,7 +431,9 @@ public class SymbolFinderTests
         var ctorSymbolTable = map.Get(ctor.Body);
         Assert.That(ctorSymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(ctorSymbolTable.Ids, Contains.Key("this").WithValue(new IdSymbol("this", type)));
-        Assert.That(ctorSymbolTable.Ids, Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter)));
+        Assert.That(
+            ctorSymbolTable.Ids,
+            Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter.Name, parameter)));
     }
 
     [Test]
@@ -427,7 +459,9 @@ public class SymbolFinderTests
         var methodSymbolTable = map.Get(method.Body);
         Assert.That(methodSymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(methodSymbolTable.Ids, Contains.Key("this").WithValue(new IdSymbol("this", type)));
-        Assert.That(methodSymbolTable.Ids, Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter)));
+        Assert.That(
+            methodSymbolTable.Ids,
+            Contains.Key(parameter.Name).WithValue(new IdSymbol(parameter.Name, parameter)));
     }
 
     [Test]
@@ -525,10 +559,18 @@ public class SymbolFinderTests
 
         var typeSymbolTable = map.Get(type);
         Assert.That(typeSymbolTable.Ids, Has.Count.EqualTo(4));
-        Assert.That(typeSymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(type.Properties[0])));
-        Assert.That(typeSymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(type.Properties[1])));
-        Assert.That(typeSymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(type.Methods[0])));
-        Assert.That(typeSymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(type.Methods[1])));
+        Assert.That(
+            typeSymbolTable.Ids,
+            Contains.Key("x").WithValue(new IdSymbol("x", type.Properties[0])));
+        Assert.That(
+            typeSymbolTable.Ids,
+            Contains.Key("y").WithValue(new IdSymbol("y", type.Properties[1])));
+        Assert.That(
+            typeSymbolTable.Ids,
+            Contains.Key("toString").WithValue(new IdSymbol("toString", type.Methods[0])));
+        Assert.That(
+            typeSymbolTable.Ids,
+            Contains.Key("distance").WithValue(new IdSymbol("distance", type.Methods[1])));
     }
 
     [Test]
@@ -562,10 +604,18 @@ public class SymbolFinderTests
         var interfaceSymbolTable = map.Get(@interface);
         Assert.That(interfaceSymbolTable, Is.Not.Null);
         Assert.That(interfaceSymbolTable.Ids, Has.Count.EqualTo(4));
-        Assert.That(interfaceSymbolTable.Ids, Contains.Key("x").WithValue(new IdSymbol(@interface.Properties[0])));
-        Assert.That(interfaceSymbolTable.Ids, Contains.Key("y").WithValue(new IdSymbol(@interface.Properties[1])));
-        Assert.That(interfaceSymbolTable.Ids, Contains.Key("toString").WithValue(new IdSymbol(@interface.Methods[0])));
-        Assert.That(interfaceSymbolTable.Ids, Contains.Key("distance").WithValue(new IdSymbol(@interface.Methods[1])));
+        Assert.That(
+            interfaceSymbolTable.Ids,
+            Contains.Key("x").WithValue(new IdSymbol("x", @interface.Properties[0])));
+        Assert.That(
+            interfaceSymbolTable.Ids,
+            Contains.Key("y").WithValue(new IdSymbol("y", @interface.Properties[1])));
+        Assert.That(
+            interfaceSymbolTable.Ids,
+            Contains.Key("toString").WithValue(new IdSymbol("toString", @interface.Methods[0])));
+        Assert.That(
+            interfaceSymbolTable.Ids,
+            Contains.Key("distance").WithValue(new IdSymbol("distance", @interface.Methods[1])));
     }
 
     [Test]

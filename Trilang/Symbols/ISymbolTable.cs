@@ -1,11 +1,12 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;
 
 public interface ISymbolTable
 {
     IdSymbol? GetId(string name);
-    bool TryAddId(IdSymbol symbol);
+    bool TryAddId(string name, ISemanticNode node);
     void AddType(TypeSymbol symbol);
 
     ISymbolTable CreateChild();

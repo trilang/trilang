@@ -4,34 +4,6 @@ namespace Trilang.Symbols;
 
 public class IdSymbol : IEquatable<IdSymbol>
 {
-    public IdSymbol(FunctionDeclaration node) : this(node.Name, node)
-    {
-    }
-
-    public IdSymbol(VariableDeclaration node) : this(node.Name, node)
-    {
-    }
-
-    public IdSymbol(Parameter node) : this(node.Name, node)
-    {
-    }
-
-    public IdSymbol(PropertyDeclaration node) : this(node.Name, node)
-    {
-    }
-
-    public IdSymbol(MethodDeclaration node) : this(node.Name, node)
-    {
-    }
-
-    public IdSymbol(InterfaceProperty node) : this(node.Name, node)
-    {
-    }
-
-    public IdSymbol(InterfaceMethod node) : this(node.Name, node)
-    {
-    }
-
     public IdSymbol(string name, ISemanticNode? node)
     {
         Name = name;
