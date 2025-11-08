@@ -39,10 +39,7 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
         var symbol = symbolTable.GetId(node.Name);
         if (symbol is not null)
         {
-            if (symbol.Node is Parameter
-                or FunctionDeclaration
-                or PropertyDeclaration
-                or MethodDeclaration)
+            if (symbol.Nodes[0] is not VariableDeclaration)
                 return;
 
             for (var i = scopes.Count - 1; i >= 0; i--)

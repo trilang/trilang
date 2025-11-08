@@ -4,10 +4,12 @@ namespace Trilang.Metadata;
 public class RootTypeMetadataProvider : ITypeMetadataProvider
 {
     private readonly Dictionary<string, ITypeMetadata> types;
+    private readonly List<FunctionMetadata> functions;
 
     public RootTypeMetadataProvider()
     {
         types = [];
+        functions = [];
 
         DefineType(TypeMetadata.Void.Name, TypeMetadata.Void);
         DefineType(TypeMetadata.Null.Name, TypeMetadata.Null);
@@ -47,9 +49,15 @@ public class RootTypeMetadataProvider : ITypeMetadataProvider
             _ => throw new InvalidOperationException(),
         };
 
+    public void AddFunction(FunctionMetadata function)
+        => functions.Add(function);
+
     public ITypeMetadataProvider CreateChild()
         => new TypeMetadataProvider(this);
 
     public IEnumerable<ITypeMetadata> Types
         => types.Values;
+
+    public IReadOnlyList<FunctionMetadata> Functions
+        => functions;
 }

@@ -5,7 +5,7 @@ namespace Trilang.Semantics.Passes;
 
 internal class MetadataGenerator : ISemanticPass
 {
-    public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
         var rootSymbolTable = context.RootSymbolTable;
         var types = rootSymbolTable.Types;
@@ -41,6 +41,10 @@ internal class MetadataGenerator : ISemanticPass
         functionTypeGenerator.PopulateFunctionTypes();
         functionGenerator.PopulateFunctions();
         genericTypeGenerator.PopulateGenericTypes();
+
+        var variableGenerator = new VariableGenerator(context.Diagnostics, symbolTableMap);
+        foreach (var semanticTree in semanticTrees)
+            semanticTree.Accept(variableGenerator);
     }
 
     public string Name => nameof(MetadataGenerator);

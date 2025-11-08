@@ -93,6 +93,9 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
     public override string ToString()
         => $"{Name}: {Type}";
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     private MethodMetadata GenerateGetter(AccessModifierMetadata getterModifier)
         => new MethodMetadata(
             null,
@@ -117,7 +120,7 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 
     public SourceLocation? Definition { get; }
 
-    public bool IsInvalid => false;
+    public bool IsInvalid { get; private set; }
 
     public ITypeMetadata DeclaringType { get; }
 

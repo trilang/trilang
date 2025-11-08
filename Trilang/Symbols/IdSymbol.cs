@@ -4,10 +4,16 @@ namespace Trilang.Symbols;
 
 public class IdSymbol : IEquatable<IdSymbol>
 {
+    private readonly List<ISemanticNode> nodes;
+
     public IdSymbol(string name, ISemanticNode? node)
     {
+        nodes = [];
+
         Name = name;
-        Node = node;
+
+        if (node is not null)
+            nodes.Add(node);
     }
 
     public static bool operator ==(IdSymbol? left, IdSymbol? right)
@@ -25,7 +31,7 @@ public class IdSymbol : IEquatable<IdSymbol>
             return true;
 
         return Name == other.Name &&
-               Equals(Node, other.Node);
+               nodes.SequenceEqual(other.nodes);
     }
 
     public override bool Equals(object? obj)
@@ -43,12 +49,15 @@ public class IdSymbol : IEquatable<IdSymbol>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(Name, Node);
+        => HashCode.Combine(Name, nodes);
 
     public override string ToString()
         => $"Id: {Name}";
 
+    public void AddNode(ISemanticNode node)
+        => nodes.Add(node);
+
     public string Name { get; }
 
-    public ISemanticNode? Node { get; }
+    public IReadOnlyList<ISemanticNode> Nodes => nodes;
 }

@@ -7,13 +7,13 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
 {
     private readonly ISymbolTable parent;
     private readonly ITypeMetadataProvider typeMetadataProvider;
-    private readonly Dictionary<string, IdSymbol> variables;
+    private readonly Dictionary<string, IdSymbol> ids;
 
     public SymbolTable(ISymbolTable parent, ITypeMetadataProvider typeMetadataProvider)
     {
         this.parent = parent;
         this.typeMetadataProvider = typeMetadataProvider;
-        variables = new Dictionary<string, IdSymbol>();
+        ids = [];
     }
 
     public static bool operator ==(SymbolTable? left, SymbolTable? right)
@@ -30,7 +30,7 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
         if (ReferenceEquals(this, other))
             return true;
 
-        return variables.DictionaryEquals(other.variables);
+        return ids.DictionaryEquals(other.ids);
     }
 
     public override bool Equals(object? obj)
@@ -48,15 +48,20 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
     }
 
     public override int GetHashCode()
-        => HashCode.Combine(parent, variables);
+        => HashCode.Combine(parent, ids);
 
     public IdSymbol? GetId(string name)
-        => variables.TryGetValue(name, out var symbol)
+        => ids.TryGetValue(name, out var symbol)
             ? symbol
             : parent.GetId(name);
 
-    public bool TryAddId(string name, ISemanticNode node)
-        => variables.TryAdd(name, new IdSymbol(name, node));
+    public void AddId(string name, ISemanticNode node)
+    {
+        if (ids.TryGetValue(name, out var symbol))
+            symbol.AddNode(node);
+        else
+            ids.Add(name, new IdSymbol(name, node));
+    }
 
     public void AddType(TypeSymbol symbol)
         => parent.AddType(symbol);
@@ -68,7 +73,7 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
         => parent.Types;
 
     public IReadOnlyDictionary<string, IdSymbol> Ids
-        => variables;
+        => ids;
 
     public ITypeMetadataProvider TypeProvider
         => typeMetadataProvider;

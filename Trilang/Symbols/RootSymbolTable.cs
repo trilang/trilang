@@ -53,8 +53,13 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
     public IdSymbol? GetId(string name)
         => ids.GetValueOrDefault(name);
 
-    public bool TryAddId(string name, ISemanticNode node)
-        => ids.TryAdd(name, new IdSymbol(name, node));
+    public void AddId(string name, ISemanticNode node)
+    {
+        if (ids.TryGetValue(name, out var symbol))
+            symbol.AddNode(node);
+        else
+            ids.Add(name, new IdSymbol(name, node));
+    }
 
     public void AddType(TypeSymbol symbol)
         => types.Add(symbol);

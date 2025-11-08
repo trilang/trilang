@@ -53,9 +53,12 @@ public class VariableMetadata : IMetadata, IEquatable<VariableMetadata>
     public override string ToString()
         => $"{Name}: {Type}";
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     public SourceLocation? Definition { get; }
 
-    public bool IsInvalid => false;
+    public bool IsInvalid { get; private set; }
 
     public string Name { get; }
 

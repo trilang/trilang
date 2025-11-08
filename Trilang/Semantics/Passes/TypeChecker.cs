@@ -218,7 +218,18 @@ internal class TypeChecker : Visitor, ISemanticPass
         var symbol = symbolTable.GetId(node.Name);
         if (symbol is not null)
         {
-            node.Reference = symbol.Node switch
+            var symbolNode = symbol.Nodes[0];
+            if (node.IsThis)
+            {
+                node.Reference = new ParameterMetadata(
+                    null,
+                    MemberAccessExpression.This,
+                    ((TypeDeclaration)symbolNode).Metadata!);
+
+                return;
+            }
+
+            node.Reference = symbolNode switch
             {
                 PropertyDeclaration propertyDeclarationNode
                     => propertyDeclarationNode.Metadata,
@@ -234,12 +245,6 @@ internal class TypeChecker : Visitor, ISemanticPass
 
                 MethodDeclaration methodNode
                     => methodNode.Metadata,
-
-                TypeDeclaration typeDeclarationNode when node.IsThis
-                    => new ParameterMetadata(
-                        null,
-                        MemberAccessExpression.This,
-                        typeDeclarationNode.Metadata!),
 
                 _ => throw new ArgumentException("Unknown symbol"),
             };
@@ -374,7 +379,6 @@ internal class TypeChecker : Visitor, ISemanticPass
 
         var typeProvider = symbolTableMap.Get(node).TypeProvider;
 
-        // TODO: move to MetadataGenerator?
         node.Metadata = node.PopulateMetadata(typeProvider, diagnostics);
     }
 
@@ -444,12 +448,6 @@ internal class TypeChecker : Visitor, ISemanticPass
             !node.Type.Metadata.IsInvalid &&
             !node.Expression.ReturnTypeMetadata.Equals(node.Type.Metadata))
             diagnostics.TypeMismatch(node.Expression, node.Type.Metadata, node.Expression.ReturnTypeMetadata);
-
-        // TODO: move to MetadataGenerator?
-        node.Metadata = new VariableMetadata(
-            new SourceLocation(file, node.SourceSpan.GetValueOrDefault()),
-            node.Name,
-            node.Type.Metadata);
     }
 
     protected override void VisitWhileExit(While node)

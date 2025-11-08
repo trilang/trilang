@@ -64,9 +64,12 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
     public void AddParameter(ParameterMetadata parameter)
         => parameters.Add(parameter);
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     public SourceLocation? Definition { get; }
 
-    public bool IsInvalid => false;
+    public bool IsInvalid { get; private set; }
 
     public ITypeMetadata? DeclaringType => null;
 

@@ -10,7 +10,11 @@ public interface ITypeMetadataProvider
 
     T GetOrDefine<T>(T type) where T : ITypeMetadata;
 
+    void AddFunction(FunctionMetadata function);
+
     ITypeMetadataProvider CreateChild();
 
     IEnumerable<ITypeMetadata> Types { get; }
+
+    IReadOnlyList<FunctionMetadata> Functions { get; }
 }

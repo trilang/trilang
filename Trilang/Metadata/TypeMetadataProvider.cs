@@ -31,9 +31,15 @@ public class TypeMetadataProvider : ITypeMetadataProvider
             _ => throw new InvalidOperationException(),
         };
 
+    public void AddFunction(FunctionMetadata function)
+        => parent.AddFunction(function);
+
     public ITypeMetadataProvider CreateChild()
         => new TypeMetadataProvider(this);
 
     public IEnumerable<ITypeMetadata> Types
         => types.Values;
+
+    public IReadOnlyList<FunctionMetadata> Functions
+        => parent.Functions;
 }

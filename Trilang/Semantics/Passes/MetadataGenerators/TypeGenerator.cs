@@ -134,6 +134,12 @@ internal class TypeGenerator
             property.Getter?.AccessModifier.ToMetadata(),
             property.Setter?.AccessModifier.ToMetadata());
 
+        if (type.GetProperty(property.Name) is not null)
+        {
+            propertyMetadata.MarkAsInvalid();
+            diagnostics.PropertyAlreadyDefined(property);
+        }
+
         // TODO: add in a constructor?
         type.AddProperty(propertyMetadata);
         property.Metadata = propertyMetadata;
@@ -202,6 +208,12 @@ internal class TypeGenerator
             parameters,
             functionType);
 
+        if (type.GetMethod(method.Name) is not null)
+        {
+            methodMetadata.MarkAsInvalid();
+            diagnostics.MethodAlreadyDefined(method);
+        }
+
         type.AddMethod(methodMetadata);
         method.Metadata = methodMetadata;
     }
@@ -211,7 +223,7 @@ internal class TypeGenerator
         ITypeMetadataProvider typeProvider,
         IReadOnlyList<Parameter> parameters)
     {
-        var result = new ParameterMetadata[parameters.Count];
+        var result = new ParameterMetadata?[parameters.Count];
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
@@ -221,10 +233,17 @@ internal class TypeGenerator
                 parameter.Name,
                 parameterTypeMetadata);
 
+            var isDefined = result.Any(x => x?.Name == parameter.Name);
+            if (isDefined)
+            {
+                parameterMetadata.MarkAsInvalid();
+                diagnostics.ParameterAlreadyDefined(parameter);
+            }
+
             result[i] = parameterMetadata;
             parameter.Metadata = parameterMetadata;
         }
 
-        return result;
+        return result!;
     }
 }

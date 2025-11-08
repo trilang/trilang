@@ -69,6 +69,12 @@ internal class InterfaceGenerator
             property.GetterModifier?.ToMetadata() ?? AccessModifierMetadata.Public,
             property.SetterModifier?.ToMetadata());
 
+        if (metadata.GetProperty(property.Name) is not null)
+        {
+            propertyMetadata.MarkAsInvalid();
+            diagnostics.InterfacePropertyAlreadyDefined(property);
+        }
+
         metadata.AddProperty(propertyMetadata);
         property.Metadata = propertyMetadata;
     }
@@ -97,6 +103,13 @@ internal class InterfaceGenerator
             metadata,
             method.Name,
             existingFunctionType);
+
+        if (metadata.GetMethod(method.Name) is not null)
+        {
+            methodMetadata.MarkAsInvalid();
+            diagnostics.InterfaceMethodAlreadyDefined(method);
+        }
+
         metadata.AddMethod(methodMetadata);
         method.Metadata = methodMetadata;
     }

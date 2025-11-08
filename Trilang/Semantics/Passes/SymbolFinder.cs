@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Trilang.Compilation.Diagnostics;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
 using Type = Trilang.Semantics.Model.Type;
@@ -10,7 +9,6 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 {
     private readonly SymbolTableMap map;
     private HashSet<string> directives = null!;
-    private SemanticDiagnosticReporter diagnostics = null!;
 
     public SymbolFinder()
         => map = new SymbolTableMap();
@@ -18,7 +16,6 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
         directives = context.Directives;
-        diagnostics = context.Diagnostics;
 
         foreach (var tree in semanticTrees)
             tree.Accept(this, context.RootSymbolTable);
@@ -88,7 +85,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         map.Add(node, context);
 
         var child = context.CreateChild();
-        child.TryAddId(MemberAccessExpression.This, node.Parent!);
+        child.AddId(MemberAccessExpression.This, node.Parent!);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, child);
@@ -137,8 +134,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     {
         map.Add(node, context);
 
-        if (!context.TryAddId(node.Name, node))
-            diagnostics.FunctionAlreadyDefined(node);
+        context.AddId(node.Name, node);
 
         node.ReturnType.Accept(this, context);
 
@@ -219,18 +215,16 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     {
         map.Add(node, context);
 
-        node.Type.Accept(this, context);
+        context.AddId(node.Name, node);
 
-        if (!context.TryAddId(node.Name, node))
-            diagnostics.InterfacePropertyAlreadyDefined(node);
+        node.Type.Accept(this, context);
     }
 
     public void VisitInterfaceMethod(InterfaceMethod node, ISymbolTable context)
     {
         map.Add(node, context);
 
-        if (!context.TryAddId(node.Name, node))
-            diagnostics.InterfaceMethodAlreadyDefined(node);
+        context.AddId(node.Name, node);
 
         var child = context.CreateChild();
         foreach (var parameter in node.ParameterTypes)
@@ -265,15 +259,14 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
     public void VisitMethod(MethodDeclaration node, ISymbolTable context)
     {
-        if (!context.TryAddId(node.Name, node))
-            diagnostics.MethodAlreadyDefined(node);
-
         map.Add(node, context);
+
+        context.AddId(node.Name, node);
 
         node.ReturnType.Accept(this, context);
 
         var child = context.CreateChild();
-        child.TryAddId(MemberAccessExpression.This, node.Parent!);
+        child.AddId(MemberAccessExpression.This, node.Parent!);
 
         foreach (var parameter in node.Parameters)
             parameter.Accept(this, child);
@@ -313,8 +306,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     {
         map.Add(node, context);
 
-        if (!context.TryAddId(node.Name, node))
-            diagnostics.ParameterAlreadyDefined(node);
+        context.AddId(node.Name, node);
 
         node.Type.Accept(this, context);
     }
@@ -323,8 +315,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     {
         map.Add(node, context);
 
-        if (!context.TryAddId(node.Name, node))
-            diagnostics.PropertyAlreadyDefined(node);
+        context.AddId(node.Name, node);
 
         node.Type.Accept(this, context);
         node.Getter?.Accept(this, context);
@@ -336,8 +327,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         map.Add(node, context);
 
         var child = context.CreateChild();
-        if (!child.TryAddId(MemberAccessExpression.Field, node.Parent!))
-            diagnostics.ParameterAlreadyDefined(node, MemberAccessExpression.Field);
+        child.AddId(MemberAccessExpression.Field, node.Parent!);
 
         if (node.Body is not null)
             VisitBlockWithoutScope(node.Body, child);
@@ -348,11 +338,8 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         map.Add(node, context);
 
         var child = context.CreateChild();
-        if (!child.TryAddId(MemberAccessExpression.Field, node.Parent!))
-            diagnostics.ParameterAlreadyDefined(node, MemberAccessExpression.Field);
-
-        if (!child.TryAddId(MemberAccessExpression.Value, node.Parent!))
-            diagnostics.ParameterAlreadyDefined(node, MemberAccessExpression.Value);
+        child.AddId(MemberAccessExpression.Field, node.Parent!);
+        child.AddId(MemberAccessExpression.Value, node.Parent!);
 
         if (node.Body is not null)
             VisitBlockWithoutScope(node.Body, child);
@@ -438,13 +425,12 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
     public void VisitVariable(VariableDeclaration node, ISymbolTable context)
     {
+        map.Add(node, context);
+
+        context.AddId(node.Name, node);
+
         node.Type.Accept(this, context);
         node.Expression.Accept(this, context);
-
-        if (!context.TryAddId(node.Name, node))
-            diagnostics.VariableAlreadyDefined(node);
-
-        map.Add(node, context);
     }
 
     public void VisitWhile(While node, ISymbolTable context)

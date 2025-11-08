@@ -6,7 +6,7 @@ namespace Trilang.Symbols;
 public interface ISymbolTable
 {
     IdSymbol? GetId(string name);
-    bool TryAddId(string name, ISemanticNode node);
+    void AddId(string name, ISemanticNode node);
     void AddType(TypeSymbol symbol);
 
     ISymbolTable CreateChild();

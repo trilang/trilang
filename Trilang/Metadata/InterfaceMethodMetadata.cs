@@ -56,9 +56,12 @@ public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMeta
     public override string ToString()
         => $"{Name}: {Type}";
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     public SourceLocation? Definition { get; }
 
-    public bool IsInvalid => false;
+    public bool IsInvalid { get; private set; }
 
     public InterfaceMetadata DeclaringType { get; }
 

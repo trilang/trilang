@@ -22,26 +22,40 @@ internal class FunctionGenerator
     {
         foreach (var (_, symbol) in functions)
         {
-            if (symbol.Node is not FunctionDeclaration node)
-                continue;
-
-            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var parameterTypes = string.Join(", ", node.Parameters.Select(p => p.Type.Name));
-            var name = $"({parameterTypes}) => {node.ReturnType.Name}";
-            if (typeProvider.GetType(name) is not FunctionTypeMetadata metadata)
+            foreach (var node in symbol.Nodes)
             {
-                metadata = new FunctionTypeMetadata(node.GetLocation());
+                if (node is not FunctionDeclaration function)
+                    continue;
 
-                if (typeProvider.DefineType(name, metadata))
-                    typesToProcess.Add(node);
+                var typeProvider = symbolTableMap.Get(node).TypeProvider;
+                var parameterTypes = string.Join(", ", function.Parameters.Select(p => p.Type.Name));
+                var name = $"({parameterTypes}) => {function.ReturnType.Name}";
+                if (typeProvider.GetType(name) is not FunctionTypeMetadata functionTypeMetadata)
+                {
+                    functionTypeMetadata = new FunctionTypeMetadata(function.GetLocation());
+
+                    if (typeProvider.DefineType(name, functionTypeMetadata))
+                        typesToProcess.Add(function);
+                }
+
+                var metadata = new FunctionMetadata(
+                    function.GetLocation(),
+                    function.AccessModifier.ToMetadata(),
+                    function.Name,
+                    [],
+                    functionTypeMetadata);
+
+                var isDefined = typeProvider.Functions.Any(x => x.Name == metadata.Name);
+                if (isDefined)
+                {
+                    metadata.MarkAsInvalid();
+                    diagnostics.FunctionAlreadyDefined(function);
+                }
+
+                typeProvider.AddFunction(metadata);
+
+                function.Metadata = metadata;
             }
-
-            node.Metadata = new FunctionMetadata(
-                node.GetLocation(),
-                node.AccessModifier.ToMetadata(),
-                node.Name,
-                [],
-                metadata);
         }
     }
 
@@ -61,6 +75,13 @@ internal class FunctionGenerator
                     new SourceLocation(root.SourceFile, functionParameter.SourceSpan.GetValueOrDefault()),
                     functionParameter.Name,
                     parameterType);
+
+                var isDefined = metadata.Parameters.Any(x => x.Name == parameter.Name);
+                if (isDefined)
+                {
+                    parameter.MarkAsInvalid();
+                    diagnostics.ParameterAlreadyDefined(functionParameter);
+                }
 
                 functionParameter.Metadata = parameter;
                 functionTypeMetadata.AddParameter(parameterType);

@@ -53,12 +53,6 @@ public class SemanticDiagnosticReporter
             parameter.GetLocation(),
             $"The '{parameter.Name}' parameter is already defined.");
 
-    public void ParameterAlreadyDefined(ISemanticNode parameter, string name)
-        => diagnostics.Error(
-            DiagnosticId.S0002AlreadyDefined,
-            parameter.GetLocation(),
-            $"The '{name}' parameter is already defined.");
-
     public void TypeAlreadyDefined(TypeDeclaration type)
         => diagnostics.Error(
             DiagnosticId.S0002AlreadyDefined,
@@ -212,7 +206,7 @@ public class SemanticDiagnosticReporter
             node.GetLocation(),
             $"The '{function.Name}' function is not accessible.");
 
-    // TODO: highlight not a function name
+    // TODO: highlight a function name
     public void NotAllPathsReturnValue(IFunctionMetadata function)
         => diagnostics.Error(
             DiagnosticId.S0015NotAllPathsReturnValue,
