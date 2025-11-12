@@ -4,8 +4,6 @@ namespace Trilang.Semantics.Passes.ControlFlow;
 
 public class SemanticBlock
 {
-    private readonly string name;
-    private readonly BlockStatement node;
     private readonly List<IStatement> statements;
     private readonly HashSet<SemanticBlock> previous;
     private readonly HashSet<SemanticBlock> next;
@@ -16,8 +14,8 @@ public class SemanticBlock
 
     public SemanticBlock(string name, BlockStatement node, IEnumerable<IStatement> statements)
     {
-        this.name = name;
-        this.node = node;
+        Name = name;
+        BlockNode = node;
         this.statements = [..statements];
         previous = [];
         next = [];
@@ -38,11 +36,11 @@ public class SemanticBlock
     }
 
     public override string ToString()
-        => name;
+        => Name;
 
-    public string Name => name;
+    public string Name { get; }
 
-    public BlockStatement BlockNode => node;
+    public BlockStatement BlockNode { get; }
 
     public IReadOnlyCollection<IStatement> Statements => statements;
 

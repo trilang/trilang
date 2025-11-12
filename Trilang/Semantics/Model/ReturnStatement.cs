@@ -6,8 +6,7 @@ public class ReturnStatement : IStatement
     {
         SourceSpan = sourceSpan;
         Expression = expression;
-        if (Expression is not null)
-            Expression.Parent = this;
+        Expression?.Parent = this;
     }
 
     public void Accept(IVisitor visitor)

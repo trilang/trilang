@@ -5,9 +5,6 @@ namespace Trilang.Semantics.Model;
 // TODO: don't generate backing field if it's not needed
 public class PropertyDeclaration : ISemanticNode
 {
-    private PropertyGetter? getter;
-    private PropertySetter? setter;
-
     public PropertyDeclaration(
         SourceSpan? sourceSpan,
         string name,
@@ -22,12 +19,8 @@ public class PropertyDeclaration : ISemanticNode
         Setter = setter;
 
         Type.Parent = this;
-
-        if (Getter is not null)
-            Getter.Parent = this;
-
-        if (Setter is not null)
-            Setter.Parent = this;
+        Getter?.Parent = this;
+        Setter?.Parent = this;
     }
 
     public void Accept(IVisitor visitor)
@@ -49,25 +42,21 @@ public class PropertyDeclaration : ISemanticNode
 
     public PropertyGetter? Getter
     {
-        get => getter;
+        get;
         set
         {
-            getter = value;
-
-            if (getter is not null)
-                getter.Parent = this;
+            field = value;
+            field?.Parent = this;
         }
     }
 
     public PropertySetter? Setter
     {
-        get => setter;
+        get;
         set
         {
-            setter = value;
-
-            if (setter is not null)
-                setter.Parent = this;
+            field = value;
+            field?.Parent = this;
         }
     }
 

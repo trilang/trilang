@@ -4,6 +4,11 @@ namespace Trilang.Compilation;
 
 public class Project
 {
+    private static readonly JsonSerializerOptions jsonOptions = new(JsonSerializerOptions.Default)
+    {
+        PropertyNameCaseInsensitive = true,
+    };
+
     private readonly List<SourceFile> sourceFiles;
 
     private Project(string projectPath, IEnumerable<SourceFile> files)
@@ -26,11 +31,6 @@ public class Project
         else if (ext == ".project")
         {
             var projectFile = File.ReadAllText(path);
-            var jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
-            {
-                PropertyNameCaseInsensitive = true,
-            };
-
             var projectJson = JsonSerializer.Deserialize<ProjectJson>(projectFile, jsonOptions) ??
                               throw new Exception();
 

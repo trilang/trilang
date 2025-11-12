@@ -48,7 +48,7 @@ public class TypePointerMetadata : ITypeMetadata, IEquatable<TypePointerMetadata
     public IMetadata? GetMember(string name)
         => Type.GetMember(name);
 
-    public bool IsInvalid { get; }
+    public bool IsInvalid => false;
 
     public SourceLocation? Definition => Type.Definition;
 

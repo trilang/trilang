@@ -6,13 +6,12 @@ namespace Trilang.Symbols;
 public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
 {
     private readonly ISymbolTable parent;
-    private readonly ITypeMetadataProvider typeMetadataProvider;
     private readonly Dictionary<string, IdSymbol> ids;
 
     public SymbolTable(ISymbolTable parent, ITypeMetadataProvider typeMetadataProvider)
     {
         this.parent = parent;
-        this.typeMetadataProvider = typeMetadataProvider;
+        TypeProvider = typeMetadataProvider;
         ids = [];
     }
 
@@ -67,7 +66,7 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
         => parent.AddType(symbol);
 
     public ISymbolTable CreateChild()
-        => new SymbolTable(this, typeMetadataProvider.CreateChild());
+        => new SymbolTable(this, TypeProvider.CreateChild());
 
     public IReadOnlyList<TypeSymbol> Types
         => parent.Types;
@@ -75,6 +74,5 @@ public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
     public IReadOnlyDictionary<string, IdSymbol> Ids
         => ids;
 
-    public ITypeMetadataProvider TypeProvider
-        => typeMetadataProvider;
+    public ITypeMetadataProvider TypeProvider { get; }
 }

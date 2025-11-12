@@ -1,6 +1,6 @@
 namespace Trilang;
 
-public record struct SourcePosition(int Index, int Line, int Column)
+public readonly record struct SourcePosition(int Index, int Line, int Column)
 {
     public SourcePosition() : this(0, 1, 1)
     {

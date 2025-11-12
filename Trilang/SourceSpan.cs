@@ -9,5 +9,5 @@ public record struct SourceSpan(SourcePosition Start, SourcePosition End)
         => new SourceSpan(Start, other.End);
 
     public SourceSpan Combine(SourcePosition other)
-        => new SourceSpan(Start, other);
+        => this with { End = other };
 }

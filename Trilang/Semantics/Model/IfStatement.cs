@@ -15,9 +15,7 @@ public class IfStatement : IStatement
 
         Condition.Parent = this;
         Then.Parent = this;
-
-        if (Else is not null)
-            Else.Parent = this;
+        Else?.Parent = this;
     }
 
     public void Accept(IVisitor visitor)

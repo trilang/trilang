@@ -11,9 +11,7 @@ public class PropertyGetter : ISemanticNode
         SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Body = body;
-
-        if (Body is not null)
-            Body.Parent = this;
+        Body?.Parent = this;
     }
 
     public void Accept(IVisitor visitor)

@@ -59,7 +59,7 @@ public class MemberAccessExpression : IExpression
                 => parameter.Type,
 
             FieldMetadata field
-                => field.Type,
+                => @field.Type,
 
             PropertyMetadata property
                 => property.Type,
