@@ -102,11 +102,21 @@ internal class GenericTypeGenerator
             var propertyType = typeArgumentsMap.Map(property.Type);
             var getter = default(MethodMetadata);
             if (property.Getter is not null)
-                getter = PopulateClosedMethod(typeProvider, typeArgumentsMap, closed, property.Getter);
+                getter = PopulateClosedMethod(
+                    typeProvider,
+                    typeArgumentsMap,
+                    closed,
+                    property.Getter,
+                    new FunctionGroupMetadata());
 
             var setter = default(MethodMetadata);
             if (property.Setter is not null)
-                setter = PopulateClosedMethod(typeProvider, typeArgumentsMap, closed, property.Setter);
+                setter = PopulateClosedMethod(
+                    typeProvider,
+                    typeArgumentsMap,
+                    closed,
+                    property.Setter,
+                    new FunctionGroupMetadata());
 
             var propertyMetadata = new PropertyMetadata(
                 closed,
@@ -135,18 +145,26 @@ internal class GenericTypeGenerator
             closed.AddConstructor(constructorMetadata);
         }
 
-        foreach (var method in open.Methods)
+        foreach (var methods in open.Methods.GroupBy(x => x.Name))
         {
-            var methodMetadata = PopulateClosedMethod(typeProvider, typeArgumentsMap, closed, method);
-            closed.AddMethod(methodMetadata);
+            var group = new FunctionGroupMetadata();
+
+            foreach (var method in methods)
+                closed.AddMethod(
+                    PopulateClosedMethod(
+                        typeProvider,
+                        typeArgumentsMap,
+                        closed,
+                        method,
+                        group));
         }
     }
 
-    private MethodMetadata PopulateClosedMethod(
-        ITypeMetadataProvider typeProvider,
+    private MethodMetadata PopulateClosedMethod(ITypeMetadataProvider typeProvider,
         TypeArgumentMap typeArgumentsMap,
         TypeMetadata closed,
-        MethodMetadata method)
+        MethodMetadata method,
+        FunctionGroupMetadata group)
     {
         // TODO: support generic methods
         var parameters = GetParameters(typeArgumentsMap, method.Parameters);
@@ -164,7 +182,8 @@ internal class GenericTypeGenerator
             method.IsStatic,
             method.Name,
             parameters,
-            functionType);
+            functionType,
+            group);
     }
 
     private void PopulateClosedTypes(

@@ -101,11 +101,14 @@ internal class TypeArgumentMap
                 x.SetterModifier));
 
         var methods = interfaceMetadata.Methods
-            .Select(x => new InterfaceMethodMetadata(
+            .GroupBy(method => method.Name)
+            .Select(g => new { g, functionGroup = new FunctionGroupMetadata() })
+            .SelectMany(t => t.g, (t, x) => new InterfaceMethodMetadata(
                 x.Definition,
                 interfaceMetadata,
                 x.Name,
-                Map(x.Type)));
+                Map(x.Type),
+                t.functionGroup));
 
         var metadata = new InterfaceMetadata(
             interfaceMetadata.Definition,
@@ -172,11 +175,11 @@ internal class TypeArgumentMap
         {
             var getter = default(MethodMetadata);
             if (property.Getter is not null)
-                getter = Map(closed, property.Getter);
+                getter = Map(closed, property.Getter, new FunctionGroupMetadata());
 
             var setter = default(MethodMetadata);
             if (property.Setter is not null)
-                setter = Map(closed, property.Setter);
+                setter = Map(closed, property.Setter, new FunctionGroupMetadata());
 
             closed.AddProperty(
                 new PropertyMetadata(
@@ -196,8 +199,13 @@ internal class TypeArgumentMap
                     constructor.Parameters.Select(Map).ToList(),
                     Map(constructor.Type)));
 
-        foreach (var method in type.Methods)
-            closed.AddMethod(Map(closed, method));
+        foreach (var methods in type.Methods.GroupBy(x => x.Name))
+        {
+            var group = new FunctionGroupMetadata();
+
+            foreach (var method in methods)
+                closed.AddMethod(Map(closed, method, group));
+        }
 
         return closed;
     }
@@ -205,7 +213,7 @@ internal class TypeArgumentMap
     private ParameterMetadata Map(ParameterMetadata parameter)
         => new ParameterMetadata(parameter.Definition, parameter.Name, Map(parameter.Type));
 
-    private MethodMetadata Map(TypeMetadata closed, MethodMetadata method)
+    private MethodMetadata Map(TypeMetadata closed, MethodMetadata method, FunctionGroupMetadata group)
         => new MethodMetadata(
             method.Definition,
             closed,
@@ -213,7 +221,8 @@ internal class TypeArgumentMap
             method.IsStatic,
             method.Name,
             method.Parameters.Select(Map).ToList(),
-            Map(method.Type));
+            Map(method.Type),
+            group);
 
     private bool HasTypeArgument(ITypeMetadata type)
         => type switch

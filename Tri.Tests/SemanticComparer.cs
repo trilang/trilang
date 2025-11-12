@@ -176,6 +176,9 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
         if (!x.Parameters.SequenceEqual(y.Parameters, this))
             throw new Exception("Arguments don't match.");
 
+        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
+            throw new Exception("Metadata doesn't match.");
+
         return true;
     }
 

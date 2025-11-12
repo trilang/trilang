@@ -1,17 +1,21 @@
 namespace Trilang.Metadata;
 
-public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMetadata>
+public class InterfaceMethodMetadata : IHasFunctionType, IEquatable<InterfaceMethodMetadata>
 {
     public InterfaceMethodMetadata(
         SourceLocation? definition,
         InterfaceMetadata declaringType,
         string name,
-        FunctionTypeMetadata type)
+        FunctionTypeMetadata type,
+        FunctionGroupMetadata group)
     {
         Definition = definition;
         DeclaringType = declaringType;
         Name = name;
         Type = type;
+        Group = group;
+
+        group.AddFunction(this);
     }
 
     public static bool operator ==(InterfaceMethodMetadata? left, InterfaceMethodMetadata? right)
@@ -68,4 +72,6 @@ public class InterfaceMethodMetadata : IMetadata, IEquatable<InterfaceMethodMeta
     public string Name { get; }
 
     public FunctionTypeMetadata Type { get; }
+
+    public FunctionGroupMetadata Group { get; }
 }

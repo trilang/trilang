@@ -22,39 +22,27 @@ internal class FunctionGenerator
     {
         foreach (var (_, symbol) in functions)
         {
+            var group = new FunctionGroupMetadata();
+
             foreach (var node in symbol.Nodes)
             {
                 if (node is not FunctionDeclaration function)
                     continue;
 
                 var typeProvider = symbolTableMap.Get(node).TypeProvider;
-                var parameterTypes = string.Join(", ", function.Parameters.Select(p => p.Type.Name));
-                var name = $"({parameterTypes}) => {function.ReturnType.Name}";
-                if (typeProvider.GetType(name) is not FunctionTypeMetadata functionTypeMetadata)
-                {
-                    functionTypeMetadata = new FunctionTypeMetadata(function.GetLocation());
-
-                    if (typeProvider.DefineType(name, functionTypeMetadata))
-                        typesToProcess.Add(function);
-                }
-
                 var metadata = new FunctionMetadata(
                     function.GetLocation(),
                     function.AccessModifier.ToMetadata(),
                     function.Name,
                     [],
-                    functionTypeMetadata);
-
-                var isDefined = typeProvider.Functions.Any(x => x.Name == metadata.Name);
-                if (isDefined)
-                {
-                    metadata.MarkAsInvalid();
-                    diagnostics.FunctionAlreadyDefined(function);
-                }
+                    null!,
+                    group);
 
                 typeProvider.AddFunction(metadata);
 
                 function.Metadata = metadata;
+
+                typesToProcess.Add(function);
             }
         }
     }
@@ -65,30 +53,69 @@ internal class FunctionGenerator
         {
             var root = function.GetRoot();
             var metadata = function.Metadata!;
-            var functionTypeMetadata = metadata.Type;
             var typeProvider = symbolTableMap.Get(function).TypeProvider;
 
             foreach (var functionParameter in function.Parameters)
             {
-                var parameterType = functionParameter.Type.PopulateMetadata(typeProvider, diagnostics);
                 var parameter = new ParameterMetadata(
                     new SourceLocation(root.SourceFile, functionParameter.SourceSpan.GetValueOrDefault()),
                     functionParameter.Name,
-                    parameterType);
+                    functionParameter.Type.PopulateMetadata(typeProvider, diagnostics));
 
-                var isDefined = metadata.Parameters.Any(x => x.Name == parameter.Name);
-                if (isDefined)
+                var isParameterDefined = metadata.Parameters.Any(x => x.Name == parameter.Name);
+                if (isParameterDefined)
                 {
                     parameter.MarkAsInvalid();
                     diagnostics.ParameterAlreadyDefined(functionParameter);
                 }
 
                 functionParameter.Metadata = parameter;
-                functionTypeMetadata.AddParameter(parameterType);
                 metadata.AddParameter(parameter);
             }
 
-            functionTypeMetadata.ReturnType = function.ReturnType.PopulateMetadata(typeProvider, diagnostics);
+            metadata.Type = GetFunctionType(function, typeProvider);
+        }
+
+        foreach (var function in typesToProcess)
+            CheckFunctionDuplicates(function);
+    }
+
+    private FunctionTypeMetadata GetFunctionType(
+        FunctionDeclaration function,
+        ITypeMetadataProvider typeProvider)
+    {
+        var metadata = function.Metadata!;
+        var functionTypeMetadata = new FunctionTypeMetadata(
+            null,
+            metadata.Parameters.Select(x => x.Type),
+            function.ReturnType.PopulateMetadata(typeProvider, diagnostics));
+
+        if (typeProvider.GetType(functionTypeMetadata.ToString()) is not FunctionTypeMetadata existingFunctionType)
+        {
+            typeProvider.DefineType(functionTypeMetadata.ToString(), functionTypeMetadata);
+            existingFunctionType = functionTypeMetadata;
+        }
+
+        return existingFunctionType;
+    }
+
+    private void CheckFunctionDuplicates(FunctionDeclaration function)
+    {
+        // TODO: use type provider to check for existing functions
+        var metadata = function.Metadata!;
+        var group = metadata.Group;
+        if (ReferenceEquals(metadata, group.Functions[0]))
+            return;
+
+        var actualParameters = metadata.Parameters.Select(x => x.Type).ToArray();
+        var isDefined = group.Functions
+            .Any(x => !ReferenceEquals(x, metadata) &&
+                      x.Type.ParameterTypes.SequenceEqual(actualParameters));
+
+        if (isDefined)
+        {
+            metadata.MarkAsInvalid();
+            diagnostics.FunctionAlreadyDefined(function);
         }
     }
 }

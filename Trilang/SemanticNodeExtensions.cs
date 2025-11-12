@@ -74,6 +74,14 @@ public static class SemanticNodeExtensions
                 case ExpressionStatement expressionStatementNode:
                     q.Enqueue(expressionStatementNode.Expression);
                     break;
+                case FakeDeclaration:
+                    break;
+                case FakeExpression:
+                    break;
+                case FakeStatement:
+                    break;
+                case FakeType:
+                    break;
                 case FunctionDeclaration functionDeclarationNode:
                     foreach (var parameter in functionDeclarationNode.Parameters)
                         q.Enqueue(parameter);

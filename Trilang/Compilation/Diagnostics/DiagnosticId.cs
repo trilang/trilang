@@ -42,6 +42,10 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
     public static readonly DiagnosticId S0020VariableUsedBeforeDeclaration = ForSemantic(20);
     public static readonly DiagnosticId S0021MemberIsNotImplemented = ForSemantic(21);
     public static readonly DiagnosticId S0022InterfacePropertyCantBePrivate = ForSemantic(22);
+    public static readonly DiagnosticId S0023NoSuitableOverload = ForSemantic(23);
+    public static readonly DiagnosticId S0024MultipleOverloads = ForSemantic(24);
+    public static readonly DiagnosticId S0025ExtraArgument = ForSemantic(25);
+    public static readonly DiagnosticId S0026MissingArgument = ForSemantic(26);
 
     private static DiagnosticId ForLexer(int id)
         => new DiagnosticId(DiagnosticCategory.Lexer, id);

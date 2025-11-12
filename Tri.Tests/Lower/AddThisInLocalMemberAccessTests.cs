@@ -109,8 +109,8 @@ public class AddThisInLocalMemberAccessTests
             false,
             "print",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
-        );
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata());
 
         var expected = new MemberAccessExpression(
             null,

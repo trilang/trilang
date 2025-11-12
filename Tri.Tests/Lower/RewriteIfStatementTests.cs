@@ -128,7 +128,8 @@ public class RewriteIfStatementTests
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
+                    new FunctionGroupMetadata()
                 )
             }
         ]);
@@ -227,7 +228,8 @@ public class RewriteIfStatementTests
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
+                    new FunctionGroupMetadata()
                 )
             }
         ]);

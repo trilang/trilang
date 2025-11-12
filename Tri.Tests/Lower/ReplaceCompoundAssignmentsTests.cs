@@ -106,7 +106,8 @@ public class ReplaceCompoundAssignmentsTests
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void)
+                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
+                    new FunctionGroupMetadata()
                 )
             }
         ]);

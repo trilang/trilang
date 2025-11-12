@@ -49,7 +49,7 @@ public class MemberAccessExpression : IExpression
 
     public IMetadata? Reference { get; set; }
 
-    public ITypeMetadata? ReturnTypeMetadata
+    public ITypeMetadata ReturnTypeMetadata
         => Reference switch
         {
             VariableMetadata variable
@@ -82,7 +82,6 @@ public class MemberAccessExpression : IExpression
             InvalidMemberMetadata invalidMember
                 => invalidMember.Type,
 
-            null => null,
             _ => throw new InvalidOperationException(),
         };
 

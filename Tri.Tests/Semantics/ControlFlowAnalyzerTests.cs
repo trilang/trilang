@@ -56,8 +56,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "add",
             [new ParameterMetadata(null, "a", TypeMetadata.I32), new ParameterMetadata(null, "b", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32)
-        );
+            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32),
+            new FunctionGroupMetadata());
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -104,7 +104,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -160,7 +161,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -214,7 +216,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -264,7 +267,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -322,7 +326,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -369,7 +374,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -426,7 +432,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -473,7 +480,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -530,7 +538,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -585,7 +594,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
@@ -645,7 +655,8 @@ public class ControlFlowAnalyzerTests
             AccessModifierMetadata.Public,
             "test",
             [new ParameterMetadata(null, "a", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
+            new FunctionGroupMetadata()
         );
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));

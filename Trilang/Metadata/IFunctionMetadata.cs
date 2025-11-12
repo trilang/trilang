@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Trilang.Metadata;
 
-public interface IFunctionMetadata : IMetadata
+public interface IFunctionMetadata : IHasFunctionType
 {
     ITypeMetadata? DeclaringType { get; }
 
@@ -12,6 +12,4 @@ public interface IFunctionMetadata : IMetadata
     string Name { get; }
 
     IReadOnlyList<ParameterMetadata> Parameters { get; }
-
-    FunctionTypeMetadata Type { get; }
 }

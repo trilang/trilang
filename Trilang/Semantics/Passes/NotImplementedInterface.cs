@@ -57,11 +57,24 @@ internal class NotImplementedInterface : Visitor, ISemanticPass
                 if (interfaceMethod.IsInvalid)
                     continue;
 
-                var method = type.GetMethod(interfaceMethod.Name);
-                if (method is null)
+                var group = type.GetMethod(interfaceMethod.Name);
+                if (group is null)
                 {
                     diagnostics.MethodIsNotImplemented(node, interfaceMethod);
                     continue;
+                }
+
+                var method = (MethodMetadata)group.Functions[0];
+                if (group.Functions.Count > 1)
+                {
+                    var matches = group.Match(interfaceMethod.Type.ParameterTypes).ToArray();
+                    if (matches.Length == 0)
+                    {
+                        diagnostics.MethodIsNotImplemented(node, interfaceMethod);
+                        continue;
+                    }
+
+                    method = (MethodMetadata)matches[0];
                 }
 
                 if (!interfaceMethod.Type.Equals(method.Type))

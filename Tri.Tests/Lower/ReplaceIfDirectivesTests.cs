@@ -261,7 +261,8 @@ public class ReplaceIfDirectivesTests
                         null,
                         [new FunctionTypeMetadata(null, [], TypeMetadata.Void)],
                         TypeMetadata.I32
-                    )
+                    ),
+                    new FunctionGroupMetadata()
                 )
             }
         ]);
@@ -345,7 +346,8 @@ public class ReplaceIfDirectivesTests
                         null,
                         [new FunctionTypeMetadata(null, [], TypeMetadata.Void)],
                         TypeMetadata.I32
-                    )
+                    ),
+                    new FunctionGroupMetadata()
                 )
             }
         ]);
@@ -429,7 +431,8 @@ public class ReplaceIfDirectivesTests
                         null,
                         [new FunctionTypeMetadata(null, [], TypeMetadata.Void)],
                         TypeMetadata.I32
-                    )
+                    ),
+                    new FunctionGroupMetadata()
                 )
             }
         ]);

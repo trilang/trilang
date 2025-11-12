@@ -167,7 +167,8 @@ public class ReplaceConditionalOperatorsTests
                     AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter],
-                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32),
+                    new FunctionGroupMetadata()
                 ),
             }
         ]);
@@ -313,7 +314,8 @@ public class ReplaceConditionalOperatorsTests
                     AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter],
-                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32),
+                    new FunctionGroupMetadata()
                 ),
             }
         ]);
@@ -511,7 +513,8 @@ public class ReplaceConditionalOperatorsTests
                     AccessModifierMetadata.Public,
                     "test",
                     [aParameter, bParameter, cParameter],
-                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32)
+                    new FunctionTypeMetadata(null, [TypeMetadata.Bool, TypeMetadata.Bool, TypeMetadata.Bool], TypeMetadata.I32),
+                    new FunctionGroupMetadata()
                 ),
             }
         ]);

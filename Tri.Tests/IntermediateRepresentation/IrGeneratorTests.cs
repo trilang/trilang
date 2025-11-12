@@ -1062,7 +1062,7 @@ public class IrGeneratorTests
 
         var testType = (TypeMetadata)typeProvider.GetType("Test")!;
         var typePointer = new TypePointerMetadata(testType);
-        var method = testType.GetMethod("method1")!;
+        var method = testType.GetMethod("method1")!.Functions[0];
         var methodPointer = new TypePointerMetadata(method.Type);
 
         var ir = new IrGenerator();
@@ -1112,7 +1112,7 @@ public class IrGeneratorTests
 
         var testType = (TypeMetadata)typeProvider.GetType("Test")!;
         var typePointer = new TypePointerMetadata(testType);
-        var method = testType.GetMethod("method1")!;
+        var method = testType.GetMethod("method1")!.Functions[0];
         var methodPointer = new TypePointerMetadata(method.Type);
 
         var ir = new IrGenerator();
@@ -1170,7 +1170,7 @@ public class IrGeneratorTests
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = pointType.GetField("<>_x")!;
         var fieldPointer = new TypePointerMetadata(field.Type);
-        var setter = pointType.GetMethod("<>_set_x")!;
+        var setter = pointType.GetMethod("<>_set_x")!.Functions[0];
         var setterPointer = new TypePointerMetadata(setter.Type);
 
         var ir = new IrGenerator();
@@ -1234,9 +1234,9 @@ public class IrGeneratorTests
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = pointType.GetField("<>_x")!;
         var fieldPointer = new TypePointerMetadata(field.Type);
-        var getter = pointType.GetMethod("<>_get_x")!;
+        var getter = pointType.GetMethod("<>_get_x")!.Functions[0];
         var getterPointer = new TypePointerMetadata(getter.Type);
-        var setter = pointType.GetMethod("<>_set_x")!;
+        var setter = pointType.GetMethod("<>_set_x")!.Functions[0];
         var setterPointer = new TypePointerMetadata(setter.Type);
         var ctor = pointType.GetConstructor([TypeMetadata.I32])!;
         var ctorPointer = new TypePointerMetadata(ctor.Type);
@@ -1338,9 +1338,9 @@ public class IrGeneratorTests
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = pointType.GetField("<>_x")!;
         var fieldPointer = new TypePointerMetadata(field.Type);
-        var getter = pointType.GetMethod("<>_get_x")!;
+        var getter = pointType.GetMethod("<>_get_x")!.Functions[0];
         var getterPointer = new TypePointerMetadata(getter.Type);
-        var setter = pointType.GetMethod("<>_set_x")!;
+        var setter = pointType.GetMethod("<>_set_x")!.Functions[0];
         var setterPointer = new TypePointerMetadata(setter.Type);
         var ctor = pointType.GetConstructor([TypeMetadata.I32])!;
         var ctorPointer = new TypePointerMetadata(ctor.Type);
@@ -1439,13 +1439,13 @@ public class IrGeneratorTests
         var xFieldPointer = new TypePointerMetadata(xField.Type);
         var yField = pointType.GetField("<>_y")!;
         var yFieldPointer = new TypePointerMetadata(yField.Type);
-        var xGetter = pointType.GetMethod("<>_get_x")!;
+        var xGetter = pointType.GetMethod("<>_get_x")!.Functions[0];
         var xGetterPointer = new TypePointerMetadata(xGetter.Type);
-        var xSetter = pointType.GetMethod("<>_set_x")!;
+        var xSetter = pointType.GetMethod("<>_set_x")!.Functions[0];
         var xSetterPointer = new TypePointerMetadata(xSetter.Type);
-        var yGetter = pointType.GetMethod("<>_get_y")!;
+        var yGetter = pointType.GetMethod("<>_get_y")!.Functions[0];
         var yGetterPointer = new TypePointerMetadata(yGetter.Type);
-        var ySetter = pointType.GetMethod("<>_set_y")!;
+        var ySetter = pointType.GetMethod("<>_set_y")!.Functions[0];
         var ySetterPointer = new TypePointerMetadata(ySetter.Type);
         var ctor = pointType.GetConstructor([TypeMetadata.I32, TypeMetadata.I32])!;
         var ctorPointer = new TypePointerMetadata(ctor.Type);
@@ -1595,9 +1595,9 @@ public class IrGeneratorTests
         // Test1 members
         var test1XField = test1Type.GetField("<>_x")!;
         var test1XFieldPointer = new TypePointerMetadata(test1XField.Type);
-        var test1XGetter = test1Type.GetMethod("<>_get_x")!;
+        var test1XGetter = test1Type.GetMethod("<>_get_x")!.Functions[0];
         var test1XGetterPointer = new TypePointerMetadata(test1XGetter.Type);
-        var test1XSetter = test1Type.GetMethod("<>_set_x")!;
+        var test1XSetter = test1Type.GetMethod("<>_set_x")!.Functions[0];
         var test1XSetterPointer = new TypePointerMetadata(test1XSetter.Type);
         var test1Ctor = test1Type.GetConstructor([TypeMetadata.I32])!;
         var test1CtorPointer = new TypePointerMetadata(test1Ctor.Type);
@@ -1605,9 +1605,9 @@ public class IrGeneratorTests
         // Test2 members
         var test2ObjField = test2Type.GetField("<>_obj")!;
         var test2ObjFieldPointer = new TypePointerMetadata(test2ObjField.Type);
-        var test2ObjGetter = test2Type.GetMethod("<>_get_obj")!;
+        var test2ObjGetter = test2Type.GetMethod("<>_get_obj")!.Functions[0];
         var test2ObjGetterPointer = new TypePointerMetadata(test2ObjGetter.Type);
-        var test2ObjSetter = test2Type.GetMethod("<>_set_obj")!;
+        var test2ObjSetter = test2Type.GetMethod("<>_set_obj")!.Functions[0];
         var test2ObjSetterPointer = new TypePointerMetadata(test2ObjSetter.Type);
         var test2Ctor = test2Type.GetConstructor([test1Type])!;
         var test2CtorPointer = new TypePointerMetadata(test2Ctor.Type);
@@ -1798,7 +1798,7 @@ public class IrGeneratorTests
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
-                    new FunctionMetadata(null, AccessModifierMetadata.Public, "test1", [], functionType)
+                    new FunctionMetadata(null, AccessModifierMetadata.Public, "test1", [], functionType, new FunctionGroupMetadata())
                 ),
                 new Load(new Register(1, functionType), new Register(0, functionPointer)),
                 new Call(
@@ -1830,7 +1830,7 @@ public class IrGeneratorTests
         var (tree, typeProvider) = Parse(code);
 
         var testType = (TypeMetadata)typeProvider.GetType("Test")!;
-        var testMethod = testType.GetMethod("test")!;
+        var testMethod = testType.GetMethod("test")!.Functions[0];
 
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
@@ -1887,7 +1887,7 @@ public class IrGeneratorTests
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
-                    new FunctionMetadata(null, AccessModifierMetadata.Public, "test", [], functionType)
+                    new FunctionMetadata(null, AccessModifierMetadata.Public, "test", [], functionType, new FunctionGroupMetadata())
                 ),
                 new Load(new Register(1, functionType), new Register(0, functionPointer)),
                 new Move(new Register(2, functionType), new Register(1, functionType)),
@@ -1956,7 +1956,7 @@ public class IrGeneratorTests
         var interfaceType = (TypeAliasMetadata)typeProvider.GetType("Interface")!;
         var interfacePointer = new TypePointerMetadata(interfaceType);
 
-        var method = (InterfaceMethodMetadata)interfaceType.GetMember("method")!;
+        var method = ((FunctionGroupMetadata)interfaceType.GetMember("method")!).Functions[0];
         var methodPointer = new TypePointerMetadata(method.Type);
 
         var expected = new List<IrFunction>

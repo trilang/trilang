@@ -9,13 +9,17 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
         AccessModifierMetadata accessModifier,
         string name,
         IReadOnlyList<ParameterMetadata> parameters,
-        FunctionTypeMetadata type)
+        FunctionTypeMetadata type,
+        FunctionGroupMetadata group)
     {
         Definition = definition;
         AccessModifier = accessModifier;
         Name = name;
         this.parameters = [..parameters];
         Type = type;
+        Group = group;
+
+        group.AddFunction(this);
     }
 
     public static bool operator ==(FunctionMetadata? left, FunctionMetadata? right)
@@ -81,5 +85,7 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 
     public IReadOnlyList<ParameterMetadata> Parameters => parameters;
 
-    public FunctionTypeMetadata Type { get; }
+    public FunctionTypeMetadata Type { get; set; }
+
+    public FunctionGroupMetadata Group { get; }
 }

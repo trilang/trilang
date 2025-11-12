@@ -104,8 +104,8 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
             false,
             $"<>_get_{Name}",
             [],
-            new FunctionTypeMetadata(null, [], Type)
-        );
+            new FunctionTypeMetadata(null, [], Type),
+            new FunctionGroupMetadata());
 
     private MethodMetadata GenerateSetter(AccessModifierMetadata setterModifier)
         => new MethodMetadata(
@@ -115,8 +115,8 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
             false,
             $"<>_set_{Name}",
             [new ParameterMetadata(null, MemberAccessExpression.Value, Type)],
-            new FunctionTypeMetadata(null, [Type], TypeMetadata.Void)
-        );
+            new FunctionTypeMetadata(null, [Type], TypeMetadata.Void),
+            new FunctionGroupMetadata());
 
     public SourceLocation? Definition { get; }
 

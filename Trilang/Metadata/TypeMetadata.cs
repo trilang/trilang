@@ -24,10 +24,10 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 
     private readonly List<ITypeMetadata> genericArguments;
     private readonly HashSet<InterfaceMetadata> interfaces;
-    private readonly HashSet<FieldMetadata> fields;
-    private readonly HashSet<PropertyMetadata> properties;
-    private readonly HashSet<ConstructorMetadata> constructors;
-    private readonly HashSet<MethodMetadata> methods;
+    private readonly List<FieldMetadata> fields;
+    private readonly List<PropertyMetadata> properties;
+    private readonly List<ConstructorMetadata> constructors;
+    private readonly List<MethodMetadata> methods;
 
     private TypeMetadata(
         SourceLocation? definition,
@@ -149,28 +149,22 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
         => properties.FirstOrDefault(f => f.Name == name);
 
     public void AddProperty(PropertyMetadata property)
-    {
-        if (!properties.Add(property))
-            throw new ArgumentException($"Property with name {property.Name} already exists in type {Name}");
-    }
+        => properties.Add(property);
 
     public ConstructorMetadata? GetConstructor(IEnumerable<ITypeMetadata> parameters)
         => constructors.FirstOrDefault(c => c.Type.ParameterTypes.SequenceEqual(parameters));
 
     public void AddConstructor(ConstructorMetadata constructor)
-    {
-        if (!constructors.Add(constructor))
-            throw new ArgumentException($"Constructor already exists in type {Name}");
-    }
+        => constructors.Add(constructor);
 
-    public MethodMetadata? GetMethod(string name)
-        => methods.FirstOrDefault(m => m.Name == name);
+    public FunctionGroupMetadata? GetMethod(string name)
+        => methods.FirstOrDefault(m => m.Name == name)?.Group;
+
+    public IEnumerable<MethodMetadata> GetMethods(string name, IEnumerable<ITypeMetadata> parameters)
+        => methods.Where(m => m.Name == name && m.Type.ParameterTypes.SequenceEqual(parameters));
 
     public void AddMethod(MethodMetadata method)
-    {
-        if (!methods.Add(method))
-            throw new ArgumentException($"Method with name {method.Name} already exists in type {Name}");
-    }
+        => methods.Add(method);
 
     public IMetadata? GetMember(string name)
         => GetProperty(name) ??
@@ -190,15 +184,15 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 
     public string Name { get; }
 
-    public IReadOnlyCollection<ITypeMetadata> GenericArguments => genericArguments;
+    public IReadOnlyList<ITypeMetadata> GenericArguments => genericArguments;
 
     public IReadOnlyCollection<InterfaceMetadata> Interfaces => interfaces;
 
-    public IReadOnlyCollection<PropertyMetadata> Properties => properties;
+    public IReadOnlyList<PropertyMetadata> Properties => properties;
 
-    public IReadOnlyCollection<FieldMetadata> Fields => fields;
+    public IReadOnlyList<FieldMetadata> Fields => fields;
 
-    public IReadOnlyCollection<ConstructorMetadata> Constructors => constructors;
+    public IReadOnlyList<ConstructorMetadata> Constructors => constructors;
 
-    public IReadOnlyCollection<MethodMetadata> Methods => methods;
+    public IReadOnlyList<MethodMetadata> Methods => methods;
 }

@@ -50,8 +50,13 @@ internal class InterfaceGenerator
             foreach (var property in node.Properties)
                 PopulateProperty(typeProvider, metadata, property);
 
-            foreach (var method in node.Methods)
-                PopulateMethod(typeProvider, metadata, method);
+            foreach (var methods in node.Methods.GroupBy(x => x.Name))
+            {
+                var group = new FunctionGroupMetadata();
+
+                foreach (var method in methods)
+                    PopulateMethod(typeProvider, metadata, method, group);
+            }
         }
     }
 
@@ -82,7 +87,8 @@ internal class InterfaceGenerator
     private void PopulateMethod(
         ITypeMetadataProvider typeProvider,
         InterfaceMetadata metadata,
-        InterfaceMethod method)
+        InterfaceMethod method,
+        FunctionGroupMetadata group)
     {
         var parameters = new ITypeMetadata[method.ParameterTypes.Count];
         for (var i = 0; i < method.ParameterTypes.Count; i++)
@@ -102,9 +108,10 @@ internal class InterfaceGenerator
             metadata.Definition! with { Span = method.SourceSpan.GetValueOrDefault() },
             metadata,
             method.Name,
-            existingFunctionType);
+            existingFunctionType,
+            group);
 
-        if (metadata.GetMethod(method.Name) is not null)
+        if (metadata.GetMethods(method.Name, parameters).Any())
         {
             methodMetadata.MarkAsInvalid();
             diagnostics.InterfaceMethodAlreadyDefined(method);

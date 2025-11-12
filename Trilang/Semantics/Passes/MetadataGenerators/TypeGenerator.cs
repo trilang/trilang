@@ -94,8 +94,13 @@ internal class TypeGenerator
                 ));
             }
 
-            foreach (var method in node.Methods)
-                PopulateMethod(typeProvider, root, type, method);
+            foreach (var methods in node.Methods.GroupBy(x => x.Name))
+            {
+                var group = new FunctionGroupMetadata();
+
+                foreach (var method in methods)
+                    PopulateMethod(typeProvider, root, type, method, group);
+            }
         }
     }
 
@@ -184,18 +189,19 @@ internal class TypeGenerator
         constructor.Metadata = constructorMetadata;
     }
 
-    private void PopulateMethod(
-        ITypeMetadataProvider typeProvider,
+    private void PopulateMethod(ITypeMetadataProvider typeProvider,
         SemanticTree root,
         TypeMetadata type,
-        MethodDeclaration method)
+        MethodDeclaration method,
+        FunctionGroupMetadata group)
     {
         var parameters = GetParameters(root, typeProvider, method.Parameters);
+        var parameterTypes = parameters.Select(x => x.Type).ToArray();
         var returnTypeMetadata = method.ReturnType.PopulateMetadata(typeProvider, diagnostics);
 
         var functionType = new FunctionTypeMetadata(
             null,
-            parameters.Select(x => x.Type),
+            parameterTypes,
             returnTypeMetadata);
         functionType = typeProvider.GetOrDefine(functionType);
 
@@ -206,9 +212,10 @@ internal class TypeGenerator
             method.IsStatic,
             method.Name,
             parameters,
-            functionType);
+            functionType,
+            group);
 
-        if (type.GetMethod(method.Name) is not null)
+        if (type.GetMethods(method.Name, parameterTypes).Any())
         {
             methodMetadata.MarkAsInvalid();
             diagnostics.MethodAlreadyDefined(method);

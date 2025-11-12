@@ -11,7 +11,6 @@ namespace Trilang.Semantics.Passes;
 
 internal class TypeChecker : Visitor, ISemanticPass
 {
-    private SourceFile file;
     private SemanticDiagnosticReporter diagnostics = null!;
     private IEnumerable<string> directives = null!;
     private SymbolTableMap symbolTableMap = null!;
@@ -23,10 +22,7 @@ internal class TypeChecker : Visitor, ISemanticPass
         symbolTableMap = context.SymbolTableMap!;
 
         foreach (var tree in semanticTrees)
-        {
-            file = tree.SourceFile;
             tree.Accept(this);
-        }
     }
 
     protected override void VisitArrayAccessExit(ArrayAccessExpression node)
@@ -144,13 +140,34 @@ internal class TypeChecker : Visitor, ISemanticPass
     protected override void VisitCallExit(CallExpression node)
     {
         Debug.Assert(node.Member.ReturnTypeMetadata is not null);
+
+        ResolveFunctionGroup(node.Member, node.Parameters.Select(x => x.ReturnTypeMetadata!));
+
         if (node.Member.ReturnTypeMetadata is FunctionTypeMetadata function)
         {
-            for (var i = 0; i < node.Parameters.Count; i++)
+            var expectedCount = function.ParameterTypes.Count;
+            var actualCount = node.Parameters.Count;
+
+            if (actualCount > expectedCount)
+                for (var i = expectedCount; i < actualCount; i++)
+                    diagnostics.ExtraArgument(node.Parameters[i]);
+
+            if (actualCount < expectedCount)
+                for (var i = actualCount; i < expectedCount; i++)
+                    diagnostics.MissingArgument(node, function.ParameterTypes[i]);
+
+            for (var i = 0; i < Math.Min(expectedCount, actualCount); i++)
             {
                 var parameter = node.Parameters[i];
-                var actual = parameter.ReturnTypeMetadata;
-                var expected = function.ParameterTypes.ElementAt(i);
+                var expected = function.ParameterTypes[i];
+                if (expected.IsInvalid)
+                    continue;
+
+                ResolveFunctionGroup(parameter, expected);
+                var actual = parameter.ReturnTypeMetadata!;
+                if (actual.IsInvalid)
+                    continue;
+
                 if (!expected.Equals(actual))
                     diagnostics.TypeMismatch(parameter, expected, actual);
             }
@@ -241,10 +258,10 @@ internal class TypeChecker : Visitor, ISemanticPass
                     => parameterNode.Metadata,
 
                 FunctionDeclaration functionNode
-                    => functionNode.Metadata,
+                    => functionNode.Metadata!.Group,
 
                 MethodDeclaration methodNode
-                    => methodNode.Metadata,
+                    => methodNode.Metadata!.Group,
 
                 _ => throw new ArgumentException("Unknown symbol"),
             };
@@ -272,6 +289,47 @@ internal class TypeChecker : Visitor, ISemanticPass
         }
 
         node.Reference = memberMetadata;
+    }
+
+    private void ResolveFunctionGroup(IExpression node, ITypeMetadata expectedType)
+    {
+        expectedType = expectedType.UnpackAlias()!;
+
+        if (expectedType is not FunctionTypeMetadata functionType)
+            return;
+
+        ResolveFunctionGroup(node, functionType.ParameterTypes);
+    }
+
+    private void ResolveFunctionGroup(IExpression node, IEnumerable<ITypeMetadata> actualParameters)
+    {
+        if (node is not MemberAccessExpression member)
+            return;
+
+        if (member.Reference is not FunctionGroupMetadata group)
+            return;
+
+        if (group.Functions.Count == 1)
+        {
+            member.Reference = group.Functions[0];
+        }
+        else
+        {
+            var candidates = group.Match(actualParameters).ToArray();
+            if (candidates.Length == 0)
+            {
+                member.Reference = new InvalidMemberMetadata(member.Name);
+
+                diagnostics.NoSuitableOverload(member);
+            }
+            else
+            {
+                member.Reference = candidates[0];
+
+                if (candidates.Length > 1)
+                    diagnostics.MultipleOverloads(member);
+            }
+        }
     }
 
     protected override void VisitNewArrayExit(NewArrayExpression node)
@@ -443,6 +501,8 @@ internal class TypeChecker : Visitor, ISemanticPass
     {
         Debug.Assert(node.Expression.ReturnTypeMetadata is not null);
         Debug.Assert(node.Type.Metadata is not null);
+
+        ResolveFunctionGroup(node.Expression, node.Type.Metadata);
 
         if (!node.Expression.ReturnTypeMetadata.IsInvalid &&
             !node.Type.Metadata.IsInvalid &&

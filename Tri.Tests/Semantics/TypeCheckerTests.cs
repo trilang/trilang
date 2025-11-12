@@ -47,7 +47,8 @@ public class TypeCheckerTests
             AccessModifierMetadata.Public,
             "main",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void));
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata());
 
         var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>();
@@ -73,7 +74,8 @@ public class TypeCheckerTests
                 new ParameterMetadata(null, "a", TypeMetadata.I32),
                 new ParameterMetadata(null, "b", TypeMetadata.Bool)
             ],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void));
+            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.Bool], TypeMetadata.Void),
+            new FunctionGroupMetadata());
 
         var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>();
@@ -191,7 +193,8 @@ public class TypeCheckerTests
             false,
             "toString",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata()));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,
@@ -199,7 +202,8 @@ public class TypeCheckerTests
             false,
             "distance",
             [new ParameterMetadata(null, "other", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)));
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
+            new FunctionGroupMetadata()));
 
         var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeDeclaration>();
@@ -267,7 +271,8 @@ public class TypeCheckerTests
                 new ParameterMetadata(null, "a", TypeMetadata.I32),
                 new ParameterMetadata(null, "b", TypeMetadata.I32)
             ],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32));
+            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32),
+            new FunctionGroupMetadata());
 
         var semanticTree = semanticTrees.Single();
         var node = semanticTree.Find<FunctionDeclaration>();
@@ -297,7 +302,8 @@ public class TypeCheckerTests
             AccessModifierMetadata.Public,
             "test2",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void));
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            new FunctionGroupMetadata());
 
         var semanticTree = semanticTrees.Single();
         var node = semanticTree.Find<FunctionDeclaration>(x => x.Name == "test2");
@@ -800,7 +806,8 @@ public class TypeCheckerTests
                 null,
                 interfaceType,
                 "distance",
-                new FunctionTypeMetadata(null, [expected], TypeMetadata.F64)));
+                new FunctionTypeMetadata(null, [expected], TypeMetadata.F64),
+                new FunctionGroupMetadata()));
 
         var semanticTree = semanticTrees.Single();
         var type = semanticTree.Find<TypeAliasDeclaration>();
@@ -1554,8 +1561,8 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var type = typeProvider.GetType("Test")!;
-        var method = type.GetMember("method2")!;
+        var type = (TypeMetadata)typeProvider.GetType("Test")!;
+        var method = type.GetMethod("method2")!.Functions[0];
 
         var semanticTree = semanticTrees.Single();
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
@@ -1582,12 +1589,11 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var type = typeProvider.GetType("Test")!;
-        var method = type.GetMember("method2")!;
+        var type = (TypeMetadata)typeProvider.GetType("Test")!;
+        var method = type.GetMethod("method2")!.Functions[0];
 
         var semanticTree = semanticTrees.Single();
-        var memberAccess = semanticTree.Find<MemberAccessExpression>();
-        Assert.That(memberAccess, Is.Not.Null);
+        var memberAccess = semanticTree.Find<MemberAccessExpression>()!;
         Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
     }
 
@@ -1617,5 +1623,274 @@ public class TypeCheckerTests
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void CallFunctionOverloadTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public test(x: i32): void { }
+
+            public test(x: bool): void { }
+
+            public main(): void {
+                test(1);
+                test(true);
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var semanticTree = semanticTrees.Single();
+        var members = semanticTree.Where<MemberAccessExpression>().ToArray();
+        var calls = semanticTree.Where<CallExpression>().ToArray();
+        var functionGroup = new FunctionGroupMetadata();
+        var function1 = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "test",
+            [new ParameterMetadata(null, "x", TypeMetadata.I32)],
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
+            functionGroup);
+        var function2 = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "test",
+            [new ParameterMetadata(null, "x", TypeMetadata.Bool)],
+            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
+            functionGroup);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(members[0].Reference, Is.EqualTo(function1).Using(new MetadataComparer()));
+        Assert.That(members[1].Reference, Is.EqualTo(function2).Using(new MetadataComparer()));
+        Assert.That(calls[0].Metadata, Is.EqualTo(function1.Type).Using(new MetadataComparer()));
+        Assert.That(calls[1].Metadata, Is.EqualTo(function2.Type).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void CallMethodOverloadTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Test {
+                public method(x: i32): void { }
+
+                public method(x: bool): void { }
+
+                public test(): void {
+                    method(1);
+                    method(true);
+                }
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var semanticTree = semanticTrees.Single();
+        var members = semanticTree.Where<MemberAccessExpression>().ToArray();
+        var calls = semanticTree.Where<CallExpression>().ToArray();
+        var type = new TypeMetadata(null, "Test");
+        var functionGroup = new FunctionGroupMetadata();
+        var method1 = new MethodMetadata(
+            null,
+            type,
+            AccessModifierMetadata.Public,
+            false,
+            "method",
+            [new ParameterMetadata(null, "x", TypeMetadata.I32)],
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
+            functionGroup);
+        var method2 = new MethodMetadata(
+            null,
+            type,
+            AccessModifierMetadata.Public,
+            false,
+            "method",
+            [new ParameterMetadata(null, "x", TypeMetadata.Bool)],
+            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
+            functionGroup);
+        type.AddMethod(method1);
+        type.AddMethod(method2);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(members[0].Reference, Is.EqualTo(method1).Using(new MetadataComparer()));
+        Assert.That(members[1].Reference, Is.EqualTo(method2).Using(new MetadataComparer()));
+        Assert.That(calls[0].Metadata, Is.EqualTo(method1.Type).Using(new MetadataComparer()));
+        Assert.That(calls[1].Metadata, Is.EqualTo(method2.Type).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void CallMethodOverloadOutsideTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Test {
+                public method(x: i32): void { }
+
+                public method(x: bool): void { }
+            }
+
+            public test(o: Test): void {
+                o.method(1);
+                o.method(true);
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var semanticTree = semanticTrees.Single();
+        var members = semanticTree.Where<MemberAccessExpression>().ToArray();
+        var calls = semanticTree.Where<CallExpression>().ToArray();
+        var type = new TypeMetadata(null, "Test");
+        var functionGroup = new FunctionGroupMetadata();
+        var method1 = new MethodMetadata(
+            null,
+            type,
+            AccessModifierMetadata.Public,
+            false,
+            "method",
+            [new ParameterMetadata(null, "x", TypeMetadata.I32)],
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
+            functionGroup);
+        var method2 = new MethodMetadata(
+            null,
+            type,
+            AccessModifierMetadata.Public,
+            false,
+            "method",
+            [new ParameterMetadata(null, "x", TypeMetadata.Bool)],
+            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
+            functionGroup);
+        type.AddMethod(method1);
+        type.AddMethod(method2);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(members[0].Reference, Is.EqualTo(method1).Using(new MetadataComparer()));
+        Assert.That(members[1].Reference, Is.EqualTo(method2).Using(new MetadataComparer()));
+        Assert.That(calls[0].Metadata, Is.EqualTo(method1.Type).Using(new MetadataComparer()));
+        Assert.That(calls[1].Metadata, Is.EqualTo(method2.Type).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void CallInterfaceMethodOverloadOutsideTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Test = {
+                method(i32): void;
+                method(bool): void;
+            }
+
+            public test(o: Test): void {
+                o.method(1);
+                o.method(true);
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var semanticTree = semanticTrees.Single();
+        var members = semanticTree.Where<MemberAccessExpression>().ToArray();
+        var calls = semanticTree.Where<CallExpression>().ToArray();
+        var type = new InterfaceMetadata(null);
+        var functionGroup = new FunctionGroupMetadata();
+        var method1 = new InterfaceMethodMetadata(
+            null,
+            type,
+            "method",
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
+            functionGroup);
+        var method2 = new InterfaceMethodMetadata(
+            null,
+            type,
+            "method",
+            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
+            functionGroup);
+        type.AddMethod(method1);
+        type.AddMethod(method2);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(members[0].Reference, Is.EqualTo(method1).Using(new MetadataComparer()));
+        Assert.That(members[1].Reference, Is.EqualTo(method2).Using(new MetadataComparer()));
+        Assert.That(calls[0].Metadata, Is.EqualTo(method1.Type).Using(new MetadataComparer()));
+        Assert.That(calls[1].Metadata, Is.EqualTo(method2.Type).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void PassFunctionGroupAsParameterTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public f(x: i32): void { }
+            public f(x: bool): void { }
+            public test(func: (bool) => void): void { }
+
+            public main(): void {
+                test(f);
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var semanticTree = semanticTrees.Single();
+        var call = semanticTree.Find<CallExpression>()!;
+        var parameter = (MemberAccessExpression)call.Parameters[0];
+
+        var function = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "f",
+            [new ParameterMetadata(null, "x", TypeMetadata.Bool)],
+            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
+            new FunctionGroupMetadata());
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(parameter.Reference, Is.EqualTo(function).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void PassFunctionGroupAsParameterFailTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public f(x: i32): void { }
+            public f(x: f64): void { }
+            public test(func: (bool) => void): void { }
+
+            public main(): void {
+                test(f);
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0023NoSuitableOverload,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(130, 6, 10), new SourcePosition(131, 6, 11))),
+            "No suitable overload found for 'f'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

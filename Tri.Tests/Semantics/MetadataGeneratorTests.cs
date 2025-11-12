@@ -5,6 +5,7 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Model;
 
 namespace Tri.Tests.Semantics;
 
@@ -89,7 +90,8 @@ public class MetadataGeneratorTests
             false,
             "toString",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.String)));
+            new FunctionTypeMetadata(null, [], TypeMetadata.String),
+            new FunctionGroupMetadata()));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,
@@ -97,7 +99,8 @@ public class MetadataGeneratorTests
             false,
             "distance",
             [new ParameterMetadata(null, "other", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32)));
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
+            new FunctionGroupMetadata()));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -619,7 +622,8 @@ public class MetadataGeneratorTests
             null,
             expectedInterface,
             "distance",
-            new FunctionTypeMetadata(null, [expectedAlias], TypeMetadata.F64)));
+            new FunctionTypeMetadata(null, [expectedAlias], TypeMetadata.F64),
+            new FunctionGroupMetadata()));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -1344,5 +1348,246 @@ public class MetadataGeneratorTests
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
         Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void GenerateMetadataForFunctionOverloadTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public test(): void { }
+
+            public test(x: i32): void { }
+
+            public test(x: bool): void { }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var semanticTree = semanticTrees.Single();
+        var functions = semanticTree.Where<FunctionDeclaration>().ToArray();
+        var functionGroup = new FunctionGroupMetadata();
+        var function1 = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "test",
+            [],
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            functionGroup);
+        var function2 = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "test",
+            [new ParameterMetadata(null, "x", TypeMetadata.I32)],
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
+            functionGroup);
+        var function3 = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "test",
+            [new ParameterMetadata(null, "x", TypeMetadata.Bool)],
+            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
+            functionGroup);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(functions[0].Metadata, Is.EqualTo(function1));
+        Assert.That(functions[1].Metadata, Is.EqualTo(function2));
+        Assert.That(functions[2].Metadata, Is.EqualTo(function3));
+    }
+
+    [Test]
+    public void GenerateMetadataForDuplicateFunctionsTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public test(): void { }
+
+            public test(): void { }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0002AlreadyDefined,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(25, 3, 1), new SourcePosition(48, 3, 24))),
+            "The 'test' function is already defined.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void GenerateMetadataForMethodOverloadTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Test {
+                public method(): void { }
+
+                public method(x: i32): void { }
+
+                public method(x: bool): void { }
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var semanticTree = semanticTrees.Single();
+        var methods = semanticTree.Where<MethodDeclaration>().ToArray();
+        var type = new TypeMetadata(null, "Test");
+        var functionGroup = new FunctionGroupMetadata();
+        var method1 = new MethodMetadata(
+            null,
+            type,
+            AccessModifierMetadata.Public,
+            false,
+            "method",
+            [],
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            functionGroup);
+        var method2 = new MethodMetadata(
+            null,
+            type,
+            AccessModifierMetadata.Public,
+            false,
+            "method",
+            [new ParameterMetadata(null, "x", TypeMetadata.I32)],
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
+            functionGroup);
+        var method3 = new MethodMetadata(
+            null,
+            type,
+            AccessModifierMetadata.Public,
+            false,
+            "method",
+            [new ParameterMetadata(null, "x", TypeMetadata.Bool)],
+            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
+            functionGroup);
+        type.AddMethod(method1);
+        type.AddMethod(method2);
+        type.AddMethod(method3);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(methods[0].Metadata, Is.EqualTo(method1).Using(new MetadataComparer()));
+        Assert.That(methods[1].Metadata, Is.EqualTo(method2).Using(new MetadataComparer()));
+        Assert.That(methods[2].Metadata, Is.EqualTo(method3).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void GenerateMetadataForDuplicateMethodsTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Test {
+                public method(): void { }
+
+                public method(): void { }
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0002AlreadyDefined,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(54, 4, 5), new SourcePosition(79, 4, 30))),
+            "The 'method' method is already defined.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void GenerateMetadataForInterfaceMethodOverloadTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Test = {
+                method(): void;
+
+                method(i32): void;
+
+                method(bool): void;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, _, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var semanticTree = semanticTrees.Single();
+        var methods = semanticTree.Where<InterfaceMethod>().ToArray();
+        var type = new InterfaceMetadata(null);
+        var functionGroup = new FunctionGroupMetadata();
+        var method1 = new InterfaceMethodMetadata(
+            null,
+            type,
+            "method",
+            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+            functionGroup);
+        var method2 = new InterfaceMethodMetadata(
+            null,
+            type,
+            "method",
+            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
+            functionGroup);
+        var method3 = new InterfaceMethodMetadata(
+            null,
+            type,
+            "method",
+            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
+            functionGroup);
+        type.AddMethod(method1);
+        type.AddMethod(method2);
+        type.AddMethod(method3);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(methods[0].Metadata, Is.EqualTo(method1).Using(new MetadataComparer()));
+        Assert.That(methods[1].Metadata, Is.EqualTo(method2).Using(new MetadataComparer()));
+        Assert.That(methods[2].Metadata, Is.EqualTo(method3).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void GenerateMetadataForDuplicateInterfaceMethodsTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Test = {
+                method(): void;
+
+                method(): void;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0002AlreadyDefined,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(46, 4, 5), new SourcePosition(61, 4, 20))),
+            "The 'method' method is already defined.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

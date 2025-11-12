@@ -296,4 +296,28 @@ public class SemanticDiagnosticReporter
             DiagnosticId.S0022InterfacePropertyCantBePrivate,
             property.Definition ?? new SourceLocation(default, default),
             $"The setter of the interface property '{property.Name}' cannot be private.");
+
+    public void NoSuitableOverload(MemberAccessExpression node)
+        => diagnostics.Error(
+            DiagnosticId.S0023NoSuitableOverload,
+            node.GetLocation(),
+            $"No suitable overload found for '{node.Name}'.");
+
+    public void MultipleOverloads(MemberAccessExpression node)
+        => diagnostics.Error(
+            DiagnosticId.S0024MultipleOverloads,
+            node.GetLocation(),
+            $"Multiple overloads found for '{node.Name}'.");
+
+    public void ExtraArgument(IExpression node)
+        => diagnostics.Error(
+            DiagnosticId.S0025ExtraArgument,
+            node.GetLocation(),
+            $"Extra argument: '{node}'.");
+
+    public void MissingArgument(CallExpression node, ITypeMetadata type)
+        => diagnostics.Error(
+            DiagnosticId.S0026MissingArgument,
+            node.GetLocation(),
+            $"Missing argument: '{type}'.");
 }

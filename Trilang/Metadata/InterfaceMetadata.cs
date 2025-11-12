@@ -2,8 +2,8 @@ namespace Trilang.Metadata;
 
 public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
 {
-    private readonly HashSet<InterfacePropertyMetadata> properties;
-    private readonly HashSet<InterfaceMethodMetadata> methods;
+    private readonly List<InterfacePropertyMetadata> properties;
+    private readonly List<InterfaceMethodMetadata> methods;
 
     public InterfaceMetadata(SourceLocation? definition) : this(definition, [], [])
     {
@@ -15,8 +15,8 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
         IEnumerable<InterfaceMethodMetadata> methods)
     {
         Definition = definition;
-        this.properties = new HashSet<InterfacePropertyMetadata>(properties);
-        this.methods = new HashSet<InterfaceMethodMetadata>(methods);
+        this.properties = [..properties];
+        this.methods = [..methods];
     }
 
     public static InterfaceMetadata Invalid()
@@ -84,22 +84,19 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     }
 
     public void AddProperty(InterfacePropertyMetadata property)
-    {
-        if (!properties.Add(property))
-            throw new ArgumentException($"Property with name {property.Name} already exists in interface.");
-    }
+        => properties.Add(property);
 
     public InterfacePropertyMetadata? GetProperty(string name)
         => properties.FirstOrDefault(f => f.Name == name);
 
     public void AddMethod(InterfaceMethodMetadata method)
-    {
-        if (!methods.Add(method))
-            throw new ArgumentException($"Method with name {method.Name} already exists in interface.");
-    }
+        => methods.Add(method);
 
-    public InterfaceMethodMetadata? GetMethod(string name)
-        => methods.FirstOrDefault(m => m.Name == name);
+    public FunctionGroupMetadata? GetMethod(string name)
+        => methods.FirstOrDefault(m => m.Name == name)?.Group;
+
+    public IEnumerable<InterfaceMethodMetadata> GetMethods(string name, IEnumerable<ITypeMetadata> parameters)
+        => methods.Where(m => m.Name == name && m.Type.ParameterTypes.SequenceEqual(parameters));
 
     public IMetadata? GetMember(string name)
         => GetProperty(name) ??
