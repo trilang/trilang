@@ -2,7 +2,7 @@ namespace Trilang.Metadata;
 
 public class FunctionGroupMetadata : ITypeMetadata
 {
-    private readonly List<IHasFunctionType> functions;
+    private readonly List<IFunctionMetadata> functions;
 
     public FunctionGroupMetadata()
         => functions = [];
@@ -10,7 +10,7 @@ public class FunctionGroupMetadata : ITypeMetadata
     public IMetadata? GetMember(string name)
         => null;
 
-    public void AddFunction(IHasFunctionType function)
+    public void AddFunction(IFunctionMetadata function)
         => functions.Add(function);
 
     public IEnumerable<IMetadata> Match(IEnumerable<ITypeMetadata> actualParameters)
@@ -24,5 +24,5 @@ public class FunctionGroupMetadata : ITypeMetadata
 
     public TypeLayout? Layout { get; set; }
 
-    public IReadOnlyList<IHasFunctionType> Functions => functions;
+    public IReadOnlyList<IFunctionMetadata> Functions => functions;
 }

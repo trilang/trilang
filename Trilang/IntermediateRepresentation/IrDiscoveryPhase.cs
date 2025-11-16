@@ -6,12 +6,12 @@ namespace Trilang.IntermediateRepresentation;
 
 internal class IrDiscoveryPhase : Visitor
 {
-    private readonly Dictionary<IFunctionMetadata, BlockStatement> functionsToGenerate;
+    private readonly Dictionary<IMetadata, BlockStatement> functionsToGenerate;
 
     public IrDiscoveryPhase()
         => functionsToGenerate = [];
 
-    public IReadOnlyDictionary<IFunctionMetadata, BlockStatement> Discover(
+    public IReadOnlyDictionary<IMetadata, BlockStatement> Discover(
         IEnumerable<ITypeMetadata> types,
         IEnumerable<SemanticTree> syntaxTrees)
     {

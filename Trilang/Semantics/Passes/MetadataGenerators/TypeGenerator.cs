@@ -175,7 +175,10 @@ internal class TypeGenerator
         ConstructorDeclaration constructor)
     {
         var parameters = GetParameters(root, typeProvider, constructor.Parameters);
-        var functionType = new FunctionTypeMetadata(null, parameters.Select(x => x.Type), type);
+        var functionType = new FunctionTypeMetadata(
+            null,
+            parameters.Select(x => x.Type),
+            TypeMetadata.Void);
         functionType = typeProvider.GetOrDefine(functionType);
 
         var constructorMetadata = new ConstructorMetadata(

@@ -42,7 +42,7 @@ public class MissingReturnStatementTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23))),
-            "Not all paths return a value in 'test'.");
+            "Not all paths return a value.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
@@ -70,7 +70,7 @@ public class MissingReturnStatementTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(63, 5, 2))),
-            "Not all paths return a value in 'test'.");
+            "Not all paths return a value.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
@@ -144,7 +144,7 @@ public class MissingReturnStatementTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(66, 5, 2))),
-            "Not all paths return a value in 'test'.");
+            "Not all paths return a value.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }

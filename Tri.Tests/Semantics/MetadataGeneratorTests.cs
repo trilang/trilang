@@ -82,7 +82,7 @@ public class MetadataGeneratorTests
                 new ParameterMetadata(null, "x", TypeMetadata.I32),
                 new ParameterMetadata(null, "y", TypeMetadata.I32)
             ],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], expected)));
+            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.Void)));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,

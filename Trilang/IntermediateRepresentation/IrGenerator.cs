@@ -29,20 +29,48 @@ public class IrGenerator
         var functionsToGenerate = discoveryPhase.Discover(typeMetadata, semanticTrees);
 
         foreach (var (metadata, body) in functionsToGenerate)
-            functions.Add(GenerateFunction(metadata, body));
+        {
+            var irFunction = metadata switch
+            {
+                FunctionMetadata function => GenerateFunction(function, body),
+                MethodMetadata method => GenerateMethod(method, body),
+                ConstructorMetadata ctor => GenerateConstructor(ctor, body),
+                _ => throw new ArgumentOutOfRangeException(nameof(metadata)),
+            };
+
+            functions.Add(irFunction);
+        }
 
         return functions;
     }
 
-    private IrFunction GenerateFunction(IFunctionMetadata method, BlockStatement body)
+    private IrFunction GenerateFunction(FunctionMetadata function, BlockStatement body)
+    {
+        var builder = new IrBuilder();
+
+        for (var i = 0; i < function.Parameters.Count; i++)
+        {
+            var parameter = function.Parameters[i];
+            builder.LoadParameter(parameter.Name, parameter.Type, i);
+        }
+
+        GenerateBlock(builder, body);
+
+        var code = builder.Build();
+        ssaTransformer.Transform(code);
+
+        return IrFunction.FromFunction(function, code);
+    }
+
+    private IrFunction GenerateMethod(MethodMetadata function, BlockStatement body)
     {
         var builder = new IrBuilder();
 
         var parameterIndex = 0;
-        if (!method.IsStatic)
-            builder.LoadParameter(MemberAccessExpression.This, method.DeclaringType, parameterIndex++);
+        if (!function.IsStatic)
+            builder.LoadParameter(MemberAccessExpression.This, function.DeclaringType, parameterIndex++);
 
-        foreach (var parameter in method.Parameters)
+        foreach (var parameter in function.Parameters)
             builder.LoadParameter(parameter.Name, parameter.Type, parameterIndex++);
 
         GenerateBlock(builder, body);
@@ -50,7 +78,25 @@ public class IrGenerator
         var code = builder.Build();
         ssaTransformer.Transform(code);
 
-        return IrFunction.FromMethod(method, code);
+        return IrFunction.FromMethod(function, code);
+    }
+
+    private IrFunction GenerateConstructor(ConstructorMetadata function, BlockStatement body)
+    {
+        var builder = new IrBuilder();
+
+        var parameterIndex = 0;
+        builder.LoadParameter(MemberAccessExpression.This, function.DeclaringType, parameterIndex++);
+
+        foreach (var parameter in function.Parameters)
+            builder.LoadParameter(parameter.Name, parameter.Type, parameterIndex++);
+
+        GenerateBlock(builder, body);
+
+        var code = builder.Build();
+        ssaTransformer.Transform(code);
+
+        return IrFunction.FromConstructor(function, code);
     }
 
     private void GenerateStatement(IrBuilder builder, IStatement statementNode)
@@ -317,10 +363,20 @@ public class IrGenerator
         var functionType = default(FunctionTypeMetadata);
         if (node.Member is MemberAccessExpression member)
         {
-            if (member.Reference is IFunctionMetadata function)
+            if (member.Reference is FunctionMetadata function)
             {
-                isStatic = function.IsStatic;
+                isStatic = true;
                 functionType = function.Type;
+            }
+            else if (member.Reference is MethodMetadata method)
+            {
+                isStatic = method.IsStatic;
+                functionType = method.Type;
+            }
+            else if (member.Reference is ConstructorMetadata constructor)
+            {
+                isStatic = false;
+                functionType = constructor.Type;
             }
             else if (member.Reference is InterfaceMethodMetadata interfaceMethod)
             {
@@ -435,7 +491,9 @@ public class IrGenerator
         var memory = builder.Alloc(node.ReturnTypeMetadata!);
         var member = builder.GetMemberPointer(constructorMetadata, memory);
 
-        return GenerateCall(builder, member, node.Parameters, false, constructorMetadata.Type);
+        GenerateCall(builder, member, node.Parameters, false, constructorMetadata.Type);
+
+        return memory;
     }
 
     private Register GenerateNull(IrBuilder builder, NullExpression node)

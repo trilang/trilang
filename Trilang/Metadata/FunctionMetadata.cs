@@ -75,10 +75,6 @@ public class FunctionMetadata : IFunctionMetadata, IEquatable<FunctionMetadata>
 
     public bool IsInvalid { get; private set; }
 
-    public ITypeMetadata? DeclaringType => null;
-
-    public bool IsStatic => true;
-
     public AccessModifierMetadata AccessModifier { get; }
 
     public string Name { get; }

@@ -33,32 +33,59 @@ public record IrFunction(string Name, IrCode Code)
         return sb.ToString();
     }
 
-    public static IrFunction FromMethod(IFunctionMetadata method, IrCode code)
+    public static IrFunction FromFunction(FunctionMetadata function, IrCode code)
     {
-        var name = new StringBuilder();
-        if (method.DeclaringType is not null)
-            name.Append(MangleTypeName(method.DeclaringType)).Append('_');
+        var mangler = new Mangler();
+        var name = $"{function.Name}_{function.Parameters.Count}_{mangler.Mangle(function.Type)}";
 
-        name.Append(method.Name);
+        return new IrFunction(name, code);
+    }
 
-        if (method.IsStatic && method is not FunctionMetadata)
+    public static IrFunction FromMethod(MethodMetadata method, IrCode code)
+    {
+        var name = new StringBuilder(GetTypePrefix(method.DeclaringType));
+        name.Append('_')
+            .Append(method.Name);
+
+        if (method.IsStatic)
             name.Append("_s");
+
+        name.Append('_')
+            .Append(method.Parameters.Count);
+
+        var mangler = new Mangler();
+        name.Append('_')
+            .Append(mangler.Mangle(method.Type));
 
         return new IrFunction(name.ToString(), code);
     }
 
-    private static string MangleTypeName(ITypeMetadata metadata)
+    public static IrFunction FromConstructor(ConstructorMetadata method, IrCode code)
+    {
+        var name = new StringBuilder(GetTypePrefix(method.DeclaringType));
+        name.Append('_')
+            .Append(method.Name);
+
+        var mangler = new Mangler();
+        name.Append('_')
+            .Append(mangler.Mangle(method.Type));
+
+        return new IrFunction(name.ToString(), code);
+    }
+
+    private static string GetTypePrefix(ITypeMetadata metadata)
         => metadata switch
         {
-            TupleMetadata tuple
-                => $"_{string.Join("_", tuple.Types.Select(MangleTypeName))}_",
-
             ArrayMetadata array
-                => $"array_{MangleTypeName(array.ItemMetadata!)}_",
+                => $"array_{GetTypePrefix(array.ItemMetadata!)}",
 
-            TypeMetadata type
+            TupleMetadata tuple
+                => $"tuple_{string.Join("_", tuple.Types.Select(GetTypePrefix))}",
+
+            TypeMetadata { IsGeneric: false } type
                 => type.Name,
 
+            // TODO: support other types
             _ => throw new ArgumentOutOfRangeException(nameof(metadata)),
         };
 }

@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class InterfaceMethodMetadata : IHasFunctionType, IEquatable<InterfaceMethodMetadata>
+public class InterfaceMethodMetadata : IFunctionMetadata, IEquatable<InterfaceMethodMetadata>
 {
     public InterfaceMethodMetadata(
         SourceLocation? definition,

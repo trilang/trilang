@@ -207,11 +207,11 @@ public class SemanticDiagnosticReporter
             $"The '{function.Name}' function is not accessible.");
 
     // TODO: highlight a function name
-    public void NotAllPathsReturnValue(IFunctionMetadata function)
+    public void NotAllPathsReturnValue(IMetadata function)
         => diagnostics.Error(
             DiagnosticId.S0015NotAllPathsReturnValue,
             function.Definition ?? new SourceLocation(default, default),
-            $"Not all paths return a value in '{function.Name}'.");
+            $"Not all paths return a value.");
 
     public void ThisInStaticMethod(MemberAccessExpression node)
         => diagnostics.Error(

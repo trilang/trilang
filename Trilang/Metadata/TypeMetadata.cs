@@ -195,4 +195,6 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public IReadOnlyList<ConstructorMetadata> Constructors => constructors;
 
     public IReadOnlyList<MethodMetadata> Methods => methods;
+
+    public bool IsGeneric => genericArguments.Count > 0;
 }

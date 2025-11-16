@@ -66,7 +66,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new LoadConst(new Register(1, TypeMetadata.I32), 2),
                 new BinaryOperation(
@@ -104,7 +104,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_cd2fd49bc6b014bd", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new LoadConst(new Register(1, TypeMetadata.I32), 2),
                 new BinaryOperation(
@@ -136,7 +136,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
@@ -170,7 +170,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -205,7 +205,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -240,7 +240,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_2_e24cc7bc82aab685", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new BinaryOperation(
@@ -275,7 +275,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 1),
                 new Move(new Register(1, TypeMetadata.I32), new Register(0, TypeMetadata.I32)),
                 new LoadConst(new Register(2, TypeMetadata.I32), 2),
@@ -309,7 +309,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_5b9bc4ba528108e4", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.Null), null),
                 new Return(new Register(0, TypeMetadata.Null)),
             ]))
@@ -334,7 +334,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.I32),
@@ -364,7 +364,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_7772fb92073661c5", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.Bool), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.Bool),
@@ -394,7 +394,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
                 new LoadParameter(new Register(0, TypeMetadata.I32), 0),
                 new UnaryOperation(
                     new Register(1, TypeMetadata.I32),
@@ -428,7 +428,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_38a40cc70c225276", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 0),
                 new GetElementPointer(
@@ -442,7 +442,7 @@ public class IrGeneratorTests
                 ),
                 new Return(new Register(3, TypeMetadata.I32)),
             ])),
-            new IrFunction("array_i32__<>_get_size", new Block("entry", [
+            new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new GetMemberPointer(
                     new Register(1, new TypePointerMetadata(arraySize.Type)),
@@ -480,7 +480,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_2_e9c73c3fbe34f858", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new LoadConst(new Register(2, TypeMetadata.I32), 2),
@@ -501,7 +501,7 @@ public class IrGeneratorTests
                 ),
                 new Return(new Register(5, TypeMetadata.I32)),
             ])),
-            new IrFunction("array_i32__<>_get_size", new Block("entry", [
+            new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new GetMemberPointer(
                     new Register(1, new TypePointerMetadata(arraySize.Type)),
@@ -539,7 +539,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_cf03852a6cca2be2", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 0),
                 new GetElementPointer(
@@ -553,7 +553,7 @@ public class IrGeneratorTests
                     new Register(3, TypeMetadata.I32)
                 ),
             ])),
-            new IrFunction("array_i32__<>_get_size", new Block("entry", [
+            new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new GetMemberPointer(
                     new Register(1, new TypePointerMetadata(arraySize.Type)),
@@ -593,7 +593,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_e29ec11cb667c068", new Block("entry", [
                 new LoadConst(new Register(0, TypeMetadata.I32), 10),
                 new ArrayAlloc(
                     new Register(1, arrayPointerType),
@@ -604,7 +604,7 @@ public class IrGeneratorTests
                 new Move(new Register(2, arrayPointerType), new Register(1, arrayPointerType)),
                 new Return(new Register(2, arrayPointerType)),
             ])),
-            new IrFunction("array_i32__<>_get_size", new Block("entry", [
+            new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
                 new GetMemberPointer(
                     new Register(1, new TypePointerMetadata(arraySize.Type)),
@@ -647,12 +647,12 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("Point_ctor", new Block("entry", [
+            new IrFunction("Point_ctor_d5a01a8bf898461f", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new LoadParameter(new Register(2, TypeMetadata.I32), 2),
             ])),
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_8a439296ced9ed11", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(
                     new Register(1, ctorPointer),
@@ -663,7 +663,7 @@ public class IrGeneratorTests
                 new LoadConst(new Register(3, TypeMetadata.I32), 1),
                 new LoadConst(new Register(4, TypeMetadata.I32), 2),
                 new Call(
-                    new Register(5, pointPointerType),
+                    new Register(5, TypeMetadata.Void),
                     new Register(2, ctor.Type),
                     [
                         new Register(3, TypeMetadata.I32),
@@ -671,7 +671,7 @@ public class IrGeneratorTests
                     ],
                     false
                 ),
-                new Return(new Register(5, pointPointerType)),
+                new Return(new Register(0, pointPointerType)),
             ]))
         };
 
@@ -732,7 +732,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max", entryBlock)
+            new IrFunction("max_2_e24cc7bc82aab685", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -795,7 +795,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max", entryBlock)
+            new IrFunction("max_1_35acf129a21c9365", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -886,7 +886,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("max", entryBlock)
+            new IrFunction("max_1_35acf129a21c9365", entryBlock)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -922,7 +922,7 @@ public class IrGeneratorTests
         ]);
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block(
+            new IrFunction("test_1_35acf129a21c9365", new Block(
                 "entry",
                 [
                     new LoadParameter(new Register(0, TypeMetadata.I32), 0),
@@ -1037,7 +1037,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", entry)
+            new IrFunction("test_0_2af2b3192b419145", entry)
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -1070,12 +1070,12 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("Test_method1", new Block("entry", [
+            new IrFunction("Test_method1_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, new TypePointerMetadata(testType)), 0),
                 new LoadConst(new Register(1, TypeMetadata.I32), 0),
                 new Return(new Register(1, TypeMetadata.I32)),
             ])),
-            new IrFunction("Test_method2", new Block("entry", [
+            new IrFunction("Test_method2_0_3173c900e37ae1df", new Block("entry", [
                 new LoadParameter(new Register(0, typePointer), 0),
                 new GetMemberPointer(
                     new Register(1, methodPointer),
@@ -1120,10 +1120,10 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("Test_method1", new Block("entry", [
+            new IrFunction("Test_method1_0_3173c900e37ae1df", new Block("entry", [
                 new LoadParameter(new Register(0, new TypePointerMetadata(testType)), 0),
             ])),
-            new IrFunction("Test_method2", new Block("entry", [
+            new IrFunction("Test_method2_0_3173c900e37ae1df", new Block("entry", [
                 new LoadParameter(new Register(0, typePointer), 0),
                 new GetMemberPointer(
                     new Register(1, methodPointer),
@@ -1178,19 +1178,19 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("Point_<>_get_x", new Block("entry", [
+            new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
                 new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
                 new Return(new Register(2, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_<>_set_x", new Block("entry", [
+            new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
                 new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_ctor", new Block("entry", [
+            new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(new Register(2, setterPointer), new Register(0, pointPointerType), setter),
@@ -1246,19 +1246,19 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("Point_<>_get_x", new Block("entry", [
+            new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
                 new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
                 new Return(new Register(2, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_<>_set_x", new Block("entry", [
+            new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
                 new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_ctor", new Block("entry", [
+            new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(
@@ -1276,7 +1276,7 @@ public class IrGeneratorTests
                     false
                 ),
             ])),
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 4),
                 new GetMemberPointer(
                     new Register(1, ctorPointer),
@@ -1286,14 +1286,14 @@ public class IrGeneratorTests
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
                 new LoadConst(new Register(3, TypeMetadata.I32), 1),
                 new Call(
-                    new Register(4, pointPointerType),
+                    new Register(4, TypeMetadata.Void),
                     new Register(2, ctor.Type),
                     [
                         new Register(3, TypeMetadata.I32)
                     ],
                     false
                 ),
-                new Move(new Register(5, pointPointerType), new Register(4, pointPointerType)),
+                new Move(new Register(5, pointPointerType), new Register(0, pointPointerType)),
                 new GetMemberPointer(
                     new Register(6, getterPointer),
                     new Register(5, pointPointerType),
@@ -1350,19 +1350,19 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("Point_<>_get_x", new Block("entry", [
+            new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
                 new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
                 new Return(new Register(2, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_<>_set_x", new Block("entry", [
+            new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
                 new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_ctor", new Block("entry", [
+            new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(new Register(2, setterPointer), new Register(0, pointPointerType), setter),
@@ -1376,21 +1376,29 @@ public class IrGeneratorTests
                     false
                 ),
             ])),
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 4),
-                new GetMemberPointer(new Register(1, ctorPointer), new Register(0, pointPointerType), ctor),
+                new GetMemberPointer(
+                    new Register(1, ctorPointer),
+                    new Register(0, pointPointerType),
+                    ctor
+                ),
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
                 new LoadConst(new Register(3, TypeMetadata.I32), 1),
                 new Call(
-                    new Register(4, pointPointerType),
+                    new Register(4, TypeMetadata.Void),
                     new Register(2, ctor.Type),
                     [
                         new Register(3, TypeMetadata.I32)
                     ],
                     false
                 ),
-                new Move(new Register(5, pointPointerType), new Register(4, pointPointerType)),
-                new GetMemberPointer(new Register(6, getterPointer), new Register(5, pointPointerType), getter),
+                new Move(new Register(5, pointPointerType), new Register(0, pointPointerType)),
+                new GetMemberPointer(
+                    new Register(6, getterPointer),
+                    new Register(5, pointPointerType),
+                    getter
+                ),
                 new Load(new Register(7, getter.Type), new Register(6, getterPointer)),
                 new Call(
                     new Register(8, TypeMetadata.I32),
@@ -1455,31 +1463,31 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("Point_<>_get_x", new Block("entry", [
+            new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, xFieldPointer), new Register(0, pointPointerType), xField),
                 new Load(new Register(2, TypeMetadata.I32), new Register(1, xFieldPointer)),
                 new Return(new Register(2, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_<>_set_x", new Block("entry", [
+            new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(new Register(2, xFieldPointer), new Register(0, pointPointerType), xField),
                 new Store(new Register(2, xFieldPointer), new Register(1, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_<>_get_y", new Block("entry", [
+            new IrFunction("Point_<>_get_y_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, yFieldPointer), new Register(0, pointPointerType), yField),
                 new Load(new Register(2, TypeMetadata.I32), new Register(1, yFieldPointer)),
                 new Return(new Register(2, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_<>_set_y", new Block("entry", [
+            new IrFunction("Point_<>_set_y_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(new Register(2, yFieldPointer), new Register(0, pointPointerType), yField),
                 new Store(new Register(2, yFieldPointer), new Register(1, TypeMetadata.I32)),
             ])),
-            new IrFunction("Point_ctor", new Block("entry", [
+            new IrFunction("Point_ctor_d5a01a8bf898461f", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new LoadParameter(new Register(2, TypeMetadata.I32), 2),
@@ -1504,14 +1512,14 @@ public class IrGeneratorTests
                     false
                 ),
             ])),
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 8),
                 new GetMemberPointer(new Register(1, ctorPointer), new Register(0, pointPointerType), ctor),
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
                 new LoadConst(new Register(3, TypeMetadata.I32), 1),
                 new LoadConst(new Register(4, TypeMetadata.I32), 2),
                 new Call(
-                    new Register(5, pointPointerType),
+                    new Register(5, TypeMetadata.Void),
                     new Register(2, ctor.Type),
                     [
                         new Register(3, TypeMetadata.I32),
@@ -1519,7 +1527,7 @@ public class IrGeneratorTests
                     ],
                     false
                 ),
-                new Move(new Register(6, pointPointerType), new Register(5, pointPointerType)),
+                new Move(new Register(6, pointPointerType), new Register(0, pointPointerType)),
                 new GetMemberPointer(
                     new Register(7, xGetterPointer),
                     new Register(6, pointPointerType),
@@ -1618,7 +1626,7 @@ public class IrGeneratorTests
         var expected = new List<IrFunction>
         {
             // Test1
-            new IrFunction("Test1_<>_get_x", new Block("entry", [
+            new IrFunction("Test1_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, test1PointerType), 0),
                 new GetMemberPointer(
                     new Register(1, test1XFieldPointer),
@@ -1628,7 +1636,7 @@ public class IrGeneratorTests
                 new Load(new Register(2, TypeMetadata.I32), new Register(1, test1XFieldPointer)),
                 new Return(new Register(2, TypeMetadata.I32)),
             ])),
-            new IrFunction("Test1_<>_set_x", new Block("entry", [
+            new IrFunction("Test1_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, test1PointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(
@@ -1638,7 +1646,7 @@ public class IrGeneratorTests
                 ),
                 new Store(new Register(2, test1XFieldPointer), new Register(1, TypeMetadata.I32)),
             ])),
-            new IrFunction("Test1_ctor", new Block("entry", [
+            new IrFunction("Test1_ctor_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, test1PointerType), 0),
                 new LoadParameter(new Register(1, TypeMetadata.I32), 1),
                 new GetMemberPointer(
@@ -1658,7 +1666,7 @@ public class IrGeneratorTests
             ])),
 
             // Test2
-            new IrFunction("Test2_<>_get_obj", new Block("entry", [
+            new IrFunction("Test2_<>_get_obj_0_df4563aec012855c", new Block("entry", [
                 new LoadParameter(new Register(0, test2PointerType), 0),
                 new GetMemberPointer(
                     new Register(1, new TypePointerMetadata(test2ObjFieldPointer)),
@@ -1671,7 +1679,7 @@ public class IrGeneratorTests
                 ),
                 new Return(new Register(2, test2ObjFieldPointer)),
             ])),
-            new IrFunction("Test2_<>_set_obj", new Block("entry", [
+            new IrFunction("Test2_<>_set_obj_1_d0266fe934ea148e", new Block("entry", [
                 new LoadParameter(new Register(0, test2PointerType), 0),
                 new LoadParameter(new Register(1, test1PointerType), 1),
                 new GetMemberPointer(
@@ -1684,7 +1692,7 @@ public class IrGeneratorTests
                     new Register(1, test1PointerType)
                 ),
             ])),
-            new IrFunction("Test2_ctor", new Block("entry", [
+            new IrFunction("Test2_ctor_d0266fe934ea148e", new Block("entry", [
                 new LoadParameter(new Register(0, test2PointerType), 0),
                 new LoadParameter(new Register(1, test1PointerType), 1),
                 new GetMemberPointer(
@@ -1704,7 +1712,7 @@ public class IrGeneratorTests
             ])),
 
             // test
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
                 new Alloc(new Register(0, test1PointerType), 4),
                 new GetMemberPointer(
                     new Register(1, test1CtorPointer),
@@ -1714,14 +1722,14 @@ public class IrGeneratorTests
                 new Load(new Register(2, test1Ctor.Type), new Register(1, test1CtorPointer)),
                 new LoadConst(new Register(3, TypeMetadata.I32), 1),
                 new Call(
-                    new Register(4, test1PointerType),
+                    new Register(4, TypeMetadata.Void),
                     new Register(2, test1Ctor.Type),
                     [
                         new Register(3, TypeMetadata.I32)
                     ],
                     false
                 ),
-                new Move(new Register(5, test1PointerType), new Register(4, test1PointerType)),
+                new Move(new Register(5, test1PointerType), new Register(0, test1PointerType)),
 
                 new Alloc(new Register(6, test2PointerType), 8),
                 new GetMemberPointer(
@@ -1731,14 +1739,14 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(8, test2Ctor.Type), new Register(7, test2CtorPointer)),
                 new Call(
-                    new Register(9, test2PointerType),
+                    new Register(9, TypeMetadata.Void),
                     new Register(8, test2Ctor.Type),
                     [
                         new Register(5, test1PointerType)
                     ],
                     false
                 ),
-                new Move(new Register(10, test2PointerType), new Register(9, test2PointerType)),
+                new Move(new Register(10, test2PointerType), new Register(6, test2PointerType)),
 
                 new GetMemberPointer(
                     new Register(11, test2ObjGetterPointer),
@@ -1794,7 +1802,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("main", new Block("entry", [
+            new IrFunction("main_0_3173c900e37ae1df", new Block("entry", [
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
@@ -1808,7 +1816,7 @@ public class IrGeneratorTests
                     true
                 )
             ])),
-            new IrFunction("test1", new Block("entry", [])),
+            new IrFunction("test1_0_3173c900e37ae1df", new Block("entry", [])),
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
@@ -1837,8 +1845,8 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("Test_test_s", new Block("entry", [])),
-            new IrFunction("main", new Block("entry", [
+            new IrFunction("Test_test_s_0_3173c900e37ae1df", new Block("entry", [])),
+            new IrFunction("main_0_3173c900e37ae1df", new Block("entry", [
                 new GetMemberPointer(
                     new Register(0, new TypePointerMetadata(testMethod.Type)),
                     null,
@@ -1882,8 +1890,8 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [])),
-            new IrFunction("main", new Block("entry", [
+            new IrFunction("test_0_3173c900e37ae1df", new Block("entry", [])),
+            new IrFunction("main_0_3173c900e37ae1df", new Block("entry", [
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
@@ -1921,7 +1929,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_2662accf658c5c8b", new Block("entry", [
                 new LoadParameter(new Register(0, functionType), 0),
                 new Call(
                     new Register(1, TypeMetadata.Void),
@@ -1961,7 +1969,7 @@ public class IrGeneratorTests
 
         var expected = new List<IrFunction>
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_cf064f170ff86101", new Block("entry", [
                 new LoadParameter(new Register(0, interfacePointer), 0),
                 new GetMemberPointer(
                     new Register(1, methodPointer),
@@ -2000,7 +2008,7 @@ public class IrGeneratorTests
 
         var expected = new[]
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_31fc2f6c0e066efc", new Block("entry", [
                 new LoadParameter(new Register(0, anyPointer), 0),
                 new IsType(
                     new Register(1, TypeMetadata.Bool),
@@ -2033,7 +2041,7 @@ public class IrGeneratorTests
 
         var expected = new[]
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_2baa3d192bdd861d", new Block("entry", [
                 new LoadParameter(new Register(0, anyPointer), 0),
                 new Cast(
                     new Register(1, TypeMetadata.I8),
@@ -2071,7 +2079,7 @@ public class IrGeneratorTests
 
         var expected = new[]
         {
-            new IrFunction("test", new Block("entry", [
+            new IrFunction("test_1_695e7ecb50fc0a40", new Block("entry", [
                 new LoadParameter(new Register(0, anyPointer), 0),
                 new Cast(
                     new Register(1, testPointer),
@@ -2105,7 +2113,7 @@ public class IrGeneratorTests
 
         var expected = new[]
         {
-            new IrFunction("test", new Block(
+            new IrFunction("test_2_2471114b9902d8e5", new Block(
                 "entry",
                 [
                     new LoadParameter(new Register(0, TypeMetadata.Bool), 0),
@@ -2139,6 +2147,32 @@ public class IrGeneratorTests
                     ]),
                 ]
             )),
+        };
+
+        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+    }
+
+    [Test]
+    public void FunctionOverloadTest()
+    {
+        const string code =
+            """
+            public test(x: i32): void { }
+            public test(x: bool): void { }
+            """;
+        var (tree, typeProvider) = Parse(code);
+
+        var ir = new IrGenerator();
+        var functions = ir.Generate(typeProvider.Types, [tree]);
+
+        var expected = new[]
+        {
+            new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
+                new LoadParameter(new Register(0, TypeMetadata.I32), 0)
+            ])),
+            new IrFunction("test_1_c79f1eebc0a6b477", new Block("entry", [
+                new LoadParameter(new Register(0, TypeMetadata.Bool), 0)
+            ])),
         };
 
         Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));

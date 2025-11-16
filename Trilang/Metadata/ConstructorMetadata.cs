@@ -73,8 +73,6 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
 
     public ITypeMetadata DeclaringType { get; }
 
-    public bool IsStatic => false;
-
     public string Name => "ctor";
 
     public AccessModifierMetadata AccessModifier { get; }
