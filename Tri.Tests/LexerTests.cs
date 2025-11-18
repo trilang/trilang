@@ -150,6 +150,8 @@ public class LexerTests
     [TestCase("set", TokenKind.Set)]
     [TestCase("static", TokenKind.Static)]
     [TestCase("is", TokenKind.Is)]
+    [TestCase("use", TokenKind.Use)]
+    [TestCase("namespace", TokenKind.Namespace)]
     public void TokenizeKeywordTest(string code, TokenKind kind)
     {
         var (_, tokens) = Tokenize(code);

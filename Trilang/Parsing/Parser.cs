@@ -15,21 +15,98 @@ public class Parser
     public SyntaxTree Parse(IReadOnlyList<Token> tokens, ParserOptions options)
     {
         var context = new ParserContext(tokens, options.Diagnostics, this);
-        var functions = new List<IDeclarationNode>();
+        var useNodes = ParseUseNodes(context);
+        var namespaceNode = TryParseNamespaceNode(context);
+        var declarations = ParseDeclarations(context);
+
+        return new SyntaxTree(
+            options.SourceFile,
+            useNodes,
+            namespaceNode,
+            declarations);
+    }
+
+    private string GetGeneratedName()
+        => $"<>_{nameCounter++}";
+
+    private IReadOnlyList<UseNode> ParseUseNodes(ParserContext context)
+    {
+        var useNodes = new List<UseNode>();
+
+        while (!context.Reader.HasEnded)
+        {
+            var useNode = ParseUseNode(context);
+            if (useNode is null)
+                break;
+
+            useNodes.Add(useNode);
+        }
+
+        return useNodes;
+    }
+
+    private UseNode? ParseUseNode(ParserContext context)
+    {
+        var (hasUse, useKeyword) = context.Reader.Check(Use);
+        if (!hasUse)
+            return null;
+
+        var parts = new List<string>
+        {
+            ParseNamespacePart(context)
+        };
+
+        while (context.Reader.Check(Dot))
+            parts.Add(ParseNamespacePart(context));
+
+        var semiColonSpan = context.Reader.Expect(SemiColon);
+
+        return new UseNode(useKeyword.SourceSpan.Combine(semiColonSpan), parts);
+    }
+
+    private NamespaceNode? TryParseNamespaceNode(ParserContext context)
+    {
+        var (hasNamespace, namespaceToken) = context.Reader.Check(Namespace);
+        if (!hasNamespace)
+            return null;
+
+        var parts = new List<string>
+        {
+            ParseNamespacePart(context)
+        };
+
+        while (context.Reader.Check(Dot))
+            parts.Add(ParseNamespacePart(context));
+
+        var semiColonSpan = context.Reader.Expect(SemiColon);
+
+        return new NamespaceNode(namespaceToken.SourceSpan.Combine(semiColonSpan), parts);
+    }
+
+    private string ParseNamespacePart(ParserContext context)
+    {
+        var (_, part) = TryParseId(context);
+        if (part is null)
+            context.Diagnostics.ExpectedNamespacePart(
+                context.Reader.SkipTo(Dot, SemiColon));
+
+        return part ?? "<namespace>";
+    }
+
+    private IReadOnlyList<IDeclarationNode> ParseDeclarations(ParserContext context)
+    {
+        var declarations = new List<IDeclarationNode>();
 
         while (!context.Reader.HasEnded)
         {
             var declaration = TryParseDeclaration(context) ??
                               ParseFakeDeclaration(context, Public, Internal, Private);
 
-            functions.Add(declaration);
+            declarations.Add(declaration);
         }
 
-        return new SyntaxTree(options.SourceFile, functions);
+        return declarations;
     }
-
-    private string GetGeneratedName()
-        => $"<>_{nameCounter++}";
 
     private IDeclarationNode? TryParseDeclaration(ParserContext context)
         => TryParseFunction(context) ??
@@ -273,7 +350,7 @@ public class Parser
                        ParseFakeType(context, SemiColon);
 
             if (type is InterfaceNode)
-                return new TypeAliasDeclarationNode(
+                return new AliasDeclarationNode(
                     accessModifierSpan.Combine(type.SourceSpan),
                     accessModifier.Value,
                     name,
@@ -282,7 +359,7 @@ public class Parser
 
             var endSpan = context.Reader.Expect(SemiColon);
 
-            return new TypeAliasDeclarationNode(
+            return new AliasDeclarationNode(
                 accessModifierSpan.Combine(endSpan),
                 accessModifier.Value,
                 name,

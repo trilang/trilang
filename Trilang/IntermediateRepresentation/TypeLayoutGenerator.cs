@@ -81,6 +81,9 @@ internal class TypeLayoutGenerator
     private TypeLayout? Generate(ITypeMetadata type)
         => type switch
         {
+            AliasMetadata aliasMetadata
+                => Generate(aliasMetadata),
+
             DiscriminatedUnionMetadata discriminatedUnionMetadata
                 => Generate(discriminatedUnionMetadata),
 
@@ -92,9 +95,6 @@ internal class TypeLayoutGenerator
 
             TupleMetadata tupleMetadata
                 => Generate(tupleMetadata),
-
-            TypeAliasMetadata typeAliasMetadata
-                => Generate(typeAliasMetadata),
 
             TypeArgumentMetadata typeArgumentMetadata
                 => Generate(typeArgumentMetadata),
@@ -110,6 +110,17 @@ internal class TypeLayoutGenerator
 
             _ => throw new ArgumentOutOfRangeException(nameof(type)),
         };
+
+    private TypeLayout? Generate(AliasMetadata alias)
+    {
+        var type = alias.Type!;
+        if (type.Layout is not null)
+            return type.Layout;
+
+        type.Layout = Generate(type);
+
+        return type.Layout;
+    }
 
     private TypeLayout Generate(DiscriminatedUnionMetadata du)
     {
@@ -141,17 +152,6 @@ internal class TypeLayoutGenerator
             layout.AddField(field, GetFieldSize(field.Type));
 
         return layout;
-    }
-
-    private TypeLayout? Generate(TypeAliasMetadata alias)
-    {
-        var type = alias.Type!;
-        if (type.Layout is not null)
-            return type.Layout;
-
-        type.Layout = Generate(type);
-
-        return type.Layout;
     }
 
     private TypeLayout Generate(TypeArgumentMetadata type)

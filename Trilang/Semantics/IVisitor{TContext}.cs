@@ -5,6 +5,8 @@ namespace Trilang.Semantics;
 
 public interface IVisitor<in TContext>
 {
+    void VisitTypeAlias(AliasDeclaration node, TContext context);
+
     void VisitArrayAccess(ArrayAccessExpression node, TContext context);
 
     void VisitArrayType(ArrayType node, TContext context);
@@ -65,6 +67,8 @@ public interface IVisitor<in TContext>
 
     void VisitMethod(MethodDeclaration node, TContext context);
 
+    void VisitNamespace(Namespace node, TContext context);
+
     void VisitNewArray(NewArrayExpression node, TContext context);
 
     void VisitNewObject(NewObjectExpression node, TContext context);
@@ -87,13 +91,13 @@ public interface IVisitor<in TContext>
 
     void VisitTupleType(TupleType node, TContext context);
 
-    void VisitTypeAlias(TypeAliasDeclaration node, TContext context);
-
     void VisitType(TypeDeclaration node, TContext context);
 
     void VisitTypeNode(Type node, TContext context);
 
     void VisitUnaryExpression(UnaryExpression node, TContext context);
+
+    void VisitUse(Use node, TContext context);
 
     void VisitVariable(VariableDeclaration node, TContext context);
 

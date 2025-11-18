@@ -4,22 +4,22 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
-internal class CyclicTypeAlias : ISemanticPass
+internal class CyclicAlias : ISemanticPass
 {
     private readonly HashSet<ITypeMetadata> visitedTypes;
 
-    public CyclicTypeAlias()
+    public CyclicAlias()
         => visitedTypes = [];
 
     public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
     {
         var typeProvider = context.RootSymbolTable.TypeProvider;
-        foreach (var aliasType in typeProvider.Types.OfType<TypeAliasMetadata>())
+        foreach (var aliasType in typeProvider.Types.OfType<AliasMetadata>())
             CheckCircularReference(aliasType, context.Diagnostics);
     }
 
     private void CheckCircularReference(
-        TypeAliasMetadata aliasType,
+        AliasMetadata aliasType,
         SemanticDiagnosticReporter diagnostics)
     {
         var metadata = aliasType as ITypeMetadata;
@@ -27,7 +27,7 @@ internal class CyclicTypeAlias : ISemanticPass
 
         while (true)
         {
-            if (metadata is not TypeAliasMetadata alias)
+            if (metadata is not AliasMetadata alias)
                 return;
 
             if (!visitedTypes.Add(alias))
@@ -41,7 +41,7 @@ internal class CyclicTypeAlias : ISemanticPass
         }
     }
 
-    public string Name => nameof(CyclicTypeAlias);
+    public string Name => nameof(CyclicAlias);
 
     public IEnumerable<string> DependsOn => [nameof(MetadataGenerator)];
 }

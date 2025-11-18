@@ -2,9 +2,9 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-public class TypeAliasDeclaration : IDeclaration
+public class AliasDeclaration : IDeclaration
 {
-    public TypeAliasDeclaration(
+    public AliasDeclaration(
         SourceSpan? sourceSpan,
         AccessModifier accessModifier,
         string name,

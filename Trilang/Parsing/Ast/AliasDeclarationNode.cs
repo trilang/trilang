@@ -2,9 +2,9 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeAliasDeclarationNode : IDeclarationNode, IHasGenericArguments
+public class AliasDeclarationNode : IDeclarationNode, IHasGenericArguments
 {
-    public TypeAliasDeclarationNode(
+    public AliasDeclarationNode(
         SourceSpan sourceSpan,
         AccessModifier accessModifier,
         string name,

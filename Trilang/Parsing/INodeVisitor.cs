@@ -4,6 +4,8 @@ namespace Trilang.Parsing;
 
 public interface INodeVisitor
 {
+    void VisitTypeAlias(AliasDeclarationNode node);
+
     void VisitArrayAccess(ArrayAccessExpressionNode node);
 
     void VisitArrayType(ArrayTypeNode node);
@@ -58,6 +60,8 @@ public interface INodeVisitor
 
     void VisitMethod(MethodDeclarationNode node);
 
+    void VisitNamespace(NamespaceNode node);
+
     void VisitNewArray(NewArrayExpressionNode node);
 
     void VisitNewObject(NewObjectExpressionNode node);
@@ -80,13 +84,13 @@ public interface INodeVisitor
 
     void VisitTupleType(TupleTypeNode node);
 
-    void VisitTypeAlias(TypeAliasDeclarationNode node);
-
     void VisitType(TypeDeclarationNode node);
 
     void VisitTypeNode(TypeNode node);
 
     void VisitUnaryExpression(UnaryExpressionNode node);
+
+    void VisitUse(UseNode node);
 
     void VisitVariable(VariableDeclarationNode node);
 

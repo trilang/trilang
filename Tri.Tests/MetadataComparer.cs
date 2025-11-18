@@ -24,6 +24,8 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
         return (x, y) switch
         {
+            (AliasMetadata x1, AliasMetadata y1)
+                => CompareAliasMetadata(x1, y1),
             (ConstructorMetadata x1, ConstructorMetadata y1)
                 => CompareConstructorMetadata(x1, y1),
             (DiscriminatedUnionMetadata x1, DiscriminatedUnionMetadata y1)
@@ -48,8 +50,6 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
                 => ComparePropertyMetadata(x1, y1),
             (TupleMetadata x1, TupleMetadata y1)
                 => CompareTupleMetadata(x1, y1),
-            (TypeAliasMetadata x1, TypeAliasMetadata y1)
-                => CompareTypeAliasMetadata(x1, y1),
             (TypeArgumentMetadata x1, TypeArgumentMetadata y1)
                 => CompareTypeArgumentMetadata(x1, y1),
             (ArrayMetadata x1, ArrayMetadata y1)
@@ -61,6 +61,20 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
             _ => throw new Exception($"{x.GetType()} != {y.GetType()}"),
         };
+    }
+
+    private bool CompareAliasMetadata(AliasMetadata x, AliasMetadata y)
+    {
+        if (x.Name != y.Name)
+            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+
+        if (!x.GenericArguments.SequenceEqual(y.GenericArguments, this))
+            throw new Exception("GenericArguments don't match.");
+
+        if (!Equals(x.Type, y.Type))
+            throw new Exception("Type doesn't match.");
+
+        return true;
     }
 
     private bool CompareConstructorMetadata(ConstructorMetadata x, ConstructorMetadata y)
@@ -212,20 +226,6 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
     {
         if (!x.Types.SequenceEqual(y.Types, this))
             throw new Exception("Types don't match.");
-
-        return true;
-    }
-
-    private bool CompareTypeAliasMetadata(TypeAliasMetadata x, TypeAliasMetadata y)
-    {
-        if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
-
-        if (!x.GenericArguments.SequenceEqual(y.GenericArguments, this))
-            throw new Exception("GenericArguments don't match.");
-
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
 
         return true;
     }

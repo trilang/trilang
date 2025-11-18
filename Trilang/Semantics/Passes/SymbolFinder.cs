@@ -274,6 +274,9 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         VisitBlockWithoutScope(node.Body, child);
     }
 
+    public void VisitNamespace(Namespace node, ISymbolTable context)
+        => map.Add(node, context);
+
     public void VisitNewArray(NewArrayExpression node, ISymbolTable context)
     {
         map.Add(node, context);
@@ -372,7 +375,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         context.AddType(symbol);
     }
 
-    public void VisitTypeAlias(TypeAliasDeclaration node, ISymbolTable context)
+    public void VisitTypeAlias(AliasDeclaration node, ISymbolTable context)
     {
         context.AddType(TypeSymbol.Alias(node));
 
@@ -422,6 +425,9 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
         node.Operand.Accept(this, context);
     }
+
+    public void VisitUse(Use node, ISymbolTable context)
+        => map.Add(node, context);
 
     public void VisitVariable(VariableDeclaration node, ISymbolTable context)
     {

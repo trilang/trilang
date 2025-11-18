@@ -22,7 +22,7 @@ public class SemanticAnalysis
         new MetadataGenerator(),
         new MissingReturnStatement(),
         new NotImplementedInterface(),
-        new CyclicTypeAlias(),
+        new CyclicAlias(),
         new PrivateInterfaceProperties(),
         new RestrictFieldAccess(),
         new SymbolFinder(),

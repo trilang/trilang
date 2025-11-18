@@ -221,9 +221,9 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new TypeAliasMetadata(null, "MyInt", [], TypeMetadata.I32);
+        var expected = new AliasMetadata(null, "MyInt", [], TypeMetadata.I32);
         var semanticTree = semanticTrees.Single();
-        var node = semanticTree.Find<TypeAliasDeclaration>();
+        var node = semanticTree.Find<AliasDeclaration>();
         Assert.That(node, Is.Not.Null);
         Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -783,7 +783,7 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var interfaceType = new InterfaceMetadata(null);
-        var expected = new TypeAliasMetadata(null, "Point", [], interfaceType);
+        var expected = new AliasMetadata(null, "Point", [], interfaceType);
 
         interfaceType.AddProperty(
             new InterfacePropertyMetadata(
@@ -810,7 +810,7 @@ public class TypeCheckerTests
                 new FunctionGroupMetadata()));
 
         var semanticTree = semanticTrees.Single();
-        var type = semanticTree.Find<TypeAliasDeclaration>();
+        var type = semanticTree.Find<AliasDeclaration>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1154,10 +1154,10 @@ public class TypeCheckerTests
             TypeMetadata.I32,
             new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         ]);
-        var alias = new TypeAliasMetadata(null, "DU", [], du);
+        var alias = new AliasMetadata(null, "DU", [], du);
 
         var semanticTree = semanticTrees.Single();
-        var aliasNode = semanticTree.Find<TypeAliasDeclaration>();
+        var aliasNode = semanticTree.Find<AliasDeclaration>();
         Assert.That(aliasNode, Is.Not.Null);
         Assert.That(aliasNode.Metadata, Is.EqualTo(alias).Using(new MetadataComparer()));
 

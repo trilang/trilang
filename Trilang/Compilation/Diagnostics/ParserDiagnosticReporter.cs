@@ -97,4 +97,10 @@ public class ParserDiagnosticReporter
             DiagnosticId.P0014ExpectedTypeMember,
             new SourceLocation(file, span),
             "Expected a type member (a property, a method or a constructor).");
+
+    public void ExpectedNamespacePart(SourceSpan span)
+        => diagnostics.Error(
+            DiagnosticId.P0015ExpectedNamespacePart,
+            new SourceLocation(file, span),
+            "Expected a namespace part.");
 }

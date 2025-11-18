@@ -300,7 +300,7 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var expected = new TypeAliasMetadata(null, "MyInt", [], TypeMetadata.I32);
+        var expected = new AliasMetadata(null, "MyInt", [], TypeMetadata.I32);
         var actual = typeProvider.GetType("MyInt");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -471,7 +471,7 @@ public class MetadataGeneratorTests
                 [],
                 new FunctionTypeMetadata(null, [], expectedType)));
 
-        var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedType);
+        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType);
         var actualType = typeProvider.GetType("Point");
         var actualAlias = typeProvider.GetType("MyPoint");
 
@@ -503,7 +503,7 @@ public class MetadataGeneratorTests
                 [],
                 new FunctionTypeMetadata(null, [], expectedType)));
 
-        var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedType);
+        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType);
         var actualType = typeProvider.GetType("Point");
         var actualAlias = typeProvider.GetType("MyPoint");
 
@@ -536,7 +536,7 @@ public class MetadataGeneratorTests
                 new FunctionTypeMetadata(null, [], expectedType)));
 
         var expectedArrayType = new ArrayMetadata(null, expectedType);
-        var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedArrayType);
+        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType);
         var actualType = typeProvider.GetType("Point");
         var actualArrayType = typeProvider.GetType("Point[]");
         var actualAlias = typeProvider.GetType("MyPoint");
@@ -571,7 +571,7 @@ public class MetadataGeneratorTests
                 new FunctionTypeMetadata(null, [], expectedType)));
 
         var expectedArrayType = new ArrayMetadata(null, expectedType);
-        var expectedAlias = new TypeAliasMetadata(null, "MyPoint", [], expectedArrayType);
+        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType);
         var actualType = typeProvider.GetType("Point");
         var actualArrayType = typeProvider.GetType("Point[]");
         var actualAlias = typeProvider.GetType("MyPoint");
@@ -617,7 +617,7 @@ public class MetadataGeneratorTests
                 AccessModifierMetadata.Public,
                 null));
 
-        var expectedAlias = new TypeAliasMetadata(null, "Point", [], expectedInterface);
+        var expectedAlias = new AliasMetadata(null, "Point", [], expectedInterface);
         expectedInterface.AddMethod(new InterfaceMethodMetadata(
             null,
             expectedInterface,
@@ -652,7 +652,7 @@ public class MetadataGeneratorTests
             TypeMetadata.I32,
             new FunctionTypeMetadata(null, [], TypeMetadata.Void),
         ]);
-        var alias = new TypeAliasMetadata(null, "DU", [], du);
+        var alias = new AliasMetadata(null, "DU", [], du);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -674,7 +674,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.F64]);
-        var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
+        var alias = new AliasMetadata(null, "Tuple", [], tuple);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -697,7 +697,7 @@ public class MetadataGeneratorTests
 
         var nestedTuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, nestedTuple]);
-        var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
+        var alias = new AliasMetadata(null, "Tuple", [], tuple);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -723,7 +723,7 @@ public class MetadataGeneratorTests
 
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.Bool, TypeMetadata.I8]);
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, du]);
-        var alias = new TypeAliasMetadata(null, "Tuple", [], tuple);
+        var alias = new AliasMetadata(null, "Tuple", [], tuple);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -749,7 +749,7 @@ public class MetadataGeneratorTests
 
         var tuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, tuple]);
-        var alias = new TypeAliasMetadata(null, "Tuple", [], du);
+        var alias = new AliasMetadata(null, "Tuple", [], du);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -1132,7 +1132,7 @@ public class MetadataGeneratorTests
 
         var type = typeProvider.GetType("Test<>");
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")]);
-        var expected = new TypeAliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], du);
+        var expected = new AliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], du);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1158,7 +1158,7 @@ public class MetadataGeneratorTests
 
         var type = typeProvider.GetType("Test<i32>");
         var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
-        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], du);
+        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], du);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1184,7 +1184,7 @@ public class MetadataGeneratorTests
 
         var type = typeProvider.GetType("Test<i32>");
         var functionType = new FunctionTypeMetadata(null, [], TypeMetadata.I32);
-        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], functionType);
+        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], functionType);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1217,7 +1217,7 @@ public class MetadataGeneratorTests
             TypeMetadata.I32,
             AccessModifierMetadata.Public,
             null));
-        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], interfaceType);
+        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], interfaceType);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1243,7 +1243,7 @@ public class MetadataGeneratorTests
 
         var type = typeProvider.GetType("Test<i32>");
         var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
-        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], tuple);
+        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], tuple);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1269,7 +1269,7 @@ public class MetadataGeneratorTests
 
         var type = typeProvider.GetType("Test<i32>");
         var array = new ArrayMetadata(null, TypeMetadata.I32);
-        var expected = new TypeAliasMetadata(null, "Test", [TypeMetadata.I32], array);
+        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], array);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1305,7 +1305,7 @@ public class MetadataGeneratorTests
                 [],
                 new FunctionTypeMetadata(null, [], listMetadata)));
 
-        var expected = new TypeAliasMetadata(
+        var expected = new AliasMetadata(
             null,
             "Test",
             [TypeMetadata.I32],
@@ -1335,11 +1335,11 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Alias2<i32>");
-        var expected = new TypeAliasMetadata(
+        var expected = new AliasMetadata(
             null,
             "Alias2",
             [TypeMetadata.I32],
-            new TypeAliasMetadata(
+            new AliasMetadata(
                 null,
                 "Alias1",
                 [TypeMetadata.I32],

@@ -5,6 +5,8 @@ namespace Trilang.Semantics;
 
 public interface ITransformer<out TResult>
 {
+    TResult TransformTypeAlias(AliasDeclaration node);
+
     TResult TransformArrayAccess(ArrayAccessExpression node);
 
     TResult TransformArrayType(ArrayType node);
@@ -65,6 +67,8 @@ public interface ITransformer<out TResult>
 
     TResult TransformMethod(MethodDeclaration node);
 
+    TResult TransformNamespace(Namespace node);
+
     TResult TransformNewArray(NewArrayExpression node);
 
     TResult TransformNewObject(NewObjectExpression node);
@@ -87,13 +91,13 @@ public interface ITransformer<out TResult>
 
     TResult TransformTupleType(TupleType node);
 
-    TResult TransformTypeAlias(TypeAliasDeclaration node);
-
     TResult TransformType(TypeDeclaration node);
 
     TResult TransformTypeNode(Type node);
 
     TResult TransformUnaryExpression(UnaryExpression node);
+
+    TResult TransformUse(Use node);
 
     TResult TransformVariable(VariableDeclaration node);
 

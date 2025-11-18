@@ -1479,7 +1479,7 @@ public class FormatterTests
     public void FormatTypeAliasTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(default, AccessModifier.Public, "MyType", [], new TypeNode(default, "i32"))
+            new AliasDeclarationNode(default, AccessModifier.Public, "MyType", [], new TypeNode(default, "i32"))
         ]);
         var formatted = tree.ToString();
         const string expected = "public type MyType = i32;";
@@ -1491,7 +1491,7 @@ public class FormatterTests
     public void FormatFunctionTypeTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "MyType",
@@ -1607,7 +1607,7 @@ public class FormatterTests
     public void FormatAliasInterfaceTypeTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "Point",
@@ -1639,7 +1639,7 @@ public class FormatterTests
     public void FormatAliasInterfaceTypeWithGettersSettersTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "Point",
@@ -1847,7 +1847,7 @@ public class FormatterTests
     public void FormatDiscriminatedUnionOfTypesTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "Numbers",
@@ -1869,7 +1869,7 @@ public class FormatterTests
     public void FormatDiscriminatedUnionOfFunctionsTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "F",
@@ -1889,7 +1889,7 @@ public class FormatterTests
     public void FormatDiscriminatedUnionOfInterfacesTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "I",
@@ -1916,7 +1916,7 @@ public class FormatterTests
     public void FormatDiscriminatedUnionTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "T",
@@ -1962,7 +1962,7 @@ public class FormatterTests
     public void FormatTupleTypeTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "T",
@@ -1982,7 +1982,7 @@ public class FormatterTests
     public void FormatNestedTupleTypeTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "T",
@@ -2091,7 +2091,7 @@ public class FormatterTests
     public void FormatGenericTypeNodeTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "Test",
@@ -2109,7 +2109,7 @@ public class FormatterTests
     public void FormatGenericTypeAliasTest()
     {
         var tree = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 default,
                 AccessModifier.Public,
                 "T",
@@ -2335,6 +2335,38 @@ public class FormatterTests
             """
             public test(): f64 {
                 return 3.14;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatUseTest()
+    {
+        var tree = new SyntaxTree(
+            file,
+            [
+                new UseNode(default, ["Test", "SubNamespace", "SubSubNamespace"])
+            ],
+            new NamespaceNode(default, ["Test", "Test2"]),
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeNode(default, "void"),
+                    new BlockStatementNode(default, []))
+            ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            use Test.SubNamespace.SubSubNamespace;
+
+            namespace Test.Test2;
+
+            public main(): void {
             }
             """;
 

@@ -15,6 +15,8 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
             (null, _) => throw new Exception("x is null"),
             (_, null) => throw new Exception("y is null"),
 
+            (AliasDeclaration x1, AliasDeclaration y1)
+                => CompareAliasDeclarationNode(x1, y1),
             (ArrayAccessExpression x1, ArrayAccessExpression y1)
                 => CompareArrayAccessExpressionNode(x1, y1),
             (ArrayType x1, ArrayType y1)
@@ -97,8 +99,6 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
                 => CompareTupleExpressionNode(x1, y1),
             (TupleType x1, TupleType y1)
                 => CompareTupleTypeNode(x1, y1),
-            (TypeAliasDeclaration x1, TypeAliasDeclaration y1)
-                => CompareTypeAliasDeclarationNode(x1, y1),
             (TypeDeclaration x1, TypeDeclaration y1)
                 => CompareTypeDeclarationNode(x1, y1),
             (Type x1, Type y1)
@@ -112,6 +112,26 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
 
             _ => throw new Exception($"{x.GetType()} != {y.GetType()}"),
         };
+
+    private bool CompareAliasDeclarationNode(AliasDeclaration x, AliasDeclaration y)
+    {
+        if (x.AccessModifier != y.AccessModifier)
+            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
+
+        if (x.Name != y.Name)
+            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+
+        if (!x.GenericArguments.SequenceEqual(y.GenericArguments, this))
+            throw new Exception("GenericArguments don't match.");
+
+        if (!Equals(x.Type, y.Type))
+            throw new Exception("Type doesn't match.");
+
+        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
+            throw new Exception("Metadata doesn't match.");
+
+        return true;
+    }
 
     private bool CompareArrayAccessExpressionNode(ArrayAccessExpression x, ArrayAccessExpression y)
     {
@@ -582,26 +602,6 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
     {
         if (!x.Types.SequenceEqual(y.Types, this))
             throw new Exception("Elements don't match.");
-
-        if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
-            throw new Exception("Metadata doesn't match.");
-
-        return true;
-    }
-
-    private bool CompareTypeAliasDeclarationNode(TypeAliasDeclaration x, TypeAliasDeclaration y)
-    {
-        if (x.AccessModifier != y.AccessModifier)
-            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
-
-        if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
-
-        if (!x.GenericArguments.SequenceEqual(y.GenericArguments, this))
-            throw new Exception("GenericArguments don't match.");
-
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
 
         if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
             throw new Exception("Metadata doesn't match.");

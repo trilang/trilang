@@ -475,7 +475,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var type = semanticTree.Find<TypeAliasDeclaration>()!;
+        var type = semanticTree.Find<AliasDeclaration>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
         Assert.That(treeSymbolTable.Types, Is.EqualTo([TypeSymbol.Alias(type)]));
@@ -517,7 +517,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var aliasType = semanticTree.Find<TypeAliasDeclaration>()!;
+        var aliasType = semanticTree.Find<AliasDeclaration>()!;
         var type = semanticTree.Find<FunctionType>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
@@ -592,7 +592,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var alias = semanticTree.Find<TypeAliasDeclaration>()!;
+        var alias = semanticTree.Find<AliasDeclaration>()!;
         var @interface = semanticTree.Find<Interface>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
@@ -634,7 +634,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var alias = semanticTree.Find<TypeAliasDeclaration>()!;
+        var alias = semanticTree.Find<AliasDeclaration>()!;
         var @interface = semanticTree.Find<Interface>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
@@ -654,7 +654,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var alias = semanticTree.Find<TypeAliasDeclaration>()!;
+        var alias = semanticTree.Find<AliasDeclaration>()!;
         var discriminatedUnionNode = semanticTree.Find<DiscriminatedUnion>()!;
 
         var treeSymbolTable = map.Get(semanticTree);
@@ -678,7 +678,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var aliasNode = semanticTree.Find<TypeAliasDeclaration>();
+        var aliasNode = semanticTree.Find<AliasDeclaration>();
         var tupleNode = semanticTree.Find<TupleType>();
         Assert.That(aliasNode, Is.Not.Null);
         Assert.That(tupleNode, Is.Not.Null);
@@ -701,7 +701,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var aliasNode = semanticTree.Find<TypeAliasDeclaration>();
+        var aliasNode = semanticTree.Find<AliasDeclaration>();
         var tupleNode = semanticTree.Find<TupleType>(x => x.Name == "((i32, i32), bool)");
         var nestedTupleNode = semanticTree.Find<TupleType>(x => x.Name == "(i32, i32)");
 
@@ -811,7 +811,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var alias = semanticTree.Find<TypeAliasDeclaration>();
+        var alias = semanticTree.Find<AliasDeclaration>();
         Assert.That(alias, Is.Not.Null);
 
         var closedGeneric = semanticTree.Find<GenericType>();

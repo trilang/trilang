@@ -112,6 +112,8 @@ public class Lexer
                     "set" => Token.Create(sourceSpan, TokenKind.Set),
                     "static" => Token.Create(sourceSpan, TokenKind.Static),
                     "is" => Token.Create(sourceSpan, TokenKind.Is),
+                    "use" => Token.Create(sourceSpan, TokenKind.Use),
+                    "namespace" => Token.Create(sourceSpan, TokenKind.Namespace),
 
                     _ => Token.CreateId(sourceSpan, id),
                 });

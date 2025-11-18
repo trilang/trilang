@@ -230,6 +230,9 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
         return node;
     }
 
+    public ISemanticNode TransformNamespace(Namespace node)
+        => node;
+
     public ISemanticNode TransformNewArray(NewArrayExpression node)
     {
         var size = (IExpression)node.Size.Transform(this);
@@ -335,7 +338,7 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
     public ISemanticNode TransformTupleType(TupleType node)
         => node;
 
-    public ISemanticNode TransformTypeAlias(TypeAliasDeclaration node)
+    public ISemanticNode TransformTypeAlias(AliasDeclaration node)
         => node;
 
     public ISemanticNode TransformType(TypeDeclaration node)
@@ -366,6 +369,9 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
+
+    public ISemanticNode TransformUse(Use node)
+        => node;
 
     public ISemanticNode TransformVariable(VariableDeclaration node)
     {

@@ -508,6 +508,13 @@ public partial class Formatter : INodeVisitor
         node.Body.Accept(this);
     }
 
+    public void VisitNamespace(NamespaceNode node)
+    {
+        writer.Write("namespace ");
+        writer.Write(string.Join('.', node.Parts));
+        writer.Write(';');
+    }
+
     public void VisitNewArray(NewArrayExpressionNode node)
     {
         writer.Write("new ");
@@ -560,13 +567,33 @@ public partial class Formatter : INodeVisitor
 
     public void VisitTree(SyntaxTree node)
     {
-        var count = node.Declarations.Count;
-        for (var i = 0; i < count; i++)
+        foreach (var useNode in node.UseNodes)
         {
-            node.Declarations[i].Accept(this);
+            useNode.Accept(this);
+            writer.WriteLine();
+        }
 
-            if (i < count - 1)
+        var hasNamespace = node.Namespace is not null;
+        if (hasNamespace)
+        {
+            if (node.UseNodes.Count > 0)
                 writer.WriteLine();
+
+            node.Namespace!.Accept(this);
+            writer.WriteLine();
+        }
+
+        if (node.Declarations.Count > 0)
+        {
+            if (hasNamespace)
+                writer.WriteLine();
+
+            var count = node.Declarations.Count;
+            for (var i = 0; i < count; i++)
+            {
+                node.Declarations[i].Accept(this);
+                writer.WriteLine();
+            }
         }
 
         writer.RemoveLastNewLine();
@@ -602,7 +629,7 @@ public partial class Formatter : INodeVisitor
         writer.Write(')');
     }
 
-    public void VisitTypeAlias(TypeAliasDeclarationNode node)
+    public void VisitTypeAlias(AliasDeclarationNode node)
     {
         WriteAccessModifier(node.AccessModifier);
         writer.Write(" type ");
@@ -685,6 +712,13 @@ public partial class Formatter : INodeVisitor
         });
 
         node.Operand.Accept(this);
+    }
+
+    public void VisitUse(UseNode node)
+    {
+        writer.Write("use ");
+        writer.Write(string.Join('.', node.Parts));
+        writer.Write(';');
     }
 
     public void VisitVariable(VariableDeclarationNode node)

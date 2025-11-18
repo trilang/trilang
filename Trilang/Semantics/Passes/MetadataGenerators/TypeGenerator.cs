@@ -111,7 +111,7 @@ internal class TypeGenerator
     {
         // TODO: support generic interfaces
         var interfaceMetadata = default(InterfaceMetadata);
-        if (typeProvider.GetType(@interface.Name) is TypeAliasMetadata aliasMetadata)
+        if (typeProvider.GetType(@interface.Name) is AliasMetadata aliasMetadata)
             interfaceMetadata = aliasMetadata.Type as InterfaceMetadata;
 
         if (interfaceMetadata is null)

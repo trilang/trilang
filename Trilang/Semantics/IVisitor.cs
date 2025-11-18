@@ -5,6 +5,8 @@ namespace Trilang.Semantics;
 
 public interface IVisitor
 {
+    void VisitTypeAlias(AliasDeclaration node);
+
     void VisitArrayAccess(ArrayAccessExpression node);
 
     void VisitArrayType(ArrayType node);
@@ -65,6 +67,8 @@ public interface IVisitor
 
     void VisitMethod(MethodDeclaration node);
 
+    void VisitNamespace(Namespace node);
+
     void VisitNewArray(NewArrayExpression node);
 
     void VisitNewObject(NewObjectExpression node);
@@ -87,13 +91,13 @@ public interface IVisitor
 
     void VisitTupleType(TupleType node);
 
-    void VisitTypeAlias(TypeAliasDeclaration node);
-
     void VisitType(TypeDeclaration node);
 
     void VisitTypeNode(Type node);
 
     void VisitUnaryExpression(UnaryExpression node);
+
+    void VisitUse(Use node);
 
     void VisitVariable(VariableDeclaration node);
 

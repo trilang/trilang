@@ -280,6 +280,9 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
         return node;
     }
 
+    public ISemanticNode TransformNamespace(Namespace node)
+        => node;
+
     public ISemanticNode TransformNewArray(NewArrayExpression node)
     {
         var size = (IExpression)node.Size.Transform(this);
@@ -385,7 +388,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
     public ISemanticNode TransformTupleType(TupleType node)
         => node;
 
-    public ISemanticNode TransformTypeAlias(TypeAliasDeclaration node)
+    public ISemanticNode TransformTypeAlias(AliasDeclaration node)
         => node;
 
     public ISemanticNode TransformType(TypeDeclaration node)
@@ -416,6 +419,9 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
+
+    public ISemanticNode TransformUse(Use node)
+        => node;
 
     public ISemanticNode TransformVariable(VariableDeclaration node)
     {

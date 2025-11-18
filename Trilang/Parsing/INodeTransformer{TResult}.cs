@@ -4,6 +4,8 @@ namespace Trilang.Parsing;
 
 public interface INodeTransformer<out TResult>
 {
+    TResult TransformTypeAlias(AliasDeclarationNode node);
+
     TResult TransformArrayAccess(ArrayAccessExpressionNode node);
 
     TResult TransformArrayType(ArrayTypeNode node);
@@ -58,6 +60,8 @@ public interface INodeTransformer<out TResult>
 
     TResult TransformMethod(MethodDeclarationNode node);
 
+    TResult TransformNamespace(NamespaceNode node);
+
     TResult TransformNewArray(NewArrayExpressionNode node);
 
     TResult TransformNewObject(NewObjectExpressionNode node);
@@ -80,13 +84,13 @@ public interface INodeTransformer<out TResult>
 
     TResult TransformTupleType(TupleTypeNode node);
 
-    TResult TransformTypeAlias(TypeAliasDeclarationNode node);
-
     TResult TransformType(TypeDeclarationNode node);
 
     TResult TransformTypeNode(TypeNode node);
 
     TResult TransformUnaryExpression(UnaryExpressionNode node);
+
+    TResult TransformUse(UseNode node);
 
     TResult TransformVariable(VariableDeclarationNode node);
 

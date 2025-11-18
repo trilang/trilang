@@ -7,7 +7,7 @@ using Trilang.Semantics;
 
 namespace Tri.Tests.Semantics;
 
-public class CyclicTypeAliasTests
+public class CyclicAliasTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 

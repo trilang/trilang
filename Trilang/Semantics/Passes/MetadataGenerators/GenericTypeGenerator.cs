@@ -42,8 +42,8 @@ internal class GenericTypeGenerator
                 var openGenericType = typeProvider.GetType(openName);
                 if (openGenericType is TypeMetadata type)
                     closedType = new TypeMetadata(openGenericType.Definition, type.Name);
-                else if (openGenericType is TypeAliasMetadata alias)
-                    closedType = new TypeAliasMetadata(openGenericType.Definition, alias.Name);
+                else if (openGenericType is AliasMetadata alias)
+                    closedType = new AliasMetadata(openGenericType.Definition, alias.Name);
                 else
                     Debug.Fail($"The '{openName}' generic type is not supported.");
 
@@ -62,7 +62,7 @@ internal class GenericTypeGenerator
             var closed = genericTypeNode.Metadata!;
             if (closed is TypeMetadata closedType && open is TypeMetadata openType)
                 PopulateClosedTypes(genericTypeNode, closedType, openType);
-            else if (closed is TypeAliasMetadata closedAlias && open is TypeAliasMetadata openAlias)
+            else if (closed is AliasMetadata closedAlias && open is AliasMetadata openAlias)
                 PopulateClosedTypes(genericTypeNode, closedAlias, openAlias);
             else
                 Debug.Fail($"The '{genericTypeNode.Name}' generic type is not defined.");
@@ -88,7 +88,7 @@ internal class GenericTypeGenerator
         {
             // TODO: support generic interfaces
             var interfaceMetadata = default(InterfaceMetadata);
-            var aliasMetadata = typeProvider.GetType(@interface.ToString()) as TypeAliasMetadata;
+            var aliasMetadata = typeProvider.GetType(@interface.ToString()) as AliasMetadata;
             if (aliasMetadata is not null)
                 interfaceMetadata = aliasMetadata.Type as InterfaceMetadata;
 
@@ -188,8 +188,8 @@ internal class GenericTypeGenerator
 
     private void PopulateClosedTypes(
         GenericType genericTypeNode,
-        TypeAliasMetadata closed,
-        TypeAliasMetadata open)
+        AliasMetadata closed,
+        AliasMetadata open)
     {
         var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
 

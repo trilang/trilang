@@ -77,20 +77,33 @@ public partial class Formatter
             isIndented = false;
         }
 
-
         public void RemoveLastNewLine()
         {
             var newLine = Environment.NewLine;
             var newLineLength = newLine.Length;
-            if (sb.Length < newLineLength)
-                return;
+            var removed = false;
 
-            var lastChars = sb.ToString(sb.Length - newLineLength, newLineLength);
-            if (lastChars == newLine)
+            while (sb.Length >= newLineLength)
             {
+                var isNewLine = true;
+                for (var i = 0; i < newLineLength; i++)
+                {
+                    if (sb[sb.Length - newLineLength + i] != newLine[i])
+                    {
+                        isNewLine = false;
+                        break;
+                    }
+                }
+
+                if (!isNewLine)
+                    break;
+
                 sb.Length -= newLineLength;
-                CancelIndent();
+                removed = true;
             }
+
+            if (removed)
+                CancelIndent();
         }
 
         public void CancelIndent()

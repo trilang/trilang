@@ -38,6 +38,9 @@ internal class TypeArgumentMap
 
         return type switch
         {
+            AliasMetadata aliasMetadata
+                => Map(aliasMetadata),
+
             DiscriminatedUnionMetadata discriminatedUnionMetadata
                 => Map(discriminatedUnionMetadata),
 
@@ -50,9 +53,6 @@ internal class TypeArgumentMap
             TupleMetadata tupleMetadata
                 => Map(tupleMetadata),
 
-            TypeAliasMetadata typeAliasMetadata
-                => Map(typeAliasMetadata),
-
             TypeArgumentMetadata typeArgumentMetadata
                 => Map(typeArgumentMetadata),
 
@@ -64,6 +64,20 @@ internal class TypeArgumentMap
 
             _ => throw new ArgumentOutOfRangeException(nameof(type))
         };
+    }
+
+    private ITypeMetadata Map(AliasMetadata type)
+    {
+        var alias = new AliasMetadata(
+            type.Definition,
+            type.Name,
+            type.GenericArguments.Select(Map),
+            Map(type.Type!));
+
+        if (type.IsInvalid)
+            alias.MarkAsInvalid();
+
+        return typeProvider.GetOrDefine(alias);
     }
 
     private DiscriminatedUnionMetadata Map(DiscriminatedUnionMetadata discriminatedUnion)
@@ -124,20 +138,6 @@ internal class TypeArgumentMap
         var tupleMetadata = new TupleMetadata(tuple.Definition, types);
 
         return typeProvider.GetOrDefine(tupleMetadata);
-    }
-
-    private ITypeMetadata Map(TypeAliasMetadata type)
-    {
-        var alias = new TypeAliasMetadata(
-            type.Definition,
-            type.Name,
-            type.GenericArguments.Select(Map),
-            Map(type.Type!));
-
-        if (type.IsInvalid)
-            alias.MarkAsInvalid();
-
-        return typeProvider.GetOrDefine(alias);
     }
 
     private ITypeMetadata Map(TypeArgumentMetadata type)
@@ -241,7 +241,7 @@ internal class TypeArgumentMap
             TupleMetadata tupleMetadata
                 => tupleMetadata.Types.Any(HasTypeArgument),
 
-            TypeAliasMetadata typeAliasMetadata
+            AliasMetadata typeAliasMetadata
                 => HasTypeArgument(typeAliasMetadata.Type!),
 
             TypeArgumentMetadata

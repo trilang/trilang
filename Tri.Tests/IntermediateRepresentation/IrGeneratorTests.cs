@@ -1961,7 +1961,7 @@ public class IrGeneratorTests
         var ir = new IrGenerator();
         var functions = ir.Generate(typeProvider.Types, [tree]);
 
-        var interfaceType = (TypeAliasMetadata)typeProvider.GetType("Interface")!;
+        var interfaceType = (AliasMetadata)typeProvider.GetType("Interface")!;
         var interfacePointer = new TypePointerMetadata(interfaceType);
 
         var method = ((FunctionGroupMetadata)interfaceType.GetMember("method")!).Functions[0];

@@ -4,19 +4,34 @@ namespace Trilang.Parsing.Ast;
 
 public class SyntaxTree : ISyntaxNode
 {
-    private readonly List<IDeclarationNode> declarations;
-
     public SyntaxTree(SourceFile sourceFile, IReadOnlyList<IDeclarationNode> declarations)
+        : this(sourceFile, [], null, declarations)
+    {
+    }
+
+    public SyntaxTree(
+        SourceFile sourceFile,
+        IReadOnlyList<UseNode> useNodes,
+        NamespaceNode? namespaceNode,
+        IReadOnlyList<IDeclarationNode> declarations)
     {
         SourceFile = sourceFile;
-        SourceSpan = declarations switch
-        {
-            [] => default,
-            [var single] => single.SourceSpan,
-            [var first, .., var last] => first.SourceSpan.Combine(last.SourceSpan),
-        };
+        UseNodes = useNodes;
+        Namespace = namespaceNode;
+        Declarations = declarations;
 
-        this.declarations = [.. declarations];
+        var firstNode = useNodes.FirstOrDefault() ??
+                        namespaceNode as ISyntaxNode ??
+                        declarations.FirstOrDefault();
+
+        var lastNode = declarations.LastOrDefault() ??
+                       namespaceNode as ISyntaxNode ??
+                       useNodes.LastOrDefault();
+
+        var firstSpan = firstNode?.SourceSpan ?? default;
+        var lastSpan = lastNode?.SourceSpan ?? default;
+
+        SourceSpan = firstSpan.Combine(lastSpan);
     }
 
     public override string ToString()
@@ -37,6 +52,9 @@ public class SyntaxTree : ISyntaxNode
 
     public SourceSpan SourceSpan { get; }
 
-    public IReadOnlyList<IDeclarationNode> Declarations
-        => declarations;
+    public IReadOnlyList<UseNode> UseNodes { get; }
+
+    public NamespaceNode? Namespace { get; }
+
+    public IReadOnlyList<IDeclarationNode> Declarations { get; }
 }

@@ -154,7 +154,7 @@ public class ParseGenericTypeTests
         var (tree, diagnostics) = Parse("public type T = List<i32, bool>;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
                 AccessModifier.Public,
                 "T",
@@ -176,7 +176,7 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = List<i32, List<bool>>;");
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(38, 1, 39)),
                 AccessModifier.Public,
                 "T",
@@ -202,7 +202,7 @@ public class ParseGenericTypeTests
         var (tree, diagnostics) = Parse("public type T = List<>;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
                 AccessModifier.Public,
                 "T",
@@ -236,7 +236,7 @@ public class ParseGenericTypeTests
         var (tree, diagnostics) = Parse("public type T = List<i32, >;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(28, 1, 29)),
                 AccessModifier.Public,
                 "T",
@@ -274,7 +274,7 @@ public class ParseGenericTypeTests
         var (tree, diagnostics) = Parse("public type T = List<i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(25, 1, 26)),
                 AccessModifier.Public,
                 "T",
@@ -308,7 +308,7 @@ public class ParseGenericTypeTests
         var (tree, diagnostics) = Parse("public type T<T1, T2> = T1 | T2;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
                 AccessModifier.Public,
                 "T",
@@ -330,7 +330,7 @@ public class ParseGenericTypeTests
         var (tree, diagnostics) = Parse("public type T<> = T1 | T2;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(26, 1, 27)),
                 AccessModifier.Public,
                 "T",
@@ -369,7 +369,7 @@ public class ParseGenericTypeTests
         var (tree, diagnostics) = Parse("public type T<T1, > = T1 | T2;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(30, 1, 31)),
                 AccessModifier.Public,
                 "T",
@@ -412,7 +412,7 @@ public class ParseGenericTypeTests
         var (tree, diagnostics) = Parse("public type T<T1, T2 = T1 | T2;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
                 AccessModifier.Public,
                 "T",

@@ -11,7 +11,7 @@ public class SemanticDiagnosticReporter
     public SemanticDiagnosticReporter(DiagnosticCollection diagnostics)
         => this.diagnostics = diagnostics;
 
-    public void CyclicTypeAlias(TypeAliasMetadata alias)
+    public void CyclicTypeAlias(AliasMetadata alias)
         => diagnostics.Error(
             DiagnosticId.S0001CyclicTypeAlias,
             alias.Definition ?? new SourceLocation(default, default),
@@ -59,7 +59,7 @@ public class SemanticDiagnosticReporter
             type.GetLocation(),
             $"The '{type.Name}' type is already defined.");
 
-    public void TypeAlreadyDefined(TypeAliasDeclaration type)
+    public void TypeAlreadyDefined(AliasDeclaration type)
         => diagnostics.Error(
             DiagnosticId.S0002AlreadyDefined,
             type.GetLocation(),

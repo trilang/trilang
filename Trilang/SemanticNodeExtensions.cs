@@ -150,6 +150,8 @@ public static class SemanticNodeExtensions
                     q.Enqueue(methodDeclarationNode.ReturnType);
                     q.Enqueue(methodDeclarationNode.Body);
                     break;
+                case Namespace:
+                    break;
                 case NewArrayExpression newArrayExpressionNode:
                     q.Enqueue(newArrayExpressionNode.Type);
                     q.Enqueue(newArrayExpressionNode.Size);
@@ -194,7 +196,7 @@ public static class SemanticNodeExtensions
                         q.Enqueue(type);
 
                     break;
-                case TypeAliasDeclaration typeAliasNode:
+                case AliasDeclaration typeAliasNode:
                     q.Enqueue(typeAliasNode.Type);
                     break;
                 case TypeDeclaration typeDeclarationNode:
@@ -215,6 +217,8 @@ public static class SemanticNodeExtensions
                     break;
                 case UnaryExpression unaryExpressionNode:
                     q.Enqueue(unaryExpressionNode.Operand);
+                    break;
+                case Use:
                     break;
                 case VariableDeclaration variableDeclarationStatementNode:
                     q.Enqueue(variableDeclarationStatementNode.Expression);

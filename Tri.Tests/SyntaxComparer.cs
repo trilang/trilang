@@ -37,6 +37,9 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 errors.Add("y is null but x is not.");
                 return;
 
+            case (AliasDeclarationNode x1, AliasDeclarationNode y1):
+                CompareAliasDeclarationNode(x1, y1, errors);
+                return;
             case (ArrayAccessExpressionNode x1, ArrayAccessExpressionNode y1):
                 CompareArrayAccessExpressionNode(x1, y1, errors);
                 return;
@@ -118,6 +121,9 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             case (MethodDeclarationNode x1, MethodDeclarationNode y1):
                 CompareMethodDeclarationNode(x1, y1, errors);
                 return;
+            case (NamespaceNode x1, NamespaceNode y1):
+                CompareNamespaceNode(x1, y1, errors);
+                return;
             case (NewArrayExpressionNode x1, NewArrayExpressionNode y1):
                 CompareNewArrayExpressionNode(x1, y1, errors);
                 return;
@@ -151,9 +157,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             case (TupleTypeNode x1, TupleTypeNode y1):
                 CompareTupleTypeNode(x1, y1, errors);
                 return;
-            case (TypeAliasDeclarationNode x1, TypeAliasDeclarationNode y1):
-                CompareTypeAliasDeclarationNode(x1, y1, errors);
-                return;
             case (TypeDeclarationNode x1, TypeDeclarationNode y1):
                 CompareTypeDeclarationNode(x1, y1, errors);
                 return;
@@ -162,6 +165,9 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 return;
             case (UnaryExpressionNode x1, UnaryExpressionNode y1):
                 CompareUnaryExpressionNode(x1, y1, errors);
+                return;
+            case (UseNode x1, UseNode y1):
+                CompareUseNode(x1, y1, errors);
                 return;
             case (VariableDeclarationNode x1, VariableDeclarationNode y1):
                 CompareVariableDeclarationStatementNode(x1, y1, errors);
@@ -174,6 +180,21 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
                 errors.Add($"{x.GetType()} != {y.GetType()}");
                 return;
         }
+    }
+
+    private void CompareAliasDeclarationNode(AliasDeclarationNode x, AliasDeclarationNode y, List<string> errors)
+    {
+        if (x.AccessModifier != y.AccessModifier)
+            errors.Add($"TypeAlias: AccessModifier mismatch. {x.AccessModifier} != {y.AccessModifier}.");
+
+        if (x.Name != y.Name)
+            errors.Add($"TypeAlias: Name mismatch. {x.Name} != {y.Name}.");
+
+        CompareNodes(x.Type, y.Type, errors);
+        CompareSequences(x.GenericArguments, y.GenericArguments, errors, "TypeAlias.GenericArguments");
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"TypeAlias: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareArrayAccessExpressionNode(ArrayAccessExpressionNode x, ArrayAccessExpressionNode y, List<string> errors)
@@ -437,6 +458,15 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             errors.Add($"Method: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
+    private void CompareNamespaceNode(NamespaceNode x, NamespaceNode y, List<string> errors)
+    {
+        if (!x.Parts.SequenceEqual(y.Parts))
+            errors.Add($"Namespace: Parts mismatch. {string.Join(".", x.Parts)} != {string.Join(".", y.Parts)}.");
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"Namespace: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
     private void CompareNewArrayExpressionNode(NewArrayExpressionNode x, NewArrayExpressionNode y, List<string> errors)
     {
         CompareNodes(x.Type, y.Type, errors);
@@ -511,6 +541,8 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
     private void CompareSyntaxTree(SyntaxTree x, SyntaxTree y, List<string> errors)
     {
+        CompareSequences(x.UseNodes, y.UseNodes, errors, "SyntaxTree.UseNodes");
+        CompareNodes(x.Namespace, y.Namespace, errors);
         CompareSequences(x.Declarations, y.Declarations, errors, "SyntaxTree.Declarations");
 
         if (!x.SourceFile.Equals(y.SourceFile))
@@ -534,21 +566,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!x.SourceSpan.Equals(y.SourceSpan))
             errors.Add($"TupleType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
-    }
-
-    private void CompareTypeAliasDeclarationNode(TypeAliasDeclarationNode x, TypeAliasDeclarationNode y, List<string> errors)
-    {
-        if (x.AccessModifier != y.AccessModifier)
-            errors.Add($"TypeAlias: AccessModifier mismatch. {x.AccessModifier} != {y.AccessModifier}.");
-
-        if (x.Name != y.Name)
-            errors.Add($"TypeAlias: Name mismatch. {x.Name} != {y.Name}.");
-
-        CompareNodes(x.Type, y.Type, errors);
-        CompareSequences(x.GenericArguments, y.GenericArguments, errors, "TypeAlias.GenericArguments");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"TypeAlias: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareTypeDeclarationNode(TypeDeclarationNode x, TypeDeclarationNode y, List<string> errors)
@@ -587,6 +604,15 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!x.SourceSpan.Equals(y.SourceSpan))
             errors.Add($"UnaryExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
+    }
+
+    private void CompareUseNode(UseNode x, UseNode y, List<string> errors)
+    {
+        if (!x.Parts.SequenceEqual(y.Parts))
+            errors.Add($"Use: Parts mismatch. {string.Join(".", x.Parts)} != {string.Join(".", y.Parts)}.");
+
+        if (!x.SourceSpan.Equals(y.SourceSpan))
+            errors.Add($"UseNode: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareVariableDeclarationStatementNode(VariableDeclarationNode x, VariableDeclarationNode y, List<string> errors)

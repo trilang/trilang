@@ -526,6 +526,20 @@ public abstract class Visitor : IVisitor
     {
     }
 
+    public virtual void VisitNamespace(Namespace node)
+    {
+        VisitNamespaceEnter(node);
+        VisitNamespaceExit(node);
+    }
+
+    protected virtual void VisitNamespaceEnter(Namespace node)
+    {
+    }
+
+    protected virtual void VisitNamespaceExit(Namespace node)
+    {
+    }
+
     public virtual void VisitNewArray(NewArrayExpression node)
     {
         VisitNewArrayEnter(node);
@@ -719,7 +733,7 @@ public abstract class Visitor : IVisitor
     {
     }
 
-    public virtual void VisitTypeAlias(TypeAliasDeclaration node)
+    public virtual void VisitTypeAlias(AliasDeclaration node)
     {
         VisitTypeAliasEnter(node);
 
@@ -728,11 +742,11 @@ public abstract class Visitor : IVisitor
         VisitTypeAliasExit(node);
     }
 
-    protected virtual void VisitTypeAliasEnter(TypeAliasDeclaration node)
+    protected virtual void VisitTypeAliasEnter(AliasDeclaration node)
     {
     }
 
-    protected virtual void VisitTypeAliasExit(TypeAliasDeclaration node)
+    protected virtual void VisitTypeAliasExit(AliasDeclaration node)
     {
     }
 
@@ -794,6 +808,20 @@ public abstract class Visitor : IVisitor
     }
 
     protected virtual void VisitUnaryExpressionExit(UnaryExpression node)
+    {
+    }
+
+    public virtual void VisitUse(Use node)
+    {
+        VisitUseEnter(node);
+        VisitUseExit(node);
+    }
+
+    protected virtual void VisitUseEnter(Use node)
+    {
+    }
+
+    protected virtual void VisitUseExit(Use node)
     {
     }
 

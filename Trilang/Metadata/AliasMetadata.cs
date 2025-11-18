@@ -2,15 +2,15 @@ using System.Text;
 
 namespace Trilang.Metadata;
 
-public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
+public class AliasMetadata : ITypeMetadata, IEquatable<AliasMetadata>
 {
     private readonly List<ITypeMetadata> genericArguments;
 
-    public TypeAliasMetadata(SourceLocation? definition, string name) : this(definition, name, [], null)
+    public AliasMetadata(SourceLocation? definition, string name) : this(definition, name, [], null)
     {
     }
 
-    public TypeAliasMetadata(
+    public AliasMetadata(
         SourceLocation? definition,
         string name,
         IEnumerable<ITypeMetadata> genericArguments,
@@ -22,13 +22,13 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
         Type = type;
     }
 
-    public static bool operator ==(TypeAliasMetadata? left, TypeAliasMetadata? right)
+    public static bool operator ==(AliasMetadata? left, AliasMetadata? right)
         => Equals(left, right);
 
-    public static bool operator !=(TypeAliasMetadata? left, TypeAliasMetadata? right)
+    public static bool operator !=(AliasMetadata? left, AliasMetadata? right)
         => !Equals(left, right);
 
-    public bool Equals(TypeAliasMetadata? other)
+    public bool Equals(AliasMetadata? other)
     {
         if (other is null)
             return false;
@@ -54,7 +54,7 @@ public class TypeAliasMetadata : ITypeMetadata, IEquatable<TypeAliasMetadata>
         if (obj.GetType() != GetType())
             return false;
 
-        return Equals((TypeAliasMetadata)obj);
+        return Equals((AliasMetadata)obj);
     }
 
     public override int GetHashCode()

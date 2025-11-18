@@ -64,7 +64,7 @@ internal class Mangler
             foreach (var type in tupleMetadata.Types)
                 Mangle(type);
         }
-        else if (metadata is TypeAliasMetadata typeAliasMetadata)
+        else if (metadata is AliasMetadata typeAliasMetadata)
         {
             AddData("alias");
 

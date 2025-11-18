@@ -1346,7 +1346,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type MyType = i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(25, 1, 26)),
                 AccessModifier.Public,
                 "MyType",
@@ -1365,7 +1365,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type = i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(18, 1, 19)),
                 AccessModifier.Public,
                 "<>_0",
@@ -1393,7 +1393,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type MyType = ;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
                 AccessModifier.Public,
                 "MyType",
@@ -1421,7 +1421,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type MyType = i32");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25)),
                 AccessModifier.Public,
                 "MyType",
@@ -1449,7 +1449,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type F = () => void;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
                 AccessModifier.Public,
                 "F",
@@ -1472,7 +1472,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type F = (i32, i32) => i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
                 AccessModifier.Public,
                 "F",
@@ -1495,7 +1495,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type = (i32, i32) => i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
                 AccessModifier.Public,
                 "<>_0",
@@ -1571,7 +1571,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type F = i32, i32) => i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 1, 20)),
                 AccessModifier.Public,
                 "F",
@@ -1610,7 +1610,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type F = (i32, i32 => i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
                 AccessModifier.Public,
                 "F",
@@ -1654,7 +1654,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type F = (i32 i32) => i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
                 AccessModifier.Public,
                 "F",
@@ -1698,7 +1698,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type F = (i32, i32) i32;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
                 AccessModifier.Public,
                 "F",
@@ -1746,7 +1746,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type F = (i32, i32) => ;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
                 AccessModifier.Public,
                 "F",
@@ -1790,7 +1790,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type F = (i32, i32) => i32");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(33, 1, 34)),
                 AccessModifier.Public,
                 "F",
@@ -1944,7 +1944,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(74, 6, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -1985,7 +1985,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(130, 6, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -2035,7 +2035,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(50, 3, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -2071,7 +2071,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(50, 3, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -2109,7 +2109,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(72, 5, 26)),
                 AccessModifier.Public,
                 "Point",
@@ -2182,7 +2182,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(71, 6, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -2255,7 +2255,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -2336,7 +2336,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(71, 6, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -2409,7 +2409,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -2482,7 +2482,7 @@ public class ParseTypeTests
             """);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 6, 2)),
                 AccessModifier.Public,
                 "Point",
@@ -2787,7 +2787,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = { } | i32 | () => void;");
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(39, 1, 40)),
                 AccessModifier.Public,
                 "T",
@@ -2844,7 +2844,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = (i32, i32);");
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
                 AccessModifier.Public,
                 "T",
@@ -2862,7 +2862,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = ((i32, i32), i32);");
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
                 AccessModifier.Public,
                 "T",
@@ -2883,7 +2883,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = (bool | i32, () => void);");
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
                 AccessModifier.Public,
                 "T",
@@ -2914,7 +2914,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type T = (i32);");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
                 AccessModifier.Public,
                 "T",
@@ -2938,7 +2938,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse(code);
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(20, 1, 21)),
                 AccessModifier.Public,
                 "T",
@@ -2998,7 +2998,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = i32 | (bool, f64);");
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
                 AccessModifier.Public,
                 "T",
@@ -3019,7 +3019,7 @@ public class ParseTypeTests
     {
         var (tree, diagnostics) = Parse("public type T = (bool, i32 | f64);");
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(34, 1, 35)),
                 AccessModifier.Public,
                 "T",
@@ -3139,7 +3139,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type T = i32 | (() => i32 | null);");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
                 AccessModifier.Public,
                 "T",
@@ -3177,7 +3177,7 @@ public class ParseTypeTests
         var (tree, diagnostics) = Parse("public type T = i32 | (() => i32) | null;");
 
         var expected = new SyntaxTree(file, [
-            new TypeAliasDeclarationNode(
+            new AliasDeclarationNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(41, 1, 42)),
                 AccessModifier.Public,
                 "T",

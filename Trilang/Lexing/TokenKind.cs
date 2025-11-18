@@ -77,6 +77,8 @@ public enum TokenKind
     Set,
     Static,
     Is,
+    Use,
+    Namespace,
 }
 
 public static class TokenKindExtensions
@@ -152,6 +154,8 @@ public static class TokenKindExtensions
             TokenKind.Set => "set",
             TokenKind.Static => "static",
             TokenKind.Is => "is",
+            TokenKind.Use => "use",
+            TokenKind.Namespace => "namespace",
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null),
         };
 }

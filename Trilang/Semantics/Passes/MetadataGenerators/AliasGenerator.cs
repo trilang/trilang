@@ -9,7 +9,7 @@ internal class AliasGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
-    private readonly HashSet<TypeAliasDeclaration> typesToProcess;
+    private readonly HashSet<AliasDeclaration> typesToProcess;
 
     public AliasGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
     {
@@ -26,9 +26,9 @@ internal class AliasGenerator
                 continue;
 
             var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
-            var node = (TypeAliasDeclaration)symbol.Node;
+            var node = (AliasDeclaration)symbol.Node;
             var root = node.GetRoot();
-            var metadata = new TypeAliasMetadata(
+            var metadata = new AliasMetadata(
                 new SourceLocation(root.SourceFile, node.SourceSpan.GetValueOrDefault()),
                 node.Name);
 
@@ -64,7 +64,7 @@ internal class AliasGenerator
     {
         foreach (var typeAliasNode in typesToProcess)
         {
-            var metadata = (TypeAliasMetadata)typeAliasNode.Metadata!;
+            var metadata = (AliasMetadata)typeAliasNode.Metadata!;
             var typeProvider = symbolTableMap.Get(typeAliasNode).TypeProvider;
             var aliasedType = typeAliasNode.Type;
             var aliasedMetadata = typeProvider.GetType(aliasedType.Name);
