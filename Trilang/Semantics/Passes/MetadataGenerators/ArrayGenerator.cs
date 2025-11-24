@@ -8,13 +8,13 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 internal class ArrayGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<ArrayType> typesToProcess;
 
-    public ArrayGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public ArrayGenerator(SemanticDiagnosticReporter diagnostics, MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -25,8 +25,8 @@ internal class ArrayGenerator
             if (!symbol.IsArray)
                 continue;
 
-            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var node = (ArrayType)symbol.Node;
+            var typeProvider = metadataProviderMap.Get(node);
 
             if (typeProvider.GetType(symbol.Name) is not ArrayMetadata metadata)
             {
@@ -45,7 +45,7 @@ internal class ArrayGenerator
         foreach (var arrayTypeNode in typesToProcess)
         {
             var metadata = (ArrayMetadata)arrayTypeNode.Metadata!;
-            var typeProvider = symbolTableMap.Get(arrayTypeNode).TypeProvider;
+            var typeProvider = metadataProviderMap.Get(arrayTypeNode);
             var itemMetadata = arrayTypeNode.ElementType.PopulateMetadata(typeProvider, diagnostics);
 
             metadata.ItemMetadata = itemMetadata;

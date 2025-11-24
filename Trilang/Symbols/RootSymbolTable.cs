@@ -8,9 +8,8 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
     private readonly List<TypeSymbol> types;
     private readonly Dictionary<string, IdSymbol> ids;
 
-    public RootSymbolTable(ITypeMetadataProvider typeMetadataProvider)
+    public RootSymbolTable()
     {
-        TypeProvider = typeMetadataProvider;
         types = [];
         ids = [];
     }
@@ -65,13 +64,11 @@ public class RootSymbolTable : ISymbolTable, IEquatable<RootSymbolTable>
         => types.Add(symbol);
 
     public ISymbolTable CreateChild()
-        => new SymbolTable(this, TypeProvider.CreateChild());
+        => new SymbolTable(this);
 
     public IReadOnlyList<TypeSymbol> Types
         => types;
 
     public IReadOnlyDictionary<string, IdSymbol> Ids
         => ids;
-
-    public ITypeMetadataProvider TypeProvider { get; }
 }

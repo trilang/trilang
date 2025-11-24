@@ -6,7 +6,8 @@ namespace Trilang.Semantics.Passes;
 internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
 {
     private readonly List<HashSet<string>> scopes;
-    private SymbolTableMap symbolFinderMap = null!;
+    private SymbolTableMap symbolTableMap = null!;
+    private MetadataProviderMap metadataProviderMap = null!;
     private SemanticDiagnosticReporter diagnostics = null!;
 
     public VariableUsedBeforeDeclared()
@@ -14,7 +15,8 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
-        symbolFinderMap = context.SymbolTableMap!;
+        symbolTableMap = context.SymbolTableMap!;
+        metadataProviderMap = context.TypeProviderMap!;
         diagnostics = context.Diagnostics;
 
         foreach (var tree in semanticTrees)
@@ -35,7 +37,7 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
         if (!node.IsFirstMember || node.IsThis || node.IsField || node.IsValue)
             return;
 
-        var symbolTable = symbolFinderMap.Get(node);
+        var symbolTable = symbolTableMap.Get(node);
         var symbol = symbolTable.GetId(node.Name);
         if (symbol is not null)
         {
@@ -51,7 +53,7 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
         }
 
         // access static member
-        var typeProvider = symbolTable.TypeProvider;
+        var typeProvider = metadataProviderMap.Get(node);
         var type = typeProvider.GetType(node.Name);
         if (type is null)
             diagnostics.UnknownSymbol(node);

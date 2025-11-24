@@ -1,11 +1,11 @@
 namespace Trilang.Metadata;
 
-public class TypeMetadataProvider : ITypeMetadataProvider
+public class MetadataProvider : IMetadataProvider
 {
-    private readonly ITypeMetadataProvider parent;
+    private readonly IMetadataProvider parent;
     private readonly Dictionary<string, ITypeMetadata> types;
 
-    public TypeMetadataProvider(ITypeMetadataProvider parent)
+    public MetadataProvider(IMetadataProvider parent)
     {
         this.parent = parent;
         types = new Dictionary<string, ITypeMetadata>();
@@ -34,8 +34,8 @@ public class TypeMetadataProvider : ITypeMetadataProvider
     public void AddFunction(FunctionMetadata function)
         => parent.AddFunction(function);
 
-    public ITypeMetadataProvider CreateChild()
-        => new TypeMetadataProvider(this);
+    public IMetadataProvider CreateChild()
+        => new MetadataProvider(this);
 
     public IEnumerable<ITypeMetadata> Types
         => types.Values;

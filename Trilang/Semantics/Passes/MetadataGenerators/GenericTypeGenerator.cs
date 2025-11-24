@@ -11,13 +11,15 @@ internal class GenericTypeGenerator
     private record Item(ITypeMetadata Open, GenericType Node);
 
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<Item> typesToProcess;
 
-    public GenericTypeGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public GenericTypeGenerator(
+        SemanticDiagnosticReporter diagnostics,
+        MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -29,7 +31,7 @@ internal class GenericTypeGenerator
                 continue;
 
             var node = (GenericType)symbol.Node;
-            var typeProvider = symbolTableMap.Get(node).TypeProvider;
+            var typeProvider = metadataProviderMap.Get(node);
 
             // ignore open generic types
             if (IsOpenGeneric(typeProvider, node))
@@ -74,7 +76,7 @@ internal class GenericTypeGenerator
         TypeMetadata closed,
         TypeMetadata open)
     {
-        var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
+        var typeProvider = metadataProviderMap.Get(genericTypeNode);
 
         foreach (var argumentNode in genericTypeNode.TypeArguments)
             closed.AddGenericArgument(argumentNode.PopulateMetadata(typeProvider, diagnostics));
@@ -160,7 +162,7 @@ internal class GenericTypeGenerator
         }
     }
 
-    private MethodMetadata PopulateClosedMethod(ITypeMetadataProvider typeProvider,
+    private MethodMetadata PopulateClosedMethod(IMetadataProvider provider,
         TypeArgumentMap typeArgumentsMap,
         TypeMetadata closed,
         MethodMetadata method,
@@ -173,7 +175,7 @@ internal class GenericTypeGenerator
         var parameterTypes = methodType.ParameterTypes.Select(typeArgumentsMap.Map);
         var returnType = typeArgumentsMap.Map(methodType.ReturnType);
         var functionType = new FunctionTypeMetadata(null, parameterTypes, returnType);
-        functionType = typeProvider.GetOrDefine(functionType);
+        functionType = provider.GetOrDefine(functionType);
 
         return new MethodMetadata(
             method.Definition,
@@ -191,7 +193,7 @@ internal class GenericTypeGenerator
         AliasMetadata closed,
         AliasMetadata open)
     {
-        var typeProvider = symbolTableMap.Get(genericTypeNode).TypeProvider;
+        var typeProvider = metadataProviderMap.Get(genericTypeNode);
 
         foreach (var argumentNode in genericTypeNode.TypeArguments)
             closed.AddGenericArgument(argumentNode.PopulateMetadata(typeProvider, diagnostics));
@@ -229,12 +231,12 @@ internal class GenericTypeGenerator
         return parametersMetadata;
     }
 
-    private bool IsOpenGeneric(ITypeMetadataProvider typeProvider, GenericType genericTypeNode)
+    private bool IsOpenGeneric(IMetadataProvider metadataProvider, GenericType genericTypeNode)
     {
         var isOpenGeneric = true;
         foreach (var argumentNode in genericTypeNode.TypeArguments)
         {
-            var typeArgument = typeProvider.GetType(argumentNode.Name);
+            var typeArgument = metadataProvider.GetType(argumentNode.Name);
             if (typeArgument is null or not TypeArgumentMetadata)
             {
                 isOpenGeneric = false;

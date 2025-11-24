@@ -2,7 +2,6 @@ using Trilang.Compilation.Diagnostics;
 using Trilang.IntermediateRepresentation;
 using Trilang.Lexing;
 using Trilang.Lower;
-using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
@@ -17,8 +16,7 @@ public class Compiler
         var diagnostics = new DiagnosticCollection();
         var lexer = new Lexer();
         var parser = new Parser();
-        var rootTypeMetadataProvider = new RootTypeMetadataProvider();
-        var semantic = new SemanticAnalysis(rootTypeMetadataProvider);
+        var semantic = new SemanticAnalysis();
         var semanticOptions = new SemanticAnalysisOptions(
             options.Directives,
             new SemanticDiagnosticReporter(diagnostics));
@@ -84,7 +82,7 @@ public class Compiler
 
         var ir = new IrGenerator();
         var functions = ir.Generate(
-            rootTypeMetadataProvider.Types,
+            semanticResult.MetadataProvider.Types,
             semanticResult.SemanticTrees);
 
         if (options.PrintIr)

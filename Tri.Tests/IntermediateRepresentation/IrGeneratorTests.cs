@@ -16,7 +16,7 @@ public class IrGeneratorTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static (SemanticTree, ITypeMetadataProvider) Parse(string code)
+    private static (SemanticTree, IMetadataProvider) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 

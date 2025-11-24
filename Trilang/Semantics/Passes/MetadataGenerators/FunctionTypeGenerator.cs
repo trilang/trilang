@@ -8,13 +8,13 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 internal class FunctionTypeGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<FunctionType> typesToProcess;
 
-    public FunctionTypeGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public FunctionTypeGenerator(SemanticDiagnosticReporter diagnostics, MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -25,8 +25,8 @@ internal class FunctionTypeGenerator
             if (!symbol.IsFunction)
                 continue;
 
-            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var node = (FunctionType)symbol.Node;
+            var typeProvider = metadataProviderMap.Get(node);
 
             if (typeProvider.GetType(symbol.Name) is not FunctionTypeMetadata metadata)
             {
@@ -46,7 +46,7 @@ internal class FunctionTypeGenerator
         {
             // TODO: generic?
             var metadata = (FunctionTypeMetadata)functionTypeNode.Metadata!;
-            var typeProvider = symbolTableMap.Get(functionTypeNode).TypeProvider;
+            var typeProvider = metadataProviderMap.Get(functionTypeNode);
 
             foreach (var parameterType in functionTypeNode.ParameterTypes)
                 metadata.AddParameter(parameterType.PopulateMetadata(typeProvider, diagnostics));

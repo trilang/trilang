@@ -9,13 +9,13 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 internal class TypeGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<TypeDeclaration> typesToProcess;
 
-    public TypeGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public TypeGenerator(SemanticDiagnosticReporter diagnostics, MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -26,12 +26,13 @@ internal class TypeGenerator
             if (symbol is { IsTypeDeclaration: false, IsGenericTypeDeclaration: false })
                 continue;
 
-            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var node = (TypeDeclaration)symbol.Node;
             var root = node.GetRoot();
             var metadata = new TypeMetadata(
                 new SourceLocation(root.SourceFile, node.SourceSpan ?? default),
                 node.Name);
+
+            var typeProvider = metadataProviderMap.Get(node);
 
             foreach (var genericArgument in node.GenericArguments)
             {
@@ -67,7 +68,7 @@ internal class TypeGenerator
         {
             var type = node.Metadata!;
             var root = node.GetRoot();
-            var typeProvider = symbolTableMap.Get(node).TypeProvider;
+            var typeProvider = metadataProviderMap.Get(node);
 
             foreach (var @interface in node.Interfaces)
                 PopulateInterface(typeProvider, type, @interface);
@@ -105,13 +106,13 @@ internal class TypeGenerator
     }
 
     private void PopulateInterface(
-        ITypeMetadataProvider typeProvider,
+        IMetadataProvider provider,
         TypeMetadata type,
         Type @interface)
     {
         // TODO: support generic interfaces
         var interfaceMetadata = default(InterfaceMetadata);
-        if (typeProvider.GetType(@interface.Name) is AliasMetadata aliasMetadata)
+        if (provider.GetType(@interface.Name) is AliasMetadata aliasMetadata)
             interfaceMetadata = aliasMetadata.Type as InterfaceMetadata;
 
         if (interfaceMetadata is null)
@@ -125,12 +126,12 @@ internal class TypeGenerator
     }
 
     private void PopulateProperty(
-        ITypeMetadataProvider typeProvider,
+        IMetadataProvider provider,
         SemanticTree root,
         TypeMetadata type,
         PropertyDeclaration property)
     {
-        var propertyTypeMetadata = property.Type.PopulateMetadata(typeProvider, diagnostics);
+        var propertyTypeMetadata = property.Type.PopulateMetadata(provider, diagnostics);
         var propertyMetadata = new PropertyMetadata(
             new SourceLocation(root.SourceFile, property.SourceSpan.GetValueOrDefault()),
             type,
@@ -152,7 +153,7 @@ internal class TypeGenerator
         if (propertyMetadata.Getter is not null)
         {
             type.AddMethod(propertyMetadata.Getter);
-            typeProvider.DefineType(propertyMetadata.Getter.Type);
+            provider.DefineType(propertyMetadata.Getter.Type);
 
             if (property.Getter is not null)
                 property.Getter.Metadata = propertyMetadata.Getter;
@@ -161,7 +162,7 @@ internal class TypeGenerator
         if (propertyMetadata.Setter is not null)
         {
             type.AddMethod(propertyMetadata.Setter);
-            typeProvider.DefineType(propertyMetadata.Setter.Type);
+            provider.DefineType(propertyMetadata.Setter.Type);
 
             if (property.Setter is not null)
                 property.Setter.Metadata = propertyMetadata.Setter;
@@ -169,17 +170,17 @@ internal class TypeGenerator
     }
 
     private void PopulateConstructor(
-        ITypeMetadataProvider typeProvider,
+        IMetadataProvider provider,
         SemanticTree root,
         TypeMetadata type,
         ConstructorDeclaration constructor)
     {
-        var parameters = GetParameters(root, typeProvider, constructor.Parameters);
+        var parameters = GetParameters(root, provider, constructor.Parameters);
         var functionType = new FunctionTypeMetadata(
             null,
             parameters.Select(x => x.Type),
             TypeMetadata.Void);
-        functionType = typeProvider.GetOrDefine(functionType);
+        functionType = provider.GetOrDefine(functionType);
 
         var constructorMetadata = new ConstructorMetadata(
             new SourceLocation(root.SourceFile, constructor.SourceSpan.GetValueOrDefault()),
@@ -192,21 +193,21 @@ internal class TypeGenerator
         constructor.Metadata = constructorMetadata;
     }
 
-    private void PopulateMethod(ITypeMetadataProvider typeProvider,
+    private void PopulateMethod(IMetadataProvider provider,
         SemanticTree root,
         TypeMetadata type,
         MethodDeclaration method,
         FunctionGroupMetadata group)
     {
-        var parameters = GetParameters(root, typeProvider, method.Parameters);
+        var parameters = GetParameters(root, provider, method.Parameters);
         var parameterTypes = parameters.Select(x => x.Type).ToArray();
-        var returnTypeMetadata = method.ReturnType.PopulateMetadata(typeProvider, diagnostics);
+        var returnTypeMetadata = method.ReturnType.PopulateMetadata(provider, diagnostics);
 
         var functionType = new FunctionTypeMetadata(
             null,
             parameterTypes,
             returnTypeMetadata);
-        functionType = typeProvider.GetOrDefine(functionType);
+        functionType = provider.GetOrDefine(functionType);
 
         var methodMetadata = new MethodMetadata(
             new SourceLocation(root.SourceFile, method.SourceSpan.GetValueOrDefault()),
@@ -230,14 +231,14 @@ internal class TypeGenerator
 
     private ParameterMetadata[] GetParameters(
         SemanticTree root,
-        ITypeMetadataProvider typeProvider,
+        IMetadataProvider provider,
         IReadOnlyList<Parameter> parameters)
     {
         var result = new ParameterMetadata?[parameters.Count];
         for (var i = 0; i < parameters.Count; i++)
         {
             var parameter = parameters[i];
-            var parameterTypeMetadata = parameter.Type.PopulateMetadata(typeProvider, diagnostics);
+            var parameterTypeMetadata = parameter.Type.PopulateMetadata(provider, diagnostics);
             var parameterMetadata = new ParameterMetadata(
                 new SourceLocation(root.SourceFile, parameter.SourceSpan.GetValueOrDefault()),
                 parameter.Name,

@@ -8,15 +8,15 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 internal class DiscriminatedUnionGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<DiscriminatedUnion> typesToProcess;
 
     public DiscriminatedUnionGenerator(
         SemanticDiagnosticReporter diagnostics,
-        SymbolTableMap symbolTableMap)
+        MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -27,8 +27,8 @@ internal class DiscriminatedUnionGenerator
             if (!symbol.IsDiscriminatedUnion)
                 continue;
 
-            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var node = (DiscriminatedUnion)symbol.Node;
+            var typeProvider = metadataProviderMap.Get(node);
 
             if (typeProvider.GetType(symbol.Name) is not DiscriminatedUnionMetadata metadata)
             {
@@ -47,7 +47,7 @@ internal class DiscriminatedUnionGenerator
         foreach (var node in typesToProcess)
         {
             var metadata = (DiscriminatedUnionMetadata)node.Metadata!;
-            var typeProvider = symbolTableMap.Get(node).TypeProvider;
+            var typeProvider = metadataProviderMap.Get(node);
 
             foreach (var typeNode in node.Types)
                 metadata.AddType(typeNode.PopulateMetadata(typeProvider, diagnostics));

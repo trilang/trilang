@@ -5,7 +5,7 @@ namespace Trilang.Semantics;
 
 public interface IVisitor
 {
-    void VisitTypeAlias(AliasDeclaration node);
+    void VisitAlias(AliasDeclaration node);
 
     void VisitArrayAccess(ArrayAccessExpression node);
 

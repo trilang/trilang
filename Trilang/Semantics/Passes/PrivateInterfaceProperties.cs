@@ -8,7 +8,7 @@ internal class PrivateInterfaceProperties : ISemanticPass
     public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
     {
         var diagnostics = context.Diagnostics;
-        var typeProvider = context.RootSymbolTable.TypeProvider;
+        var typeProvider = context.RootMetadataProvider;
         foreach (var interfaceMetadata in typeProvider.Types.OfType<InterfaceMetadata>())
         {
             foreach (var propertyMetadata in interfaceMetadata.Properties)

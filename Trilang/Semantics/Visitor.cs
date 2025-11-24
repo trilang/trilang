@@ -3,8 +3,28 @@ using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics;
 
-public abstract class Visitor : IVisitor
+internal abstract class Visitor : IVisitor
 {
+    public virtual void VisitAlias(AliasDeclaration node)
+    {
+        VisitAliasEnter(node);
+
+        foreach (var genericArgument in node.GenericArguments)
+            genericArgument.Accept(this);
+
+        node.Type.Accept(this);
+
+        VisitAliasExit(node);
+    }
+
+    protected virtual void VisitAliasEnter(AliasDeclaration node)
+    {
+    }
+
+    protected virtual void VisitAliasExit(AliasDeclaration node)
+    {
+    }
+
     public virtual void VisitArrayAccess(ArrayAccessExpression node)
     {
         VisitArrayAccessEnter(node);
@@ -730,23 +750,6 @@ public abstract class Visitor : IVisitor
     }
 
     protected virtual void VisitTupleTypeExit(TupleType node)
-    {
-    }
-
-    public virtual void VisitTypeAlias(AliasDeclaration node)
-    {
-        VisitTypeAliasEnter(node);
-
-        node.Type.Accept(this);
-
-        VisitTypeAliasExit(node);
-    }
-
-    protected virtual void VisitTypeAliasEnter(AliasDeclaration node)
-    {
-    }
-
-    protected virtual void VisitTypeAliasExit(AliasDeclaration node)
     {
     }
 

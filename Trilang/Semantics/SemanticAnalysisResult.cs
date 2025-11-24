@@ -8,5 +8,5 @@ namespace Trilang.Semantics;
 public record SemanticAnalysisResult(
     IReadOnlyList<SemanticTree> SemanticTrees,
     SymbolTableMap SymbolTableMap,
-    ITypeMetadataProvider TypeMetadataProvider,
+    IMetadataProvider MetadataProvider,
     ControlFlowGraphMap ControlFlowGraphs);

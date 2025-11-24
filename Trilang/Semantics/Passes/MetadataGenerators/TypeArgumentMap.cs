@@ -4,21 +4,21 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class TypeArgumentMap
 {
-    private readonly ITypeMetadataProvider typeProvider;
+    private readonly IMetadataProvider provider;
     private readonly Dictionary<string, ITypeMetadata> map;
 
-    private TypeArgumentMap(ITypeMetadataProvider typeProvider)
+    private TypeArgumentMap(IMetadataProvider provider)
     {
-        this.typeProvider = typeProvider;
+        this.provider = provider;
         map = [];
     }
 
     public static TypeArgumentMap Create(
-        ITypeMetadataProvider typeProvider,
+        IMetadataProvider metadataProvider,
         IReadOnlyCollection<ITypeMetadata> closedTypes,
         IReadOnlyCollection<ITypeMetadata> openTypes)
     {
-        var result = new TypeArgumentMap(typeProvider);
+        var result = new TypeArgumentMap(metadataProvider);
 
         foreach (var (specific, open) in closedTypes.Zip(openTypes))
         {
@@ -77,7 +77,7 @@ internal class TypeArgumentMap
         if (type.IsInvalid)
             alias.MarkAsInvalid();
 
-        return typeProvider.GetOrDefine(alias);
+        return provider.GetOrDefine(alias);
     }
 
     private DiscriminatedUnionMetadata Map(DiscriminatedUnionMetadata discriminatedUnion)
@@ -88,7 +88,7 @@ internal class TypeArgumentMap
 
         var metadata = new DiscriminatedUnionMetadata(discriminatedUnion.Definition, types);
 
-        return typeProvider.GetOrDefine(metadata);
+        return provider.GetOrDefine(metadata);
     }
 
     private FunctionTypeMetadata Map(FunctionTypeMetadata functionType)
@@ -100,7 +100,7 @@ internal class TypeArgumentMap
             parameterTypes,
             returnType);
 
-        return typeProvider.GetOrDefine(functionTypeMetadata);
+        return provider.GetOrDefine(functionTypeMetadata);
     }
 
     private InterfaceMetadata Map(InterfaceMetadata interfaceMetadata)
@@ -129,7 +129,7 @@ internal class TypeArgumentMap
             properties,
             methods);
 
-        return typeProvider.GetOrDefine(metadata);
+        return provider.GetOrDefine(metadata);
     }
 
     private TupleMetadata Map(TupleMetadata tuple)
@@ -137,7 +137,7 @@ internal class TypeArgumentMap
         var types = tuple.Types.Select(Map);
         var tupleMetadata = new TupleMetadata(tuple.Definition, types);
 
-        return typeProvider.GetOrDefine(tupleMetadata);
+        return provider.GetOrDefine(tupleMetadata);
     }
 
     private ITypeMetadata Map(TypeArgumentMetadata type)
@@ -148,7 +148,7 @@ internal class TypeArgumentMap
         var itemType = Map(type.ItemMetadata!);
         var typeArrayMetadata = new ArrayMetadata(type.Definition, itemType);
 
-        return typeProvider.GetOrDefine(typeArrayMetadata);
+        return provider.GetOrDefine(typeArrayMetadata);
     }
 
     private TypeMetadata Map(TypeMetadata type)
@@ -163,10 +163,10 @@ internal class TypeArgumentMap
             [],
             []);
 
-        if (typeProvider.GetType(closed.ToString()) is TypeMetadata existingType)
+        if (provider.GetType(closed.ToString()) is TypeMetadata existingType)
             return existingType;
 
-        typeProvider.DefineType(closed.ToString(), closed);
+        provider.DefineType(closed.ToString(), closed);
 
         foreach (var @interface in type.Interfaces)
             closed.AddInterface(Map(@interface));

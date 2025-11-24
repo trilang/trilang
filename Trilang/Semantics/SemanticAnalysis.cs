@@ -9,8 +9,6 @@ namespace Trilang.Semantics;
 
 public class SemanticAnalysis
 {
-    private readonly ITypeMetadataProvider typeMetadataProvider;
-
     // TODO: reflection?
     private readonly ISemanticPass[] semanticPasses =
     [
@@ -28,27 +26,22 @@ public class SemanticAnalysis
         new SymbolFinder(),
         new ThisInStaticMethods(),
         new ThisOutsideOfType(),
+        new MetadataProviderAnalyzer(),
         new TypeChecker(),
         new VariableUsedBeforeDeclared(),
     ];
-
-    public SemanticAnalysis()
-        : this(new RootTypeMetadataProvider())
-    {
-    }
-
-    public SemanticAnalysis(ITypeMetadataProvider typeMetadataProvider)
-        => this.typeMetadataProvider = typeMetadataProvider;
 
     public SemanticAnalysisResult Analyze(
         IEnumerable<Parsing.Ast.SyntaxTree> syntaxTrees,
         SemanticAnalysisOptions options)
     {
-        var rootSymbolTable = new RootSymbolTable(typeMetadataProvider);
+        var rootSymbolTable = new RootSymbolTable();
+        var rootTypeProvider = new RootMetadataProvider();
         var context = new SemanticPassContext(
             [.. options.Directives],
             options.Diagnostics,
-            rootSymbolTable);
+            rootSymbolTable,
+            rootTypeProvider);
 
         var converter = new ConvertToSemanticTree();
         var semanticTrees = syntaxTrees
@@ -62,7 +55,7 @@ public class SemanticAnalysis
         return new SemanticAnalysisResult(
             semanticTrees,
             context.SymbolTableMap!,
-            typeMetadataProvider,
+            rootTypeProvider,
             context.ControlFlowGraphs!);
     }
 

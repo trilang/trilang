@@ -13,5 +13,4 @@ public interface ISymbolTable
 
     IReadOnlyList<TypeSymbol> Types { get; }
     IReadOnlyDictionary<string, IdSymbol> Ids { get; }
-    ITypeMetadataProvider TypeProvider { get; }
 }

@@ -8,13 +8,13 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 internal class FunctionGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<FunctionDeclaration> typesToProcess;
 
-    public FunctionGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public FunctionGenerator(SemanticDiagnosticReporter diagnostics, MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -29,7 +29,7 @@ internal class FunctionGenerator
                 if (node is not FunctionDeclaration function)
                     continue;
 
-                var typeProvider = symbolTableMap.Get(node).TypeProvider;
+                var metadataProvider = metadataProviderMap.Get(function);
                 var metadata = new FunctionMetadata(
                     function.GetLocation(),
                     function.AccessModifier.ToMetadata(),
@@ -38,7 +38,7 @@ internal class FunctionGenerator
                     null!,
                     group);
 
-                typeProvider.AddFunction(metadata);
+                metadataProvider.AddFunction(metadata);
 
                 function.Metadata = metadata;
 
@@ -53,14 +53,14 @@ internal class FunctionGenerator
         {
             var root = function.GetRoot();
             var metadata = function.Metadata!;
-            var typeProvider = symbolTableMap.Get(function).TypeProvider;
+            var metadataProvider = metadataProviderMap.Get(function);
 
             foreach (var functionParameter in function.Parameters)
             {
                 var parameter = new ParameterMetadata(
                     new SourceLocation(root.SourceFile, functionParameter.SourceSpan.GetValueOrDefault()),
                     functionParameter.Name,
-                    functionParameter.Type.PopulateMetadata(typeProvider, diagnostics));
+                    functionParameter.Type.PopulateMetadata(metadataProvider, diagnostics));
 
                 var isParameterDefined = metadata.Parameters.Any(x => x.Name == parameter.Name);
                 if (isParameterDefined)
@@ -73,7 +73,7 @@ internal class FunctionGenerator
                 metadata.AddParameter(parameter);
             }
 
-            metadata.Type = GetFunctionType(function, typeProvider);
+            metadata.Type = GetFunctionType(function, metadataProvider);
         }
 
         foreach (var function in typesToProcess)
@@ -82,17 +82,17 @@ internal class FunctionGenerator
 
     private FunctionTypeMetadata GetFunctionType(
         FunctionDeclaration function,
-        ITypeMetadataProvider typeProvider)
+        IMetadataProvider metadataProvider)
     {
         var metadata = function.Metadata!;
         var functionTypeMetadata = new FunctionTypeMetadata(
             null,
             metadata.Parameters.Select(x => x.Type),
-            function.ReturnType.PopulateMetadata(typeProvider, diagnostics));
+            function.ReturnType.PopulateMetadata(metadataProvider, diagnostics));
 
-        if (typeProvider.GetType(functionTypeMetadata.ToString()) is not FunctionTypeMetadata existingFunctionType)
+        if (metadataProvider.GetType(functionTypeMetadata.ToString()) is not FunctionTypeMetadata existingFunctionType)
         {
-            typeProvider.DefineType(functionTypeMetadata.ToString(), functionTypeMetadata);
+            metadataProvider.DefineType(functionTypeMetadata.ToString(), functionTypeMetadata);
             existingFunctionType = functionTypeMetadata;
         }
 

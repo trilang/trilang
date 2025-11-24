@@ -8,13 +8,13 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 internal class InterfaceGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<Interface> typesToProcess;
 
-    public InterfaceGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public InterfaceGenerator(SemanticDiagnosticReporter diagnostics, MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -25,8 +25,8 @@ internal class InterfaceGenerator
             if (!symbol.IsInterface)
                 continue;
 
-            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var node = (Interface)symbol.Node;
+            var typeProvider = metadataProviderMap.Get(node);
 
             if (typeProvider.GetType(symbol.Name) is not InterfaceMetadata metadata)
             {
@@ -45,7 +45,7 @@ internal class InterfaceGenerator
         foreach (var node in typesToProcess)
         {
             var metadata = (InterfaceMetadata)node.Metadata!;
-            var typeProvider = symbolTableMap.Get(node).TypeProvider;
+            var typeProvider = metadataProviderMap.Get(node);
 
             foreach (var property in node.Properties)
                 PopulateProperty(typeProvider, metadata, property);
@@ -61,11 +61,11 @@ internal class InterfaceGenerator
     }
 
     private void PopulateProperty(
-        ITypeMetadataProvider typeProvider,
+        IMetadataProvider metadataProvider,
         InterfaceMetadata metadata,
         InterfaceProperty property)
     {
-        var propertyTypeMetadata = property.Type.PopulateMetadata(typeProvider, diagnostics);
+        var propertyTypeMetadata = property.Type.PopulateMetadata(metadataProvider, diagnostics);
         var propertyMetadata = new InterfacePropertyMetadata(
             metadata.Definition! with { Span = property.SourceSpan.GetValueOrDefault() },
             metadata,
@@ -85,21 +85,21 @@ internal class InterfaceGenerator
     }
 
     private void PopulateMethod(
-        ITypeMetadataProvider typeProvider,
+        IMetadataProvider metadataProvider,
         InterfaceMetadata metadata,
         InterfaceMethod method,
         FunctionGroupMetadata group)
     {
         var parameters = new ITypeMetadata[method.ParameterTypes.Count];
         for (var i = 0; i < method.ParameterTypes.Count; i++)
-            parameters[i] = method.ParameterTypes[i].PopulateMetadata(typeProvider, diagnostics);
+            parameters[i] = method.ParameterTypes[i].PopulateMetadata(metadataProvider, diagnostics);
 
-        var returnTypeMetadata = method.ReturnType.PopulateMetadata(typeProvider, diagnostics);
+        var returnTypeMetadata = method.ReturnType.PopulateMetadata(metadataProvider, diagnostics);
         var functionType = new FunctionTypeMetadata(null, parameters, returnTypeMetadata);
 
-        if (typeProvider.GetType(functionType.ToString()) is not FunctionTypeMetadata existingFunctionType)
+        if (metadataProvider.GetType(functionType.ToString()) is not FunctionTypeMetadata existingFunctionType)
         {
-            typeProvider.DefineType(functionType.ToString(), functionType);
+            metadataProvider.DefineType(functionType.ToString(), functionType);
             existingFunctionType = functionType;
         }
 

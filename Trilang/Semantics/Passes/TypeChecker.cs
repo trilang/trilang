@@ -14,12 +14,14 @@ internal class TypeChecker : Visitor, ISemanticPass
     private SemanticDiagnosticReporter diagnostics = null!;
     private IEnumerable<string> directives = null!;
     private SymbolTableMap symbolTableMap = null!;
+    private MetadataProviderMap metadataProviderMap = null!;
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
         diagnostics = context.Diagnostics;
         directives = context.Directives;
         symbolTableMap = context.SymbolTableMap!;
+        metadataProviderMap = context.TypeProviderMap!;
 
         foreach (var tree in semanticTrees)
             tree.Accept(this);
@@ -270,7 +272,7 @@ internal class TypeChecker : Visitor, ISemanticPass
         }
 
         // static access
-        var typeProvider = symbolTable.TypeProvider;
+        var typeProvider = metadataProviderMap.Get(node);
         node.Reference = typeProvider.GetType(node.Name);
     }
 
@@ -414,7 +416,7 @@ internal class TypeChecker : Visitor, ISemanticPass
 
     protected override void VisitTupleExit(TupleExpression node)
     {
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
+        var typeProvider = metadataProviderMap.Get(node);
 
         // we can't generate metadata for this tuple in GenerateMetadata
         // because we don't know the types of the expressions yet
@@ -435,7 +437,7 @@ internal class TypeChecker : Visitor, ISemanticPass
         if (node.Metadata is not null)
             return;
 
-        var typeProvider = symbolTableMap.Get(node).TypeProvider;
+        var typeProvider = metadataProviderMap.Get(node);
 
         node.Metadata = node.PopulateMetadata(typeProvider, diagnostics);
     }

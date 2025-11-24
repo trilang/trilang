@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public interface ITypeMetadataProvider
+public interface IMetadataProvider
 {
     ITypeMetadata? GetType(string name);
 
@@ -12,7 +12,7 @@ public interface ITypeMetadataProvider
 
     void AddFunction(FunctionMetadata function);
 
-    ITypeMetadataProvider CreateChild();
+    IMetadataProvider CreateChild();
 
     IEnumerable<ITypeMetadata> Types { get; }
 

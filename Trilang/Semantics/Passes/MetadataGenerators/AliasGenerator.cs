@@ -8,13 +8,13 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 internal class AliasGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<AliasDeclaration> typesToProcess;
 
-    public AliasGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public AliasGenerator(SemanticDiagnosticReporter diagnostics, MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -25,7 +25,6 @@ internal class AliasGenerator
             if (!symbol.IsAlias)
                 continue;
 
-            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var node = (AliasDeclaration)symbol.Node;
             var root = node.GetRoot();
             var metadata = new AliasMetadata(
@@ -38,7 +37,8 @@ internal class AliasGenerator
                     new SourceLocation(root.SourceFile, genericArgument.SourceSpan.GetValueOrDefault()),
                     genericArgument.Name) as ITypeMetadata;
 
-                if (!typeProvider.DefineType(genericArgument.Name, argumentMetadata))
+                var argumentProvider = metadataProviderMap.Get(genericArgument);
+                if (!argumentProvider.DefineType(genericArgument.Name, argumentMetadata))
                 {
                     argumentMetadata = TypeArgumentMetadata.Invalid(genericArgument.Name);
                     diagnostics.TypeArgumentAlreadyDefined(genericArgument);
@@ -48,7 +48,8 @@ internal class AliasGenerator
                 genericArgument.Metadata = argumentMetadata;
             }
 
-            if (!typeProvider.DefineType(symbol.Name, metadata))
+            var metadataProvider = metadataProviderMap.Get(node);
+            if (!metadataProvider.DefineType(symbol.Name, metadata))
             {
                 diagnostics.TypeAlreadyDefined(node);
                 metadata.MarkAsInvalid();
@@ -65,7 +66,7 @@ internal class AliasGenerator
         foreach (var typeAliasNode in typesToProcess)
         {
             var metadata = (AliasMetadata)typeAliasNode.Metadata!;
-            var typeProvider = symbolTableMap.Get(typeAliasNode).TypeProvider;
+            var typeProvider = metadataProviderMap.Get(typeAliasNode);
             var aliasedType = typeAliasNode.Type;
             var aliasedMetadata = typeProvider.GetType(aliasedType.Name);
             if (aliasedMetadata is null && aliasedType is GenericType genericType)

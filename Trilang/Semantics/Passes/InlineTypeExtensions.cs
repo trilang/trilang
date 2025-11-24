@@ -8,10 +8,10 @@ internal static class InlineTypeExtensions
 {
     internal static ITypeMetadata PopulateMetadata(
         this IInlineType node,
-        ITypeMetadataProvider typeProvider,
+        IMetadataProvider metadataProvider,
         SemanticDiagnosticReporter diagnostics)
     {
-        var metadata = typeProvider.GetType(node.Name);
+        var metadata = metadataProvider.GetType(node.Name);
         if (metadata is null)
         {
             metadata = TypeMetadata.Invalid(node.Name);

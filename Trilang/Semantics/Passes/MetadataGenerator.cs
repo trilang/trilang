@@ -11,16 +11,17 @@ internal class MetadataGenerator : ISemanticPass
         var types = rootSymbolTable.Types;
         var ids = rootSymbolTable.Ids;
         var symbolTableMap = context.SymbolTableMap!;
+        var typeProviderMap = context.TypeProviderMap!;
 
-        var typeGenerator = new TypeGenerator(context.Diagnostics, symbolTableMap);
-        var interfaceGenerator = new InterfaceGenerator(context.Diagnostics, symbolTableMap);
-        var discriminatedUnionGenerator = new DiscriminatedUnionGenerator(context.Diagnostics, symbolTableMap);
-        var aliasGenerator = new AliasGenerator(context.Diagnostics, symbolTableMap);
-        var tupleGenerator = new TupleGenerator(context.Diagnostics, symbolTableMap);
-        var arrayGenerator = new ArrayGenerator(context.Diagnostics, symbolTableMap);
-        var genericTypeGenerator = new GenericTypeGenerator(context.Diagnostics, symbolTableMap);
-        var functionTypeGenerator = new FunctionTypeGenerator(context.Diagnostics, symbolTableMap);
-        var functionGenerator = new FunctionGenerator(context.Diagnostics, symbolTableMap);
+        var typeGenerator = new TypeGenerator(context.Diagnostics, typeProviderMap);
+        var interfaceGenerator = new InterfaceGenerator(context.Diagnostics, typeProviderMap);
+        var discriminatedUnionGenerator = new DiscriminatedUnionGenerator(context.Diagnostics, typeProviderMap);
+        var aliasGenerator = new AliasGenerator(context.Diagnostics, typeProviderMap);
+        var tupleGenerator = new TupleGenerator(context.Diagnostics, typeProviderMap);
+        var arrayGenerator = new ArrayGenerator(context.Diagnostics, typeProviderMap);
+        var genericTypeGenerator = new GenericTypeGenerator(context.Diagnostics, typeProviderMap);
+        var functionTypeGenerator = new FunctionTypeGenerator(context.Diagnostics, typeProviderMap);
+        var functionGenerator = new FunctionGenerator(context.Diagnostics, typeProviderMap);
 
         typeGenerator.CreateTypes(types);
         interfaceGenerator.CreateInterfaces(types);
@@ -42,12 +43,20 @@ internal class MetadataGenerator : ISemanticPass
         functionGenerator.PopulateFunctions();
         genericTypeGenerator.PopulateGenericTypes();
 
-        var variableGenerator = new VariableGenerator(context.Diagnostics, symbolTableMap);
+        var variableGenerator = new VariableGenerator(
+            context.Diagnostics,
+            symbolTableMap,
+            typeProviderMap);
+
         foreach (var semanticTree in semanticTrees)
             semanticTree.Accept(variableGenerator);
     }
 
     public string Name => nameof(MetadataGenerator);
 
-    public IEnumerable<string> DependsOn => [nameof(SymbolFinder)];
+    public IEnumerable<string> DependsOn =>
+    [
+        nameof(SymbolFinder),
+        nameof(MetadataProviderAnalyzer),
+    ];
 }

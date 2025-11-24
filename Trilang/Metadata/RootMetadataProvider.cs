@@ -1,12 +1,12 @@
 namespace Trilang.Metadata;
 
 // TODO: is not thread safe
-public class RootTypeMetadataProvider : ITypeMetadataProvider
+public class RootMetadataProvider : IMetadataProvider
 {
     private readonly Dictionary<string, ITypeMetadata> types;
     private readonly List<FunctionMetadata> functions;
 
-    public RootTypeMetadataProvider()
+    public RootMetadataProvider()
     {
         types = [];
         functions = [];
@@ -52,8 +52,8 @@ public class RootTypeMetadataProvider : ITypeMetadataProvider
     public void AddFunction(FunctionMetadata function)
         => functions.Add(function);
 
-    public ITypeMetadataProvider CreateChild()
-        => new TypeMetadataProvider(this);
+    public IMetadataProvider CreateChild()
+        => new MetadataProvider(this);
 
     public IEnumerable<ITypeMetadata> Types
         => types.Values;

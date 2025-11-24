@@ -28,10 +28,10 @@ public class AliasDeclaration : IDeclaration
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.VisitTypeAlias(this);
+        => visitor.VisitAlias(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
-        => visitor.VisitTypeAlias(this, context);
+        => visitor.VisitAlias(this, context);
 
     public T Transform<T>(ITransformer<T> transformer)
         => transformer.TransformTypeAlias(this);

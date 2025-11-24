@@ -13,7 +13,7 @@ internal class CyclicAlias : ISemanticPass
 
     public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
     {
-        var typeProvider = context.RootSymbolTable.TypeProvider;
+        var typeProvider = context.RootMetadataProvider;
         foreach (var aliasType in typeProvider.Types.OfType<AliasMetadata>())
             CheckCircularReference(aliasType, context.Diagnostics);
     }

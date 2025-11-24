@@ -8,13 +8,13 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 internal class TupleGenerator
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
     private readonly HashSet<TupleType> typesToProcess;
 
-    public TupleGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public TupleGenerator(SemanticDiagnosticReporter diagnostics, MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
-        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
         typesToProcess = [];
     }
 
@@ -25,8 +25,8 @@ internal class TupleGenerator
             if (!symbol.IsTuple)
                 continue;
 
-            var typeProvider = symbolTableMap.Get(symbol.Node).TypeProvider;
             var node = (TupleType)symbol.Node;
+            var typeProvider = metadataProviderMap.Get(node);
 
             if (typeProvider.GetType(symbol.Name) is not TupleMetadata metadata)
             {
@@ -45,7 +45,7 @@ internal class TupleGenerator
         foreach (var node in typesToProcess)
         {
             var tuple = (TupleMetadata)node.Metadata!;
-            var typeProvider = symbolTableMap.Get(node).TypeProvider;
+            var typeProvider = metadataProviderMap.Get(node);
 
             foreach (var typeNode in node.Types)
                 tuple.AddType(typeNode.PopulateMetadata(typeProvider, diagnostics));

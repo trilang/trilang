@@ -8,13 +8,18 @@ internal class VariableGenerator : Visitor
 {
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
 
     private SourceFile file;
 
-    public VariableGenerator(SemanticDiagnosticReporter diagnostics, SymbolTableMap symbolTableMap)
+    public VariableGenerator(
+        SemanticDiagnosticReporter diagnostics,
+        SymbolTableMap symbolTableMap,
+        MetadataProviderMap metadataProviderMap)
     {
         this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
     }
 
     protected override void VisitTreeEnter(SemanticTree node)
@@ -23,7 +28,7 @@ internal class VariableGenerator : Visitor
     protected override void VisitVariableEnter(VariableDeclaration node)
     {
         var symbolTable = symbolTableMap.Get(node);
-        var typeProvider = symbolTable.TypeProvider;
+        var typeProvider = metadataProviderMap.Get(node);
 
         var type = node.Type.PopulateMetadata(typeProvider, diagnostics);
         var metadata = new VariableMetadata(
