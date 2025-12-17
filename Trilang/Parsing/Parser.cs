@@ -367,7 +367,7 @@ public class Parser
                 type);
         }
 
-        var interfaces = new List<TypeNode>();
+        var interfaces = new List<TypeRefNode>();
         if (context.Reader.Check(Colon))
         {
             var @interface = TryParseTypeNode(context);
@@ -1293,7 +1293,7 @@ public class Parser
         if (!hasNull)
             return null;
 
-        return new TypeNode(token.SourceSpan, "null");
+        return new TypeRefNode(token.SourceSpan, "null");
     }
 
     private IInlineTypeNode? TryParseArrayType(ParserContext context)
@@ -1310,10 +1310,10 @@ public class Parser
 
             return new ArrayTypeNode(
                 id.SourceSpan.Combine(closeBracketSpan),
-                new TypeNode(id.SourceSpan, id.Identifier));
+                new TypeRefNode(id.SourceSpan, id.Identifier));
         });
 
-    private GenericTypeNode? TryParseGenericTypeNode(ParserContext context)
+    private GenericTypeRefNode? TryParseGenericTypeNode(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
             var (hasToken, token) = c.Reader.Check(Identifier);
@@ -1351,20 +1351,20 @@ public class Parser
 
             var greaterSignSpan = c.Reader.Expect(Greater);
 
-            return new GenericTypeNode(
+            return new GenericTypeRefNode(
                 token.SourceSpan.Combine(greaterSignSpan),
                 token.Identifier,
                 typeArguments);
         });
 
-    private TypeNode? TryParseTypeNode(ParserContext context)
+    private TypeRefNode? TryParseTypeNode(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
             var (hasToken, token) = c.Reader.Check(Identifier);
             if (!hasToken)
                 return null;
 
-            return new TypeNode(token.SourceSpan, token.Identifier);
+            return new TypeRefNode(token.SourceSpan, token.Identifier);
         });
 
     private (SourceSpan, IReadOnlyList<IInlineTypeNode>?) TryParseParenTypes(

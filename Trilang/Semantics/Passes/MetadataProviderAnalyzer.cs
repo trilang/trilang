@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics.Passes;
 
@@ -151,7 +150,7 @@ internal class MetadataProviderAnalyzer : IVisitor<IMetadataProvider>, ISemantic
         node.ReturnType.Accept(this, context);
     }
 
-    public void VisitGenericType(GenericType node, IMetadataProvider context)
+    public void VisitGenericType(GenericTypeRef node, IMetadataProvider context)
     {
         map.Add(node, context);
 
@@ -352,7 +351,7 @@ internal class MetadataProviderAnalyzer : IVisitor<IMetadataProvider>, ISemantic
             method.Accept(this, child);
     }
 
-    public void VisitTypeNode(Type node, IMetadataProvider context)
+    public void VisitTypeNode(TypeRef node, IMetadataProvider context)
         => map.Add(node, context);
 
     public void VisitUnaryExpression(UnaryExpression node, IMetadataProvider context)

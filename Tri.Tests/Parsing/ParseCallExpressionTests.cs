@@ -39,7 +39,7 @@ public class ParseCallExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -87,7 +87,7 @@ public class ParseCallExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -142,7 +142,7 @@ public class ParseCallExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -152,7 +152,7 @@ public class ParseCallExpressionTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(56, 2, 35)),
                             "x",
-                            new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
                             new BinaryExpressionNode(
                                 new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(55, 2, 34)),
                                 BinaryExpressionKind.Addition,

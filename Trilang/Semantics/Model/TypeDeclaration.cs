@@ -8,8 +8,8 @@ public class TypeDeclaration : IDeclaration
         SourceSpan? sourceSpan,
         AccessModifier accessModifier,
         string name,
-        IReadOnlyList<Type> genericArguments,
-        IReadOnlyList<Type> interfaces,
+        IReadOnlyList<TypeRef> genericArguments,
+        IReadOnlyList<TypeRef> interfaces,
         IReadOnlyList<PropertyDeclaration> properties,
         IReadOnlyList<ConstructorDeclaration> constructors,
         IReadOnlyList<MethodDeclaration> methods)
@@ -62,9 +62,9 @@ public class TypeDeclaration : IDeclaration
 
     public string FullName { get; }
 
-    public IReadOnlyList<Type> GenericArguments { get; }
+    public IReadOnlyList<TypeRef> GenericArguments { get; }
 
-    public IReadOnlyList<Type> Interfaces { get; }
+    public IReadOnlyList<TypeRef> Interfaces { get; }
 
     public IReadOnlyList<PropertyDeclaration> Properties { get; }
 

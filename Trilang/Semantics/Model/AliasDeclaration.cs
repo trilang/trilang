@@ -8,7 +8,7 @@ public class AliasDeclaration : IDeclaration
         SourceSpan? sourceSpan,
         AccessModifier accessModifier,
         string name,
-        IReadOnlyList<Type> genericArguments,
+        IReadOnlyList<TypeRef> genericArguments,
         IInlineType type)
     {
         SourceSpan = sourceSpan;
@@ -46,7 +46,7 @@ public class AliasDeclaration : IDeclaration
 
     public string FullName { get; }
 
-    public IReadOnlyList<Type> GenericArguments { get; }
+    public IReadOnlyList<TypeRef> GenericArguments { get; }
 
     public IInlineType Type { get; }
 

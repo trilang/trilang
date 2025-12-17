@@ -7,7 +7,6 @@ using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using static Trilang.Semantics.Model.BinaryExpressionKind;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Tri.Tests.Lower;
 
@@ -60,12 +59,12 @@ public class ReplaceCompoundAssignmentsTests
                 AccessModifier.Public,
                 "test",
                 [
-                    new Parameter(null, "x", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "x", new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type(null, "void") { Metadata = TypeMetadata.Void },
+                new TypeRef(null, "void") { Metadata = TypeMetadata.Void },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,

@@ -45,7 +45,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(32, 3, 16), new SourcePosition(36, 3, 20)),
                         "void"),
                     new BlockStatementNode(
@@ -80,7 +80,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(61, 3, 16), new SourcePosition(65, 3, 20)),
                         "void"),
                     new BlockStatementNode(
@@ -117,7 +117,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(26, 3, 16), new SourcePosition(30, 3, 20)),
                         "void"),
                     new BlockStatementNode(
@@ -154,7 +154,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(55, 3, 16), new SourcePosition(59, 3, 20)),
                         "void"),
                     new BlockStatementNode(
@@ -191,7 +191,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(44, 3, 16), new SourcePosition(48, 3, 20)),
                         "void"),
                     new BlockStatementNode(

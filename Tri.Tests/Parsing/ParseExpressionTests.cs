@@ -39,7 +39,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -49,7 +49,7 @@ public class ParseExpressionTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(41, 2, 20)),
                             "x",
-                            new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
                             LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(40, 2, 19)), 5)
                         )
                     ])
@@ -76,12 +76,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(44, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(42, 2, 21)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
                         new UnaryExpressionNode(
                             new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(41, 2, 20)),
                             UnaryExpressionKind.UnaryPlus,
@@ -112,12 +112,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(44, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(42, 2, 21)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
                         new UnaryExpressionNode(
                             new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(41, 2, 20)),
                             UnaryExpressionKind.UnaryMinus,
@@ -148,12 +148,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(44, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(42, 2, 21)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
                         new UnaryExpressionNode(
                             new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(41, 2, 20)),
                             UnaryExpressionKind.LogicalNot,
@@ -184,12 +184,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(44, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(42, 2, 21)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
                         new UnaryExpressionNode(
                             new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(41, 2, 20)),
                             UnaryExpressionKind.BitwiseNot,
@@ -220,7 +220,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -230,7 +230,7 @@ public class ParseExpressionTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(43, 2, 22)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)),
                                 "i32"
                             ),
@@ -273,12 +273,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(47, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(45, 2, 24)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(44, 2, 23)),
                             kind,
@@ -310,14 +310,14 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(
                     new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(47, 3, 2)),
                     [
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(45, 2, 24)),
                             "x",
-                            new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
                             new BinaryExpressionNode(
                                 new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(44, 2, 23)),
                                 BinaryExpressionKind.BitwiseAnd,
@@ -355,7 +355,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -365,7 +365,7 @@ public class ParseExpressionTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(45, 2, 24)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)),
                                 "i32"
                             ),
@@ -407,7 +407,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -417,7 +417,7 @@ public class ParseExpressionTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(45, 2, 24)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)),
                                 "i32"
                             ),
@@ -459,12 +459,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(55, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(53, 2, 32)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(40, 2, 19), new SourcePosition(52, 2, 31)),
                             BinaryExpressionKind.ConditionalAnd,
@@ -496,12 +496,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(55, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(53, 2, 32)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(40, 2, 19), new SourcePosition(52, 2, 31)),
                             BinaryExpressionKind.ConditionalOr,
@@ -533,12 +533,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(55, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(53, 2, 32)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(40, 2, 19), new SourcePosition(52, 2, 31)),
                             BinaryExpressionKind.Equality,
@@ -570,12 +570,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(55, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(53, 2, 32)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(40, 2, 19), new SourcePosition(52, 2, 31)),
                             BinaryExpressionKind.Inequality,
@@ -607,12 +607,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(48, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(46, 2, 25)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(40, 2, 19), new SourcePosition(45, 2, 24)),
                             BinaryExpressionKind.LessThan,
@@ -644,12 +644,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(49, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(47, 2, 26)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(40, 2, 19), new SourcePosition(46, 2, 25)),
                             BinaryExpressionKind.LessThanOrEqual,
@@ -681,12 +681,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(48, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(46, 2, 25)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(40, 2, 19), new SourcePosition(45, 2, 24)),
                             BinaryExpressionKind.GreaterThan,
@@ -718,12 +718,12 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(49, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(47, 2, 26)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(37, 2, 16)), "bool"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(40, 2, 19), new SourcePosition(46, 2, 25)),
                             BinaryExpressionKind.GreaterThanOrEqual,
@@ -755,7 +755,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(34, 3, 2)), [
                     new ExpressionStatementNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(32, 2, 11)),
@@ -798,7 +798,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(35, 3, 2)), [
                     new ExpressionStatementNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
@@ -833,7 +833,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -843,7 +843,7 @@ public class ParseExpressionTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(51, 2, 30)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)),
                                 "i32"
                             ),
@@ -891,13 +891,13 @@ public class ParseExpressionTests
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(53, 3, 2)),
                 AccessModifier.Public,
                 "main",
-                [new ParameterNode(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)), "y", new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32"))],
-                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)), "void"),
+                [new ParameterNode(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)), "y", new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32"))],
+                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(53, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(51, 2, 24)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(42, 2, 15)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(42, 2, 15)), "i32"),
                         new BinaryExpressionNode(
                             new SourceSpan(new SourcePosition(45, 2, 18), new SourcePosition(50, 2, 23)),
                             BinaryExpressionKind.Multiplication,
@@ -926,7 +926,7 @@ public class ParseExpressionTests
         var variableDeclarationNode = new VariableDeclarationNode(
             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(102, 2, 81)),
             "x",
-            new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+            new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
             new BinaryExpressionNode(
                 new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(101, 2, 80)),
                 BinaryExpressionKind.ConditionalOr,
@@ -978,7 +978,7 @@ public class ParseExpressionTests
             FunctionDeclarationNode.Create(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(104, 3, 2)),
                 AccessModifier.Public,
-                "main", [], new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"), new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(104, 3, 2)), [variableDeclarationNode])
+                "main", [], new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"), new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(104, 3, 2)), [variableDeclarationNode])
             )
         ]);
 
@@ -1001,7 +1001,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(42, 3, 2)), [
                     new ReturnStatementNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(40, 2, 19)),
@@ -1034,7 +1034,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -1088,7 +1088,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(47, 3, 2)), [
                     new ReturnStatementNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(45, 2, 24)),
@@ -1096,7 +1096,7 @@ public class ParseExpressionTests
                             new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(44, 2, 23)),
                             new ArrayTypeNode(
                                 new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(40, 2, 19)),
-                                new TypeNode(new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(40, 2, 19)), "i32")
+                                new TypeRefNode(new SourceSpan(new SourcePosition(37, 2, 16), new SourcePosition(40, 2, 19)), "i32")
                             ),
                             LiteralExpressionNode.Integer(
                                 new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(43, 2, 22)),
@@ -1130,16 +1130,16 @@ public class ParseExpressionTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "a",
-                        new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
+                        new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
                     )
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(47, 3, 2)), [
                     new ReturnStatementNode(
                         new SourceSpan(new SourcePosition(30, 2, 5), new SourcePosition(45, 2, 20)),
                         new IsExpressionNode(
                             new MemberAccessExpressionNode(new SourceSpan(new SourcePosition(37, 2, 12), new SourcePosition(38, 2, 13)), "a"),
-                            new TypeNode(new SourceSpan(new SourcePosition(42, 2, 17), new SourcePosition(44, 2, 19)), "i8")
+                            new TypeRefNode(new SourceSpan(new SourcePosition(42, 2, 17), new SourcePosition(44, 2, 19)), "i8")
                         )
                     )
                 ])
@@ -1170,13 +1170,13 @@ public class ParseExpressionTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "a",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)),
                     "i8"
                 ),
@@ -1229,10 +1229,10 @@ public class ParseExpressionTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "a",
-                        new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
+                        new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
                     )
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
                 new BlockStatementNode(
                     new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(45, 3, 2)),
                     [
@@ -1240,7 +1240,7 @@ public class ParseExpressionTests
                             new SourceSpan(new SourcePosition(30, 2, 5), new SourcePosition(43, 2, 18)),
                             new CastExpressionNode(
                                 new SourceSpan(new SourcePosition(37, 2, 12), new SourcePosition(42, 2, 17)),
-                                new TypeNode(new SourceSpan(new SourcePosition(38, 2, 13), new SourcePosition(40, 2, 15)), "i8"),
+                                new TypeRefNode(new SourceSpan(new SourcePosition(38, 2, 13), new SourcePosition(40, 2, 15)), "i8"),
                                 new MemberAccessExpressionNode(new SourceSpan(new SourcePosition(41, 2, 16), new SourcePosition(42, 2, 17)), "a")
                             )
                         )
@@ -1272,10 +1272,10 @@ public class ParseExpressionTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "a",
-                        new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
+                        new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
                     )
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
                 new BlockStatementNode(
                     new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(45, 3, 2)),
                     [
@@ -1283,7 +1283,7 @@ public class ParseExpressionTests
                             new SourceSpan(new SourcePosition(30, 2, 5), new SourcePosition(43, 2, 18)),
                             new CastExpressionNode(
                                 new SourceSpan(new SourcePosition(37, 2, 12), new SourcePosition(42, 2, 17)),
-                                new TypeNode(new SourceSpan(new SourcePosition(38, 2, 13), new SourcePosition(40, 2, 15)), "i8"),
+                                new TypeRefNode(new SourceSpan(new SourcePosition(38, 2, 13), new SourcePosition(40, 2, 15)), "i8"),
                                 new MemberAccessExpressionNode(new SourceSpan(new SourcePosition(41, 2, 16), new SourcePosition(42, 2, 17)), "a")
                             )
                         )
@@ -1322,10 +1322,10 @@ public class ParseExpressionTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "a",
-                        new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
+                        new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")
                     )
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(23, 1, 24)), "i8"),
                 new BlockStatementNode(
                     new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(44, 3, 2)),
                     [
@@ -1333,7 +1333,7 @@ public class ParseExpressionTests
                             new SourceSpan(new SourcePosition(30, 2, 5), new SourcePosition(42, 2, 17)),
                             new CastExpressionNode(
                                 new SourceSpan(new SourcePosition(37, 2, 12), new SourcePosition(41, 2, 16)),
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(38, 2, 13), new SourcePosition(40, 2, 15)),
                                     "i8"
                                 ),
@@ -1373,7 +1373,7 @@ public class ParseExpressionTests
                 AccessModifier.Public,
                 "test",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "f64"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "f64"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(39, 3, 2)), [
                     new ReturnStatementNode(
                         new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(37, 2, 17)),

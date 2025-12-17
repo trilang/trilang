@@ -2,9 +2,9 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-public class Type : IInlineType
+public class TypeRef : IInlineType
 {
-    public Type(SourceSpan? sourceSpan, string name)
+    public TypeRef(SourceSpan? sourceSpan, string name)
     {
         SourceSpan = sourceSpan;
         Name = name;
@@ -20,7 +20,7 @@ public class Type : IInlineType
         => transformer.TransformTypeNode(this);
 
     public IInlineType Clone()
-        => new Type(SourceSpan, Name)
+        => new TypeRef(SourceSpan, Name)
         {
             Metadata = Metadata,
         };

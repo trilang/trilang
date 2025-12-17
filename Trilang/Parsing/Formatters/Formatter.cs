@@ -283,7 +283,7 @@ public partial class Formatter : INodeVisitor
         node.ReturnType.Accept(this);
     }
 
-    public void VisitGenericType(GenericTypeNode node)
+    public void VisitGenericType(GenericTypeRefNode node)
     {
         writer.Write(node.PrefixName);
         writer.Write('<');
@@ -694,7 +694,7 @@ public partial class Formatter : INodeVisitor
         writer.WriteLine('}');
     }
 
-    public void VisitTypeNode(TypeNode node)
+    public void VisitTypeNode(TypeRefNode node)
     {
         writer.Write(node.Name);
     }

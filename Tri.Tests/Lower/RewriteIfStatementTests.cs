@@ -6,7 +6,6 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Tri.Tests.Lower;
 
@@ -56,12 +55,12 @@ public class RewriteIfStatementTests
                 AccessModifier.Public,
                 "test",
                 [
-                    new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new IfStatement(
                         null,
@@ -160,12 +159,12 @@ public class RewriteIfStatementTests
                 AccessModifier.Public,
                 "test",
                 [
-                    new Parameter(null, "a", new Type(null, "i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new IfStatement(
                         null,

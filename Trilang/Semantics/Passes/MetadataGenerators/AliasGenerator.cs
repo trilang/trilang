@@ -69,7 +69,7 @@ internal class AliasGenerator
             var typeProvider = metadataProviderMap.Get(typeAliasNode);
             var aliasedType = typeAliasNode.Type;
             var aliasedMetadata = typeProvider.GetType(aliasedType.Name);
-            if (aliasedMetadata is null && aliasedType is GenericType genericType)
+            if (aliasedMetadata is null && aliasedType is GenericTypeRef genericType)
                 aliasedMetadata = typeProvider.GetType(genericType.GetOpenGenericName());
 
             if (aliasedMetadata is null)

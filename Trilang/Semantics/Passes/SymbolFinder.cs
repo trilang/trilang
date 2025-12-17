@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics.Passes;
 
@@ -171,7 +170,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.ReturnType.Accept(this, context);
     }
 
-    public void VisitGenericType(GenericType node, ISymbolTable context)
+    public void VisitGenericType(GenericTypeRef node, ISymbolTable context)
     {
         map.Add(node, context);
 
@@ -410,7 +409,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             method.Accept(this, child);
     }
 
-    public void VisitTypeNode(Type node, ISymbolTable context)
+    public void VisitTypeNode(TypeRef node, ISymbolTable context)
         => map.Add(node, context);
 
     public void VisitUnaryExpression(UnaryExpression node, ISymbolTable context)

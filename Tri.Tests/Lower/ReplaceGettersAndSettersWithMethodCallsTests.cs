@@ -6,7 +6,6 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Tri.Tests.Lower;
 
@@ -90,7 +89,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                         null,
                         null
                     )
@@ -112,13 +111,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new Parameter(
                         null,
                         "p",
-                        new Type(null, "Point") { Metadata = point }
+                        new TypeRef(null, "Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new ReturnStatement(
                         null,
@@ -232,7 +231,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetter(
                             null,
                             AccessModifier.Public,
@@ -270,7 +269,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "point",
-                        new Type(null, "Point") { Metadata = pointType },
+                        new TypeRef(null, "Point") { Metadata = pointType },
                         null,
                         null
                     )
@@ -292,13 +291,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new Parameter(
                         null,
                         "t",
-                        new Type(null, "Test") { Metadata = testType }
+                        new TypeRef(null, "Test") { Metadata = testType }
                     )
                     {
                         Metadata = tParameter,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new ReturnStatement(
                         null,
@@ -402,7 +401,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetter(null, AccessModifier.Public, null)
                         {
                             Metadata = xProperty.Getter,
@@ -430,13 +429,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new Parameter(
                         null,
                         "p",
-                        new Type(null, "Point") { Metadata = point }
+                        new TypeRef(null, "Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new Type(null, "void") { Metadata = TypeMetadata.Void },
+                new TypeRef(null, "void") { Metadata = TypeMetadata.Void },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -535,7 +534,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetter(
                             null,
                             AccessModifier.Public,
@@ -571,13 +570,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new Parameter(
                         null,
                         "p",
-                        new Type(null, "Point") { Metadata = point }
+                        new TypeRef(null, "Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new ReturnStatement(
                         null,
@@ -585,7 +584,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             new VariableDeclaration(
                                 null,
                                 tmpVariable.Name,
-                                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                                 new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                 {
                                     ReturnTypeMetadata = TypeMetadata.I32,
@@ -700,7 +699,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetter(
                             null,
                             AccessModifier.Public,
@@ -736,13 +735,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new Parameter(
                         null,
                         "p",
-                        new Type(null, "Point") { Metadata = point }
+                        new TypeRef(null, "Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new Type(null, "void") { Metadata = TypeMetadata.Void },
+                new TypeRef(null, "void") { Metadata = TypeMetadata.Void },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -865,7 +864,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                         new PropertyGetter(
                             null,
                             AccessModifier.Public,
@@ -901,13 +900,13 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new Parameter(
                         null,
                         "p",
-                        new Type(null, "Point") { Metadata = point }
+                        new TypeRef(null, "Point") { Metadata = point }
                     )
                     {
                         Metadata = pParameter,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new ReturnStatement(
                         null,
@@ -915,7 +914,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             new VariableDeclaration(
                                 null,
                                 tmpVariable.Name,
-                                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                                 new BinaryExpression(
                                     null,
                                     BinaryExpressionKind.Addition,

@@ -1,5 +1,4 @@
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics;
 
@@ -43,7 +42,7 @@ public interface IVisitor
 
     void VisitFunctionType(FunctionType node);
 
-    void VisitGenericType(GenericType node);
+    void VisitGenericType(GenericTypeRef node);
 
     void VisitGoTo(GoTo node);
 
@@ -93,7 +92,7 @@ public interface IVisitor
 
     void VisitType(TypeDeclaration node);
 
-    void VisitTypeNode(Type node);
+    void VisitTypeNode(TypeRef node);
 
     void VisitUnaryExpression(UnaryExpression node);
 

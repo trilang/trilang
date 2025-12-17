@@ -1,5 +1,4 @@
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics;
 
@@ -332,7 +331,7 @@ internal abstract class Visitor : IVisitor
     {
     }
 
-    public virtual void VisitGenericType(GenericType node)
+    public virtual void VisitGenericType(GenericTypeRef node)
     {
         VisitGenericTypeEnter(node);
 
@@ -342,11 +341,11 @@ internal abstract class Visitor : IVisitor
         VisitGenericTypeExit(node);
     }
 
-    protected virtual void VisitGenericTypeEnter(GenericType node)
+    protected virtual void VisitGenericTypeEnter(GenericTypeRef node)
     {
     }
 
-    protected virtual void VisitGenericTypeExit(GenericType node)
+    protected virtual void VisitGenericTypeExit(GenericTypeRef node)
     {
     }
 
@@ -783,17 +782,17 @@ internal abstract class Visitor : IVisitor
     {
     }
 
-    public virtual void VisitTypeNode(Type node)
+    public virtual void VisitTypeNode(TypeRef node)
     {
         VisitTypeNodeEnter(node);
         VisitTypeNodeExit(node);
     }
 
-    protected virtual void VisitTypeNodeEnter(Type node)
+    protected virtual void VisitTypeNodeEnter(TypeRef node)
     {
     }
 
-    protected virtual void VisitTypeNodeExit(Type node)
+    protected virtual void VisitTypeNodeExit(TypeRef node)
     {
     }
 

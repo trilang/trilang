@@ -1,7 +1,6 @@
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using static Trilang.Semantics.Model.BinaryExpressionKind;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Lower;
 
@@ -163,7 +162,7 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
     public ISemanticNode TransformFunctionType(FunctionType node)
         => node;
 
-    public ISemanticNode TransformGenericType(GenericType node)
+    public ISemanticNode TransformGenericType(GenericTypeRef node)
         => node;
 
     public ISemanticNode TransformGoTo(GoTo node)
@@ -355,7 +354,7 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
         return node;
     }
 
-    public ISemanticNode TransformTypeNode(Type node)
+    public ISemanticNode TransformTypeNode(TypeRef node)
         => node;
 
     public ISemanticNode TransformUnaryExpression(UnaryExpression node)

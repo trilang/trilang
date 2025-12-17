@@ -7,7 +7,6 @@ using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Tri.Tests.Lower;
 
@@ -219,7 +218,7 @@ public class ReplaceIfDirectivesTests
                     new Parameter(
                         null,
                         "callback",
-                        new FunctionType(null, [], new Type(null, "void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata(null, [], TypeMetadata.Void),
                         }
@@ -228,7 +227,7 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -304,7 +303,7 @@ public class ReplaceIfDirectivesTests
                     new Parameter(
                         null,
                         "callback",
-                        new FunctionType(null, [], new Type(null, "void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata(null, [], TypeMetadata.Void)
                         }
@@ -313,7 +312,7 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -389,7 +388,7 @@ public class ReplaceIfDirectivesTests
                     new Parameter(
                         null,
                         "callback",
-                        new FunctionType(null, [], new Type(null, "void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = TypeMetadata.Void })
                         {
                             Metadata = new FunctionTypeMetadata(null, [], TypeMetadata.Void),
                         }
@@ -398,7 +397,7 @@ public class ReplaceIfDirectivesTests
                         Metadata = parameterMetadata,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,

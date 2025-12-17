@@ -43,13 +43,13 @@ public class ParseLoopTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)), "void"),
                 new BlockStatementNode(
                     new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(55, 4, 2)),
                     [
@@ -102,13 +102,13 @@ public class ParseLoopTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
                     "void"
                 ),
@@ -168,13 +168,13 @@ public class ParseLoopTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
                     "void"
                 ),
@@ -225,13 +225,13 @@ public class ParseLoopTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
                     "void"
                 ),
@@ -292,13 +292,13 @@ public class ParseLoopTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
                     "void"
                 ),
@@ -377,13 +377,13 @@ public class ParseLoopTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
                     "void"
                 ),
@@ -442,13 +442,13 @@ public class ParseLoopTests
                     new ParameterNode(
                         new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         )
                     )
                 ],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
                     "void"
                 ),

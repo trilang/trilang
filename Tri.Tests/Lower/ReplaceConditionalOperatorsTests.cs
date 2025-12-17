@@ -6,7 +6,6 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Tri.Tests.Lower;
 
@@ -61,16 +60,16 @@ public class ReplaceConditionalOperatorsTests
                 AccessModifier.Public,
                 "test",
                 [
-                    new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "a", new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = aParameter,
                     },
-                    new Parameter(null, "b", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "b", new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = bParameter,
                     },
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new IfStatement(
                         null,
@@ -78,7 +77,7 @@ public class ReplaceConditionalOperatorsTests
                             new VariableDeclaration(
                                 null,
                                 "cond_0",
-                                new Type(null, "bool") { Metadata = TypeMetadata.Bool },
+                                new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool },
                                 new MemberAccessExpression(null, "a")
                                 {
                                     AccessKind = MemberAccessKind.Read,
@@ -201,16 +200,16 @@ public class ReplaceConditionalOperatorsTests
                 AccessModifier.Public,
                 "test",
                 [
-                    new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "a", new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = aParameter,
                     },
-                    new Parameter(null, "b", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "b", new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = bParameter,
                     },
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new IfStatement(
                         null,
@@ -218,7 +217,7 @@ public class ReplaceConditionalOperatorsTests
                             new VariableDeclaration(
                                 null,
                                 "cond_0",
-                                new Type(null, "bool") { Metadata = TypeMetadata.Bool },
+                                new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool },
                                 new MemberAccessExpression(null, "a")
                                 {
                                     AccessKind = MemberAccessKind.Read,
@@ -349,20 +348,20 @@ public class ReplaceConditionalOperatorsTests
                 AccessModifier.Public,
                 "test",
                 [
-                    new Parameter(null, "a", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "a", new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = aParameter,
                     },
-                    new Parameter(null, "b", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "b", new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = bParameter,
                     },
-                    new Parameter(null, "c", new Type(null, "bool") { Metadata = TypeMetadata.Bool })
+                    new Parameter(null, "c", new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool })
                     {
                         Metadata = cParameter,
                     }
                 ],
-                new Type(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
                 new BlockStatement(null, [
                     new IfStatement(
                         null,
@@ -370,12 +369,12 @@ public class ReplaceConditionalOperatorsTests
                             new VariableDeclaration(
                                 null,
                                 "cond_1",
-                                new Type(null, "bool") { Metadata = TypeMetadata.Bool },
+                                new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool },
                                 new ExpressionBlock([
                                     new VariableDeclaration(
                                         null,
                                         "cond_0",
-                                        new Type(null, "bool") { Metadata = TypeMetadata.Bool },
+                                        new TypeRef(null, "bool") { Metadata = TypeMetadata.Bool },
                                         new MemberAccessExpression(null, "a")
                                         {
                                             AccessKind = MemberAccessKind.Read,

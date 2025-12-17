@@ -1,5 +1,4 @@
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang;
 
@@ -95,7 +94,7 @@ public static class SemanticNodeExtensions
 
                     q.Enqueue(functionTypeDeclarationNode.ReturnType);
                     break;
-                case GenericType genericTypeNode:
+                case GenericTypeRef genericTypeNode:
                     foreach (var typeArgument in genericTypeNode.TypeArguments)
                         q.Enqueue(typeArgument);
 
@@ -213,7 +212,7 @@ public static class SemanticNodeExtensions
                         q.Enqueue(constructor);
 
                     break;
-                case Type:
+                case TypeRef:
                     break;
                 case UnaryExpression unaryExpressionNode:
                     q.Enqueue(unaryExpressionNode.Operand);

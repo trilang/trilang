@@ -33,7 +33,7 @@ public class ParseGenericTypeTests
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
                 AccessModifier.Public,
                 "List",
-                [new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(18, 1, 19)), "T")],
+                [new TypeRefNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(18, 1, 19)), "T")],
                 [],
                 [],
                 [],
@@ -89,7 +89,7 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "List",
                 [
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(18, 1, 19)),
                         "T"
                     ),
@@ -126,7 +126,7 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "List",
                 [
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(18, 1, 19)),
                         "T"
                     )
@@ -159,10 +159,10 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeNode(
+                new GenericTypeRefNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(31, 1, 32)),
                     "List",
-                    [new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(30, 1, 31)), "bool")]
+                    [new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32"), new TypeRefNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(30, 1, 31)), "bool")]
                 )
             )
         ]);
@@ -181,12 +181,12 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeNode(
+                new GenericTypeRefNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(37, 1, 38)),
                     "List",
                     [
-                        new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32"),
-                        new GenericTypeNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(36, 1, 37)), "List", [new TypeNode(new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(35, 1, 36)), "bool")])
+                        new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32"),
+                        new GenericTypeRefNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(36, 1, 37)), "List", [new TypeRefNode(new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(35, 1, 36)), "bool")])
                     ]
                 )
             )
@@ -207,7 +207,7 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeNode(
+                new GenericTypeRefNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(22, 1, 23)),
                     "List",
                     [
@@ -241,11 +241,11 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeNode(
+                new GenericTypeRefNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(27, 1, 28)),
                     "List",
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
                             "i32"
                         ),
@@ -279,11 +279,11 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeNode(
+                new GenericTypeRefNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(24, 1, 25)),
                     "List",
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
                             "i32"
                         ),
@@ -312,10 +312,10 @@ public class ParseGenericTypeTests
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(32, 1, 33)),
                 AccessModifier.Public,
                 "T",
-                [new TypeNode(new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(16, 1, 17)), "T1"), new TypeNode(new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(20, 1, 21)), "T2")],
+                [new TypeRefNode(new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(16, 1, 17)), "T1"), new TypeRefNode(new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(20, 1, 21)), "T2")],
                 new DiscriminatedUnionNode([
-                    new TypeNode(new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(26, 1, 27)), "T1"),
-                    new TypeNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(31, 1, 32)), "T2")
+                    new TypeRefNode(new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(26, 1, 27)), "T1"),
+                    new TypeRefNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(31, 1, 32)), "T2")
                 ])
             )
         ]);
@@ -341,11 +341,11 @@ public class ParseGenericTypeTests
                     )
                 ],
                 new DiscriminatedUnionNode([
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(20, 1, 21)),
                         "T1"
                     ),
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(25, 1, 26)),
                         "T2"
                     )
@@ -374,7 +374,7 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(16, 1, 17)),
                         "T1"
                     ),
@@ -384,11 +384,11 @@ public class ParseGenericTypeTests
                     )
                 ],
                 new DiscriminatedUnionNode([
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(24, 1, 25)),
                         "T1"
                     ),
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(27, 1, 28), new SourcePosition(29, 1, 30)),
                         "T2"
                     )
@@ -417,21 +417,21 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(16, 1, 17)),
                         "T1"
                     ),
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(20, 1, 21)),
                         "T2"
                     )
                 ],
                 new DiscriminatedUnionNode([
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(25, 1, 26)),
                         "T1"
                     ),
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(30, 1, 31)),
                         "T2"
                     )

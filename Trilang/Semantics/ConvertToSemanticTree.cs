@@ -4,7 +4,6 @@ using Trilang.Semantics.Model;
 using AccessModifier = Trilang.Semantics.Model.AccessModifier;
 using BinaryExpressionKind = Trilang.Semantics.Model.BinaryExpressionKind;
 using LiteralExpressionKind = Trilang.Semantics.Model.LiteralExpressionKind;
-using Type = Trilang.Semantics.Model.Type;
 using UnaryExpressionKind = Trilang.Semantics.Model.UnaryExpressionKind;
 
 namespace Trilang.Semantics;
@@ -116,11 +115,11 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         return new FunctionType(node.SourceSpan, parameters, returnType);
     }
 
-    public ISemanticNode TransformGenericType(GenericTypeNode node)
+    public ISemanticNode TransformGenericType(GenericTypeRefNode node)
     {
         var typeArguments = node.TypeArguments.Select(t => (IInlineType)t.Transform(this)).ToList();
 
-        return new GenericType(node.SourceSpan, node.PrefixName, typeArguments);
+        return new GenericTypeRef(node.SourceSpan, node.PrefixName, typeArguments);
     }
 
     public ISemanticNode TransformIfDirective(IfDirectiveNode node)
@@ -299,7 +298,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
     public ISemanticNode TransformTypeAlias(AliasDeclarationNode node)
     {
         var accessModifier = (AccessModifier)node.AccessModifier;
-        var genericArguments = node.GenericArguments.Select(ga => (Type)ga.Transform(this)).ToList();
+        var genericArguments = node.GenericArguments.Select(ga => (TypeRef)ga.Transform(this)).ToList();
         var type = (IInlineType)node.Type.Transform(this);
 
         return new AliasDeclaration(node.SourceSpan, accessModifier, node.Name, genericArguments, type);
@@ -308,8 +307,8 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
     public ISemanticNode TransformType(TypeDeclarationNode node)
     {
         var accessModifier = (AccessModifier)node.AccessModifier;
-        var genericArguments = node.GenericArguments.Select(ga => (Type)ga.Transform(this)).ToList();
-        var interfaces = node.Interfaces.Select(i => (Type)i.Transform(this)).ToList();
+        var genericArguments = node.GenericArguments.Select(ga => (TypeRef)ga.Transform(this)).ToList();
+        var interfaces = node.Interfaces.Select(i => (TypeRef)i.Transform(this)).ToList();
         var properties = node.Properties.Select(f => (PropertyDeclaration)f.Transform(this)).ToList();
         var constructors = node.Constructors.Select(c => (ConstructorDeclaration)c.Transform(this)).ToList();
         var methods = node.Methods.Select(m => (MethodDeclaration)m.Transform(this)).ToList();
@@ -325,8 +324,8 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
             methods);
     }
 
-    public ISemanticNode TransformTypeNode(TypeNode node)
-        => new Type(node.SourceSpan, node.Name);
+    public ISemanticNode TransformTypeNode(TypeRefNode node)
+        => new TypeRef(node.SourceSpan, node.Name);
 
     public ISemanticNode TransformUnaryExpression(UnaryExpressionNode node)
     {

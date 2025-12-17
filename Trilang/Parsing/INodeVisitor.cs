@@ -40,7 +40,7 @@ public interface INodeVisitor
 
     void VisitFunctionType(FunctionTypeNode node);
 
-    void VisitGenericType(GenericTypeNode node);
+    void VisitGenericType(GenericTypeRefNode node);
 
     void VisitIfDirective(IfDirectiveNode node);
 
@@ -86,7 +86,7 @@ public interface INodeVisitor
 
     void VisitType(TypeDeclarationNode node);
 
-    void VisitTypeNode(TypeNode node);
+    void VisitTypeNode(TypeRefNode node);
 
     void VisitUnaryExpression(UnaryExpressionNode node);
 

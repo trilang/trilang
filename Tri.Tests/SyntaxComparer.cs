@@ -91,7 +91,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             case (FunctionTypeNode x1, FunctionTypeNode y1):
                 CompareFunctionTypeNode(x1, y1, errors);
                 return;
-            case (GenericTypeNode x1, GenericTypeNode y1):
+            case (GenericTypeRefNode x1, GenericTypeRefNode y1):
                 CompareGenericTypeNode(x1, y1, errors);
                 return;
             case (IfDirectiveNode x1, IfDirectiveNode y1):
@@ -160,7 +160,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             case (TypeDeclarationNode x1, TypeDeclarationNode y1):
                 CompareTypeDeclarationNode(x1, y1, errors);
                 return;
-            case (TypeNode x1, TypeNode y1):
+            case (TypeRefNode x1, TypeRefNode y1):
                 CompareTypeNode(x1, y1, errors);
                 return;
             case (UnaryExpressionNode x1, UnaryExpressionNode y1):
@@ -339,7 +339,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             errors.Add($"FunctionType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private void CompareGenericTypeNode(GenericTypeNode x, GenericTypeNode y, List<string> errors)
+    private void CompareGenericTypeNode(GenericTypeRefNode x, GenericTypeRefNode y, List<string> errors)
     {
         CompareSequences(x.TypeArguments, y.TypeArguments, errors, "GenericType.Arguments");
 
@@ -586,7 +586,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             errors.Add($"TypeDeclaration: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private void CompareTypeNode(TypeNode x, TypeNode y, List<string> errors)
+    private void CompareTypeNode(TypeRefNode x, TypeRefNode y, List<string> errors)
     {
         if (x.Name != y.Name)
             errors.Add($"TypeNode: Name mismatch. {x.Name} != {y.Name}.");

@@ -1,6 +1,5 @@
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Compilation.Diagnostics;
 
@@ -86,7 +85,7 @@ public class SemanticDiagnosticReporter
             returnType.GetLocation(),
             $"Return type mismatch: expected '{expected}', got '{actual}'.");
 
-    public void TypeArgumentAlreadyDefined(Type genericArgument)
+    public void TypeArgumentAlreadyDefined(TypeRef genericArgument)
         => diagnostics.Error(
             DiagnosticId.S0002AlreadyDefined,
             genericArgument.GetLocation(),

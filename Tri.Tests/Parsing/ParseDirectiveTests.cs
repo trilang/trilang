@@ -190,7 +190,7 @@ public class ParseDirectiveTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),

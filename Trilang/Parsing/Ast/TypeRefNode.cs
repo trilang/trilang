@@ -2,9 +2,9 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class TypeNode : IInlineTypeNode
+public class TypeRefNode : IInlineTypeNode
 {
-    public TypeNode(SourceSpan sourceSpan, string name)
+    public TypeRefNode(SourceSpan sourceSpan, string name)
     {
         SourceSpan = sourceSpan;
         Name = name;

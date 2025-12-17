@@ -1346,7 +1346,7 @@ public class TypeCheckerTests
 
         var closedType = typeProvider.GetType("List<i32>");
         var semanticTree = semanticTrees.Single();
-        var genericTypeNode = semanticTree.Find<GenericType>();
+        var genericTypeNode = semanticTree.Find<GenericTypeRef>();
         Assert.That(closedType, Is.Not.Null);
         Assert.That(genericTypeNode, Is.Not.Null);
         Assert.That(genericTypeNode.Metadata, Is.EqualTo(closedType).Using(new MetadataComparer()));

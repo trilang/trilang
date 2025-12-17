@@ -40,7 +40,7 @@ public interface INodeTransformer<out TResult>
 
     TResult TransformFunctionType(FunctionTypeNode node);
 
-    TResult TransformGenericType(GenericTypeNode node);
+    TResult TransformGenericType(GenericTypeRefNode node);
 
     TResult TransformIfDirective(IfDirectiveNode node);
 
@@ -86,7 +86,7 @@ public interface INodeTransformer<out TResult>
 
     TResult TransformType(TypeDeclarationNode node);
 
-    TResult TransformTypeNode(TypeNode node);
+    TResult TransformTypeNode(TypeRefNode node);
 
     TResult TransformUnaryExpression(UnaryExpressionNode node);
 

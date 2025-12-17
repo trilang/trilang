@@ -9,7 +9,7 @@ public class TypeDeclarationNode : IDeclarationNode, IHasGenericArguments
         AccessModifier accessModifier,
         string name,
         IReadOnlyList<IInlineTypeNode> genericArguments,
-        IReadOnlyList<TypeNode> interfaces,
+        IReadOnlyList<TypeRefNode> interfaces,
         IReadOnlyList<PropertyDeclarationNode> properties,
         IReadOnlyList<ConstructorDeclarationNode> constructors,
         IReadOnlyList<MethodDeclarationNode> methods)
@@ -46,7 +46,7 @@ public class TypeDeclarationNode : IDeclarationNode, IHasGenericArguments
 
     public IReadOnlyList<IInlineTypeNode> GenericArguments { get; }
 
-    public IReadOnlyList<TypeNode> Interfaces { get; }
+    public IReadOnlyList<TypeRefNode> Interfaces { get; }
 
     public IReadOnlyList<PropertyDeclarationNode> Properties { get; }
 

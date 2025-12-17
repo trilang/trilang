@@ -5,7 +5,6 @@ using Trilang.Semantics.Model;
 using static Trilang.Metadata.TypeMetadata;
 using static Trilang.Semantics.Model.BinaryExpressionKind;
 using static Trilang.Semantics.Model.UnaryExpressionKind;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics.Passes;
 
@@ -432,7 +431,7 @@ internal class TypeChecker : Visitor, ISemanticPass
         node.ReturnTypeMetadata = existingTuple;
     }
 
-    protected override void VisitTypeNodeExit(Type node)
+    protected override void VisitTypeNodeExit(TypeRef node)
     {
         if (node.Metadata is not null)
             return;

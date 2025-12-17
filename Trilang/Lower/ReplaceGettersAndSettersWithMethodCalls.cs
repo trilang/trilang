@@ -1,7 +1,6 @@
 using Trilang.Metadata;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Lower;
 
@@ -56,7 +55,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
                 new VariableDeclaration(
                     null,
                     name,
-                    new Type(null, variableMetadata.Type.ToString()!)
+                    new TypeRef(null, variableMetadata.Type.ToString()!)
                     {
                         Metadata = variableMetadata.Type
                     },
@@ -196,7 +195,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
     public ISemanticNode TransformFunctionType(FunctionType node)
         => node;
 
-    public ISemanticNode TransformGenericType(GenericType node)
+    public ISemanticNode TransformGenericType(GenericTypeRef node)
         => node;
 
     public ISemanticNode TransformGoTo(GoTo node)
@@ -405,7 +404,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
         return node;
     }
 
-    public ISemanticNode TransformTypeNode(Type node)
+    public ISemanticNode TransformTypeNode(TypeRef node)
         => node;
 
     public ISemanticNode TransformUnaryExpression(UnaryExpression node)

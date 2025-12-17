@@ -8,7 +8,7 @@ namespace Trilang.Semantics.Passes.MetadataGenerators;
 
 internal class GenericTypeGenerator
 {
-    private record Item(ITypeMetadata Open, GenericType Node);
+    private record Item(ITypeMetadata Open, GenericTypeRef Node);
 
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly MetadataProviderMap metadataProviderMap;
@@ -30,7 +30,7 @@ internal class GenericTypeGenerator
             if (!symbol.IsGenericType)
                 continue;
 
-            var node = (GenericType)symbol.Node;
+            var node = (GenericTypeRef)symbol.Node;
             var typeProvider = metadataProviderMap.Get(node);
 
             // ignore open generic types
@@ -72,7 +72,7 @@ internal class GenericTypeGenerator
     }
 
     private void PopulateClosedTypes(
-        GenericType genericTypeNode,
+        GenericTypeRef genericTypeNode,
         TypeMetadata closed,
         TypeMetadata open)
     {
@@ -189,7 +189,7 @@ internal class GenericTypeGenerator
     }
 
     private void PopulateClosedTypes(
-        GenericType genericTypeNode,
+        GenericTypeRef genericTypeNode,
         AliasMetadata closed,
         AliasMetadata open)
     {
@@ -231,7 +231,7 @@ internal class GenericTypeGenerator
         return parametersMetadata;
     }
 
-    private bool IsOpenGeneric(IMetadataProvider metadataProvider, GenericType genericTypeNode)
+    private bool IsOpenGeneric(IMetadataProvider metadataProvider, GenericTypeRef genericTypeNode)
     {
         var isOpenGeneric = true;
         foreach (var argumentNode in genericTypeNode.TypeArguments)

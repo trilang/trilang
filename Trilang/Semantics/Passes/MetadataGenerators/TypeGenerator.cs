@@ -2,7 +2,6 @@ using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics.Passes.MetadataGenerators;
 
@@ -108,7 +107,7 @@ internal class TypeGenerator
     private void PopulateInterface(
         IMetadataProvider provider,
         TypeMetadata type,
-        Type @interface)
+        TypeRef @interface)
     {
         // TODO: support generic interfaces
         var interfaceMetadata = default(InterfaceMetadata);

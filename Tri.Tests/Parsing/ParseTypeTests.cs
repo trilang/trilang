@@ -151,7 +151,7 @@ public class ParseTypeTests
                     new PropertyDeclarationNode(
                         new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(31, 2, 12)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11)),
                             "i32"
                         )
@@ -159,7 +159,7 @@ public class ParseTypeTests
                     new PropertyDeclarationNode(
                         new SourceSpan(new SourcePosition(36, 3, 5), new SourcePosition(43, 3, 12)),
                         "y",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(39, 3, 8), new SourcePosition(42, 3, 11)),
                             "i32"
                         )
@@ -210,7 +210,7 @@ public class ParseTypeTests
                     new PropertyDeclarationNode(
                         new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(155, 9, 6)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11)),
                             "i32"
                         ),
@@ -257,7 +257,7 @@ public class ParseTypeTests
                     new PropertyDeclarationNode(
                         new SourceSpan(new SourcePosition(160, 10, 5), new SourcePosition(290, 17, 6)),
                         "y",
-                        new TypeNode(new SourceSpan(new SourcePosition(163, 10, 8), new SourcePosition(166, 10, 11)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(163, 10, 8), new SourcePosition(166, 10, 11)), "i32"),
                         new PropertyGetterNode(
                             new SourceSpan(new SourcePosition(177, 11, 9), new SourcePosition(225, 13, 10)),
                             AccessModifier.Private,
@@ -335,7 +335,7 @@ public class ParseTypeTests
                     new PropertyDeclarationNode(
                         new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(118, 7, 6)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11)),
                             "i32"
                         ),
@@ -405,7 +405,7 @@ public class ParseTypeTests
                     new PropertyDeclarationNode(
                         new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(117, 7, 6)),
                         "x",
-                        new TypeNode(new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11)), "i32"),
                         new PropertyGetterNode(
                             new SourceSpan(new SourcePosition(41, 3, 9), new SourcePosition(90, 5, 10)),
                             AccessModifier.Private,
@@ -482,7 +482,7 @@ public class ParseTypeTests
                     new PropertyDeclarationNode(
                         new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(30, 2, 11)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(26, 2, 7), new SourcePosition(29, 2, 10)),
                             "i32"
                         )
@@ -566,7 +566,7 @@ public class ParseTypeTests
                     new PropertyDeclarationNode(
                         new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(31, 3, 1)),
                         "x",
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11)),
                             "i32"
                         )
@@ -615,7 +615,7 @@ public class ParseTypeTests
                         false,
                         "toString",
                         [],
-                        new TypeNode(new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(49, 2, 30)), "string"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(49, 2, 30)), "string"),
                         new BlockStatementNode(new SourceSpan(new SourcePosition(50, 2, 31), new SourcePosition(53, 2, 34)), [])
                     ),
                     new MethodDeclarationNode(
@@ -623,8 +623,8 @@ public class ParseTypeTests
                         AccessModifier.Public,
                         false,
                         "distance",
-                        [new ParameterNode(new SourceSpan(new SourcePosition(75, 4, 21), new SourcePosition(87, 4, 33)), "other", new TypeNode(new SourceSpan(new SourcePosition(82, 4, 28), new SourcePosition(87, 4, 33)), "Point"))],
-                        new TypeNode(new SourceSpan(new SourcePosition(90, 4, 36), new SourcePosition(93, 4, 39)), "f32"),
+                        [new ParameterNode(new SourceSpan(new SourcePosition(75, 4, 21), new SourcePosition(87, 4, 33)), "other", new TypeRefNode(new SourceSpan(new SourcePosition(82, 4, 28), new SourcePosition(87, 4, 33)), "Point"))],
+                        new TypeRefNode(new SourceSpan(new SourcePosition(90, 4, 36), new SourcePosition(93, 4, 39)), "f32"),
                         new BlockStatementNode(new SourceSpan(new SourcePosition(94, 4, 40), new SourcePosition(97, 4, 43)), [])
                     )
                 ]
@@ -661,7 +661,7 @@ public class ParseTypeTests
                         false,
                         "<>_0",
                         [],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(35, 2, 16), new SourcePosition(41, 2, 22)),
                             "string"
                         ),
@@ -709,7 +709,7 @@ public class ParseTypeTests
                         false,
                         "toString",
                         [],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(48, 2, 29)),
                             "string"
                         ),
@@ -757,7 +757,7 @@ public class ParseTypeTests
                         false,
                         "toString",
                         [],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(48, 2, 29)),
                             "string"
                         ),
@@ -813,7 +813,7 @@ public class ParseTypeTests
                         false,
                         "toString",
                         [],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(48, 2, 29)),
                             "string"
                         ),
@@ -872,7 +872,7 @@ public class ParseTypeTests
                                 new VariableDeclarationNode(
                                     new SourceSpan(new SourcePosition(45, 2, 26), new SourcePosition(60, 2, 41)),
                                     "x",
-                                    new TypeNode(
+                                    new TypeRefNode(
                                         new SourceSpan(new SourcePosition(52, 2, 33), new SourcePosition(55, 2, 36)),
                                         "i32"
                                     ),
@@ -933,7 +933,7 @@ public class ParseTypeTests
                         false,
                         "toString",
                         [],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(49, 2, 30)),
                             "string"
                         ),
@@ -981,7 +981,7 @@ public class ParseTypeTests
                         false,
                         "toString",
                         [],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(49, 2, 30)),
                             "string"
                         ),
@@ -1032,7 +1032,7 @@ public class ParseTypeTests
                             new ParameterNode(
                                 new SourceSpan(new SourcePosition(40, 2, 21), new SourcePosition(46, 2, 27)),
                                 "a",
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(46, 2, 27)),
                                     "i32"
                                 )
@@ -1040,13 +1040,13 @@ public class ParseTypeTests
                             new ParameterNode(
                                 new SourceSpan(new SourcePosition(47, 2, 28), new SourcePosition(53, 2, 34)),
                                 "b",
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(50, 2, 31), new SourcePosition(53, 2, 34)),
                                     "i32"
                                 )
                             ),
                         ],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(56, 2, 37), new SourcePosition(62, 2, 43)),
                             "string"
                         ),
@@ -1097,13 +1097,13 @@ public class ParseTypeTests
                             new ParameterNode(
                                 new SourceSpan(new SourcePosition(40, 2, 21), new SourcePosition(45, 2, 26)),
                                 "a",
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(42, 2, 23), new SourcePosition(45, 2, 26)),
                                     "i32"
                                 )
                             ),
                         ],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(48, 2, 29), new SourcePosition(54, 2, 35)),
                             "string"
                         ),
@@ -1160,7 +1160,7 @@ public class ParseTypeTests
                                 )
                             ),
                         ],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(46, 2, 27), new SourcePosition(52, 2, 33)),
                             "string"
                         ),
@@ -1205,8 +1205,8 @@ public class ParseTypeTests
                         new SourceSpan(new SourcePosition(24, 2, 5), new SourcePosition(62, 2, 43)),
                         AccessModifier.Public,
                         [
-                            new ParameterNode(new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(49, 2, 30)), "x", new TypeNode(new SourceSpan(new SourcePosition(46, 2, 27), new SourcePosition(49, 2, 30)), "i32")),
-                            new ParameterNode(new SourceSpan(new SourcePosition(51, 2, 32), new SourcePosition(57, 2, 38)), "y", new TypeNode(new SourceSpan(new SourcePosition(54, 2, 35), new SourcePosition(57, 2, 38)), "i32")),
+                            new ParameterNode(new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(49, 2, 30)), "x", new TypeRefNode(new SourceSpan(new SourcePosition(46, 2, 27), new SourcePosition(49, 2, 30)), "i32")),
+                            new ParameterNode(new SourceSpan(new SourcePosition(51, 2, 32), new SourcePosition(57, 2, 38)), "y", new TypeRefNode(new SourceSpan(new SourcePosition(54, 2, 35), new SourcePosition(57, 2, 38)), "i32")),
                         ],
                         new BlockStatementNode(new SourceSpan(new SourcePosition(59, 2, 40), new SourcePosition(62, 2, 43)), [])
                     )
@@ -1230,7 +1230,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "Point",
                 [],
-                [new TypeNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(30, 1, 31)), "Interface1"), new TypeNode(new SourceSpan(new SourcePosition(32, 1, 33), new SourcePosition(42, 1, 43)), "Interface2")],
+                [new TypeRefNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(30, 1, 31)), "Interface1"), new TypeRefNode(new SourceSpan(new SourcePosition(32, 1, 33), new SourcePosition(42, 1, 43)), "Interface2")],
                 [],
                 [],
                 []
@@ -1281,11 +1281,11 @@ public class ParseTypeTests
                 "Point",
                 [],
                 [
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(30, 1, 31)),
                         "Interface1"
                     ),
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(41, 1, 42)),
                         "Interface2"
                     )
@@ -1319,7 +1319,7 @@ public class ParseTypeTests
                 "Point",
                 [],
                 [
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(30, 1, 31)),
                         "Interface1"
                     ),
@@ -1351,7 +1351,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "MyType",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32")
+                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32")
             )
         ]);
 
@@ -1370,7 +1370,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "<>_0",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(17, 1, 18)),
                     "i32"
                 )
@@ -1426,7 +1426,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "MyType",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
                     "i32"
                 )
@@ -1457,7 +1457,7 @@ public class ParseTypeTests
                 new FunctionTypeNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(26, 1, 27)),
                     [],
-                    new TypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(26, 1, 27)), "void")
+                    new TypeRefNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(26, 1, 27)), "void")
                 )
             )
         ]);
@@ -1479,8 +1479,8 @@ public class ParseTypeTests
                 [],
                 new FunctionTypeNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(33, 1, 34)),
-                    [new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)), "i32")],
-                    new TypeNode(new SourceSpan(new SourcePosition(30, 1, 31), new SourcePosition(33, 1, 34)), "i32")
+                    [new TypeRefNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)), "i32"), new TypeRefNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)), "i32")],
+                    new TypeRefNode(new SourceSpan(new SourcePosition(30, 1, 31), new SourcePosition(33, 1, 34)), "i32")
                 )
             )
         ]);
@@ -1503,16 +1503,16 @@ public class ParseTypeTests
                 new FunctionTypeNode(
                     new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(31, 1, 32)),
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
                             "i32"
                         ),
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(23, 1, 24)),
                             "i32"
                         )
                     ],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)),
                         "i32"
                     )
@@ -1576,7 +1576,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "F",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
                     "i32"
                 )
@@ -1618,16 +1618,16 @@ public class ParseTypeTests
                 new FunctionTypeNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(32, 1, 33)),
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
                             "i32"
                         ),
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
                             "i32"
                         )
                     ],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
                         "i32"
                     )
@@ -1662,16 +1662,16 @@ public class ParseTypeTests
                 new FunctionTypeNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(32, 1, 33)),
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
                             "i32"
                         ),
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
                             "i32"
                         )
                     ],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
                         "i32"
                     )
@@ -1706,11 +1706,11 @@ public class ParseTypeTests
                 new TupleTypeNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(26, 1, 27)),
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
                             "i32"
                         ),
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
                             "i32"
                         ),
@@ -1754,11 +1754,11 @@ public class ParseTypeTests
                 new FunctionTypeNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(30, 1, 31)),
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
                             "i32"
                         ),
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
                             "i32"
                         )
@@ -1798,16 +1798,16 @@ public class ParseTypeTests
                 new FunctionTypeNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(33, 1, 34)),
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
                             "i32"
                         ),
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
                             "i32"
                         )
                     ],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(30, 1, 31), new SourcePosition(33, 1, 34)),
                         "i32"
                     )
@@ -1842,14 +1842,14 @@ public class ParseTypeTests
                         new FunctionTypeNode(
                             new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(40, 1, 41)),
                             [
-                                new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32"),
-                                new TypeNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)), "i32")
+                                new TypeRefNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32"),
+                                new TypeRefNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)), "i32")
                             ],
-                            new TypeNode(new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(40, 1, 41)), "void")
+                            new TypeRefNode(new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(40, 1, 41)), "void")
                         )
                     )
                 ],
-                new TypeNode(new SourceSpan(new SourcePosition(43, 1, 44), new SourcePosition(47, 1, 48)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(43, 1, 44), new SourcePosition(47, 1, 48)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(48, 1, 49), new SourcePosition(51, 1, 52)), [])
             )
         ]);
@@ -1872,16 +1872,16 @@ public class ParseTypeTests
                 new FunctionTypeNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(33, 1, 34)),
                     [
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
                             "i32"
                         ),
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)),
                             "i32"
                         )
                     ],
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(33, 1, 34)),
                         "void"
                     )
@@ -1910,15 +1910,15 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(58, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(56, 2, 35)),
                         "x",
                         new FunctionTypeNode(
                             new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(51, 2, 30)),
-                            [new TypeNode(new SourceSpan(new SourcePosition(34, 2, 13), new SourcePosition(37, 2, 16)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(42, 2, 21)), "i32")],
-                            new TypeNode(new SourceSpan(new SourcePosition(47, 2, 26), new SourcePosition(51, 2, 30)), "void")
+                            [new TypeRefNode(new SourceSpan(new SourcePosition(34, 2, 13), new SourcePosition(37, 2, 16)), "i32"), new TypeRefNode(new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(42, 2, 21)), "i32")],
+                            new TypeRefNode(new SourceSpan(new SourcePosition(47, 2, 26), new SourcePosition(51, 2, 30)), "void")
                         ),
                         LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(54, 2, 33), new SourcePosition(55, 2, 34)), 0)
                     )
@@ -1952,15 +1952,15 @@ public class ParseTypeTests
                 new InterfaceNode(
                     new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(74, 6, 2)),
                     [
-                        new InterfacePropertyNode(new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)), "x", new TypeNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"), null, null),
-                        new InterfacePropertyNode(new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)), "y", new TypeNode(new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)), "i32"), null, null)
+                        new InterfacePropertyNode(new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)), "x", new TypeRefNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"), null, null),
+                        new InterfacePropertyNode(new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)), "y", new TypeRefNode(new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)), "i32"), null, null)
                     ],
                     [
                         new InterfaceMethodNode(
                             new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(72, 5, 26)),
                             "distance",
-                            [new TypeNode(new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)), "Point")],
-                            new TypeNode(new SourceSpan(new SourcePosition(68, 5, 22), new SourcePosition(71, 5, 25)), "f32")
+                            [new TypeRefNode(new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)), "Point")],
+                            new TypeRefNode(new SourceSpan(new SourcePosition(68, 5, 22), new SourcePosition(71, 5, 25)), "f32")
                         )
                     ]
                 )
@@ -1996,14 +1996,14 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(60, 2, 39)),
                             "x",
-                            new TypeNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"),
                             AccessModifier.Public,
                             AccessModifier.Public
                         ),
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(65, 3, 5), new SourcePosition(101, 3, 41)),
                             "y",
-                            new TypeNode(new SourceSpan(new SourcePosition(68, 3, 8), new SourcePosition(71, 3, 11)), "i32"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(68, 3, 8), new SourcePosition(71, 3, 11)), "i32"),
                             AccessModifier.Private,
                             AccessModifier.Private
                         )
@@ -2012,8 +2012,8 @@ public class ParseTypeTests
                         new InterfaceMethodNode(
                             new SourceSpan(new SourcePosition(107, 5, 5), new SourcePosition(128, 5, 26)),
                             "distance",
-                            [new TypeNode(new SourceSpan(new SourcePosition(116, 5, 14), new SourcePosition(121, 5, 19)), "Point")],
-                            new TypeNode(new SourceSpan(new SourcePosition(124, 5, 22), new SourcePosition(127, 5, 25)), "f32")
+                            [new TypeRefNode(new SourceSpan(new SourcePosition(116, 5, 14), new SourcePosition(121, 5, 19)), "Point")],
+                            new TypeRefNode(new SourceSpan(new SourcePosition(124, 5, 22), new SourcePosition(127, 5, 25)), "f32")
                         )
                     ]
                 )
@@ -2046,7 +2046,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(48, 2, 27)),
                             "x",
-                            new TypeNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"),
                             AccessModifier.Public,
                             null
                         ),
@@ -2082,7 +2082,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(48, 2, 27)),
                             "x",
-                            new TypeNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)), "i32"),
                             null,
                             AccessModifier.Public
                         ),
@@ -2120,7 +2120,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
                                 "i32"
                             ),
@@ -2130,7 +2130,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)),
                             "y",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)),
                                 "i32"
                             ),
@@ -2143,12 +2143,12 @@ public class ParseTypeTests
                             new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(72, 5, 26)),
                             "distance",
                             [
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)),
                                     "Point"
                                 )
                             ],
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(68, 5, 22), new SourcePosition(71, 5, 25)),
                                 "f32"
                             )
@@ -2203,7 +2203,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(35, 3, 5), new SourcePosition(42, 3, 12)),
                             "y",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(38, 3, 8), new SourcePosition(41, 3, 11)),
                                 "i32"
                             ),
@@ -2216,12 +2216,12 @@ public class ParseTypeTests
                             new SourceSpan(new SourcePosition(48, 5, 5), new SourcePosition(69, 5, 26)),
                             "distance",
                             [
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(57, 5, 14), new SourcePosition(62, 5, 19)),
                                     "Point"
                                 )
                             ],
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(65, 5, 22), new SourcePosition(68, 5, 25)),
                                 "f32"
                             )
@@ -2266,7 +2266,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(37, 3, 5)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
                                 "i32"
                             ),
@@ -2276,7 +2276,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(37, 3, 5), new SourcePosition(44, 3, 12)),
                             "y",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(40, 3, 8), new SourcePosition(43, 3, 11)),
                                 "i32"
                             ),
@@ -2289,12 +2289,12 @@ public class ParseTypeTests
                             new SourceSpan(new SourcePosition(50, 5, 5), new SourcePosition(71, 5, 26)),
                             "distance",
                             [
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(59, 5, 14), new SourcePosition(64, 5, 19)),
                                     "Point"
                                 )
                             ],
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(67, 5, 22), new SourcePosition(70, 5, 25)),
                                 "f32"
                             )
@@ -2347,7 +2347,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
                                 "i32"
                             ),
@@ -2357,7 +2357,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)),
                             "y",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)),
                                 "i32"
                             ),
@@ -2370,7 +2370,7 @@ public class ParseTypeTests
                             new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(69, 5, 23)),
                             "distance",
                             [
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)),
                                     "Point"
                                 )
@@ -2420,7 +2420,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
                                 "i32"
                             ),
@@ -2430,7 +2430,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)),
                             "y",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)),
                                 "i32"
                             ),
@@ -2443,12 +2443,12 @@ public class ParseTypeTests
                             new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(71, 5, 25)),
                             "distance",
                             [
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)),
                                     "Point"
                                 )
                             ],
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(67, 5, 21), new SourcePosition(70, 5, 24)),
                                 "f64"
                             )
@@ -2493,7 +2493,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(33, 2, 12)),
                             "x",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(29, 2, 8), new SourcePosition(32, 2, 11)),
                                 "i32"
                             ),
@@ -2503,7 +2503,7 @@ public class ParseTypeTests
                         new InterfacePropertyNode(
                             new SourceSpan(new SourcePosition(38, 3, 5), new SourcePosition(45, 3, 12)),
                             "y",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(41, 3, 8), new SourcePosition(44, 3, 11)),
                                 "i32"
                             ),
@@ -2516,12 +2516,12 @@ public class ParseTypeTests
                             new SourceSpan(new SourcePosition(51, 5, 5), new SourcePosition(72, 6, 1)),
                             "distance",
                             [
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(60, 5, 14), new SourcePosition(65, 5, 19)),
                                     "Point"
                                 )
                             ],
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(68, 5, 22), new SourcePosition(71, 5, 25)),
                                 "f64"
                             )
@@ -2557,13 +2557,13 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(55, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(53, 2, 32)),
                         "p",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)), "Point"),
-                        new NewObjectExpressionNode(new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(52, 2, 31)), new TypeNode(new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)), "Point"), [])
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)), "Point"),
+                        new NewObjectExpressionNode(new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(52, 2, 31)), new TypeRefNode(new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)), "Point"), [])
                     )
                 ])
             )
@@ -2589,15 +2589,15 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(59, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(57, 2, 36)),
                         "p",
-                        new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)), "Point"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)), "Point"),
                         new NewObjectExpressionNode(
                             new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(56, 2, 35)),
-                            new TypeNode(new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)), "Point"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)), "Point"),
                             [
                                 LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(51, 2, 30), new SourcePosition(52, 2, 31)), 1),
                                 LiteralExpressionNode.Integer(new SourceSpan(new SourcePosition(54, 2, 33), new SourcePosition(55, 2, 34)), 2)
@@ -2628,7 +2628,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -2638,7 +2638,7 @@ public class ParseTypeTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(48, 2, 27)),
                             "p",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)),
                                 "Point"
                             ),
@@ -2682,7 +2682,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -2692,13 +2692,13 @@ public class ParseTypeTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(56, 2, 35)),
                             "p",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)),
                                 "Point"
                             ),
                             new NewObjectExpressionNode(
                                 new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(55, 2, 34)),
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)),
                                     "Point"
                                 ),
@@ -2744,7 +2744,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
                     "void"
                 ),
@@ -2754,13 +2754,13 @@ public class ParseTypeTests
                         new VariableDeclarationNode(
                             new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(52, 2, 31)),
                             "p",
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(38, 2, 17)),
                                 "Point"
                             ),
                             new NewObjectExpressionNode(
                                 new SourceSpan(new SourcePosition(41, 2, 20), new SourcePosition(51, 2, 30)),
-                                new TypeNode(
+                                new TypeRefNode(
                                     new SourceSpan(new SourcePosition(45, 2, 24), new SourcePosition(50, 2, 29)),
                                     "Point"
                                 ),
@@ -2794,8 +2794,8 @@ public class ParseTypeTests
                 [],
                 new DiscriminatedUnionNode([
                     new InterfaceNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), [], []),
-                    new TypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)), "i32"),
-                    new FunctionTypeNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(38, 1, 39)), [], new TypeNode(new SourceSpan(new SourcePosition(34, 1, 35), new SourcePosition(38, 1, 39)), "void")),
+                    new TypeRefNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)), "i32"),
+                    new FunctionTypeNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(38, 1, 39)), [], new TypeRefNode(new SourceSpan(new SourcePosition(34, 1, 35), new SourcePosition(38, 1, 39)), "void")),
                 ])
             )
         ]);
@@ -2820,14 +2820,14 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(53, 3, 2)), [
                     new VariableDeclarationNode(
                         new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(51, 2, 30)),
                         "x",
                         new DiscriminatedUnionNode([
-                            new TypeNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
-                            new TypeNode(new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(43, 2, 22)), "null")
+                            new TypeRefNode(new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15)), "i32"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(43, 2, 22)), "null")
                         ]),
                         new NullExpressionNode(new SourceSpan(new SourcePosition(46, 2, 25), new SourcePosition(50, 2, 29)))
                     )
@@ -2849,7 +2849,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new TupleTypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(26, 1, 27)), [new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)), "i32")])
+                new TupleTypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(26, 1, 27)), [new TypeRefNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)), "i32"), new TypeRefNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)), "i32")])
             )
         ]);
 
@@ -2868,8 +2868,8 @@ public class ParseTypeTests
                 "T",
                 [],
                 new TupleTypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(33, 1, 34)), [
-                    new TupleTypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(27, 1, 28)), [new TypeNode(new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(21, 1, 22)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32")]),
-                    new TypeNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)), "i32")
+                    new TupleTypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(27, 1, 28)), [new TypeRefNode(new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(21, 1, 22)), "i32"), new TypeRefNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32")]),
+                    new TypeRefNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)), "i32")
                 ])
             )
         ]);
@@ -2892,13 +2892,13 @@ public class ParseTypeTests
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(40, 1, 41)),
                     [
                         new DiscriminatedUnionNode([
-                            new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "bool"),
-                            new TypeNode(new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(27, 1, 28)), "i32")
+                            new TypeRefNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "bool"),
+                            new TypeRefNode(new SourceSpan(new SourcePosition(24, 1, 25), new SourcePosition(27, 1, 28)), "i32")
                         ]),
                         new FunctionTypeNode(
                             new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(39, 1, 40)),
                             [],
-                            new TypeNode(new SourceSpan(new SourcePosition(35, 1, 36), new SourcePosition(39, 1, 40)), "void")
+                            new TypeRefNode(new SourceSpan(new SourcePosition(35, 1, 36), new SourcePosition(39, 1, 40)), "void")
                         )
                     ])
             )
@@ -2919,7 +2919,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
                     "i32"
                 )
@@ -2943,7 +2943,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new TypeNode(
+                new TypeRefNode(
                     new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21)),
                     "i32"
                 )
@@ -2981,8 +2981,8 @@ public class ParseTypeTests
                 new TupleTypeNode(
                     new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(25, 1, 26)),
                     [
-                        new TypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), "i32"),
-                        new TypeNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32")
+                        new TypeRefNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), "i32"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32")
                     ]
                 ),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(29, 1, 30)), [])
@@ -3004,8 +3004,8 @@ public class ParseTypeTests
                 "T",
                 [],
                 new DiscriminatedUnionNode([
-                    new TypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), "i32"),
-                    new TupleTypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(33, 1, 34)), [new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)), "bool"), new TypeNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)), "f64")])
+                    new TypeRefNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)), "i32"),
+                    new TupleTypeNode(new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(33, 1, 34)), [new TypeRefNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)), "bool"), new TypeRefNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)), "f64")])
                 ])
             )
         ]);
@@ -3025,8 +3025,8 @@ public class ParseTypeTests
                 "T",
                 [],
                 new TupleTypeNode(new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(33, 1, 34)), [
-                    new TypeNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "bool"),
-                    new DiscriminatedUnionNode([new TypeNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32"), new TypeNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)), "f64")])
+                    new TypeRefNode(new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(21, 1, 22)), "bool"),
+                    new DiscriminatedUnionNode([new TypeRefNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32"), new TypeRefNode(new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)), "f64")])
                 ])
             )
         ]);
@@ -3060,7 +3060,7 @@ public class ParseTypeTests
                         true,
                         "test",
                         [],
-                        new TypeNode(new SourceSpan(new SourcePosition(45, 2, 27), new SourcePosition(49, 2, 31)), "void"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(45, 2, 27), new SourcePosition(49, 2, 31)), "void"),
                         new BlockStatementNode(new SourceSpan(new SourcePosition(50, 2, 32), new SourcePosition(53, 2, 35)))
                     )
                 ]
@@ -3101,7 +3101,7 @@ public class ParseTypeTests
                         true,
                         "test",
                         [],
-                        new TypeNode(new SourceSpan(new SourcePosition(45, 2, 27), new SourcePosition(49, 2, 31)), "void"),
+                        new TypeRefNode(new SourceSpan(new SourcePosition(45, 2, 27), new SourcePosition(49, 2, 31)), "void"),
                         new BlockStatementNode(new SourceSpan(new SourcePosition(50, 2, 32), new SourcePosition(53, 2, 35)))
                     )
                 ]
@@ -3111,7 +3111,7 @@ public class ParseTypeTests
                 AccessModifier.Public,
                 "main",
                 [],
-                new TypeNode(new SourceSpan(new SourcePosition(72, 5, 16), new SourcePosition(76, 5, 20)), "void"),
+                new TypeRefNode(new SourceSpan(new SourcePosition(72, 5, 16), new SourcePosition(76, 5, 20)), "void"),
                 new BlockStatementNode(new SourceSpan(new SourcePosition(77, 5, 21), new SourcePosition(97, 7, 2)), [
                     new ExpressionStatementNode(
                         new SourceSpan(new SourcePosition(83, 6, 5), new SourcePosition(95, 6, 17)),
@@ -3145,7 +3145,7 @@ public class ParseTypeTests
                 "T",
                 [],
                 new DiscriminatedUnionNode([
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
                         "i32"
                     ),
@@ -3153,11 +3153,11 @@ public class ParseTypeTests
                         new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(39, 1, 40)),
                         [],
                         new DiscriminatedUnionNode([
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
                                 "i32"
                             ),
-                            new TypeNode(
+                            new TypeRefNode(
                                 new SourceSpan(new SourcePosition(35, 1, 36), new SourcePosition(39, 1, 40)),
                                 "null"
                             ),
@@ -3183,19 +3183,19 @@ public class ParseTypeTests
                 "T",
                 [],
                 new DiscriminatedUnionNode([
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(19, 1, 20)),
                         "i32"
                     ),
                     new FunctionTypeNode(
                         new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(32, 1, 33)),
                         [],
-                        new TypeNode(
+                        new TypeRefNode(
                             new SourceSpan(new SourcePosition(29, 1, 30), new SourcePosition(32, 1, 33)),
                             "i32"
                         )
                     ),
-                    new TypeNode(
+                    new TypeRefNode(
                         new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(40, 1, 41)),
                         "null"
                     ),

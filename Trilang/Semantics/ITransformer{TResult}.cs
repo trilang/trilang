@@ -1,5 +1,4 @@
 using Trilang.Semantics.Model;
-using Type = Trilang.Semantics.Model.Type;
 
 namespace Trilang.Semantics;
 
@@ -43,7 +42,7 @@ public interface ITransformer<out TResult>
 
     TResult TransformFunctionType(FunctionType node);
 
-    TResult TransformGenericType(GenericType node);
+    TResult TransformGenericType(GenericTypeRef node);
 
     TResult TransformGoTo(GoTo node);
 
@@ -93,7 +92,7 @@ public interface ITransformer<out TResult>
 
     TResult TransformType(TypeDeclaration node);
 
-    TResult TransformTypeNode(Type node);
+    TResult TransformTypeNode(TypeRef node);
 
     TResult TransformUnaryExpression(UnaryExpression node);
 
