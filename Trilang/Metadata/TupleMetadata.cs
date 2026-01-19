@@ -7,10 +7,6 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     private readonly List<PropertyMetadata> properties;
     private readonly List<MethodMetadata> methods;
 
-    public TupleMetadata(SourceLocation? definition) : this(definition, [])
-    {
-    }
-
     public TupleMetadata(SourceLocation? definition, IEnumerable<ITypeMetadata> types)
     {
         Definition = definition;
@@ -63,7 +59,7 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     public override string ToString()
         => $"({string.Join(", ", types)})";
 
-    public void AddType(ITypeMetadata type)
+    private void AddType(ITypeMetadata type)
     {
         var name = types.Count.ToString();
 

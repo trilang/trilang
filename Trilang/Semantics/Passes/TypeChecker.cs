@@ -20,7 +20,7 @@ internal class TypeChecker : Visitor, ISemanticPass
         diagnostics = context.Diagnostics;
         directives = context.Directives;
         symbolTableMap = context.SymbolTableMap!;
-        metadataProviderMap = context.TypeProviderMap!;
+        metadataProviderMap = context.MetadataProviderMap!;
 
         foreach (var tree in semanticTrees)
             tree.Accept(this);
@@ -421,24 +421,9 @@ internal class TypeChecker : Visitor, ISemanticPass
         // because we don't know the types of the expressions yet
         var types = node.Expressions.Select(x => x.ReturnTypeMetadata!);
         var tuple = new TupleMetadata(null, types);
-        var existingTuple = typeProvider.GetType(tuple.ToString());
-        if (existingTuple is null)
-        {
-            typeProvider.DefineType(tuple.ToString(), tuple);
-            existingTuple = tuple;
-        }
+        tuple = typeProvider.GetOrDefine(tuple);
 
-        node.ReturnTypeMetadata = existingTuple;
-    }
-
-    protected override void VisitTypeNodeExit(TypeRef node)
-    {
-        if (node.Metadata is not null)
-            return;
-
-        var typeProvider = metadataProviderMap.Get(node);
-
-        node.Metadata = node.PopulateMetadata(typeProvider, diagnostics);
+        node.ReturnTypeMetadata = tuple;
     }
 
     protected override void VisitUnaryExpressionExit(UnaryExpression node)

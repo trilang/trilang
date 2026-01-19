@@ -197,4 +197,6 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public IReadOnlyList<MethodMetadata> Methods => methods;
 
     public bool IsGeneric => genericArguments.Count > 0;
+
+    public TypeMetadata? OpenGenericType { get; set; }
 }

@@ -1,6 +1,6 @@
 using Trilang.Metadata;
 
-namespace Trilang.Semantics.Passes.MetadataGenerators;
+namespace Trilang.Semantics.Passes;
 
 internal class TypeArgumentMap
 {
@@ -20,12 +20,12 @@ internal class TypeArgumentMap
     {
         var result = new TypeArgumentMap(metadataProvider);
 
-        foreach (var (specific, open) in closedTypes.Zip(openTypes))
+        foreach (var (closed, open) in closedTypes.Zip(openTypes))
         {
-            if (specific is TypeArgumentMetadata || specific.Equals(open))
+            if (closed.Equals(open))
                 continue;
 
-            result.map.Add(open.ToString()!, specific);
+            result.map.Add(open.ToString()!, closed);
         }
 
         return result;
@@ -40,6 +40,9 @@ internal class TypeArgumentMap
         {
             AliasMetadata aliasMetadata
                 => Map(aliasMetadata),
+
+            ArrayMetadata typeArrayMetadata
+                => Map(typeArrayMetadata),
 
             DiscriminatedUnionMetadata discriminatedUnionMetadata
                 => Map(discriminatedUnionMetadata),
@@ -56,9 +59,6 @@ internal class TypeArgumentMap
             TypeArgumentMetadata typeArgumentMetadata
                 => Map(typeArgumentMetadata),
 
-            ArrayMetadata typeArrayMetadata
-                => Map(typeArrayMetadata),
-
             TypeMetadata typeMetadata
                 => Map(typeMetadata),
 
@@ -66,7 +66,7 @@ internal class TypeArgumentMap
         };
     }
 
-    private ITypeMetadata Map(AliasMetadata type)
+    private AliasMetadata Map(AliasMetadata type)
     {
         var alias = new AliasMetadata(
             type.Definition,
@@ -141,7 +141,9 @@ internal class TypeArgumentMap
     }
 
     private ITypeMetadata Map(TypeArgumentMetadata type)
-        => map.GetValueOrDefault(type.Name, type);
+        => map.TryGetValue(type.Name, out var mapped)
+            ? mapped
+            : throw new InvalidOperationException($"Type argument {type.Name} is not mapped.");
 
     private ArrayMetadata Map(ArrayMetadata type)
     {
@@ -227,6 +229,13 @@ internal class TypeArgumentMap
     private bool HasTypeArgument(ITypeMetadata type)
         => type switch
         {
+            AliasMetadata typeAliasMetadata
+                => typeAliasMetadata.GenericArguments.Any(HasTypeArgument) ||
+                   HasTypeArgument(typeAliasMetadata.Type!),
+
+            ArrayMetadata typeArrayMetadata
+                => HasTypeArgument(typeArrayMetadata.ItemMetadata!),
+
             DiscriminatedUnionMetadata discriminatedUnionMetadata
                 => discriminatedUnionMetadata.Types.Any(HasTypeArgument),
 
@@ -241,14 +250,8 @@ internal class TypeArgumentMap
             TupleMetadata tupleMetadata
                 => tupleMetadata.Types.Any(HasTypeArgument),
 
-            AliasMetadata typeAliasMetadata
-                => HasTypeArgument(typeAliasMetadata.Type!),
-
             TypeArgumentMetadata
                 => true,
-
-            ArrayMetadata typeArrayMetadata
-                => HasTypeArgument(typeArrayMetadata.ItemMetadata!),
 
             TypeMetadata typeMetadata
                 => typeMetadata.GenericArguments.Any(HasTypeArgument) ||

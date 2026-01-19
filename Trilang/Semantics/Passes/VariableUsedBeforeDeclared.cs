@@ -16,7 +16,7 @@ internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
     public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
     {
         symbolTableMap = context.SymbolTableMap!;
-        metadataProviderMap = context.TypeProviderMap!;
+        metadataProviderMap = context.MetadataProviderMap!;
         diagnostics = context.Diagnostics;
 
         foreach (var tree in semanticTrees)

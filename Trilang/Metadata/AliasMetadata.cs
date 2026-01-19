@@ -121,4 +121,6 @@ public class AliasMetadata : ITypeMetadata, IEquatable<AliasMetadata>
         => genericArguments;
 
     public ITypeMetadata? Type { get; set; }
+
+    public AliasMetadata? OpenGenericType { get; set; }
 }

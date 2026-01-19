@@ -10,6 +10,15 @@ namespace Trilang.Semantics;
 
 internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
 {
+    public ISemanticNode TransformTypeAlias(AliasDeclarationNode node)
+    {
+        var accessModifier = (AccessModifier)node.AccessModifier;
+        var genericArguments = node.GenericArguments.Select(ga => (TypeRef)ga.Transform(this)).ToList();
+        var type = (IInlineType)node.Type.Transform(this);
+
+        return new AliasDeclaration(node.SourceSpan, accessModifier, node.Name, genericArguments, type);
+    }
+
     public ISemanticNode TransformArrayAccess(ArrayAccessExpressionNode node)
     {
         var member = (IExpression)node.Member.Transform(this);
@@ -293,15 +302,6 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var types = node.Types.Select(e => (IInlineType)e.Transform(this)).ToList();
 
         return new TupleType(node.SourceSpan, types);
-    }
-
-    public ISemanticNode TransformTypeAlias(AliasDeclarationNode node)
-    {
-        var accessModifier = (AccessModifier)node.AccessModifier;
-        var genericArguments = node.GenericArguments.Select(ga => (TypeRef)ga.Transform(this)).ToList();
-        var type = (IInlineType)node.Type.Transform(this);
-
-        return new AliasDeclaration(node.SourceSpan, accessModifier, node.Name, genericArguments, type);
     }
 
     public ISemanticNode TransformType(TypeDeclarationNode node)

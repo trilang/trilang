@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="example.tri" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="Tri.Tests/Tri.Tests.csproj" />
+  <Project Path="Tri/Tri.csproj" />
+  <Project Path="Trilang/Trilang.csproj" />
+</Solution>

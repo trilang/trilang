@@ -48,8 +48,6 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
     {
         map.Add(node, context);
 
-        context.AddType(TypeSymbol.Array(node));
-
         node.ElementType.Accept(this, context);
     }
 
@@ -111,9 +109,6 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
     public void VisitDiscriminatedUnion(DiscriminatedUnion node, ISymbolTable context)
     {
-        var symbol = TypeSymbol.DiscriminatedUnion(node);
-        context.AddType(symbol);
-
         var child = context.CreateChild();
         map.Add(node, child);
 
@@ -159,9 +154,6 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
     public void VisitFunctionType(FunctionType node, ISymbolTable context)
     {
-        var symbol = TypeSymbol.FunctionType(node);
-        context.AddType(symbol);
-
         map.Add(node, context);
 
         foreach (var parameterType in node.ParameterTypes)
@@ -177,6 +169,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         foreach (var typeArgument in node.TypeArguments)
             typeArgument.Accept(this, context);
 
+        // TODO: remove?
         var symbol = TypeSymbol.GenericType(node);
         context.AddType(symbol);
     }
@@ -209,9 +202,6 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
     public void VisitInterface(Interface node, ISymbolTable context)
     {
-        var symbol = TypeSymbol.Interface(node);
-        context.AddType(symbol);
-
         var child = context.CreateChild();
         map.Add(node, child);
 
@@ -378,9 +368,6 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
 
         foreach (var type in node.Types)
             type.Accept(this, context);
-
-        var symbol = TypeSymbol.Tuple(node);
-        context.AddType(symbol);
     }
 
     public void VisitType(TypeDeclaration node, ISymbolTable context)

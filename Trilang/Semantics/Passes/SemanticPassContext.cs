@@ -13,7 +13,7 @@ internal record SemanticPassContext(
 {
     public SymbolTableMap? SymbolTableMap { get; set; }
 
-    public MetadataProviderMap? TypeProviderMap { get; set; }
+    public MetadataProviderMap? MetadataProviderMap { get; set; }
 
     public ControlFlowGraphMap? ControlFlowGraphs { get; set; }
 }

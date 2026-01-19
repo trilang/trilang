@@ -4,10 +4,6 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
 {
     private readonly List<ITypeMetadata> types;
 
-    public DiscriminatedUnionMetadata(SourceLocation? definition) : this(definition, [])
-    {
-    }
-
     public DiscriminatedUnionMetadata(SourceLocation? definition, IEnumerable<ITypeMetadata> types)
     {
         Definition = definition;
@@ -54,16 +50,11 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
     public override string ToString()
         => string.Join(" | ", types);
 
-    public void AddType(ITypeMetadata type)
-        => types.Add(type);
-
-    public bool HasType(TypeMetadata type)
-        => types.Contains(type);
-
     public IMetadata? GetMember(string name)
         => null;
 
-    public bool IsInvalid => false;
+    public bool IsInvalid
+        => false;
 
     public SourceLocation? Definition { get; }
 
@@ -72,5 +63,6 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
 
     public TypeLayout? Layout { get; set; }
 
-    public IReadOnlyList<ITypeMetadata> Types => types;
+    public IReadOnlyList<ITypeMetadata> Types
+        => types;
 }

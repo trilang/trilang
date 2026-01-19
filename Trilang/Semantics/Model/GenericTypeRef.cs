@@ -4,7 +4,10 @@ namespace Trilang.Semantics.Model;
 
 public class GenericTypeRef : IInlineType
 {
-    public GenericTypeRef(SourceSpan? sourceSpan, string prefixName, IReadOnlyList<IInlineType> typeArguments)
+    public GenericTypeRef(
+        SourceSpan? sourceSpan,
+        string prefixName,
+        IReadOnlyList<IInlineType> typeArguments)
     {
         SourceSpan = sourceSpan;
         PrefixName = prefixName;
@@ -16,7 +19,7 @@ public class GenericTypeRef : IInlineType
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.VisitGenericType(this);
+        => visitor.VisitGenericTypeRef(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitGenericType(this, context);

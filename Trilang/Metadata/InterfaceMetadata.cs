@@ -111,9 +111,9 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
 
     public TypeLayout? Layout { get; set; }
 
-    public IReadOnlyCollection<InterfacePropertyMetadata> Properties
+    public IReadOnlyList<InterfacePropertyMetadata> Properties
         => properties;
 
-    public IReadOnlyCollection<InterfaceMethodMetadata> Methods
+    public IReadOnlyList<InterfaceMethodMetadata> Methods
         => methods;
 }

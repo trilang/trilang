@@ -14,23 +14,8 @@ public class TypeSymbol : IEquatable<TypeSymbol>
     public static TypeSymbol TypeDeclaration(TypeDeclaration node)
         => new TypeSymbol(TypeSymbolKind.TypeDeclaration, node.Name, node);
 
-    public static TypeSymbol Array(ArrayType node)
-        => new TypeSymbol(TypeSymbolKind.Array, node.Name, node);
-
     public static TypeSymbol Alias(AliasDeclaration node)
         => new TypeSymbol(TypeSymbolKind.Alias, node.FullName, node);
-
-    public static TypeSymbol FunctionType(FunctionType node)
-        => new TypeSymbol(TypeSymbolKind.Function, node.Name, node);
-
-    public static TypeSymbol Interface(Interface node)
-        => new TypeSymbol(TypeSymbolKind.Interface, node.Name, node);
-
-    public static TypeSymbol DiscriminatedUnion(DiscriminatedUnion node)
-        => new TypeSymbol(TypeSymbolKind.DiscriminatedUnion, node.Name, node);
-
-    public static TypeSymbol Tuple(TupleType node)
-        => new TypeSymbol(TypeSymbolKind.Tuple, node.Name, node);
 
     public static TypeSymbol GenericTypeDeclaration(TypeDeclaration node)
         => new TypeSymbol(TypeSymbolKind.GenericTypeDeclaration, node.FullName, node);
@@ -85,17 +70,7 @@ public class TypeSymbol : IEquatable<TypeSymbol>
 
     public bool IsTypeDeclaration => TypeKind == TypeSymbolKind.TypeDeclaration;
 
-    public bool IsArray => TypeKind == TypeSymbolKind.Array;
-
     public bool IsAlias => TypeKind == TypeSymbolKind.Alias;
-
-    public bool IsFunction => TypeKind == TypeSymbolKind.Function;
-
-    public bool IsInterface => TypeKind == TypeSymbolKind.Interface;
-
-    public bool IsDiscriminatedUnion => TypeKind == TypeSymbolKind.DiscriminatedUnion;
-
-    public bool IsTuple => TypeKind == TypeSymbolKind.Tuple;
 
     public bool IsGenericTypeDeclaration => TypeKind == TypeSymbolKind.GenericTypeDeclaration;
 

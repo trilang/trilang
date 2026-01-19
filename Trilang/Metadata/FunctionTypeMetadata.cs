@@ -8,10 +8,6 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     private readonly List<FieldMetadata> fields;
     private readonly List<ITypeMetadata> parameterTypes;
 
-    public FunctionTypeMetadata(SourceLocation? definition) : this(definition, [], null!)
-    {
-    }
-
     public FunctionTypeMetadata(
         SourceLocation? definition,
         IEnumerable<ITypeMetadata> parameterTypes,
@@ -80,9 +76,6 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     public override string ToString()
         => $"({string.Join(", ", parameterTypes)}) => {ReturnType}";
 
-    public void AddParameter(ITypeMetadata parameter)
-        => parameterTypes.Add(parameter);
-
     public IMetadata? GetMember(string name)
         => fields.FirstOrDefault(f => f.Name == name);
 
@@ -103,5 +96,5 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
 
     public IReadOnlyList<ITypeMetadata> ParameterTypes => parameterTypes;
 
-    public ITypeMetadata ReturnType { get; set; }
+    public ITypeMetadata ReturnType { get; }
 }

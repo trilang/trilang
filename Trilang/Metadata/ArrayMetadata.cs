@@ -6,10 +6,6 @@ public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
     private readonly List<PropertyMetadata> properties;
     private readonly List<MethodMetadata> methods;
 
-    public ArrayMetadata(SourceLocation? definition) : this(definition, null)
-    {
-    }
-
     public ArrayMetadata(SourceLocation? definition, ITypeMetadata? itemMetadata)
     {
         Definition = definition;
@@ -101,5 +97,5 @@ public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
     public IReadOnlyList<MethodMetadata> Methods
         => methods;
 
-    public ITypeMetadata? ItemMetadata { get; set; }
+    public ITypeMetadata? ItemMetadata { get; }
 }

@@ -1317,7 +1317,155 @@ public class MetadataGeneratorTests
     }
 
     [Test]
+    public void GenerateMetadataForNestedClosedGenericAliasToTypeTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type List<T2> {}
+            public type Test<T> = List<T>;
+
+            public func(x: Test<i32>): void {
+                return;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var type = typeProvider.GetType("Test<i32>");
+
+        var listMetadata = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
+        listMetadata.AddConstructor(
+            new ConstructorMetadata(
+                null,
+                listMetadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata(null, [], listMetadata)));
+
+        var expected = new AliasMetadata(
+            null,
+            "Test",
+            [TypeMetadata.I32],
+            listMetadata);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void GenerateMetadataForNestedClosedGenericAliasToTypeWithReserveArgumentsTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type List<X1, X2> {}
+            public type Test<T1, T2> = List<T2, T1>;
+
+            public func(x: Test<i32, bool>): void {
+                return;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var type = typeProvider.GetType("Test<i32>");
+
+        var listMetadata = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
+        listMetadata.AddConstructor(
+            new ConstructorMetadata(
+                null,
+                listMetadata,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata(null, [], listMetadata)));
+
+        var expected = new AliasMetadata(
+            null,
+            "Test",
+            [TypeMetadata.I32],
+            listMetadata);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
+    }
+
+    [Test]
     public void GenerateMetadataForClosedAliasOnAliasTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Alias1<T1> = T1 | i32;
+            public type Alias2<T1> = Alias1<T1>;
+
+            public test(x: Alias2<i32>): void {
+                return;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var type = typeProvider.GetType("Alias2<i32>");
+        var expected = new AliasMetadata(
+            null,
+            "Alias2",
+            [TypeMetadata.I32],
+            new AliasMetadata(
+                null,
+                "Alias1",
+                [TypeMetadata.I32],
+                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void GenerateMetadataForNestedClosedAliasOnAliasTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public type Alias1<T2> = T2 | i32;
+            public type Alias2<T1> = Alias1<T1>;
+
+            public test(x: Alias2<i32>): void {
+                return;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var type = typeProvider.GetType("Alias2<i32>");
+        var expected = new AliasMetadata(
+            null,
+            "Alias2",
+            [TypeMetadata.I32],
+            new AliasMetadata(
+                null,
+                "Alias1",
+                [TypeMetadata.I32],
+                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(type, Is.Not.Null);
+        Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void GenerateMetadataForNestedClosedAliasOnAliasTest2()
     {
         var (tree, diagnostics) = Parse(
             """
@@ -1589,5 +1737,31 @@ public class MetadataGeneratorTests
             "The 'method' method is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void GenerateMetadataForVariableWithAnonymousTypeTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            public main(): void {
+                var du: i32 | null = (i32 | null)1;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, typeProvider, _) = semantic.Analyze(
+            [tree],
+            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+
+        var expectedDu = new DiscriminatedUnionMetadata(null, [
+            TypeMetadata.I32,
+            TypeMetadata.Null,
+        ]);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
+        var actualDu = typeProvider.GetType("i32 | null");
+        Assert.That(actualDu, Is.EqualTo(expectedDu).Using(new MetadataComparer()));
     }
 }

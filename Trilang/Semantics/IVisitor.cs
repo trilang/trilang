@@ -42,7 +42,7 @@ public interface IVisitor
 
     void VisitFunctionType(FunctionType node);
 
-    void VisitGenericType(GenericTypeRef node);
+    void VisitGenericTypeRef(GenericTypeRef node);
 
     void VisitGoTo(GoTo node);
 
@@ -92,7 +92,7 @@ public interface IVisitor
 
     void VisitType(TypeDeclaration node);
 
-    void VisitTypeNode(TypeRef node);
+    void VisitTypeRef(TypeRef node);
 
     void VisitUnaryExpression(UnaryExpression node);
 

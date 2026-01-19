@@ -11,7 +11,7 @@ public class TypeRef : IInlineType
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.VisitTypeNode(this);
+        => visitor.VisitTypeRef(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitTypeNode(this, context);

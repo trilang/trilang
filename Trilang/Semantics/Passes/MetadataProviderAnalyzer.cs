@@ -19,7 +19,7 @@ internal class MetadataProviderAnalyzer : IVisitor<IMetadataProvider>, ISemantic
         foreach (var tree in semanticTrees)
             tree.Accept(this, context.RootMetadataProvider);
 
-        context.TypeProviderMap = map;
+        context.MetadataProviderMap = map;
     }
 
     public void VisitAlias(AliasDeclaration node, IMetadataProvider context)

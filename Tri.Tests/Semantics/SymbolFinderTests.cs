@@ -348,25 +348,6 @@ public class SymbolFinderTests
     }
 
     [Test]
-    public void ArrayTypeTest()
-    {
-        var (tree, diagnostics) = Parse("public main(): i32[] { return new i32[0]; }");
-
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
-
-        var semanticTree = semanticTrees.Single();
-        var arrayTypeNodes = semanticTree.Where<ArrayType>().ToArray();
-        var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Is.EqualTo([
-            TypeSymbol.Array(arrayTypeNodes[0]),
-            TypeSymbol.Array(arrayTypeNodes[1]),
-        ]));
-    }
-
-    [Test]
     public void TypeDeclarationTest()
     {
         var (tree, diagnostics) = Parse("public type Point { }");
@@ -507,27 +488,6 @@ public class SymbolFinderTests
     }
 
     [Test]
-    public void FunctionTypeAliasTest()
-    {
-        var (tree, diagnostics) = Parse("public type F = (i32, i32) => i32;");
-
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
-
-        var semanticTree = semanticTrees.Single();
-        var aliasType = semanticTree.Find<AliasDeclaration>()!;
-        var type = semanticTree.Find<FunctionType>()!;
-
-        var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Is.EqualTo([
-            TypeSymbol.Alias(aliasType),
-            TypeSymbol.FunctionType(type),
-        ]));
-    }
-
-    [Test]
     public void TypeIdsInSymbolTableTest()
     {
         var (tree, diagnostics) = Parse(
@@ -592,14 +552,7 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var semanticTree = semanticTrees.Single();
-        var alias = semanticTree.Find<AliasDeclaration>()!;
         var @interface = semanticTree.Find<Interface>()!;
-
-        var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Is.EqualTo([
-            TypeSymbol.Alias(alias),
-            TypeSymbol.Interface(@interface),
-        ]));
 
         var interfaceSymbolTable = map.Get(@interface);
         Assert.That(interfaceSymbolTable, Is.Not.Null);
@@ -616,105 +569,6 @@ public class SymbolFinderTests
         Assert.That(
             interfaceSymbolTable.Ids,
             Contains.Key("distance").WithValue(new IdSymbol("distance", @interface.Methods[1])));
-    }
-
-    [Test]
-    public void InlineFunctionTypeInInterfaceTest()
-    {
-        var (tree, diagnostics) = Parse(
-            """
-            public type Point = {
-                x: () => void;
-            }
-            """);
-
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
-
-        var semanticTree = semanticTrees.Single();
-        var alias = semanticTree.Find<AliasDeclaration>()!;
-        var @interface = semanticTree.Find<Interface>()!;
-
-        var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(3));
-        Assert.That(treeSymbolTable.Types, Contains.Item(TypeSymbol.Interface(@interface)));
-        Assert.That(treeSymbolTable.Types, Contains.Item(TypeSymbol.Alias(alias)));
-    }
-
-    [Test]
-    public void DiscriminatedUnionTest()
-    {
-        var (tree, diagnostics) = Parse("public type T = {} | i32 | () => void;");
-
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
-
-        var semanticTree = semanticTrees.Single();
-        var alias = semanticTree.Find<AliasDeclaration>()!;
-        var discriminatedUnionNode = semanticTree.Find<DiscriminatedUnion>()!;
-
-        var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Has.Count.EqualTo(4));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Item(TypeSymbol.DiscriminatedUnion(discriminatedUnionNode)));
-        Assert.That(
-            treeSymbolTable.Types,
-            Contains.Item(TypeSymbol.Alias(alias)));
-    }
-
-    [Test]
-    public void TupleTypeTest()
-    {
-        var (tree, diagnostics) = Parse("public type T = (i32, bool);");
-
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
-
-        var semanticTree = semanticTrees.Single();
-        var aliasNode = semanticTree.Find<AliasDeclaration>();
-        var tupleNode = semanticTree.Find<TupleType>();
-        Assert.That(aliasNode, Is.Not.Null);
-        Assert.That(tupleNode, Is.Not.Null);
-
-        var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Is.EqualTo([
-            TypeSymbol.Alias(aliasNode),
-            TypeSymbol.Tuple(tupleNode),
-        ]));
-    }
-
-    [Test]
-    public void NestedTupleTypeTest()
-    {
-        var (tree, diagnostics) = Parse("public type T = ((i32, i32), bool);");
-
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
-
-        var semanticTree = semanticTrees.Single();
-        var aliasNode = semanticTree.Find<AliasDeclaration>();
-        var tupleNode = semanticTree.Find<TupleType>(x => x.Name == "((i32, i32), bool)");
-        var nestedTupleNode = semanticTree.Find<TupleType>(x => x.Name == "(i32, i32)");
-
-        Assert.That(aliasNode, Is.Not.Null);
-        Assert.That(tupleNode, Is.Not.Null);
-        Assert.That(nestedTupleNode, Is.Not.Null);
-
-        var treeSymbolTable = map.Get(semanticTree);
-        Assert.That(treeSymbolTable.Types, Is.EqualTo([
-            TypeSymbol.Alias(aliasNode),
-            TypeSymbol.Tuple(nestedTupleNode),
-            TypeSymbol.Tuple(tupleNode),
-        ]));
     }
 
     [Test]

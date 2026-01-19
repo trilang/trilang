@@ -331,21 +331,21 @@ internal abstract class Visitor : IVisitor
     {
     }
 
-    public virtual void VisitGenericType(GenericTypeRef node)
+    public virtual void VisitGenericTypeRef(GenericTypeRef node)
     {
-        VisitGenericTypeEnter(node);
+        VisitGenericTypeRefEnter(node);
 
         for (var i = 0; i < node.TypeArguments.Count; i++)
             node.TypeArguments[i].Accept(this);
 
-        VisitGenericTypeExit(node);
+        VisitGenericTypeRefExit(node);
     }
 
-    protected virtual void VisitGenericTypeEnter(GenericTypeRef node)
+    protected virtual void VisitGenericTypeRefEnter(GenericTypeRef node)
     {
     }
 
-    protected virtual void VisitGenericTypeExit(GenericTypeRef node)
+    protected virtual void VisitGenericTypeRefExit(GenericTypeRef node)
     {
     }
 
@@ -782,17 +782,17 @@ internal abstract class Visitor : IVisitor
     {
     }
 
-    public virtual void VisitTypeNode(TypeRef node)
+    public virtual void VisitTypeRef(TypeRef node)
     {
-        VisitTypeNodeEnter(node);
-        VisitTypeNodeExit(node);
+        VisitTypeRefEnter(node);
+        VisitTypeRefExit(node);
     }
 
-    protected virtual void VisitTypeNodeEnter(TypeRef node)
+    protected virtual void VisitTypeRefEnter(TypeRef node)
     {
     }
 
-    protected virtual void VisitTypeNodeExit(TypeRef node)
+    protected virtual void VisitTypeRefExit(TypeRef node)
     {
     }
 
