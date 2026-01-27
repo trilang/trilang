@@ -91,7 +91,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             case (FunctionTypeNode x1, FunctionTypeNode y1):
                 CompareFunctionTypeNode(x1, y1, errors);
                 return;
-            case (GenericTypeRefNode x1, GenericTypeRefNode y1):
+            case (GenericApplicationNode x1, GenericApplicationNode y1):
                 CompareGenericTypeNode(x1, y1, errors);
                 return;
             case (IfDirectiveNode x1, IfDirectiveNode y1):
@@ -339,7 +339,7 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             errors.Add($"FunctionType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
-    private void CompareGenericTypeNode(GenericTypeRefNode x, GenericTypeRefNode y, List<string> errors)
+    private void CompareGenericTypeNode(GenericApplicationNode x, GenericApplicationNode y, List<string> errors)
     {
         CompareSequences(x.TypeArguments, y.TypeArguments, errors, "GenericType.Arguments");
 

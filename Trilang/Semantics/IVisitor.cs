@@ -42,7 +42,7 @@ public interface IVisitor
 
     void VisitFunctionType(FunctionType node);
 
-    void VisitGenericTypeRef(GenericTypeRef node);
+    void VisitGenericTypeRef(GenericApplication node);
 
     void VisitGoTo(GoTo node);
 

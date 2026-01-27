@@ -2,9 +2,9 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-public class GenericTypeRefNode : IInlineTypeNode
+public class GenericApplicationNode : IInlineTypeNode
 {
-    public GenericTypeRefNode(
+    public GenericApplicationNode(
         SourceSpan sourceSpan,
         string prefixName,
         IReadOnlyList<IInlineTypeNode> typeArguments)

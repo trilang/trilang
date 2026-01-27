@@ -162,7 +162,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.ReturnType.Accept(this, context);
     }
 
-    public void VisitGenericType(GenericTypeRef node, ISymbolTable context)
+    public void VisitGenericType(GenericApplication node, ISymbolTable context)
     {
         map.Add(node, context);
 

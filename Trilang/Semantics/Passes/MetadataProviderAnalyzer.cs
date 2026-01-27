@@ -150,7 +150,7 @@ internal class MetadataProviderAnalyzer : IVisitor<IMetadataProvider>, ISemantic
         node.ReturnType.Accept(this, context);
     }
 
-    public void VisitGenericType(GenericTypeRef node, IMetadataProvider context)
+    public void VisitGenericType(GenericApplication node, IMetadataProvider context)
     {
         map.Add(node, context);
 

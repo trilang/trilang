@@ -125,7 +125,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
     public ISemanticNode TransformFunctionType(FunctionType node)
         => node;
 
-    public ISemanticNode TransformGenericType(GenericTypeRef node)
+    public ISemanticNode TransformGenericType(GenericApplication node)
         => node;
 
     public ISemanticNode TransformGoTo(GoTo node)

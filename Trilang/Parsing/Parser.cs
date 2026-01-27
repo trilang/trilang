@@ -1313,7 +1313,7 @@ public class Parser
                 new TypeRefNode(id.SourceSpan, id.Identifier));
         });
 
-    private GenericTypeRefNode? TryParseGenericTypeNode(ParserContext context)
+    private GenericApplicationNode? TryParseGenericTypeNode(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
             var (hasToken, token) = c.Reader.Check(Identifier);
@@ -1351,7 +1351,7 @@ public class Parser
 
             var greaterSignSpan = c.Reader.Expect(Greater);
 
-            return new GenericTypeRefNode(
+            return new GenericApplicationNode(
                 token.SourceSpan.Combine(greaterSignSpan),
                 token.Identifier,
                 typeArguments);

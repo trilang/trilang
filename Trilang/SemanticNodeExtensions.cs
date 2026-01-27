@@ -94,7 +94,7 @@ public static class SemanticNodeExtensions
 
                     q.Enqueue(functionTypeDeclarationNode.ReturnType);
                     break;
-                case GenericTypeRef genericTypeNode:
+                case GenericApplication genericTypeNode:
                     foreach (var typeArgument in genericTypeNode.TypeArguments)
                         q.Enqueue(typeArgument);
 

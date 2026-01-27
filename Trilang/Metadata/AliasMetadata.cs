@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Trilang.Metadata;
 
-public class AliasMetadata : ITypeMetadata, IEquatable<AliasMetadata>
+public class AliasMetadata : IGenericMetadata, IEquatable<AliasMetadata>
 {
     private readonly List<ITypeMetadata> genericArguments;
 
@@ -40,7 +40,7 @@ public class AliasMetadata : ITypeMetadata, IEquatable<AliasMetadata>
             return false;
 
         return Name == other.Name &&
-               genericArguments.SequenceEqual(genericArguments);
+               genericArguments.SequenceEqual(other.genericArguments);
     }
 
     public override bool Equals(object? obj)
@@ -62,10 +62,14 @@ public class AliasMetadata : ITypeMetadata, IEquatable<AliasMetadata>
 
     public override string ToString()
     {
-        if (genericArguments.Count == 0)
+        if (!IsGeneric)
             return Name;
 
         var sb = new StringBuilder();
+
+        if (genericArguments.Any(x => x is not TypeArgumentMetadata))
+            sb.Append("<>_");
+
         sb.Append(Name);
         sb.Append('<');
 
@@ -117,10 +121,10 @@ public class AliasMetadata : ITypeMetadata, IEquatable<AliasMetadata>
 
     public string Name { get; }
 
-    public IReadOnlyCollection<ITypeMetadata> GenericArguments
+    public IReadOnlyList<ITypeMetadata> GenericArguments
         => genericArguments;
 
     public ITypeMetadata? Type { get; set; }
 
-    public AliasMetadata? OpenGenericType { get; set; }
+    public bool IsGeneric => genericArguments.Count > 0;
 }

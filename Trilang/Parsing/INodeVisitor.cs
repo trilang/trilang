@@ -40,7 +40,7 @@ public interface INodeVisitor
 
     void VisitFunctionType(FunctionTypeNode node);
 
-    void VisitGenericType(GenericTypeRefNode node);
+    void VisitGenericType(GenericApplicationNode node);
 
     void VisitIfDirective(IfDirectiveNode node);
 

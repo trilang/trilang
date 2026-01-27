@@ -2,9 +2,9 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-public class GenericTypeRef : IInlineType
+public class GenericApplication : IInlineType
 {
-    public GenericTypeRef(
+    public GenericApplication(
         SourceSpan? sourceSpan,
         string prefixName,
         IReadOnlyList<IInlineType> typeArguments)
@@ -28,7 +28,7 @@ public class GenericTypeRef : IInlineType
         => transformer.TransformGenericType(this);
 
     public IInlineType Clone()
-        => new GenericTypeRef(SourceSpan, PrefixName, TypeArguments.Select(t => t.Clone()).ToArray())
+        => new GenericApplication(SourceSpan, PrefixName, TypeArguments.Select(t => t.Clone()).ToArray())
         {
             Metadata = Metadata,
         };

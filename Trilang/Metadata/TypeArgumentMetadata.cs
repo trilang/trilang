@@ -22,22 +22,16 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
         if (other is null)
             return false;
 
-        if (ReferenceEquals(this, other))
-            return true;
-
         if (IsInvalid || other.IsInvalid)
             return false;
 
-        return Name == other.Name;
+        return ReferenceEquals(this, other);
     }
 
     public override bool Equals(object? obj)
     {
         if (obj is null)
             return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
 
         if (obj.GetType() != GetType())
             return false;

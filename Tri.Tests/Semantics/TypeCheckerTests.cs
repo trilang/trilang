@@ -1346,7 +1346,7 @@ public class TypeCheckerTests
 
         var closedType = typeProvider.GetType("List<i32>");
         var semanticTree = semanticTrees.Single();
-        var genericTypeNode = semanticTree.Find<GenericTypeRef>();
+        var genericTypeNode = semanticTree.Find<GenericApplication>();
         Assert.That(closedType, Is.Not.Null);
         Assert.That(genericTypeNode, Is.Not.Null);
         Assert.That(genericTypeNode.Metadata, Is.EqualTo(closedType).Using(new MetadataComparer()));
@@ -1371,7 +1371,8 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var closedType = typeProvider.GetType("Test<i32>") as TypeMetadata;
+        var closedGeneric = typeProvider.GetType("Test<i32>") as GenericApplicationMetadata;
+        var closedType = closedGeneric!.ClosedGeneric as TypeMetadata;
         var ctor = closedType!.GetConstructor([]);
 
         var semanticTree = semanticTrees.Single();

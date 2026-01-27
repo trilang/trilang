@@ -79,6 +79,9 @@ public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
     public MethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(f => f.Name == name);
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }

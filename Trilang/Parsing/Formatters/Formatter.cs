@@ -283,7 +283,7 @@ public partial class Formatter : INodeVisitor
         node.ReturnType.Accept(this);
     }
 
-    public void VisitGenericType(GenericTypeRefNode node)
+    public void VisitGenericType(GenericApplicationNode node)
     {
         writer.Write(node.PrefixName);
         writer.Write('<');

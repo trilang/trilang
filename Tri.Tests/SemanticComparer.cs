@@ -52,7 +52,7 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
                 => CompareFunctionDeclarationNode(x1, y1),
             (FunctionType x1, FunctionType y1)
                 => CompareFunctionTypeNode(x1, y1),
-            (GenericTypeRef x1, GenericTypeRef y1)
+            (GenericApplication x1, GenericApplication y1)
                 => CompareGenericTypeNode(x1, y1),
             (GoTo x1, GoTo y1)
                 => CompareGoToNode(x1, y1),
@@ -295,7 +295,7 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
         return true;
     }
 
-    private bool CompareGenericTypeNode(GenericTypeRef x, GenericTypeRef y)
+    private bool CompareGenericTypeNode(GenericApplication x, GenericApplication y)
     {
         if (x.Name != y.Name)
             throw new Exception("BaseType doesn't match.");

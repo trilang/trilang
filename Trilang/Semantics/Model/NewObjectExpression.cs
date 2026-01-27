@@ -7,7 +7,7 @@ public class NewObjectExpression : IExpression
 {
     public NewObjectExpression(SourceSpan? sourceSpan, IInlineType type, IReadOnlyList<IExpression> parameters)
     {
-        Debug.Assert(type is TypeRef or GenericTypeRef or FakeType);
+        Debug.Assert(type is TypeRef or GenericApplication or FakeType);
 
         SourceSpan = sourceSpan;
         Type = type;

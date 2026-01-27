@@ -3,7 +3,7 @@ using System.Text;
 namespace Trilang.Metadata;
 
 // TODO: immutable metadata
-public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
+public class TypeMetadata : IGenericMetadata, IEquatable<TypeMetadata>
 {
     public static readonly TypeMetadata InvalidType = TypeMetadata.Invalid("<>_invalid_type");
     public static readonly TypeMetadata Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true);
@@ -111,10 +111,14 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
 
     public override string ToString()
     {
-        if (genericArguments.Count == 0)
+        if (!IsGeneric)
             return Name;
 
         var sb = new StringBuilder();
+
+        if (genericArguments.Any(x => x is not TypeArgumentMetadata))
+            sb.Append("<>_");
+
         sb.Append(Name);
         sb.Append('<');
 
@@ -197,6 +201,4 @@ public class TypeMetadata : ITypeMetadata, IEquatable<TypeMetadata>
     public IReadOnlyList<MethodMetadata> Methods => methods;
 
     public bool IsGeneric => genericArguments.Count > 0;
-
-    public TypeMetadata? OpenGenericType { get; set; }
 }

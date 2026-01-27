@@ -159,7 +159,7 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeRefNode(
+                new GenericApplicationNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(31, 1, 32)),
                     "List",
                     [new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32"), new TypeRefNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(30, 1, 31)), "bool")]
@@ -181,12 +181,12 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeRefNode(
+                new GenericApplicationNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(37, 1, 38)),
                     "List",
                     [
                         new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(24, 1, 25)), "i32"),
-                        new GenericTypeRefNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(36, 1, 37)), "List", [new TypeRefNode(new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(35, 1, 36)), "bool")])
+                        new GenericApplicationNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(36, 1, 37)), "List", [new TypeRefNode(new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(35, 1, 36)), "bool")])
                     ]
                 )
             )
@@ -207,7 +207,7 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeRefNode(
+                new GenericApplicationNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(22, 1, 23)),
                     "List",
                     [
@@ -241,7 +241,7 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeRefNode(
+                new GenericApplicationNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(27, 1, 28)),
                     "List",
                     [
@@ -279,7 +279,7 @@ public class ParseGenericTypeTests
                 AccessModifier.Public,
                 "T",
                 [],
-                new GenericTypeRefNode(
+                new GenericApplicationNode(
                     new SourceSpan(new SourcePosition(16, 1, 17), new SourcePosition(24, 1, 25)),
                     "List",
                     [

@@ -124,11 +124,11 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         return new FunctionType(node.SourceSpan, parameters, returnType);
     }
 
-    public ISemanticNode TransformGenericType(GenericTypeRefNode node)
+    public ISemanticNode TransformGenericType(GenericApplicationNode node)
     {
         var typeArguments = node.TypeArguments.Select(t => (IInlineType)t.Transform(this)).ToList();
 
-        return new GenericTypeRef(node.SourceSpan, node.PrefixName, typeArguments);
+        return new GenericApplication(node.SourceSpan, node.PrefixName, typeArguments);
     }
 
     public ISemanticNode TransformIfDirective(IfDirectiveNode node)

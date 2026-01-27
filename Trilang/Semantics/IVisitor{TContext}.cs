@@ -42,7 +42,7 @@ public interface IVisitor<in TContext>
 
     void VisitFunctionType(FunctionType node, TContext context);
 
-    void VisitGenericType(GenericTypeRef node, TContext context);
+    void VisitGenericType(GenericApplication node, TContext context);
 
     void VisitGoTo(GoTo node, TContext context);
 

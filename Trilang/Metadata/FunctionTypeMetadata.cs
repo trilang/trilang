@@ -79,6 +79,9 @@ public class FunctionTypeMetadata : ITypeMetadata, IEquatable<FunctionTypeMetada
     public IMetadata? GetMember(string name)
         => fields.FirstOrDefault(f => f.Name == name);
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }

@@ -668,7 +668,7 @@ public class SymbolFinderTests
         var alias = semanticTree.Find<AliasDeclaration>();
         Assert.That(alias, Is.Not.Null);
 
-        var closedGeneric = semanticTree.Find<GenericTypeRef>();
+        var closedGeneric = semanticTree.Find<GenericApplication>();
         Assert.That(closedGeneric, Is.Not.Null);
 
         var treeSymbolTable = map.Get(semanticTree);

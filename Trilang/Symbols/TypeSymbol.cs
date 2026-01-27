@@ -20,7 +20,7 @@ public class TypeSymbol : IEquatable<TypeSymbol>
     public static TypeSymbol GenericTypeDeclaration(TypeDeclaration node)
         => new TypeSymbol(TypeSymbolKind.GenericTypeDeclaration, node.FullName, node);
 
-    public static TypeSymbol GenericType(GenericTypeRef node)
+    public static TypeSymbol GenericType(GenericApplication node)
         => new TypeSymbol(TypeSymbolKind.GenericType, node.Name, node);
 
     public static bool operator ==(TypeSymbol? left, TypeSymbol? right)

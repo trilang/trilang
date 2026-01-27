@@ -42,7 +42,7 @@ public interface ITransformer<out TResult>
 
     TResult TransformFunctionType(FunctionType node);
 
-    TResult TransformGenericType(GenericTypeRef node);
+    TResult TransformGenericType(GenericApplication node);
 
     TResult TransformGoTo(GoTo node);
 

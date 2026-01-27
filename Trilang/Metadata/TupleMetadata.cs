@@ -86,7 +86,10 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     public MethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(f => f.Name == name);
 
-    public bool IsInvalid => false;
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
+    public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }
 

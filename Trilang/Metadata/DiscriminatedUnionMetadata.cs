@@ -53,8 +53,10 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
     public IMetadata? GetMember(string name)
         => null;
 
-    public bool IsInvalid
-        => false;
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
+    public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }
 

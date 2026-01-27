@@ -102,6 +102,9 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
         => GetProperty(name) ??
            GetMethod(name) as IMetadata;
 
+    public void MarkAsInvalid()
+        => IsInvalid = true;
+
     public bool IsInvalid { get; private set; }
 
     public SourceLocation? Definition { get; }

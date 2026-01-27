@@ -1,4 +1,3 @@
-using Trilang.Metadata;
 using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;

@@ -331,7 +331,7 @@ internal abstract class Visitor : IVisitor
     {
     }
 
-    public virtual void VisitGenericTypeRef(GenericTypeRef node)
+    public virtual void VisitGenericTypeRef(GenericApplication node)
     {
         VisitGenericTypeRefEnter(node);
 
@@ -341,11 +341,11 @@ internal abstract class Visitor : IVisitor
         VisitGenericTypeRefExit(node);
     }
 
-    protected virtual void VisitGenericTypeRefEnter(GenericTypeRef node)
+    protected virtual void VisitGenericTypeRefEnter(GenericApplication node)
     {
     }
 
-    protected virtual void VisitGenericTypeRefExit(GenericTypeRef node)
+    protected virtual void VisitGenericTypeRefExit(GenericApplication node)
     {
     }
 

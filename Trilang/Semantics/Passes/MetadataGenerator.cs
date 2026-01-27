@@ -15,7 +15,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
     private readonly HashSet<TypeDeclaration> typesToProcess;
     private readonly HashSet<AliasDeclaration> aliasToProcess;
     private readonly HashSet<FunctionDeclaration> functionsToProcess;
-    private readonly HashSet<(ITypeMetadata Open, GenericTypeRef Node)> genericToProcess;
+    private readonly HashSet<(GenericApplication, GenericApplicationMetadata)> genericToProcess;
 
     public MetadataGenerator()
     {
@@ -43,11 +43,10 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         PopulateTypes();
         PopulateFunctions();
 
-        // TODO: move up
         foreach (var semanticTree in semanticTrees)
             semanticTree.Accept(this);
 
-        PopulateGenericTypes();
+        CreateClosedGenericTypes();
     }
 
     private ITypeMetadata CreateTypeArgumentMetadata(TypeRef genericArgument)
@@ -381,162 +380,17 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         }
     }
 
-    private void PopulateGenericTypes()
+    private void CreateClosedGenericTypes()
     {
-        foreach (var (open, genericTypeNode) in genericToProcess)
+        foreach (var (node, generic) in genericToProcess)
         {
-            var closed = genericTypeNode.Metadata!;
-            if (closed is TypeMetadata closedType && open is TypeMetadata openType)
-                PopulateClosedType(genericTypeNode, closedType, openType);
-            else if (closed is AliasMetadata closedAlias && open is AliasMetadata openAlias)
-                PopulateClosedAlias(genericTypeNode, closedAlias, openAlias);
-            else
-                Debug.Fail($"The '{genericTypeNode.Name}' generic type is not defined.");
+            if (generic.ClosedGeneric is not null)
+                continue;
+
+            var metadataProvider = metadataProviderMap.Get(node);
+            var map = new TypeArgumentMap(metadataProvider, generic);
+            map.Map();
         }
-    }
-
-    private void PopulateClosedType(
-        GenericTypeRef genericTypeRef,
-        TypeMetadata closed,
-        TypeMetadata open)
-    {
-        // TODO: reuse TypeArgumentMap for mapping
-        var metadataProvider = metadataProviderMap.Get(genericTypeRef);
-        var typeArgumentsMap = TypeArgumentMap.Create(
-            metadataProvider,
-            closed.GenericArguments,
-            open.GenericArguments);
-
-        // TODO: support generic interfaces
-        foreach (var @interface in open.Interfaces)
-            closed.AddInterface(@interface);
-
-        foreach (var property in open.Properties)
-        {
-            var propertyType = typeArgumentsMap.Map(property.Type);
-            var getter = default(MethodMetadata);
-            if (property.Getter is not null)
-                getter = PopulateClosedMethod(
-                    metadataProvider,
-                    typeArgumentsMap,
-                    closed,
-                    property.Getter,
-                    new FunctionGroupMetadata());
-
-            var setter = default(MethodMetadata);
-            if (property.Setter is not null)
-                setter = PopulateClosedMethod(
-                    metadataProvider,
-                    typeArgumentsMap,
-                    closed,
-                    property.Setter,
-                    new FunctionGroupMetadata());
-
-            var propertyMetadata = new PropertyMetadata(
-                closed,
-                property.Name,
-                propertyType,
-                getter,
-                setter);
-
-            closed.AddProperty(propertyMetadata);
-        }
-
-        foreach (var constructor in open.Constructors)
-        {
-            var parameters = MapParameters(typeArgumentsMap, constructor.Parameters);
-
-            var functionType = new FunctionTypeMetadata(null, parameters.Select(x => x.Type), closed);
-            functionType = metadataProvider.GetOrDefine(functionType);
-
-            var constructorMetadata = new ConstructorMetadata(
-                constructor.Definition,
-                closed,
-                constructor.AccessModifier,
-                parameters,
-                functionType);
-
-            closed.AddConstructor(constructorMetadata);
-        }
-
-        foreach (var methods in open.Methods.GroupBy(x => x.Name))
-        {
-            var group = new FunctionGroupMetadata();
-
-            foreach (var method in methods)
-                closed.AddMethod(
-                    PopulateClosedMethod(
-                        metadataProvider,
-                        typeArgumentsMap,
-                        closed,
-                        method,
-                        group));
-        }
-    }
-
-    private MethodMetadata PopulateClosedMethod(
-        IMetadataProvider provider,
-        TypeArgumentMap typeArgumentsMap,
-        TypeMetadata closed,
-        MethodMetadata method,
-        FunctionGroupMetadata group)
-    {
-        // TODO: support generic methods
-        var parameters = MapParameters(typeArgumentsMap, method.Parameters);
-
-        var methodType = method.Type;
-        var parameterTypes = methodType.ParameterTypes.Select(typeArgumentsMap.Map);
-        var returnType = typeArgumentsMap.Map(methodType.ReturnType);
-        var functionType = new FunctionTypeMetadata(null, parameterTypes, returnType);
-        functionType = provider.GetOrDefine(functionType);
-
-        return new MethodMetadata(
-            method.Definition,
-            closed,
-            method.AccessModifier,
-            method.IsStatic,
-            method.Name,
-            parameters,
-            functionType,
-            group);
-    }
-
-    private void PopulateClosedAlias(
-        GenericTypeRef genericTypeNode,
-        AliasMetadata closed,
-        AliasMetadata open)
-    {
-        if (open.IsInvalid)
-        {
-            closed.MarkAsInvalid();
-            return;
-        }
-
-        var metadataProvider = metadataProviderMap.Get(genericTypeNode);
-        var typeArgumentsMap = TypeArgumentMap.Create(
-            metadataProvider,
-            closed.GenericArguments,
-            open.GenericArguments);
-
-        closed.Type = typeArgumentsMap.Map(open.Type!);
-    }
-
-    private ParameterMetadata[] MapParameters(
-        TypeArgumentMap map,
-        IReadOnlyList<ParameterMetadata> parameters)
-    {
-        var parametersMetadata = new ParameterMetadata[parameters.Count];
-        for (var i = 0; i < parametersMetadata.Length; i++)
-        {
-            var parameterMetadata = parameters[i];
-
-            parametersMetadata[i] = new ParameterMetadata(
-                parameterMetadata.Definition,
-                parameterMetadata.Name,
-                map.Map(parameterMetadata.Type));
-        }
-
-        return parametersMetadata;
     }
 
     private ITypeMetadata GetOrCreateType(IInlineType inlineType)
@@ -550,7 +404,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
                 ArrayType arrayType => CreateArray(arrayType),
                 DiscriminatedUnion discriminatedUnion => CreateDiscriminatedUnion(discriminatedUnion),
                 FunctionType functionType => CreateFunctionType(functionType),
-                GenericTypeRef genericTypeRef => CreateGenericTypeRef(genericTypeRef),
+                GenericApplication genericApplication => CreateGenericApplication(genericApplication),
                 Interface @interface => CreateInterface(@interface),
                 TupleType tupleType => CreateTuple(tupleType),
 
@@ -591,46 +445,30 @@ internal class MetadataGenerator : Visitor, ISemanticPass
             functionType.ParameterTypes.Select(GetOrCreateType),
             GetOrCreateType(functionType.ReturnType));
 
-    private ITypeMetadata? CreateGenericTypeRef(GenericTypeRef genericTypeRef)
+    private ITypeMetadata CreateGenericApplication(GenericApplication genericApplication)
     {
-        var typeProvider = metadataProviderMap.Get(genericTypeRef);
+        var typeProvider = metadataProviderMap.Get(genericApplication);
 
-        foreach (var argumentNode in genericTypeRef.TypeArguments)
+        foreach (var argumentNode in genericApplication.TypeArguments)
             GetOrCreateType(argumentNode);
 
-        var genericArguments = genericTypeRef.TypeArguments.Select(x => x.Metadata!).ToArray();
-        var openName = genericTypeRef.GetOpenGenericName();
-        var open = typeProvider.GetType(openName);
-
-        // TODO: fix partial generics
-        if (IsOpenGeneric(genericTypeRef))
-            return open;
-
-        var closed = open switch
+        var openGenericName = genericApplication.GetOpenGenericName();
+        if (typeProvider.GetType(openGenericName) is not IGenericMetadata openGeneric)
         {
-            TypeMetadata type
-                => new TypeMetadata(open.Definition, type.Name, genericArguments, [], [], [], [], [])
-                {
-                    OpenGenericType = type,
-                } as ITypeMetadata,
+            diagnostics.UnknownType(genericApplication);
+            openGeneric = TypeMetadata.Invalid(openGenericName);
+        }
 
-            AliasMetadata alias
-                => new AliasMetadata(open.Definition, alias.Name, genericArguments, null)
-                {
-                    OpenGenericType = alias,
-                },
+        var metadata = new GenericApplicationMetadata(
+            genericApplication.GetLocation(),
+            openGeneric,
+            genericApplication.TypeArguments.Select(x => x.Metadata!));
 
-            _ => throw new InvalidOperationException($"The '{openName}' generic type is not supported."),
-        };
+        metadata = typeProvider.GetOrDefine(metadata);
+        genericToProcess.Add((genericApplication, metadata));
 
-        genericToProcess.Add((open, genericTypeRef));
-
-        return closed;
+        return metadata;
     }
-
-    private bool IsOpenGeneric(GenericTypeRef genericTypeNode)
-        => genericTypeNode.TypeArguments
-            .All(argumentNode => argumentNode.Metadata is TypeArgumentMetadata);
 
     private InterfaceMetadata CreateInterface(Interface @interface)
     {
@@ -729,7 +567,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         GetOrCreateType(node);
     }
 
-    protected override void VisitGenericTypeRefEnter(GenericTypeRef node)
+    protected override void VisitGenericTypeRefEnter(GenericApplication node)
     {
         if (node.Metadata is not null)
             return;

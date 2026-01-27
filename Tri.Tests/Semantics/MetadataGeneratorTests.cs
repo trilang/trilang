@@ -883,7 +883,7 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var closedType = typeProvider.GetType("List<i32>");
+        var closedType = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
 
         var expected = new TypeMetadata(null, "List");
         expected.AddGenericArgument(TypeMetadata.I32);
@@ -896,7 +896,7 @@ public class MetadataGeneratorTests
                 new FunctionTypeMetadata(null, [], expected)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(closedType, Is.EqualTo(expected).Using(new MetadataComparer()));
+        Assert.That(closedType!.ClosedGeneric, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -915,8 +915,9 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var closedType = typeProvider.GetType("List<i32>") as TypeMetadata;
-        var property = closedType!.GetProperty("Prop");
+        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var closedType = generic!.ClosedGeneric;
+        var property = closedType!.GetMember("Prop") as PropertyMetadata;
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(property, Is.Not.Null);
@@ -966,8 +967,9 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
-        var property = type!.GetProperty("prop");
+        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var type = generic!.ClosedGeneric;
+        var property = type!.GetMember("prop") as PropertyMetadata;
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(new ArrayMetadata(null, TypeMetadata.I32)).Using(new MetadataComparer()));
     }
@@ -993,8 +995,9 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
-        var property = type!.GetProperty("prop");
+        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var type = generic!.ClosedGeneric;
+        var property = type!.GetMember("prop") as PropertyMetadata;
         Assert.That(property, Is.Not.Null);
         Assert.That(
             property.Type,
@@ -1022,8 +1025,9 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
-        var property = type!.GetProperty("prop");
+        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var type = generic!.ClosedGeneric;
+        var property = type!.GetMember("prop") as PropertyMetadata;
         var expected = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1050,8 +1054,9 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
-        var property = type!.GetProperty("prop");
+        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var type = generic!.ClosedGeneric;
+        var property = type!.GetMember("prop") as PropertyMetadata;
         Assert.That(property, Is.Not.Null);
         Assert.That(
             property.Type,
@@ -1077,8 +1082,9 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var type = typeProvider.GetType("List<i32>") as TypeMetadata;
-        var property = type!.GetProperty("prop");
+        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var type = generic!.ClosedGeneric;
+        var property = type!.GetMember("prop") as PropertyMetadata;
         var expected = new InterfaceMetadata(null);
         expected.AddProperty(
             new InterfacePropertyMetadata(
@@ -1131,8 +1137,9 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<>");
-        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")]);
-        var expected = new AliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], du);
+        var typeArgumentMetadata = new TypeArgumentMetadata(null, "T");
+        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, typeArgumentMetadata]);
+        var expected = new AliasMetadata(null, "Test", [typeArgumentMetadata], du);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1157,8 +1164,23 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
-        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], du);
+
+        var expected = new GenericApplicationMetadata(
+            null,
+            new AliasMetadata(
+                null,
+                "Test",
+                [new TypeArgumentMetadata(null, "T")],
+                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")])),
+            [TypeMetadata.I32]
+        )
+        {
+            ClosedGeneric = new AliasMetadata(
+                null,
+                "Test",
+                [TypeMetadata.I32],
+                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])),
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1183,8 +1205,22 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var functionType = new FunctionTypeMetadata(null, [], TypeMetadata.I32);
-        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], functionType);
+        var expected = new GenericApplicationMetadata(
+            null,
+            new AliasMetadata(
+                null,
+                "Test",
+                [new TypeArgumentMetadata(null, "T")],
+                new FunctionTypeMetadata(null, [], new TypeArgumentMetadata(null, "T"))),
+            [TypeMetadata.I32]
+        )
+        {
+            ClosedGeneric = new AliasMetadata(
+                null,
+                "Test",
+                [TypeMetadata.I32],
+                new FunctionTypeMetadata(null, [], TypeMetadata.I32)),
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1209,15 +1245,31 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var interfaceType = new InterfaceMetadata(null);
-        interfaceType.AddProperty(new InterfacePropertyMetadata(
+
+        var openInterface = new InterfaceMetadata(null);
+        openInterface.AddProperty(new InterfacePropertyMetadata(
             null,
-            interfaceType,
+            openInterface,
+            "x",
+            new TypeArgumentMetadata(null, "T"),
+            AccessModifierMetadata.Public,
+            null));
+        var openAlias = new AliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], openInterface);
+
+        var closedInterface = new InterfaceMetadata(null);
+        closedInterface.AddProperty(new InterfacePropertyMetadata(
+            null,
+            closedInterface,
             "x",
             TypeMetadata.I32,
             AccessModifierMetadata.Public,
             null));
-        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], interfaceType);
+        var closedAlias = new AliasMetadata(null, "Test", [TypeMetadata.I32], closedInterface);
+
+        var expected = new GenericApplicationMetadata(null, openAlias, [TypeMetadata.I32])
+        {
+            ClosedGeneric = closedAlias,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1242,8 +1294,23 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Test<i32>");
-        var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
-        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], tuple);
+
+        var expected = new GenericApplicationMetadata(
+            null,
+            new AliasMetadata(
+                null,
+                "Test",
+                [new TypeArgumentMetadata(null, "T")],
+                new TupleMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")])),
+            [TypeMetadata.I32]
+        )
+        {
+            ClosedGeneric = new AliasMetadata(
+                null,
+                "Test",
+                [TypeMetadata.I32],
+                new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])),
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1267,13 +1334,27 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var type = typeProvider.GetType("Test<i32>");
-        var array = new ArrayMetadata(null, TypeMetadata.I32);
-        var expected = new AliasMetadata(null, "Test", [TypeMetadata.I32], array);
+        var actual = typeProvider.GetType("Test<i32>");
+
+        var typeArgumentMetadata = new TypeArgumentMetadata(null, "T");
+        var openGeneric = new AliasMetadata(
+            null,
+            "Test",
+            [typeArgumentMetadata],
+            new ArrayMetadata(null, typeArgumentMetadata));
+        var closedGeneric = new AliasMetadata(
+            null,
+            "Test",
+            [TypeMetadata.I32],
+            new ArrayMetadata(null, TypeMetadata.I32));
+        var expected = new GenericApplicationMetadata(null, openGeneric, [TypeMetadata.I32])
+        {
+            ClosedGeneric = closedGeneric,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(type, Is.Not.Null);
-        Assert.That(type, Is.EqualTo(expected).Using(new MetadataComparer()));
+        Assert.That(actual, Is.Not.Null);
+        Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -1296,20 +1377,45 @@ public class MetadataGeneratorTests
 
         var type = typeProvider.GetType("Test<i32>");
 
-        var listMetadata = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
-        listMetadata.AddConstructor(
+        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T")], [], [], [], [], []);
+        openList.AddConstructor(
             new ConstructorMetadata(
                 null,
-                listMetadata,
+                openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], listMetadata)));
+                new FunctionTypeMetadata(null, [], openList)));
 
-        var expected = new AliasMetadata(
+        var closedList = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
+        closedList.AddConstructor(
+            new ConstructorMetadata(
+                null,
+                closedList,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata(null, [], closedList)));
+
+        var expected = new GenericApplicationMetadata(
             null,
-            "Test",
-            [TypeMetadata.I32],
-            listMetadata);
+            new AliasMetadata(
+                null,
+                "Test",
+                [new TypeArgumentMetadata(null, "T")],
+                new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
+            ),
+            [TypeMetadata.I32]
+        )
+        {
+            ClosedGeneric = new AliasMetadata(
+                null,
+                "Test",
+                [TypeMetadata.I32],
+                new GenericApplicationMetadata(null, openList, [TypeMetadata.I32])
+                {
+                    ClosedGeneric = closedList,
+                }
+            ),
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1336,20 +1442,45 @@ public class MetadataGeneratorTests
 
         var type = typeProvider.GetType("Test<i32>");
 
-        var listMetadata = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
-        listMetadata.AddConstructor(
+        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T2")], [], [], [], [], []);
+        openList.AddConstructor(
             new ConstructorMetadata(
                 null,
-                listMetadata,
+                openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], listMetadata)));
+                new FunctionTypeMetadata(null, [], openList)));
 
-        var expected = new AliasMetadata(
+        var closedList = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
+        closedList.AddConstructor(
+            new ConstructorMetadata(
+                null,
+                closedList,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata(null, [], closedList)));
+
+        var expected = new GenericApplicationMetadata(
             null,
-            "Test",
-            [TypeMetadata.I32],
-            listMetadata);
+            new AliasMetadata(
+                null,
+                "Test",
+                [new TypeArgumentMetadata(null, "T")],
+                new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
+            ),
+            [TypeMetadata.I32]
+        )
+        {
+            ClosedGeneric = new AliasMetadata(
+                null,
+                "Test",
+                [TypeMetadata.I32],
+                new GenericApplicationMetadata(null, openList, [TypeMetadata.I32])
+                {
+                    ClosedGeneric = closedList,
+                }
+            ),
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1374,22 +1505,55 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
-        var type = typeProvider.GetType("Test<i32>");
+        var type = typeProvider.GetType("Test<i32, bool>");
 
-        var listMetadata = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
-        listMetadata.AddConstructor(
+        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "X1"), new TypeArgumentMetadata(null, "X2")], [], [], [], [], []);
+        openList.AddConstructor(
             new ConstructorMetadata(
                 null,
-                listMetadata,
+                openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], listMetadata)));
+                new FunctionTypeMetadata(null, [], openList)));
 
-        var expected = new AliasMetadata(
+        var closedList = new TypeMetadata(null, "List", [TypeMetadata.Bool, TypeMetadata.I32], [], [], [], [], []);
+        closedList.AddConstructor(
+            new ConstructorMetadata(
+                null,
+                closedList,
+                AccessModifierMetadata.Public,
+                [],
+                new FunctionTypeMetadata(null, [], closedList)));
+
+        var expected = new GenericApplicationMetadata(
             null,
-            "Test",
-            [TypeMetadata.I32],
-            listMetadata);
+            new AliasMetadata(
+                null,
+                "Test",
+                [new TypeArgumentMetadata(null, "T1"), new TypeArgumentMetadata(null, "T2")],
+                new GenericApplicationMetadata(
+                    null,
+                    openList,
+                    [new TypeArgumentMetadata(null, "T2"), new TypeArgumentMetadata(null, "T1")]
+                )
+            ),
+            [TypeMetadata.I32, TypeMetadata.Bool]
+        )
+        {
+            ClosedGeneric = new AliasMetadata(
+                null,
+                "Test",
+                [TypeMetadata.I32, TypeMetadata.Bool],
+                new GenericApplicationMetadata(
+                    null,
+                    openList,
+                    [TypeMetadata.Bool, TypeMetadata.I32]
+                )
+                {
+                    ClosedGeneric = closedList,
+                }
+            ),
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1415,15 +1579,54 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Alias2<i32>");
-        var expected = new AliasMetadata(
+
+        var openAlias2 = new AliasMetadata(
+            null,
+            "Alias2",
+            [new TypeArgumentMetadata(null, "T1")],
+            new GenericApplicationMetadata(
+                null,
+                new AliasMetadata(
+                    null,
+                    "Alias1",
+                    [new TypeArgumentMetadata(null, "T1")],
+                    new DiscriminatedUnionMetadata(
+                        null,
+                        [new TypeArgumentMetadata(null, "T1"), TypeMetadata.I32])),
+                [new TypeArgumentMetadata(null, "T1")]
+            )
+        );
+
+        var closedAlias2 = new AliasMetadata(
             null,
             "Alias2",
             [TypeMetadata.I32],
-            new AliasMetadata(
+            new GenericApplicationMetadata(
                 null,
-                "Alias1",
-                [TypeMetadata.I32],
-                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])));
+                new AliasMetadata(
+                    null,
+                    "Alias1",
+                    [new TypeArgumentMetadata(null, "T1")],
+                    new DiscriminatedUnionMetadata(
+                        null,
+                        [new TypeArgumentMetadata(null, "T1"), TypeMetadata.I32])),
+                [TypeMetadata.I32]
+            )
+            {
+                ClosedGeneric = new AliasMetadata(
+                    null,
+                    "Alias1",
+                    [TypeMetadata.I32],
+                    new DiscriminatedUnionMetadata(
+                        null,
+                        [TypeMetadata.I32, TypeMetadata.I32])),
+            }
+        );
+
+        var expected = new GenericApplicationMetadata(null, openAlias2, [TypeMetadata.I32])
+        {
+            ClosedGeneric = closedAlias2,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1449,15 +1652,59 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Alias2<i32>");
-        var expected = new AliasMetadata(
+        var expected = new GenericApplicationMetadata(
             null,
-            "Alias2",
-            [TypeMetadata.I32],
             new AliasMetadata(
                 null,
-                "Alias1",
+                "Alias2",
+                [new TypeArgumentMetadata(null, "T1")],
+                new GenericApplicationMetadata(
+                    null,
+                    new AliasMetadata(
+                        null,
+                        "Alias1",
+                        [new TypeArgumentMetadata(null, "T2")],
+                        new DiscriminatedUnionMetadata(
+                            null,
+                            [new TypeArgumentMetadata(null, "T2"), TypeMetadata.I32]
+                        )
+                    ),
+                    [new TypeArgumentMetadata(null, "T1")]
+                )
+            ),
+            [TypeMetadata.I32]
+        )
+        {
+            ClosedGeneric = new AliasMetadata(
+                null,
+                "Alias2",
                 [TypeMetadata.I32],
-                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])));
+                new GenericApplicationMetadata(
+                    null,
+                    new AliasMetadata(
+                        null,
+                        "Alias1",
+                        [new TypeArgumentMetadata(null, "T2")],
+                        new DiscriminatedUnionMetadata(
+                            null,
+                            [new TypeArgumentMetadata(null, "T2"), TypeMetadata.I32]
+                        )
+                    ),
+                    [TypeMetadata.I32]
+                )
+                {
+                    ClosedGeneric = new AliasMetadata(
+                        null,
+                        "Alias1",
+                        [TypeMetadata.I32],
+                        new DiscriminatedUnionMetadata(
+                            null,
+                            [TypeMetadata.I32, TypeMetadata.I32]
+                        )
+                    )
+                }
+            ),
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1483,15 +1730,59 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
 
         var type = typeProvider.GetType("Alias2<i32>");
-        var expected = new AliasMetadata(
+        var expected = new GenericApplicationMetadata(
             null,
-            "Alias2",
-            [TypeMetadata.I32],
             new AliasMetadata(
                 null,
-                "Alias1",
+                "Alias2",
+                [new TypeArgumentMetadata(null, "T1")],
+                new GenericApplicationMetadata(
+                    null,
+                    new AliasMetadata(
+                        null,
+                        "Alias1",
+                        [new TypeArgumentMetadata(null, "T1")],
+                        new DiscriminatedUnionMetadata(
+                            null,
+                            [new TypeArgumentMetadata(null, "T1"), TypeMetadata.I32]
+                        )
+                    ),
+                    [new TypeArgumentMetadata(null, "T1")]
+                )
+            ),
+            [TypeMetadata.I32]
+        )
+        {
+            ClosedGeneric = new AliasMetadata(
+                null,
+                "Alias2",
                 [TypeMetadata.I32],
-                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])));
+                new GenericApplicationMetadata(
+                    null,
+                    new AliasMetadata(
+                        null,
+                        "Alias1",
+                        [new TypeArgumentMetadata(null, "T1")],
+                        new DiscriminatedUnionMetadata(
+                            null,
+                            [new TypeArgumentMetadata(null, "T1"), TypeMetadata.I32]
+                        )
+                    ),
+                    [TypeMetadata.I32]
+                )
+                {
+                    ClosedGeneric = new AliasMetadata(
+                        null,
+                        "Alias1",
+                        [TypeMetadata.I32],
+                        new DiscriminatedUnionMetadata(
+                            null,
+                            [TypeMetadata.I32, TypeMetadata.I32]
+                        )
+                    )
+                }
+            ),
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);

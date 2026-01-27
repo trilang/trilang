@@ -338,7 +338,12 @@ internal class TypeChecker : Visitor, ISemanticPass
 
     protected override void VisitNewObjectExit(NewObjectExpression node)
     {
-        if (node.Type.Metadata is not TypeMetadata type || type.IsValueType)
+        // TODO: get ctor via GetMember?
+        var metadata = node.Type.Metadata;
+        if (metadata is GenericApplicationMetadata generic)
+            metadata = generic.ClosedGeneric;
+
+        if (metadata is not TypeMetadata type || type.IsValueType)
         {
             node.Metadata = ConstructorMetadata.Invalid();
             diagnostics.CantCreateObject(node);

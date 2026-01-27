@@ -36,6 +36,8 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
                 => CompareFunctionMetadata(x1, y1),
             (FunctionTypeMetadata x1, FunctionTypeMetadata y1)
                 => CompareFunctionTypeMetadata(x1, y1),
+            (GenericApplicationMetadata x1, GenericApplicationMetadata y1)
+                => CompareGenericApplicationMetadata(x1, y1),
             (InterfaceMetadata x1, InterfaceMetadata y1)
                 => CompareInterfaceMetadata(x1, y1),
             (InterfaceMethodMetadata x1, InterfaceMethodMetadata y1)
@@ -131,6 +133,20 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
         if (!Equals(x.ReturnType, y.ReturnType))
             throw new Exception("ReturnType doesn't match.");
+
+        return true;
+    }
+
+    private bool CompareGenericApplicationMetadata(GenericApplicationMetadata x, GenericApplicationMetadata y)
+    {
+        if (!Equals(x.OpenGeneric, y.OpenGeneric))
+            throw new Exception("OpenGeneric doesn't match.");
+
+        if (!x.Arguments.SequenceEqual(y.Arguments, this))
+            throw new Exception("Arguments don't match.");
+
+        if (!Equals(x.ClosedGeneric, y.ClosedGeneric))
+            throw new Exception("ClosedGeneric doesn't match.");
 
         return true;
     }
