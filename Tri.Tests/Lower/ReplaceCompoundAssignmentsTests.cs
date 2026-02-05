@@ -53,7 +53,7 @@ public class ReplaceCompoundAssignmentsTests
               }
               """);
         var parameterMetadata = new ParameterMetadata(null, "x", TypeMetadata.I32);
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,

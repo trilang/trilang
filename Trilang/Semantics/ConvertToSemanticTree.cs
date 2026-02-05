@@ -287,7 +287,12 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
     {
         var declarations = node.Declarations.Select(d => (IDeclaration)d.Transform(this)).ToList();
 
-        return new SemanticTree(node.SourceFile, node.SourceSpan, declarations);
+        return new SemanticTree(
+            node.SourceFile,
+            node.SourceSpan,
+            node.UseNodes.Select(u => (Use)u.Transform(this)).ToList(),
+            (Namespace?)node.Namespace?.Transform(this),
+            declarations);
     }
 
     public ISemanticNode TransformTuple(TupleExpressionNode node)

@@ -49,7 +49,7 @@ public class RewriteIfStatementTests
             }
             """);
         var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -153,7 +153,7 @@ public class RewriteIfStatementTests
             }
             """);
         var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,

@@ -78,7 +78,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             new FunctionTypeMetadata(null, [point], TypeMetadata.I32),
             new FunctionGroupMetadata());
 
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new TypeDeclaration(
                 null,
                 AccessModifier.Public,
@@ -220,7 +220,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             new FunctionGroupMetadata()
         );
 
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new TypeDeclaration(
                 null,
                 AccessModifier.Public,
@@ -390,7 +390,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             new FunctionTypeMetadata(null, [point], TypeMetadata.Void),
             new FunctionGroupMetadata());
 
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new TypeDeclaration(
                 null,
                 AccessModifier.Public,
@@ -523,7 +523,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             new FunctionTypeMetadata(null, [point], TypeMetadata.I32),
             new FunctionGroupMetadata());
 
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new TypeDeclaration(
                 null,
                 AccessModifier.Public,
@@ -688,7 +688,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             new FunctionTypeMetadata(null, [point], TypeMetadata.Void),
             new FunctionGroupMetadata());
 
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new TypeDeclaration(
                 null,
                 AccessModifier.Public,
@@ -853,7 +853,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             new FunctionTypeMetadata(null, [point], TypeMetadata.I32),
             new FunctionGroupMetadata());
 
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new TypeDeclaration(
                 null,
                 AccessModifier.Public,

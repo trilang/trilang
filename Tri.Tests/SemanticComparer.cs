@@ -580,6 +580,12 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
 
     private bool CompareSyntaxTree(SemanticTree x, SemanticTree y)
     {
+        if (!x.UseNodes.SequenceEqual(y.UseNodes, this))
+            throw new Exception("UseNodes don't match.");
+
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
+
         if (!x.Declarations.SequenceEqual(y.Declarations, this))
             throw new Exception("Members don't match.");
 

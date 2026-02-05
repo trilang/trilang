@@ -54,7 +54,7 @@ public class ReplaceConditionalOperatorsTests
 
         var aParameter = new ParameterMetadata(null, "a", TypeMetadata.Bool);
         var bParameter = new ParameterMetadata(null, "b", TypeMetadata.Bool);
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -194,7 +194,7 @@ public class ReplaceConditionalOperatorsTests
 
         var aParameter = new ParameterMetadata(null, "a", TypeMetadata.Bool);
         var bParameter = new ParameterMetadata(null, "b", TypeMetadata.Bool);
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -342,7 +342,7 @@ public class ReplaceConditionalOperatorsTests
         var aParameter = new ParameterMetadata(null, "a", TypeMetadata.Bool);
         var bParameter = new ParameterMetadata(null, "b", TypeMetadata.Bool);
         var cParameter = new ParameterMetadata(null, "c", TypeMetadata.Bool);
-        var expected = new SemanticTree(file, null, [
+        var expected = new SemanticTree(file, null, [], null, [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
