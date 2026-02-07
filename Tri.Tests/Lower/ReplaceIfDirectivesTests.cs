@@ -78,7 +78,7 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata(null, [], type3Metadata)));
 
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type1", [], [], [], [], [])
             {
                 Metadata = type1Metadata,
@@ -132,7 +132,7 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata(null, [], type3Metadata)));
 
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type2", [], [], [], [], [])
             {
                 Metadata = type2Metadata,
@@ -173,7 +173,7 @@ public class ReplaceIfDirectivesTests
                 [],
                 new FunctionTypeMetadata(null, [], typeMetadata)));
 
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
             {
                 Metadata = typeMetadata,
@@ -209,7 +209,7 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -294,7 +294,7 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -379,7 +379,7 @@ public class ReplaceIfDirectivesTests
             "callback",
             new FunctionTypeMetadata(null, [], TypeMetadata.Void)
         );
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,

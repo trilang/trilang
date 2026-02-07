@@ -567,25 +567,29 @@ public partial class Formatter : INodeVisitor
 
     public void VisitTree(SyntaxTree node)
     {
-        foreach (var useNode in node.UseNodes)
-        {
-            useNode.Accept(this);
-            writer.WriteLine();
-        }
-
         var hasNamespace = node.Namespace is not null;
         if (hasNamespace)
         {
-            if (node.UseNodes.Count > 0)
-                writer.WriteLine();
-
             node.Namespace!.Accept(this);
             writer.WriteLine();
         }
 
-        if (node.Declarations.Count > 0)
+        var hasUses = node.UseNodes.Count > 0;
+        if (hasUses)
         {
             if (hasNamespace)
+                writer.WriteLine();
+
+            foreach (var useNode in node.UseNodes)
+            {
+                useNode.Accept(this);
+                writer.WriteLine();
+            }
+        }
+
+        if (node.Declarations.Count > 0)
+        {
+            if (hasUses)
                 writer.WriteLine();
 
             var count = node.Declarations.Count;

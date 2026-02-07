@@ -51,7 +51,7 @@ public class ReplaceWhileLoopTests
             }
             """);
         var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -194,7 +194,7 @@ public class ReplaceWhileLoopTests
             }
             """);
         var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -357,7 +357,7 @@ public class ReplaceWhileLoopTests
             }
             """);
         var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
@@ -528,7 +528,7 @@ public class ReplaceWhileLoopTests
             }
             """);
         var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
-        var expected = new SemanticTree(file, null, [], null, [
+        var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,

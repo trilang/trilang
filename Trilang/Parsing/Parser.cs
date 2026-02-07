@@ -15,14 +15,14 @@ public class Parser
     public SyntaxTree Parse(IReadOnlyList<Token> tokens, ParserOptions options)
     {
         var context = new ParserContext(tokens, options.Diagnostics, this);
-        var useNodes = ParseUseNodes(context);
         var namespaceNode = TryParseNamespaceNode(context);
+        var useNodes = ParseUseNodes(context);
         var declarations = ParseDeclarations(context);
 
         return new SyntaxTree(
             options.SourceFile,
-            useNodes,
             namespaceNode,
+            useNodes,
             declarations);
     }
 

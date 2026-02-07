@@ -2346,10 +2346,10 @@ public class FormatterTests
     {
         var tree = new SyntaxTree(
             file,
+            new NamespaceNode(default, ["Test", "Test2"]),
             [
                 new UseNode(default, ["Test", "SubNamespace", "SubSubNamespace"])
             ],
-            new NamespaceNode(default, ["Test", "Test2"]),
             [
                 new FunctionDeclarationNode(
                     default,
@@ -2362,9 +2362,9 @@ public class FormatterTests
         var formatted = tree.ToString();
         const string expected =
             """
-            use Test.SubNamespace.SubSubNamespace;
-
             namespace Test.Test2;
+
+            use Test.SubNamespace.SubSubNamespace;
 
             public main(): void {
             }

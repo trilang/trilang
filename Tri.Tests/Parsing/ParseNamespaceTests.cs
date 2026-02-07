@@ -35,10 +35,10 @@ public class ParseNamespaceTests
 
         var expected = new SyntaxTree(
             file,
-            [],
             new NamespaceNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(15, 1, 16)),
                 ["Test"]),
+            [],
             [
                 new FunctionDeclarationNode(
                     new SourceSpan(new SourcePosition(17, 3, 1), new SourcePosition(40, 3, 24)),
@@ -70,10 +70,10 @@ public class ParseNamespaceTests
 
         var expected = new SyntaxTree(
             file,
-            [],
             new NamespaceNode(
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(44, 1, 45)),
                 ["Test", "SubNamespace", "SubSubNamespace"]),
+            [],
             [
                 new FunctionDeclarationNode(
                     new SourceSpan(new SourcePosition(46, 3, 1), new SourcePosition(69, 3, 24)),
@@ -105,12 +105,12 @@ public class ParseNamespaceTests
 
         var expected = new SyntaxTree(
             file,
+            null,
             [
                 new UseNode(
                     new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(9, 1, 10)),
                     ["Test"])
             ],
-            null,
             [
                 new FunctionDeclarationNode(
                     new SourceSpan(new SourcePosition(11, 3, 1), new SourcePosition(34, 3, 24)),
@@ -142,12 +142,12 @@ public class ParseNamespaceTests
 
         var expected = new SyntaxTree(
             file,
+            null,
             [
                 new UseNode(
                     new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(38, 1, 39)),
                     ["Test", "SubNamespace", "SubSubNamespace"])
             ],
-            null,
             [
                 new FunctionDeclarationNode(
                     new SourceSpan(new SourcePosition(40, 3, 1), new SourcePosition(63, 3, 24)),
@@ -179,12 +179,12 @@ public class ParseNamespaceTests
 
         var expected = new SyntaxTree(
             file,
+            null,
             [
                 new UseNode(
                     new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
                     ["Test", "<namespace>", "SubSubNamespace"])
             ],
-            null,
             [
                 new FunctionDeclarationNode(
                     new SourceSpan(new SourcePosition(29, 3, 1), new SourcePosition(52, 3, 24)),
@@ -210,5 +210,46 @@ public class ParseNamespaceTests
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void ParseNamespaceAndUseTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test;
+
+            use OtherNamespace;
+
+            public main(): void { }
+            """);
+
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(
+                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(15, 1, 16)),
+                ["Test"]),
+            [
+                new UseNode(
+                    new SourceSpan(new SourcePosition(17, 3, 1), new SourcePosition(36, 3, 20)),
+                    ["OtherNamespace"])
+            ],
+            [
+                new FunctionDeclarationNode(
+                    new SourceSpan(new SourcePosition(38, 5, 1), new SourcePosition(61, 5, 24)),
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(
+                        new SourceSpan(new SourcePosition(53, 5, 16), new SourcePosition(57, 5, 20)),
+                        "void"),
+                    new BlockStatementNode(
+                        new SourceSpan(new SourcePosition(58, 5, 21), new SourcePosition(61, 5, 24)),
+                        [])
+                )
+            ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

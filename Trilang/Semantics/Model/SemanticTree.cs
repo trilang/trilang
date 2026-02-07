@@ -7,14 +7,14 @@ public class SemanticTree : ISemanticNode
     public SemanticTree(
         SourceFile sourceFile,
         SourceSpan? sourceSpan,
-        IReadOnlyList<Use> useNodes,
         Namespace? namespaceNode,
+        IReadOnlyList<Use> useNodes,
         IReadOnlyList<IDeclaration> declarations)
     {
         SourceFile = sourceFile;
         SourceSpan = sourceSpan;
-        UseNodes = useNodes;
         Namespace = namespaceNode;
+        UseNodes = useNodes;
         this.declarations = [.. declarations];
 
         foreach (var function in declarations)
@@ -45,9 +45,9 @@ public class SemanticTree : ISemanticNode
 
     public SourceSpan? SourceSpan { get; }
 
-    public IReadOnlyList<Use> UseNodes { get; }
-
     public Namespace? Namespace { get; }
+
+    public IReadOnlyList<Use> UseNodes { get; }
 
     public IReadOnlyList<IDeclaration> Declarations
         => declarations;

@@ -5,14 +5,14 @@ namespace Trilang.Parsing.Ast;
 public class SyntaxTree : ISyntaxNode
 {
     public SyntaxTree(SourceFile sourceFile, IReadOnlyList<IDeclarationNode> declarations)
-        : this(sourceFile, [], null, declarations)
+        : this(sourceFile, null, [], declarations)
     {
     }
 
     public SyntaxTree(
         SourceFile sourceFile,
-        IReadOnlyList<UseNode> useNodes,
         NamespaceNode? namespaceNode,
+        IReadOnlyList<UseNode> useNodes,
         IReadOnlyList<IDeclarationNode> declarations)
     {
         SourceFile = sourceFile;
@@ -52,9 +52,9 @@ public class SyntaxTree : ISyntaxNode
 
     public SourceSpan SourceSpan { get; }
 
-    public IReadOnlyList<UseNode> UseNodes { get; }
-
     public NamespaceNode? Namespace { get; }
+
+    public IReadOnlyList<UseNode> UseNodes { get; }
 
     public IReadOnlyList<IDeclarationNode> Declarations { get; }
 }
