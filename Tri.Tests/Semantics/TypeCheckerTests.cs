@@ -166,7 +166,7 @@ public class TypeCheckerTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], expected)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var xProperty = new PropertyMetadata(
             null,

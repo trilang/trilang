@@ -138,7 +138,7 @@ public class MetadataGeneratorTests
                 typeMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], typeMetadata)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
         var propertyMetadata = new PropertyMetadata(
             null,
             typeMetadata,
@@ -191,7 +191,7 @@ public class MetadataGeneratorTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], expected)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
         var actual = typeProvider.GetType("Point");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -469,7 +469,7 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], expectedType)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType);
         var actualType = typeProvider.GetType("Point");
@@ -501,7 +501,7 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], expectedType)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType);
         var actualType = typeProvider.GetType("Point");
@@ -533,7 +533,7 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], expectedType)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expectedArrayType = new ArrayMetadata(null, expectedType);
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType);
@@ -568,7 +568,7 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], expectedType)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expectedArrayType = new ArrayMetadata(null, expectedType);
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType);
@@ -782,7 +782,7 @@ public class MetadataGeneratorTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], expected)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -893,7 +893,7 @@ public class MetadataGeneratorTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], expected)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(closedType!.ClosedGeneric, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1384,7 +1384,7 @@ public class MetadataGeneratorTests
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], openList)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var closedList = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
         closedList.AddConstructor(
@@ -1393,7 +1393,7 @@ public class MetadataGeneratorTests
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], closedList)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -1449,7 +1449,7 @@ public class MetadataGeneratorTests
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], openList)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var closedList = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
         closedList.AddConstructor(
@@ -1458,7 +1458,7 @@ public class MetadataGeneratorTests
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], closedList)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -1514,7 +1514,7 @@ public class MetadataGeneratorTests
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], openList)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var closedList = new TypeMetadata(null, "List", [TypeMetadata.Bool, TypeMetadata.I32], [], [], [], [], []);
         closedList.AddConstructor(
@@ -1523,7 +1523,7 @@ public class MetadataGeneratorTests
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], closedList)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expected = new GenericApplicationMetadata(
             null,

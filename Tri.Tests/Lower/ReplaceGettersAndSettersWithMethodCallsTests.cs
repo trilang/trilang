@@ -59,7 +59,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], point)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var count = new PropertyMetadata(null, point, "x", TypeMetadata.I32);
         point.AddProperty(count);
@@ -177,7 +177,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 pointType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], pointType)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var xProperty = new PropertyMetadata(
             null,
@@ -200,7 +200,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 testType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], testType)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var pointProperty = new PropertyMetadata(null, testType, "point", pointType);
         testType.AddProperty(pointProperty);
@@ -365,7 +365,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], point)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var xProperty = new PropertyMetadata(
             null,
@@ -496,7 +496,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], point)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var xProperty = new PropertyMetadata(
             null,
@@ -663,7 +663,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], point)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var xProperty = new PropertyMetadata(
             null,
@@ -826,7 +826,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], point)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var xProperty = new PropertyMetadata(
             null,

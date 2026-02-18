@@ -67,7 +67,7 @@ public class ReplaceIfDirectivesTests
                 type1Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], type1Metadata)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var type3Metadata = new TypeMetadata(null, "Type3");
         type3Metadata.AddConstructor(
@@ -76,7 +76,7 @@ public class ReplaceIfDirectivesTests
                 type3Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], type3Metadata)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type1", [], [], [], [], [])
@@ -121,7 +121,7 @@ public class ReplaceIfDirectivesTests
                 type2Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], type2Metadata)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var type3Metadata = new TypeMetadata(null, "Type3");
         type3Metadata.AddConstructor(
@@ -130,7 +130,7 @@ public class ReplaceIfDirectivesTests
                 type3Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], type3Metadata)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type2", [], [], [], [], [])
@@ -171,7 +171,7 @@ public class ReplaceIfDirectivesTests
                 typeMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], typeMetadata)));
+                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])

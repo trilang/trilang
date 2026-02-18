@@ -179,7 +179,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
             }
             else
             {
-                var functionType = new FunctionTypeMetadata(null, [], type);
+                var functionType = new FunctionTypeMetadata(null, [], TypeMetadata.Void);
                 functionType = typeProvider.GetOrDefine(functionType);
 
                 type.AddConstructor(new ConstructorMetadata(
@@ -187,8 +187,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
                     type,
                     AccessModifierMetadata.Public,
                     [],
-                    functionType
-                ));
+                    functionType));
             }
 
             foreach (var methods in node.Methods.GroupBy(x => x.Name))
