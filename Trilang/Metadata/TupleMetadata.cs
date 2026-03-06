@@ -1,22 +1,20 @@
 namespace Trilang.Metadata;
 
-public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
+public class TupleMetadata : IAnonymousTypeMetadata, IEquatable<TupleMetadata>
 {
     private readonly List<ITypeMetadata> types;
     private readonly List<FieldMetadata> fields;
     private readonly List<PropertyMetadata> properties;
     private readonly List<MethodMetadata> methods;
 
-    public TupleMetadata(SourceLocation? definition, IEnumerable<ITypeMetadata> types)
+    public TupleMetadata(SourceLocation? definition)
     {
         Definition = definition;
-        this.types = [];
-        this.fields = [];
-        this.properties = [];
-        this.methods = [];
 
-        foreach (var type in types)
-            AddType(type);
+        types = [];
+        fields = [];
+        properties = [];
+        methods = [];
     }
 
     public static bool operator ==(TupleMetadata? left, TupleMetadata? right)
@@ -36,7 +34,8 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         if (IsInvalid || other.IsInvalid)
             return false;
 
-        return types.SequenceEqual(other.types);
+        return types.SequenceEqual(other.types) &&
+               Equals(Namespace, other.Namespace);
     }
 
     public override bool Equals(object? obj)
@@ -59,18 +58,8 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     public override string ToString()
         => $"({string.Join(", ", types)})";
 
-    private void AddType(ITypeMetadata type)
-    {
-        var name = types.Count.ToString();
-
-        types.Add(type);
-        fields.Add(new FieldMetadata(this, $"<>_{name}", type));
-
-        // TODO: add in ctor?
-        var propertyMetadata = new PropertyMetadata(null, this, name, type, AccessModifierMetadata.Public);
-        properties.Add(propertyMetadata);
-        methods.Add(propertyMetadata.Getter!);
-    }
+    public void AddType(ITypeMetadata type)
+        => types.Add(type);
 
     public IMetadata? GetMember(string name)
         => GetProperty(name) ??
@@ -80,11 +69,20 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
     public FieldMetadata? GetField(string name)
         => fields.FirstOrDefault(f => f.Name == name);
 
+    public void AddField(FieldMetadata field)
+        => fields.Add(field);
+
     public PropertyMetadata? GetProperty(string name)
         => properties.FirstOrDefault(f => f.Name == name);
 
+    public void AddProperty(PropertyMetadata property)
+        => properties.Add(property);
+
     public MethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(f => f.Name == name);
+
+    public void AddMethod(MethodMetadata method)
+        => methods.Add(method);
 
     public void MarkAsInvalid()
         => IsInvalid = true;
@@ -97,6 +95,8 @@ public class TupleMetadata : ITypeMetadata, IEquatable<TupleMetadata>
         => true;
 
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace { get; set; }
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;

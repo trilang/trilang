@@ -6,18 +6,26 @@ namespace Trilang.Semantics.Passes;
 
 internal class CheckStaticAndInstanceMembersAccess : Visitor, ISemanticPass
 {
-    private SemanticDiagnosticReporter diagnostics = null!;
+    private readonly SemanticDiagnosticReporter diagnostics;
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public CheckStaticAndInstanceMembersAccess(
+        ISet<string> directives,
+        SemanticDiagnosticReporter diagnostics)
+        : base(directives)
     {
-        diagnostics = context.Diagnostics;
+        this.diagnostics = diagnostics;
+    }
 
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    {
         foreach (var tree in semanticTrees)
             tree.Accept(this);
     }
 
-    protected override void VisitMemberAccessExit(MemberAccessExpression node)
+    public override void VisitMemberAccess(MemberAccessExpression node)
     {
+        base.VisitMemberAccess(node);
+
         if (node.Member is not MemberAccessExpression parent)
             return;
 

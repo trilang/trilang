@@ -2,7 +2,7 @@ using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Trilang.Lower;
 
-public record LoweringOptions(IEnumerable<string> Directives, ControlFlowGraphMap ControlFlowGraphs)
+public record LoweringOptions(ISet<string> Directives, ControlFlowGraphMap ControlFlowGraphs)
 {
-    public static readonly LoweringOptions Default = new LoweringOptions([], new ControlFlowGraphMap());
+    public static readonly LoweringOptions Default = new LoweringOptions(new HashSet<string>(), new ControlFlowGraphMap());
 }

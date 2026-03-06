@@ -5,17 +5,21 @@ namespace Trilang.Semantics.Passes;
 
 internal class ThisInStaticMethods : Visitor, ISemanticPass
 {
-    private SemanticDiagnosticReporter diagnostics = null!;
+    private readonly SemanticDiagnosticReporter diagnostics;
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public ThisInStaticMethods(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
+        : base(directives)
     {
-        diagnostics = context.Diagnostics;
+        this.diagnostics = diagnostics;
+    }
 
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    {
         foreach (var tree in semanticTrees)
             tree.Accept(this);
     }
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
+    public override void VisitMemberAccess(MemberAccessExpression node)
     {
         if (!node.IsThis)
             return;
@@ -25,6 +29,8 @@ internal class ThisInStaticMethods : Visitor, ISemanticPass
             return;
 
         diagnostics.ThisInStaticMethod(node);
+
+        base.VisitMemberAccess(node);
     }
 
     public string Name => nameof(ThisInStaticMethods);

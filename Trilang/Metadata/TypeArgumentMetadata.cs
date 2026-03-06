@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetadata>
+public class TypeArgumentMetadata : ITypeMetadata
 {
     public TypeArgumentMetadata(SourceLocation? definition, string name)
     {
@@ -10,34 +10,6 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
 
     public static TypeArgumentMetadata Invalid(string name)
         => new TypeArgumentMetadata(null, name) { IsInvalid = true };
-
-    public static bool operator ==(TypeArgumentMetadata? left, TypeArgumentMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(TypeArgumentMetadata? left, TypeArgumentMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(TypeArgumentMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return ReferenceEquals(this, other);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((TypeArgumentMetadata)obj);
-    }
 
     public override int GetHashCode()
         => HashCode.Combine(Name);
@@ -56,6 +28,12 @@ public class TypeArgumentMetadata : ITypeMetadata, IEquatable<TypeArgumentMetada
         => throw new NotSupportedException();
 
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace
+    {
+        get => throw new NotSupportedException();
+        set => throw new NotSupportedException();
+    }
 
     public string Name { get; }
 }

@@ -6,11 +6,17 @@ namespace Trilang.Lower;
 
 internal class AddImplicitReturnStatements
 {
+    private readonly BuiltInTypes builtInTypes;
+
+    public AddImplicitReturnStatements(BuiltInTypes builtInTypes)
+        => this.builtInTypes = builtInTypes;
+
     public void InsertReturnStatements(ControlFlowGraphMap cfgs)
     {
         foreach (var (function, cfg) in cfgs.Functions)
         {
-            if (function is not ConstructorMetadata && !function.Type.ReturnType.Equals(TypeMetadata.Void))
+            if (function is not ConstructorMetadata &&
+                !function.Type.ReturnType.Equals(builtInTypes.Void))
                 continue;
 
             var visited = new HashSet<SemanticBlock>();

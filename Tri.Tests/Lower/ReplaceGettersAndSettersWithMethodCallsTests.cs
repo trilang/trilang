@@ -6,6 +6,7 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
+using static Tri.Tests.Factory;
 
 namespace Tri.Tests.Lower;
 
@@ -25,14 +26,20 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        return semanticTrees.Single();
+        var semanticTree = semanticTrees.Single();
+
+        var lowering = new Lowering(builtInTypes);
+        lowering.Lower(semanticTree, LoweringOptions.Default);
+
+        return semanticTree;
     }
 
     [Test]
@@ -49,19 +56,22 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
 
-        var point = new TypeMetadata(null, "Point");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var point = new TypeMetadata(null, "Point")
+        {
+            Namespace = rootNamespace,
+        };
         point.AddConstructor(
             new ConstructorMetadata(
                 null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var count = new PropertyMetadata(null, point, "x", TypeMetadata.I32);
+        var count = CreatePropertyMetadata(point, "x", builtInTypes.I32);
         point.AddProperty(count);
         point.AddMethod(count.Getter!);
         point.AddMethod(count.Setter!);
@@ -75,8 +85,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata(null, [point], TypeMetadata.I32),
-            new FunctionGroupMetadata());
+            CreateFunctionType([point], builtInTypes.I32, rootNamespace))
+        {
+            Namespace = rootNamespace,
+        };
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(
@@ -89,7 +101,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                         null,
                         null
                     )
@@ -117,7 +129,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         Metadata = pParameter,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new ReturnStatement(
                         null,
@@ -167,23 +179,23 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var pointType = new TypeMetadata(null, "Point");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var pointType = new TypeMetadata(null, "Point")
+        {
+            Namespace = rootNamespace,
+        };
         pointType.AddConstructor(
             new ConstructorMetadata(
                 null,
                 pointType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var xProperty = new PropertyMetadata(
-            null,
-            pointType,
+        var xProperty = CreatePropertyMetadata(pointType,
             "x",
-            TypeMetadata.I32,
+            builtInTypes.I32,
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         pointType.AddProperty(xProperty);
@@ -193,16 +205,19 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(pointType, $"<>_{xProperty.Name}", xProperty.Type);
         pointType.AddField(xBackingField);
 
-        var testType = new TypeMetadata(null, "Test");
+        var testType = new TypeMetadata(null, "Test")
+        {
+            Namespace = rootNamespace,
+        };
         testType.AddConstructor(
             new ConstructorMetadata(
                 null,
                 testType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var pointProperty = new PropertyMetadata(null, testType, "point", pointType);
+        var pointProperty = CreatePropertyMetadata(testType, "point", pointType);
         testType.AddProperty(pointProperty);
         testType.AddMethod(pointProperty.Getter!);
         testType.AddMethod(pointProperty.Setter!);
@@ -216,9 +231,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             "test",
             [tParameter],
-            new FunctionTypeMetadata(null, [testType], TypeMetadata.I32),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([testType], builtInTypes.I32, rootNamespace))
+        {
+            Namespace = rootNamespace,
+        };
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(
@@ -231,7 +247,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                         new PropertyGetter(
                             null,
                             AccessModifier.Public,
@@ -297,7 +313,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         Metadata = tParameter,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new ReturnStatement(
                         null,
@@ -355,23 +371,23 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var point = new TypeMetadata(null, "Point");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var point = new TypeMetadata(null, "Point")
+        {
+            Namespace = rootNamespace,
+        };
         point.AddConstructor(
             new ConstructorMetadata(
                 null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var xProperty = new PropertyMetadata(
-            null,
-            point,
+        var xProperty = CreatePropertyMetadata(point,
             "x",
-            TypeMetadata.I32,
+            builtInTypes.I32,
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         point.AddProperty(xProperty);
@@ -387,8 +403,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata(null, [point], TypeMetadata.Void),
-            new FunctionGroupMetadata());
+            CreateFunctionType([point], builtInTypes.Void, rootNamespace))
+        {
+            Namespace = rootNamespace,
+        };
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(
@@ -401,7 +419,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                         new PropertyGetter(null, AccessModifier.Public, null)
                         {
                             Metadata = xProperty.Getter,
@@ -435,7 +453,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         Metadata = pParameter,
                     }
                 ],
-                new TypeRef(null, "void") { Metadata = TypeMetadata.Void },
+                new TypeRef(null, "void") { Metadata = builtInTypes.Void },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -457,7 +475,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             [
                                 new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32,
+                                    ReturnTypeMetadata = builtInTypes.I32,
                                 }
                             ]
                         )
@@ -486,23 +504,23 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var point = new TypeMetadata(null, "Point");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var point = new TypeMetadata(null, "Point")
+        {
+            Namespace = rootNamespace,
+        };
         point.AddConstructor(
             new ConstructorMetadata(
                 null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var xProperty = new PropertyMetadata(
-            null,
-            point,
+        var xProperty = CreatePropertyMetadata(point,
             "x",
-            TypeMetadata.I32,
+            builtInTypes.I32,
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         point.AddProperty(xProperty);
@@ -520,8 +538,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata(null, [point], TypeMetadata.I32),
-            new FunctionGroupMetadata());
+            CreateFunctionType([point], builtInTypes.I32, rootNamespace))
+        {
+            Namespace = rootNamespace,
+        };
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(
@@ -534,7 +554,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                         new PropertyGetter(
                             null,
                             AccessModifier.Public,
@@ -576,7 +596,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         Metadata = pParameter,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new ReturnStatement(
                         null,
@@ -584,10 +604,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             new VariableDeclaration(
                                 null,
                                 tmpVariable.Name,
-                                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                                 new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32,
+                                    ReturnTypeMetadata = builtInTypes.I32,
                                 }
                             )
                             {
@@ -653,23 +673,23 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var point = new TypeMetadata(null, "Point");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var point = new TypeMetadata(null, "Point")
+        {
+            Namespace = rootNamespace,
+        };
         point.AddConstructor(
             new ConstructorMetadata(
                 null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var xProperty = new PropertyMetadata(
-            null,
-            point,
+        var xProperty = CreatePropertyMetadata(point,
             "x",
-            TypeMetadata.I32,
+            builtInTypes.I32,
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         point.AddProperty(xProperty);
@@ -685,8 +705,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata(null, [point], TypeMetadata.Void),
-            new FunctionGroupMetadata());
+            CreateFunctionType([point], builtInTypes.Void, rootNamespace))
+        {
+            Namespace = rootNamespace,
+        };
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(
@@ -699,7 +721,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                         new PropertyGetter(
                             null,
                             AccessModifier.Public,
@@ -741,7 +763,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         Metadata = pParameter,
                     }
                 ],
-                new TypeRef(null, "void") { Metadata = TypeMetadata.Void },
+                new TypeRef(null, "void") { Metadata = builtInTypes.Void },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -783,11 +805,11 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     ),
                                     new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                     {
-                                        ReturnTypeMetadata = TypeMetadata.I32,
+                                        ReturnTypeMetadata = builtInTypes.I32,
                                     }
                                 )
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32,
+                                    ReturnTypeMetadata = builtInTypes.I32,
                                 }
                             ]
                         )
@@ -816,23 +838,23 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var point = new TypeMetadata(null, "Point");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var point = new TypeMetadata(null, "Point")
+        {
+            Namespace = rootNamespace,
+        };
         point.AddConstructor(
             new ConstructorMetadata(
                 null,
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var xProperty = new PropertyMetadata(
-            null,
-            point,
+        var xProperty = CreatePropertyMetadata(point,
             "x",
-            TypeMetadata.I32,
+            builtInTypes.I32,
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         point.AddProperty(xProperty);
@@ -850,8 +872,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             AccessModifierMetadata.Public,
             "test",
             [pParameter],
-            new FunctionTypeMetadata(null, [point], TypeMetadata.I32),
-            new FunctionGroupMetadata());
+            CreateFunctionType([point], builtInTypes.I32, rootNamespace))
+        {
+            Namespace = rootNamespace,
+        };
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(
@@ -864,7 +888,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                     new PropertyDeclaration(
                         null,
                         "x",
-                        new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                         new PropertyGetter(
                             null,
                             AccessModifier.Public,
@@ -906,7 +930,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                         Metadata = pParameter,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new ReturnStatement(
                         null,
@@ -914,7 +938,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                             new VariableDeclaration(
                                 null,
                                 tmpVariable.Name,
-                                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                                 new BinaryExpression(
                                     null,
                                     BinaryExpressionKind.Addition,
@@ -937,11 +961,11 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     ),
                                     new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                     {
-                                        ReturnTypeMetadata = TypeMetadata.I32,
+                                        ReturnTypeMetadata = builtInTypes.I32,
                                     }
                                 )
                                 {
-                                    ReturnTypeMetadata = TypeMetadata.I32,
+                                    ReturnTypeMetadata = builtInTypes.I32,
                                 }
                             )
                             {

@@ -1,5 +1,3 @@
-using Trilang.Semantics.Model;
-
 namespace Trilang.Metadata;
 
 public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
@@ -9,39 +7,10 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
         ITypeMetadata declaringType,
         string name,
         ITypeMetadata type,
-        AccessModifierMetadata? getterModifier = null,
-        AccessModifierMetadata? setterModifier = null)
-    {
-        Definition = definition;
-        DeclaringType = declaringType;
-        Name = name;
-        Type = type;
-
-        var hasGetter = getterModifier is not null;
-        var hasSetter = setterModifier is not null;
-
-        if (!hasGetter && !hasSetter)
-        {
-            Getter = GenerateGetter(AccessModifierMetadata.Public);
-            Setter = GenerateSetter(AccessModifierMetadata.Private);
-        }
-        else
-        {
-            if (hasGetter)
-                Getter = GenerateGetter(getterModifier!.Value);
-
-            if (hasSetter)
-                Setter = GenerateSetter(setterModifier!.Value);
-        }
-    }
-
-    public PropertyMetadata(
-        TypeMetadata declaringType,
-        string name,
-        ITypeMetadata type,
         MethodMetadata? getter,
         MethodMetadata? setter)
     {
+        Definition = definition;
         DeclaringType = declaringType;
         Name = name;
         Type = type;
@@ -95,28 +64,6 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
 
     public void MarkAsInvalid()
         => IsInvalid = true;
-
-    private MethodMetadata GenerateGetter(AccessModifierMetadata getterModifier)
-        => new MethodMetadata(
-            null,
-            DeclaringType,
-            getterModifier,
-            false,
-            $"<>_get_{Name}",
-            [],
-            new FunctionTypeMetadata(null, [], Type),
-            new FunctionGroupMetadata());
-
-    private MethodMetadata GenerateSetter(AccessModifierMetadata setterModifier)
-        => new MethodMetadata(
-            null,
-            DeclaringType,
-            setterModifier,
-            false,
-            $"<>_set_{Name}",
-            [new ParameterMetadata(null, MemberAccessExpression.Value, Type)],
-            new FunctionTypeMetadata(null, [Type], TypeMetadata.Void),
-            new FunctionGroupMetadata());
 
     public SourceLocation? Definition { get; }
 

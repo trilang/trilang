@@ -6,10 +6,14 @@ namespace Trilang.Lower;
 
 internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticNode>
 {
+    private readonly BuiltInTypes builtInTypes;
     private int tempVariableCounter;
 
-    public ReplaceGettersAndSettersWithMethodCalls()
-        => tempVariableCounter = 0;
+    public ReplaceGettersAndSettersWithMethodCalls(BuiltInTypes builtInTypes)
+    {
+        this.builtInTypes = builtInTypes;
+        tempVariableCounter = 0;
+    }
 
     public ISemanticNode TransformArrayAccess(ArrayAccessExpression node)
     {
@@ -231,7 +235,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new IsExpression(null, expression, node.Type);
+        return new IsExpression(null, expression, node.Type, builtInTypes);
     }
 
     public ISemanticNode TransformLabel(Label node)
@@ -357,6 +361,11 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
 
     public ISemanticNode TransformTree(SemanticTree node)
     {
+        node.Namespace?.Transform(this);
+
+        foreach (var use in node.UseNodes)
+            use.Transform(this);
+
         foreach (var declaration in node.Declarations)
             declaration.Transform(this);
 

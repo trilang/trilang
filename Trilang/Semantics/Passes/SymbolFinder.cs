@@ -4,29 +4,26 @@ using Trilang.Symbols;
 
 namespace Trilang.Semantics.Passes;
 
-internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
+internal class SymbolFinder : IVisitor<SymbolTable>, ISemanticPass
 {
+    private readonly ISet<string> directives;
     private readonly SymbolTableMap map;
-    private HashSet<string> directives = null!;
 
-    public SymbolFinder()
-        => map = new SymbolTableMap();
-
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public SymbolFinder(ISet<string> directives, SymbolTableMap map)
     {
-        directives = context.Directives;
-
-        foreach (var tree in semanticTrees)
-            tree.Accept(this, context.RootSymbolTable);
-
-        context.SymbolTableMap = map;
+        this.directives = directives;
+        this.map = map;
     }
 
-    public void VisitAlias(AliasDeclaration node, ISymbolTable context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    {
+        foreach (var tree in semanticTrees)
+            tree.Accept(this, new SymbolTable());
+    }
+
+    public void VisitAlias(AliasDeclaration node, SymbolTable context)
     {
         map.Add(node, context);
-
-        context.AddType(TypeSymbol.Alias(node));
 
         var child = context.CreateChild();
 
@@ -36,7 +33,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Type.Accept(this, child);
     }
 
-    public void VisitArrayAccess(ArrayAccessExpression node, ISymbolTable context)
+    public void VisitArrayAccess(ArrayAccessExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -44,14 +41,14 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Index.Accept(this, context);
     }
 
-    public void VisitArrayType(ArrayType node, ISymbolTable context)
+    public void VisitArrayType(ArrayType node, SymbolTable context)
     {
         map.Add(node, context);
 
         node.ElementType.Accept(this, context);
     }
 
-    public void VisitBinaryExpression(BinaryExpression node, ISymbolTable context)
+    public void VisitBinaryExpression(BinaryExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -59,7 +56,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Right.Accept(this, context);
     }
 
-    private void VisitBlockWithoutScope(BlockStatement node, ISymbolTable context)
+    private void VisitBlockWithoutScope(BlockStatement node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -67,13 +64,13 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             statement.Accept(this, context);
     }
 
-    public void VisitBlock(BlockStatement node, ISymbolTable context)
+    public void VisitBlock(BlockStatement node, SymbolTable context)
         => VisitBlockWithoutScope(node, context.CreateChild());
 
-    public void VisitBreak(Break node, ISymbolTable context)
+    public void VisitBreak(Break node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitCall(CallExpression node, ISymbolTable context)
+    public void VisitCall(CallExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -83,7 +80,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             parameter.Accept(this, context);
     }
 
-    public void VisitCast(CastExpression node, ISymbolTable context)
+    public void VisitCast(CastExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -91,7 +88,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Expression.Accept(this, context);
     }
 
-    public void VisitConstructor(ConstructorDeclaration node, ISymbolTable context)
+    public void VisitConstructor(ConstructorDeclaration node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -104,10 +101,10 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitContinue(Continue node, ISymbolTable context)
+    public void VisitContinue(Continue node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitDiscriminatedUnion(DiscriminatedUnion node, ISymbolTable context)
+    public void VisitDiscriminatedUnion(DiscriminatedUnion node, SymbolTable context)
     {
         var child = context.CreateChild();
         map.Add(node, child);
@@ -116,33 +113,31 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             type.Accept(this, child);
     }
 
-    public void VisitExpressionBlock(ExpressionBlock node, ISymbolTable context)
+    public void VisitExpressionBlock(ExpressionBlock node, SymbolTable context)
         => Debug.Fail("Expression blocks are the compiler's internal feature and are not directly supported in the programming language.");
 
-    public void VisitExpressionStatement(ExpressionStatement node, ISymbolTable context)
+    public void VisitExpressionStatement(ExpressionStatement node, SymbolTable context)
     {
         map.Add(node, context);
 
         node.Expression.Accept(this, context);
     }
 
-    public void VisitFakeDeclaration(FakeDeclaration node, ISymbolTable context)
+    public void VisitFakeDeclaration(FakeDeclaration node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitFakeExpression(FakeExpression node, ISymbolTable context)
+    public void VisitFakeExpression(FakeExpression node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitFakeStatement(FakeStatement node, ISymbolTable context)
+    public void VisitFakeStatement(FakeStatement node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitFakeType(FakeType node, ISymbolTable context)
+    public void VisitFakeType(FakeType node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitFunction(FunctionDeclaration node, ISymbolTable context)
+    public void VisitFunction(FunctionDeclaration node, SymbolTable context)
     {
         map.Add(node, context);
-
-        context.AddId(node.Name, node);
 
         var child = context.CreateChild();
         foreach (var parameter in node.Parameters)
@@ -152,7 +147,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitFunctionType(FunctionType node, ISymbolTable context)
+    public void VisitFunctionType(FunctionType node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -162,22 +157,18 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.ReturnType.Accept(this, context);
     }
 
-    public void VisitGenericType(GenericApplication node, ISymbolTable context)
+    public void VisitGenericType(GenericApplication node, SymbolTable context)
     {
         map.Add(node, context);
 
         foreach (var typeArgument in node.TypeArguments)
             typeArgument.Accept(this, context);
-
-        // TODO: remove?
-        var symbol = TypeSymbol.GenericType(node);
-        context.AddType(symbol);
     }
 
-    public void VisitGoTo(GoTo node, ISymbolTable context)
+    public void VisitGoTo(GoTo node, SymbolTable context)
         => Debug.Fail("`goto` is the compiler's internal feature and are not directly supported in the programming language.");
 
-    public void VisitIfDirective(IfDirective node, ISymbolTable context)
+    public void VisitIfDirective(IfDirective node, SymbolTable context)
     {
         if (directives.Contains(node.DirectiveName))
         {
@@ -191,7 +182,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         }
     }
 
-    public void VisitIf(IfStatement node, ISymbolTable context)
+    public void VisitIf(IfStatement node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -200,7 +191,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Else?.Accept(this, context);
     }
 
-    public void VisitInterface(Interface node, ISymbolTable context)
+    public void VisitInterface(Interface node, SymbolTable context)
     {
         var child = context.CreateChild();
         map.Add(node, child);
@@ -212,20 +203,16 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             method.Accept(this, child);
     }
 
-    public void VisitInterfaceProperty(InterfaceProperty node, ISymbolTable context)
+    public void VisitInterfaceProperty(InterfaceProperty node, SymbolTable context)
     {
         map.Add(node, context);
-
-        context.AddId(node.Name, node);
 
         node.Type.Accept(this, context);
     }
 
-    public void VisitInterfaceMethod(InterfaceMethod node, ISymbolTable context)
+    public void VisitInterfaceMethod(InterfaceMethod node, SymbolTable context)
     {
         map.Add(node, context);
-
-        context.AddId(node.Name, node);
 
         var child = context.CreateChild();
         foreach (var parameter in node.ParameterTypes)
@@ -234,7 +221,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.ReturnType.Accept(this, child);
     }
 
-    public void VisitIsExpression(IsExpression node, ISymbolTable context)
+    public void VisitIsExpression(IsExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -242,20 +229,20 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Type.Accept(this, context);
     }
 
-    public void VisitLabel(Label node, ISymbolTable context)
+    public void VisitLabel(Label node, SymbolTable context)
         => Debug.Fail("Labels are the compiler's internal feature and are not directly supported in the programming language.");
 
-    public void VisitLiteral(LiteralExpression node, ISymbolTable context)
+    public void VisitLiteral(LiteralExpression node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitMemberAccess(MemberAccessExpression node, ISymbolTable context)
+    public void VisitMemberAccess(MemberAccessExpression node, SymbolTable context)
     {
         node.Member?.Accept(this, context);
 
         map.Add(node, context);
     }
 
-    public void VisitMethod(MethodDeclaration node, ISymbolTable context)
+    public void VisitMethod(MethodDeclaration node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -272,10 +259,10 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitNamespace(Namespace node, ISymbolTable context)
+    public void VisitNamespace(Namespace node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitNewArray(NewArrayExpression node, ISymbolTable context)
+    public void VisitNewArray(NewArrayExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -283,7 +270,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Size.Accept(this, context);
     }
 
-    public void VisitNewObject(NewObjectExpression node, ISymbolTable context)
+    public void VisitNewObject(NewObjectExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -293,17 +280,17 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             parameter.Accept(this, context);
     }
 
-    public void VisitNull(NullExpression node, ISymbolTable context)
+    public void VisitNull(NullExpression node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitReturn(ReturnStatement node, ISymbolTable context)
+    public void VisitReturn(ReturnStatement node, SymbolTable context)
     {
         map.Add(node, context);
 
         node.Expression?.Accept(this, context);
     }
 
-    public void VisitParameter(Parameter node, ISymbolTable context)
+    public void VisitParameter(Parameter node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -312,7 +299,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Type.Accept(this, context);
     }
 
-    public void VisitProperty(PropertyDeclaration node, ISymbolTable context)
+    public void VisitProperty(PropertyDeclaration node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -323,7 +310,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Setter?.Accept(this, context);
     }
 
-    public void VisitGetter(PropertyGetter node, ISymbolTable context)
+    public void VisitGetter(PropertyGetter node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -334,7 +321,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitSetter(PropertySetter node, ISymbolTable context)
+    public void VisitSetter(PropertySetter node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -346,15 +333,20 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             VisitBlockWithoutScope(node.Body, child);
     }
 
-    public void VisitTree(SemanticTree node, ISymbolTable context)
+    public void VisitTree(SemanticTree node, SymbolTable context)
     {
         map.Add(node, context);
+
+        node.Namespace?.Accept(this, context);
+
+        foreach (var use in node.UseNodes)
+            use.Accept(this, context);
 
         foreach (var declaration in node.Declarations)
             declaration.Accept(this, context);
     }
 
-    public void VisitTuple(TupleExpression node, ISymbolTable context)
+    public void VisitTuple(TupleExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -362,7 +354,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             expression.Accept(this, context);
     }
 
-    public void VisitTupleType(TupleType node, ISymbolTable context)
+    public void VisitTupleType(TupleType node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -370,13 +362,8 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             type.Accept(this, context);
     }
 
-    public void VisitType(TypeDeclaration node, ISymbolTable context)
+    public void VisitType(TypeDeclaration node, SymbolTable context)
     {
-        var symbol = node.GenericArguments.Count > 0
-            ? TypeSymbol.GenericTypeDeclaration(node)
-            : TypeSymbol.TypeDeclaration(node);
-        context.AddType(symbol);
-
         var child = context.CreateChild();
         map.Add(node, child);
 
@@ -396,20 +383,20 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
             method.Accept(this, child);
     }
 
-    public void VisitTypeNode(TypeRef node, ISymbolTable context)
+    public void VisitTypeNode(TypeRef node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitUnaryExpression(UnaryExpression node, ISymbolTable context)
+    public void VisitUnaryExpression(UnaryExpression node, SymbolTable context)
     {
         map.Add(node, context);
 
         node.Operand.Accept(this, context);
     }
 
-    public void VisitUse(Use node, ISymbolTable context)
+    public void VisitUse(Use node, SymbolTable context)
         => map.Add(node, context);
 
-    public void VisitVariable(VariableDeclaration node, ISymbolTable context)
+    public void VisitVariable(VariableDeclaration node, SymbolTable context)
     {
         map.Add(node, context);
 
@@ -419,7 +406,7 @@ internal class SymbolFinder : IVisitor<ISymbolTable>, ISemanticPass
         node.Expression.Accept(this, context);
     }
 
-    public void VisitWhile(While node, ISymbolTable context)
+    public void VisitWhile(While node, SymbolTable context)
     {
         map.Add(node, context);
 

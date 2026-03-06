@@ -9,8 +9,7 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
         bool isStatic,
         string name,
         IReadOnlyList<ParameterMetadata> parameters,
-        FunctionTypeMetadata type,
-        FunctionGroupMetadata group)
+        FunctionTypeMetadata type)
     {
         Definition = definition;
         DeclaringType = declaringType;
@@ -19,9 +18,6 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
         Name = name;
         Parameters = parameters;
         Type = type;
-        Group = group;
-
-        group.AddFunction(this);
     }
 
     public static bool operator ==(MethodMetadata? left, MethodMetadata? right)
@@ -87,6 +83,4 @@ public class MethodMetadata : IFunctionMetadata, IEquatable<MethodMetadata>
     public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
     public FunctionTypeMetadata Type { get; }
-
-    public FunctionGroupMetadata Group { get; }
 }

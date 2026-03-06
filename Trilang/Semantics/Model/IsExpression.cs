@@ -5,8 +5,15 @@ namespace Trilang.Semantics.Model;
 // TODO: replace by pattern matching
 public class IsExpression : IExpression
 {
-    public IsExpression(SourceSpan? sourceSpan, IExpression expression, IInlineType type)
+    private readonly BuiltInTypes builtInTypes;
+
+    public IsExpression(
+        SourceSpan? sourceSpan,
+        IExpression expression,
+        IInlineType type,
+        BuiltInTypes builtInTypes)
     {
+        this.builtInTypes = builtInTypes;
         SourceSpan = sourceSpan;
         Expression = expression;
         Type = type;
@@ -25,7 +32,7 @@ public class IsExpression : IExpression
         => transformer.TransformAsExpression(this);
 
     public IExpression Clone()
-        => new IsExpression(SourceSpan, Expression.Clone(), Type.Clone());
+        => new IsExpression(SourceSpan, Expression.Clone(), Type.Clone(), builtInTypes);
 
     public ISemanticNode? Parent { get; set; }
 
@@ -36,5 +43,5 @@ public class IsExpression : IExpression
     public IInlineType Type { get; }
 
     public ITypeMetadata ReturnTypeMetadata
-        => TypeMetadata.Bool;
+        => builtInTypes.Bool;
 }

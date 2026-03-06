@@ -8,12 +8,12 @@ internal class IrDiscoveryPhase : Visitor
 {
     private readonly Dictionary<IMetadata, BlockStatement> functionsToGenerate;
 
-    public IrDiscoveryPhase()
+    public IrDiscoveryPhase(ISet<string> directives) : base(directives)
         => functionsToGenerate = [];
 
     public IReadOnlyDictionary<IMetadata, BlockStatement> Discover(
-        IEnumerable<ITypeMetadata> types,
-        IEnumerable<SemanticTree> syntaxTrees)
+        IEnumerable<SemanticTree> syntaxTrees,
+        IEnumerable<ITypeMetadata> types)
     {
         foreach (var tree in syntaxTrees)
             VisitTree(tree);
@@ -103,18 +103,38 @@ internal class IrDiscoveryPhase : Visitor
         return functionsToGenerate;
     }
 
-    protected override void VisitFunctionEnter(FunctionDeclaration node)
-        => functionsToGenerate.Add(node.Metadata!, node.Body);
+    public override void VisitFunction(FunctionDeclaration node)
+    {
+        functionsToGenerate.Add(node.Metadata!, node.Body);
 
-    protected override void VisitGetterEnter(PropertyGetter node)
-        => functionsToGenerate.Add(node.Metadata!, node.Body!);
+        base.VisitFunction(node);
+    }
 
-    protected override void VisitSetterEnter(PropertySetter node)
-        => functionsToGenerate.Add(node.Metadata!, node.Body!);
+    public override void VisitGetter(PropertyGetter node)
+    {
+        functionsToGenerate.Add(node.Metadata!, node.Body!);
 
-    protected override void VisitMethodEnter(MethodDeclaration node)
-        => functionsToGenerate.Add(node.Metadata!, node.Body);
+        base.VisitGetter(node);
+    }
 
-    protected override void VisitConstructorEnter(ConstructorDeclaration node)
-        => functionsToGenerate.Add(node.Metadata!, node.Body);
+    public override void VisitSetter(PropertySetter node)
+    {
+        functionsToGenerate.Add(node.Metadata!, node.Body!);
+
+        base.VisitSetter(node);
+    }
+
+    public override void VisitMethod(MethodDeclaration node)
+    {
+        functionsToGenerate.Add(node.Metadata!, node.Body);
+
+        base.VisitMethod(node);
+    }
+
+    public override void VisitConstructor(ConstructorDeclaration node)
+    {
+        functionsToGenerate.Add(node.Metadata!, node.Body);
+
+        base.VisitConstructor(node);
+    }
 }

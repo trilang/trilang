@@ -2,73 +2,36 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Symbols;
 
-public class SymbolTable : ISymbolTable, IEquatable<SymbolTable>
+public class SymbolTable
 {
-    private readonly ISymbolTable parent;
-    private readonly Dictionary<string, IdSymbol> ids;
+    private readonly SymbolTable? parent;
+    private readonly List<IdSymbol> ids;
 
-    public SymbolTable(ISymbolTable parent)
+    public SymbolTable() : this(null)
+    {
+    }
+
+    private SymbolTable(SymbolTable? parent)
     {
         this.parent = parent;
         ids = [];
     }
 
-    public static bool operator ==(SymbolTable? left, SymbolTable? right)
-        => Equals(left, right);
-
-    public static bool operator !=(SymbolTable? left, SymbolTable? right)
-        => !Equals(left, right);
-
-    public bool Equals(SymbolTable? other)
+    public IReadOnlyList<IdSymbol> GetId(string name)
     {
-        if (other is null)
-            return false;
+        var symbols = ids.Where(id => id.Name == name).ToList();
+        if (symbols.Count != 0)
+            return symbols;
 
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return ids.DictionaryEquals(other.ids);
+        return parent?.GetId(name) ?? [];
     }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((RootSymbolTable)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(parent, ids);
-
-    public IdSymbol? GetId(string name)
-        => ids.TryGetValue(name, out var symbol)
-            ? symbol
-            : parent.GetId(name);
 
     public void AddId(string name, ISemanticNode node)
-    {
-        if (ids.TryGetValue(name, out var symbol))
-            symbol.AddNode(node);
-        else
-            ids.Add(name, new IdSymbol(name, node));
-    }
+        => ids.Add(new IdSymbol(name, node));
 
-    public void AddType(TypeSymbol symbol)
-        => parent.AddType(symbol);
-
-    public ISymbolTable CreateChild()
+    public SymbolTable CreateChild()
         => new SymbolTable(this);
 
-    public IReadOnlyList<TypeSymbol> Types
-        => parent.Types;
-
-    public IReadOnlyDictionary<string, IdSymbol> Ids
+    public IReadOnlyList<IdSymbol> Ids
         => ids;
 }

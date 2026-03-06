@@ -16,7 +16,7 @@ public class IrGeneratorTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static (SemanticTree, IMetadataProvider) Parse(string code)
+    private static (SemanticTree, NamespaceMetadata, BuiltInTypes) Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -28,18 +28,22 @@ public class IrGeneratorTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, typeProvider, _) = semantic.Analyze(
+        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var semanticTree = semanticTrees.Single();
-        var lowering = new Lowering();
+        var lowering = new Lowering(builtInTypes);
         lowering.Lower(semanticTree, LoweringOptions.Default);
 
-        return (semanticTree, typeProvider);
+        return (semanticTree, rootNamespace, builtInTypes);
     }
 
     [Test]
@@ -59,23 +63,23 @@ public class IrGeneratorTests
                   return 1 {{op}} 2;
               }
               """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
-                new LoadConst(new Register(0, TypeMetadata.I32), 1),
-                new LoadConst(new Register(1, TypeMetadata.I32), 2),
+                new LoadConst(new Register(0, builtInTypes.I32), 1),
+                new LoadConst(new Register(1, builtInTypes.I32), 2),
                 new BinaryOperation(
-                    new Register(2, TypeMetadata.I32),
+                    new Register(2, builtInTypes.I32),
                     @operator,
-                    new Register(0, TypeMetadata.I32),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32),
+                    new Register(1, builtInTypes.I32)
                 ),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Return(new Register(2, builtInTypes.I32)),
             ]))
         };
 
@@ -97,23 +101,23 @@ public class IrGeneratorTests
                   return 1 {{op}} 2;
               }
               """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_0_cd2fd49bc6b014bd", new Block("entry", [
-                new LoadConst(new Register(0, TypeMetadata.I32), 1),
-                new LoadConst(new Register(1, TypeMetadata.I32), 2),
+                new LoadConst(new Register(0, builtInTypes.I32), 1),
+                new LoadConst(new Register(1, builtInTypes.I32), 2),
                 new BinaryOperation(
-                    new Register(2, TypeMetadata.Bool),
+                    new Register(2, builtInTypes.Bool),
                     @operator,
-                    new Register(0, TypeMetadata.I32),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32),
+                    new Register(1, builtInTypes.I32)
                 ),
-                new Return(new Register(2, TypeMetadata.Bool)),
+                new Return(new Register(2, builtInTypes.Bool)),
             ]))
         };
 
@@ -129,17 +133,17 @@ public class IrGeneratorTests
                 x = 1;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
-                new LoadConst(new Register(1, TypeMetadata.I32), 1),
-                new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
+                new LoadConst(new Register(1, builtInTypes.I32), 1),
+                new Move(new Register(2, builtInTypes.I32), new Register(1, builtInTypes.I32)),
             ]))
         };
 
@@ -163,23 +167,23 @@ public class IrGeneratorTests
                   x {{op}} 1;
               }
               """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
-                new LoadConst(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
+                new LoadConst(new Register(1, builtInTypes.I32), 1),
                 new BinaryOperation(
-                    new Register(2, TypeMetadata.I32),
+                    new Register(2, builtInTypes.I32),
                     @operator,
-                    new Register(0, TypeMetadata.I32),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32),
+                    new Register(1, builtInTypes.I32)
                 ),
-                new Move(new Register(3, TypeMetadata.I32), new Register(2, TypeMetadata.I32)),
+                new Move(new Register(3, builtInTypes.I32), new Register(2, builtInTypes.I32)),
             ]))
         };
 
@@ -198,26 +202,26 @@ public class IrGeneratorTests
                 return x;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
-                new LoadConst(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
+                new LoadConst(new Register(1, builtInTypes.I32), 1),
                 new BinaryOperation(
-                    new Register(2, TypeMetadata.I32),
+                    new Register(2, builtInTypes.I32),
                     Add,
-                    new Register(0, TypeMetadata.I32),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32),
+                    new Register(1, builtInTypes.I32)
                 ),
-                new Move(new Register(4, TypeMetadata.I32), new Register(2, TypeMetadata.I32)),
-                new LoadConst(new Register(3, TypeMetadata.I32), 10),
-                new Move(new Register(5, TypeMetadata.I32), new Register(3, TypeMetadata.I32)),
-                new Return(new Register(5, TypeMetadata.I32)),
+                new Move(new Register(4, builtInTypes.I32), new Register(2, builtInTypes.I32)),
+                new LoadConst(new Register(3, builtInTypes.I32), 10),
+                new Move(new Register(5, builtInTypes.I32), new Register(3, builtInTypes.I32)),
+                new Return(new Register(5, builtInTypes.I32)),
             ]))
         };
 
@@ -233,23 +237,23 @@ public class IrGeneratorTests
                 return a + b;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_2_e24cc7bc82aab685", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new BinaryOperation(
-                    new Register(2, TypeMetadata.I32),
+                    new Register(2, builtInTypes.I32),
                     Add,
-                    new Register(0, TypeMetadata.I32),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32),
+                    new Register(1, builtInTypes.I32)
                 ),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Return(new Register(2, builtInTypes.I32)),
             ]))
         };
 
@@ -268,25 +272,25 @@ public class IrGeneratorTests
                 return a + b;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
-                new LoadConst(new Register(0, TypeMetadata.I32), 1),
-                new Move(new Register(1, TypeMetadata.I32), new Register(0, TypeMetadata.I32)),
-                new LoadConst(new Register(2, TypeMetadata.I32), 2),
-                new Move(new Register(3, TypeMetadata.I32), new Register(2, TypeMetadata.I32)),
+                new LoadConst(new Register(0, builtInTypes.I32), 1),
+                new Move(new Register(1, builtInTypes.I32), new Register(0, builtInTypes.I32)),
+                new LoadConst(new Register(2, builtInTypes.I32), 2),
+                new Move(new Register(3, builtInTypes.I32), new Register(2, builtInTypes.I32)),
                 new BinaryOperation(
-                    new Register(4, TypeMetadata.I32),
+                    new Register(4, builtInTypes.I32),
                     Add,
-                    new Register(1, TypeMetadata.I32),
-                    new Register(3, TypeMetadata.I32)
+                    new Register(1, builtInTypes.I32),
+                    new Register(3, builtInTypes.I32)
                 ),
-                new Return(new Register(4, TypeMetadata.I32)),
+                new Return(new Register(4, builtInTypes.I32)),
             ]))
         };
 
@@ -302,16 +306,16 @@ public class IrGeneratorTests
                 return null;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_0_5b9bc4ba528108e4", new Block("entry", [
-                new LoadConst(new Register(0, TypeMetadata.Null), null),
-                new Return(new Register(0, TypeMetadata.Null)),
+                new LoadConst(new Register(0, builtInTypes.Null), null),
+                new Return(new Register(0, builtInTypes.Null)),
             ]))
         };
 
@@ -327,21 +331,21 @@ public class IrGeneratorTests
                 return -a;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
                 new UnaryOperation(
-                    new Register(1, TypeMetadata.I32),
+                    new Register(1, builtInTypes.I32),
                     UnaryInstructionKind.Neg,
-                    new Register(0, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32)
                 ),
-                new Return(new Register(1, TypeMetadata.I32)),
+                new Return(new Register(1, builtInTypes.I32)),
             ]))
         };
 
@@ -357,21 +361,21 @@ public class IrGeneratorTests
                 return !a;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_7772fb92073661c5", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.Bool), 0),
+                new LoadParameter(new Register(0, builtInTypes.Bool), 0),
                 new UnaryOperation(
-                    new Register(1, TypeMetadata.Bool),
+                    new Register(1, builtInTypes.Bool),
                     UnaryInstructionKind.Not,
-                    new Register(0, TypeMetadata.Bool)
+                    new Register(0, builtInTypes.Bool)
                 ),
-                new Return(new Register(1, TypeMetadata.Bool)),
+                new Return(new Register(1, builtInTypes.Bool)),
             ]))
         };
 
@@ -387,21 +391,21 @@ public class IrGeneratorTests
                 return ~a;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
                 new UnaryOperation(
-                    new Register(1, TypeMetadata.I32),
+                    new Register(1, builtInTypes.I32),
                     UnaryInstructionKind.Not,
-                    new Register(0, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32)
                 ),
-                new Return(new Register(1, TypeMetadata.I32)),
+                new Return(new Register(1, builtInTypes.I32)),
             ]))
         };
 
@@ -417,30 +421,30 @@ public class IrGeneratorTests
                 return a[0];
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var arrayType = (ArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayType = (ArrayMetadata)rootNamespace.FindType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_38a40cc70c225276", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                new LoadConst(new Register(1, builtInTypes.I32), 0),
                 new GetElementPointer(
-                    new Register(2, new TypePointerMetadata(TypeMetadata.I32)),
+                    new Register(2, new TypePointerMetadata(builtInTypes.I32)),
                     new Register(0, arrayPointerType),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(1, builtInTypes.I32)
                 ),
                 new Load(
-                    new Register(3, TypeMetadata.I32),
-                    new Register(2, new TypePointerMetadata(TypeMetadata.I32))
+                    new Register(3, builtInTypes.I32),
+                    new Register(2, new TypePointerMetadata(builtInTypes.I32))
                 ),
-                new Return(new Register(3, TypeMetadata.I32)),
+                new Return(new Register(3, builtInTypes.I32)),
             ])),
             new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
@@ -469,37 +473,37 @@ public class IrGeneratorTests
                 return a[index + 2];
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var arrayType = (ArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayType = (ArrayMetadata)rootNamespace.FindType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_2_e9c73c3fbe34f858", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
-                new LoadConst(new Register(2, TypeMetadata.I32), 2),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
+                new LoadConst(new Register(2, builtInTypes.I32), 2),
                 new BinaryOperation(
-                    new Register(3, TypeMetadata.I32),
+                    new Register(3, builtInTypes.I32),
                     Add,
-                    new Register(1, TypeMetadata.I32),
-                    new Register(2, TypeMetadata.I32)
+                    new Register(1, builtInTypes.I32),
+                    new Register(2, builtInTypes.I32)
                 ),
                 new GetElementPointer(
-                    new Register(4, new TypePointerMetadata(TypeMetadata.I32)),
+                    new Register(4, new TypePointerMetadata(builtInTypes.I32)),
                     new Register(0, arrayPointerType),
-                    new Register(3, TypeMetadata.I32)
+                    new Register(3, builtInTypes.I32)
                 ),
                 new Load(
-                    new Register(5, TypeMetadata.I32),
-                    new Register(4, new TypePointerMetadata(TypeMetadata.I32))
+                    new Register(5, builtInTypes.I32),
+                    new Register(4, new TypePointerMetadata(builtInTypes.I32))
                 ),
-                new Return(new Register(5, TypeMetadata.I32)),
+                new Return(new Register(5, builtInTypes.I32)),
             ])),
             new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
@@ -528,29 +532,29 @@ public class IrGeneratorTests
                 a[0] = 10;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var arrayType = (ArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayType = (ArrayMetadata)rootNamespace.FindType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_cf03852a6cca2be2", new Block("entry", [
                 new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                new LoadConst(new Register(1, builtInTypes.I32), 0),
                 new GetElementPointer(
-                    new Register(2, new TypePointerMetadata(TypeMetadata.I32)),
+                    new Register(2, new TypePointerMetadata(builtInTypes.I32)),
                     new Register(0, arrayPointerType),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(1, builtInTypes.I32)
                 ),
-                new LoadConst(new Register(3, TypeMetadata.I32), 10),
+                new LoadConst(new Register(3, builtInTypes.I32), 10),
                 new Store(
-                    new Register(2, new TypePointerMetadata(TypeMetadata.I32)),
-                    new Register(3, TypeMetadata.I32)
+                    new Register(2, new TypePointerMetadata(builtInTypes.I32)),
+                    new Register(3, builtInTypes.I32)
                 ),
             ])),
             new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
@@ -582,24 +586,24 @@ public class IrGeneratorTests
                 return a;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var arrayType = (ArrayMetadata)typeProvider.GetType("i32[]")!;
+        var arrayType = (ArrayMetadata)rootNamespace.FindType("i32[]")!;
         var arrayPointerType = new TypePointerMetadata(arrayType);
         var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_0_e29ec11cb667c068", new Block("entry", [
-                new LoadConst(new Register(0, TypeMetadata.I32), 10),
+                new LoadConst(new Register(0, builtInTypes.I32), 10),
                 new ArrayAlloc(
                     new Register(1, arrayPointerType),
                     8,
                     4,
-                    new Register(0, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32)
                 ),
                 new Move(new Register(2, arrayPointerType), new Register(1, arrayPointerType)),
                 new Return(new Register(2, arrayPointerType)),
@@ -635,22 +639,22 @@ public class IrGeneratorTests
                 return new Point(1, 2);
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var ctor = pointType.Constructors.First();
         var ctorPointer = new TypePointerMetadata(ctor.Type);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("Point_ctor_d5a01a8bf898461f", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
-                new LoadParameter(new Register(2, TypeMetadata.I32), 2),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
+                new LoadParameter(new Register(2, builtInTypes.I32), 2),
             ])),
             new IrFunction("test_0_8a439296ced9ed11", new Block("entry", [
                 new Alloc(new Register(0, pointPointerType), 0),
@@ -660,14 +664,14 @@ public class IrGeneratorTests
                     ctor
                 ),
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
-                new LoadConst(new Register(3, TypeMetadata.I32), 1),
-                new LoadConst(new Register(4, TypeMetadata.I32), 2),
+                new LoadConst(new Register(3, builtInTypes.I32), 1),
+                new LoadConst(new Register(4, builtInTypes.I32), 2),
                 new Call(
-                    new Register(5, TypeMetadata.Void),
+                    new Register(5, builtInTypes.Void),
                     new Register(2, ctor.Type),
                     [
-                        new Register(3, TypeMetadata.I32),
-                        new Register(4, TypeMetadata.I32)
+                        new Register(3, builtInTypes.I32),
+                        new Register(4, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -691,30 +695,30 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var endBlock = new Block("if_0_end");
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new BinaryOperation(
-                    new Register(2, TypeMetadata.Bool),
+                    new Register(2, builtInTypes.Bool),
                     Ge,
-                    new Register(0, TypeMetadata.I32),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32),
+                    new Register(1, builtInTypes.I32)
                 ),
-                new Branch(new Register(2, TypeMetadata.Bool), "if_0_then", "if_0_else"),
+                new Branch(new Register(2, builtInTypes.Bool), "if_0_then", "if_0_else"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new Return(new Register(0, TypeMetadata.I32)),
+                        new Return(new Register(0, builtInTypes.I32)),
                         new Jump("if_0_end"),
                     ],
                     [endBlock]
@@ -722,7 +726,7 @@ public class IrGeneratorTests
                 new Block(
                     "if_0_else",
                     [
-                        new Return(new Register(1, TypeMetadata.I32)),
+                        new Return(new Register(1, builtInTypes.I32)),
                         new Jump("if_0_end"),
                     ],
                     [endBlock]
@@ -752,39 +756,39 @@ public class IrGeneratorTests
                 return b;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var endBlock = new Block("if_0_end", [
             new Phi(
-                new Register(7, TypeMetadata.I32),
-                [new Register(2, TypeMetadata.I32), new Register(6, TypeMetadata.I32)]
+                new Register(7, builtInTypes.I32),
+                [new Register(2, builtInTypes.I32), new Register(6, builtInTypes.I32)]
             ),
-            new Return(new Register(7, TypeMetadata.I32)),
+            new Return(new Register(7, builtInTypes.I32)),
         ]);
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
-                new LoadConst(new Register(1, TypeMetadata.I32), 0),
-                new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
-                new LoadConst(new Register(3, TypeMetadata.I32), 0),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
+                new LoadConst(new Register(1, builtInTypes.I32), 0),
+                new Move(new Register(2, builtInTypes.I32), new Register(1, builtInTypes.I32)),
+                new LoadConst(new Register(3, builtInTypes.I32), 0),
                 new BinaryOperation(
-                    new Register(4, TypeMetadata.Bool),
+                    new Register(4, builtInTypes.Bool),
                     Gt,
-                    new Register(0, TypeMetadata.I32),
-                    new Register(3, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32),
+                    new Register(3, builtInTypes.I32)
                 ),
-                new Branch(new Register(4, TypeMetadata.Bool), "if_0_then", "if_0_end"),
+                new Branch(new Register(4, builtInTypes.Bool), "if_0_then", "if_0_end"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new LoadConst(new Register(5, TypeMetadata.I32), 10),
-                        new Move(new Register(6, TypeMetadata.I32), new Register(5, TypeMetadata.I32)),
+                        new LoadConst(new Register(5, builtInTypes.I32), 10),
+                        new Move(new Register(6, builtInTypes.I32), new Register(5, builtInTypes.I32)),
                         new Jump("if_0_end"),
                     ],
                     [endBlock]
@@ -818,45 +822,45 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var endBlock0 = new Block("if_0_end");
         var endBlock1 = new Block("if_1_end", [new Jump("if_0_end")], [endBlock0]);
         var entryBlock = new Block(
             "entry",
             [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0),
-                new LoadConst(new Register(1, TypeMetadata.I32), 0),
+                new LoadParameter(new Register(0, builtInTypes.I32), 0),
+                new LoadConst(new Register(1, builtInTypes.I32), 0),
                 new BinaryOperation(
-                    new Register(2, TypeMetadata.Bool),
+                    new Register(2, builtInTypes.Bool),
                     Gt,
-                    new Register(0, TypeMetadata.I32),
-                    new Register(1, TypeMetadata.I32)
+                    new Register(0, builtInTypes.I32),
+                    new Register(1, builtInTypes.I32)
                 ),
-                new Branch(new Register(2, TypeMetadata.Bool), "if_0_then", "if_0_else"),
+                new Branch(new Register(2, builtInTypes.Bool), "if_0_then", "if_0_else"),
             ],
             [
                 new Block(
                     "if_0_then",
                     [
-                        new LoadConst(new Register(3, TypeMetadata.I32), 10),
+                        new LoadConst(new Register(3, builtInTypes.I32), 10),
                         new BinaryOperation(
-                            new Register(4, TypeMetadata.Bool),
+                            new Register(4, builtInTypes.Bool),
                             Gt,
-                            new Register(0, TypeMetadata.I32),
-                            new Register(3, TypeMetadata.I32)
+                            new Register(0, builtInTypes.I32),
+                            new Register(3, builtInTypes.I32)
                         ),
-                        new Branch(new Register(4, TypeMetadata.Bool), "if_1_then", "if_1_else"),
+                        new Branch(new Register(4, builtInTypes.Bool), "if_1_then", "if_1_else"),
                     ],
                     [
                         new Block(
                             "if_1_then",
                             [
-                                new LoadConst(new Register(5, TypeMetadata.I32), 1),
-                                new Return(new Register(5, TypeMetadata.I32)),
+                                new LoadConst(new Register(5, builtInTypes.I32), 1),
+                                new Return(new Register(5, builtInTypes.I32)),
                                 new Jump("if_1_end"),
                             ],
                             [endBlock1]
@@ -864,8 +868,8 @@ public class IrGeneratorTests
                         new Block(
                             "if_1_else",
                             [
-                                new LoadConst(new Register(6, TypeMetadata.I32), 2),
-                                new Return(new Register(6, TypeMetadata.I32)),
+                                new LoadConst(new Register(6, builtInTypes.I32), 2),
+                                new Return(new Register(6, builtInTypes.I32)),
                                 new Jump("if_1_end"),
                             ],
                             [endBlock1]
@@ -875,8 +879,8 @@ public class IrGeneratorTests
                 new Block(
                     "if_0_else",
                     [
-                        new LoadConst(new Register(7, TypeMetadata.I32), 0),
-                        new Return(new Register(7, TypeMetadata.I32)),
+                        new LoadConst(new Register(7, builtInTypes.I32), 0),
+                        new Return(new Register(7, builtInTypes.I32)),
                         new Jump("if_0_end"),
                     ],
                     [endBlock0]
@@ -908,41 +912,41 @@ public class IrGeneratorTests
                 return b;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var endBlock = new Block("if_0_end", [
             new Phi(
-                new Register(10, TypeMetadata.I32),
-                [new Register(8, TypeMetadata.I32), new Register(9, TypeMetadata.I32)]
+                new Register(10, builtInTypes.I32),
+                [new Register(8, builtInTypes.I32), new Register(9, builtInTypes.I32)]
             ),
-            new Return(new Register(10, TypeMetadata.I32))
+            new Return(new Register(10, builtInTypes.I32))
         ]);
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_35acf129a21c9365", new Block(
                 "entry",
                 [
-                    new LoadParameter(new Register(0, TypeMetadata.I32), 0),
-                    new LoadConst(new Register(1, TypeMetadata.I32), 0),
-                    new Move(new Register(2, TypeMetadata.I32), new Register(1, TypeMetadata.I32)),
-                    new LoadConst(new Register(3, TypeMetadata.I32), 0),
+                    new LoadParameter(new Register(0, builtInTypes.I32), 0),
+                    new LoadConst(new Register(1, builtInTypes.I32), 0),
+                    new Move(new Register(2, builtInTypes.I32), new Register(1, builtInTypes.I32)),
+                    new LoadConst(new Register(3, builtInTypes.I32), 0),
                     new BinaryOperation(
-                        new Register(4, TypeMetadata.Bool),
+                        new Register(4, builtInTypes.Bool),
                         Gt,
-                        new Register(0, TypeMetadata.I32),
-                        new Register(3, TypeMetadata.I32)
+                        new Register(0, builtInTypes.I32),
+                        new Register(3, builtInTypes.I32)
                     ),
-                    new Branch(new Register(4, TypeMetadata.Bool), "if_0_then", "if_0_else"),
+                    new Branch(new Register(4, builtInTypes.Bool), "if_0_then", "if_0_else"),
                 ],
                 [
                     new Block(
                         "if_0_then",
                         [
-                            new LoadConst(new Register(5, TypeMetadata.I32), 1),
-                            new Move(new Register(9, TypeMetadata.I32), new Register(5, TypeMetadata.I32)),
+                            new LoadConst(new Register(5, builtInTypes.I32), 1),
+                            new Move(new Register(9, builtInTypes.I32), new Register(5, builtInTypes.I32)),
                             new Jump("if_0_end"),
                         ],
                         [endBlock]
@@ -950,13 +954,13 @@ public class IrGeneratorTests
                     new Block(
                         "if_0_else",
                         [
-                            new LoadConst(new Register(6, TypeMetadata.I32), 1),
+                            new LoadConst(new Register(6, builtInTypes.I32), 1),
                             new UnaryOperation(
-                                new Register(7, TypeMetadata.I32),
+                                new Register(7, builtInTypes.I32),
                                 UnaryInstructionKind.Neg,
-                                new Register(6, TypeMetadata.I32)
+                                new Register(6, builtInTypes.I32)
                             ),
-                            new Move(new Register(8, TypeMetadata.I32), new Register(7, TypeMetadata.I32)),
+                            new Move(new Register(8, builtInTypes.I32), new Register(7, builtInTypes.I32)),
                             new Jump("if_0_end"),
                         ],
                         [endBlock]
@@ -982,27 +986,27 @@ public class IrGeneratorTests
                 return i;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var loopEnd = new Block(
             "loop_0_end", [
-                new Return(new Register(6, TypeMetadata.I32))
+                new Return(new Register(6, builtInTypes.I32))
             ]
         );
         var ifThen = new Block(
             "if_0_then",
             [
-                new LoadConst(new Register(4, TypeMetadata.I32), 1),
+                new LoadConst(new Register(4, builtInTypes.I32), 1),
                 new BinaryOperation(
-                    new Register(5, TypeMetadata.I32),
+                    new Register(5, builtInTypes.I32),
                     Add,
-                    new Register(6, TypeMetadata.I32),
-                    new Register(4, TypeMetadata.I32)
+                    new Register(6, builtInTypes.I32),
+                    new Register(4, builtInTypes.I32)
                 ),
-                new Move(new Register(7, TypeMetadata.I32), new Register(5, TypeMetadata.I32)),
+                new Move(new Register(7, builtInTypes.I32), new Register(5, builtInTypes.I32)),
                 new Jump("loop_0_start"),
             ]
         );
@@ -1010,17 +1014,17 @@ public class IrGeneratorTests
             "loop_0_start",
             [
                 new Phi(
-                    new Register(6, TypeMetadata.I32),
-                    [new Register(1, TypeMetadata.I32), new Register(7, TypeMetadata.I32)]
+                    new Register(6, builtInTypes.I32),
+                    [new Register(1, builtInTypes.I32), new Register(7, builtInTypes.I32)]
                 ),
-                new LoadConst(new Register(2, TypeMetadata.I32), 10),
+                new LoadConst(new Register(2, builtInTypes.I32), 10),
                 new BinaryOperation(
-                    new Register(3, TypeMetadata.Bool),
+                    new Register(3, builtInTypes.Bool),
                     Lt,
-                    new Register(6, TypeMetadata.I32),
-                    new Register(2, TypeMetadata.I32)
+                    new Register(6, builtInTypes.I32),
+                    new Register(2, builtInTypes.I32)
                 ),
-                new Branch(new Register(3, TypeMetadata.Bool), "if_0_then", "loop_0_end"),
+                new Branch(new Register(3, builtInTypes.Bool), "if_0_then", "loop_0_end"),
             ],
             [ifThen, loopEnd]
         );
@@ -1028,8 +1032,8 @@ public class IrGeneratorTests
         var entry = new Block(
             "entry",
             [
-                new LoadConst(new Register(0, TypeMetadata.I32), 0),
-                new Move(new Register(1, TypeMetadata.I32), new Register(0, TypeMetadata.I32)),
+                new LoadConst(new Register(0, builtInTypes.I32), 0),
+                new Move(new Register(1, builtInTypes.I32), new Register(0, builtInTypes.I32)),
                 new Jump("loop_0_start"),
             ],
             [loopStart]
@@ -1058,22 +1062,22 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var testType = (TypeMetadata)typeProvider.GetType("Test")!;
+        var testType = (TypeMetadata)rootNamespace.FindType("Test")!;
         var typePointer = new TypePointerMetadata(testType);
-        var method = testType.GetMethod("method1")!.Functions[0];
+        var method = (MethodMetadata)testType.GetMethods("method1")[0];
         var methodPointer = new TypePointerMetadata(method.Type);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("Test_method1_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, new TypePointerMetadata(testType)), 0),
-                new LoadConst(new Register(1, TypeMetadata.I32), 0),
-                new Return(new Register(1, TypeMetadata.I32)),
+                new LoadConst(new Register(1, builtInTypes.I32), 0),
+                new Return(new Register(1, builtInTypes.I32)),
             ])),
             new IrFunction("Test_method2_0_3173c900e37ae1df", new Block("entry", [
                 new LoadParameter(new Register(0, typePointer), 0),
@@ -1084,7 +1088,7 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(2, method.Type), new Register(1, methodPointer)),
                 new Call(
-                    new Register(3, TypeMetadata.I32),
+                    new Register(3, builtInTypes.I32),
                     new Register(2, method.Type),
                     [],
                     false
@@ -1108,15 +1112,15 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var testType = (TypeMetadata)typeProvider.GetType("Test")!;
+        var testType = (TypeMetadata)rootNamespace.FindType("Test")!;
         var typePointer = new TypePointerMetadata(testType);
-        var method = testType.GetMethod("method1")!.Functions[0];
+        var method = (MethodMetadata)testType.GetMethods("method1")[0];
         var methodPointer = new TypePointerMetadata(method.Type);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
@@ -1132,7 +1136,7 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(2, method.Type), new Register(1, methodPointer)),
                 new Call(
-                    new Register(3, TypeMetadata.Void),
+                    new Register(3, builtInTypes.Void),
                     new Register(2, method.Type),
                     [],
                     false
@@ -1164,42 +1168,42 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
-        var field = pointType.GetField("<>_x")!;
+        var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
         var fieldPointer = new TypePointerMetadata(field.Type);
-        var setter = pointType.GetMethod("<>_set_x")!.Functions[0];
+        var setter = (MethodMetadata)pointType.GetMethods("<>_set_x")[0];
         var setterPointer = new TypePointerMetadata(setter.Type);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
-                new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Load(new Register(2, builtInTypes.I32), new Register(1, fieldPointer)),
+                new Return(new Register(2, builtInTypes.I32)),
             ])),
             new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
-                new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
+                new Store(new Register(2, fieldPointer), new Register(1, builtInTypes.I32)),
             ])),
             new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(new Register(2, setterPointer), new Register(0, pointPointerType), setter),
                 new Load(new Register(3, setter.Type), new Register(2, setterPointer)),
                 new Call(
-                    new Register(4, TypeMetadata.Void),
+                    new Register(4, builtInTypes.Void),
                     new Register(3, setter.Type),
                     [
-                        new Register(1, TypeMetadata.I32)
+                        new Register(1, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -1228,39 +1232,39 @@ public class IrGeneratorTests
                 return p.x;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
-        var field = pointType.GetField("<>_x")!;
+        var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
         var fieldPointer = new TypePointerMetadata(field.Type);
-        var getter = pointType.GetMethod("<>_get_x")!.Functions[0];
+        var getter = (MethodMetadata)pointType.GetMethods("<>_get_x")[0];
         var getterPointer = new TypePointerMetadata(getter.Type);
-        var setter = pointType.GetMethod("<>_set_x")!.Functions[0];
+        var setter = (MethodMetadata)pointType.GetMethods("<>_set_x")[0];
         var setterPointer = new TypePointerMetadata(setter.Type);
-        var ctor = pointType.GetConstructor([TypeMetadata.I32])!;
+        var ctor = pointType.GetConstructor([builtInTypes.I32])!;
         var ctorPointer = new TypePointerMetadata(ctor.Type);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
-                new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Load(new Register(2, builtInTypes.I32), new Register(1, fieldPointer)),
+                new Return(new Register(2, builtInTypes.I32)),
             ])),
             new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
-                new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
+                new Store(new Register(2, fieldPointer), new Register(1, builtInTypes.I32)),
             ])),
             new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(
                     new Register(2, setterPointer),
                     new Register(0, pointPointerType),
@@ -1268,10 +1272,10 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(3, setter.Type), new Register(2, setterPointer)),
                 new Call(
-                    new Register(4, TypeMetadata.Void),
+                    new Register(4, builtInTypes.Void),
                     new Register(3, setter.Type),
                     [
-                        new Register(1, TypeMetadata.I32)
+                        new Register(1, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -1284,12 +1288,12 @@ public class IrGeneratorTests
                     ctor
                 ),
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
-                new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                new LoadConst(new Register(3, builtInTypes.I32), 1),
                 new Call(
-                    new Register(4, TypeMetadata.Void),
+                    new Register(4, builtInTypes.Void),
                     new Register(2, ctor.Type),
                     [
-                        new Register(3, TypeMetadata.I32)
+                        new Register(3, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -1301,12 +1305,12 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(7, getter.Type), new Register(6, getterPointer)),
                 new Call(
-                    new Register(8, TypeMetadata.I32),
+                    new Register(8, builtInTypes.I32),
                     new Register(7, getter.Type),
                     [],
                     false
                 ),
-                new Return(new Register(8, TypeMetadata.I32)),
+                new Return(new Register(8, builtInTypes.I32)),
             ])),
         };
 
@@ -1332,46 +1336,46 @@ public class IrGeneratorTests
                 return -p.x;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
-        var field = pointType.GetField("<>_x")!;
+        var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
         var fieldPointer = new TypePointerMetadata(field.Type);
-        var getter = pointType.GetMethod("<>_get_x")!.Functions[0];
+        var getter = (MethodMetadata)pointType.GetMethods("<>_get_x")[0];
         var getterPointer = new TypePointerMetadata(getter.Type);
-        var setter = pointType.GetMethod("<>_set_x")!.Functions[0];
+        var setter = (MethodMetadata)pointType.GetMethods("<>_set_x")[0];
         var setterPointer = new TypePointerMetadata(setter.Type);
-        var ctor = pointType.GetConstructor([TypeMetadata.I32])!;
+        var ctor = pointType.GetConstructor([builtInTypes.I32])!;
         var ctorPointer = new TypePointerMetadata(ctor.Type);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
-                new Load(new Register(2, TypeMetadata.I32), new Register(1, fieldPointer)),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Load(new Register(2, builtInTypes.I32), new Register(1, fieldPointer)),
+                new Return(new Register(2, builtInTypes.I32)),
             ])),
             new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
-                new Store(new Register(2, fieldPointer), new Register(1, TypeMetadata.I32)),
+                new Store(new Register(2, fieldPointer), new Register(1, builtInTypes.I32)),
             ])),
             new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(new Register(2, setterPointer), new Register(0, pointPointerType), setter),
                 new Load(new Register(3, setter.Type), new Register(2, setterPointer)),
                 new Call(
-                    new Register(4, TypeMetadata.Void),
+                    new Register(4, builtInTypes.Void),
                     new Register(3, setter.Type),
                     [
-                        new Register(1, TypeMetadata.I32)
+                        new Register(1, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -1384,12 +1388,12 @@ public class IrGeneratorTests
                     ctor
                 ),
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
-                new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                new LoadConst(new Register(3, builtInTypes.I32), 1),
                 new Call(
-                    new Register(4, TypeMetadata.Void),
+                    new Register(4, builtInTypes.Void),
                     new Register(2, ctor.Type),
                     [
-                        new Register(3, TypeMetadata.I32)
+                        new Register(3, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -1401,17 +1405,17 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(7, getter.Type), new Register(6, getterPointer)),
                 new Call(
-                    new Register(8, TypeMetadata.I32),
+                    new Register(8, builtInTypes.I32),
                     new Register(7, getter.Type),
                     [],
                     false
                 ),
                 new UnaryOperation(
-                    new Register(9, TypeMetadata.I32),
+                    new Register(9, builtInTypes.I32),
                     UnaryInstructionKind.Neg,
-                    new Register(8, TypeMetadata.I32)
+                    new Register(8, builtInTypes.I32)
                 ),
-                new Return(new Register(9, TypeMetadata.I32)),
+                new Return(new Register(9, builtInTypes.I32)),
             ])),
         };
 
@@ -1439,75 +1443,75 @@ public class IrGeneratorTests
                 return p.x + p.y;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)typeProvider.GetType("Point")!;
+        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
-        var xField = pointType.GetField("<>_x")!;
+        var xField = (FieldMetadata)pointType.GetFields("<>_x")[0];
         var xFieldPointer = new TypePointerMetadata(xField.Type);
-        var yField = pointType.GetField("<>_y")!;
+        var yField = (FieldMetadata)pointType.GetFields("<>_y")[0];
         var yFieldPointer = new TypePointerMetadata(yField.Type);
-        var xGetter = pointType.GetMethod("<>_get_x")!.Functions[0];
+        var xGetter = (MethodMetadata)pointType.GetMethods("<>_get_x")[0];
         var xGetterPointer = new TypePointerMetadata(xGetter.Type);
-        var xSetter = pointType.GetMethod("<>_set_x")!.Functions[0];
+        var xSetter = (MethodMetadata)pointType.GetMethods("<>_set_x")[0];
         var xSetterPointer = new TypePointerMetadata(xSetter.Type);
-        var yGetter = pointType.GetMethod("<>_get_y")!.Functions[0];
+        var yGetter = (MethodMetadata)pointType.GetMethods("<>_get_y")[0];
         var yGetterPointer = new TypePointerMetadata(yGetter.Type);
-        var ySetter = pointType.GetMethod("<>_set_y")!.Functions[0];
+        var ySetter = (MethodMetadata)pointType.GetMethods("<>_set_y")[0];
         var ySetterPointer = new TypePointerMetadata(ySetter.Type);
-        var ctor = pointType.GetConstructor([TypeMetadata.I32, TypeMetadata.I32])!;
+        var ctor = pointType.GetConstructor([builtInTypes.I32, builtInTypes.I32])!;
         var ctorPointer = new TypePointerMetadata(ctor.Type);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, xFieldPointer), new Register(0, pointPointerType), xField),
-                new Load(new Register(2, TypeMetadata.I32), new Register(1, xFieldPointer)),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Load(new Register(2, builtInTypes.I32), new Register(1, xFieldPointer)),
+                new Return(new Register(2, builtInTypes.I32)),
             ])),
             new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(new Register(2, xFieldPointer), new Register(0, pointPointerType), xField),
-                new Store(new Register(2, xFieldPointer), new Register(1, TypeMetadata.I32)),
+                new Store(new Register(2, xFieldPointer), new Register(1, builtInTypes.I32)),
             ])),
             new IrFunction("Point_<>_get_y_0_2af2b3192b419145", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
                 new GetMemberPointer(new Register(1, yFieldPointer), new Register(0, pointPointerType), yField),
-                new Load(new Register(2, TypeMetadata.I32), new Register(1, yFieldPointer)),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Load(new Register(2, builtInTypes.I32), new Register(1, yFieldPointer)),
+                new Return(new Register(2, builtInTypes.I32)),
             ])),
             new IrFunction("Point_<>_set_y_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(new Register(2, yFieldPointer), new Register(0, pointPointerType), yField),
-                new Store(new Register(2, yFieldPointer), new Register(1, TypeMetadata.I32)),
+                new Store(new Register(2, yFieldPointer), new Register(1, builtInTypes.I32)),
             ])),
             new IrFunction("Point_ctor_d5a01a8bf898461f", new Block("entry", [
                 new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
-                new LoadParameter(new Register(2, TypeMetadata.I32), 2),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
+                new LoadParameter(new Register(2, builtInTypes.I32), 2),
                 new GetMemberPointer(new Register(3, xSetterPointer), new Register(0, pointPointerType), xSetter),
                 new Load(new Register(4, xSetter.Type), new Register(3, xSetterPointer)),
                 new Call(
-                    new Register(5, TypeMetadata.Void),
+                    new Register(5, builtInTypes.Void),
                     new Register(4, xSetter.Type),
                     [
-                        new Register(1, TypeMetadata.I32)
+                        new Register(1, builtInTypes.I32)
                     ],
                     false
                 ),
                 new GetMemberPointer(new Register(6, ySetterPointer), new Register(0, pointPointerType), ySetter),
                 new Load(new Register(7, ySetter.Type), new Register(6, ySetterPointer)),
                 new Call(
-                    new Register(8, TypeMetadata.Void),
+                    new Register(8, builtInTypes.Void),
                     new Register(7, ySetter.Type),
                     [
-                        new Register(2, TypeMetadata.I32)
+                        new Register(2, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -1516,14 +1520,14 @@ public class IrGeneratorTests
                 new Alloc(new Register(0, pointPointerType), 8),
                 new GetMemberPointer(new Register(1, ctorPointer), new Register(0, pointPointerType), ctor),
                 new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
-                new LoadConst(new Register(3, TypeMetadata.I32), 1),
-                new LoadConst(new Register(4, TypeMetadata.I32), 2),
+                new LoadConst(new Register(3, builtInTypes.I32), 1),
+                new LoadConst(new Register(4, builtInTypes.I32), 2),
                 new Call(
-                    new Register(5, TypeMetadata.Void),
+                    new Register(5, builtInTypes.Void),
                     new Register(2, ctor.Type),
                     [
-                        new Register(3, TypeMetadata.I32),
-                        new Register(4, TypeMetadata.I32),
+                        new Register(3, builtInTypes.I32),
+                        new Register(4, builtInTypes.I32),
                     ],
                     false
                 ),
@@ -1535,7 +1539,7 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(8, xGetter.Type), new Register(7, xGetterPointer)),
                 new Call(
-                    new Register(9, TypeMetadata.I32),
+                    new Register(9, builtInTypes.I32),
                     new Register(8, xGetter.Type),
                     [],
                     false
@@ -1547,18 +1551,18 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(11, yGetter.Type), new Register(10, yGetterPointer)),
                 new Call(
-                    new Register(12, TypeMetadata.I32),
+                    new Register(12, builtInTypes.I32),
                     new Register(11, yGetter.Type),
                     [],
                     false
                 ),
                 new BinaryOperation(
-                    new Register(13, TypeMetadata.I32),
+                    new Register(13, builtInTypes.I32),
                     Add,
-                    new Register(9, TypeMetadata.I32),
-                    new Register(12, TypeMetadata.I32)
+                    new Register(9, builtInTypes.I32),
+                    new Register(12, builtInTypes.I32)
                 ),
-                new Return(new Register(13, TypeMetadata.I32)),
+                new Return(new Register(13, builtInTypes.I32)),
             ])),
         };
 
@@ -1593,35 +1597,35 @@ public class IrGeneratorTests
                 return test2.obj.x;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Type = (TypeMetadata)typeProvider.GetType("Test1")!;
+        var test1Type = (TypeMetadata)rootNamespace.FindType("Test1")!;
         var test1PointerType = new TypePointerMetadata(test1Type);
-        var test2Type = (TypeMetadata)typeProvider.GetType("Test2")!;
+        var test2Type = (TypeMetadata)rootNamespace.FindType("Test2")!;
         var test2PointerType = new TypePointerMetadata(test2Type);
 
         // Test1 members
-        var test1XField = test1Type.GetField("<>_x")!;
+        var test1XField = (FieldMetadata)test1Type.GetFields("<>_x")[0];
         var test1XFieldPointer = new TypePointerMetadata(test1XField.Type);
-        var test1XGetter = test1Type.GetMethod("<>_get_x")!.Functions[0];
+        var test1XGetter = (MethodMetadata)test1Type.GetMethods("<>_get_x")[0];
         var test1XGetterPointer = new TypePointerMetadata(test1XGetter.Type);
-        var test1XSetter = test1Type.GetMethod("<>_set_x")!.Functions[0];
+        var test1XSetter = (MethodMetadata)test1Type.GetMethods("<>_set_x")[0];
         var test1XSetterPointer = new TypePointerMetadata(test1XSetter.Type);
-        var test1Ctor = test1Type.GetConstructor([TypeMetadata.I32])!;
+        var test1Ctor = test1Type.GetConstructor([builtInTypes.I32])!;
         var test1CtorPointer = new TypePointerMetadata(test1Ctor.Type);
 
         // Test2 members
-        var test2ObjField = test2Type.GetField("<>_obj")!;
+        var test2ObjField = (FieldMetadata)test2Type.GetFields("<>_obj")[0];
         var test2ObjFieldPointer = new TypePointerMetadata(test2ObjField.Type);
-        var test2ObjGetter = test2Type.GetMethod("<>_get_obj")!.Functions[0];
+        var test2ObjGetter = (MethodMetadata)test2Type.GetMethods("<>_get_obj")[0];
         var test2ObjGetterPointer = new TypePointerMetadata(test2ObjGetter.Type);
-        var test2ObjSetter = test2Type.GetMethod("<>_set_obj")!.Functions[0];
+        var test2ObjSetter = (MethodMetadata)test2Type.GetMethods("<>_set_obj")[0];
         var test2ObjSetterPointer = new TypePointerMetadata(test2ObjSetter.Type);
         var test2Ctor = test2Type.GetConstructor([test1Type])!;
         var test2CtorPointer = new TypePointerMetadata(test2Ctor.Type);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
@@ -1633,22 +1637,22 @@ public class IrGeneratorTests
                     new Register(0, test1PointerType),
                     test1XField
                 ),
-                new Load(new Register(2, TypeMetadata.I32), new Register(1, test1XFieldPointer)),
-                new Return(new Register(2, TypeMetadata.I32)),
+                new Load(new Register(2, builtInTypes.I32), new Register(1, test1XFieldPointer)),
+                new Return(new Register(2, builtInTypes.I32)),
             ])),
             new IrFunction("Test1_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, test1PointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(
                     new Register(2, test1XFieldPointer),
                     new Register(0, test1PointerType),
                     test1XField
                 ),
-                new Store(new Register(2, test1XFieldPointer), new Register(1, TypeMetadata.I32)),
+                new Store(new Register(2, test1XFieldPointer), new Register(1, builtInTypes.I32)),
             ])),
             new IrFunction("Test1_ctor_f22f9ef8659fbbff", new Block("entry", [
                 new LoadParameter(new Register(0, test1PointerType), 0),
-                new LoadParameter(new Register(1, TypeMetadata.I32), 1),
+                new LoadParameter(new Register(1, builtInTypes.I32), 1),
                 new GetMemberPointer(
                     new Register(2, test1XSetterPointer),
                     new Register(0, test1PointerType),
@@ -1656,10 +1660,10 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(3, test1XSetter.Type), new Register(2, test1XSetterPointer)),
                 new Call(
-                    new Register(4, TypeMetadata.Void),
+                    new Register(4, builtInTypes.Void),
                     new Register(3, test1XSetter.Type),
                     [
-                        new Register(1, TypeMetadata.I32)
+                        new Register(1, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -1702,7 +1706,7 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(3, test2ObjSetter.Type), new Register(2, test2ObjSetterPointer)),
                 new Call(
-                    new Register(4, TypeMetadata.Void),
+                    new Register(4, builtInTypes.Void),
                     new Register(3, test2ObjSetter.Type),
                     [
                         new Register(1, test1PointerType)
@@ -1720,12 +1724,12 @@ public class IrGeneratorTests
                     test1Ctor
                 ),
                 new Load(new Register(2, test1Ctor.Type), new Register(1, test1CtorPointer)),
-                new LoadConst(new Register(3, TypeMetadata.I32), 1),
+                new LoadConst(new Register(3, builtInTypes.I32), 1),
                 new Call(
-                    new Register(4, TypeMetadata.Void),
+                    new Register(4, builtInTypes.Void),
                     new Register(2, test1Ctor.Type),
                     [
-                        new Register(3, TypeMetadata.I32)
+                        new Register(3, builtInTypes.I32)
                     ],
                     false
                 ),
@@ -1739,7 +1743,7 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(8, test2Ctor.Type), new Register(7, test2CtorPointer)),
                 new Call(
-                    new Register(9, TypeMetadata.Void),
+                    new Register(9, builtInTypes.Void),
                     new Register(8, test2Ctor.Type),
                     [
                         new Register(5, test1PointerType)
@@ -1768,13 +1772,13 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(15, test1XGetter.Type), new Register(14, test1XGetterPointer)),
                 new Call(
-                    new Register(16, TypeMetadata.I32),
+                    new Register(16, builtInTypes.I32),
                     new Register(15, test1XGetter.Type),
                     [],
                     false
                 ),
 
-                new Return(new Register(16, TypeMetadata.I32)),
+                new Return(new Register(16, builtInTypes.I32)),
             ])),
         };
 
@@ -1792,13 +1796,13 @@ public class IrGeneratorTests
 
             public test1(): void { }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var functionType = (FunctionTypeMetadata)typeProvider.GetType("() => void")!;
+        var functionType = (FunctionTypeMetadata)rootNamespace.FindType("() => void")!;
         var functionPointer = new TypePointerMetadata(functionType);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
@@ -1806,15 +1810,18 @@ public class IrGeneratorTests
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
-                    new FunctionMetadata(null, AccessModifierMetadata.Public, "test1", [], functionType, new FunctionGroupMetadata())
-                ),
+                    new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test1",
+                        [],
+                        functionType)),
                 new Load(new Register(1, functionType), new Register(0, functionPointer)),
                 new Call(
-                    new Register(2, TypeMetadata.Void),
+                    new Register(2, builtInTypes.Void),
                     new Register(1, functionType),
                     [],
-                    true
-                )
+                    true)
             ])),
             new IrFunction("test1_0_3173c900e37ae1df", new Block("entry", [])),
         };
@@ -1835,13 +1842,13 @@ public class IrGeneratorTests
                 Test.test();
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var testType = (TypeMetadata)typeProvider.GetType("Test")!;
-        var testMethod = testType.GetMethod("test")!.Functions[0];
+        var testType = (TypeMetadata)rootNamespace.FindType("Test")!;
+        var testMethod = (MethodMetadata)testType.GetMethods("test")[0];
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
@@ -1857,7 +1864,7 @@ public class IrGeneratorTests
                     new Register(0, new TypePointerMetadata(testMethod.Type))
                 ),
                 new Call(
-                    new Register(2, TypeMetadata.Void),
+                    new Register(2, builtInTypes.Void),
                     new Register(1, testMethod.Type),
                     [],
                     true
@@ -1880,13 +1887,13 @@ public class IrGeneratorTests
                 f();
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var functionType = (FunctionTypeMetadata)typeProvider.GetType("() => void")!;
+        var functionType = (FunctionTypeMetadata)rootNamespace.FindType("() => void")!;
         var functionPointer = new TypePointerMetadata(functionType);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
@@ -1895,16 +1902,19 @@ public class IrGeneratorTests
                 new GetMemberPointer(
                     new Register(0, functionPointer),
                     null,
-                    new FunctionMetadata(null, AccessModifierMetadata.Public, "test", [], functionType, new FunctionGroupMetadata())
-                ),
+                    new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [],
+                        functionType)),
                 new Load(new Register(1, functionType), new Register(0, functionPointer)),
                 new Move(new Register(2, functionType), new Register(1, functionType)),
                 new Call(
-                    new Register(3, TypeMetadata.Void),
+                    new Register(3, builtInTypes.Void),
                     new Register(2, functionType),
                     [],
-                    false
-                )
+                    false)
             ]))
         };
 
@@ -1920,19 +1930,19 @@ public class IrGeneratorTests
                 callback();
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var functionType = (FunctionTypeMetadata)typeProvider.GetType("() => void")!;
+        var functionType = (FunctionTypeMetadata)rootNamespace.FindType("() => void")!;
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new List<IrFunction>
         {
             new IrFunction("test_1_2662accf658c5c8b", new Block("entry", [
                 new LoadParameter(new Register(0, functionType), 0),
                 new Call(
-                    new Register(1, TypeMetadata.Void),
+                    new Register(1, builtInTypes.Void),
                     new Register(0, functionType),
                     [],
                     false
@@ -1956,15 +1966,15 @@ public class IrGeneratorTests
                 p.method();
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
-        var interfaceType = (AliasMetadata)typeProvider.GetType("Interface")!;
+        var interfaceType = (AliasMetadata)rootNamespace.FindType("Interface")!;
         var interfacePointer = new TypePointerMetadata(interfaceType);
 
-        var method = ((FunctionGroupMetadata)interfaceType.GetMember("method")!).Functions[0];
+        var method = (InterfaceMethodMetadata)interfaceType.GetMember("method")!;
         var methodPointer = new TypePointerMetadata(method.Type);
 
         var expected = new List<IrFunction>
@@ -1978,7 +1988,7 @@ public class IrGeneratorTests
                 ),
                 new Load(new Register(2, method.Type), new Register(1, methodPointer)),
                 new Call(
-                    new Register(3, TypeMetadata.Void),
+                    new Register(3, builtInTypes.Void),
                     new Register(2, method.Type),
                     [],
                     false
@@ -1998,12 +2008,12 @@ public class IrGeneratorTests
                 return obj is i8;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
-        var any = typeProvider.GetType("{ }")!;
+        var any = rootNamespace.FindType("{ }")!;
         var anyPointer = new TypePointerMetadata(any);
 
         var expected = new[]
@@ -2011,11 +2021,11 @@ public class IrGeneratorTests
             new IrFunction("test_1_31fc2f6c0e066efc", new Block("entry", [
                 new LoadParameter(new Register(0, anyPointer), 0),
                 new IsType(
-                    new Register(1, TypeMetadata.Bool),
+                    new Register(1, builtInTypes.Bool),
                     new Register(0, anyPointer),
-                    TypeMetadata.I8
+                    builtInTypes.I8
                 ),
-                new Return(new Register(1, TypeMetadata.Bool)),
+                new Return(new Register(1, builtInTypes.Bool)),
             ])),
         };
 
@@ -2031,12 +2041,12 @@ public class IrGeneratorTests
                 return (i8)obj;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
-        var any = typeProvider.GetType("{ }")!;
+        var any = rootNamespace.FindType("{ }")!;
         var anyPointer = new TypePointerMetadata(any);
 
         var expected = new[]
@@ -2044,11 +2054,11 @@ public class IrGeneratorTests
             new IrFunction("test_1_2baa3d192bdd861d", new Block("entry", [
                 new LoadParameter(new Register(0, anyPointer), 0),
                 new Cast(
-                    new Register(1, TypeMetadata.I8),
+                    new Register(1, builtInTypes.I8),
                     new Register(0, anyPointer),
-                    TypeMetadata.I8
+                    builtInTypes.I8
                 ),
-                new Return(new Register(1, TypeMetadata.I8)),
+                new Return(new Register(1, builtInTypes.I8)),
             ])),
         };
 
@@ -2066,15 +2076,15 @@ public class IrGeneratorTests
                 return (Test)obj;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
-        var any = typeProvider.GetType("{ }")!;
+        var any = rootNamespace.FindType("{ }")!;
         var anyPointer = new TypePointerMetadata(any);
 
-        var testType = (TypeMetadata)typeProvider.GetType("Test")!;
+        var testType = (TypeMetadata)rootNamespace.FindType("Test")!;
         var testPointer = new TypePointerMetadata(testType);
 
         var expected = new[]
@@ -2106,44 +2116,44 @@ public class IrGeneratorTests
                 return 0;
             }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new[]
         {
             new IrFunction("test_2_2471114b9902d8e5", new Block(
                 "entry",
                 [
-                    new LoadParameter(new Register(0, TypeMetadata.Bool), 0),
-                    new LoadParameter(new Register(1, TypeMetadata.Bool), 1),
-                    new Move(new Register(2, TypeMetadata.Bool), new Register(0, TypeMetadata.Bool)),
-                    new Branch(new Register(2, TypeMetadata.Bool), "if_1_then", "if_1_end"),
+                    new LoadParameter(new Register(0, builtInTypes.Bool), 0),
+                    new LoadParameter(new Register(1, builtInTypes.Bool), 1),
+                    new Move(new Register(2, builtInTypes.Bool), new Register(0, builtInTypes.Bool)),
+                    new Branch(new Register(2, builtInTypes.Bool), "if_1_then", "if_1_end"),
                 ],
                 [
                     new Block("if_1_then", [
-                        new Move(new Register(5, TypeMetadata.Bool), new Register(1, TypeMetadata.Bool)),
+                        new Move(new Register(5, builtInTypes.Bool), new Register(1, builtInTypes.Bool)),
                         new Jump("if_1_end"),
                     ]),
                     new Block("if_1_end", [
                         new Phi(
-                            new Register(6, TypeMetadata.Bool),
+                            new Register(6, builtInTypes.Bool),
                             [
-                                new Register(2, TypeMetadata.Bool),
-                                new Register(5, TypeMetadata.Bool),
+                                new Register(2, builtInTypes.Bool),
+                                new Register(5, builtInTypes.Bool),
                             ]
                         ),
-                        new Branch(new Register(6, TypeMetadata.Bool), "if_0_then", "if_0_end"),
+                        new Branch(new Register(6, builtInTypes.Bool), "if_0_then", "if_0_end"),
                     ]),
                     new Block("if_0_then", [
-                        new LoadConst(new Register(3, TypeMetadata.I32), 1),
-                        new Return(new Register(3, TypeMetadata.I32)),
+                        new LoadConst(new Register(3, builtInTypes.I32), 1),
+                        new Return(new Register(3, builtInTypes.I32)),
                         new Jump("if_0_end"),
                     ]),
                     new Block("if_0_end", [
-                        new LoadConst(new Register(4, TypeMetadata.I32), 0),
-                        new Return(new Register(4, TypeMetadata.I32)),
+                        new LoadConst(new Register(4, builtInTypes.I32), 0),
+                        new Return(new Register(4, builtInTypes.I32)),
                     ]),
                 ]
             )),
@@ -2160,18 +2170,18 @@ public class IrGeneratorTests
             public test(x: i32): void { }
             public test(x: bool): void { }
             """;
-        var (tree, typeProvider) = Parse(code);
+        var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(typeProvider.Types, [tree]);
+        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
+        var functions = ir.Generate([tree], rootNamespace);
 
         var expected = new[]
         {
             new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.I32), 0)
+                new LoadParameter(new Register(0, builtInTypes.I32), 0)
             ])),
             new IrFunction("test_1_c79f1eebc0a6b477", new Block("entry", [
-                new LoadParameter(new Register(0, TypeMetadata.Bool), 0)
+                new LoadParameter(new Register(0, builtInTypes.Bool), 0)
             ])),
         };
 

@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
+public class InterfaceMetadata : IAnonymousTypeMetadata, IEquatable<InterfaceMetadata>
 {
     private readonly List<InterfacePropertyMetadata> properties;
     private readonly List<InterfaceMethodMetadata> methods;
@@ -51,7 +51,7 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
                 return false;
         }
 
-        return true;
+        return Equals(Namespace, other.Namespace);
     }
 
     public override bool Equals(object? obj)
@@ -86,21 +86,27 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
     public void AddProperty(InterfacePropertyMetadata property)
         => properties.Add(property);
 
-    public InterfacePropertyMetadata? GetProperty(string name)
-        => properties.FirstOrDefault(f => f.Name == name);
+    public AggregateMetadata GetProperties(string name)
+        => new AggregateMetadata(properties.Where(f => f.Name == name));
 
     public void AddMethod(InterfaceMethodMetadata method)
         => methods.Add(method);
 
-    public FunctionGroupMetadata? GetMethod(string name)
-        => methods.FirstOrDefault(m => m.Name == name)?.Group;
-
-    public IEnumerable<InterfaceMethodMetadata> GetMethods(string name, IEnumerable<ITypeMetadata> parameters)
-        => methods.Where(m => m.Name == name && m.Type.ParameterTypes.SequenceEqual(parameters));
+    public AggregateMetadata GetMethods(string name)
+        => new AggregateMetadata(methods.Where(m => m.Name == name));
 
     public IMetadata? GetMember(string name)
-        => GetProperty(name) ??
-           GetMethod(name) as IMetadata;
+    {
+        var aggregate = GetProperties(name)
+            .Combine(GetMethods(name));
+
+        return aggregate.Members switch
+        {
+            [] => null,
+            [var single] => single,
+            _ => aggregate,
+        };
+    }
 
     public void MarkAsInvalid()
         => IsInvalid = true;
@@ -113,6 +119,8 @@ public class InterfaceMetadata : ITypeMetadata, IEquatable<InterfaceMetadata>
         => false;
 
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace { get; set; }
 
     public IReadOnlyList<InterfacePropertyMetadata> Properties
         => properties;

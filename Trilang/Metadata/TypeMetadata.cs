@@ -5,22 +5,7 @@ namespace Trilang.Metadata;
 // TODO: immutable metadata
 public class TypeMetadata : IGenericMetadata, IEquatable<TypeMetadata>
 {
-    public static readonly TypeMetadata InvalidType = TypeMetadata.Invalid("<>_invalid_type");
-    public static readonly TypeMetadata Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata Null = new TypeMetadata(null, "null", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata I8 = new TypeMetadata(null, "i8", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata I16 = new TypeMetadata(null, "i16", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata I32 = new TypeMetadata(null, "i32", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata I64 = new TypeMetadata(null, "i64", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata U8 = new TypeMetadata(null, "u8", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata U16 = new TypeMetadata(null, "u16", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata U32 = new TypeMetadata(null, "u32", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata U64 = new TypeMetadata(null, "u64", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata F32 = new TypeMetadata(null, "f32", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata F64 = new TypeMetadata(null, "f64", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata Char = new TypeMetadata(null, "char", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata Bool = new TypeMetadata(null, "bool", [], [], [], [], [], [], true);
-    public static readonly TypeMetadata String = new TypeMetadata(null, "string", [], [], [], [], [], [], false);
+    public static readonly TypeMetadata InvalidType = Invalid("<>_invalid_type");
 
     private readonly List<ITypeMetadata> genericArguments;
     private readonly HashSet<InterfaceMetadata> interfaces;
@@ -29,7 +14,7 @@ public class TypeMetadata : IGenericMetadata, IEquatable<TypeMetadata>
     private readonly List<ConstructorMetadata> constructors;
     private readonly List<MethodMetadata> methods;
 
-    private TypeMetadata(
+    public TypeMetadata(
         SourceLocation? definition,
         string name,
         IEnumerable<ITypeMetadata> genericArguments,
@@ -89,7 +74,8 @@ public class TypeMetadata : IGenericMetadata, IEquatable<TypeMetadata>
             return false;
 
         return Name == other.Name &&
-               genericArguments.SequenceEqual(other.genericArguments);
+               genericArguments.SequenceEqual(other.genericArguments) &&
+               Equals(Namespace, other.Namespace);
     }
 
     public override bool Equals(object? obj)
@@ -146,34 +132,40 @@ public class TypeMetadata : IGenericMetadata, IEquatable<TypeMetadata>
     public void AddField(FieldMetadata field)
         => fields.Add(field);
 
-    public FieldMetadata? GetField(string name)
-        => fields.FirstOrDefault(f => f.Name == name);
-
-    public PropertyMetadata? GetProperty(string name)
-        => properties.FirstOrDefault(f => f.Name == name);
+    public AggregateMetadata GetFields(string name)
+        => new AggregateMetadata(fields.Where(f => f.Name == name));
 
     public void AddProperty(PropertyMetadata property)
         => properties.Add(property);
 
-    public ConstructorMetadata? GetConstructor(IEnumerable<ITypeMetadata> parameters)
-        => constructors.FirstOrDefault(c => c.Type.ParameterTypes.SequenceEqual(parameters));
+    public AggregateMetadata GetProperties(string name)
+        => new AggregateMetadata(properties.Where(f => f.Name == name));
 
     public void AddConstructor(ConstructorMetadata constructor)
         => constructors.Add(constructor);
 
-    public FunctionGroupMetadata? GetMethod(string name)
-        => methods.FirstOrDefault(m => m.Name == name)?.Group;
-
-    public IEnumerable<MethodMetadata> GetMethods(string name, IEnumerable<ITypeMetadata> parameters)
-        => methods.Where(m => m.Name == name && m.Type.ParameterTypes.SequenceEqual(parameters));
+    public ConstructorMetadata? GetConstructor(IEnumerable<ITypeMetadata> parameters)
+        => constructors.FirstOrDefault(c => c.Type.ParameterTypes.SequenceEqual(parameters));
 
     public void AddMethod(MethodMetadata method)
         => methods.Add(method);
 
+    public AggregateMetadata GetMethods(string name)
+        => new AggregateMetadata(methods.Where(m => m.Name == name));
+
     public IMetadata? GetMember(string name)
-        => GetProperty(name) ??
-           GetMethod(name) ??
-           GetField(name) as IMetadata;
+    {
+        var aggregate = GetProperties(name)
+            .Combine(GetMethods(name))
+            .Combine(GetFields(name));
+
+        return aggregate.Members switch
+        {
+            [] => null,
+            [var single] => single,
+            _ => aggregate,
+        };
+    }
 
     public void MarkAsInvalid()
         => IsInvalid = true;
@@ -185,6 +177,8 @@ public class TypeMetadata : IGenericMetadata, IEquatable<TypeMetadata>
     public bool IsValueType { get; }
 
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace { get; set; }
 
     public string Name { get; }
 

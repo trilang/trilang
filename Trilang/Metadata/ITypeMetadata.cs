@@ -6,5 +6,7 @@ public interface ITypeMetadata : IMetadata
 
     TypeLayout? Layout { get; set; }
 
+    NamespaceMetadata? Namespace { get; set; }
+
     IMetadata? GetMember(string name);
 }

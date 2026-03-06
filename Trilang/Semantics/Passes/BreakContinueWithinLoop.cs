@@ -5,32 +5,40 @@ namespace Trilang.Semantics.Passes;
 
 internal class BreakContinueWithinLoop : Visitor, ISemanticPass
 {
-    private SemanticDiagnosticReporter diagnostics = null!;
+    private readonly SemanticDiagnosticReporter diagnostics;
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public BreakContinueWithinLoop(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
+        : base(directives)
     {
-        diagnostics = context.Diagnostics;
+        this.diagnostics = diagnostics;
+    }
 
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    {
         foreach (var tree in semanticTrees)
             tree.Accept(this);
     }
 
-    protected override void VisitBreakEnter(Break node)
+    public override void VisitBreak(Break node)
     {
         var loop = node.FindInParent<While>();
         if (loop is null)
             diagnostics.BreakOutsideLoop(node);
 
         node.LoopNode = loop;
+
+        base.VisitBreak(node);
     }
 
-    protected override void VisitContinueEnter(Continue node)
+    public override void VisitContinue(Continue node)
     {
         var loop = node.FindInParent<While>();
         if (loop is null)
             diagnostics.ContinueOutsideLoop(node);
 
         node.LoopNode = loop;
+
+        base.VisitContinue(node);
     }
 
     public string Name => nameof(BreakContinueWithinLoop);

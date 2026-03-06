@@ -17,6 +17,11 @@ public class SemanticTree : ISemanticNode
         UseNodes = useNodes;
         this.declarations = [.. declarations];
 
+        Namespace?.Parent = this;
+
+        foreach (var use in useNodes)
+            use.Parent = this;
+
         foreach (var function in declarations)
             function.Parent = this;
     }

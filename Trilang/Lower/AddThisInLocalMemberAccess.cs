@@ -6,8 +6,14 @@ namespace Trilang.Lower;
 
 internal class AddThisInLocalMemberAccess : Visitor
 {
-    protected override void VisitMemberAccessExit(MemberAccessExpression node)
+    public AddThisInLocalMemberAccess(ISet<string> directives) : base(directives)
     {
+    }
+
+    public override void VisitMemberAccess(MemberAccessExpression node)
+    {
+        base.VisitMemberAccess(node);
+
         if (node.Member is not null)
             return;
 

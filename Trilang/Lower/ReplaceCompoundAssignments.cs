@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using static Trilang.Semantics.Model.BinaryExpressionKind;
@@ -6,6 +7,11 @@ namespace Trilang.Lower;
 
 internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
 {
+    private readonly BuiltInTypes builtInTypes;
+
+    public ReplaceCompoundAssignments(BuiltInTypes builtInTypes)
+        => this.builtInTypes = builtInTypes;
+
     public ISemanticNode TransformArrayAccess(ArrayAccessExpression node)
     {
         var member = (IExpression)node.Member.Transform(this);
@@ -198,7 +204,7 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new IsExpression(null, expression, node.Type);
+        return new IsExpression(null, expression, node.Type, builtInTypes);
     }
 
     public ISemanticNode TransformLabel(Label node)
@@ -307,6 +313,11 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
 
     public ISemanticNode TransformTree(SemanticTree node)
     {
+        node.Namespace?.Transform(this);
+
+        foreach (var use in node.UseNodes)
+            use.Transform(this);
+
         foreach (var declaration in node.Declarations)
             declaration.Transform(this);
 

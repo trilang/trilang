@@ -6,6 +6,7 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
+using static Tri.Tests.Factory;
 
 namespace Tri.Tests.Lower;
 
@@ -25,14 +26,20 @@ public class AddThisInLocalMemberAccessTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        return semanticTrees.Single();
+        var semanticTree = semanticTrees.Single();
+
+        var lowering = new Lowering(builtInTypes);
+        lowering.Lower(semanticTree, LoweringOptions.Default);
+
+        return semanticTree;
     }
 
     [Test]
@@ -50,16 +57,16 @@ public class AddThisInLocalMemberAccessTests
             """;
         var tree = Parse(code);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var typeMetadata = new TypeMetadata(null, "Test");
-        var propertyMetadata = new PropertyMetadata(
-            null,
-            typeMetadata,
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var typeMetadata = new TypeMetadata(null, "Test")
+        {
+            Namespace = rootNamespace,
+        };
+        var propertyMetadata = CreatePropertyMetadata(typeMetadata,
             "count",
-            TypeMetadata.I32
-        );
+            builtInTypes.I32);
+
         var expected = new CallExpression(
             null,
             new MemberAccessExpression(
@@ -98,10 +105,12 @@ public class AddThisInLocalMemberAccessTests
             """;
         var tree = Parse(code);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var typeMetadata = new TypeMetadata(null, "Test");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var typeMetadata = new TypeMetadata(null, "Test")
+        {
+            Namespace = rootNamespace,
+        };
         var methodMetadata = new MethodMetadata(
             null,
             typeMetadata,
@@ -109,8 +118,7 @@ public class AddThisInLocalMemberAccessTests
             false,
             "print",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata());
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         var expected = new MemberAccessExpression(
             null,

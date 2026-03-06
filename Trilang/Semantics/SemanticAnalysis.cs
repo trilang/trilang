@@ -3,63 +3,83 @@ using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes;
 using Trilang.Semantics.Passes.ControlFlow;
-using Trilang.Symbols;
 
 namespace Trilang.Semantics;
 
 public class SemanticAnalysis
 {
-    // TODO: reflection?
-    private readonly ISemanticPass[] semanticPasses =
-    [
-        new BreakContinueWithinLoop(),
-        new CheckAccessModifiers(),
-        new CheckStaticAndInstanceMembersAccess(),
-        new ControlFlowAnalyzer(),
-        new MemberAccessKindAnalyser(),
-        new MetadataGenerator(),
-        new MissingReturnStatement(),
-        new NotImplementedInterface(),
-        new CyclicAlias(),
-        new PrivateInterfaceProperties(),
-        new RestrictFieldAccess(),
-        new SymbolFinder(),
-        new ThisInStaticMethods(),
-        new ThisOutsideOfType(),
-        new MetadataProviderAnalyzer(),
-        new TypeChecker(),
-        new VariableUsedBeforeDeclared(),
-    ];
-
     public SemanticAnalysisResult Analyze(
         IEnumerable<Parsing.Ast.SyntaxTree> syntaxTrees,
         SemanticAnalysisOptions options)
     {
-        var rootSymbolTable = new RootSymbolTable();
-        var rootTypeProvider = new RootMetadataProvider();
-        var context = new SemanticPassContext(
-            [.. options.Directives],
-            options.Diagnostics,
-            rootSymbolTable,
-            rootTypeProvider);
-
-        var converter = new ConvertToSemanticTree();
+        var converter = new ConvertToSemanticTree(options.BuiltInTypes);
         var semanticTrees = syntaxTrees
             .Select(x => x.Transform(converter))
             .Cast<SemanticTree>()
             .ToArray();
 
-        foreach (var pass in GetSortedPasses())
-            pass.Analyze(semanticTrees, context);
+        var rootNamespace = NamespaceMetadata.CreateRoot(options.BuiltInTypes);
+        var symbolTableMap = new SymbolTableMap();
+        var metadataProviderMap = new MetadataProviderMap();
+        var controlFlowGraphMap = new ControlFlowGraphMap();
+        var semanticPasses = CreateSemanticPasses(
+            options,
+            symbolTableMap,
+            metadataProviderMap,
+            controlFlowGraphMap,
+            rootNamespace,
+            options.BuiltInTypes);
+
+        foreach (var pass in GetSortedPasses(semanticPasses))
+            pass.Analyze(semanticTrees);
 
         return new SemanticAnalysisResult(
             semanticTrees,
-            context.SymbolTableMap!,
-            rootTypeProvider,
-            context.ControlFlowGraphs!);
+            symbolTableMap,
+            rootNamespace,
+            controlFlowGraphMap);
     }
 
-    private List<ISemanticPass> GetSortedPasses()
+    private ISemanticPass[] CreateSemanticPasses(
+        SemanticAnalysisOptions options,
+        SymbolTableMap symbolTableMap,
+        MetadataProviderMap metadataProviderMap,
+        ControlFlowGraphMap controlFlowGraphMap,
+        NamespaceMetadata rootNamespace,
+        BuiltInTypes builtInTypes)
+        =>
+        [
+            new BreakContinueWithinLoop(options.Directives, options.Diagnostics),
+            new CheckAccessModifiers(options.Directives, options.Diagnostics),
+            new CheckStaticAndInstanceMembersAccess(options.Directives, options.Diagnostics),
+            new ControlFlowAnalyzer(options.Directives, controlFlowGraphMap),
+            new MemberAccessKindAnalyser(options.Directives),
+            new MetadataGenerator(
+                options.Directives,
+                options.Diagnostics,
+                symbolTableMap,
+                metadataProviderMap,
+                rootNamespace,
+                builtInTypes),
+            new MissingReturnStatement(options.Diagnostics, controlFlowGraphMap, builtInTypes),
+            new NotImplementedInterface(options.Directives, options.Diagnostics),
+            new CyclicAlias(options.Diagnostics, rootNamespace),
+            new PrivateInterfaceProperties(options.Diagnostics, rootNamespace),
+            new RestrictFieldAccess(options.Directives, options.Diagnostics),
+            new SymbolFinder(options.Directives, symbolTableMap),
+            new ThisInStaticMethods(options.Directives, options.Diagnostics),
+            new ThisOutsideOfType(options.Directives, options.Diagnostics),
+            new TypeChecker(
+                options.Directives,
+                options.Diagnostics,
+                symbolTableMap,
+                metadataProviderMap,
+                options.BuiltInTypes),
+            new UnresolvedMemberAccess(options.Directives, options.Diagnostics),
+            new VariableUsedBeforeDeclared(options.Directives, options.Diagnostics, symbolTableMap),
+        ];
+
+    private List<ISemanticPass> GetSortedPasses(ISemanticPass[] semanticPasses)
     {
         var passMap = semanticPasses.ToDictionary(p => p.Name, p => p);
         var inDegree = new Dictionary<string, int>();

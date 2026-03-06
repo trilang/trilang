@@ -6,7 +6,6 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
-using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Tri.Tests.Lower;
 
@@ -14,7 +13,7 @@ public class AddImplicitReturnStatementsTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static (SemanticTree, ControlFlowGraphMap) Parse(string code)
+    private static SemanticTree Parse(string code)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -26,23 +25,25 @@ public class AddImplicitReturnStatementsTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, cfgs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        return (semanticTrees.Single(), cfgs);
+        var semanticTree = semanticTrees.Single();
+        var lowering = new Lowering(builtInTypes);
+        lowering.Lower(semanticTree, new LoweringOptions(new HashSet<string>(), cfgs));
+
+        return semanticTree;
     }
 
     [Test]
     public void AddReturnToEmptyVoidMethodTest()
     {
-        var (tree, cfgs) = Parse("public test(): void { }");
-
-        var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions([], cfgs));
+        var tree = Parse("public test(): void { }");
 
         var function = tree.Find<FunctionDeclaration>()!;
         var expected = new BlockStatement(null, [new ReturnStatement(null)]);
@@ -53,15 +54,15 @@ public class AddImplicitReturnStatementsTests
     [Test]
     public void AddReturnToEndAfterWhileTest()
     {
-        var (tree, cfgs) = Parse(
+        var tree = Parse(
             """
             public test(): void {
                 while (true) { }
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions([], cfgs));
+        var builtInTypes = new BuiltInTypes();
+        NamespaceMetadata.CreateRoot(builtInTypes);
 
         var function = tree.Find<FunctionDeclaration>()!;
         var expected = new BlockStatement(null, [
@@ -72,7 +73,7 @@ public class AddImplicitReturnStatementsTests
                     null,
                     new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
                     {
-                        ReturnTypeMetadata = TypeMetadata.Bool
+                        ReturnTypeMetadata = builtInTypes.Bool
                     },
                     new BlockStatement(null, [
                         new GoTo("loop_0_start"),
@@ -92,7 +93,7 @@ public class AddImplicitReturnStatementsTests
     [Test]
     public void AddReturnToEndAfterIfTest()
     {
-        var (tree, cfgs) = Parse(
+        var tree = Parse(
             """
             public test(): void {
                 if (true) { }
@@ -101,8 +102,8 @@ public class AddImplicitReturnStatementsTests
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions([], cfgs));
+        var builtInTypes = new BuiltInTypes();
+        NamespaceMetadata.CreateRoot(builtInTypes);
 
         var function = tree.Find<FunctionDeclaration>()!;
         var expected = new BlockStatement(null, [
@@ -110,7 +111,7 @@ public class AddImplicitReturnStatementsTests
                 null,
                 new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
                 {
-                    ReturnTypeMetadata = TypeMetadata.Bool,
+                    ReturnTypeMetadata = builtInTypes.Bool,
                 },
                 new BlockStatement(null, [
                     new GoTo("if_0_then"),
@@ -133,7 +134,7 @@ public class AddImplicitReturnStatementsTests
     [Test]
     public void KeepIfElseAsIsTest()
     {
-        var (tree, cfgs) = Parse(
+        var tree = Parse(
             """
             public test(): void {
                 if (true) {
@@ -144,8 +145,8 @@ public class AddImplicitReturnStatementsTests
             }
             """);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions([], cfgs));
+        var builtInTypes = new BuiltInTypes();
+        NamespaceMetadata.CreateRoot(builtInTypes);
 
         var function = tree.Find<FunctionDeclaration>()!;
         var expected = new BlockStatement(null, [
@@ -153,7 +154,7 @@ public class AddImplicitReturnStatementsTests
                 null,
                 new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
                 {
-                    ReturnTypeMetadata = TypeMetadata.Bool
+                    ReturnTypeMetadata = builtInTypes.Bool
                 },
                 new BlockStatement(null, [
                     new GoTo("if_0_then"),
@@ -181,7 +182,7 @@ public class AddImplicitReturnStatementsTests
     [Test]
     public void KeepInnerBlockAsIsTest()
     {
-        var (tree, cfgs) = Parse(
+        var tree = Parse(
             """
             public test(): void {
                 {
@@ -189,9 +190,6 @@ public class AddImplicitReturnStatementsTests
                 }
             }
             """);
-
-        var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions([], cfgs));
 
         var function = tree.Find<FunctionDeclaration>()!;
         var expected = new BlockStatement(null, [

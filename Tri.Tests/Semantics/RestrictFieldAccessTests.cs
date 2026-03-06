@@ -1,6 +1,7 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -39,7 +40,7 @@ public class RestrictFieldAccessTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0014MemberNotAccessible,

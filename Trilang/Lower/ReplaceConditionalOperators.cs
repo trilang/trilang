@@ -6,10 +6,14 @@ namespace Trilang.Lower;
 
 internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
 {
+    private readonly BuiltInTypes builtInTypes;
     private int conditionCounter;
 
-    public ReplaceConditionalOperators()
-        => conditionCounter = 0;
+    public ReplaceConditionalOperators(BuiltInTypes builtInTypes)
+    {
+        this.builtInTypes = builtInTypes;
+        conditionCounter = 0;
+    }
 
     public ISemanticNode TransformArrayAccess(ArrayAccessExpression node)
     {
@@ -35,14 +39,14 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
         if (node.Kind == BinaryExpressionKind.ConditionalAnd)
         {
             var variableName = $"cond_{conditionCounter++}";
-            var variableMetadata = new VariableMetadata(null, variableName, TypeMetadata.Bool);
+            var variableMetadata = new VariableMetadata(null, variableName, builtInTypes.Bool);
             var result = new ExpressionBlock([
                 new VariableDeclaration(
                     null,
                     variableName,
-                    new TypeRef(null, TypeMetadata.Bool.Name)
+                    new TypeRef(null, builtInTypes.Bool.Name)
                     {
-                        Metadata = TypeMetadata.Bool,
+                        Metadata = builtInTypes.Bool,
                     },
                     left
                 )
@@ -88,14 +92,14 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
         if (node.Kind == BinaryExpressionKind.ConditionalOr)
         {
             var variableName = $"cond_{conditionCounter++}";
-            var variableMetadata = new VariableMetadata(null, variableName, TypeMetadata.Bool);
+            var variableMetadata = new VariableMetadata(null, variableName, builtInTypes.Bool);
             var result = new ExpressionBlock([
                 new VariableDeclaration(
                     null,
                     variableName,
-                    new TypeRef(null, TypeMetadata.Bool.Name)
+                    new TypeRef(null, builtInTypes.Bool.Name)
                     {
-                        Metadata = TypeMetadata.Bool,
+                        Metadata = builtInTypes.Bool,
                     },
                     left
                 )
@@ -114,7 +118,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
                         }
                     )
                     {
-                        ReturnTypeMetadata = TypeMetadata.Bool,
+                        ReturnTypeMetadata = builtInTypes.Bool,
                     },
                     new BlockStatement(null, [
                         new ExpressionStatement(
@@ -284,7 +288,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new IsExpression(null, expression, node.Type);
+        return new IsExpression(null, expression, node.Type, builtInTypes);
     }
 
     public ISemanticNode TransformLabel(Label node)
@@ -393,6 +397,11 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
 
     public ISemanticNode TransformTree(SemanticTree node)
     {
+        node.Namespace?.Transform(this);
+
+        foreach (var use in node.UseNodes)
+            use.Transform(this);
+
         foreach (var declaration in node.Declarations)
             declaration.Transform(this);
 

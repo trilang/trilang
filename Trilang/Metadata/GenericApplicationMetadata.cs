@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Trilang.Metadata;
 
-public class GenericApplicationMetadata : ITypeMetadata, IEquatable<GenericApplicationMetadata>
+public class GenericApplicationMetadata : IAnonymousTypeMetadata, IEquatable<GenericApplicationMetadata>
 {
     public GenericApplicationMetadata(
         SourceLocation? definition,
@@ -31,7 +31,8 @@ public class GenericApplicationMetadata : ITypeMetadata, IEquatable<GenericAppli
             return true;
 
         return OpenGeneric.Equals(other.OpenGeneric) &&
-               Arguments.Equals(other.Arguments);
+               Arguments.Equals(other.Arguments) &&
+               Equals(Namespace, other.Namespace);
     }
 
     public override bool Equals(object? obj)
@@ -72,6 +73,8 @@ public class GenericApplicationMetadata : ITypeMetadata, IEquatable<GenericAppli
 
     // TODO: generate
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace { get; set; }
 
     public IGenericMetadata OpenGeneric { get; }
 

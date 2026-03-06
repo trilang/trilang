@@ -5,12 +5,11 @@ namespace Trilang.Lower;
 
 internal class ReplaceIfDirectives : Visitor
 {
-    private readonly HashSet<string> directives;
+    public ReplaceIfDirectives(ISet<string> directives) : base(directives)
+    {
+    }
 
-    public ReplaceIfDirectives(IEnumerable<string> directives)
-        => this.directives = [..directives];
-
-    protected override void VisitTreeEnter(SemanticTree node)
+    public override void VisitTree(SemanticTree node)
     {
         for (var i = 0; i < node.Declarations.Count; i++)
         {
@@ -29,9 +28,11 @@ internal class ReplaceIfDirectives : Visitor
 
             i--;
         }
+
+        base.VisitTree(node);
     }
 
-    protected override void VisitBlockEnter(BlockStatement node)
+    public override void VisitBlock(BlockStatement node)
     {
         for (var i = 0; i < node.Statements.Count; i++)
         {
@@ -50,5 +51,7 @@ internal class ReplaceIfDirectives : Visitor
 
             i--;
         }
+
+        base.VisitBlock(node);
     }
 }

@@ -7,8 +7,12 @@ namespace Trilang.Lower;
 
 internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISemanticNode>
 {
+    private readonly BuiltInTypes builtInTypes;
     private FieldMetadata? currentField;
     private MethodMetadata? currentSetter;
+
+    public ReplacePropertyFieldAndValueWithGeneratedField(BuiltInTypes builtInTypes)
+        => this.builtInTypes = builtInTypes;
 
     public ISemanticNode TransformArrayAccess(ArrayAccessExpression node)
     {
@@ -161,7 +165,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         if (ReferenceEquals(expression, node.Expression))
             return node;
 
-        return new IsExpression(null, expression, node.Type);
+        return new IsExpression(null, expression, node.Type, builtInTypes);
     }
 
     public ISemanticNode TransformLabel(Label node)
@@ -302,6 +306,11 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
 
     public ISemanticNode TransformTree(SemanticTree node)
     {
+        node.Namespace?.Transform(this);
+
+        foreach (var use in node.UseNodes)
+            use.Transform(this);
+
         foreach (var declaration in node.Declarations)
             declaration.Transform(this);
 

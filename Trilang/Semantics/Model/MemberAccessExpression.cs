@@ -82,7 +82,7 @@ public class MemberAccessExpression : IExpression
             InvalidMemberMetadata invalidMember
                 => invalidMember.Type,
 
-            _ => throw new InvalidOperationException(),
+            _ => TypeMetadata.InvalidType,
         };
 
     public bool IsThis

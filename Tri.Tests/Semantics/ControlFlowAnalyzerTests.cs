@@ -7,6 +7,7 @@ using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
+using static Tri.Tests.Factory;
 
 namespace Tri.Tests.Semantics;
 
@@ -40,10 +41,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
@@ -51,13 +53,13 @@ public class ControlFlowAnalyzerTests
             returnStatement
         ]);
         var expected = new ControlFlowGraph(entry, entry);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "add",
-            [new ParameterMetadata(null, "a", TypeMetadata.I32), new ParameterMetadata(null, "b", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32),
-            new FunctionGroupMetadata());
+            [new ParameterMetadata(null, "a", builtInTypes.I32), new ParameterMetadata(null, "b", builtInTypes.I32)],
+            CreateFunctionType([builtInTypes.I32, builtInTypes.I32], builtInTypes.I32, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -78,10 +80,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var block = semanticTree.Find<BlockStatement>()!;
@@ -99,14 +102,13 @@ public class ControlFlowAnalyzerTests
         thenBlock.AddNext(endBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -129,10 +131,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var returnStatements = semanticTree.Where<ReturnStatement>().ToList();
@@ -156,14 +159,13 @@ public class ControlFlowAnalyzerTests
         elseBlock.AddNext(endBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -186,10 +188,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var ifs = semanticTree.Where<IfStatement>().ToList();
@@ -211,14 +214,13 @@ public class ControlFlowAnalyzerTests
         innerEndBlock.AddNext(outerEndBlock);
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -239,10 +241,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var block = semanticTree.Find<BlockStatement>()!;
@@ -262,14 +265,13 @@ public class ControlFlowAnalyzerTests
         bodyBlock.AddNext(conditionBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -292,10 +294,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var whileNodes = semanticTree.Where<While>().ToArray();
@@ -321,14 +324,13 @@ public class ControlFlowAnalyzerTests
         innerEndBlock.AddNext(outerEndBlock);
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -349,10 +351,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var whileStatement = semanticTree.Find<While>()!;
@@ -369,14 +372,13 @@ public class ControlFlowAnalyzerTests
         bodyBlock.AddNext(endBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -399,10 +401,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var outerWhile = semanticTree.Find<While>()!;
@@ -427,14 +430,13 @@ public class ControlFlowAnalyzerTests
         innerEndBlock.AddNext(outerEndBlock);
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -455,10 +457,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var whileStatement = semanticTree.Find<While>()!;
@@ -475,14 +478,13 @@ public class ControlFlowAnalyzerTests
         bodyBlock.AddNext(conditionBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -505,10 +507,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var outerWhile = semanticTree.Find<While>()!;
@@ -533,14 +536,13 @@ public class ControlFlowAnalyzerTests
         innerEndBlock.AddNext(outerEndBlock);
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -563,10 +565,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var whileStatement = semanticTree.Find<While>()!;
@@ -589,14 +592,13 @@ public class ControlFlowAnalyzerTests
         endIfBlock.AddNext(loopcondBlock);
 
         var expected = new ControlFlowGraph(entry, loopendBlock);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            new FunctionGroupMetadata()
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
@@ -623,10 +625,11 @@ public class ControlFlowAnalyzerTests
             """;
         var (tree, diagnostics) = Parse(code);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, graphs) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var ifs = semanticTree.Where<IfStatement>().ToList();
@@ -650,14 +653,13 @@ public class ControlFlowAnalyzerTests
         else0Block.AddNext(end0Block);
 
         var expected = new ControlFlowGraph(entry, end0Block);
+        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
-            [new ParameterMetadata(null, "a", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
-            new FunctionGroupMetadata()
-        );
+            [new ParameterMetadata(null, "a", builtInTypes.I32)],
+            CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(

@@ -4,7 +4,11 @@ namespace Trilang.Semantics.Passes;
 
 internal class MemberAccessKindAnalyser : Visitor, ISemanticPass
 {
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext _)
+    public MemberAccessKindAnalyser(ISet<string> directives) : base(directives)
+    {
+    }
+
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
     {
         foreach (var tree in semanticTrees)
             tree.Accept(this);
@@ -37,8 +41,12 @@ internal class MemberAccessKindAnalyser : Visitor, ISemanticPass
         return MemberAccessKind.Read;
     }
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
-        => node.AccessKind = FindParentAssignment(node);
+    public override void VisitMemberAccess(MemberAccessExpression node)
+    {
+        node.AccessKind = FindParentAssignment(node);
+
+        base.VisitMemberAccess(node);
+    }
 
     public string Name => nameof(MemberAccessKindAnalyser);
 

@@ -6,14 +6,14 @@ namespace Trilang.Semantics.Passes;
 // TODO: add only unique tables?
 public class SymbolTableMap
 {
-    private readonly Dictionary<ISemanticNode, ISymbolTable> tables;
+    private readonly Dictionary<ISemanticNode, SymbolTable> tables;
 
     public SymbolTableMap()
         => tables = [];
 
-    public void Add(ISemanticNode node, ISymbolTable table)
+    public void Add(ISemanticNode node, SymbolTable table)
         => tables.Add(node, table);
 
-    public ISymbolTable Get(ISemanticNode node)
+    public SymbolTable Get(ISemanticNode node)
         => tables[node];
 }

@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 
@@ -5,11 +6,20 @@ namespace Trilang.Semantics.Passes;
 
 internal class PrivateInterfaceProperties : ISemanticPass
 {
-    public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
+    private readonly SemanticDiagnosticReporter diagnostics;
+    private readonly NamespaceMetadata rootNamespace;
+
+    public PrivateInterfaceProperties(
+        SemanticDiagnosticReporter diagnostics,
+        NamespaceMetadata rootNamespace)
     {
-        var diagnostics = context.Diagnostics;
-        var typeProvider = context.RootMetadataProvider;
-        foreach (var interfaceMetadata in typeProvider.Types.OfType<InterfaceMetadata>())
+        this.diagnostics = diagnostics;
+        this.rootNamespace = rootNamespace;
+    }
+
+    public void Analyze(IEnumerable<SemanticTree> _)
+    {
+        foreach (var interfaceMetadata in rootNamespace.Types.OfType<InterfaceMetadata>())
         {
             foreach (var propertyMetadata in interfaceMetadata.Properties)
             {

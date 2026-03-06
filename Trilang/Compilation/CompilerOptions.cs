@@ -47,6 +47,6 @@ public class CompilerOptions
 
     public bool PrintIr { get; set; }
 
-    public IEnumerable<string> Directives
+    public ISet<string> Directives
         => directives;
 }

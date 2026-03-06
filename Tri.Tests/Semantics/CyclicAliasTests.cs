@@ -1,6 +1,7 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -9,12 +10,9 @@ namespace Tri.Tests.Semantics;
 
 public class CyclicAliasTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
+    private static SyntaxTree Parse(DiagnosticCollection diagnostics, string filePath, string code)
     {
-        var diagnostics = new DiagnosticCollection();
-
+        var file = new SourceFile(filePath);
         var lexer = new Lexer();
         var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
         var tokens = lexer.Tokenize(code, lexerOptions);
@@ -23,26 +21,27 @@ public class CyclicAliasTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
-        return (tree, diagnostics);
+        return tree;
     }
 
     [Test]
     public void RecursiveTypeAliasTest()
     {
-        var (tree, diagnostics) = Parse("public type Test = Test;");
+        var diagnostics = new DiagnosticCollection();
+        var tree = Parse(diagnostics, "test.tri", "public type Test = Test;");
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
-        var testAlias = typeProvider.GetType("Test");
+        var testAlias = rootNamespace.FindType("Test");
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0001CyclicTypeAlias,
             DiagnosticSeverity.Error,
             new SourceLocation(
-                file,
+                new SourceFile("test.tri"),
                 new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25))),
             "The cyclic type alias detected: 'Test'.");
 
@@ -54,19 +53,22 @@ public class CyclicAliasTests
     [Test]
     public void RecursiveTypeAliasTest2()
     {
-        var (tree, diagnostics) = Parse(
+        var diagnostics = new DiagnosticCollection();
+        var tree = Parse(
+            diagnostics,
+            "test.tri",
             """
             public type Test1 = Test2;
             public type Test2 = Test1;
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
-        var test1Alias = typeProvider.GetType("Test1");
-        var test2Alias = typeProvider.GetType("Test2");
+        var test1Alias = rootNamespace.FindType("Test1");
+        var test2Alias = rootNamespace.FindType("Test2");
 
         var diagnostic = new[]
         {
@@ -74,14 +76,14 @@ public class CyclicAliasTests
                 DiagnosticId.S0001CyclicTypeAlias,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
-                    file,
+                    new SourceFile("test.tri"),
                     new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(26, 1, 27))),
                 "The cyclic type alias detected: 'Test1'."),
             new Diagnostic(
                 DiagnosticId.S0001CyclicTypeAlias,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
-                    file,
+                    new SourceFile("test.tri"),
                     new SourceSpan(new SourcePosition(27, 2, 1), new SourcePosition(53, 2, 27))),
                 "The cyclic type alias detected: 'Test2'.")
         };
@@ -91,5 +93,56 @@ public class CyclicAliasTests
         Assert.That(test1Alias.IsInvalid, Is.True);
         Assert.That(test2Alias, Is.Not.Null);
         Assert.That(test2Alias.IsInvalid, Is.True);
+    }
+
+    [Test]
+    public void RecursiveTypesInDifferentNamespacesTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            use NS2;
+
+            public type Test1 = Test2;
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace NS2;
+
+            use NS1;
+
+            public type Test2 = Test1;
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticId.S0001CyclicTypeAlias,
+                DiagnosticSeverity.Error,
+                new SourceLocation(
+                    new SourceFile("file1.tri"),
+                    new SourceSpan(new SourcePosition(26, 5, 1), new SourcePosition(52, 5, 27))),
+                "The cyclic type alias detected: 'Test1'."),
+            new Diagnostic(
+                DiagnosticId.S0001CyclicTypeAlias,
+                DiagnosticSeverity.Error,
+                new SourceLocation(
+                    new SourceFile("file2.tri"),
+                    new SourceSpan(new SourcePosition(26, 5, 1), new SourcePosition(52, 5, 27))),
+                "The cyclic type alias detected: 'Test2'.")
+        };
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 }

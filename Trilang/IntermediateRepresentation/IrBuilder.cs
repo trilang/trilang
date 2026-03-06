@@ -5,13 +5,15 @@ namespace Trilang.IntermediateRepresentation;
 
 internal class IrBuilder
 {
+    private readonly BuiltInTypes builtInTypes;
     private readonly Block entryBlock;
     private readonly Dictionary<string, Block> blocks;
     private int registerCounter;
     private Block currentBlock;
 
-    public IrBuilder()
+    public IrBuilder(BuiltInTypes builtInTypes)
     {
+        this.builtInTypes = builtInTypes;
         entryBlock = new Block("entry");
         blocks = [];
         registerCounter = 0;
@@ -263,7 +265,7 @@ internal class IrBuilder
 
     public Register Is(Register source, ITypeMetadata type)
     {
-        var register = CreateRegister(TypeMetadata.Bool);
+        var register = CreateRegister(builtInTypes.Bool);
         var isInstruction = new IsType(register, source, type);
         currentBlock.AddInstruction(isInstruction);
 

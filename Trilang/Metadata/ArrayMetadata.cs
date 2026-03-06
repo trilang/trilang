@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
+public class ArrayMetadata : IAnonymousTypeMetadata, IEquatable<ArrayMetadata>
 {
     private readonly List<FieldMetadata> fields;
     private readonly List<PropertyMetadata> properties;
@@ -8,18 +8,12 @@ public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
 
     public ArrayMetadata(SourceLocation? definition, ITypeMetadata? itemMetadata)
     {
+        fields = [];
+        properties = [];
+        methods = [];
+
         Definition = definition;
-        this.fields = [];
-        this.properties = [];
-        this.methods = [];
-
         ItemMetadata = itemMetadata;
-
-        fields.Add(new FieldMetadata(this, "<>_size", TypeMetadata.I64));
-
-        var sizeProperty = new PropertyMetadata(null, this, "size", TypeMetadata.I64, AccessModifierMetadata.Public);
-        properties.Add(sizeProperty);
-        methods.Add(sizeProperty.Getter!);
     }
 
     public static ArrayMetadata Invalid()
@@ -42,7 +36,8 @@ public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
         if (IsInvalid || other.IsInvalid)
             return false;
 
-        return Equals(ItemMetadata, other.ItemMetadata);
+        return Equals(ItemMetadata, other.ItemMetadata) &&
+               Equals(Namespace, other.Namespace);
     }
 
     public override bool Equals(object? obj)
@@ -65,19 +60,37 @@ public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
     public override string ToString()
         => $"{ItemMetadata}[]";
 
+    public void AddField(FieldMetadata field)
+        => fields.Add(field);
+
+    public AggregateMetadata GetFields(string name)
+        => new AggregateMetadata(fields.Where(f => f.Name == name));
+
+    public void AddProperty(PropertyMetadata property)
+        => properties.Add(property);
+
+    public AggregateMetadata GetProperties(string name)
+        => new AggregateMetadata(properties.Where(f => f.Name == name));
+
+    public void AddMethod(MethodMetadata method)
+        => methods.Add(method);
+
+    public AggregateMetadata GetMethods(string name)
+        => new AggregateMetadata(methods.Where(m => m.Name == name));
+
     public IMetadata? GetMember(string name)
-        => GetProperty(name) ??
-           GetMethod(name) ??
-           GetField(name) as IMetadata;
+    {
+        var aggregate = GetProperties(name)
+            .Combine(GetMethods(name))
+            .Combine(GetFields(name));
 
-    public FieldMetadata? GetField(string name)
-        => fields.FirstOrDefault(f => f.Name == name);
-
-    public PropertyMetadata? GetProperty(string name)
-        => properties.FirstOrDefault(f => f.Name == name);
-
-    public MethodMetadata? GetMethod(string name)
-        => methods.FirstOrDefault(f => f.Name == name);
+        return aggregate.Members switch
+        {
+            [] => null,
+            [var single] => single,
+            _ => aggregate,
+        };
+    }
 
     public void MarkAsInvalid()
         => IsInvalid = true;
@@ -90,6 +103,8 @@ public class ArrayMetadata : ITypeMetadata, IEquatable<ArrayMetadata>
         => false;
 
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace { get; set; }
 
     public IReadOnlyList<FieldMetadata> Fields
         => fields;

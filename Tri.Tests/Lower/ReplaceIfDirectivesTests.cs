@@ -7,6 +7,7 @@ using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
+using static Tri.Tests.Factory;
 
 namespace Tri.Tests.Lower;
 
@@ -14,7 +15,7 @@ public class ReplaceIfDirectivesTests
 {
     private static readonly SourceFile file = new SourceFile("test.tri");
 
-    private static SemanticTree Parse(string code, IEnumerable<string> directives)
+    private static SemanticTree Parse(string code, IReadOnlyList<string> directives)
     {
         var diagnostics = new DiagnosticCollection();
 
@@ -26,14 +27,23 @@ public class ReplaceIfDirectivesTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions(directives, new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(
+                directives.ToHashSet(),
+                new SemanticDiagnosticReporter(diagnostics),
+                builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        return semanticTrees.Single();
+        var semanticTree = semanticTrees.Single();
+
+        var lowering = new Lowering(builtInTypes);
+        lowering.Lower(semanticTree, new LoweringOptions(directives.ToHashSet(), new ControlFlowGraphMap()));
+
+        return semanticTree;
     }
 
     [Test]
@@ -54,29 +64,33 @@ public class ReplaceIfDirectivesTests
             public type Type3 { }
             """;
 
-        var directives = new[] { "D1" };
-        var tree = Parse(code, directives);
+        var tree = Parse(code, ["D1"]);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions(directives, new ControlFlowGraphMap()));
-
-        var type1Metadata = new TypeMetadata(null, "Type1");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var type1Metadata = new TypeMetadata(null, "Type1")
+        {
+            Namespace = rootNamespace,
+        };
         type1Metadata.AddConstructor(
             new ConstructorMetadata(
                 null,
                 type1Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var type3Metadata = new TypeMetadata(null, "Type3");
+        var type3Metadata = new TypeMetadata(null, "Type3")
+        {
+            Namespace = rootNamespace,
+        };
         type3Metadata.AddConstructor(
             new ConstructorMetadata(
                 null,
                 type3Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type1", [], [], [], [], [])
@@ -111,26 +125,31 @@ public class ReplaceIfDirectivesTests
             """;
         var tree = Parse(code, []);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var type2Metadata = new TypeMetadata(null, "Type2");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var type2Metadata = new TypeMetadata(null, "Type2")
+        {
+            Namespace = rootNamespace,
+        };
         type2Metadata.AddConstructor(
             new ConstructorMetadata(
                 null,
                 type2Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var type3Metadata = new TypeMetadata(null, "Type3");
+        var type3Metadata = new TypeMetadata(null, "Type3")
+        {
+            Namespace = rootNamespace,
+        };
         type3Metadata.AddConstructor(
             new ConstructorMetadata(
                 null,
                 type3Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type2", [], [], [], [], [])
@@ -161,17 +180,19 @@ public class ReplaceIfDirectivesTests
             """;
         var tree = Parse(code, []);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
-        var typeMetadata = new TypeMetadata(null, "Type3");
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var typeMetadata = new TypeMetadata(null, "Type3")
+        {
+            Namespace = rootNamespace,
+        };
         typeMetadata.AddConstructor(
             new ConstructorMetadata(
                 null,
                 typeMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
         var expected = new SemanticTree(file, null, null, [], [
             new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
@@ -198,17 +219,14 @@ public class ReplaceIfDirectivesTests
             #endif
             }
             """;
-        var directives = new[] { "D1" };
-        var tree = Parse(code, directives);
+        var tree = Parse(code, ["D1"]);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, new LoweringOptions(directives, new ControlFlowGraphMap()));
-
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
         var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
@@ -218,16 +236,16 @@ public class ReplaceIfDirectivesTests
                     new Parameter(
                         null,
                         "callback",
-                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
                         {
-                            Metadata = new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+                            Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
                         }
                     )
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -245,7 +263,7 @@ public class ReplaceIfDirectivesTests
                         null,
                         new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32,
+                            ReturnTypeMetadata = builtInTypes.I32,
                         }
                     )
                 ])
@@ -256,13 +274,14 @@ public class ReplaceIfDirectivesTests
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata(
-                        null,
-                        [new FunctionTypeMetadata(null, [], TypeMetadata.Void)],
-                        TypeMetadata.I32
-                    ),
-                    new FunctionGroupMetadata()
-                )
+                    CreateFunctionType([
+                            CreateFunctionType([], builtInTypes.Void, rootNamespace)
+                        ],
+                        builtInTypes.I32,
+                        rootNamespace))
+                {
+                    Namespace = rootNamespace,
+                }
             }
         ]);
 
@@ -286,14 +305,12 @@ public class ReplaceIfDirectivesTests
             """;
         var tree = Parse(code, []);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
         var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
@@ -303,16 +320,18 @@ public class ReplaceIfDirectivesTests
                     new Parameter(
                         null,
                         "callback",
-                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
                         {
-                            Metadata = new FunctionTypeMetadata(null, [], TypeMetadata.Void)
+                            Metadata = CreateFunctionType([],
+                                builtInTypes.Void,
+                                rootNamespace)
                         }
                     )
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -330,7 +349,7 @@ public class ReplaceIfDirectivesTests
                         null,
                         new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32
+                            ReturnTypeMetadata = builtInTypes.I32
                         }
                     )
                 ])
@@ -341,13 +360,14 @@ public class ReplaceIfDirectivesTests
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata(
-                        null,
-                        [new FunctionTypeMetadata(null, [], TypeMetadata.Void)],
-                        TypeMetadata.I32
-                    ),
-                    new FunctionGroupMetadata()
-                )
+                    CreateFunctionType([
+                            CreateFunctionType([], builtInTypes.Void, rootNamespace)
+                        ],
+                        builtInTypes.I32,
+                        rootNamespace))
+                {
+                    Namespace = rootNamespace,
+                }
             }
         ]);
 
@@ -371,14 +391,12 @@ public class ReplaceIfDirectivesTests
             """;
         var tree = Parse(code, []);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
-
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void)
-        );
+            CreateFunctionType([], builtInTypes.Void, rootNamespace));
         var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
@@ -388,16 +406,16 @@ public class ReplaceIfDirectivesTests
                     new Parameter(
                         null,
                         "callback",
-                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = TypeMetadata.Void })
+                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
                         {
-                            Metadata = new FunctionTypeMetadata(null, [], TypeMetadata.Void),
+                            Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
                         }
                     )
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new ExpressionStatement(
                         null,
@@ -415,7 +433,7 @@ public class ReplaceIfDirectivesTests
                         null,
                         new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32,
+                            ReturnTypeMetadata = builtInTypes.I32,
                         }
                     )
                 ])
@@ -426,13 +444,14 @@ public class ReplaceIfDirectivesTests
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata(
-                        null,
-                        [new FunctionTypeMetadata(null, [], TypeMetadata.Void)],
-                        TypeMetadata.I32
-                    ),
-                    new FunctionGroupMetadata()
-                )
+                    CreateFunctionType([
+                            CreateFunctionType([], builtInTypes.Void, rootNamespace)
+                        ],
+                        builtInTypes.I32,
+                        rootNamespace))
+                {
+                    Namespace = rootNamespace,
+                }
             }
         ]);
 

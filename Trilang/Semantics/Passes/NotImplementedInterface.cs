@@ -6,17 +6,21 @@ namespace Trilang.Semantics.Passes;
 
 internal class NotImplementedInterface : Visitor, ISemanticPass
 {
-    private SemanticDiagnosticReporter diagnostics = null!;
+    private readonly SemanticDiagnosticReporter diagnostics;
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public NotImplementedInterface(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
+        : base(directives)
     {
-        diagnostics = context.Diagnostics;
+        this.diagnostics = diagnostics;
+    }
 
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    {
         foreach (var tree in semanticTrees)
             tree.Accept(this);
     }
 
-    protected override void VisitTypeEnter(TypeDeclaration node)
+    public override void VisitType(TypeDeclaration node)
     {
         var type = node.Metadata;
         if (node.Interfaces.Count == 0 || type is null || type.IsInvalid)
@@ -32,13 +36,14 @@ internal class NotImplementedInterface : Visitor, ISemanticPass
                 if (interfaceProperty.IsInvalid)
                     continue;
 
-                var propertyMetadata = type.GetProperty(interfaceProperty.Name);
-                if (propertyMetadata is null)
+                var properties = type.GetProperties(interfaceProperty.Name);
+                if (properties.IsEmpty)
                 {
                     diagnostics.PropertyIsNotImplemented(node, interfaceProperty);
                     continue;
                 }
 
+                var propertyMetadata = (PropertyMetadata)properties[0];
                 if (!interfaceProperty.Type.Equals(propertyMetadata.Type))
                     diagnostics.PropertyImplementationHasIncorrectType(propertyMetadata, interfaceProperty);
 
@@ -57,17 +62,20 @@ internal class NotImplementedInterface : Visitor, ISemanticPass
                 if (interfaceMethod.IsInvalid)
                     continue;
 
-                var group = type.GetMethod(interfaceMethod.Name);
-                if (group is null)
+                var aggregate = type.GetMethods(interfaceMethod.Name);
+                if (aggregate.IsEmpty)
                 {
                     diagnostics.MethodIsNotImplemented(node, interfaceMethod);
                     continue;
                 }
 
-                var method = (MethodMetadata)group.Functions[0];
-                if (group.Functions.Count > 1)
+                var method = (MethodMetadata?)null;
+                if (aggregate.Members.Count > 1)
                 {
-                    var matches = group.Match(interfaceMethod.Type.ParameterTypes).ToArray();
+                    var matches = aggregate
+                        .MatchFunction(interfaceMethod.Type.ParameterTypes)
+                        .ToArray();
+
                     if (matches.Length == 0)
                     {
                         diagnostics.MethodIsNotImplemented(node, interfaceMethod);
@@ -75,6 +83,16 @@ internal class NotImplementedInterface : Visitor, ISemanticPass
                     }
 
                     method = (MethodMetadata)matches[0];
+                }
+                else
+                {
+                    method = aggregate.Members.OfType<MethodMetadata>().FirstOrDefault();
+                }
+
+                if (method is null)
+                {
+                    diagnostics.MethodIsNotImplemented(node, interfaceMethod);
+                    continue;
                 }
 
                 if (!interfaceMethod.Type.Equals(method.Type))
@@ -84,6 +102,8 @@ internal class NotImplementedInterface : Visitor, ISemanticPass
                     diagnostics.MethodImplementationIsNotPublic(method);
             }
         }
+
+        base.VisitType(node);
     }
 
     public string Name => nameof(NotImplementedInterface);

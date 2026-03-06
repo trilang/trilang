@@ -7,24 +7,24 @@ namespace Trilang.Semantics.Passes.ControlFlow;
 internal class ControlFlowAnalyzer : ISemanticPass
 {
     private readonly Stack<(SemanticBlock Condition, SemanticBlock End)> whileLoops;
+    private readonly ISet<string> directives;
+    private readonly ControlFlowGraphMap? graph;
 
-    private IEnumerable<string> directives = null!;
-    private ControlFlowGraphMap? graph;
     private int ifCounter;
     private int loopCounter;
 
-    public ControlFlowAnalyzer()
+    public ControlFlowAnalyzer(ISet<string> directives, ControlFlowGraphMap? graph)
     {
+        this.directives = directives;
+        this.graph = graph;
+
         whileLoops = [];
         ifCounter = 0;
         loopCounter = 0;
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
     {
-        directives = context.Directives;
-        graph = new ControlFlowGraphMap();
-
         foreach (var tree in semanticTrees)
         {
             foreach (var function in GetFunctions(tree))
@@ -39,8 +39,6 @@ internal class ControlFlowAnalyzer : ISemanticPass
                 if (constructor.Metadata is not null)
                     BuildControlFlowGraph(constructor.Metadata!, constructor.Body);
         }
-
-        context.ControlFlowGraphs = graph;
     }
 
     private IEnumerable<FunctionDeclaration> GetFunctions(SemanticTree tree)

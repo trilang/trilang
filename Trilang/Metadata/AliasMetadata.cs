@@ -6,7 +6,8 @@ public class AliasMetadata : IGenericMetadata, IEquatable<AliasMetadata>
 {
     private readonly List<ITypeMetadata> genericArguments;
 
-    public AliasMetadata(SourceLocation? definition, string name) : this(definition, name, [], null)
+    public AliasMetadata(SourceLocation? definition, string name)
+        : this(definition, name, [], null)
     {
     }
 
@@ -40,7 +41,8 @@ public class AliasMetadata : IGenericMetadata, IEquatable<AliasMetadata>
             return false;
 
         return Name == other.Name &&
-               genericArguments.SequenceEqual(other.genericArguments);
+               genericArguments.SequenceEqual(other.genericArguments) &&
+               Equals(Namespace, other.Namespace);
     }
 
     public override bool Equals(object? obj)
@@ -118,6 +120,8 @@ public class AliasMetadata : IGenericMetadata, IEquatable<AliasMetadata>
     }
 
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace { get; set; }
 
     public string Name { get; }
 

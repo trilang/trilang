@@ -2,6 +2,7 @@ using Trilang.Compilation.Diagnostics;
 using Trilang.IntermediateRepresentation;
 using Trilang.Lexing;
 using Trilang.Lower;
+using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
@@ -17,10 +18,12 @@ public class Compiler
         var lexer = new Lexer();
         var parser = new Parser();
         var semantic = new SemanticAnalysis();
+        var buildInTypes = new BuiltInTypes();
         var semanticOptions = new SemanticAnalysisOptions(
             options.Directives,
-            new SemanticDiagnosticReporter(diagnostics));
-        var lowering = new Lowering();
+            new SemanticDiagnosticReporter(diagnostics),
+            buildInTypes);
+        var lowering = new Lowering(buildInTypes);
 
         var syntaxTrees = new List<SyntaxTree>();
         var project = Project.Load(options.Path);
@@ -80,10 +83,8 @@ public class Compiler
                 semanticTree,
                 new LoweringOptions(options.Directives, semanticResult.ControlFlowGraphs));
 
-        var ir = new IrGenerator();
-        var functions = ir.Generate(
-            semanticResult.MetadataProvider.Types,
-            semanticResult.SemanticTrees);
+        var ir = new IrGenerator(options.Directives, buildInTypes);
+        var functions = ir.Generate(semanticResult.SemanticTrees, semanticResult.RootNamespace);
 
         if (options.PrintIr)
             foreach (var function in functions)

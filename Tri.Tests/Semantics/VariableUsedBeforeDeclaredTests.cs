@@ -1,6 +1,7 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -42,7 +43,10 @@ public class VariableUsedBeforeDeclaredTests
         Assert.That(
             () => semantic.Analyze(
                 [tree],
-                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+                new SemanticAnalysisOptions(
+                    new HashSet<string>(),
+                    new SemanticDiagnosticReporter(diagnostics),
+                    new BuiltInTypes())),
             Throws.Nothing);
     }
 
@@ -61,7 +65,10 @@ public class VariableUsedBeforeDeclaredTests
         Assert.That(
             () => semantic.Analyze(
                 [tree],
-                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+                new SemanticAnalysisOptions(
+                    new HashSet<string>(),
+                    new SemanticDiagnosticReporter(diagnostics),
+                    new BuiltInTypes())),
             Throws.Nothing);
     }
 
@@ -79,7 +86,10 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0020VariableUsedBeforeDeclaration,
@@ -108,7 +118,10 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0020VariableUsedBeforeDeclaration,
@@ -139,7 +152,10 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0008UnknownMember,
@@ -169,7 +185,10 @@ public class VariableUsedBeforeDeclaredTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0008UnknownMember,
@@ -200,7 +219,10 @@ public class VariableUsedBeforeDeclaredTests
         Assert.That(
             () => semantic.Analyze(
                 [tree],
-                new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics))),
+                new SemanticAnalysisOptions(
+                    new HashSet<string>(),
+                    new SemanticDiagnosticReporter(diagnostics),
+                    new BuiltInTypes())),
             Throws.Nothing);
     }
 }

@@ -5,17 +5,21 @@ namespace Trilang.Semantics.Passes;
 
 internal class ThisOutsideOfType : Visitor, ISemanticPass
 {
-    private SemanticDiagnosticReporter diagnostics = null!;
+    private readonly SemanticDiagnosticReporter diagnostics;
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public ThisOutsideOfType(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
+        : base(directives)
     {
-        diagnostics = context.Diagnostics;
+        this.diagnostics = diagnostics;
+    }
 
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    {
         foreach (var tree in semanticTrees)
             tree.Accept(this);
     }
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
+    public override void VisitMemberAccess(MemberAccessExpression node)
     {
         if (!node.IsThis)
             return;
@@ -25,6 +29,8 @@ internal class ThisOutsideOfType : Visitor, ISemanticPass
             return;
 
         diagnostics.ThisOutsideOfType(node);
+
+        base.VisitMemberAccess(node);
     }
 
     public string Name => nameof(ThisOutsideOfType);

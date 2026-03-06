@@ -6,6 +6,7 @@ using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
+using static Tri.Tests.Factory;
 
 namespace Tri.Tests.Semantics;
 
@@ -49,27 +50,31 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                builtInTypes));
 
-        var expected = new TypeMetadata(null, "Point");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = new TypeMetadata(null, "Point")
+        {
+            Namespace = ns,
+        };
 
-        var xProperty = new PropertyMetadata(
-            null,
-            expected,
+        var xProperty = CreatePropertyMetadata(expected,
             "x",
-            TypeMetadata.I32);
+            builtInTypes.I32);
         expected.AddProperty(xProperty);
         expected.AddMethod(xProperty.Getter!);
         expected.AddMethod(xProperty.Setter!);
 
-        var yProperty = new PropertyMetadata(
-            null,
-            expected,
+        var yProperty = CreatePropertyMetadata(expected,
             "y",
-            TypeMetadata.I32);
+            builtInTypes.I32);
         expected.AddProperty(yProperty);
         expected.AddMethod(yProperty.Getter!);
         expected.AddMethod(yProperty.Setter!);
@@ -79,10 +84,10 @@ public class MetadataGeneratorTests
             expected,
             AccessModifierMetadata.Public,
             [
-                new ParameterMetadata(null, "x", TypeMetadata.I32),
-                new ParameterMetadata(null, "y", TypeMetadata.I32)
+                new ParameterMetadata(null, "x", builtInTypes.I32),
+                new ParameterMetadata(null, "y", builtInTypes.I32)
             ],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.Void)));
+            CreateFunctionType([builtInTypes.I32, builtInTypes.I32], builtInTypes.Void, ns)));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,
@@ -90,29 +95,27 @@ public class MetadataGeneratorTests
             false,
             "toString",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.String),
-            new FunctionGroupMetadata()));
+            CreateFunctionType([], builtInTypes.String, ns)));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,
             AccessModifierMetadata.Private,
             false,
             "distance",
-            [new ParameterMetadata(null, "other", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
-            new FunctionGroupMetadata()));
+            [new ParameterMetadata(null, "other", builtInTypes.I32)],
+            CreateFunctionType([builtInTypes.I32], builtInTypes.I32, ns)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actual = typeProvider.GetType("Point");
+        var actual = rootNamespace.FindType("Point");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
 
-        var toStringType = typeProvider.GetType("() => string");
-        var expectedToStringType = new FunctionTypeMetadata(null, [], TypeMetadata.String);
+        var toStringType = rootNamespace.FindType("() => string");
+        var expectedToStringType = CreateFunctionType([], builtInTypes.String, ns);
         Assert.That(toStringType, Is.EqualTo(expectedToStringType).Using(new MetadataComparer()));
 
-        var distanceType = typeProvider.GetType("(i32) => i32");
-        var expectedDistanceType = new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32);
+        var distanceType = rootNamespace.FindType("(i32) => i32");
+        var expectedDistanceType = CreateFunctionType([builtInTypes.I32], builtInTypes.I32, ns);
         Assert.That(distanceType, Is.EqualTo(expectedDistanceType).Using(new MetadataComparer()));
     }
 
@@ -127,23 +130,29 @@ public class MetadataGeneratorTests
             """);
 
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
 
-        var typeMetadata = new TypeMetadata(null, "Test");
+        var builtInTypes = new BuiltInTypes();
+        var ns = NamespaceMetadata.CreateRoot(builtInTypes);
+        var typeMetadata = new TypeMetadata(null, "Test")
+        {
+            Namespace = ns,
+        };
         typeMetadata.AddConstructor(
             new ConstructorMetadata(
                 null,
                 typeMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
-        var propertyMetadata = new PropertyMetadata(
-            null,
-            typeMetadata,
+                CreateFunctionType([], builtInTypes.Void, ns)));
+        var propertyMetadata = CreatePropertyMetadata(typeMetadata,
             "x",
-            TypeMetadata.I32,
+            builtInTypes.I32,
             AccessModifierMetadata.Public,
             AccessModifierMetadata.Public);
         typeMetadata.AddProperty(propertyMetadata);
@@ -152,10 +161,10 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actual = typeProvider.GetType("Test") as TypeMetadata;
+        var actual = rootNamespace.FindType("Test") as TypeMetadata;
         Assert.That(actual, Is.EqualTo(typeMetadata).Using(new MetadataComparer()));
 
-        var actualProperty = actual.GetProperty("x");
+        var actualProperty = (PropertyMetadata)actual.GetProperties("x")[0];
         Assert.That(actualProperty, Is.Not.Null);
         Assert.That(propertyMetadata, Is.EqualTo(actualProperty).Using(new MetadataComparer()));
     }
@@ -170,12 +179,17 @@ public class MetadataGeneratorTests
             public type Point : Interface1, Interface2 { }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var interfaceMetadata = new InterfaceMetadata(null);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var interfaceMetadata = new InterfaceMetadata(null)
+        {
+            Namespace = ns,
+        };
         var expected = new TypeMetadata(
             null,
             "Point",
@@ -184,15 +198,18 @@ public class MetadataGeneratorTests
             [],
             [],
             [],
-            []);
+            [])
+        {
+            Namespace = ns,
+        };
         expected.AddConstructor(
             new ConstructorMetadata(
                 null,
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
-        var actual = typeProvider.GetType("Point");
+                CreateFunctionType([], builtInTypes.Void, ns)));
+        var actual = rootNamespace.FindType("Point");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -208,10 +225,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0003UnknownType,
@@ -236,10 +254,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new[]
         {
@@ -274,10 +293,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0003UnknownType,
@@ -295,13 +315,18 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse("public type MyInt = i32;");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expected = new AliasMetadata(null, "MyInt", [], TypeMetadata.I32);
-        var actual = typeProvider.GetType("MyInt");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = new AliasMetadata(null, "MyInt", [], builtInTypes.I32)
+        {
+            Namespace = ns,
+        };
+        var actual = rootNamespace.FindType("MyInt");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
@@ -310,10 +335,11 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse("public type MyInt = xxx;");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0003UnknownType,
@@ -336,13 +362,15 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expected = new ArrayMetadata(null, TypeMetadata.I32);
-        var actual = typeProvider.GetType("i32[]");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = CreateArrayMetadata(builtInTypes.I32, ns);
+        var actual = rootNamespace.FindType("i32[]");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -358,10 +386,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0003UnknownType,
@@ -384,13 +413,17 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expected = new FunctionTypeMetadata(null, [TypeMetadata.I32, TypeMetadata.I32], TypeMetadata.I32);
-        var actual = typeProvider.GetType("(i32, i32) => i32");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = CreateFunctionType([builtInTypes.I32, builtInTypes.I32],
+            builtInTypes.I32,
+            ns);
+        var actual = rootNamespace.FindType("(i32, i32) => i32");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -406,10 +439,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0003UnknownType,
@@ -432,10 +466,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0003UnknownType,
@@ -457,23 +492,31 @@ public class MetadataGeneratorTests
             public type MyPoint = Point;
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expectedType = new TypeMetadata(null, "Point");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedType = new TypeMetadata(null, "Point")
+        {
+            Namespace = ns,
+        };
         expectedType.AddConstructor(
             new ConstructorMetadata(
                 null,
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
-        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType);
-        var actualType = typeProvider.GetType("Point");
-        var actualAlias = typeProvider.GetType("MyPoint");
+        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType)
+        {
+            Namespace = ns,
+        };
+        var actualType = rootNamespace.FindType("Point");
+        var actualAlias = rootNamespace.FindType("MyPoint");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
@@ -489,23 +532,31 @@ public class MetadataGeneratorTests
             public type Point {}
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expectedType = new TypeMetadata(null, "Point");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedType = new TypeMetadata(null, "Point")
+        {
+            Namespace = ns,
+        };
         expectedType.AddConstructor(
             new ConstructorMetadata(
                 null,
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
-        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType);
-        var actualType = typeProvider.GetType("Point");
-        var actualAlias = typeProvider.GetType("MyPoint");
+        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType)
+        {
+            Namespace = ns,
+        };
+        var actualType = rootNamespace.FindType("Point");
+        var actualAlias = rootNamespace.FindType("MyPoint");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
@@ -521,25 +572,33 @@ public class MetadataGeneratorTests
             public type MyPoint = Point[];
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expectedType = new TypeMetadata(null, "Point");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedType = new TypeMetadata(null, "Point")
+        {
+            Namespace = ns,
+        };
         expectedType.AddConstructor(
             new ConstructorMetadata(
                 null,
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
-        var expectedArrayType = new ArrayMetadata(null, expectedType);
-        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType);
-        var actualType = typeProvider.GetType("Point");
-        var actualArrayType = typeProvider.GetType("Point[]");
-        var actualAlias = typeProvider.GetType("MyPoint");
+        var expectedArrayType = CreateArrayMetadata(expectedType, ns);
+        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType)
+        {
+            Namespace = ns,
+        };
+        var actualType = rootNamespace.FindType("Point");
+        var actualArrayType = rootNamespace.FindType("Point[]");
+        var actualAlias = rootNamespace.FindType("MyPoint");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
@@ -556,25 +615,33 @@ public class MetadataGeneratorTests
             public type Point {}
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expectedType = new TypeMetadata(null, "Point");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedType = new TypeMetadata(null, "Point")
+        {
+            Namespace = ns,
+        };
         expectedType.AddConstructor(
             new ConstructorMetadata(
                 null,
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
-        var expectedArrayType = new ArrayMetadata(null, expectedType);
-        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType);
-        var actualType = typeProvider.GetType("Point");
-        var actualArrayType = typeProvider.GetType("Point[]");
-        var actualAlias = typeProvider.GetType("MyPoint");
+        var expectedArrayType = CreateArrayMetadata(expectedType, ns);
+        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType)
+        {
+            Namespace = ns,
+        };
+        var actualType = rootNamespace.FindType("Point");
+        var actualArrayType = rootNamespace.FindType("Point[]");
+        var actualAlias = rootNamespace.FindType("MyPoint");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
@@ -594,18 +661,23 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expectedInterface = new InterfaceMetadata(null);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedInterface = new InterfaceMetadata(null)
+        {
+            Namespace = ns,
+        };
         expectedInterface.AddProperty(
             new InterfacePropertyMetadata(
                 null,
                 expectedInterface,
                 "x",
-                TypeMetadata.I32,
+                builtInTypes.I32,
                 AccessModifierMetadata.Public,
                 null));
         expectedInterface.AddProperty(
@@ -613,53 +685,63 @@ public class MetadataGeneratorTests
                 null,
                 expectedInterface,
                 "y",
-                TypeMetadata.I32,
+                builtInTypes.I32,
                 AccessModifierMetadata.Public,
                 null));
 
-        var expectedAlias = new AliasMetadata(null, "Point", [], expectedInterface);
+        var expectedAlias = new AliasMetadata(null, "Point", [], expectedInterface)
+        {
+            Namespace = ns,
+        };
         expectedInterface.AddMethod(new InterfaceMethodMetadata(
             null,
             expectedInterface,
             "distance",
-            new FunctionTypeMetadata(null, [expectedAlias], TypeMetadata.F64),
-            new FunctionGroupMetadata()));
+            CreateFunctionType([expectedAlias], builtInTypes.F64, ns)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualInterface = typeProvider.GetType(expectedInterface.ToString());
+        var actualInterface = rootNamespace.FindType(expectedInterface.ToString());
         Assert.That(actualInterface, Is.EqualTo(expectedInterface).Using(new MetadataComparer()));
 
-        var actualAlias = typeProvider.GetType("Point");
+        var actualAlias = rootNamespace.FindType("Point");
         Assert.That(actualAlias, Is.EqualTo(expectedAlias).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateMetadataForDiscriminatedUnionTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            public type DU = {} | i32 | () => void;
-            """);
+        var (tree, diagnostics) = Parse("public type DU = {} | i32 | () => void;");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var du = new DiscriminatedUnionMetadata(null, [
-            new InterfaceMetadata(null),
-            TypeMetadata.I32,
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-        ]);
-        var alias = new AliasMetadata(null, "DU", [], du);
+            new InterfaceMetadata(null)
+            {
+                Namespace = ns,
+            },
+            builtInTypes.I32,
+            CreateFunctionType([], builtInTypes.Void, ns),
+        ])
+        {
+            Namespace = ns,
+        };
+        var alias = new AliasMetadata(null, "DU", [], du)
+        {
+            Namespace = ns,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = typeProvider.GetType("DU");
+        var actualAlias = rootNamespace.FindType("DU");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
-        var actualDu = typeProvider.GetType("{ } | i32 | () => void");
+        var actualDu = rootNamespace.FindType("{ } | i32 | () => void");
         Assert.That(actualDu, Is.EqualTo(du).Using(new MetadataComparer()));
     }
 
@@ -668,20 +750,25 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse("public type Tuple = (i32, f64);");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var tuple = new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.F64]);
-        var alias = new AliasMetadata(null, "Tuple", [], tuple);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var tuple = CreateTupleMetadata([builtInTypes.I32, builtInTypes.F64], ns);
+        var alias = new AliasMetadata(null, "Tuple", [], tuple)
+        {
+            Namespace = ns,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = typeProvider.GetType("Tuple");
+        var actualAlias = rootNamespace.FindType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
-        var actualTuple = typeProvider.GetType("(i32, f64)");
+        var actualTuple = rootNamespace.FindType("(i32, f64)");
         Assert.That(actualTuple, Is.EqualTo(tuple).Using(new MetadataComparer()));
     }
 
@@ -690,24 +777,29 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse("public type Tuple = (i32, (f64, bool));");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var nestedTuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
-        var tuple = new TupleMetadata(null, [TypeMetadata.I32, nestedTuple]);
-        var alias = new AliasMetadata(null, "Tuple", [], tuple);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var nestedTuple = CreateTupleMetadata([builtInTypes.F64, builtInTypes.Bool], ns);
+        var tuple = CreateTupleMetadata([builtInTypes.I32, nestedTuple], ns);
+        var alias = new AliasMetadata(null, "Tuple", [], tuple)
+        {
+            Namespace = ns,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = typeProvider.GetType("Tuple");
+        var actualAlias = rootNamespace.FindType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
-        var actualTuple = typeProvider.GetType("(i32, (f64, bool))");
+        var actualTuple = rootNamespace.FindType("(i32, (f64, bool))");
         Assert.That(actualTuple, Is.EqualTo(tuple).Using(new MetadataComparer()));
 
-        var actualNestedTuple = typeProvider.GetType("(f64, bool)");
+        var actualNestedTuple = rootNamespace.FindType("(f64, bool)");
         Assert.That(actualNestedTuple, Is.EqualTo(nestedTuple).Using(new MetadataComparer()));
     }
 
@@ -716,24 +808,32 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse("public type Tuple = (i32, bool | i8);");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.Bool, TypeMetadata.I8]);
-        var tuple = new TupleMetadata(null, [TypeMetadata.I32, du]);
-        var alias = new AliasMetadata(null, "Tuple", [], tuple);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var du = new DiscriminatedUnionMetadata(null, [builtInTypes.Bool, builtInTypes.I8])
+        {
+            Namespace = ns,
+        };
+        var tuple = CreateTupleMetadata([builtInTypes.I32, du], ns);
+        var alias = new AliasMetadata(null, "Tuple", [], tuple)
+        {
+            Namespace = ns,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = typeProvider.GetType("Tuple");
+        var actualAlias = rootNamespace.FindType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
-        var actualTuple = typeProvider.GetType("(i32, bool | i8)");
+        var actualTuple = rootNamespace.FindType("(i32, bool | i8)");
         Assert.That(actualTuple, Is.EqualTo(tuple).Using(new MetadataComparer()));
 
-        var actualDu = typeProvider.GetType("bool | i8");
+        var actualDu = rootNamespace.FindType("bool | i8");
         Assert.That(actualDu, Is.EqualTo(du).Using(new MetadataComparer()));
     }
 
@@ -742,24 +842,32 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse("public type Tuple = i32 | (f64, bool);");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var tuple = new TupleMetadata(null, [TypeMetadata.F64, TypeMetadata.Bool]);
-        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, tuple]);
-        var alias = new AliasMetadata(null, "Tuple", [], du);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var tuple = CreateTupleMetadata([builtInTypes.F64, builtInTypes.Bool], ns);
+        var du = new DiscriminatedUnionMetadata(null, [builtInTypes.I32, tuple])
+        {
+            Namespace = ns,
+        };
+        var alias = new AliasMetadata(null, "Tuple", [], du)
+        {
+            Namespace = ns,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = typeProvider.GetType("Tuple");
+        var actualAlias = rootNamespace.FindType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
-        var actualTuple = typeProvider.GetType("(f64, bool)");
+        var actualTuple = rootNamespace.FindType("(f64, bool)");
         Assert.That(actualTuple, Is.EqualTo(tuple).Using(new MetadataComparer()));
 
-        var actualDu = typeProvider.GetType("i32 | (f64, bool)");
+        var actualDu = rootNamespace.FindType("i32 | (f64, bool)");
         Assert.That(actualDu, Is.EqualTo(du).Using(new MetadataComparer()));
     }
 
@@ -768,12 +876,17 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse("public type Test<T1, T2> {}");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var expected = new TypeMetadata(null, "Test");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = new TypeMetadata(null, "Test")
+        {
+            Namespace = ns,
+        };
         expected.AddGenericArgument(new TypeArgumentMetadata(null, "T1"));
         expected.AddGenericArgument(new TypeArgumentMetadata(null, "T2"));
         expected.AddConstructor(
@@ -782,11 +895,11 @@ public class MetadataGeneratorTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actual = typeProvider.GetType("Test<,>");
+        var actual = rootNamespace.FindType("Test<,>");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
@@ -800,19 +913,22 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = typeProvider.GetType("Test<>") as TypeMetadata;
+        var type = rootNamespace.FindType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
-        var property = type.GetProperty("x");
+        var property = (PropertyMetadata)type.GetProperties("x")[0];
         Assert.That(property, Is.Not.Null);
-        Assert.That(property.Type, Is.EqualTo(new TypeArgumentMetadata(null, "T")).Using(new MetadataComparer()));
+        Assert.That(
+            property.Type,
+            Is.EqualTo(new TypeArgumentMetadata(null, "T")).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -826,10 +942,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0003UnknownType,
@@ -852,20 +969,22 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = typeProvider.GetType("Test<>") as TypeMetadata;
+        var type = rootNamespace.FindType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
-        var property = type.GetProperty("x");
+        var property = (PropertyMetadata)type.GetProperties("x")[0];
         Assert.That(property, Is.Not.Null);
 
-        var typeArrayMetadata = new ArrayMetadata(null, new TypeArgumentMetadata(null, "T"));
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var typeArrayMetadata = CreateArrayMetadata(new TypeArgumentMetadata(null, "T"), ns);
         Assert.That(property.Type, Is.EqualTo(typeArrayMetadata).Using(new MetadataComparer()));
     }
 
@@ -878,22 +997,27 @@ public class MetadataGeneratorTests
             public type Test = List<i32>;
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var closedType = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var closedType = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
 
-        var expected = new TypeMetadata(null, "List");
-        expected.AddGenericArgument(TypeMetadata.I32);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = new TypeMetadata(null, "List")
+        {
+            Namespace = ns,
+        };
+        expected.AddGenericArgument(builtInTypes.I32);
         expected.AddConstructor(
             new ConstructorMetadata(
                 null,
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(closedType!.ClosedGeneric, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -910,18 +1034,19 @@ public class MetadataGeneratorTests
             public type Test = List<i32>;
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
         var closedType = generic!.ClosedGeneric;
         var property = closedType!.GetMember("Prop") as PropertyMetadata;
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(property, Is.Not.Null);
-        Assert.That(property.Type, Is.EqualTo(TypeMetadata.I32).Using(new MetadataComparer()));
+        Assert.That(property.Type, Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -932,14 +1057,15 @@ public class MetadataGeneratorTests
             public type Test {}
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = typeProvider.GetType("Test") as TypeMetadata;
+        var type = rootNamespace.FindType("Test") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Constructors, Has.Count.EqualTo(1));
 
@@ -962,16 +1088,20 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
         var type = generic!.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = CreateArrayMetadata(builtInTypes.I32, ns);
+
         Assert.That(property, Is.Not.Null);
-        Assert.That(property.Type, Is.EqualTo(new ArrayMetadata(null, TypeMetadata.I32)).Using(new MetadataComparer()));
+        Assert.That(property.Type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -988,20 +1118,24 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
         var type = generic!.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = CreateTupleMetadata([builtInTypes.I32, builtInTypes.I32], ns);
+
         Assert.That(property, Is.Not.Null);
         Assert.That(
             property.Type,
-            Is.EqualTo(new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])).Using(new MetadataComparer()));
+            Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -1018,17 +1152,23 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
         var type = generic!.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
-        var expected = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32]);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = new DiscriminatedUnionMetadata(null, [builtInTypes.I32, builtInTypes.I32])
+        {
+            Namespace = ns,
+        };
+
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
@@ -1047,20 +1187,22 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
         var type = generic!.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = CreateFunctionType([], builtInTypes.I32, ns);
+
         Assert.That(property, Is.Not.Null);
-        Assert.That(
-            property.Type,
-            Is.EqualTo(new FunctionTypeMetadata(null, [], TypeMetadata.I32)).Using(new MetadataComparer()));
+        Assert.That(property.Type, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -1077,21 +1219,26 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var generic = typeProvider.GetType("List<i32>") as GenericApplicationMetadata;
+        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
         var type = generic!.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
-        var expected = new InterfaceMetadata(null);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = new InterfaceMetadata(null)
+        {
+            Namespace = ns,
+        };
         expected.AddProperty(
             new InterfacePropertyMetadata(
                 null,
                 expected,
                 "x",
-                TypeMetadata.I32,
+                builtInTypes.I32,
                 AccessModifierMetadata.Public,
                 null));
 
@@ -1110,16 +1257,19 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("((i32) => void) => void");
-        var expected = new FunctionTypeMetadata(
-            null,
-            [new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void)],
-            TypeMetadata.Void);
+        var type = rootNamespace.FindType("((i32) => void) => void");
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expected = CreateFunctionType([
+                CreateFunctionType([builtInTypes.I32], builtInTypes.Void, ns)
+            ],
+            builtInTypes.Void,
+            ns);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1131,15 +1281,23 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse("public type Test<T> = i32 | T;");
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Test<>");
+        var type = rootNamespace.FindType("Test<>");
         var typeArgumentMetadata = new TypeArgumentMetadata(null, "T");
-        var du = new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, typeArgumentMetadata]);
-        var expected = new AliasMetadata(null, "Test", [typeArgumentMetadata], du);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var du = new DiscriminatedUnionMetadata(null, [builtInTypes.I32, typeArgumentMetadata])
+        {
+            Namespace = ns,
+        };
+        var expected = new AliasMetadata(null, "Test", [typeArgumentMetadata], du)
+        {
+            Namespace = ns,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(type, Is.Not.Null);
@@ -1158,28 +1316,45 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Test<i32>");
+        var type = rootNamespace.FindType("Test<i32>");
 
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
-                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")])),
-            [TypeMetadata.I32]
+                new DiscriminatedUnionMetadata(null, [builtInTypes.I32, new TypeArgumentMetadata(null, "T")])
+                {
+                    Namespace = ns,
+                }
+            )
+            {
+                Namespace = ns,
+            },
+            [builtInTypes.I32]
         )
         {
+            Namespace = ns,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
-                [TypeMetadata.I32],
-                new DiscriminatedUnionMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])),
+                [builtInTypes.I32],
+                new DiscriminatedUnionMetadata(null, [builtInTypes.I32, builtInTypes.I32])
+                {
+                    Namespace = ns,
+                }
+            )
+            {
+                Namespace = ns,
+            },
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1199,27 +1374,39 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Test<i32>");
+        var type = rootNamespace.FindType("Test<i32>");
+
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
-                new FunctionTypeMetadata(null, [], new TypeArgumentMetadata(null, "T"))),
-            [TypeMetadata.I32]
+                CreateFunctionType([], new TypeArgumentMetadata(null, "T"), ns)
+            )
+            {
+                Namespace = ns,
+            },
+            [builtInTypes.I32]
         )
         {
+            Namespace = ns,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
-                [TypeMetadata.I32],
-                new FunctionTypeMetadata(null, [], TypeMetadata.I32)),
+                [builtInTypes.I32],
+                CreateFunctionType([], builtInTypes.I32, ns)
+            )
+            {
+                Namespace = ns,
+            },
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1239,14 +1426,19 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Test<i32>");
+        var type = rootNamespace.FindType("Test<i32>");
 
-        var openInterface = new InterfaceMetadata(null);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var openInterface = new InterfaceMetadata(null)
+        {
+            Namespace = ns,
+        };
         openInterface.AddProperty(new InterfacePropertyMetadata(
             null,
             openInterface,
@@ -1254,20 +1446,30 @@ public class MetadataGeneratorTests
             new TypeArgumentMetadata(null, "T"),
             AccessModifierMetadata.Public,
             null));
-        var openAlias = new AliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], openInterface);
+        var openAlias = new AliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], openInterface)
+        {
+            Namespace = ns,
+        };
 
-        var closedInterface = new InterfaceMetadata(null);
+        var closedInterface = new InterfaceMetadata(null)
+        {
+            Namespace = ns,
+        };
         closedInterface.AddProperty(new InterfacePropertyMetadata(
             null,
             closedInterface,
             "x",
-            TypeMetadata.I32,
+            builtInTypes.I32,
             AccessModifierMetadata.Public,
             null));
-        var closedAlias = new AliasMetadata(null, "Test", [TypeMetadata.I32], closedInterface);
-
-        var expected = new GenericApplicationMetadata(null, openAlias, [TypeMetadata.I32])
+        var closedAlias = new AliasMetadata(null, "Test", [builtInTypes.I32], closedInterface)
         {
+            Namespace = ns,
+        };
+
+        var expected = new GenericApplicationMetadata(null, openAlias, [builtInTypes.I32])
+        {
+            Namespace = ns,
             ClosedGeneric = closedAlias,
         };
 
@@ -1288,28 +1490,39 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Test<i32>");
+        var type = rootNamespace.FindType("Test<i32>");
 
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
-                new TupleMetadata(null, [TypeMetadata.I32, new TypeArgumentMetadata(null, "T")])),
-            [TypeMetadata.I32]
+                CreateTupleMetadata([builtInTypes.I32, new TypeArgumentMetadata(null, "T")], ns)
+            )
+            {
+                Namespace = ns,
+            },
+            [builtInTypes.I32]
         )
         {
+            Namespace = ns,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
-                [TypeMetadata.I32],
-                new TupleMetadata(null, [TypeMetadata.I32, TypeMetadata.I32])),
+                [builtInTypes.I32],
+                CreateTupleMetadata([builtInTypes.I32, builtInTypes.I32], ns)
+            )
+            {
+                Namespace = ns,
+            },
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1329,26 +1542,37 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var actual = typeProvider.GetType("Test<i32>");
+        var actual = rootNamespace.FindType("Test<i32>");
 
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var typeArgumentMetadata = new TypeArgumentMetadata(null, "T");
         var openGeneric = new AliasMetadata(
             null,
             "Test",
             [typeArgumentMetadata],
-            new ArrayMetadata(null, typeArgumentMetadata));
+            CreateArrayMetadata(typeArgumentMetadata, ns)
+        )
+        {
+            Namespace = ns,
+        };
         var closedGeneric = new AliasMetadata(
             null,
             "Test",
-            [TypeMetadata.I32],
-            new ArrayMetadata(null, TypeMetadata.I32));
-        var expected = new GenericApplicationMetadata(null, openGeneric, [TypeMetadata.I32])
+            [builtInTypes.I32],
+            CreateArrayMetadata(builtInTypes.I32, ns)
+        )
         {
+            Namespace = ns,
+        };
+        var expected = new GenericApplicationMetadata(null, openGeneric, [builtInTypes.I32])
+        {
+            Namespace = ns,
             ClosedGeneric = closedGeneric,
         };
 
@@ -1370,30 +1594,38 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Test<i32>");
+        var type = rootNamespace.FindType("Test<i32>");
 
-        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T")], [], [], [], [], []);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T")], [], [], [], [], [])
+        {
+            Namespace = ns,
+        };
         openList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
-        var closedList = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
+        var closedList = new TypeMetadata(null, "List", [builtInTypes.I32], [], [], [], [], [])
+        {
+            Namespace = ns,
+        };
         closedList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -1402,19 +1634,30 @@ public class MetadataGeneratorTests
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
                 new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
-            ),
-            [TypeMetadata.I32]
+                {
+                    Namespace = ns,
+                }
+            )
+            {
+                Namespace = ns,
+            },
+            [builtInTypes.I32]
         )
         {
+            Namespace = ns,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
-                [TypeMetadata.I32],
-                new GenericApplicationMetadata(null, openList, [TypeMetadata.I32])
+                [builtInTypes.I32],
+                new GenericApplicationMetadata(null, openList, [builtInTypes.I32])
                 {
+                    Namespace = ns,
                     ClosedGeneric = closedList,
                 }
-            ),
+            )
+            {
+                Namespace = ns,
+            },
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1435,30 +1678,38 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Test<i32>");
+        var type = rootNamespace.FindType("Test<i32>");
 
-        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T2")], [], [], [], [], []);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T2")], [], [], [], [], [])
+        {
+            Namespace = ns,
+        };
         openList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
-        var closedList = new TypeMetadata(null, "List", [TypeMetadata.I32], [], [], [], [], []);
+        var closedList = new TypeMetadata(null, "List", [builtInTypes.I32], [], [], [], [], [])
+        {
+            Namespace = ns,
+        };
         closedList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -1467,19 +1718,30 @@ public class MetadataGeneratorTests
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
                 new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
-            ),
-            [TypeMetadata.I32]
+                {
+                    Namespace = ns,
+                }
+            )
+            {
+                Namespace = ns,
+            },
+            [builtInTypes.I32]
         )
         {
+            Namespace = ns,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
-                [TypeMetadata.I32],
-                new GenericApplicationMetadata(null, openList, [TypeMetadata.I32])
+                [builtInTypes.I32],
+                new GenericApplicationMetadata(null, openList, [builtInTypes.I32])
                 {
+                    Namespace = ns,
                     ClosedGeneric = closedList,
                 }
-            ),
+            )
+            {
+                Namespace = ns,
+            },
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1500,30 +1762,38 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Test<i32, bool>");
+        var type = rootNamespace.FindType("Test<i32, bool>");
 
-        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "X1"), new TypeArgumentMetadata(null, "X2")], [], [], [], [], []);
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "X1"), new TypeArgumentMetadata(null, "X2")], [], [], [], [], [])
+        {
+            Namespace = ns,
+        };
         openList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
-        var closedList = new TypeMetadata(null, "List", [TypeMetadata.Bool, TypeMetadata.I32], [], [], [], [], []);
+        var closedList = new TypeMetadata(null, "List", [builtInTypes.Bool, builtInTypes.I32], [], [], [], [], [])
+        {
+            Namespace = ns,
+        };
         closedList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                new FunctionTypeMetadata(null, [], TypeMetadata.Void)));
+                CreateFunctionType([], builtInTypes.Void, ns)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -1536,23 +1806,34 @@ public class MetadataGeneratorTests
                     openList,
                     [new TypeArgumentMetadata(null, "T2"), new TypeArgumentMetadata(null, "T1")]
                 )
-            ),
-            [TypeMetadata.I32, TypeMetadata.Bool]
+                {
+                    Namespace = ns,
+                }
+            )
+            {
+                Namespace = ns,
+            },
+            [builtInTypes.I32, builtInTypes.Bool]
         )
         {
+            Namespace = ns,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
-                [TypeMetadata.I32, TypeMetadata.Bool],
+                [builtInTypes.I32, builtInTypes.Bool],
                 new GenericApplicationMetadata(
                     null,
                     openList,
-                    [TypeMetadata.Bool, TypeMetadata.I32]
+                    [builtInTypes.Bool, builtInTypes.I32]
                 )
                 {
+                    Namespace = ns,
                     ClosedGeneric = closedList,
                 }
-            ),
+            )
+            {
+                Namespace = ns,
+            },
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1573,13 +1854,15 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Alias2<i32>");
+        var type = rootNamespace.FindType("Alias2<i32>");
 
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var openAlias2 = new AliasMetadata(
             null,
             "Alias2",
@@ -1592,15 +1875,28 @@ public class MetadataGeneratorTests
                     [new TypeArgumentMetadata(null, "T1")],
                     new DiscriminatedUnionMetadata(
                         null,
-                        [new TypeArgumentMetadata(null, "T1"), TypeMetadata.I32])),
+                        [new TypeArgumentMetadata(null, "T1"), builtInTypes.I32])
+                    {
+                        Namespace = ns,
+                    }
+                )
+                {
+                    Namespace = ns,
+                },
                 [new TypeArgumentMetadata(null, "T1")]
             )
-        );
+            {
+                Namespace = ns,
+            }
+        )
+        {
+            Namespace = ns,
+        };
 
         var closedAlias2 = new AliasMetadata(
             null,
             "Alias2",
-            [TypeMetadata.I32],
+            [builtInTypes.I32],
             new GenericApplicationMetadata(
                 null,
                 new AliasMetadata(
@@ -1609,22 +1905,41 @@ public class MetadataGeneratorTests
                     [new TypeArgumentMetadata(null, "T1")],
                     new DiscriminatedUnionMetadata(
                         null,
-                        [new TypeArgumentMetadata(null, "T1"), TypeMetadata.I32])),
-                [TypeMetadata.I32]
+                        [new TypeArgumentMetadata(null, "T1"), builtInTypes.I32])
+                    {
+                        Namespace = ns,
+                    }
+                )
+                {
+                    Namespace = ns,
+                },
+                [builtInTypes.I32]
             )
             {
+                Namespace = ns,
                 ClosedGeneric = new AliasMetadata(
                     null,
                     "Alias1",
-                    [TypeMetadata.I32],
+                    [builtInTypes.I32],
                     new DiscriminatedUnionMetadata(
                         null,
-                        [TypeMetadata.I32, TypeMetadata.I32])),
+                        [builtInTypes.I32, builtInTypes.I32])
+                    {
+                        Namespace = ns,
+                    }
+                )
+                {
+                    Namespace = ns,
+                },
             }
-        );
-
-        var expected = new GenericApplicationMetadata(null, openAlias2, [TypeMetadata.I32])
+        )
         {
+            Namespace = ns,
+        };
+
+        var expected = new GenericApplicationMetadata(null, openAlias2, [builtInTypes.I32])
+        {
+            Namespace = ns,
             ClosedGeneric = closedAlias2,
         };
 
@@ -1646,12 +1961,15 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Alias2<i32>");
+        var type = rootNamespace.FindType("Alias2<i32>");
+
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
@@ -1666,19 +1984,32 @@ public class MetadataGeneratorTests
                         [new TypeArgumentMetadata(null, "T2")],
                         new DiscriminatedUnionMetadata(
                             null,
-                            [new TypeArgumentMetadata(null, "T2"), TypeMetadata.I32]
+                            [new TypeArgumentMetadata(null, "T2"), builtInTypes.I32]
                         )
-                    ),
+                        {
+                            Namespace = ns,
+                        }
+                    )
+                    {
+                        Namespace = ns,
+                    },
                     [new TypeArgumentMetadata(null, "T1")]
                 )
-            ),
-            [TypeMetadata.I32]
+                {
+                    Namespace = ns,
+                }
+            )
+            {
+                Namespace = ns,
+            },
+            [builtInTypes.I32]
         )
         {
+            Namespace = ns,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Alias2",
-                [TypeMetadata.I32],
+                [builtInTypes.I32],
                 new GenericApplicationMetadata(
                     null,
                     new AliasMetadata(
@@ -1687,23 +2018,39 @@ public class MetadataGeneratorTests
                         [new TypeArgumentMetadata(null, "T2")],
                         new DiscriminatedUnionMetadata(
                             null,
-                            [new TypeArgumentMetadata(null, "T2"), TypeMetadata.I32]
+                            [new TypeArgumentMetadata(null, "T2"), builtInTypes.I32]
                         )
-                    ),
-                    [TypeMetadata.I32]
+                        {
+                            Namespace = ns,
+                        }
+                    )
+                    {
+                        Namespace = ns,
+                    },
+                    [builtInTypes.I32]
                 )
                 {
+                    Namespace = ns,
                     ClosedGeneric = new AliasMetadata(
                         null,
                         "Alias1",
-                        [TypeMetadata.I32],
+                        [builtInTypes.I32],
                         new DiscriminatedUnionMetadata(
                             null,
-                            [TypeMetadata.I32, TypeMetadata.I32]
+                            [builtInTypes.I32, builtInTypes.I32]
                         )
+                        {
+                            Namespace = ns,
+                        }
                     )
+                    {
+                        Namespace = ns,
+                    }
                 }
-            ),
+            )
+            {
+                Namespace = ns,
+            },
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1724,12 +2071,15 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = typeProvider.GetType("Alias2<i32>");
+        var type = rootNamespace.FindType("Alias2<i32>");
+
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
@@ -1744,19 +2094,32 @@ public class MetadataGeneratorTests
                         [new TypeArgumentMetadata(null, "T1")],
                         new DiscriminatedUnionMetadata(
                             null,
-                            [new TypeArgumentMetadata(null, "T1"), TypeMetadata.I32]
+                            [new TypeArgumentMetadata(null, "T1"), builtInTypes.I32]
                         )
-                    ),
+                        {
+                            Namespace = ns,
+                        }
+                    )
+                    {
+                        Namespace = ns,
+                    },
                     [new TypeArgumentMetadata(null, "T1")]
                 )
-            ),
-            [TypeMetadata.I32]
+                {
+                    Namespace = ns,
+                }
+            )
+            {
+                Namespace = ns,
+            },
+            [builtInTypes.I32]
         )
         {
+            Namespace = ns,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Alias2",
-                [TypeMetadata.I32],
+                [builtInTypes.I32],
                 new GenericApplicationMetadata(
                     null,
                     new AliasMetadata(
@@ -1765,23 +2128,39 @@ public class MetadataGeneratorTests
                         [new TypeArgumentMetadata(null, "T1")],
                         new DiscriminatedUnionMetadata(
                             null,
-                            [new TypeArgumentMetadata(null, "T1"), TypeMetadata.I32]
+                            [new TypeArgumentMetadata(null, "T1"), builtInTypes.I32]
                         )
-                    ),
-                    [TypeMetadata.I32]
+                        {
+                            Namespace = ns,
+                        }
+                    )
+                    {
+                        Namespace = ns,
+                    },
+                    [builtInTypes.I32]
                 )
                 {
+                    Namespace = ns,
                     ClosedGeneric = new AliasMetadata(
                         null,
                         "Alias1",
-                        [TypeMetadata.I32],
+                        [builtInTypes.I32],
                         new DiscriminatedUnionMetadata(
                             null,
-                            [TypeMetadata.I32, TypeMetadata.I32]
+                            [builtInTypes.I32, builtInTypes.I32]
                         )
+                        {
+                            Namespace = ns,
+                        }
                     )
+                    {
+                        Namespace = ns,
+                    }
                 }
-            ),
+            )
+            {
+                Namespace = ns,
+            },
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1801,35 +2180,33 @@ public class MetadataGeneratorTests
             public test(x: bool): void { }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var functions = semanticTree.Where<FunctionDeclaration>().ToArray();
-        var functionGroup = new FunctionGroupMetadata();
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var function1 = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            functionGroup);
+            CreateFunctionType([], builtInTypes.Void, ns));
         var function2 = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
-            [new ParameterMetadata(null, "x", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
-            functionGroup);
+            [new ParameterMetadata(null, "x", builtInTypes.I32)],
+            CreateFunctionType([builtInTypes.I32], builtInTypes.Void, ns));
         var function3 = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
-            [new ParameterMetadata(null, "x", TypeMetadata.Bool)],
-            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
-            functionGroup);
+            [new ParameterMetadata(null, "x", builtInTypes.Bool)],
+            CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, ns));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions[0].Metadata, Is.EqualTo(function1));
@@ -1847,10 +2224,11 @@ public class MetadataGeneratorTests
             public test(): void { }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,
@@ -1877,15 +2255,19 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var methods = semanticTree.Where<MethodDeclaration>().ToArray();
-        var type = new TypeMetadata(null, "Test");
-        var functionGroup = new FunctionGroupMetadata();
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var type = new TypeMetadata(null, "Test")
+        {
+            Namespace = ns,
+        };
         var method1 = new MethodMetadata(
             null,
             type,
@@ -1893,26 +2275,23 @@ public class MetadataGeneratorTests
             false,
             "method",
             [],
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            functionGroup);
+            CreateFunctionType([], builtInTypes.Void, ns));
         var method2 = new MethodMetadata(
             null,
             type,
             AccessModifierMetadata.Public,
             false,
             "method",
-            [new ParameterMetadata(null, "x", TypeMetadata.I32)],
-            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
-            functionGroup);
+            [new ParameterMetadata(null, "x", builtInTypes.I32)],
+            CreateFunctionType([builtInTypes.I32], builtInTypes.Void, ns));
         var method3 = new MethodMetadata(
             null,
             type,
             AccessModifierMetadata.Public,
             false,
             "method",
-            [new ParameterMetadata(null, "x", TypeMetadata.Bool)],
-            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
-            functionGroup);
+            [new ParameterMetadata(null, "x", builtInTypes.Bool)],
+            CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, ns));
         type.AddMethod(method1);
         type.AddMethod(method2);
         type.AddMethod(method3);
@@ -1935,10 +2314,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,
@@ -1965,33 +2345,34 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var semanticTree = semanticTrees.Single();
         var methods = semanticTree.Where<InterfaceMethod>().ToArray();
-        var type = new InterfaceMetadata(null);
-        var functionGroup = new FunctionGroupMetadata();
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var type = new InterfaceMetadata(null)
+        {
+            Namespace = ns,
+        };
         var method1 = new InterfaceMethodMetadata(
             null,
             type,
             "method",
-            new FunctionTypeMetadata(null, [], TypeMetadata.Void),
-            functionGroup);
+            CreateFunctionType([], builtInTypes.Void, ns));
         var method2 = new InterfaceMethodMetadata(
             null,
             type,
             "method",
-            new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.Void),
-            functionGroup);
+            CreateFunctionType([builtInTypes.I32], builtInTypes.Void, ns));
         var method3 = new InterfaceMethodMetadata(
             null,
             type,
             "method",
-            new FunctionTypeMetadata(null, [TypeMetadata.Bool], TypeMetadata.Void),
-            functionGroup);
+            CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, ns));
         type.AddMethod(method1);
         type.AddMethod(method2);
         type.AddMethod(method3);
@@ -2014,10 +2395,11 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,
@@ -2040,19 +2422,24 @@ public class MetadataGeneratorTests
             }
             """);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
-        var (_, _, typeProvider, _) = semantic.Analyze(
+        var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
+        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expectedDu = new DiscriminatedUnionMetadata(null, [
-            TypeMetadata.I32,
-            TypeMetadata.Null,
-        ]);
+            builtInTypes.I32,
+            builtInTypes.Null,
+        ])
+        {
+            Namespace = ns,
+        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualDu = typeProvider.GetType("i32 | null");
+        var actualDu = rootNamespace.FindType("i32 | null");
         Assert.That(actualDu, Is.EqualTo(expectedDu).Using(new MetadataComparer()));
     }
 }

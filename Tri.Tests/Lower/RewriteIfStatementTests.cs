@@ -6,6 +6,7 @@ using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
+using static Tri.Tests.Factory;
 
 namespace Tri.Tests.Lower;
 
@@ -25,14 +26,20 @@ public class RewriteIfStatementTests
         var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
         var tree = parser.Parse(tokens, parserOptions);
 
+        var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
         var (semanticTrees, _, _, _) = semantic.Analyze(
             [tree],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        return semanticTrees.Single();
+        var semanticTree = semanticTrees.Single();
+
+        var lowering = new Lowering(builtInTypes);
+        lowering.Lower(semanticTree, LoweringOptions.Default);
+
+        return semanticTree;
     }
 
     [Test]
@@ -48,19 +55,22 @@ public class RewriteIfStatementTests
                 }
             }
             """);
-        var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
         var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
                 "test",
                 [
-                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new IfStatement(
                         null,
@@ -74,11 +84,11 @@ public class RewriteIfStatementTests
                             },
                             new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                ReturnTypeMetadata = builtInTypes.I32
                             }
                         )
                         {
-                            ReturnTypeMetadata = TypeMetadata.Bool
+                            ReturnTypeMetadata = builtInTypes.Bool
                         },
                         new BlockStatement(null, [
                             new GoTo("if_0_then")
@@ -113,7 +123,7 @@ public class RewriteIfStatementTests
                                 }
                             )
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                ReturnTypeMetadata = builtInTypes.I32
                             }
                         ),
                         new GoTo("if_0_end"),
@@ -127,14 +137,14 @@ public class RewriteIfStatementTests
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
-                    new FunctionGroupMetadata()
+                    CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
                 )
+                {
+                    Namespace = rootNamespace,
+                }
             }
         ]);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -152,19 +162,22 @@ public class RewriteIfStatementTests
                 return -a;
             }
             """);
-        var parameterMetadata = new ParameterMetadata(null, "a", TypeMetadata.I32);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
         var expected = new SemanticTree(file, null, null, [], [
             new FunctionDeclaration(
                 null,
                 AccessModifier.Public,
                 "test",
                 [
-                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 })
+                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
                     {
                         Metadata = parameterMetadata,
                     }
                 ],
-                new TypeRef(null, "i32") { Metadata = TypeMetadata.I32 },
+                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                 new BlockStatement(null, [
                     new IfStatement(
                         null,
@@ -178,11 +191,11 @@ public class RewriteIfStatementTests
                             },
                             new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                             {
-                                ReturnTypeMetadata = TypeMetadata.I32
+                                ReturnTypeMetadata = builtInTypes.I32
                             }
                         )
                         {
-                            ReturnTypeMetadata = TypeMetadata.Bool
+                            ReturnTypeMetadata = builtInTypes.Bool
                         },
                         new BlockStatement(null, [
                             new GoTo("if_0_then")
@@ -216,7 +229,7 @@ public class RewriteIfStatementTests
                             }
                         )
                         {
-                            ReturnTypeMetadata = TypeMetadata.I32
+                            ReturnTypeMetadata = builtInTypes.I32
                         }
                     ),
                 ])
@@ -227,14 +240,14 @@ public class RewriteIfStatementTests
                     AccessModifierMetadata.Public,
                     "test",
                     [parameterMetadata],
-                    new FunctionTypeMetadata(null, [TypeMetadata.I32], TypeMetadata.I32),
-                    new FunctionGroupMetadata()
+                    CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
                 )
+                {
+                    Namespace = rootNamespace,
+                }
             }
         ]);
 
-        var lowering = new Lowering();
-        lowering.Lower(tree, LoweringOptions.Default);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }

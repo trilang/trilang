@@ -8,7 +8,7 @@ internal class ReplaceWhileLoop : Visitor
     private readonly Dictionary<While, string> loopLabels;
     private int loopCounter;
 
-    public ReplaceWhileLoop()
+    public ReplaceWhileLoop(ISet<string> directives) : base(directives)
     {
         loopLabels = [];
         loopCounter = 0;
@@ -58,36 +58,60 @@ internal class ReplaceWhileLoop : Visitor
         newBlock.Accept(this);
     }
 
-    protected override void VisitBreakEnter(Break node)
+    public override void VisitBreak(Break node)
     {
         var loop = node.LoopNode!;
         var label = GetLoopLabel(loop);
 
         var parentBlock = (BlockStatement)node.Parent!;
         parentBlock.Replace(node, new GoTo($"{label}_end"));
+
+        base.VisitBreak(node);
     }
 
-    protected override void VisitContinueEnter(Continue node)
+    public override void VisitContinue(Continue node)
     {
         var loop = node.LoopNode!;
         var label = GetLoopLabel(loop);
 
         var parentBlock = (BlockStatement)node.Parent!;
         parentBlock.Replace(node, new GoTo($"{label}_start"));
+
+        base.VisitContinue(node);
     }
 
-    protected override void VisitConstructorExit(ConstructorDeclaration node)
-        => ResetLabelCounter();
+    public override void VisitConstructor(ConstructorDeclaration node)
+    {
+        base.VisitConstructor(node);
 
-    protected override void VisitFunctionExit(FunctionDeclaration node)
-        => ResetLabelCounter();
+        ResetLabelCounter();
+    }
 
-    protected override void VisitMethodExit(MethodDeclaration node)
-        => ResetLabelCounter();
+    public override void VisitFunction(FunctionDeclaration node)
+    {
+        base.VisitFunction(node);
 
-    protected override void VisitGetterExit(PropertyGetter node)
-        => ResetLabelCounter();
+        ResetLabelCounter();
+    }
 
-    protected override void VisitSetterExit(PropertySetter node)
-        => ResetLabelCounter();
+    public override void VisitMethod(MethodDeclaration node)
+    {
+        base.VisitMethod(node);
+
+        ResetLabelCounter();
+    }
+
+    public override void VisitGetter(PropertyGetter node)
+    {
+        base.VisitGetter(node);
+
+        ResetLabelCounter();
+    }
+
+    public override void VisitSetter(PropertySetter node)
+    {
+        base.VisitSetter(node);
+
+        ResetLabelCounter();
+    }
 }

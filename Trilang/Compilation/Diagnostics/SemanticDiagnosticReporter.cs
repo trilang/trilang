@@ -319,4 +319,16 @@ public class SemanticDiagnosticReporter
             DiagnosticId.S0026MissingArgument,
             node.GetLocation(),
             $"Missing argument: '{type}'.");
+
+    public void MultipleMembersFound(ISemanticNode node, IEnumerable<IMetadata> types)
+        => diagnostics.Error(
+            DiagnosticId.S0027MultipleMembersFound,
+            node.GetLocation(),
+            $"Multiple members found:\n{string.Join("\n", types.Select(x => $"{x}: {x.Definition}"))}.");
+
+    public void UnknownNamespace(Use node)
+        => diagnostics.Error(
+            DiagnosticId.S0028UnknownNamespace,
+            node.GetLocation(),
+            $"Unknown namespace: {string.Join(".", node.Parts)}.");
 }

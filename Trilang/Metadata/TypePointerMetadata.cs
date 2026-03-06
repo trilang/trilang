@@ -1,5 +1,6 @@
 namespace Trilang.Metadata;
 
+// TODO: anonymous type?
 public class TypePointerMetadata : ITypeMetadata, IEquatable<TypePointerMetadata>
 {
     public TypePointerMetadata(ITypeMetadata type)
@@ -22,7 +23,8 @@ public class TypePointerMetadata : ITypeMetadata, IEquatable<TypePointerMetadata
         if (IsInvalid || other.IsInvalid)
             return false;
 
-        return Type.Equals(other.Type);
+        return Type.Equals(other.Type) &&
+               Equals(Namespace, other.Namespace);
     }
 
     public override bool Equals(object? obj)
@@ -56,6 +58,8 @@ public class TypePointerMetadata : ITypeMetadata, IEquatable<TypePointerMetadata
         => true;
 
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace { get; set; }
 
     public ITypeMetadata Type { get; }
 }

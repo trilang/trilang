@@ -1,3 +1,4 @@
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics.Model;
@@ -10,6 +11,11 @@ namespace Trilang.Semantics;
 
 internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
 {
+    private readonly BuiltInTypes builtInTypes;
+
+    public ConvertToSemanticTree(BuiltInTypes builtInTypes)
+        => this.builtInTypes = builtInTypes;
+
     public ISemanticNode TransformTypeAlias(AliasDeclarationNode node)
     {
         var accessModifier = (AccessModifier)node.AccessModifier;
@@ -178,7 +184,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var expression = (IExpression)node.Expression.Transform(this);
         var type = (IInlineType)node.Type.Transform(this);
 
-        return new IsExpression(node.SourceSpan, expression, type);
+        return new IsExpression(node.SourceSpan, expression, type, builtInTypes);
     }
 
     public ISemanticNode TransformLiteral(LiteralExpressionNode node)
@@ -242,7 +248,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
     }
 
     public ISemanticNode TransformNull(NullExpressionNode node)
-        => new NullExpression(node.SourceSpan);
+        => new NullExpression(node.SourceSpan, builtInTypes);
 
     public ISemanticNode TransformParameter(ParameterNode node)
     {

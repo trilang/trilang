@@ -6,57 +6,61 @@ namespace Trilang.Semantics.Passes;
 internal class VariableUsedBeforeDeclared : Visitor, ISemanticPass
 {
     private readonly List<HashSet<string>> scopes;
-    private SymbolTableMap symbolTableMap = null!;
-    private MetadataProviderMap metadataProviderMap = null!;
-    private SemanticDiagnosticReporter diagnostics = null!;
+    private readonly SemanticDiagnosticReporter diagnostics;
+    private readonly SymbolTableMap symbolTableMap;
 
-    public VariableUsedBeforeDeclared()
-        => scopes = [];
-
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public VariableUsedBeforeDeclared(
+        ISet<string> directives,
+        SemanticDiagnosticReporter diagnostics,
+        SymbolTableMap symbolTableMap) : base(directives)
     {
-        symbolTableMap = context.SymbolTableMap!;
-        metadataProviderMap = context.MetadataProviderMap!;
-        diagnostics = context.Diagnostics;
+        this.diagnostics = diagnostics;
+        this.symbolTableMap = symbolTableMap;
+        scopes = [];
+    }
 
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    {
         foreach (var tree in semanticTrees)
             tree.Accept(this);
     }
 
-    protected override void VisitBlockEnter(BlockStatement node)
-        => scopes.Add([]);
+    public override void VisitBlock(BlockStatement node)
+    {
+        scopes.Add([]);
 
-    protected override void VisitBlockExit(BlockStatement node)
-        => scopes.RemoveAt(scopes.Count - 1);
+        base.VisitBlock(node);
 
-    protected override void VisitVariableEnter(VariableDeclaration node)
-        => scopes[^1].Add(node.Name);
+        scopes.RemoveAt(scopes.Count - 1);
+    }
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
+    public override void VisitVariable(VariableDeclaration node)
+    {
+        scopes[^1].Add(node.Name);
+
+        base.VisitVariable(node);
+    }
+
+    public override void VisitMemberAccess(MemberAccessExpression node)
     {
         if (!node.IsFirstMember || node.IsThis || node.IsField || node.IsValue)
             return;
 
         var symbolTable = symbolTableMap.Get(node);
-        var symbol = symbolTable.GetId(node.Name);
-        if (symbol is not null)
-        {
-            if (symbol.Nodes[0] is not VariableDeclaration)
+        var symbols = symbolTable.GetId(node.Name);
+        if (symbols is [])
+            return;
+
+        if (!symbols.Any(x => x.Node is VariableDeclaration))
+            return;
+
+        for (var i = scopes.Count - 1; i >= 0; i--)
+            if (scopes[i].Contains(node.Name))
                 return;
 
-            for (var i = scopes.Count - 1; i >= 0; i--)
-                if (scopes[i].Contains(node.Name))
-                    return;
+        diagnostics.VariableUsedBeforeDeclaration(node);
 
-            diagnostics.VariableUsedBeforeDeclaration(node);
-            return;
-        }
-
-        // access static member
-        var typeProvider = metadataProviderMap.Get(node);
-        var type = typeProvider.GetType(node.Name);
-        if (type is null)
-            diagnostics.UnknownSymbol(node);
+        base.VisitMemberAccess(node);
     }
 
     public string Name => nameof(VariableUsedBeforeDeclared);

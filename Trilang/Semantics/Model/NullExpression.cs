@@ -4,8 +4,13 @@ namespace Trilang.Semantics.Model;
 
 public class NullExpression : IExpression
 {
-    public NullExpression(SourceSpan? sourceSpan)
-        => SourceSpan = sourceSpan;
+    private readonly BuiltInTypes builtInTypes;
+
+    public NullExpression(SourceSpan? sourceSpan, BuiltInTypes builtInTypes)
+    {
+        this.builtInTypes = builtInTypes;
+        SourceSpan = sourceSpan;
+    }
 
     public void Accept(IVisitor visitor)
         => visitor.VisitNull(this);
@@ -17,12 +22,12 @@ public class NullExpression : IExpression
         => transformer.TransformNull(this);
 
     public IExpression Clone()
-        => new NullExpression(SourceSpan);
+        => new NullExpression(SourceSpan, builtInTypes);
 
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
 
     public ITypeMetadata ReturnTypeMetadata
-        => TypeMetadata.Null;
+        => builtInTypes.Null;
 }

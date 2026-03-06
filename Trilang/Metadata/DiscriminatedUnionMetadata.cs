@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<DiscriminatedUnionMetadata>
+public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata, IEquatable<DiscriminatedUnionMetadata>
 {
     private readonly List<ITypeMetadata> types;
 
@@ -27,7 +27,8 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
         if (IsInvalid || other.IsInvalid)
             return false;
 
-        return types.SequenceEqual(other.types);
+        return types.SequenceEqual(other.types) &&
+               Equals(Namespace, other.Namespace);
     }
 
     public override bool Equals(object? obj)
@@ -64,6 +65,8 @@ public class DiscriminatedUnionMetadata : ITypeMetadata, IEquatable<Discriminate
         => true;
 
     public TypeLayout? Layout { get; set; }
+
+    public NamespaceMetadata? Namespace { get; set; }
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;

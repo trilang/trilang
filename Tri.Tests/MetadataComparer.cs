@@ -46,6 +46,8 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
                 => CompareInterfacePropertyMetadata(x1, y1),
             (MethodMetadata x1, MethodMetadata y1)
                 => CompareMethodMetadata(x1, y1),
+            (NamespaceMetadata x1, NamespaceMetadata y1)
+                => CompareNamespaceMetadata(x1, y1),
             (ParameterMetadata x1, ParameterMetadata y1)
                 => CompareParameterMetadata(x1, y1),
             (PropertyMetadata x1, PropertyMetadata y1)
@@ -76,6 +78,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (!Equals(x.Type, y.Type))
             throw new Exception("Type doesn't match.");
 
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
+
         return true;
     }
 
@@ -97,6 +102,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
     {
         if (!x.Types.SequenceEqual(y.Types, this))
             throw new Exception("Types don't match.");
+
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
 
         return true;
     }
@@ -134,6 +142,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (!Equals(x.ReturnType, y.ReturnType))
             throw new Exception("ReturnType doesn't match.");
 
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
+
         return true;
     }
 
@@ -148,6 +159,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (!Equals(x.ClosedGeneric, y.ClosedGeneric))
             throw new Exception("ClosedGeneric doesn't match.");
 
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
+
         return true;
     }
 
@@ -158,6 +172,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
         if (!x.Methods.SequenceEqual(y.Methods, this))
             throw new Exception("Methods don't match.");
+
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
 
         return true;
     }
@@ -210,6 +227,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         return true;
     }
 
+    private bool CompareNamespaceMetadata(NamespaceMetadata x, NamespaceMetadata y)
+        => object.ReferenceEquals(x, y);
+
     private bool CompareParameterMetadata(ParameterMetadata x, ParameterMetadata y)
     {
         if (x.Name != y.Name)
@@ -243,6 +263,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (!x.Types.SequenceEqual(y.Types, this))
             throw new Exception("Types don't match.");
 
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
+
         return true;
     }
 
@@ -259,6 +282,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (!Equals(x.ItemMetadata, y.ItemMetadata))
             throw new Exception("ItemMetadata doesn't match.");
 
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
+
         return true;
     }
 
@@ -269,6 +295,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
         if (!x.GenericArguments.SequenceEqual(y.GenericArguments, this))
             throw new Exception("GenericArguments don't match.");
+
+        if (!Equals(x.Namespace, y.Namespace))
+            throw new Exception("Namespace doesn't match.");
 
         if (!x.Interfaces.SequenceEqual(y.Interfaces, this))
             throw new Exception("Interfaces don't match.");

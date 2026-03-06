@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
@@ -7,18 +8,28 @@ namespace Trilang.Semantics.Passes;
 // TODO: handle endless loops
 internal class MissingReturnStatement : ISemanticPass
 {
-    public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
-    {
-        var cfgs = context.ControlFlowGraphs;
-        if (cfgs is null)
-            return;
+    private readonly SemanticDiagnosticReporter diagnostics;
+    private readonly ControlFlowGraphMap map;
+    private readonly BuiltInTypes builtInTypes;
 
+    public MissingReturnStatement(
+        SemanticDiagnosticReporter diagnostics,
+        ControlFlowGraphMap map,
+        BuiltInTypes builtInTypes)
+    {
+        this.map = map;
+        this.builtInTypes = builtInTypes;
+        this.diagnostics = diagnostics;
+    }
+
+    public void Analyze(IEnumerable<SemanticTree> _)
+    {
         var visited = new HashSet<SemanticBlock>();
         var q = new Queue<SemanticBlock>();
 
-        foreach (var (function, cfg) in cfgs.Functions)
+        foreach (var (function, cfg) in map.Functions)
         {
-            if (function is ConstructorMetadata || function.Type.ReturnType.Equals(TypeMetadata.Void))
+            if (function is ConstructorMetadata || function.Type.ReturnType.Equals(builtInTypes.Void))
                 continue;
 
             visited.Clear();
@@ -35,7 +46,7 @@ internal class MissingReturnStatement : ISemanticPass
 
                 if (block.Next.Count == 0)
                 {
-                    context.Diagnostics.NotAllPathsReturnValue(function);
+                    diagnostics.NotAllPathsReturnValue(function);
                     continue;
                 }
 

@@ -1,6 +1,7 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;
+using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Parsing.Ast;
 using Trilang.Semantics;
@@ -41,7 +42,7 @@ public class MultifileSemanticTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [file1, file2],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
@@ -61,7 +62,7 @@ public class MultifileSemanticTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [file1, file2],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
@@ -76,7 +77,7 @@ public class MultifileSemanticTests
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
             [file1, file2],
-            new SemanticAnalysisOptions([], new SemanticDiagnosticReporter(diagnostics)));
+            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,

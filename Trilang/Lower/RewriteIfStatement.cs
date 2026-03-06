@@ -8,7 +8,7 @@ internal class RewriteIfStatement : Visitor
     private readonly Dictionary<IfStatement, string> ifLabels;
     private int ifCounter;
 
-    public RewriteIfStatement()
+    public RewriteIfStatement(ISet<string> directives) : base(directives)
     {
         ifLabels = [];
         ifCounter = 0;
@@ -28,7 +28,7 @@ internal class RewriteIfStatement : Visitor
         return label;
     }
 
-    protected override void VisitIfEnter(IfStatement node)
+    public override void VisitIf(IfStatement node)
     {
         var parentBlock = (IBlock)node.Parent!;
 
@@ -94,20 +94,42 @@ internal class RewriteIfStatement : Visitor
 
         if (generateThenBlock)
             parentBlock.InsertAfter(newIf, thenBlock);
+
+        base.VisitIf(node);
     }
 
-    protected override void VisitConstructorExit(ConstructorDeclaration node)
-        => ResetLabelCounter();
+    public override void VisitConstructor(ConstructorDeclaration node)
+    {
+        base.VisitConstructor(node);
 
-    protected override void VisitFunctionExit(FunctionDeclaration node)
-        => ResetLabelCounter();
+        ResetLabelCounter();
+    }
 
-    protected override void VisitMethodExit(MethodDeclaration node)
-        => ResetLabelCounter();
+    public override void VisitFunction(FunctionDeclaration node)
+    {
+        base.VisitFunction(node);
 
-    protected override void VisitGetterExit(PropertyGetter node)
-        => ResetLabelCounter();
+        ResetLabelCounter();
+    }
 
-    protected override void VisitSetterExit(PropertySetter node)
-        => ResetLabelCounter();
+    public override void VisitMethod(MethodDeclaration node)
+    {
+        base.VisitMethod(node);
+
+        ResetLabelCounter();
+    }
+
+    public override void VisitGetter(PropertyGetter node)
+    {
+        base.VisitGetter(node);
+
+        ResetLabelCounter();
+    }
+
+    public override void VisitSetter(PropertySetter node)
+    {
+        base.VisitSetter(node);
+
+        ResetLabelCounter();
+    }
 }

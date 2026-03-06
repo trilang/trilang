@@ -1,7 +1,9 @@
 using Trilang.Compilation.Diagnostics;
+using Trilang.Metadata;
 
 namespace Trilang.Semantics;
 
 public record SemanticAnalysisOptions(
-    IEnumerable<string> Directives,
-    SemanticDiagnosticReporter Diagnostics);
+    ISet<string> Directives,
+    SemanticDiagnosticReporter Diagnostics,
+    BuiltInTypes BuiltInTypes);

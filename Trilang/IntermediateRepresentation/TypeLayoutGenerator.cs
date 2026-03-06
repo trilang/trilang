@@ -5,8 +5,13 @@ namespace Trilang.IntermediateRepresentation;
 // TODO: use alignment/pack
 internal class TypeLayoutGenerator
 {
+    private readonly BuiltInTypes builtInTypes;
+
     // TODO: use platform pointer size
     private const int PointerSize = 8;
+
+    public TypeLayoutGenerator(BuiltInTypes builtInTypes)
+        => this.builtInTypes = builtInTypes;
 
     public void Generate(IEnumerable<ITypeMetadata> types)
     {
@@ -23,57 +28,57 @@ internal class TypeLayoutGenerator
 
     private void GenerateBuiltInTypes()
     {
-        TypeMetadata.Void.Layout = new TypeLayout();
+        builtInTypes.Void.Layout = new TypeLayout();
 
-        TypeMetadata.Null.Layout = new TypeLayout([
+        builtInTypes.Null.Layout = new TypeLayout([
             new FieldLayout(null, 0, PointerSize),
         ]);
 
-        TypeMetadata.I8.Layout = new TypeLayout([
+        builtInTypes.I8.Layout = new TypeLayout([
             new FieldLayout(null, 0, 1),
         ]);
 
-        TypeMetadata.I16.Layout = new TypeLayout([
+        builtInTypes.I16.Layout = new TypeLayout([
             new FieldLayout(null, 0, 2),
         ]);
 
-        TypeMetadata.I32.Layout = new TypeLayout([
+        builtInTypes.I32.Layout = new TypeLayout([
             new FieldLayout(null, 0, 4),
         ]);
 
-        TypeMetadata.I64.Layout = new TypeLayout([
+        builtInTypes.I64.Layout = new TypeLayout([
             new FieldLayout(null, 0, 8),
         ]);
 
-        TypeMetadata.U8.Layout = new TypeLayout([
+        builtInTypes.U8.Layout = new TypeLayout([
             new FieldLayout(null, 0, 1),
         ]);
 
-        TypeMetadata.U16.Layout = new TypeLayout([
+        builtInTypes.U16.Layout = new TypeLayout([
             new FieldLayout(null, 0, 2),
         ]);
 
-        TypeMetadata.U32.Layout = new TypeLayout([
+        builtInTypes.U32.Layout = new TypeLayout([
             new FieldLayout(null, 0, 4),
         ]);
 
-        TypeMetadata.U64.Layout = new TypeLayout([
+        builtInTypes.U64.Layout = new TypeLayout([
             new FieldLayout(null, 0, 8),
         ]);
 
-        TypeMetadata.F32.Layout = new TypeLayout([
+        builtInTypes.F32.Layout = new TypeLayout([
             new FieldLayout(null, 0, 4),
         ]);
 
-        TypeMetadata.F64.Layout = new TypeLayout([
+        builtInTypes.F64.Layout = new TypeLayout([
             new FieldLayout(null, 0, 8),
         ]);
 
-        TypeMetadata.Bool.Layout = new TypeLayout([
+        builtInTypes.Bool.Layout = new TypeLayout([
             new FieldLayout(null, 0, 1),
         ]);
 
-        TypeMetadata.Char.Layout = new TypeLayout([
+        builtInTypes.Char.Layout = new TypeLayout([
             new FieldLayout(null, 0, 2),
         ]);
     }

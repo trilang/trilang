@@ -6,21 +6,24 @@ namespace Trilang.Semantics.Passes;
 
 internal class CyclicAlias : ISemanticPass
 {
+    private readonly SemanticDiagnosticReporter diagnostics;
+    private readonly NamespaceMetadata rootNamespace;
     private readonly HashSet<ITypeMetadata> visitedTypes;
 
-    public CyclicAlias()
-        => visitedTypes = [];
-
-    public void Analyze(IEnumerable<SemanticTree> _, SemanticPassContext context)
+    public CyclicAlias(SemanticDiagnosticReporter diagnostics, NamespaceMetadata rootNamespace)
     {
-        var typeProvider = context.RootMetadataProvider;
-        foreach (var aliasType in typeProvider.Types.OfType<AliasMetadata>())
-            CheckCircularReference(aliasType, context.Diagnostics);
+        this.diagnostics = diagnostics;
+        this.rootNamespace = rootNamespace;
+        visitedTypes = [];
     }
 
-    private void CheckCircularReference(
-        AliasMetadata aliasType,
-        SemanticDiagnosticReporter diagnostics)
+    public void Analyze(IEnumerable<SemanticTree> _)
+    {
+        foreach (var aliasType in rootNamespace.EnumerateAllTypes().OfType<AliasMetadata>())
+            CheckCircularReference(aliasType, diagnostics);
+    }
+
+    private void CheckCircularReference(AliasMetadata aliasType, SemanticDiagnosticReporter diagnostics)
     {
         var metadata = aliasType as ITypeMetadata;
         visitedTypes.Clear();

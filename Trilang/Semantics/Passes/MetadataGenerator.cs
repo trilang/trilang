@@ -2,61 +2,113 @@ using System.Diagnostics;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
-using Trilang.Symbols;
+using Trilang.Semantics.Providers;
 
 namespace Trilang.Semantics.Passes;
 
 internal class MetadataGenerator : Visitor, ISemanticPass
 {
-    private SemanticDiagnosticReporter diagnostics = null!;
-    private MetadataProviderMap metadataProviderMap = null!;
-    private SymbolTableMap symbolTableMap = null!;
+    private readonly SemanticDiagnosticReporter diagnostics;
+    private readonly SymbolTableMap symbolTableMap;
+    private readonly MetadataProviderMap metadataProviderMap;
+    private readonly NamespaceMetadata rootNamespace;
+    private readonly BuiltInTypes builtInTypes;
 
     private readonly HashSet<TypeDeclaration> typesToProcess;
     private readonly HashSet<AliasDeclaration> aliasToProcess;
     private readonly HashSet<FunctionDeclaration> functionsToProcess;
-    private readonly HashSet<(GenericApplication, GenericApplicationMetadata)> genericToProcess;
+    private readonly HashSet<GenericApplicationMetadata> genericToProcess;
 
-    public MetadataGenerator()
+    public MetadataGenerator(
+        ISet<string> directives,
+        SemanticDiagnosticReporter diagnostics,
+        SymbolTableMap symbolTableMap,
+        MetadataProviderMap metadataProviderMap,
+        NamespaceMetadata rootNamespace,
+        BuiltInTypes builtInTypes)
+        : base(directives)
     {
+        this.diagnostics = diagnostics;
+        this.symbolTableMap = symbolTableMap;
+        this.metadataProviderMap = metadataProviderMap;
+        this.rootNamespace = rootNamespace;
+        this.builtInTypes = builtInTypes;
+
         typesToProcess = [];
         aliasToProcess = [];
         functionsToProcess = [];
         genericToProcess = [];
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
     {
-        diagnostics = context.Diagnostics;
-        metadataProviderMap = context.MetadataProviderMap!;
-        symbolTableMap = context.SymbolTableMap!;
+        var treesToAnalyze = semanticTrees as SemanticTree[] ??
+                             semanticTrees.ToArray();
 
-        var rootSymbolTable = context.RootSymbolTable;
-        var types = rootSymbolTable.Types;
-        var ids = rootSymbolTable.Ids;
+        var rootProvider = new FileMetadataProvider(rootNamespace);
+        CreateNamespaces(treesToAnalyze, rootProvider);
+        AddUses(treesToAnalyze, rootProvider);
+
+        var (types, functions) = CollectTypesAndFunctions(treesToAnalyze);
 
         CreateAliases(types);
         CreateTypes(types);
-        CreateFunctions(ids);
+        CreateGeneric(types);
+        CreateFunctions(functions);
 
         PopulateAliases();
         PopulateTypes();
         PopulateFunctions();
 
-        foreach (var semanticTree in semanticTrees)
+        foreach (var semanticTree in treesToAnalyze)
             semanticTree.Accept(this);
 
         CreateClosedGenericTypes();
     }
 
-    private ITypeMetadata CreateTypeArgumentMetadata(TypeRef genericArgument)
+    private void CreateNamespaces(
+        SemanticTree[] treesToAnalyze,
+        FileMetadataProvider rootProvider)
+    {
+        var visitor = new NamespaceMetadataGenerator(directives, rootProvider, metadataProviderMap);
+        foreach (var tree in treesToAnalyze)
+            tree.Accept(visitor);
+    }
+
+    private void AddUses(SemanticTree[] treesToAnalyze, FileMetadataProvider rootProvider)
+    {
+        var addNamespaceUses = new AddNamespaceUses(
+            directives,
+            diagnostics,
+            rootProvider,
+            metadataProviderMap);
+
+        foreach (var tree in treesToAnalyze)
+            tree.Accept(addNamespaceUses);
+    }
+
+    private (IReadOnlyList<TypeDescriptor>, IReadOnlyList<FunctionDeclaration>) CollectTypesAndFunctions(SemanticTree[] treesToAnalyze)
+    {
+        var collector = new CollectTypesVisitor(directives);
+        foreach (var tree in treesToAnalyze)
+            tree.Accept(collector);
+
+        return (collector.Types, collector.Functions);
+    }
+
+    private ITypeMetadata CreateTypeArgumentMetadata(
+        IGenericMetadata metadata,
+        TypeRef genericArgument)
     {
         var argumentMetadata = new TypeArgumentMetadata(
             genericArgument.GetLocation(),
             genericArgument.Name) as ITypeMetadata;
 
-        var argumentProvider = metadataProviderMap.Get(genericArgument);
-        if (!argumentProvider.DefineType(genericArgument.Name, argumentMetadata))
+        var argumentExists = metadata.GenericArguments
+            .OfType<TypeArgumentMetadata>()
+            .Any(x => x.Name == genericArgument.Name);
+
+        if (argumentExists)
         {
             argumentMetadata = TypeArgumentMetadata.Invalid(genericArgument.Name);
             diagnostics.TypeArgumentAlreadyDefined(genericArgument);
@@ -67,18 +119,24 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         return argumentMetadata;
     }
 
-    private void CreateTypes(IReadOnlyList<TypeSymbol> types)
+    private void CreateTypes(IReadOnlyList<TypeDescriptor> types)
     {
         foreach (var symbol in types)
         {
-            if (symbol is { IsTypeDeclaration: false, IsGenericTypeDeclaration: false })
+            if (symbol is { IsTypeDeclaration: false, IsGenericDeclaration: false })
                 continue;
 
             var node = (TypeDeclaration)symbol.Node;
             var metadata = new TypeMetadata(node.GetLocation(), node.Name);
 
+            // create a new provider for generic
+            if (node.GenericArguments.Count > 0)
+                metadataProviderMap.Add(
+                    node,
+                    new GenericMetadataProvider(metadataProviderMap.Get(node), metadata));
+
             foreach (var genericArgument in node.GenericArguments)
-                metadata.AddGenericArgument(CreateTypeArgumentMetadata(genericArgument));
+                metadata.AddGenericArgument(CreateTypeArgumentMetadata(metadata, genericArgument));
 
             var metadataProvider = metadataProviderMap.Get(node);
             if (!metadataProvider.DefineType(symbol.Name, metadata))
@@ -99,19 +157,33 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         {
             var type = node.Metadata!;
             var root = node.GetRoot();
-            var typeProvider = metadataProviderMap.Get(node);
+            var metadataProvider = metadataProviderMap.Get(node);
+            var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
 
             foreach (var @interface in node.Interfaces)
             {
                 // TODO: support generic interfaces
                 var interfaceMetadata = default(InterfaceMetadata);
-                if (typeProvider.GetType(@interface.Name) is AliasMetadata aliasMetadata)
-                    interfaceMetadata = aliasMetadata.Type as InterfaceMetadata;
-
-                if (interfaceMetadata is null)
+                var types = metadataProvider.FindTypes(@interface.Name);
+                if (types is [AliasMetadata aliasMetadata])
                 {
-                    interfaceMetadata = InterfaceMetadata.Invalid();
+                    interfaceMetadata = aliasMetadata.UnpackAlias() as InterfaceMetadata;
+
+                    if (interfaceMetadata is null)
+                    {
+                        interfaceMetadata = InterfaceMetadata.Invalid();
+                        diagnostics.UnknownType(@interface);
+                    }
+                }
+                else if (types is [_] or [])
+                {
                     diagnostics.UnknownType(@interface);
+                    interfaceMetadata = InterfaceMetadata.Invalid();
+                }
+                else
+                {
+                    diagnostics.MultipleMembersFound(@interface, types);
+                    interfaceMetadata = InterfaceMetadata.Invalid();
                 }
 
                 type.AddInterface(interfaceMetadata);
@@ -120,7 +192,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
 
             foreach (var property in node.Properties)
             {
-                var propertyMetadata = new PropertyMetadata(
+                var propertyMetadata = metadataFactory.CreatePropertyMetadata(
                     new SourceLocation(root.SourceFile, property.SourceSpan.GetValueOrDefault()),
                     type,
                     property.Name,
@@ -128,7 +200,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
                     property.Getter?.AccessModifier.ToMetadata(),
                     property.Setter?.AccessModifier.ToMetadata());
 
-                if (type.GetProperty(property.Name) is not null)
+                if (!type.GetProperties(property.Name).IsEmpty)
                 {
                     propertyMetadata.MarkAsInvalid();
                     diagnostics.PropertyAlreadyDefined(property);
@@ -141,16 +213,12 @@ internal class MetadataGenerator : Visitor, ISemanticPass
                 if (propertyMetadata.Getter is not null)
                 {
                     type.AddMethod(propertyMetadata.Getter);
-                    typeProvider.DefineType(propertyMetadata.Getter.Type);
-
                     property.Getter?.Metadata = propertyMetadata.Getter;
                 }
 
                 if (propertyMetadata.Setter is not null)
                 {
                     type.AddMethod(propertyMetadata.Setter);
-                    typeProvider.DefineType(propertyMetadata.Setter.Type);
-
                     property.Setter?.Metadata = propertyMetadata.Setter;
                 }
             }
@@ -160,11 +228,10 @@ internal class MetadataGenerator : Visitor, ISemanticPass
                 foreach (var constructor in node.Constructors)
                 {
                     var parameters = GetParameters(root, constructor.Parameters);
-                    var functionType = new FunctionTypeMetadata(
+                    var functionType = metadataFactory.CreateFunctionType(
                         null,
                         parameters.Select(x => x.Type),
-                        TypeMetadata.Void);
-                    functionType = typeProvider.GetOrDefine(functionType);
+                        builtInTypes.Void);
 
                     var constructorMetadata = new ConstructorMetadata(
                         new SourceLocation(root.SourceFile, constructor.SourceSpan.GetValueOrDefault()),
@@ -179,9 +246,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
             }
             else
             {
-                var functionType = new FunctionTypeMetadata(null, [], TypeMetadata.Void);
-                functionType = typeProvider.GetOrDefine(functionType);
-
+                var functionType = metadataFactory.CreateFunctionType(null, [], builtInTypes.Void);
                 type.AddConstructor(new ConstructorMetadata(
                     null,
                     type,
@@ -192,18 +257,14 @@ internal class MetadataGenerator : Visitor, ISemanticPass
 
             foreach (var methods in node.Methods.GroupBy(x => x.Name))
             {
-                var group = new FunctionGroupMetadata();
-
                 foreach (var method in methods)
                 {
                     var parameters = GetParameters(root, method.Parameters);
                     var parameterTypes = parameters.Select(x => x.Type).ToArray();
-
-                    var functionType = new FunctionTypeMetadata(
+                    var functionType = metadataFactory.CreateFunctionType(
                         null,
                         parameterTypes,
                         GetOrCreateType(method.ReturnType));
-                    functionType = typeProvider.GetOrDefine(functionType);
 
                     var methodMetadata = new MethodMetadata(
                         new SourceLocation(root.SourceFile, method.SourceSpan.GetValueOrDefault()),
@@ -212,10 +273,9 @@ internal class MetadataGenerator : Visitor, ISemanticPass
                         method.IsStatic,
                         method.Name,
                         parameters,
-                        functionType,
-                        group);
+                        functionType);
 
-                    if (type.GetMethods(method.Name, parameterTypes).Any())
+                    if (type.GetMethods(method.Name).MatchFunction(parameterTypes).Any())
                     {
                         methodMetadata.MarkAsInvalid();
                         diagnostics.MethodAlreadyDefined(method);
@@ -253,7 +313,18 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         return result!;
     }
 
-    private void CreateAliases(IReadOnlyList<TypeSymbol> types)
+    private void CreateGeneric(IReadOnlyList<TypeDescriptor> types)
+    {
+        foreach (var symbol in types)
+        {
+            if (!symbol.IsGenericApplication)
+                continue;
+
+            CreateGenericApplication((GenericApplication)symbol.Node);
+        }
+    }
+
+    private void CreateAliases(IReadOnlyList<TypeDescriptor> types)
     {
         foreach (var symbol in types)
         {
@@ -263,8 +334,14 @@ internal class MetadataGenerator : Visitor, ISemanticPass
             var node = (AliasDeclaration)symbol.Node;
             var metadata = new AliasMetadata(node.GetLocation(), node.Name);
 
+            // create a new provider for generic
+            if (node.GenericArguments.Count > 0)
+                metadataProviderMap.Add(
+                    node,
+                    new GenericMetadataProvider(metadataProviderMap.Get(node), metadata));
+
             foreach (var genericArgument in node.GenericArguments)
-                metadata.AddGenericArgument(CreateTypeArgumentMetadata(genericArgument));
+                metadata.AddGenericArgument(CreateTypeArgumentMetadata(metadata, genericArgument));
 
             var metadataProvider = metadataProviderMap.Get(node);
             if (!metadataProvider.DefineType(symbol.Name, metadata))
@@ -289,32 +366,23 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         }
     }
 
-    private void CreateFunctions(IReadOnlyDictionary<string, IdSymbol> functions)
+    private void CreateFunctions(IReadOnlyList<FunctionDeclaration> functions)
     {
-        foreach (var (_, symbol) in functions)
+        foreach (var function in functions)
         {
-            var group = new FunctionGroupMetadata();
+            var metadataProvider = metadataProviderMap.Get(function);
+            var metadata = new FunctionMetadata(
+                function.GetLocation(),
+                function.AccessModifier.ToMetadata(),
+                function.Name,
+                [],
+                null!);
 
-            foreach (var node in symbol.Nodes)
-            {
-                if (node is not FunctionDeclaration function)
-                    continue;
+            metadataProvider.AddFunction(metadata);
 
-                var metadataProvider = metadataProviderMap.Get(function);
-                var metadata = new FunctionMetadata(
-                    function.GetLocation(),
-                    function.AccessModifier.ToMetadata(),
-                    function.Name,
-                    [],
-                    null!,
-                    group);
+            function.Metadata = metadata;
 
-                metadataProvider.AddFunction(metadata);
-
-                function.Metadata = metadata;
-
-                functionsToProcess.Add(function);
-            }
+            functionsToProcess.Add(function);
         }
     }
 
@@ -325,6 +393,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
             var root = function.GetRoot();
             var metadata = function.Metadata!;
             var metadataProvider = metadataProviderMap.Get(function);
+            var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
 
             foreach (var functionParameter in function.Parameters)
             {
@@ -344,30 +413,26 @@ internal class MetadataGenerator : Visitor, ISemanticPass
                 metadata.AddParameter(parameter);
             }
 
-            var functionTypeMetadata = new FunctionTypeMetadata(
+            var functionTypeMetadata = metadataFactory.CreateFunctionType(
                 null,
                 metadata.Parameters.Select(x => x.Type),
                 GetOrCreateType(function.ReturnType));
 
-            if (metadataProvider.GetType(functionTypeMetadata.ToString()) is not FunctionTypeMetadata existingFunctionType)
-            {
-                metadataProvider.DefineType(functionTypeMetadata.ToString(), functionTypeMetadata);
-                existingFunctionType = functionTypeMetadata;
-            }
-
-            metadata.Type = existingFunctionType;
+            metadata.Type = functionTypeMetadata;
         }
 
         foreach (var function in functionsToProcess)
         {
-            // TODO: use type provider to check for existing functions
             var metadata = function.Metadata!;
-            var group = metadata.Group;
-            if (ReferenceEquals(metadata, group.Functions[0]))
+            var metadataProvider = metadataProviderMap.Get(function);
+            var functions = metadataProvider.FindFunctions(function.Name);
+
+            // TODO: report all duplicates?
+            if (ReferenceEquals(functions[0], metadata))
                 continue;
 
             var actualParameters = metadata.Parameters.Select(x => x.Type).ToArray();
-            var isDefined = group.Functions
+            var isDefined = functions
                 .Any(x => !ReferenceEquals(x, metadata) &&
                           x.Type.ParameterTypes.SequenceEqual(actualParameters));
 
@@ -381,46 +446,66 @@ internal class MetadataGenerator : Visitor, ISemanticPass
 
     private void CreateClosedGenericTypes()
     {
-        foreach (var (node, generic) in genericToProcess)
+        foreach (var generic in genericToProcess)
         {
             if (generic.ClosedGeneric is not null)
                 continue;
 
-            var metadataProvider = metadataProviderMap.Get(node);
-            var map = new TypeArgumentMap(metadataProvider, generic);
+            var map = new TypeArgumentMap(builtInTypes, generic);
             map.Map();
         }
     }
 
     private ITypeMetadata GetOrCreateType(IInlineType inlineType)
     {
-        var typeProvider = metadataProviderMap.Get(inlineType);
-        var metadata = typeProvider.GetType(inlineType.Name);
-        if (metadata is null)
+        var metadataProvider = metadataProviderMap.Get(inlineType);
+        var types = metadataProvider.FindTypes(inlineType.Name);
+        var metadata = default(ITypeMetadata);
+
+        if (types is [])
         {
-            metadata = inlineType switch
+            if (inlineType is ArrayType arrayType)
             {
-                ArrayType arrayType => CreateArray(arrayType),
-                DiscriminatedUnion discriminatedUnion => CreateDiscriminatedUnion(discriminatedUnion),
-                FunctionType functionType => CreateFunctionType(functionType),
-                GenericApplication genericApplication => CreateGenericApplication(genericApplication),
-                Interface @interface => CreateInterface(@interface),
-                TupleType tupleType => CreateTuple(tupleType),
-
-                TypeRef => null,
-
-                _ => throw new ArgumentOutOfRangeException(nameof(inlineType)),
-            };
-
-            if (metadata is not null)
-            {
-                typeProvider.DefineType(inlineType.Name, metadata);
+                metadata = CreateArray(arrayType);
             }
-            else
+            else if (inlineType is DiscriminatedUnion discriminatedUnion)
+            {
+                metadata = CreateDiscriminatedUnion(discriminatedUnion);
+            }
+            else if (inlineType is FunctionType functionType)
+            {
+                metadata = CreateFunctionType(functionType);
+            }
+            else if (inlineType is GenericApplication genericApplication)
+            {
+                metadata = CreateGenericApplication(genericApplication);
+            }
+            else if (inlineType is Interface @interface)
+            {
+                metadata = CreateInterface(@interface);
+            }
+            else if (inlineType is TupleType tupleType)
+            {
+                metadata = CreateTuple(tupleType);
+            }
+            else if (inlineType is TypeRef)
             {
                 metadata = TypeMetadata.Invalid(inlineType.Name);
                 diagnostics.UnknownType(inlineType);
             }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(inlineType));
+            }
+        }
+        else if (types is [var type])
+        {
+            metadata = type;
+        }
+        else
+        {
+            diagnostics.MultipleMembersFound(inlineType, types);
+            metadata = TypeMetadata.Invalid(inlineType.Name);
         }
 
         inlineType.Metadata = metadata;
@@ -429,32 +514,60 @@ internal class MetadataGenerator : Visitor, ISemanticPass
     }
 
     private ArrayMetadata CreateArray(ArrayType arrayType)
-        => new ArrayMetadata(
+    {
+        var metadataProvider = metadataProviderMap.Get(arrayType);
+        var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
+        var metadata = metadataFactory.CreateArrayMetadata(
             arrayType.GetLocation(),
             GetOrCreateType(arrayType.ElementType));
 
+        return metadata;
+    }
+
     private DiscriminatedUnionMetadata CreateDiscriminatedUnion(DiscriminatedUnion discriminatedUnion)
-        => new DiscriminatedUnionMetadata(
+    {
+        var metadataProvider = metadataProviderMap.Get(discriminatedUnion);
+        var metadata = new DiscriminatedUnionMetadata(
             discriminatedUnion.GetLocation(),
             discriminatedUnion.Types.Select(GetOrCreateType));
 
+        return metadataProvider.GetOrDefine(metadata);
+    }
+
     private FunctionTypeMetadata CreateFunctionType(FunctionType functionType)
-        => new FunctionTypeMetadata(
+    {
+        var metadataProvider = metadataProviderMap.Get(functionType);
+        var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
+
+        return metadataFactory.CreateFunctionType(
             functionType.GetLocation(),
             functionType.ParameterTypes.Select(GetOrCreateType),
             GetOrCreateType(functionType.ReturnType));
+    }
 
     private ITypeMetadata CreateGenericApplication(GenericApplication genericApplication)
     {
-        var typeProvider = metadataProviderMap.Get(genericApplication);
+        var metadataProvider = metadataProviderMap.Get(genericApplication);
 
         foreach (var argumentNode in genericApplication.TypeArguments)
             GetOrCreateType(argumentNode);
 
         var openGenericName = genericApplication.GetOpenGenericName();
-        if (typeProvider.GetType(openGenericName) is not IGenericMetadata openGeneric)
+        var openGeneric = default(IGenericMetadata);
+
+        var types = metadataProvider.FindTypes(openGenericName);
+        if (types is [IGenericMetadata genericMetadata])
+        {
+            openGeneric = genericMetadata;
+        }
+        else if (types is [_] or [])
         {
             diagnostics.UnknownType(genericApplication);
+            openGeneric = TypeMetadata.Invalid(openGenericName);
+        }
+        else
+        {
+            diagnostics.MultipleMembersFound(genericApplication, types);
             openGeneric = TypeMetadata.Invalid(openGenericName);
         }
 
@@ -463,15 +576,17 @@ internal class MetadataGenerator : Visitor, ISemanticPass
             openGeneric,
             genericApplication.TypeArguments.Select(x => x.Metadata!));
 
-        metadata = typeProvider.GetOrDefine(metadata);
-        genericToProcess.Add((genericApplication, metadata));
+        metadata = metadataProvider.GetOrDefine(metadata);
+
+        genericToProcess.Add(metadata);
 
         return metadata;
     }
 
     private InterfaceMetadata CreateInterface(Interface @interface)
     {
-        var typeProvider = metadataProviderMap.Get(@interface);
+        var metadataProvider = metadataProviderMap.Get(@interface);
+        var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
         var metadata = new InterfaceMetadata(@interface.GetLocation());
 
         foreach (var property in @interface.Properties)
@@ -484,7 +599,7 @@ internal class MetadataGenerator : Visitor, ISemanticPass
                 property.GetterModifier?.ToMetadata() ?? AccessModifierMetadata.Public,
                 property.SetterModifier?.ToMetadata());
 
-            if (metadata.GetProperty(property.Name) is not null)
+            if (!metadata.GetProperties(property.Name).IsEmpty)
             {
                 propertyMetadata.MarkAsInvalid();
                 diagnostics.InterfacePropertyAlreadyDefined(property);
@@ -496,34 +611,25 @@ internal class MetadataGenerator : Visitor, ISemanticPass
 
         foreach (var methods in @interface.Methods.GroupBy(x => x.Name))
         {
-            var group = new FunctionGroupMetadata();
-
             foreach (var method in methods)
             {
                 var parameters = new ITypeMetadata[method.ParameterTypes.Count];
                 for (var i = 0; i < method.ParameterTypes.Count; i++)
                     parameters[i] = GetOrCreateType(method.ParameterTypes[i]);
 
-                var functionType = new FunctionTypeMetadata(
+                var functionType = metadataFactory.CreateFunctionType(
                     null,
                     parameters,
                     GetOrCreateType(method.ReturnType));
-
-                if (typeProvider.GetType(functionType.ToString()) is not FunctionTypeMetadata existingFunctionType)
-                {
-                    typeProvider.DefineType(functionType.ToString(), functionType);
-                    existingFunctionType = functionType;
-                }
 
                 // TODO: generic?
                 var methodMetadata = new InterfaceMethodMetadata(
                     metadata.Definition! with { Span = method.SourceSpan.GetValueOrDefault() },
                     metadata,
                     method.Name,
-                    existingFunctionType,
-                    group);
+                    functionType);
 
-                if (metadata.GetMethods(method.Name, parameters).Any())
+                if (metadata.GetMethods(method.Name).MatchFunction(parameters).Any())
                 {
                     methodMetadata.MarkAsInvalid();
                     diagnostics.InterfaceMethodAlreadyDefined(method);
@@ -534,78 +640,105 @@ internal class MetadataGenerator : Visitor, ISemanticPass
             }
         }
 
-        return metadata;
+        return metadataProvider.GetOrDefine(metadata);
     }
 
     private TupleMetadata CreateTuple(TupleType tupleType)
-        => new TupleMetadata(
+    {
+        var metadataProvider = metadataProviderMap.Get(tupleType);
+        var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
+        var metadata = metadataFactory.CreateTupleMetadata(
             tupleType.GetLocation(),
             tupleType.Types.Select(GetOrCreateType));
 
-    protected override void VisitArrayTypeEnter(ArrayType node)
+        return metadata;
+    }
+
+    public override void VisitArrayType(ArrayType node)
     {
         if (node.Metadata is not null)
             return;
 
         GetOrCreateType(node);
+
+        base.VisitArrayType(node);
     }
 
-    protected override void VisitDiscriminatedUnionEnter(DiscriminatedUnion node)
+    public override void VisitDiscriminatedUnion(DiscriminatedUnion node)
     {
         if (node.Metadata is not null)
             return;
 
         GetOrCreateType(node);
+
+        base.VisitDiscriminatedUnion(node);
     }
 
-    protected override void VisitFunctionTypeEnter(FunctionType node)
+    public override void VisitFunctionType(FunctionType node)
     {
         if (node.Metadata is not null)
             return;
 
         GetOrCreateType(node);
+
+        base.VisitFunctionType(node);
     }
 
-    protected override void VisitGenericTypeRefEnter(GenericApplication node)
+    public override void VisitGenericType(GenericApplication node)
     {
         if (node.Metadata is not null)
             return;
 
         GetOrCreateType(node);
+
+        base.VisitGenericType(node);
     }
 
-    protected override void VisitInterfaceEnter(Interface node)
+    public override void VisitInterface(Interface node)
     {
         if (node.Metadata is not null)
             return;
 
         GetOrCreateType(node);
+
+        base.VisitInterface(node);
     }
 
-    protected override void VisitTupleTypeEnter(TupleType node)
+    public override void VisitTupleType(TupleType node)
     {
         if (node.Metadata is not null)
             return;
 
         GetOrCreateType(node);
+
+        base.VisitTupleType(node);
     }
 
-    protected override void VisitTypeRefEnter(TypeRef node)
+    public override void VisitTypeRef(TypeRef node)
     {
         if (node.Metadata is not null)
             return;
 
         GetOrCreateType(node);
+
+        base.VisitTypeRef(node);
     }
 
-    protected override void VisitVariableExit(VariableDeclaration node)
+    public override void VisitVariable(VariableDeclaration node)
     {
+        base.VisitVariable(node);
+
         Debug.Assert(node.Type.Metadata is not null);
 
         var symbolTable = symbolTableMap.Get(node);
         var metadata = new VariableMetadata(node.GetLocation(), node.Name, node.Type.Metadata);
-        var symbol = symbolTable.GetId(node.Name);
-        if (symbol is not null && symbol.Nodes[0] != node)
+
+        // TODO: optimize? it will query the same symbols in the same scope multiple times
+        var symbols = symbolTable.GetId(node.Name);
+
+        // we don't need to check all symbols, just the first one
+        // all other will be checked in other passes of the tree
+        if (symbols[0].Node != node)
         {
             metadata.MarkAsInvalid();
             diagnostics.VariableAlreadyDefined(node);
@@ -618,5 +751,155 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         => nameof(MetadataGenerator);
 
     public IEnumerable<string> DependsOn
-        => [nameof(SymbolFinder), nameof(MetadataProviderAnalyzer)];
+        => [nameof(SymbolFinder)];
+
+    private sealed class NamespaceMetadataGenerator : Visitor
+    {
+        private readonly FileMetadataProvider rootProvider;
+        private readonly MetadataProviderMap map;
+
+        public NamespaceMetadataGenerator(
+            ISet<string> directives,
+            FileMetadataProvider rootProvider,
+            MetadataProviderMap map) : base(directives)
+        {
+            this.rootProvider = rootProvider;
+            this.map = map;
+        }
+
+        public override void VisitNamespace(Namespace node)
+        {
+            var @namespace = rootProvider.Namespace.CreateChild(node.Parts);
+
+            map.Add(node.Parent!, new FileMetadataProvider(@namespace));
+
+            base.VisitNamespace(node);
+        }
+
+        public override void VisitTree(SemanticTree node)
+        {
+            // at this point, we add this file is in a root namespace
+            map.Add(node, new FileMetadataProvider(rootProvider.Namespace));
+
+            base.VisitTree(node);
+        }
+    }
+
+    private sealed class AddNamespaceUses : Visitor
+    {
+        private readonly SemanticDiagnosticReporter diagnostics;
+        private readonly FileMetadataProvider rootProvider;
+        private readonly MetadataProviderMap map;
+
+        public AddNamespaceUses(
+            ISet<string> directives,
+            SemanticDiagnosticReporter diagnostics,
+            FileMetadataProvider rootProvider,
+            MetadataProviderMap map) : base(directives)
+        {
+            this.diagnostics = diagnostics;
+            this.rootProvider = rootProvider;
+            this.map = map;
+        }
+
+        public override void VisitUse(Use node)
+        {
+            var @namespace = rootProvider.Namespace.FindNamespace(node.Parts);
+            if (@namespace is null)
+            {
+                diagnostics.UnknownNamespace(node);
+                return;
+            }
+
+            // we know it always be FileMetadataProvider
+            var provider = (FileMetadataProvider)map.Get(node);
+            provider.AddUse(@namespace);
+
+            base.VisitUse(node);
+        }
+    }
+
+    private sealed class CollectTypesVisitor : Visitor
+    {
+        private readonly List<TypeDescriptor> types;
+        private readonly List<FunctionDeclaration> functions;
+
+        public CollectTypesVisitor(ISet<string> directives) : base(directives)
+        {
+            types = [];
+            functions = [];
+        }
+
+        public override void VisitAlias(AliasDeclaration node)
+        {
+            types.Add(TypeDescriptor.Alias(node));
+
+            base.VisitAlias(node);
+        }
+
+        public override void VisitGenericType(GenericApplication node)
+        {
+            types.Add(TypeDescriptor.GenericApplication(node));
+
+            base.VisitGenericType(node);
+        }
+
+        public override void VisitFunction(FunctionDeclaration node)
+        {
+            functions.Add(node);
+
+            base.VisitFunction(node);
+        }
+
+        public override void VisitType(TypeDeclaration node)
+        {
+            types.Add(
+                node.GenericArguments.Count > 0
+                    ? TypeDescriptor.GenericDeclaration(node)
+                    : TypeDescriptor.TypeDeclaration(node));
+
+            base.VisitType(node);
+        }
+
+        public IReadOnlyList<TypeDescriptor> Types
+            => types;
+
+        public IReadOnlyList<FunctionDeclaration> Functions
+            => functions;
+    }
+
+    private enum TypeKind
+    {
+        TypeDeclaration,
+        Alias,
+        GenericDeclaration,
+        GenericApplication,
+    }
+
+    private record TypeDescriptor(TypeKind Kind, string Name, ISemanticNode Node)
+    {
+        public static TypeDescriptor TypeDeclaration(TypeDeclaration node)
+            => new TypeDescriptor(TypeKind.TypeDeclaration, node.Name, node);
+
+        public static TypeDescriptor Alias(AliasDeclaration node)
+            => new TypeDescriptor(TypeKind.Alias, node.FullName, node);
+
+        public static TypeDescriptor GenericDeclaration(TypeDeclaration node)
+            => new TypeDescriptor(TypeKind.GenericDeclaration, node.FullName, node);
+
+        public static TypeDescriptor GenericApplication(GenericApplication node)
+            => new TypeDescriptor(TypeKind.GenericApplication, node.Name, node);
+
+        public bool IsTypeDeclaration
+            => Kind == TypeKind.TypeDeclaration;
+
+        public bool IsAlias
+            => Kind == TypeKind.Alias;
+
+        public bool IsGenericDeclaration
+            => Kind == TypeKind.GenericDeclaration;
+
+        public bool IsGenericApplication
+            => Kind == TypeKind.GenericApplication;
+    }
 }

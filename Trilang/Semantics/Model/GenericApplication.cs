@@ -19,7 +19,7 @@ public class GenericApplication : IInlineType
     }
 
     public void Accept(IVisitor visitor)
-        => visitor.VisitGenericTypeRef(this);
+        => visitor.VisitGenericType(this);
 
     public void Accept<TContext>(IVisitor<TContext> visitor, TContext context)
         => visitor.VisitGenericType(this, context);

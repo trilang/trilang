@@ -6,13 +6,19 @@ namespace Trilang.Semantics.Passes;
 
 internal class CheckAccessModifiers : Visitor, ISemanticPass
 {
+    private readonly SemanticDiagnosticReporter diagnostics;
     private SourceFile file;
-    private SemanticDiagnosticReporter diagnostics = null!;
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees, SemanticPassContext context)
+    public CheckAccessModifiers(
+        ISet<string> directives,
+        SemanticDiagnosticReporter diagnostics)
+        : base(directives)
     {
-        diagnostics = context.Diagnostics;
+        this.diagnostics = diagnostics;
+    }
 
+    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    {
         foreach (var tree in semanticTrees)
         {
             file = tree.SourceFile;
@@ -20,7 +26,7 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         }
     }
 
-    protected override void VisitNewObjectEnter(NewObjectExpression node)
+    public override void VisitNewObject(NewObjectExpression node)
     {
         var ctor = node.Metadata!;
         var type = ctor.DeclaringType;
@@ -35,9 +41,11 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         // TODO: check internal ctors, implement when the package system is ready
         if (ctor.AccessModifier != AccessModifierMetadata.Public)
             diagnostics.ConstructorNotAccessible(node, type);
+
+        base.VisitNewObject(node);
     }
 
-    protected override void VisitMemberAccessEnter(MemberAccessExpression node)
+    public override void VisitMemberAccess(MemberAccessExpression node)
     {
         if (node.AccessKind is null)
             return;
@@ -50,6 +58,8 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
             CheckFunction(node, type);
         else if (node.Reference is TypeMetadata typeMetadata)
             CheckType(node, typeMetadata);
+
+        base.VisitMemberAccess(node);
     }
 
     private void CheckProperty(MemberAccessExpression node, PropertyMetadata property)

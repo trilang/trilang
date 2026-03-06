@@ -6,16 +6,12 @@ public class InterfaceMethodMetadata : IFunctionMetadata, IEquatable<InterfaceMe
         SourceLocation? definition,
         InterfaceMetadata declaringType,
         string name,
-        FunctionTypeMetadata type,
-        FunctionGroupMetadata group)
+        FunctionTypeMetadata type)
     {
         Definition = definition;
         DeclaringType = declaringType;
         Name = name;
         Type = type;
-        Group = group;
-
-        group.AddFunction(this);
     }
 
     public static bool operator ==(InterfaceMethodMetadata? left, InterfaceMethodMetadata? right)
@@ -72,6 +68,4 @@ public class InterfaceMethodMetadata : IFunctionMetadata, IEquatable<InterfaceMe
     public string Name { get; }
 
     public FunctionTypeMetadata Type { get; }
-
-    public FunctionGroupMetadata Group { get; }
 }

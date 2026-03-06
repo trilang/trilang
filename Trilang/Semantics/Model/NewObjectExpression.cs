@@ -45,5 +45,5 @@ public class NewObjectExpression : IExpression
     public ConstructorMetadata? Metadata { get; set; }
 
     public ITypeMetadata? ReturnTypeMetadata
-        => Metadata?.DeclaringType;
+        => Type.Metadata;
 }
