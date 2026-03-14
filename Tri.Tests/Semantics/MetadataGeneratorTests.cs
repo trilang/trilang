@@ -34,6 +34,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32;
                 y: i32;
@@ -59,10 +61,11 @@ public class MetadataGeneratorTests
                 new SemanticDiagnosticReporter(diagnostics),
                 builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expected = new TypeMetadata(null, "Point")
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         var xProperty = CreatePropertyMetadata(expected,
@@ -87,7 +90,7 @@ public class MetadataGeneratorTests
                 new ParameterMetadata(null, "x", builtInTypes.I32),
                 new ParameterMetadata(null, "y", builtInTypes.I32)
             ],
-            CreateFunctionType([builtInTypes.I32, builtInTypes.I32], builtInTypes.Void, ns)));
+            CreateFunctionType([builtInTypes.I32, builtInTypes.I32], builtInTypes.Void, expectedRoot)));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,
@@ -95,7 +98,7 @@ public class MetadataGeneratorTests
             false,
             "toString",
             [],
-            CreateFunctionType([], builtInTypes.String, ns)));
+            CreateFunctionType([], builtInTypes.String, expectedRoot)));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,
@@ -103,19 +106,20 @@ public class MetadataGeneratorTests
             false,
             "distance",
             [new ParameterMetadata(null, "other", builtInTypes.I32)],
-            CreateFunctionType([builtInTypes.I32], builtInTypes.I32, ns)));
+            CreateFunctionType([builtInTypes.I32], builtInTypes.I32, expectedRoot)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actual = rootNamespace.FindType("Point");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actual = test1Ns.FindType("Point");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
 
         var toStringType = rootNamespace.FindType("() => string");
-        var expectedToStringType = CreateFunctionType([], builtInTypes.String, ns);
+        var expectedToStringType = CreateFunctionType([], builtInTypes.String, expectedRoot);
         Assert.That(toStringType, Is.EqualTo(expectedToStringType).Using(new MetadataComparer()));
 
         var distanceType = rootNamespace.FindType("(i32) => i32");
-        var expectedDistanceType = CreateFunctionType([builtInTypes.I32], builtInTypes.I32, ns);
+        var expectedDistanceType = CreateFunctionType([builtInTypes.I32], builtInTypes.I32, expectedRoot);
         Assert.That(distanceType, Is.EqualTo(expectedDistanceType).Using(new MetadataComparer()));
     }
 
@@ -124,6 +128,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 x: i32 { public get; public set; }
             }
@@ -138,10 +144,11 @@ public class MetadataGeneratorTests
                 new BuiltInTypes()));
 
         var builtInTypes = new BuiltInTypes();
-        var ns = NamespaceMetadata.CreateRoot(builtInTypes);
+        var expectedRoot = NamespaceMetadata.CreateRoot(builtInTypes);
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var typeMetadata = new TypeMetadata(null, "Test")
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         typeMetadata.AddConstructor(
             new ConstructorMetadata(
@@ -149,7 +156,7 @@ public class MetadataGeneratorTests
                 typeMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
         var propertyMetadata = CreatePropertyMetadata(typeMetadata,
             "x",
             builtInTypes.I32,
@@ -161,7 +168,8 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actual = rootNamespace.FindType("Test") as TypeMetadata;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actual = test1Ns.FindType("Test") as TypeMetadata;
         Assert.That(actual, Is.EqualTo(typeMetadata).Using(new MetadataComparer()));
 
         var actualProperty = (PropertyMetadata)actual.GetProperties("x")[0];
@@ -174,6 +182,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = { }
             public type Interface2 = { }
             public type Point : Interface1, Interface2 { }
@@ -186,6 +196,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var test1Namespace = ns.CreateChild(["Test1"]);
         var interfaceMetadata = new InterfaceMetadata(null)
         {
             Namespace = ns,
@@ -200,7 +211,7 @@ public class MetadataGeneratorTests
             [],
             [])
         {
-            Namespace = ns,
+            Namespace = test1Namespace,
         };
         expected.AddConstructor(
             new ConstructorMetadata(
@@ -209,7 +220,9 @@ public class MetadataGeneratorTests
                 AccessModifierMetadata.Public,
                 [],
                 CreateFunctionType([], builtInTypes.Void, ns)));
-        var actual = rootNamespace.FindType("Point");
+
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actual = test1Ns.FindType("Point");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -220,6 +233,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: xxx;
             }
@@ -236,7 +251,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(27, 2, 8), new SourcePosition(30, 2, 11))),
+                new SourceSpan(new SourcePosition(45, 4, 8), new SourcePosition(48, 4, 11))),
             "Unknown type: 'xxx'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -247,6 +262,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public distance(other: xxx): f64 {
                     return;
@@ -267,14 +284,14 @@ public class MetadataGeneratorTests
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
-                    new SourceSpan(new SourcePosition(47, 2, 28), new SourcePosition(50, 2, 31))),
+                    new SourceSpan(new SourcePosition(65, 4, 28), new SourcePosition(68, 4, 31))),
                 "Unknown type: 'xxx'."),
             new Diagnostic(
                 DiagnosticId.S0004ReturnTypeMismatch,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
-                    new SourceSpan(new SourcePosition(67, 3, 9), new SourcePosition(74, 3, 16))),
+                    new SourceSpan(new SourcePosition(85, 5, 9), new SourcePosition(92, 5, 16))),
                 "Return type mismatch: expected 'f64', got 'void'.")
         };
 
@@ -286,6 +303,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public toString(): xxx {
                     return;
@@ -304,7 +323,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(43, 2, 24), new SourcePosition(46, 2, 27))),
+                new SourceSpan(new SourcePosition(61, 4, 24), new SourcePosition(64, 4, 27))),
             "Unknown type: 'xxx'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -313,7 +332,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTypeAliasTest()
     {
-        var (tree, diagnostics) = Parse("public type MyInt = i32;");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type MyInt = i32;
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -321,19 +345,27 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expected = new AliasMetadata(null, "MyInt", [], builtInTypes.I32)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
-        var actual = rootNamespace.FindType("MyInt");
+
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actual = test1Ns.FindType("MyInt");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateMetadataForTypeAliasMissingTypeTest()
     {
-        var (tree, diagnostics) = Parse("public type MyInt = xxx;");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type MyInt = xxx;
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -346,7 +378,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(23, 1, 24))),
+                new SourceSpan(new SourcePosition(38, 3, 21), new SourcePosition(41, 3, 24))),
             "Unknown type: 'xxx'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -357,6 +389,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(arr: i32[]): void {
                 return;
             }
@@ -381,6 +415,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(arr: xxx): void {
                 return;
             }
@@ -397,7 +433,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(20, 1, 21))),
+                new SourceSpan(new SourcePosition(35, 3, 18), new SourcePosition(38, 3, 21))),
             "Unknown type: 'xxx'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -408,6 +444,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: i32, b: i32): i32 {
                 return 1;
             }
@@ -434,6 +472,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: xxx): void {
                 return;
             }
@@ -450,7 +490,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19))),
+                new SourceSpan(new SourcePosition(33, 3, 16), new SourcePosition(36, 3, 19))),
             "Unknown type: 'xxx'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -461,6 +501,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): xxx {
                 return;
             }
@@ -477,7 +519,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19))),
+                new SourceSpan(new SourcePosition(33, 3, 16), new SourcePosition(36, 3, 19))),
             "Unknown type: 'xxx'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -488,6 +530,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {}
             public type MyPoint = Point;
             """);
@@ -499,9 +543,10 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var test1Namespace = ns.CreateChild(["Test1"]);
         var expectedType = new TypeMetadata(null, "Point")
         {
-            Namespace = ns,
+            Namespace = test1Namespace,
         };
         expectedType.AddConstructor(
             new ConstructorMetadata(
@@ -513,10 +558,12 @@ public class MetadataGeneratorTests
 
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType)
         {
-            Namespace = ns,
+            Namespace = test1Namespace,
         };
-        var actualType = rootNamespace.FindType("Point");
-        var actualAlias = rootNamespace.FindType("MyPoint");
+
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualType = test1Ns.FindType("Point");
+        var actualAlias = test1Ns.FindType("MyPoint");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
@@ -528,6 +575,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type MyPoint = Point;
             public type Point {}
             """);
@@ -538,10 +587,11 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expectedType = new TypeMetadata(null, "Point")
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         expectedType.AddConstructor(
             new ConstructorMetadata(
@@ -549,14 +599,16 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
 
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
-        var actualType = rootNamespace.FindType("Point");
-        var actualAlias = rootNamespace.FindType("MyPoint");
+
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualType = test1Ns.FindType("Point");
+        var actualAlias = test1Ns.FindType("MyPoint");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
@@ -568,6 +620,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {}
             public type MyPoint = Point[];
             """);
@@ -579,9 +633,10 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var test1Namespace = ns.CreateChild(["Test1"]);
         var expectedType = new TypeMetadata(null, "Point")
         {
-            Namespace = ns,
+            Namespace = test1Namespace,
         };
         expectedType.AddConstructor(
             new ConstructorMetadata(
@@ -594,11 +649,12 @@ public class MetadataGeneratorTests
         var expectedArrayType = CreateArrayMetadata(expectedType, ns);
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType)
         {
-            Namespace = ns,
+            Namespace = test1Namespace,
         };
-        var actualType = rootNamespace.FindType("Point");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualType = test1Ns.FindType("Point");
         var actualArrayType = rootNamespace.FindType("Point[]");
-        var actualAlias = rootNamespace.FindType("MyPoint");
+        var actualAlias = test1Ns.FindType("MyPoint");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
@@ -611,6 +667,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type MyPoint = Point[];
             public type Point {}
             """);
@@ -621,10 +679,11 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expectedType = new TypeMetadata(null, "Point")
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         expectedType.AddConstructor(
             new ConstructorMetadata(
@@ -632,16 +691,18 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
 
-        var expectedArrayType = CreateArrayMetadata(expectedType, ns);
+        var expectedArrayType = CreateArrayMetadata(expectedType, expectedRoot);
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
-        var actualType = rootNamespace.FindType("Point");
+
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualType = test1Ns.FindType("Point");
         var actualArrayType = rootNamespace.FindType("Point[]");
-        var actualAlias = rootNamespace.FindType("MyPoint");
+        var actualAlias = test1Ns.FindType("MyPoint");
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
@@ -654,6 +715,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point = {
                 x: i32;
                 y: i32;
@@ -667,10 +730,11 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expectedInterface = new InterfaceMetadata(null)
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
         };
         expectedInterface.AddProperty(
             new InterfacePropertyMetadata(
@@ -691,27 +755,33 @@ public class MetadataGeneratorTests
 
         var expectedAlias = new AliasMetadata(null, "Point", [], expectedInterface)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         expectedInterface.AddMethod(new InterfaceMethodMetadata(
             null,
             expectedInterface,
             "distance",
-            CreateFunctionType([expectedAlias], builtInTypes.F64, ns)));
+            CreateFunctionType([expectedAlias], builtInTypes.F64, expectedRoot)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
         var actualInterface = rootNamespace.FindType(expectedInterface.ToString());
         Assert.That(actualInterface, Is.EqualTo(expectedInterface).Using(new MetadataComparer()));
 
-        var actualAlias = rootNamespace.FindType("Point");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualAlias = test1Ns.FindType("Point");
         Assert.That(actualAlias, Is.EqualTo(expectedAlias).Using(new MetadataComparer()));
     }
 
     [Test]
     public void GenerateMetadataForDiscriminatedUnionTest()
     {
-        var (tree, diagnostics) = Parse("public type DU = {} | i32 | () => void;");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type DU = {} | i32 | () => void;
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -719,26 +789,28 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var du = new DiscriminatedUnionMetadata(null, [
             new InterfaceMetadata(null)
             {
-                Namespace = ns,
+                Namespace = expectedRoot,
             },
             builtInTypes.I32,
-            CreateFunctionType([], builtInTypes.Void, ns),
+            CreateFunctionType([], builtInTypes.Void, expectedRoot),
         ])
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
         };
         var alias = new AliasMetadata(null, "DU", [], du)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = rootNamespace.FindType("DU");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualAlias = test1Ns.FindType("DU");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
         var actualDu = rootNamespace.FindType("{ } | i32 | () => void");
@@ -748,7 +820,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTupleTypeTest()
     {
-        var (tree, diagnostics) = Parse("public type Tuple = (i32, f64);");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type Tuple = (i32, f64);
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -756,16 +833,18 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var tuple = CreateTupleMetadata([builtInTypes.I32, builtInTypes.F64], ns);
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
+        var tuple = CreateTupleMetadata([builtInTypes.I32, builtInTypes.F64], expectedRoot);
         var alias = new AliasMetadata(null, "Tuple", [], tuple)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = rootNamespace.FindType("Tuple");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualAlias = test1Ns.FindType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
         var actualTuple = rootNamespace.FindType("(i32, f64)");
@@ -775,7 +854,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForNestedTupleTypeTest()
     {
-        var (tree, diagnostics) = Parse("public type Tuple = (i32, (f64, bool));");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type Tuple = (i32, (f64, bool));
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -783,17 +867,19 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var nestedTuple = CreateTupleMetadata([builtInTypes.F64, builtInTypes.Bool], ns);
-        var tuple = CreateTupleMetadata([builtInTypes.I32, nestedTuple], ns);
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
+        var nestedTuple = CreateTupleMetadata([builtInTypes.F64, builtInTypes.Bool], expectedRoot);
+        var tuple = CreateTupleMetadata([builtInTypes.I32, nestedTuple], expectedRoot);
         var alias = new AliasMetadata(null, "Tuple", [], tuple)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = rootNamespace.FindType("Tuple");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualAlias = test1Ns.FindType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
         var actualTuple = rootNamespace.FindType("(i32, (f64, bool))");
@@ -806,7 +892,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForDuInTupleTest()
     {
-        var (tree, diagnostics) = Parse("public type Tuple = (i32, bool | i8);");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type Tuple = (i32, bool | i8);
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -814,20 +905,22 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var du = new DiscriminatedUnionMetadata(null, [builtInTypes.Bool, builtInTypes.I8])
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
         };
-        var tuple = CreateTupleMetadata([builtInTypes.I32, du], ns);
+        var tuple = CreateTupleMetadata([builtInTypes.I32, du], expectedRoot);
         var alias = new AliasMetadata(null, "Tuple", [], tuple)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = rootNamespace.FindType("Tuple");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualAlias = test1Ns.FindType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
         var actualTuple = rootNamespace.FindType("(i32, bool | i8)");
@@ -840,7 +933,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForTupleInDuTest()
     {
-        var (tree, diagnostics) = Parse("public type Tuple = i32 | (f64, bool);");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type Tuple = i32 | (f64, bool);
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -848,20 +946,22 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var tuple = CreateTupleMetadata([builtInTypes.F64, builtInTypes.Bool], ns);
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
+        var tuple = CreateTupleMetadata([builtInTypes.F64, builtInTypes.Bool], expectedRoot);
         var du = new DiscriminatedUnionMetadata(null, [builtInTypes.I32, tuple])
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
         };
         var alias = new AliasMetadata(null, "Tuple", [], du)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actualAlias = rootNamespace.FindType("Tuple");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actualAlias = test1Ns.FindType("Tuple");
         Assert.That(actualAlias, Is.EqualTo(alias).Using(new MetadataComparer()));
 
         var actualTuple = rootNamespace.FindType("(f64, bool)");
@@ -874,7 +974,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenerateMetadataForGenericTypeTest()
     {
-        var (tree, diagnostics) = Parse("public type Test<T1, T2> {}");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type Test<T1, T2> {}
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -882,10 +987,11 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expected = new TypeMetadata(null, "Test")
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         expected.AddGenericArgument(new TypeArgumentMetadata(null, "T1"));
         expected.AddGenericArgument(new TypeArgumentMetadata(null, "T2"));
@@ -895,11 +1001,12 @@ public class MetadataGeneratorTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var actual = rootNamespace.FindType("Test<,>");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var actual = test1Ns.FindType("Test<,>");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
@@ -908,6 +1015,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> {
                 x: T;
             }
@@ -921,7 +1030,8 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = rootNamespace.FindType("Test<>") as TypeMetadata;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = test1Ns.FindType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
         var property = (PropertyMetadata)type.GetProperties("x")[0];
@@ -936,6 +1046,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test1<T> {}
             public type Test2 {
                 x: T;
@@ -953,7 +1065,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(51, 3, 8), new SourcePosition(52, 3, 9))),
+                new SourceSpan(new SourcePosition(69, 5, 8), new SourcePosition(70, 5, 9))),
             "Unknown type: 'T'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -964,6 +1076,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> {
                 x: T[];
             }
@@ -977,14 +1091,15 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = rootNamespace.FindType("Test<>") as TypeMetadata;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = test1Ns.FindType("Test<>") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
         var property = (PropertyMetadata)type.GetProperties("x")[0];
         Assert.That(property, Is.Not.Null);
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var typeArrayMetadata = CreateArrayMetadata(new TypeArgumentMetadata(null, "T"), ns);
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var typeArrayMetadata = CreateArrayMetadata(new TypeArgumentMetadata(null, "T"), expectedRoot);
         Assert.That(property.Type, Is.EqualTo(typeArrayMetadata).Using(new MetadataComparer()));
     }
 
@@ -993,6 +1108,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {}
             public type Test = List<i32>;
             """);
@@ -1005,10 +1122,11 @@ public class MetadataGeneratorTests
 
         var closedType = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expected = new TypeMetadata(null, "List")
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         expected.AddGenericArgument(builtInTypes.I32);
         expected.AddConstructor(
@@ -1017,7 +1135,7 @@ public class MetadataGeneratorTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(closedType!.ClosedGeneric, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1028,6 +1146,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {
                 Prop: T;
             }
@@ -1054,6 +1174,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {}
             """);
 
@@ -1065,7 +1187,8 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var type = rootNamespace.FindType("Test") as TypeMetadata;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = test1Ns.FindType("Test") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Constructors, Has.Count.EqualTo(1));
 
@@ -1079,6 +1202,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {
                 prop: T[];
             }
@@ -1109,6 +1234,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {
                 prop: (T, i32);
             }
@@ -1143,6 +1270,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {
                 prop: T | i32;
             }
@@ -1178,6 +1307,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {
                 prop: () => T;
             }
@@ -1210,6 +1341,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {
                 prop: { x: T; };
             }
@@ -1252,6 +1385,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: ((i32) => void) => void): void {
                 return;
             }
@@ -1279,7 +1414,12 @@ public class MetadataGeneratorTests
     [Test]
     public void GenericAliasToDiscriminatedUnionTest()
     {
-        var (tree, diagnostics) = Parse("public type Test<T> = i32 | T;");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type Test<T> = i32 | T;
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -1287,16 +1427,18 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = rootNamespace.FindType("Test<>");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = test1Ns.FindType("Test<>");
         var typeArgumentMetadata = new TypeArgumentMetadata(null, "T");
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var test1Namespace = ns.CreateChild(["Test1"]);
         var du = new DiscriminatedUnionMetadata(null, [builtInTypes.I32, typeArgumentMetadata])
         {
             Namespace = ns,
         };
         var expected = new AliasMetadata(null, "Test", [typeArgumentMetadata], du)
         {
-            Namespace = ns,
+            Namespace = test1Namespace,
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1309,6 +1451,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> = i32 | T;
 
             public func(x: Test<i32>): void {
@@ -1324,7 +1468,8 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Test<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
@@ -1333,27 +1478,27 @@ public class MetadataGeneratorTests
                 [new TypeArgumentMetadata(null, "T")],
                 new DiscriminatedUnionMetadata(null, [builtInTypes.I32, new TypeArgumentMetadata(null, "T")])
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
             [builtInTypes.I32]
         )
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
                 [builtInTypes.I32],
                 new DiscriminatedUnionMetadata(null, [builtInTypes.I32, builtInTypes.I32])
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
         };
 
@@ -1367,6 +1512,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> = () => T;
 
             public func(x: Test<i32>): void {
@@ -1382,30 +1529,31 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Test<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = rootNamespace.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
-                CreateFunctionType([], new TypeArgumentMetadata(null, "T"), ns)
+                CreateFunctionType([], new TypeArgumentMetadata(null, "T"), expectedRoot)
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
             [builtInTypes.I32]
         )
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
                 [builtInTypes.I32],
-                CreateFunctionType([], builtInTypes.I32, ns)
+                CreateFunctionType([], builtInTypes.I32, expectedRoot)
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
         };
 
@@ -1419,6 +1567,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> = { x: T; }
 
             public func(x: Test<i32>): void {
@@ -1434,10 +1584,11 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Test<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = rootNamespace.CreateChild(["Test1"]);
         var openInterface = new InterfaceMetadata(null)
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
         };
         openInterface.AddProperty(new InterfacePropertyMetadata(
             null,
@@ -1448,12 +1599,12 @@ public class MetadataGeneratorTests
             null));
         var openAlias = new AliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], openInterface)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         var closedInterface = new InterfaceMetadata(null)
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
         };
         closedInterface.AddProperty(new InterfacePropertyMetadata(
             null,
@@ -1464,12 +1615,12 @@ public class MetadataGeneratorTests
             null));
         var closedAlias = new AliasMetadata(null, "Test", [builtInTypes.I32], closedInterface)
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         var expected = new GenericApplicationMetadata(null, openAlias, [builtInTypes.I32])
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = closedAlias,
         };
 
@@ -1483,6 +1634,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> = (i32, T);
 
             public func(x: Test<i32>): void {
@@ -1498,30 +1651,31 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Test<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = rootNamespace.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
-                CreateTupleMetadata([builtInTypes.I32, new TypeArgumentMetadata(null, "T")], ns)
+                CreateTupleMetadata([builtInTypes.I32, new TypeArgumentMetadata(null, "T")], expectedRoot)
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
             [builtInTypes.I32]
         )
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
                 [builtInTypes.I32],
-                CreateTupleMetadata([builtInTypes.I32, builtInTypes.I32], ns)
+                CreateTupleMetadata([builtInTypes.I32, builtInTypes.I32], expectedRoot)
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
         };
 
@@ -1535,6 +1689,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> = T[];
 
             public func(x: Test<i32>): void {
@@ -1550,29 +1706,30 @@ public class MetadataGeneratorTests
 
         var actual = rootNamespace.FindType("Test<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var typeArgumentMetadata = new TypeArgumentMetadata(null, "T");
         var openGeneric = new AliasMetadata(
             null,
             "Test",
             [typeArgumentMetadata],
-            CreateArrayMetadata(typeArgumentMetadata, ns)
+            CreateArrayMetadata(typeArgumentMetadata, expectedRoot)
         )
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         var closedGeneric = new AliasMetadata(
             null,
             "Test",
             [builtInTypes.I32],
-            CreateArrayMetadata(builtInTypes.I32, ns)
+            CreateArrayMetadata(builtInTypes.I32, expectedRoot)
         )
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         var expected = new GenericApplicationMetadata(null, openGeneric, [builtInTypes.I32])
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = closedGeneric,
         };
 
@@ -1586,6 +1743,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {}
             public type Test<T> = List<T>;
 
@@ -1603,9 +1762,10 @@ public class MetadataGeneratorTests
         var type = rootNamespace.FindType("Test<i32>");
 
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var nsTest1 = ns.CreateChild(["Test1"]);
         var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T")], [], [], [], [], [])
         {
-            Namespace = ns,
+            Namespace = nsTest1,
         };
         openList.AddConstructor(
             new ConstructorMetadata(
@@ -1617,7 +1777,7 @@ public class MetadataGeneratorTests
 
         var closedList = new TypeMetadata(null, "List", [builtInTypes.I32], [], [], [], [], [])
         {
-            Namespace = ns,
+            Namespace = nsTest1,
         };
         closedList.AddConstructor(
             new ConstructorMetadata(
@@ -1639,7 +1799,7 @@ public class MetadataGeneratorTests
                 }
             )
             {
-                Namespace = ns,
+                Namespace = nsTest1,
             },
             [builtInTypes.I32]
         )
@@ -1656,7 +1816,7 @@ public class MetadataGeneratorTests
                 }
             )
             {
-                Namespace = ns,
+                Namespace = nsTest1,
             },
         };
 
@@ -1670,6 +1830,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T2> {}
             public type Test<T> = List<T>;
 
@@ -1686,10 +1848,11 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Test<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T2")], [], [], [], [], [])
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         openList.AddConstructor(
             new ConstructorMetadata(
@@ -1697,11 +1860,11 @@ public class MetadataGeneratorTests
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
 
         var closedList = new TypeMetadata(null, "List", [builtInTypes.I32], [], [], [], [], [])
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         closedList.AddConstructor(
             new ConstructorMetadata(
@@ -1709,7 +1872,7 @@ public class MetadataGeneratorTests
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -1719,28 +1882,28 @@ public class MetadataGeneratorTests
                 [new TypeArgumentMetadata(null, "T")],
                 new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
             [builtInTypes.I32]
         )
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
                 [builtInTypes.I32],
                 new GenericApplicationMetadata(null, openList, [builtInTypes.I32])
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                     ClosedGeneric = closedList,
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
         };
 
@@ -1754,6 +1917,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<X1, X2> {}
             public type Test<T1, T2> = List<T2, T1>;
 
@@ -1770,10 +1935,11 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Test<i32, bool>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "X1"), new TypeArgumentMetadata(null, "X2")], [], [], [], [], [])
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         openList.AddConstructor(
             new ConstructorMetadata(
@@ -1781,11 +1947,11 @@ public class MetadataGeneratorTests
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
 
         var closedList = new TypeMetadata(null, "List", [builtInTypes.Bool, builtInTypes.I32], [], [], [], [], [])
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
         closedList.AddConstructor(
             new ConstructorMetadata(
@@ -1793,7 +1959,7 @@ public class MetadataGeneratorTests
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, ns)));
+                CreateFunctionType([], builtInTypes.Void, expectedRoot)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -1807,16 +1973,16 @@ public class MetadataGeneratorTests
                     [new TypeArgumentMetadata(null, "T2"), new TypeArgumentMetadata(null, "T1")]
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
             [builtInTypes.I32, builtInTypes.Bool]
         )
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Test",
@@ -1827,12 +1993,12 @@ public class MetadataGeneratorTests
                     [builtInTypes.Bool, builtInTypes.I32]
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                     ClosedGeneric = closedList,
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
         };
 
@@ -1846,6 +2012,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Alias1<T1> = T1 | i32;
             public type Alias2<T1> = Alias1<T1>;
 
@@ -1862,7 +2030,8 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Alias2<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var openAlias2 = new AliasMetadata(
             null,
             "Alias2",
@@ -1877,20 +2046,20 @@ public class MetadataGeneratorTests
                         null,
                         [new TypeArgumentMetadata(null, "T1"), builtInTypes.I32])
                     {
-                        Namespace = ns,
+                        Namespace = expectedRoot,
                     }
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedTest1,
                 },
                 [new TypeArgumentMetadata(null, "T1")]
             )
             {
-                Namespace = ns,
+                Namespace = expectedRoot,
             }
         )
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         var closedAlias2 = new AliasMetadata(
@@ -1907,16 +2076,16 @@ public class MetadataGeneratorTests
                         null,
                         [new TypeArgumentMetadata(null, "T1"), builtInTypes.I32])
                     {
-                        Namespace = ns,
+                        Namespace = expectedRoot,
                     }
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedTest1,
                 },
                 [builtInTypes.I32]
             )
             {
-                Namespace = ns,
+                Namespace = expectedRoot,
                 ClosedGeneric = new AliasMetadata(
                     null,
                     "Alias1",
@@ -1925,21 +2094,21 @@ public class MetadataGeneratorTests
                         null,
                         [builtInTypes.I32, builtInTypes.I32])
                     {
-                        Namespace = ns,
+                        Namespace = expectedRoot,
                     }
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedTest1,
                 },
             }
         )
         {
-            Namespace = ns,
+            Namespace = expectedTest1,
         };
 
         var expected = new GenericApplicationMetadata(null, openAlias2, [builtInTypes.I32])
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = closedAlias2,
         };
 
@@ -1953,6 +2122,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Alias1<T2> = T2 | i32;
             public type Alias2<T1> = Alias1<T1>;
 
@@ -1969,7 +2140,8 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Alias2<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
@@ -1987,25 +2159,25 @@ public class MetadataGeneratorTests
                             [new TypeArgumentMetadata(null, "T2"), builtInTypes.I32]
                         )
                         {
-                            Namespace = ns,
+                            Namespace = expectedRoot,
                         }
                     )
                     {
-                        Namespace = ns,
+                        Namespace = expectedTest1,
                     },
                     [new TypeArgumentMetadata(null, "T1")]
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
             [builtInTypes.I32]
         )
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Alias2",
@@ -2021,16 +2193,16 @@ public class MetadataGeneratorTests
                             [new TypeArgumentMetadata(null, "T2"), builtInTypes.I32]
                         )
                         {
-                            Namespace = ns,
+                            Namespace = expectedRoot,
                         }
                     )
                     {
-                        Namespace = ns,
+                        Namespace = expectedTest1,
                     },
                     [builtInTypes.I32]
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                     ClosedGeneric = new AliasMetadata(
                         null,
                         "Alias1",
@@ -2040,16 +2212,16 @@ public class MetadataGeneratorTests
                             [builtInTypes.I32, builtInTypes.I32]
                         )
                         {
-                            Namespace = ns,
+                            Namespace = expectedRoot,
                         }
                     )
                     {
-                        Namespace = ns,
+                        Namespace = expectedTest1,
                     }
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
         };
 
@@ -2063,6 +2235,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Alias1<T1> = T1 | i32;
             public type Alias2<T1> = Alias1<T1>;
 
@@ -2079,7 +2253,8 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("Alias2<i32>");
 
-        var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedRoot = NamespaceMetadata.CreateRoot(new BuiltInTypes());
+        var expectedTest1 = expectedRoot.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
@@ -2097,25 +2272,25 @@ public class MetadataGeneratorTests
                             [new TypeArgumentMetadata(null, "T1"), builtInTypes.I32]
                         )
                         {
-                            Namespace = ns,
+                            Namespace = expectedRoot,
                         }
                     )
                     {
-                        Namespace = ns,
+                        Namespace = expectedTest1,
                     },
                     [new TypeArgumentMetadata(null, "T1")]
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
             [builtInTypes.I32]
         )
         {
-            Namespace = ns,
+            Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
                 "Alias2",
@@ -2131,16 +2306,16 @@ public class MetadataGeneratorTests
                             [new TypeArgumentMetadata(null, "T1"), builtInTypes.I32]
                         )
                         {
-                            Namespace = ns,
+                            Namespace = expectedRoot,
                         }
                     )
                     {
-                        Namespace = ns,
+                        Namespace = expectedTest1,
                     },
                     [builtInTypes.I32]
                 )
                 {
-                    Namespace = ns,
+                    Namespace = expectedRoot,
                     ClosedGeneric = new AliasMetadata(
                         null,
                         "Alias1",
@@ -2150,16 +2325,16 @@ public class MetadataGeneratorTests
                             [builtInTypes.I32, builtInTypes.I32]
                         )
                         {
-                            Namespace = ns,
+                            Namespace = expectedRoot,
                         }
                     )
                     {
-                        Namespace = ns,
+                        Namespace = expectedTest1,
                     }
                 }
             )
             {
-                Namespace = ns,
+                Namespace = expectedTest1,
             },
         };
 
@@ -2173,6 +2348,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): void { }
 
             public test(x: i32): void { }
@@ -2219,6 +2396,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): void { }
 
             public test(): void { }
@@ -2235,7 +2414,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(25, 3, 1), new SourcePosition(48, 3, 24))),
+                new SourceSpan(new SourcePosition(43, 5, 1), new SourcePosition(66, 5, 24))),
             "The 'test' function is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -2246,6 +2425,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public method(): void { }
 
@@ -2307,6 +2488,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public method(): void { }
 
@@ -2325,7 +2508,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(54, 4, 5), new SourcePosition(79, 4, 30))),
+                new SourceSpan(new SourcePosition(72, 6, 5), new SourcePosition(97, 6, 30))),
             "The 'method' method is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -2336,6 +2519,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test = {
                 method(): void;
 
@@ -2388,6 +2573,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test = {
                 method(): void;
 
@@ -2406,7 +2593,7 @@ public class MetadataGeneratorTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(46, 4, 5), new SourcePosition(61, 4, 20))),
+                new SourceSpan(new SourcePosition(64, 6, 5), new SourcePosition(79, 6, 20))),
             "The 'method' method is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -2417,6 +2604,8 @@ public class MetadataGeneratorTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 var du: i32 | null = (i32 | null)1;
             }

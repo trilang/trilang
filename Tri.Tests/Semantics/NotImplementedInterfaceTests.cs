@@ -32,6 +32,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 x: i32;
                 toString(): string;
@@ -59,6 +61,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 x: i32;
                 toString(): string;
@@ -81,7 +85,7 @@ public class NotImplementedInterfaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(66, 6, 1), new SourcePosition(169, 10, 2))),
+                new SourceSpan(new SourcePosition(84, 8, 1), new SourcePosition(187, 12, 2))),
             "The 'x' property is not implemented.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -92,6 +96,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 x: i32;
                 toString(): string;
@@ -115,7 +121,8 @@ public class NotImplementedInterfaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(102, 7, 5), new SourcePosition(108, 7, 11))),
+                new SourceSpan(new SourcePosition(120, 9, 5),
+            new SourcePosition(126, 9, 11))),
             "The 'x' property is not of the correct type. Expected 'i8', got 'i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -126,6 +133,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 x: i32;
                 toString(): string;
@@ -146,7 +155,8 @@ public class NotImplementedInterfaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(66, 6, 1), new SourcePosition(111, 8, 2))),
+                new SourceSpan(new SourcePosition(84, 8, 1),
+            new SourcePosition(129, 10, 2))),
             "The 'toString' method is not implemented.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -157,6 +167,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 x: i32;
                 toString(): string;
@@ -180,7 +192,8 @@ public class NotImplementedInterfaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(114, 8, 5), new SourcePosition(162, 10, 6))),
+                new SourceSpan(new SourcePosition(132, 10, 5),
+            new SourcePosition(180, 12, 6))),
             "The 'toString' method is not of the correct type. Expected '() => string', got '() => i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -191,6 +204,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 x: i32;
                 toString(): string;
@@ -214,7 +229,9 @@ public class NotImplementedInterfaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(114, 8, 5), new SourcePosition(185, 10, 6))),
+                new SourceSpan(new SourcePosition(132, 10, 5),
+            new SourcePosition(203, 12, 6))
+            ),
             "The 'toString' method is not of the correct type. Expected '() => string', got '(i32) => string'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -225,6 +242,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 method(): void;
             }
@@ -245,7 +264,8 @@ public class NotImplementedInterfaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(86, 6, 5), new SourcePosition(116, 7, 6))),
+                new SourceSpan(new SourcePosition(104, 8, 5),
+            new SourcePosition(134, 9, 6))),
             "The implementation of the interface method 'method' is not public.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -256,6 +276,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 x: i32 { public get; public set; }
             }
@@ -275,7 +297,8 @@ public class NotImplementedInterfaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(105, 6, 5), new SourcePosition(140, 6, 40))),
+                new SourceSpan(new SourcePosition(123, 8, 5),
+            new SourcePosition(158, 8, 40))),
             "The implementation of an interface property getter 'x' cannot be private.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -286,6 +309,8 @@ public class NotImplementedInterfaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Interface1 = {
                 x: i32 { public get; public set; }
             }
@@ -305,7 +330,8 @@ public class NotImplementedInterfaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(105, 6, 5), new SourcePosition(140, 6, 40))),
+                new SourceSpan(new SourcePosition(123, 8, 5),
+            new SourcePosition(158, 8, 40))),
             "The implementation of an interface property setter 'x' cannot be private.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

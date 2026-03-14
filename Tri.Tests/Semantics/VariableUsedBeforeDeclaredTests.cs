@@ -32,6 +32,8 @@ public class VariableUsedBeforeDeclaredTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 var a: i32 = 1;
                 a;
@@ -55,6 +57,8 @@ public class VariableUsedBeforeDeclaredTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(a: i32): void {
                 a;
             }
@@ -77,6 +81,8 @@ public class VariableUsedBeforeDeclaredTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 a;
                 var a: i32 = 1;
@@ -96,7 +102,7 @@ public class VariableUsedBeforeDeclaredTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(27, 2, 6))),
+                new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(45, 4, 6))),
             "The 'a' variable is used before its declaration.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -107,6 +113,8 @@ public class VariableUsedBeforeDeclaredTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 {
                     a;
@@ -128,7 +136,7 @@ public class VariableUsedBeforeDeclaredTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(36, 3, 9), new SourcePosition(37, 3, 10))),
+                new SourceSpan(new SourcePosition(54, 5, 9), new SourcePosition(55, 5, 10))),
             "The 'a' variable is used before its declaration.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -139,6 +147,8 @@ public class VariableUsedBeforeDeclaredTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 {
                     var a: i32 = 1;
@@ -162,7 +172,7 @@ public class VariableUsedBeforeDeclaredTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(72, 6, 9), new SourcePosition(73, 6, 10))),
+                new SourceSpan(new SourcePosition(90, 8, 9), new SourcePosition(91, 8, 10))),
             "Unknown symbol: 'a'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -173,6 +183,8 @@ public class VariableUsedBeforeDeclaredTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 var a: i32 = 1;
             }
@@ -195,7 +207,7 @@ public class VariableUsedBeforeDeclaredTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(71, 6, 5), new SourcePosition(72, 6, 6))),
+                new SourceSpan(new SourcePosition(89, 8, 5), new SourcePosition(90, 8, 6))),
             "Unknown symbol: 'a'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -206,6 +218,8 @@ public class VariableUsedBeforeDeclaredTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): i32 {
                 var a: i32 = 1;
                 {

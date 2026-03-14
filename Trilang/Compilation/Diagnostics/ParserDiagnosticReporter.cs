@@ -103,4 +103,10 @@ public class ParserDiagnosticReporter
             DiagnosticId.P0015ExpectedNamespacePart,
             new SourceLocation(file, span),
             "Expected a namespace part.");
+
+    public void ExpectedNamespace(SourceSpan span)
+        => diagnostics.Error(
+            DiagnosticId.P0016ExpectedNamespace,
+            new SourceLocation(file, span),
+            "Expected a namespace.");
 }

@@ -34,6 +34,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
             }
             """);
@@ -63,7 +65,12 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionParameterTypesTest()
     {
-        var (tree, diagnostics) = Parse("public main(a: i32, b: bool): void { }");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public main(a: i32, b: bool): void { }
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -100,6 +107,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 var a: i32 = 1;
             }
@@ -122,6 +131,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 var a: xxx = 1;
             }
@@ -138,7 +149,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(36, 2, 15))),
+                new SourceSpan(new SourcePosition(51, 4, 12), new SourcePosition(54, 4, 15))),
             "Unknown type: 'xxx'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -149,6 +160,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32;
                 y: i32;
@@ -168,9 +181,10 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
         var expected = new TypeMetadata(null, "Point")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         expected.AddConstructor(
             new ConstructorMetadata(
@@ -220,7 +234,12 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForAliasType()
     {
-        var (tree, diagnostics) = Parse("public type MyInt = i32;");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type MyInt = i32;
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -228,9 +247,10 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
         var expected = new AliasMetadata(null, "MyInt", [], builtInTypes.I32)
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         var semanticTree = semanticTrees.Single();
         var node = semanticTree.Find<AliasDeclaration>();
@@ -241,7 +261,12 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionTypeTest()
     {
-        var (tree, diagnostics) = Parse("public type MyF = (i32, bool) => f64;");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type MyF = (i32, bool) => f64;
+            """);
 
         var builtInTypes = new BuiltInTypes();
         var semantic = new SemanticAnalysis();
@@ -263,6 +288,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public add(a: i32, b: i32): i32 {
                 return 0;
             }
@@ -298,6 +325,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test1(): void {
                 test2();
             }
@@ -336,6 +365,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): i32 {
                 return 1;
             }
@@ -361,6 +392,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): f64 {
                 return 3.14;
             }
@@ -386,6 +419,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): bool {
                 return true;
             }
@@ -411,6 +446,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): char {
                 return 'x';
             }
@@ -436,6 +473,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): string {
                 return "xxx";
             }
@@ -461,6 +500,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): bool {
                 return 1;
             }
@@ -477,7 +518,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(35, 2, 14))),
+                new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(53, 4, 14))),
             "Return type mismatch: expected 'bool', got 'i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -488,6 +529,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): i32 {
                 return -1;
             }
@@ -513,6 +556,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): i32 {
                 return -1;
             }
@@ -538,6 +583,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): bool {
                 return !true;
             }
@@ -563,6 +610,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): i32 {
                 return 1 + 2;
             }
@@ -587,6 +636,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): i32 {
                 return !1;
             }
@@ -603,7 +654,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(32, 2, 12), new SourcePosition(34, 2, 14))),
+                new SourceSpan(new SourcePosition(50, 4, 12), new SourcePosition(52, 4, 14))),
             "Incompatible operand type 'i32' for operator 'LogicalNot'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -614,6 +665,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(a: i32): i32 {
                 return a;
             }
@@ -639,6 +692,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 var a: i32 = true;
             }
@@ -655,7 +710,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(39, 2, 18), new SourcePosition(43, 2, 22))),
+                new SourceSpan(new SourcePosition(57, 4, 18), new SourcePosition(61, 4, 22))),
             "Type mismatch: expected 'i32', got 'bool'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -666,6 +721,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 if (1) {
                 }
@@ -683,7 +740,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(30, 2, 9), new SourcePosition(31, 2, 10))),
+                new SourceSpan(new SourcePosition(48, 4, 9), new SourcePosition(49, 4, 10))),
             "Type mismatch: expected 'bool', got 'i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -694,6 +751,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public add(a: i32): i32 {
                 return 0;
             }
@@ -714,7 +773,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(79, 6, 16), new SourcePosition(83, 6, 20))),
+                new SourceSpan(new SourcePosition(97, 8, 16), new SourcePosition(101, 8, 20))),
             "Type mismatch: expected 'i32', got 'bool'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -725,6 +784,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 while (1) {
                 }
@@ -742,7 +803,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(33, 2, 12), new SourcePosition(34, 2, 13))),
+                new SourceSpan(new SourcePosition(51, 4, 12), new SourcePosition(52, 4, 13))),
             "Type mismatch: expected 'bool', got 'i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -753,6 +814,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public constructor() {
                     return;
@@ -775,6 +838,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public constructor() {
                     return 0;
@@ -793,7 +858,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(55, 3, 9), new SourcePosition(64, 3, 18))),
+                new SourceSpan(new SourcePosition(73, 5, 9), new SourcePosition(82, 5, 18))),
             "Return type mismatch: expected 'void', got 'i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -804,6 +869,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point = {
                 x: i32;
                 y: i32;
@@ -817,13 +884,14 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
         var interfaceType = new InterfaceMetadata(null)
         {
             Namespace = rootNamespace,
         };
         var expected = new AliasMetadata(null, "Point", [], interfaceType)
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
 
         interfaceType.AddProperty(
@@ -860,6 +928,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public add(a: i32, b: i32): i32 {
                 return 1;
             }
@@ -889,6 +959,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: i32): void {
                 a();
             }
@@ -905,7 +977,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(33, 2, 6))),
+                new SourceSpan(new SourcePosition(50, 4, 5), new SourcePosition(51, 4, 6))),
             "Expected a function, got 'i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -916,6 +988,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public toString(): void {
                     this;
@@ -931,7 +1005,8 @@ public class TypeCheckerTests
 
         var semanticTree = semanticTrees.Single();
         var thisNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "this");
-        var pointType = rootNamespace.FindType("Point");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var pointType = test1Ns.FindType("Point");
         Assert.That(thisNode, Is.Not.Null);
         Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
     }
@@ -941,6 +1016,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 a: i32;
 
@@ -967,6 +1044,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 a: i32;
 
@@ -987,7 +1066,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(71, 5, 9), new SourcePosition(77, 5, 15))),
+                new SourceSpan(new SourcePosition(89, 7, 9), new SourcePosition(95, 7, 15))),
             "The 'Point' type doesn't have 'x'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -998,6 +1077,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point = {
                 x: i32;
             }
@@ -1015,7 +1096,8 @@ public class TypeCheckerTests
 
         var semanticTree = semanticTrees.Single();
         var aNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "a");
-        var pointType = rootNamespace.FindType("Point");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var pointType = test1Ns.FindType("Point");
         Assert.That(aNode, Is.Not.Null);
         Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
 
@@ -1029,6 +1111,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point = {
                 x: i32;
             }
@@ -1049,7 +1133,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(77, 6, 12), new SourcePosition(80, 6, 15))),
+                new SourceSpan(new SourcePosition(95, 8, 12), new SourcePosition(98, 8, 15))),
             "The 'Point' type doesn't have 'c'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1060,6 +1144,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type F = () => void;
 
             public type Test {
@@ -1079,12 +1165,13 @@ public class TypeCheckerTests
 
         var semanticTree = semanticTrees.Single();
         var aNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "a");
-        var pointType = rootNamespace.FindType("Test");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var pointType = test1Ns.FindType("Test");
         Assert.That(aNode, Is.Not.Null);
         Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
 
         var xNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "f");
-        var functionType = rootNamespace.FindType("F");
+        var functionType = test1Ns.FindType("F");
         Assert.That(xNode, Is.Not.Null);
         Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(functionType).Using(new MetadataComparer()));
     }
@@ -1094,6 +1181,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public constructor(x: i32, y: i32) {
                 }
@@ -1110,7 +1199,8 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = rootNamespace.FindType("Point") as TypeMetadata;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = test1Ns.FindType("Point") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
         var ctor = type.GetConstructor([builtInTypes.I32, builtInTypes.I32]);
@@ -1127,6 +1217,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point = {
                 x: i32;
                 y: i32;
@@ -1148,7 +1240,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(90, 7, 20), new SourcePosition(105, 7, 35))),
+                new SourceSpan(new SourcePosition(108, 9, 20), new SourcePosition(123, 9, 35))),
             "Cannot create an instance of type 'Point'");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1159,6 +1251,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public constructor(x: i32, y: i32) {
                 }
@@ -1180,7 +1274,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(111, 7, 20), new SourcePosition(123, 7, 32))),
+                new SourceSpan(new SourcePosition(129, 9, 20), new SourcePosition(141, 9, 32))),
             "The 'Point' type doesn't have 'i32' constructor.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1191,6 +1285,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type DU = {} | i32 | () => void;
             """);
 
@@ -1200,6 +1296,7 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
         var du = new DiscriminatedUnionMetadata(null, [
             new InterfaceMetadata(null)
             {
@@ -1213,7 +1310,7 @@ public class TypeCheckerTests
         };
         var alias = new AliasMetadata(null, "DU", [], du)
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
 
         var semanticTree = semanticTrees.Single();
@@ -1231,6 +1328,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: i32[]): i32 {
                 return a[1];
             }
@@ -1253,6 +1352,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: i32): void {
                 return a[1];
             }
@@ -1269,7 +1370,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13))),
+                new SourceSpan(new SourcePosition(57, 4, 12), new SourcePosition(58, 4, 13))),
             "Expected an array, got 'i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1280,6 +1381,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: i32[]): i32 {
                 return a["xxx"];
             }
@@ -1296,7 +1399,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(42, 2, 14), new SourcePosition(47, 2, 19))),
+                new SourceSpan(new SourcePosition(60, 4, 14), new SourcePosition(65, 4, 19))),
             "Type mismatch: expected 'i32', got 'string'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1307,6 +1410,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): (i32, i32) {
                 return (1, 2);
             }
@@ -1329,6 +1434,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): i32[] {
                 return new i32[10];
             }
@@ -1352,6 +1459,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> {
                 x: T;
             }
@@ -1377,6 +1486,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> {
                 x: T[];
             }
@@ -1403,6 +1514,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type List<T> {}
             public type Test = List<i32>;
             """);
@@ -1426,6 +1539,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> {
                 a: T;
             }
@@ -1456,6 +1571,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test<T> {
                 a: T;
             }
@@ -1486,6 +1603,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test1 {
                 public b(): Test2 {
                     return new Test2();
@@ -1516,6 +1635,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public static test(): void {
                 }
@@ -1532,7 +1653,8 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = rootNamespace.FindType("Test");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = test1Ns.FindType("Test");
         Assert.That(type, Is.Not.Null);
 
         var functionType = rootNamespace.FindType("() => void");
@@ -1553,6 +1675,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: (i32, string)): string {
                 return a.1;
             }
@@ -1577,6 +1701,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: (i32, string)): string {
                 return a.2;
             }
@@ -1593,7 +1719,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(51, 2, 12), new SourcePosition(54, 2, 15))),
+                new SourceSpan(new SourcePosition(69, 4, 12), new SourcePosition(72, 4, 15))),
             "The '(i32, string)' type doesn't have '2'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1604,6 +1730,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(a: i32): i8 {
                 return (i8)a;
             }
@@ -1628,6 +1756,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public method1(): void {
                     method2();
@@ -1643,7 +1773,8 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = (TypeMetadata)rootNamespace.FindType("Test")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = (TypeMetadata)test1Ns.FindType("Test")!;
         var method = (MethodMetadata)type.GetMethods("method2")[0];
 
         var semanticTree = semanticTrees.Single();
@@ -1657,6 +1788,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public constructor() {
                     method2();
@@ -1672,7 +1805,8 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = (TypeMetadata)rootNamespace.FindType("Test")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = (TypeMetadata)test1Ns.FindType("Test")!;
         var method = (MethodMetadata)type.GetMethods("method2")[0];
 
         var semanticTree = semanticTrees.Single();
@@ -1685,6 +1819,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public method1(): i32 {
                     return prop;
@@ -1700,7 +1836,8 @@ public class TypeCheckerTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var type = rootNamespace.FindType("Test")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var type = test1Ns.FindType("Test")!;
         var method = type.GetMember("prop")!;
 
         var semanticTree = semanticTrees.Single();
@@ -1714,6 +1851,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(x: i32): void { }
 
             public test(x: bool): void { }
@@ -1764,6 +1903,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public method(x: i32): void { }
 
@@ -1817,6 +1958,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public method(x: i32): void { }
 
@@ -1873,6 +2016,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test = {
                 method(i32): void;
                 method(bool): void;
@@ -1922,6 +2067,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public f(x: i32): void { }
             public f(x: bool): void { }
             public test(func: (bool) => void): void { }
@@ -1960,6 +2107,8 @@ public class TypeCheckerTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public f(x: i32): void { }
             public f(x: f64): void { }
             public test(func: (bool) => void): void { }
@@ -1980,7 +2129,7 @@ public class TypeCheckerTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(130, 6, 10), new SourcePosition(131, 6, 11))),
+                new SourceSpan(new SourcePosition(148, 8, 10), new SourcePosition(149, 8, 11))),
             "No suitable overload found for 'f'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

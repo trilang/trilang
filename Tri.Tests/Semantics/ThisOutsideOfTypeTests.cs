@@ -32,6 +32,8 @@ public class ThisOutsideOfTypeTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public constructor() {
                     this;
@@ -53,6 +55,8 @@ public class ThisOutsideOfTypeTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public toString(): void {
                     this;
@@ -74,6 +78,8 @@ public class ThisOutsideOfTypeTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 this;
             }
@@ -89,7 +95,7 @@ public class ThisOutsideOfTypeTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(30, 2, 9))),
+                new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(48, 4, 9))),
             "The 'this' keyword can only be used within a type.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

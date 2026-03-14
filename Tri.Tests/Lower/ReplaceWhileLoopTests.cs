@@ -47,6 +47,8 @@ public class ReplaceWhileLoopTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public test(a: i32): i32 {
                 a = 0;
 
@@ -60,88 +62,98 @@ public class ReplaceWhileLoopTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
-        var expected = new SemanticTree(file, null, null, [], [
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
-                    {
-                        Metadata = parameterMetadata,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new BinaryExpression(
-                            null,
-                            BinaryExpressionKind.Assignment,
-                            new MemberAccessExpression(null, "a")
-                            {
-                                Reference = parameterMetadata,
-                                AccessKind = MemberAccessKind.Write,
-                            },
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
-                            {
-                                ReturnTypeMetadata = builtInTypes.I32
-                            }
-                        )
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
                         {
-                            ReturnTypeMetadata = builtInTypes.I32
+                            Metadata = parameterMetadata,
                         }
-                    ),
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
-                        new GoTo("loop_0_start"),
-                        new Label("loop_0_start"),
-                        new IfStatement(
+                        new ExpressionStatement(
                             null,
                             new BinaryExpression(
                                 null,
-                                BinaryExpressionKind.LessThan,
+                                BinaryExpressionKind.Assignment,
                                 new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
-                                    AccessKind = MemberAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32
                                 }
                             )
                             {
-                                ReturnTypeMetadata = builtInTypes.Bool
-                            },
-                            new BlockStatement(null, [
-                                new GoTo("if_0_then")
-                            ]),
-                            new BlockStatement(null, [
-                                new GoTo("loop_0_end")
-                            ])
+                                ReturnTypeMetadata = builtInTypes.I32
+                            }
                         ),
                         new BlockStatement(null, [
-                            new Label("if_0_then"),
-                            new ExpressionStatement(
+                            new GoTo("loop_0_start"),
+                            new Label("loop_0_start"),
+                            new IfStatement(
                                 null,
                                 new BinaryExpression(
                                     null,
-                                    BinaryExpressionKind.Assignment,
+                                    BinaryExpressionKind.LessThan,
                                     new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
-                                        AccessKind = MemberAccessKind.Write,
+                                        AccessKind = MemberAccessKind.Read,
                                     },
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.I32
+                                    }
+                                )
+                                {
+                                    ReturnTypeMetadata = builtInTypes.Bool
+                                },
+                                new BlockStatement(null, [
+                                    new GoTo("if_0_then")
+                                ]),
+                                new BlockStatement(null, [
+                                    new GoTo("loop_0_end")
+                                ])
+                            ),
+                            new BlockStatement(null, [
+                                new Label("if_0_then"),
+                                new ExpressionStatement(
+                                    null,
                                     new BinaryExpression(
                                         null,
-                                        BinaryExpressionKind.Addition,
+                                        BinaryExpressionKind.Assignment,
                                         new MemberAccessExpression(null, "a")
                                         {
                                             Reference = parameterMetadata,
-                                            AccessKind = MemberAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Write,
                                         },
-                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                        new BinaryExpression(
+                                            null,
+                                            BinaryExpressionKind.Addition,
+                                            new MemberAccessExpression(null, "a")
+                                            {
+                                                Reference = parameterMetadata,
+                                                AccessKind = MemberAccessKind.Read,
+                                            },
+                                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            {
+                                                ReturnTypeMetadata = builtInTypes.I32
+                                            }
+                                        )
                                         {
                                             ReturnTypeMetadata = builtInTypes.I32
                                         }
@@ -149,38 +161,34 @@ public class ReplaceWhileLoopTests
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32
                                     }
-                                )
-                                {
-                                    ReturnTypeMetadata = builtInTypes.I32
-                                }
-                            ),
-                            new GoTo("loop_0_start"),
+                                ),
+                                new GoTo("loop_0_start"),
+                            ]),
+                            new Label("loop_0_end"),
                         ]),
-                        new Label("loop_0_end"),
-                    ]),
-                    new ReturnStatement(
-                        null,
-                        new MemberAccessExpression(null, "a")
-                        {
-                            Reference = parameterMetadata,
-                            AccessKind = MemberAccessKind.Read,
-                        }
-                    )
-                ])
-            )
-            {
-                Metadata = new FunctionMetadata(
-                    null,
-                    AccessModifierMetadata.Public,
-                    "test",
-                    [parameterMetadata],
-                    CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
+                        new ReturnStatement(
+                            null,
+                            new MemberAccessExpression(null, "a")
+                            {
+                                Reference = parameterMetadata,
+                                AccessKind = MemberAccessKind.Read,
+                            }
+                        )
+                    ])
                 )
                 {
-                    Namespace = rootNamespace,
+                    Metadata = new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [parameterMetadata],
+                        CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
+                    )
+                    {
+                        Namespace = test1Ns,
+                    }
                 }
-            }
-        ]);
+            ]);
 
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
@@ -191,6 +199,8 @@ public class ReplaceWhileLoopTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public test(a: i32): i32 {
                 a = 0;
 
@@ -206,106 +216,116 @@ public class ReplaceWhileLoopTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
-        var expected = new SemanticTree(file, null, null, [], [
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
-                    {
-                        Metadata = parameterMetadata,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new BinaryExpression(
-                            null,
-                            BinaryExpressionKind.Assignment,
-                            new MemberAccessExpression(null, "a")
-                            {
-                                Reference = parameterMetadata,
-                                AccessKind = MemberAccessKind.Write,
-                            },
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
-                            {
-                                ReturnTypeMetadata = builtInTypes.I32
-                            }
-                        )
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
                         {
-                            ReturnTypeMetadata = builtInTypes.I32
+                            Metadata = parameterMetadata,
                         }
-                    ),
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
-                        new GoTo("loop_0_start"),
-                        new Label("loop_0_start"),
-                        new IfStatement(
+                        new ExpressionStatement(
                             null,
                             new BinaryExpression(
                                 null,
-                                BinaryExpressionKind.LessThan,
+                                BinaryExpressionKind.Assignment,
                                 new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
-                                    AccessKind = MemberAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32
                                 }
                             )
                             {
-                                ReturnTypeMetadata = builtInTypes.Bool
-                            },
-                            new BlockStatement(null, [
-                                new GoTo("if_0_then"),
-                            ]),
-                            new BlockStatement(null, [
-                                new GoTo("loop_0_end")
-                            ])
+                                ReturnTypeMetadata = builtInTypes.I32
+                            }
                         ),
                         new BlockStatement(null, [
-                            new Label("if_0_then"),
-                            new BlockStatement(null, [
-                                new GoTo("loop_1_start"),
-                                new Label("loop_1_start"),
-                                new IfStatement(
-                                    null,
-                                    new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
-                                    {
-                                        ReturnTypeMetadata = builtInTypes.Bool
-                                    },
-                                    new BlockStatement(null, [
-                                        new GoTo("loop_1_start"),
-                                    ]),
-                                    new BlockStatement(null, [
-                                        new GoTo("loop_1_end"),
-                                    ])
-                                ),
-                                new Label("loop_1_end"),
-                            ]),
-                            new ExpressionStatement(
+                            new GoTo("loop_0_start"),
+                            new Label("loop_0_start"),
+                            new IfStatement(
                                 null,
                                 new BinaryExpression(
                                     null,
-                                    BinaryExpressionKind.Assignment,
+                                    BinaryExpressionKind.LessThan,
                                     new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
-                                        AccessKind = MemberAccessKind.Write,
+                                        AccessKind = MemberAccessKind.Read,
                                     },
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.I32
+                                    }
+                                )
+                                {
+                                    ReturnTypeMetadata = builtInTypes.Bool
+                                },
+                                new BlockStatement(null, [
+                                    new GoTo("if_0_then"),
+                                ]),
+                                new BlockStatement(null, [
+                                    new GoTo("loop_0_end")
+                                ])
+                            ),
+                            new BlockStatement(null, [
+                                new Label("if_0_then"),
+                                new BlockStatement(null, [
+                                    new GoTo("loop_1_start"),
+                                    new Label("loop_1_start"),
+                                    new IfStatement(
+                                        null,
+                                        new LiteralExpression(null, LiteralExpressionKind.Boolean, true)
+                                        {
+                                            ReturnTypeMetadata = builtInTypes.Bool
+                                        },
+                                        new BlockStatement(null, [
+                                            new GoTo("loop_1_start"),
+                                        ]),
+                                        new BlockStatement(null, [
+                                            new GoTo("loop_1_end"),
+                                        ])
+                                    ),
+                                    new Label("loop_1_end"),
+                                ]),
+                                new ExpressionStatement(
+                                    null,
                                     new BinaryExpression(
                                         null,
-                                        BinaryExpressionKind.Addition,
+                                        BinaryExpressionKind.Assignment,
                                         new MemberAccessExpression(null, "a")
                                         {
                                             Reference = parameterMetadata,
-                                            AccessKind = MemberAccessKind.Read,
+                                            AccessKind = MemberAccessKind.Write,
                                         },
-                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                        new BinaryExpression(
+                                            null,
+                                            BinaryExpressionKind.Addition,
+                                            new MemberAccessExpression(null, "a")
+                                            {
+                                                Reference = parameterMetadata,
+                                                AccessKind = MemberAccessKind.Read,
+                                            },
+                                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            {
+                                                ReturnTypeMetadata = builtInTypes.I32
+                                            }
+                                        )
                                         {
                                             ReturnTypeMetadata = builtInTypes.I32
                                         }
@@ -313,38 +333,34 @@ public class ReplaceWhileLoopTests
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32
                                     }
-                                )
-                                {
-                                    ReturnTypeMetadata = builtInTypes.I32
-                                }
-                            ),
-                            new GoTo("loop_0_start"),
+                                ),
+                                new GoTo("loop_0_start"),
+                            ]),
+                            new Label("loop_0_end"),
                         ]),
-                        new Label("loop_0_end"),
-                    ]),
-                    new ReturnStatement(
-                        null,
-                        new MemberAccessExpression(null, "a")
-                        {
-                            Reference = parameterMetadata,
-                            AccessKind = MemberAccessKind.Read,
-                        }
-                    )
-                ])
-            )
-            {
-                Metadata = new FunctionMetadata(
-                    null,
-                    AccessModifierMetadata.Public,
-                    "test",
-                    [parameterMetadata],
-                    CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
+                        new ReturnStatement(
+                            null,
+                            new MemberAccessExpression(null, "a")
+                            {
+                                Reference = parameterMetadata,
+                                AccessKind = MemberAccessKind.Read,
+                            }
+                        )
+                    ])
                 )
                 {
-                    Namespace = rootNamespace,
+                    Metadata = new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [parameterMetadata],
+                        CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
+                    )
+                    {
+                        Namespace = test1Ns,
+                    }
                 }
-            }
-        ]);
+            ]);
 
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
@@ -355,6 +371,8 @@ public class ReplaceWhileLoopTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public test(a: i32): i32 {
                 a = 0;
 
@@ -372,111 +390,59 @@ public class ReplaceWhileLoopTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
-        var expected = new SemanticTree(file, null, null, [], [
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
-                    {
-                        Metadata = parameterMetadata,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new BinaryExpression(
-                            null,
-                            BinaryExpressionKind.Assignment,
-                            new MemberAccessExpression(null, "a")
-                            {
-                                Reference = parameterMetadata,
-                                AccessKind = MemberAccessKind.Write,
-                            },
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
-                            {
-                                ReturnTypeMetadata = builtInTypes.I32
-                            }
-                        )
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
                         {
-                            ReturnTypeMetadata = builtInTypes.I32
+                            Metadata = parameterMetadata,
                         }
-                    ),
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
-                        new GoTo("loop_0_start"),
-                        new Label("loop_0_start"),
-                        new IfStatement(
+                        new ExpressionStatement(
                             null,
                             new BinaryExpression(
                                 null,
-                                BinaryExpressionKind.LessThan,
+                                BinaryExpressionKind.Assignment,
                                 new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
-                                    AccessKind = MemberAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32
                                 }
                             )
                             {
-                                ReturnTypeMetadata = builtInTypes.Bool
-                            },
-                            new BlockStatement(null, [
-                                new GoTo("if_0_then")
-                            ]),
-                            new BlockStatement(null, [
-                                new GoTo("loop_0_end")
-                            ])
+                                ReturnTypeMetadata = builtInTypes.I32
+                            }
                         ),
                         new BlockStatement(null, [
-                            new Label("if_0_then"),
-                            new ExpressionStatement(
-                                null,
-                                new BinaryExpression(
-                                    null,
-                                    BinaryExpressionKind.Assignment,
-                                    new MemberAccessExpression(null, "a")
-                                    {
-                                        Reference = parameterMetadata,
-                                        AccessKind = MemberAccessKind.Write,
-                                    },
-                                    new BinaryExpression(
-                                        null,
-                                        BinaryExpressionKind.Addition,
-                                        new MemberAccessExpression(null, "a")
-                                        {
-                                            Reference = parameterMetadata,
-                                            AccessKind = MemberAccessKind.Read,
-                                        },
-                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
-                                        {
-                                            ReturnTypeMetadata = builtInTypes.I32
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = builtInTypes.I32
-                                    }
-                                )
-                                {
-                                    ReturnTypeMetadata = builtInTypes.I32
-                                }
-                            ),
+                            new GoTo("loop_0_start"),
+                            new Label("loop_0_start"),
                             new IfStatement(
                                 null,
                                 new BinaryExpression(
                                     null,
-                                    BinaryExpressionKind.Equality,
+                                    BinaryExpressionKind.LessThan,
                                     new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Read,
                                     },
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 5)
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32
                                     }
@@ -485,40 +451,98 @@ public class ReplaceWhileLoopTests
                                     ReturnTypeMetadata = builtInTypes.Bool
                                 },
                                 new BlockStatement(null, [
-                                    new GoTo("loop_0_end"),
+                                    new GoTo("if_0_then")
                                 ]),
                                 new BlockStatement(null, [
-                                    new GoTo("if_1_end"),
+                                    new GoTo("loop_0_end")
                                 ])
                             ),
-                            new Label("if_1_end"),
-                            new GoTo("loop_0_start"),
+                            new BlockStatement(null, [
+                                new Label("if_0_then"),
+                                new ExpressionStatement(
+                                    null,
+                                    new BinaryExpression(
+                                        null,
+                                        BinaryExpressionKind.Assignment,
+                                        new MemberAccessExpression(null, "a")
+                                        {
+                                            Reference = parameterMetadata,
+                                            AccessKind = MemberAccessKind.Write,
+                                        },
+                                        new BinaryExpression(
+                                            null,
+                                            BinaryExpressionKind.Addition,
+                                            new MemberAccessExpression(null, "a")
+                                            {
+                                                Reference = parameterMetadata,
+                                                AccessKind = MemberAccessKind.Read,
+                                            },
+                                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            {
+                                                ReturnTypeMetadata = builtInTypes.I32
+                                            }
+                                        )
+                                        {
+                                            ReturnTypeMetadata = builtInTypes.I32
+                                        }
+                                    )
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.I32
+                                    }
+                                ),
+                                new IfStatement(
+                                    null,
+                                    new BinaryExpression(
+                                        null,
+                                        BinaryExpressionKind.Equality,
+                                        new MemberAccessExpression(null, "a")
+                                        {
+                                            Reference = parameterMetadata,
+                                            AccessKind = MemberAccessKind.Read,
+                                        },
+                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 5)
+                                        {
+                                            ReturnTypeMetadata = builtInTypes.I32
+                                        }
+                                    )
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.Bool
+                                    },
+                                    new BlockStatement(null, [
+                                        new GoTo("loop_0_end"),
+                                    ]),
+                                    new BlockStatement(null, [
+                                        new GoTo("if_1_end"),
+                                    ])
+                                ),
+                                new Label("if_1_end"),
+                                new GoTo("loop_0_start"),
+                            ]),
+                            new Label("loop_0_end"),
                         ]),
-                        new Label("loop_0_end"),
-                    ]),
-                    new ReturnStatement(
-                        null,
-                        new MemberAccessExpression(null, "a")
-                        {
-                            Reference = parameterMetadata,
-                            AccessKind = MemberAccessKind.Read,
-                        }
-                    )
-                ])
-            )
-            {
-                Metadata = new FunctionMetadata(
-                    null,
-                    AccessModifierMetadata.Public,
-                    "test",
-                    [parameterMetadata],
-                    CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
+                        new ReturnStatement(
+                            null,
+                            new MemberAccessExpression(null, "a")
+                            {
+                                Reference = parameterMetadata,
+                                AccessKind = MemberAccessKind.Read,
+                            }
+                        )
+                    ])
                 )
                 {
-                    Namespace = rootNamespace,
+                    Metadata = new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [parameterMetadata],
+                        CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
+                    )
+                    {
+                        Namespace = test1Ns,
+                    }
                 }
-            }
-        ]);
+            ]);
 
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
@@ -529,6 +553,8 @@ public class ReplaceWhileLoopTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public test(a: i32): i32 {
                 a = 0;
 
@@ -546,111 +572,59 @@ public class ReplaceWhileLoopTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
-        var expected = new SemanticTree(file, null, null, [], [
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
-                    {
-                        Metadata = parameterMetadata,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new BinaryExpression(
-                            null,
-                            BinaryExpressionKind.Assignment,
-                            new MemberAccessExpression(null, "a")
-                            {
-                                Reference = parameterMetadata,
-                                AccessKind = MemberAccessKind.Write,
-                            },
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
-                            {
-                                ReturnTypeMetadata = builtInTypes.I32
-                            }
-                        )
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
                         {
-                            ReturnTypeMetadata = builtInTypes.I32
+                            Metadata = parameterMetadata,
                         }
-                    ),
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
-                        new GoTo("loop_0_start"),
-                        new Label("loop_0_start"),
-                        new IfStatement(
+                        new ExpressionStatement(
                             null,
                             new BinaryExpression(
                                 null,
-                                BinaryExpressionKind.LessThan,
+                                BinaryExpressionKind.Assignment,
                                 new MemberAccessExpression(null, "a")
                                 {
                                     Reference = parameterMetadata,
-                                    AccessKind = MemberAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32
                                 }
                             )
                             {
-                                ReturnTypeMetadata = builtInTypes.Bool
-                            },
-                            new BlockStatement(null, [
-                                new GoTo("if_0_then")
-                            ]),
-                            new BlockStatement(null, [
-                                new GoTo("loop_0_end")
-                            ])
+                                ReturnTypeMetadata = builtInTypes.I32
+                            }
                         ),
                         new BlockStatement(null, [
-                            new Label("if_0_then"),
-                            new ExpressionStatement(
-                                null,
-                                new BinaryExpression(
-                                    null,
-                                    BinaryExpressionKind.Assignment,
-                                    new MemberAccessExpression(null, "a")
-                                    {
-                                        Reference = parameterMetadata,
-                                        AccessKind = MemberAccessKind.Write,
-                                    },
-                                    new BinaryExpression(
-                                        null,
-                                        BinaryExpressionKind.Addition,
-                                        new MemberAccessExpression(null, "a")
-                                        {
-                                            Reference = parameterMetadata,
-                                            AccessKind = MemberAccessKind.Read,
-                                        },
-                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
-                                        {
-                                            ReturnTypeMetadata = builtInTypes.I32
-                                        }
-                                    )
-                                    {
-                                        ReturnTypeMetadata = builtInTypes.I32
-                                    }
-                                )
-                                {
-                                    ReturnTypeMetadata = builtInTypes.I32
-                                }
-                            ),
+                            new GoTo("loop_0_start"),
+                            new Label("loop_0_start"),
                             new IfStatement(
                                 null,
                                 new BinaryExpression(
                                     null,
-                                    BinaryExpressionKind.Equality,
+                                    BinaryExpressionKind.LessThan,
                                     new MemberAccessExpression(null, "a")
                                     {
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Read,
                                     },
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 5)
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32
                                     }
@@ -659,40 +633,98 @@ public class ReplaceWhileLoopTests
                                     ReturnTypeMetadata = builtInTypes.Bool
                                 },
                                 new BlockStatement(null, [
-                                    new GoTo("loop_0_start"),
+                                    new GoTo("if_0_then")
                                 ]),
                                 new BlockStatement(null, [
-                                    new GoTo("if_1_end"),
+                                    new GoTo("loop_0_end")
                                 ])
                             ),
-                            new Label("if_1_end"),
-                            new GoTo("loop_0_start"),
+                            new BlockStatement(null, [
+                                new Label("if_0_then"),
+                                new ExpressionStatement(
+                                    null,
+                                    new BinaryExpression(
+                                        null,
+                                        BinaryExpressionKind.Assignment,
+                                        new MemberAccessExpression(null, "a")
+                                        {
+                                            Reference = parameterMetadata,
+                                            AccessKind = MemberAccessKind.Write,
+                                        },
+                                        new BinaryExpression(
+                                            null,
+                                            BinaryExpressionKind.Addition,
+                                            new MemberAccessExpression(null, "a")
+                                            {
+                                                Reference = parameterMetadata,
+                                                AccessKind = MemberAccessKind.Read,
+                                            },
+                                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            {
+                                                ReturnTypeMetadata = builtInTypes.I32
+                                            }
+                                        )
+                                        {
+                                            ReturnTypeMetadata = builtInTypes.I32
+                                        }
+                                    )
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.I32
+                                    }
+                                ),
+                                new IfStatement(
+                                    null,
+                                    new BinaryExpression(
+                                        null,
+                                        BinaryExpressionKind.Equality,
+                                        new MemberAccessExpression(null, "a")
+                                        {
+                                            Reference = parameterMetadata,
+                                            AccessKind = MemberAccessKind.Read,
+                                        },
+                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 5)
+                                        {
+                                            ReturnTypeMetadata = builtInTypes.I32
+                                        }
+                                    )
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.Bool
+                                    },
+                                    new BlockStatement(null, [
+                                        new GoTo("loop_0_start"),
+                                    ]),
+                                    new BlockStatement(null, [
+                                        new GoTo("if_1_end"),
+                                    ])
+                                ),
+                                new Label("if_1_end"),
+                                new GoTo("loop_0_start"),
+                            ]),
+                            new Label("loop_0_end"),
                         ]),
-                        new Label("loop_0_end"),
-                    ]),
-                    new ReturnStatement(
-                        null,
-                        new MemberAccessExpression(null, "a")
-                        {
-                            Reference = parameterMetadata,
-                            AccessKind = MemberAccessKind.Read,
-                        }
-                    )
-                ])
-            )
-            {
-                Metadata = new FunctionMetadata(
-                    null,
-                    AccessModifierMetadata.Public,
-                    "test",
-                    [parameterMetadata],
-                    CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
+                        new ReturnStatement(
+                            null,
+                            new MemberAccessExpression(null, "a")
+                            {
+                                Reference = parameterMetadata,
+                                AccessKind = MemberAccessKind.Read,
+                            }
+                        )
+                    ])
                 )
                 {
-                    Namespace = rootNamespace,
+                    Metadata = new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [parameterMetadata],
+                        CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)
+                    )
+                    {
+                        Namespace = test1Ns,
+                    }
                 }
-            }
-        ]);
+            ]);
 
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));

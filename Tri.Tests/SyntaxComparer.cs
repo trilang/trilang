@@ -192,26 +192,17 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         CompareNodes(x.Type, y.Type, errors);
         CompareSequences(x.GenericArguments, y.GenericArguments, errors, "TypeAlias.GenericArguments");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"TypeAlias: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareArrayAccessExpressionNode(ArrayAccessExpressionNode x, ArrayAccessExpressionNode y, List<string> errors)
     {
         CompareNodes(x.Member, y.Member, errors);
         CompareNodes(x.Index, y.Index, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"ArrayAccessExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareArrayTypeNode(ArrayTypeNode x, ArrayTypeNode y, List<string> errors)
     {
         CompareNodes(x.ElementType, y.ElementType, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"ArrayType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareBinaryExpressionNode(BinaryExpressionNode x, BinaryExpressionNode y, List<string> errors)
@@ -222,41 +213,27 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             errors.Add($"BinaryExpression: Operator mismatch. {x.Kind} != {y.Kind}.");
 
         CompareNodes(x.Right, y.Right, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"BinaryExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareBlockStatementNode(BlockStatementNode x, BlockStatementNode y, List<string> errors)
     {
         CompareSequences(x.Statements, y.Statements, errors, "BlockStatement.Statements");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"BlockStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareBreakNode(BreakNode x, BreakNode y, List<string> errors)
     {
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"BreakNode: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareCallExpressionNode(CallExpressionNode x, CallExpressionNode y, List<string> errors)
     {
         CompareNodes(x.Member, y.Member, errors);
         CompareSequences(x.Parameters, y.Parameters, errors, "CallExpression.Parameters");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"CallExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareCastExpressionNode(CastExpressionNode x, CastExpressionNode y, List<string> errors)
     {
         CompareNodes(x.Type, y.Type, errors);
         CompareNodes(x.Expression, y.Expression, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"CastExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareConstructorDeclarationNode(ConstructorDeclarationNode x, ConstructorDeclarationNode y, List<string> errors)
@@ -266,55 +243,36 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         CompareSequences(x.Parameters, y.Parameters, errors, "Constructor.Parameters");
         CompareNodes(x.Body, y.Body, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"Constructor: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareContinueNode(ContinueNode x, ContinueNode y, List<string> errors)
     {
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"ContinueNode: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareDiscriminatedUnionNode(DiscriminatedUnionNode x, DiscriminatedUnionNode y, List<string> errors)
     {
         CompareSequences(x.Types, y.Types, errors, "DiscriminatedUnion.Types");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"DiscriminatedUnion: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareExpressionStatementNode(ExpressionStatementNode x, ExpressionStatementNode y, List<string> errors)
     {
         CompareNodes(x.Expression, y.Expression, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"ExpressionStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareFakeDeclarationNode(FakeDeclarationNode x, FakeDeclarationNode y, List<string> errors)
     {
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"FakeDeclaration: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareFakeExpressionNode(FakeExpressionNode x, FakeExpressionNode y, List<string> errors)
     {
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"FakeExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareFakeStatementNode(FakeStatementNode x, FakeStatementNode y, List<string> errors)
     {
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"FakeStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareFakeTypeNode(FakeTypeNode x, FakeTypeNode y, List<string> errors)
     {
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"FakeType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareFunctionDeclarationNode(FunctionDeclarationNode x, FunctionDeclarationNode y, List<string> errors)
@@ -325,26 +283,17 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         CompareSequences(x.Parameters, y.Parameters, errors, "Function.Parameters");
         CompareNodes(x.ReturnType, y.ReturnType, errors);
         CompareNodes(x.Body, y.Body, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"Function: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareFunctionTypeNode(FunctionTypeNode x, FunctionTypeNode y, List<string> errors)
     {
         CompareSequences(x.ParameterTypes, y.ParameterTypes, errors, "FunctionType.Parameters");
         CompareNodes(x.ReturnType, y.ReturnType, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"FunctionType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareGenericTypeNode(GenericApplicationNode x, GenericApplicationNode y, List<string> errors)
     {
         CompareSequences(x.TypeArguments, y.TypeArguments, errors, "GenericType.Arguments");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"GenericType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareIfDirectiveNode(IfDirectiveNode x, IfDirectiveNode y, List<string> errors)
@@ -354,9 +303,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         CompareSequences(x.Then, y.Then, errors, "IfDirective.Then");
         CompareSequences(x.Else, y.Else, errors, "IfDirective.Else");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"IfDirective: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareIfStatementNode(IfStatementNode x, IfStatementNode y, List<string> errors)
@@ -364,9 +310,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         CompareNodes(x.Condition, y.Condition, errors);
         CompareNodes(x.Then, y.Then, errors);
         CompareNodes(x.Else, y.Else, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"IfStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareInterfaceMethodNode(InterfaceMethodNode x, InterfaceMethodNode y, List<string> errors)
@@ -376,18 +319,12 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         CompareSequences(x.ParameterTypes, y.ParameterTypes, errors, "InterfaceMethod.Parameters");
         CompareNodes(x.ReturnType, y.ReturnType, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"InterfaceMethod: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareInterfaceNode(InterfaceNode x, InterfaceNode y, List<string> errors)
     {
         CompareSequences(x.Properties, y.Properties, errors, "Interface.Properties");
         CompareSequences(x.Methods, y.Methods, errors, "Interface.Methods");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"Interface: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareInterfacePropertyNode(InterfacePropertyNode x, InterfacePropertyNode y, List<string> errors)
@@ -402,18 +339,12 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (x.SetterModifier != y.SetterModifier)
             errors.Add($"InterfaceProperty: SetterModifier mismatch. {x.SetterModifier} != {y.SetterModifier}.");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"InterfaceProperty: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareAsExpressionNode(IsExpressionNode x, IsExpressionNode y, List<string> errors)
     {
         CompareNodes(x.Expression, y.Expression, errors);
         CompareNodes(x.Type, y.Type, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"IsExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareLiteralExpressionNode(LiteralExpressionNode x, LiteralExpressionNode y, List<string> errors)
@@ -423,9 +354,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!x.Value.Equals(y.Value))
             errors.Add($"LiteralExpression: Value mismatch. {x.Value} != {y.Value}.");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"LiteralExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareMemberAccessExpressionNode(MemberAccessExpressionNode x, MemberAccessExpressionNode y, List<string> errors)
@@ -434,9 +362,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (x.Name != y.Name)
             errors.Add($"MemberAccessExpression: Name mismatch. {x.Name} != {y.Name}.");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"MemberAccessExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareMethodDeclarationNode(MethodDeclarationNode x, MethodDeclarationNode y, List<string> errors)
@@ -453,42 +378,28 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         CompareSequences(x.Parameters, y.Parameters, errors, "Method.Parameters");
         CompareNodes(x.ReturnType, y.ReturnType, errors);
         CompareNodes(x.Body, y.Body, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"Method: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareNamespaceNode(NamespaceNode x, NamespaceNode y, List<string> errors)
     {
         if (!x.Parts.SequenceEqual(y.Parts))
             errors.Add($"Namespace: Parts mismatch. {string.Join(".", x.Parts)} != {string.Join(".", y.Parts)}.");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"Namespace: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareNewArrayExpressionNode(NewArrayExpressionNode x, NewArrayExpressionNode y, List<string> errors)
     {
         CompareNodes(x.Type, y.Type, errors);
         CompareNodes(x.Size, y.Size, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"NewArrayExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareNewObjectExpressionNode(NewObjectExpressionNode x, NewObjectExpressionNode y, List<string> errors)
     {
         CompareNodes(x.Type, y.Type, errors);
         CompareSequences(x.Parameters, y.Parameters, errors, "NewObjectExpression.Parameters");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"NewObjectExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareNullExpressionNode(NullExpressionNode x, NullExpressionNode y, List<string> errors)
     {
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"NullExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareParameterNode(ParameterNode x, ParameterNode y, List<string> errors)
@@ -497,9 +408,6 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             errors.Add($"Parameter: Name mismatch. {x.Name} != {y.Name}.");
 
         CompareNodes(x.Type, y.Type, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"Parameter: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void ComparePropertyDeclarationNode(PropertyDeclarationNode x, PropertyDeclarationNode y, List<string> errors)
@@ -510,33 +418,21 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         CompareNodes(x.Type, y.Type, errors);
         CompareNodes(x.Getter, y.Getter, errors);
         CompareNodes(x.Setter, y.Setter, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"Property: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void ComparePropertyGetterNode(PropertyGetterNode x, PropertyGetterNode y, List<string> errors)
     {
         CompareNodes(x.Body, y.Body, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"PropertyGetter: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void ComparePropertySetterNode(PropertySetterNode x, PropertySetterNode y, List<string> errors)
     {
         CompareNodes(x.Body, y.Body, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"PropertySetter: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareReturnStatementNode(ReturnStatementNode x, ReturnStatementNode y, List<string> errors)
     {
         CompareNodes(x.Expression, y.Expression, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"ReturnStatement: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareSyntaxTree(SyntaxTree x, SyntaxTree y, List<string> errors)
@@ -547,25 +443,16 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         if (!x.SourceFile.Equals(y.SourceFile))
             errors.Add($"SyntaxTree: SourceFile mismatch. Expected {x.SourceFile}, got {y.SourceFile}.");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"SyntaxTree: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareTupleExpressionNode(TupleExpressionNode x, TupleExpressionNode y, List<string> errors)
     {
         CompareSequences(x.Expressions, y.Expressions, errors, "TupleExpression.Elements");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"TupleExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareTupleTypeNode(TupleTypeNode x, TupleTypeNode y, List<string> errors)
     {
         CompareSequences(x.Types, y.Types, errors, "TupleType.Elements");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"TupleType: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareTypeDeclarationNode(TypeDeclarationNode x, TypeDeclarationNode y, List<string> errors)
@@ -581,18 +468,12 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
         CompareSequences(x.Properties, y.Properties, errors, "TypeDeclaration.Properties");
         CompareSequences(x.Constructors, y.Constructors, errors, "TypeDeclaration.Constructors");
         CompareSequences(x.Methods, y.Methods, errors, "TypeDeclaration.Methods");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"TypeDeclaration: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareTypeNode(TypeRefNode x, TypeRefNode y, List<string> errors)
     {
         if (x.Name != y.Name)
             errors.Add($"TypeNode: Name mismatch. {x.Name} != {y.Name}.");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"TypeNode: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareUnaryExpressionNode(UnaryExpressionNode x, UnaryExpressionNode y, List<string> errors)
@@ -601,18 +482,12 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
             errors.Add($"UnaryExpression: Operator mismatch. {x.Kind} != {y.Kind}.");
 
         CompareNodes(x.Operand, y.Operand, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"UnaryExpression: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareUseNode(UseNode x, UseNode y, List<string> errors)
     {
         if (!x.Parts.SequenceEqual(y.Parts))
             errors.Add($"Use: Parts mismatch. {string.Join(".", x.Parts)} != {string.Join(".", y.Parts)}.");
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"UseNode: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareVariableDeclarationStatementNode(VariableDeclarationNode x, VariableDeclarationNode y, List<string> errors)
@@ -622,18 +497,12 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
         CompareNodes(x.Type, y.Type, errors);
         CompareNodes(x.Expression, y.Expression, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"VariableDeclaration: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareWhileNode(WhileNode x, WhileNode y, List<string> errors)
     {
         CompareNodes(x.Condition, y.Condition, errors);
         CompareNodes(x.Body, y.Body, errors);
-
-        if (!x.SourceSpan.Equals(y.SourceSpan))
-            errors.Add($"While: SourceSpan mismatch. Expected {x.SourceSpan}, got {y.SourceSpan}.");
     }
 
     private void CompareSequences<T>(IReadOnlyList<T> xs, IReadOnlyList<T> ys, List<string> errors, string context)

@@ -4,14 +4,9 @@ namespace Trilang.Parsing.Ast;
 
 public class SyntaxTree : ISyntaxNode
 {
-    public SyntaxTree(SourceFile sourceFile, IReadOnlyList<IDeclarationNode> declarations)
-        : this(sourceFile, null, [], declarations)
-    {
-    }
-
     public SyntaxTree(
         SourceFile sourceFile,
-        NamespaceNode? namespaceNode,
+        NamespaceNode namespaceNode,
         IReadOnlyList<UseNode> useNodes,
         IReadOnlyList<IDeclarationNode> declarations)
     {
@@ -20,18 +15,10 @@ public class SyntaxTree : ISyntaxNode
         Namespace = namespaceNode;
         Declarations = declarations;
 
-        var firstNode = useNodes.FirstOrDefault() ??
-                        namespaceNode as ISyntaxNode ??
-                        declarations.FirstOrDefault();
-
         var lastNode = declarations.LastOrDefault() ??
-                       namespaceNode as ISyntaxNode ??
-                       useNodes.LastOrDefault();
+                       namespaceNode as ISyntaxNode;
 
-        var firstSpan = firstNode?.SourceSpan ?? default;
-        var lastSpan = lastNode?.SourceSpan ?? default;
-
-        SourceSpan = firstSpan.Combine(lastSpan);
+        SourceSpan = namespaceNode.SourceSpan.Combine(lastNode.SourceSpan);
     }
 
     public override string ToString()
@@ -52,7 +39,7 @@ public class SyntaxTree : ISyntaxNode
 
     public SourceSpan SourceSpan { get; }
 
-    public NamespaceNode? Namespace { get; }
+    public NamespaceNode Namespace { get; }
 
     public IReadOnlyList<UseNode> UseNodes { get; }
 

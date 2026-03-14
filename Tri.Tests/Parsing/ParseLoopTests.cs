@@ -28,55 +28,51 @@ public class ParseLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(x: i32): void {
                 while (x > 0) {
                 }
             }
             """);
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(55, 4, 2)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
-                            "i32"
-                        )
-                    )
-                ],
-                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)), "void"),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(55, 4, 2)),
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
                     [
-                        new WhileNode(
-                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(53, 3, 6)),
-                            new BinaryExpressionNode(
-                                new SourceSpan(
-                                    new SourcePosition(39, 2, 12), new SourcePosition(44, 2, 17)
-                                ),
-                                BinaryExpressionKind.GreaterThan,
-                                new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
-                                    "x"
-                                ),
-                                LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(43, 2, 16), new SourcePosition(44, 2, 17)),
-                                    0
-                                )
-                            ),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(46, 2, 19), new SourcePosition(53, 3, 6))
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
                             )
                         )
-                    ]
-                )
-            ),
-        ]);
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new WhileNode(
+                                default,
+                                new BinaryExpressionNode(
+                                    default,
+                                    BinaryExpressionKind.GreaterThan,
+                                    new MemberAccessExpressionNode(default, "x"),
+                                    LiteralExpressionNode.Integer(default, 0)
+                                ),
+                                new BlockStatementNode(default)
+                            )
+                        ]
+                    )
+                ),
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -87,61 +83,65 @@ public class ParseLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(x: i32): void {
                 while x > 0) {
                 }
             }
             """);
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 4, 2)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
-                            "i32"
-                        )
-                    )
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(54, 4, 2)),
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
                     [
-                        new WhileNode(
-                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(52, 3, 6)),
-                            new BinaryExpressionNode(
-                                new SourceSpan(new SourcePosition(38, 2, 11), new SourcePosition(43, 2, 16)),
-                                BinaryExpressionKind.GreaterThan,
-                                new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(38, 2, 11), new SourcePosition(39, 2, 12)),
-                                    "x"
-                                ),
-                                LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(42, 2, 15), new SourcePosition(43, 2, 16)),
-                                    0
-                                )
-                            ),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(45, 2, 18), new SourcePosition(52, 3, 6))
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
                             )
                         )
-                    ]
-                )
-            ),
-        ]);
+                    ],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new WhileNode(
+                                default,
+                                new BinaryExpressionNode(
+                                    default,
+                                    BinaryExpressionKind.GreaterThan,
+                                    new MemberAccessExpressionNode(
+                                        default,
+                                        "x"
+                                    ),
+                                    LiteralExpressionNode.Integer(
+                                        default,
+                                        0
+                                    )
+                                ),
+                                new BlockStatementNode(default)
+                            )
+                        ]
+                    )
+                ),
+            ]);
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourcePosition(38, 2, 11).ToSpan()),
+            new SourceLocation(file, new SourcePosition(56, 4, 11).ToSpan()),
             "Expected '('.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -153,52 +153,56 @@ public class ParseLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(x: i32): void {
                 while (;) {
                 }
             }
             """);
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(51, 4, 2)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
-                            "i32"
-                        )
-                    )
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(51, 4, 2)),
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
                     [
-                        new WhileNode(
-                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(49, 3, 6)),
-                            new FakeExpressionNode(
-                                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13))
-                            ),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(42, 2, 15), new SourcePosition(49, 3, 6))
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
                             )
                         )
-                    ]
-                )
-            ),
-        ]);
+                    ],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new WhileNode(
+                                default,
+                                new FakeExpressionNode(default),
+                                new BlockStatementNode(
+                                    new SourceSpan(new SourcePosition(42, 2, 15), new SourcePosition(49, 3, 6))
+                                )
+                            )
+                        ]
+                    )
+                ),
+            ]);
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0009ExpectedExpression,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13))),
+            new SourceLocation(file, new SourceSpan(new SourcePosition(57, 4, 12), new SourcePosition(58, 4, 13))),
             "Expected an expression.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -210,61 +214,65 @@ public class ParseLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(x: i32): void {
                 while (x > 0 {
                 }
             }
             """);
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(54, 4, 2)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
-                            "i32"
-                        )
-                    )
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(54, 4, 2)),
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
                     [
-                        new WhileNode(
-                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(52, 3, 6)),
-                            new BinaryExpressionNode(
-                                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(44, 2, 17)),
-                                BinaryExpressionKind.GreaterThan,
-                                new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
-                                    "x"
-                                ),
-                                LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(43, 2, 16), new SourcePosition(44, 2, 17)),
-                                    0
-                                )
-                            ),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(45, 2, 18), new SourcePosition(52, 3, 6))
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
                             )
                         )
-                    ]
-                )
-            ),
-        ]);
+                    ],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new WhileNode(
+                                default,
+                                new BinaryExpressionNode(
+                                    default,
+                                    BinaryExpressionKind.GreaterThan,
+                                    new MemberAccessExpressionNode(
+                                        default,
+                                        "x"
+                                    ),
+                                    LiteralExpressionNode.Integer(
+                                        default,
+                                        0
+                                    )
+                                ),
+                                new BlockStatementNode(default)
+                            )
+                        ]
+                    )
+                ),
+            ]);
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourcePosition(45, 2, 18).ToSpan()),
+            new SourceLocation(file, new SourcePosition(63, 4, 18).ToSpan()),
             "Expected ')'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -275,6 +283,8 @@ public class ParseLoopTests
     public void ParseWhileMissingBlockTest()
     {
         var source = """
+                     namespace Test1;
+
                      public test(x: i32): void {
                          while (x > 0)
                             ;
@@ -283,72 +293,76 @@ public class ParseLoopTests
 
         var (tree, diagnostics) = Parse(source);
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(56, 4, 2)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
-                            "i32"
-                        )
-                    )
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(56, 4, 2)),
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
                     [
-                        new WhileNode(
-                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(56, 4, 2)),
-                            new BinaryExpressionNode(
-                                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(44, 2, 17)),
-                                BinaryExpressionKind.GreaterThan,
-                                new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
-                                    "x"
-                                ),
-                                LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(43, 2, 16), new SourcePosition(44, 2, 17)),
-                                    0
-                                )
-                            ),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(53, 3, 8), new SourcePosition(56, 4, 2)),
-                                [
-                                    new FakeStatementNode(
-                                        new SourcePosition(53, 3, 8).ToSpan()
-                                    )
-                                ]
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
                             )
                         )
-                    ]
-                )
-            ),
-        ]);
+                    ],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new WhileNode(
+                                default,
+                                new BinaryExpressionNode(
+                                    default,
+                                    BinaryExpressionKind.GreaterThan,
+                                    new MemberAccessExpressionNode(
+                                        default,
+                                        "x"
+                                    ),
+                                    LiteralExpressionNode.Integer(
+                                        default,
+                                        0
+                                    )
+                                ),
+                                new BlockStatementNode(
+                                    default,
+                                    [
+                                        new FakeStatementNode(
+                                            new SourcePosition(53, 3, 8).ToSpan()
+                                        )
+                                    ]
+                                )
+                            )
+                        ]
+                    )
+                ),
+            ]);
 
         var diagnostic = new[]
         {
             new Diagnostic(
                 DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
-                new SourceLocation(file, new SourcePosition(53, 3, 8).ToSpan()),
+                new SourceLocation(file, new SourcePosition(71, 5, 8).ToSpan()),
                 "Expected '{'."),
             new Diagnostic(
                 DiagnosticId.P0004ExpectedStatement,
                 DiagnosticSeverity.Error,
-                new SourceLocation(file, new SourcePosition(53, 3, 8).ToSpan()),
+                new SourceLocation(file, new SourcePosition(71, 5, 8).ToSpan()),
                 "Expected a statement."),
             new Diagnostic(
                 DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
-                new SourceLocation(file, new SourcePosition(56, 4, 2).ToSpan()),
+                new SourceLocation(file, new SourcePosition(74, 6, 2).ToSpan()),
                 "Expected '}'."),
         };
 
@@ -361,6 +375,8 @@ public class ParseLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(x: i32): void {
                 while (x > 0) {
                     break;
@@ -368,54 +384,58 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(70, 5, 2)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
-                            "i32"
-                        )
-                    )
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(70, 5, 2)),
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
                     [
-                        new WhileNode(
-                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(68, 4, 6)),
-                            new BinaryExpressionNode(
-                                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(44, 2, 17)),
-                                BinaryExpressionKind.GreaterThan,
-                                new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
-                                    "x"
-                                ),
-                                LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(43, 2, 16), new SourcePosition(44, 2, 17)),
-                                    0
-                                )
-                            ),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(46, 2, 19), new SourcePosition(68, 4, 6)),
-                                [
-                                    new BreakNode(
-                                        new SourceSpan(new SourcePosition(56, 3, 9), new SourcePosition(62, 3, 15))
-                                    )
-                                ]
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
                             )
                         )
-                    ])
-            ),
-        ]);
+                    ],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new WhileNode(
+                                default,
+                                new BinaryExpressionNode(
+                                    default,
+                                    BinaryExpressionKind.GreaterThan,
+                                    new MemberAccessExpressionNode(
+                                        default,
+                                        "x"
+                                    ),
+                                    LiteralExpressionNode.Integer(
+                                        default,
+                                        0
+                                    )
+                                ),
+                                new BlockStatementNode(
+                                    default,
+                                    [
+                                        new BreakNode(
+                                            new SourceSpan(new SourcePosition(56, 3, 9), new SourcePosition(62, 3, 15))
+                                        )
+                                    ]
+                                )
+                            )
+                        ])
+                ),
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -426,6 +446,8 @@ public class ParseLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(x: i32): void {
                 while (x > 0) {
                     continue;
@@ -433,54 +455,56 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(73, 5, 2)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
-                            "i32"
-                        )
-                    )
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(73, 5, 2)),
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
                     [
-                        new WhileNode(
-                            new SourceSpan(new SourcePosition(32, 2, 5), new SourcePosition(71, 4, 6)),
-                            new BinaryExpressionNode(
-                                new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(44, 2, 17)),
-                                BinaryExpressionKind.GreaterThan,
-                                new MemberAccessExpressionNode(
-                                    new SourceSpan(new SourcePosition(39, 2, 12), new SourcePosition(40, 2, 13)),
-                                    "x"
-                                ),
-                                LiteralExpressionNode.Integer(
-                                    new SourceSpan(new SourcePosition(43, 2, 16), new SourcePosition(44, 2, 17)),
-                                    0
-                                )
-                            ),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(46, 2, 19), new SourcePosition(71, 4, 6)),
-                                [
-                                    new ContinueNode(
-                                        new SourceSpan(new SourcePosition(56, 3, 9), new SourcePosition(65, 3, 18))
-                                    )
-                                ]
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
                             )
                         )
-                    ])
-            ),
-        ]);
+                    ],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new WhileNode(
+                                default,
+                                new BinaryExpressionNode(
+                                    default,
+                                    BinaryExpressionKind.GreaterThan,
+                                    new MemberAccessExpressionNode(
+                                        default,
+                                        "x"
+                                    ),
+                                    LiteralExpressionNode.Integer(
+                                        default,
+                                        0
+                                    )
+                                ),
+                                new BlockStatementNode(
+                                    default,
+                                    [
+                                        new ContinueNode(default)
+                                    ]
+                                )
+                            )
+                        ])
+                ),
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.Empty);

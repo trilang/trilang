@@ -32,6 +32,8 @@ public class RestrictFieldAccessTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(callback: () => void): {} | null {
                 return callback.context;
             }
@@ -47,7 +49,7 @@ public class RestrictFieldAccessTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(58, 2, 12), new SourcePosition(74, 2, 28))),
+                new SourceSpan(new SourcePosition(76, 4, 12), new SourcePosition(92, 4, 28))),
             "The 'context' field is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

@@ -20,6 +20,7 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
     public static readonly DiagnosticId P0013ExpectedIdentifier = ForParser(13);
     public static readonly DiagnosticId P0014ExpectedTypeMember = ForParser(14);
     public static readonly DiagnosticId P0015ExpectedNamespacePart = ForParser(15);
+    public static readonly DiagnosticId P0016ExpectedNamespace = ForParser(16);
 
     public static readonly DiagnosticId S0001CyclicTypeAlias = ForSemantic(1);
     public static readonly DiagnosticId S0002AlreadyDefined = ForSemantic(2);

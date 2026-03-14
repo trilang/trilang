@@ -31,9 +31,18 @@ public class MultifileSemanticTests
     public void UseTypeFromOtherFileTest()
     {
         var diagnostics = new DiagnosticCollection();
-        var file1 = Parse(diagnostics, "point.tri", "public type Point {}");
+        var file1 = Parse(
+            diagnostics,
+            "point.tri",
+            """
+            namespace Test1;
+
+            public type Point {}
+            """);
         var file2 = Parse(diagnostics, "test.tri",
             """
+            namespace Test1;
+
             public main(): void {
                 var p: Point = new Point();
             }
@@ -53,11 +62,20 @@ public class MultifileSemanticTests
         var diagnostics = new DiagnosticCollection();
         var file1 = Parse(diagnostics, "test.tri",
             """
+            namespace Test1;
+
             public main(): void {
                 var p: Point = new Point();
             }
             """);
-        var file2 = Parse(diagnostics, "point.tri", "public type Point {}");
+        var file2 = Parse(
+            diagnostics,
+            "point.tri",
+            """
+            namespace Test1;
+
+            public type Point {}
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
@@ -71,8 +89,22 @@ public class MultifileSemanticTests
     public void DuplicateTypeDeclarationTest()
     {
         var diagnostics = new DiagnosticCollection();
-        var file1 = Parse(diagnostics, "point1.tri", "public type Point {}");
-        var file2 = Parse(diagnostics, "point2.tri", "public type Point {}");
+        var file1 = Parse(
+            diagnostics,
+            "point1.tri",
+            """
+            namespace Test1;
+
+            public type Point {}
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "point2.tri",
+            """
+            namespace Test1;
+
+            public type Point {}
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
@@ -84,7 +116,7 @@ public class MultifileSemanticTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 new SourceFile("point2.tri"),
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(20, 1, 21))),
+                new SourceSpan(new SourcePosition(18, 3, 1), new SourcePosition(38, 3, 21))),
             "The 'Point' type is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

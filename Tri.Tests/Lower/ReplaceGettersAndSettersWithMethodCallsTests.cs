@@ -47,6 +47,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32;
             }
@@ -56,12 +58,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             }
             """);
 
-
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var point = new TypeMetadata(null, "Point")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         point.AddConstructor(
             new ConstructorMetadata(
@@ -90,73 +92,78 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             Namespace = rootNamespace,
         };
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(
-                null,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclaration(
-                        null,
-                        "x",
-                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                        null,
-                        null
-                    )
-                    {
-                        Metadata = count,
-                    },
-                ],
-                [],
-                []
-            )
-            {
-                Metadata = point,
-            },
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "p",
-                        new TypeRef(null, "Point") { Metadata = point }
-                    )
-                    {
-                        Metadata = pParameter,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ReturnStatement(
-                        null,
-                        new CallExpression(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclaration(
                             null,
-                            new MemberAccessExpression(
+                            "x",
+                            new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                            null,
+                            null
+                        )
+                        {
+                            Metadata = count,
+                        },
+                    ],
+                    [],
+                    []
+                )
+                {
+                    Metadata = point,
+                },
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(
+                            null,
+                            "p",
+                            new TypeRef(null, "Point") { Metadata = point }
+                        )
+                        {
+                            Metadata = pParameter,
+                        }
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new BlockStatement(null, [
+                        new ReturnStatement(
+                            null,
+                            new CallExpression(
                                 null,
-                                new MemberAccessExpression(null, "p")
+                                new MemberAccessExpression(
+                                    null,
+                                    new MemberAccessExpression(null, "p")
+                                    {
+                                        Reference = pParameter,
+                                        AccessKind = MemberAccessKind.Read,
+                                    },
+                                    count.Getter!.Name
+                                )
                                 {
-                                    Reference = pParameter,
+                                    Reference = count.Getter,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                count.Getter!.Name
+                                []
                             )
-                            {
-                                Reference = count.Getter,
-                                AccessKind = MemberAccessKind.Read,
-                            },
-                            []
                         )
-                    )
-                ])
-            )
-            {
-                Metadata = testFunction,
-            },
-        ]);
+                    ])
+                )
+                {
+                    Metadata = testFunction,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -166,6 +173,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { public get; public set; }
             }
@@ -181,9 +190,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var pointType = new TypeMetadata(null, "Point")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         pointType.AddConstructor(
             new ConstructorMetadata(
@@ -207,7 +217,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var testType = new TypeMetadata(null, "Test")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         testType.AddConstructor(
             new ConstructorMetadata(
@@ -236,123 +246,128 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             Namespace = rootNamespace,
         };
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(
-                null,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclaration(
-                        null,
-                        "x",
-                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                        new PropertyGetter(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclaration(
                             null,
-                            AccessModifier.Public,
-                            null
-                        )
-                        {
-                            Metadata = xProperty.Getter,
-                        },
-                        new PropertySetter(
-                            null,
-                            AccessModifier.Public,
-                            null
-                        )
-                        {
-                            Metadata = xProperty.Setter,
-                        }
-                    )
-                    {
-                        Metadata = xProperty,
-                    },
-                ],
-                [],
-                []
-            )
-            {
-                Metadata = pointType,
-            },
-            new TypeDeclaration(
-                null,
-                AccessModifier.Public,
-                "Test",
-                [],
-                [],
-                [
-                    new PropertyDeclaration(
-                        null,
-                        "point",
-                        new TypeRef(null, "Point") { Metadata = pointType },
-                        null,
-                        null
-                    )
-                    {
-                        Metadata = pointProperty,
-                    }
-                ],
-                [],
-                []
-            )
-            {
-                Metadata = testType,
-            },
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "t",
-                        new TypeRef(null, "Test") { Metadata = testType }
-                    )
-                    {
-                        Metadata = tParameter,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ReturnStatement(
-                        null,
-                        new CallExpression(
-                            null,
-                            new MemberAccessExpression(
+                            "x",
+                            new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                            new PropertyGetter(
                                 null,
-                                new CallExpression(
-                                    null,
-                                    new MemberAccessExpression(
-                                        null,
-                                        new MemberAccessExpression(null, "t")
-                                        {
-                                            Reference = tParameter,
-                                            AccessKind = MemberAccessKind.Read,
-                                        },
-                                        pointProperty.Getter!.Name
-                                    )
-                                    {
-                                        Reference = pointProperty.Getter,
-                                        AccessKind = MemberAccessKind.Read,
-                                    },
-                                    []
-                                ),
-                                xProperty.Getter!.Name
+                                AccessModifier.Public,
+                                null
                             )
                             {
-                                Reference = xProperty.Getter,
-                                AccessKind = MemberAccessKind.Read,
+                                Metadata = xProperty.Getter,
                             },
-                            []
+                            new PropertySetter(
+                                null,
+                                AccessModifier.Public,
+                                null
+                            )
+                            {
+                                Metadata = xProperty.Setter,
+                            }
                         )
-                    )
-                ])
-            )
-            {
-                Metadata = testFunction,
-            },
-        ]);
+                        {
+                            Metadata = xProperty,
+                        },
+                    ],
+                    [],
+                    []
+                )
+                {
+                    Metadata = pointType,
+                },
+                new TypeDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "Test",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclaration(
+                            null,
+                            "point",
+                            new TypeRef(null, "Point") { Metadata = pointType },
+                            null,
+                            null
+                        )
+                        {
+                            Metadata = pointProperty,
+                        }
+                    ],
+                    [],
+                    []
+                )
+                {
+                    Metadata = testType,
+                },
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(
+                            null,
+                            "t",
+                            new TypeRef(null, "Test") { Metadata = testType }
+                        )
+                        {
+                            Metadata = tParameter,
+                        }
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new BlockStatement(null, [
+                        new ReturnStatement(
+                            null,
+                            new CallExpression(
+                                null,
+                                new MemberAccessExpression(
+                                    null,
+                                    new CallExpression(
+                                        null,
+                                        new MemberAccessExpression(
+                                            null,
+                                            new MemberAccessExpression(null, "t")
+                                            {
+                                                Reference = tParameter,
+                                                AccessKind = MemberAccessKind.Read,
+                                            },
+                                            pointProperty.Getter!.Name
+                                        )
+                                        {
+                                            Reference = pointProperty.Getter,
+                                            AccessKind = MemberAccessKind.Read,
+                                        },
+                                        []
+                                    ),
+                                    xProperty.Getter!.Name
+                                )
+                                {
+                                    Reference = xProperty.Getter,
+                                    AccessKind = MemberAccessKind.Read,
+                                },
+                                []
+                            )
+                        )
+                    ])
+                )
+                {
+                    Metadata = testFunction,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -362,6 +377,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { public get; public set; }
             }
@@ -373,9 +390,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var point = new TypeMetadata(null, "Point")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         point.AddConstructor(
             new ConstructorMetadata(
@@ -408,84 +426,89 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             Namespace = rootNamespace,
         };
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(
-                null,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclaration(
-                        null,
-                        "x",
-                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                        new PropertyGetter(null, AccessModifier.Public, null)
-                        {
-                            Metadata = xProperty.Getter,
-                        },
-                        new PropertySetter(null, AccessModifier.Public, null)
-                        {
-                            Metadata = xProperty.Setter,
-                        }
-                    )
-                    {
-                        Metadata = xProperty,
-                    },
-                ],
-                [],
-                []
-            )
-            {
-                Metadata = point,
-            },
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "p",
-                        new TypeRef(null, "Point") { Metadata = point }
-                    )
-                    {
-                        Metadata = pParameter,
-                    }
-                ],
-                new TypeRef(null, "void") { Metadata = builtInTypes.Void },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new CallExpression(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclaration(
                             null,
-                            new MemberAccessExpression(
+                            "x",
+                            new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                            new PropertyGetter(null, AccessModifier.Public, null)
+                            {
+                                Metadata = xProperty.Getter,
+                            },
+                            new PropertySetter(null, AccessModifier.Public, null)
+                            {
+                                Metadata = xProperty.Setter,
+                            }
+                        )
+                        {
+                            Metadata = xProperty,
+                        },
+                    ],
+                    [],
+                    []
+                )
+                {
+                    Metadata = point,
+                },
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(
+                            null,
+                            "p",
+                            new TypeRef(null, "Point") { Metadata = point }
+                        )
+                        {
+                            Metadata = pParameter,
+                        }
+                    ],
+                    new TypeRef(null, "void") { Metadata = builtInTypes.Void },
+                    new BlockStatement(null, [
+                        new ExpressionStatement(
+                            null,
+                            new CallExpression(
                                 null,
-                                new MemberAccessExpression(null, "p")
+                                new MemberAccessExpression(
+                                    null,
+                                    new MemberAccessExpression(null, "p")
+                                    {
+                                        Reference = pParameter,
+                                        AccessKind = MemberAccessKind.Read,
+                                    },
+                                    xProperty.Setter!.Name
+                                )
                                 {
-                                    Reference = pParameter,
+                                    Reference = xProperty.Setter,
                                     AccessKind = MemberAccessKind.Read,
                                 },
-                                xProperty.Setter!.Name
+                                [
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.I32,
+                                    }
+                                ]
                             )
-                            {
-                                Reference = xProperty.Setter,
-                                AccessKind = MemberAccessKind.Read,
-                            },
-                            [
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
-                                {
-                                    ReturnTypeMetadata = builtInTypes.I32,
-                                }
-                            ]
                         )
-                    )
-                ])
-            )
-            {
-                Metadata = testFunction,
-            },
-        ]);
+                    ])
+                )
+                {
+                    Metadata = testFunction,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -495,6 +518,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { public get; public set; }
             }
@@ -506,9 +531,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var point = new TypeMetadata(null, "Point")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         point.AddConstructor(
             new ConstructorMetadata(
@@ -543,118 +569,123 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             Namespace = rootNamespace,
         };
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(
-                null,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclaration(
-                        null,
-                        "x",
-                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                        new PropertyGetter(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclaration(
                             null,
-                            AccessModifier.Public,
-                            null
-                        )
-                        {
-                            Metadata = xProperty.Getter,
-                        },
-                        new PropertySetter(
-                            null,
-                            AccessModifier.Public,
-                            null
-                        )
-                        {
-                            Metadata = xProperty.Setter,
-                        }
-                    )
-                    {
-                        Metadata = xProperty,
-                    },
-                ],
-                [],
-                []
-            )
-            {
-                Metadata = point,
-            },
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "p",
-                        new TypeRef(null, "Point") { Metadata = point }
-                    )
-                    {
-                        Metadata = pParameter,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ReturnStatement(
-                        null,
-                        new ExpressionBlock([
-                            new VariableDeclaration(
+                            "x",
+                            new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                            new PropertyGetter(
                                 null,
-                                tmpVariable.Name,
-                                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
-                                {
-                                    ReturnTypeMetadata = builtInTypes.I32,
-                                }
+                                AccessModifier.Public,
+                                null
                             )
                             {
-                                Metadata = tmpVariable,
+                                Metadata = xProperty.Getter,
                             },
-                            new ExpressionStatement(
+                            new PropertySetter(
                                 null,
-                                new CallExpression(
+                                AccessModifier.Public,
+                                null
+                            )
+                            {
+                                Metadata = xProperty.Setter,
+                            }
+                        )
+                        {
+                            Metadata = xProperty,
+                        },
+                    ],
+                    [],
+                    []
+                )
+                {
+                    Metadata = point,
+                },
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(
+                            null,
+                            "p",
+                            new TypeRef(null, "Point") { Metadata = point }
+                        )
+                        {
+                            Metadata = pParameter,
+                        }
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new BlockStatement(null, [
+                        new ReturnStatement(
+                            null,
+                            new ExpressionBlock([
+                                new VariableDeclaration(
                                     null,
-                                    new MemberAccessExpression(
+                                    tmpVariable.Name,
+                                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.I32,
+                                    }
+                                )
+                                {
+                                    Metadata = tmpVariable,
+                                },
+                                new ExpressionStatement(
+                                    null,
+                                    new CallExpression(
                                         null,
-                                        new MemberAccessExpression(null, "p")
+                                        new MemberAccessExpression(
+                                            null,
+                                            new MemberAccessExpression(null, "p")
+                                            {
+                                                Reference = pParameter,
+                                                AccessKind = MemberAccessKind.Read,
+                                            },
+                                            xProperty.Setter!.Name
+                                        )
                                         {
-                                            Reference = pParameter,
+                                            Reference = xProperty.Setter,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        xProperty.Setter!.Name
+                                        [
+                                            new MemberAccessExpression(null, tmpVariable.Name)
+                                            {
+                                                Reference = tmpVariable,
+                                                AccessKind = MemberAccessKind.Read,
+                                            }
+                                        ]
                                     )
+                                ),
+                                new ExpressionStatement(
+                                    null,
+                                    new MemberAccessExpression(null, tmpVariable.Name)
                                     {
-                                        Reference = xProperty.Setter,
+                                        Reference = tmpVariable,
                                         AccessKind = MemberAccessKind.Read,
-                                    },
-                                    [
-                                        new MemberAccessExpression(null, tmpVariable.Name)
-                                        {
-                                            Reference = tmpVariable,
-                                            AccessKind = MemberAccessKind.Read,
-                                        }
-                                    ]
+                                    }
                                 )
-                            ),
-                            new ExpressionStatement(
-                                null,
-                                new MemberAccessExpression(null, tmpVariable.Name)
-                                {
-                                    Reference = tmpVariable,
-                                    AccessKind = MemberAccessKind.Read,
-                                }
-                            )
-                        ])
-                    )
-                ])
-            )
-            {
-                Metadata = testFunction,
-            },
-        ]);
+                            ])
+                        )
+                    ])
+                )
+                {
+                    Metadata = testFunction,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -664,6 +695,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { public get; public set; }
             }
@@ -675,9 +708,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var point = new TypeMetadata(null, "Point")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         point.AddConstructor(
             new ConstructorMetadata(
@@ -710,116 +744,121 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             Namespace = rootNamespace,
         };
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(
-                null,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclaration(
-                        null,
-                        "x",
-                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                        new PropertyGetter(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclaration(
                             null,
-                            AccessModifier.Public,
-                            null
-                        )
-                        {
-                            Metadata = xProperty.Getter,
-                        },
-                        new PropertySetter(
-                            null,
-                            AccessModifier.Public,
-                            null
-                        )
-                        {
-                            Metadata = xProperty.Setter,
-                        }
-                    )
-                    {
-                        Metadata = xProperty,
-                    },
-                ],
-                [],
-                []
-            )
-            {
-                Metadata = point,
-            },
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "p",
-                        new TypeRef(null, "Point") { Metadata = point }
-                    )
-                    {
-                        Metadata = pParameter,
-                    }
-                ],
-                new TypeRef(null, "void") { Metadata = builtInTypes.Void },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new CallExpression(
-                            null,
-                            new MemberAccessExpression(
+                            "x",
+                            new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                            new PropertyGetter(
                                 null,
-                                new MemberAccessExpression(null, "p")
-                                {
-                                    Reference = pParameter,
-                                    AccessKind = MemberAccessKind.Read,
-                                },
-                                xProperty.Setter!.Name
+                                AccessModifier.Public,
+                                null
                             )
                             {
-                                Reference = xProperty.Setter,
-                                AccessKind = MemberAccessKind.Read,
+                                Metadata = xProperty.Getter,
                             },
-                            [
-                                new BinaryExpression(
+                            new PropertySetter(
+                                null,
+                                AccessModifier.Public,
+                                null
+                            )
+                            {
+                                Metadata = xProperty.Setter,
+                            }
+                        )
+                        {
+                            Metadata = xProperty,
+                        },
+                    ],
+                    [],
+                    []
+                )
+                {
+                    Metadata = point,
+                },
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(
+                            null,
+                            "p",
+                            new TypeRef(null, "Point") { Metadata = point }
+                        )
+                        {
+                            Metadata = pParameter,
+                        }
+                    ],
+                    new TypeRef(null, "void") { Metadata = builtInTypes.Void },
+                    new BlockStatement(null, [
+                        new ExpressionStatement(
+                            null,
+                            new CallExpression(
+                                null,
+                                new MemberAccessExpression(
                                     null,
-                                    BinaryExpressionKind.Addition,
-                                    new CallExpression(
+                                    new MemberAccessExpression(null, "p")
+                                    {
+                                        Reference = pParameter,
+                                        AccessKind = MemberAccessKind.Read,
+                                    },
+                                    xProperty.Setter!.Name
+                                )
+                                {
+                                    Reference = xProperty.Setter,
+                                    AccessKind = MemberAccessKind.Read,
+                                },
+                                [
+                                    new BinaryExpression(
                                         null,
-                                        new MemberAccessExpression(
+                                        BinaryExpressionKind.Addition,
+                                        new CallExpression(
                                             null,
-                                            new MemberAccessExpression(null, "p")
+                                            new MemberAccessExpression(
+                                                null,
+                                                new MemberAccessExpression(null, "p")
+                                                {
+                                                    Reference = pParameter,
+                                                    AccessKind = MemberAccessKind.Read,
+                                                },
+                                                xProperty.Getter!.Name
+                                            )
                                             {
-                                                Reference = pParameter,
+                                                Reference = xProperty.Getter,
                                                 AccessKind = MemberAccessKind.Read,
                                             },
-                                            xProperty.Getter!.Name
-                                        )
+                                            []
+                                        ),
+                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
                                         {
-                                            Reference = xProperty.Getter,
-                                            AccessKind = MemberAccessKind.Read,
-                                        },
-                                        []
-                                    ),
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            ReturnTypeMetadata = builtInTypes.I32,
+                                        }
+                                    )
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32,
                                     }
-                                )
-                                {
-                                    ReturnTypeMetadata = builtInTypes.I32,
-                                }
-                            ]
-                        )
-                    ),
-                ])
-            )
-            {
-                Metadata = testFunction,
-            },
-        ]);
+                                ]
+                            )
+                        ),
+                    ])
+                )
+                {
+                    Metadata = testFunction,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -829,6 +868,8 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { public get; public set; }
             }
@@ -840,9 +881,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var point = new TypeMetadata(null, "Point")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         point.AddConstructor(
             new ConstructorMetadata(
@@ -877,71 +919,107 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
             Namespace = rootNamespace,
         };
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(
-                null,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclaration(
-                        null,
-                        "x",
-                        new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                        new PropertyGetter(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclaration(
                             null,
-                            AccessModifier.Public,
-                            null
-                        )
-                        {
-                            Metadata = xProperty.Getter,
-                        },
-                        new PropertySetter(
-                            null,
-                            AccessModifier.Public,
-                            null
-                        )
-                        {
-                            Metadata = xProperty.Setter,
-                        }
-                    )
-                    {
-                        Metadata = xProperty,
-                    },
-                ],
-                [],
-                []
-            )
-            {
-                Metadata = point,
-            },
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "p",
-                        new TypeRef(null, "Point") { Metadata = point }
-                    )
-                    {
-                        Metadata = pParameter,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ReturnStatement(
-                        null,
-                        new ExpressionBlock([
-                            new VariableDeclaration(
+                            "x",
+                            new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                            new PropertyGetter(
                                 null,
-                                tmpVariable.Name,
-                                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                                new BinaryExpression(
+                                AccessModifier.Public,
+                                null
+                            )
+                            {
+                                Metadata = xProperty.Getter,
+                            },
+                            new PropertySetter(
+                                null,
+                                AccessModifier.Public,
+                                null
+                            )
+                            {
+                                Metadata = xProperty.Setter,
+                            }
+                        )
+                        {
+                            Metadata = xProperty,
+                        },
+                    ],
+                    [],
+                    []
+                )
+                {
+                    Metadata = point,
+                },
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(
+                            null,
+                            "p",
+                            new TypeRef(null, "Point") { Metadata = point }
+                        )
+                        {
+                            Metadata = pParameter,
+                        }
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new BlockStatement(null, [
+                        new ReturnStatement(
+                            null,
+                            new ExpressionBlock([
+                                new VariableDeclaration(
                                     null,
-                                    BinaryExpressionKind.Addition,
+                                    tmpVariable.Name,
+                                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                                    new BinaryExpression(
+                                        null,
+                                        BinaryExpressionKind.Addition,
+                                        new CallExpression(
+                                            null,
+                                            new MemberAccessExpression(
+                                                null,
+                                                new MemberAccessExpression(null, "p")
+                                                {
+                                                    Reference = pParameter,
+                                                    AccessKind = MemberAccessKind.Read,
+                                                },
+                                                xProperty.Getter!.Name
+                                            )
+                                            {
+                                                Reference = xProperty.Getter,
+                                                AccessKind = MemberAccessKind.Read,
+                                            },
+                                            []
+                                        ),
+                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                        {
+                                            ReturnTypeMetadata = builtInTypes.I32,
+                                        }
+                                    )
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.I32,
+                                    }
+                                )
+                                {
+                                    Metadata = tmpVariable,
+                                },
+                                new ExpressionStatement(
+                                    null,
                                     new CallExpression(
                                         null,
                                         new MemberAccessExpression(
@@ -951,68 +1029,37 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                                 Reference = pParameter,
                                                 AccessKind = MemberAccessKind.Read,
                                             },
-                                            xProperty.Getter!.Name
+                                            xProperty.Setter!.Name
                                         )
                                         {
-                                            Reference = xProperty.Getter,
+                                            Reference = xProperty.Setter,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        []
-                                    ),
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                        [
+                                            new MemberAccessExpression(null, tmpVariable.Name)
+                                            {
+                                                Reference = tmpVariable,
+                                                AccessKind = MemberAccessKind.Read,
+                                            }
+                                        ]
+                                    )
+                                ),
+                                new ExpressionStatement(
+                                    null,
+                                    new MemberAccessExpression(null, tmpVariable.Name)
                                     {
-                                        ReturnTypeMetadata = builtInTypes.I32,
+                                        Reference = tmpVariable,
+                                        AccessKind = MemberAccessKind.Read,
                                     }
                                 )
-                                {
-                                    ReturnTypeMetadata = builtInTypes.I32,
-                                }
-                            )
-                            {
-                                Metadata = tmpVariable,
-                            },
-                            new ExpressionStatement(
-                                null,
-                                new CallExpression(
-                                    null,
-                                    new MemberAccessExpression(
-                                        null,
-                                        new MemberAccessExpression(null, "p")
-                                        {
-                                            Reference = pParameter,
-                                            AccessKind = MemberAccessKind.Read,
-                                        },
-                                        xProperty.Setter!.Name
-                                    )
-                                    {
-                                        Reference = xProperty.Setter,
-                                        AccessKind = MemberAccessKind.Read,
-                                    },
-                                    [
-                                        new MemberAccessExpression(null, tmpVariable.Name)
-                                        {
-                                            Reference = tmpVariable,
-                                            AccessKind = MemberAccessKind.Read,
-                                        }
-                                    ]
-                                )
-                            ),
-                            new ExpressionStatement(
-                                null,
-                                new MemberAccessExpression(null, tmpVariable.Name)
-                                {
-                                    Reference = tmpVariable,
-                                    AccessKind = MemberAccessKind.Read,
-                                }
-                            )
-                        ])
-                    )
-                ])
-            )
-            {
-                Metadata = testFunction,
-            },
-        ]);
+                            ])
+                        )
+                    ])
+                )
+                {
+                    Metadata = testFunction,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }

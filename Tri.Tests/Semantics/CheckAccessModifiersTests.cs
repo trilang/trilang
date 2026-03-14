@@ -32,6 +32,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 private constructor() { }
             }
@@ -54,7 +56,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(92, 6, 19), new SourcePosition(102, 6, 29))),
+                new SourceSpan(new SourcePosition(110, 8, 19), new SourcePosition(120, 8, 29))),
             "The constructor of 'Test' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -65,6 +67,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 private constructor() { }
 
@@ -88,6 +92,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { private get; private set; }
             }
@@ -109,7 +115,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(129, 8, 12), new SourcePosition(132, 8, 15))),
+                new SourceSpan(new SourcePosition(147, 10, 12), new SourcePosition(150, 10, 15))),
             "The getter of 'x' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -120,6 +126,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { private get; private set; }
             }
@@ -141,7 +149,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(123, 8, 5), new SourcePosition(126, 8, 8))),
+                new SourceSpan(new SourcePosition(141, 10, 5), new SourcePosition(144, 10, 8))),
             "The setter of 'x' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -152,6 +160,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { private get; private set; }
 
@@ -175,6 +185,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { private get; private set; }
 
@@ -198,6 +210,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { public set; }
             }
@@ -217,7 +231,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(90, 6, 12), new SourcePosition(93, 6, 15))),
+                new SourceSpan(new SourcePosition(108, 8, 12), new SourcePosition(111, 8, 15))),
             "The 'x' property doesn't have a getter.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -228,6 +242,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 { public get; }
             }
@@ -247,7 +263,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(84, 6, 5), new SourcePosition(87, 6, 8))),
+                new SourceSpan(new SourcePosition(102, 8, 5), new SourcePosition(105, 8, 8))),
             "The 'x' property doesn't have a setter.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -258,6 +274,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public toString(): string {
                     return "xxx";
@@ -282,6 +300,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 private toString(): string {
                     return "xxx";
@@ -303,7 +323,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(134, 8, 21), new SourcePosition(144, 8, 31))),
+                new SourceSpan(new SourcePosition(152, 10, 21), new SourcePosition(162, 10, 31))),
             "The 'toString' method is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -314,6 +334,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 private toString(): string {
                     return "xxx";
@@ -338,6 +360,8 @@ public class CheckAccessModifiersTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             private test(): void { }
 
             public main(): void {

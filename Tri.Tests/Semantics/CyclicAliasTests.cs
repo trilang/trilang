@@ -28,21 +28,29 @@ public class CyclicAliasTests
     public void RecursiveTypeAliasTest()
     {
         var diagnostics = new DiagnosticCollection();
-        var tree = Parse(diagnostics, "test.tri", "public type Test = Test;");
+        var tree = Parse(
+            diagnostics,
+            "test.tri",
+            """
+            namespace Test1;
+
+            public type Test = Test;
+            """);
 
         var semantic = new SemanticAnalysis();
         var (_, _, rootNamespace, _) = semantic.Analyze(
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
-        var testAlias = rootNamespace.FindType("Test");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var testAlias = test1Ns.FindType("Test");
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0001CyclicTypeAlias,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 new SourceFile("test.tri"),
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25))),
+                new SourceSpan(new SourcePosition(18, 3, 1), new SourcePosition(42, 3, 25))),
             "The cyclic type alias detected: 'Test'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -58,6 +66,8 @@ public class CyclicAliasTests
             diagnostics,
             "test.tri",
             """
+            namespace Test1;
+
             public type Test1 = Test2;
             public type Test2 = Test1;
             """);
@@ -67,8 +77,9 @@ public class CyclicAliasTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
-        var test1Alias = rootNamespace.FindType("Test1");
-        var test2Alias = rootNamespace.FindType("Test2");
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Alias = test1Ns.FindType("Test1");
+        var test2Alias = test1Ns.FindType("Test2");
 
         var diagnostic = new[]
         {
@@ -77,14 +88,14 @@ public class CyclicAliasTests
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     new SourceFile("test.tri"),
-                    new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(26, 1, 27))),
+                    new SourceSpan(new SourcePosition(18, 3, 1), new SourcePosition(44, 3, 27))),
                 "The cyclic type alias detected: 'Test1'."),
             new Diagnostic(
                 DiagnosticId.S0001CyclicTypeAlias,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     new SourceFile("test.tri"),
-                    new SourceSpan(new SourcePosition(27, 2, 1), new SourcePosition(53, 2, 27))),
+                    new SourceSpan(new SourcePosition(45, 4, 1), new SourcePosition(71, 4, 27))),
                 "The cyclic type alias detected: 'Test2'.")
         };
 

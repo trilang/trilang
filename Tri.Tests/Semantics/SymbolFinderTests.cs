@@ -32,7 +32,7 @@ public class SymbolFinderTests
     [Test]
     public void FunctionWithParametersInRootScopeTest()
     {
-        var (tree, diagnostics) = Parse("public add(a: i32, b: i32): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1; public add(a: i32, b: i32): void { }");
 
         var semantic = new SemanticAnalysis();
         var (semanticTrees, map, _, _) = semantic.Analyze(
@@ -57,7 +57,7 @@ public class SymbolFinderTests
     [Test]
     public void FunctionWithSameParametersInRootScopeTest()
     {
-        var (tree, diagnostics) = Parse("public add(a: i32, a: i32): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1; public add(a: i32, a: i32): void { }");
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
@@ -69,7 +69,7 @@ public class SymbolFinderTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(25, 1, 26))),
+                new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(42, 1, 43))),
             "The 'a' parameter is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -80,6 +80,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 var a: i32 = 1;
                 var b: i32 = 2;
@@ -112,6 +114,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 var a: i32 = 1;
                 var a: i32 = 2;
@@ -128,7 +132,7 @@ public class SymbolFinderTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(46, 3, 5), new SourcePosition(61, 3, 20))),
+                new SourceSpan(new SourcePosition(64, 5, 5), new SourcePosition(79, 5, 20))),
             "The 'a' variable is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -139,6 +143,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 if (true) {
                     var a: i32 = 1;
@@ -167,6 +173,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 if (true) {
                     var a: i32 = 1;
@@ -182,7 +190,6 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
 
         var semanticTree = semanticTrees.Single();
-        var function = semanticTree.Find<FunctionDeclaration>()!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var variables = semanticTree.Where<VariableDeclaration>().ToArray();
         var a = variables[0];
@@ -206,6 +213,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public main(): void {
                 var a: i32 = 1;
                 if (true) {
@@ -253,6 +262,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point { }
             public type Point { }
             """);
@@ -267,7 +278,7 @@ public class SymbolFinderTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(22, 2, 1), new SourcePosition(43, 2, 22))),
+                new SourceSpan(new SourcePosition(40, 4, 1), new SourcePosition(61, 4, 22))),
             "The 'Point' type is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -278,6 +289,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public constructor(a: i32) { }
             }
@@ -306,6 +319,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 public test(a: i32): void { }
             }
@@ -334,6 +349,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type MyInt = i32;
             public type MyInt = i32;
             """);
@@ -348,7 +365,7 @@ public class SymbolFinderTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(25, 2, 1), new SourcePosition(49, 2, 25))),
+                new SourceSpan(new SourcePosition(43, 4, 1), new SourcePosition(67, 4, 25))),
             "The 'MyInt' type is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -359,6 +376,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Point {
                 x: i32;
                 y: i32;
@@ -401,6 +420,8 @@ public class SymbolFinderTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 x: i32 {
                     private get {

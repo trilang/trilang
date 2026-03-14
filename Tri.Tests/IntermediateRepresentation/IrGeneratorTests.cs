@@ -59,6 +59,8 @@ public class IrGeneratorTests
     {
         var code =
             $$"""
+              namespace Test1;
+
               public test(): i32 {
                   return 1 {{op}} 2;
               }
@@ -97,6 +99,8 @@ public class IrGeneratorTests
     {
         var code =
             $$"""
+              namespace Test1;
+
               public test(): bool {
                   return 1 {{op}} 2;
               }
@@ -129,6 +133,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(x: i32): void {
                 x = 1;
             }
@@ -163,6 +169,8 @@ public class IrGeneratorTests
     {
         var code =
             $$"""
+              namespace Test1;
+
               public test(x: i32): void {
                   x {{op}} 1;
               }
@@ -195,6 +203,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(x: i32): i32 {
                 x += 1;
                 x = 10;
@@ -233,6 +243,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: i32, b: i32): i32 {
                 return a + b;
             }
@@ -265,6 +277,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): i32 {
                 var a: i32 = 1;
                 var b: i32 = 2;
@@ -302,6 +316,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): null {
                 return null;
             }
@@ -327,6 +343,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: i32): i32 {
                 return -a;
             }
@@ -357,6 +375,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: bool): bool {
                 return !a;
             }
@@ -387,6 +407,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: i32): i32 {
                 return ~a;
             }
@@ -417,6 +439,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: i32[]): i32 {
                 return a[0];
             }
@@ -469,6 +493,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: i32[], index: i32): i32 {
                 return a[index + 2];
             }
@@ -528,6 +554,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: i32[]): void {
                 a[0] = 10;
             }
@@ -580,6 +608,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): i32[] {
                 var a: i32[] = new i32[10];
 
@@ -631,6 +661,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Point {
                 public constructor(x: i32, y: i32) { }
             }
@@ -641,7 +673,8 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var ctor = pointType.Constructors.First();
         var ctorPointer = new TypePointerMetadata(ctor.Type);
@@ -687,6 +720,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public max(a: i32, b: i32): i32 {
                 if (a >= b) {
                     return a;
@@ -747,6 +782,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public max(a: i32): i32 {
                 var b: i32 = 0;
                 if (a > 0) {
@@ -810,6 +847,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public max(a: i32): i32 {
                 if (a > 0) {
                     if (a > 10) {
@@ -901,6 +940,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: i32): i32 {
                 var b: i32 = 0;
                 if (a > 0) {
@@ -977,6 +1018,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): i32 {
                 var i: i32 = 0;
                 while (i < 10) {
@@ -1052,6 +1095,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Test {
                 public method1(): i32 {
                     return 0;
@@ -1064,7 +1109,8 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var testType = (TypeMetadata)rootNamespace.FindType("Test")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var testType = (TypeMetadata)test1Ns.FindType("Test")!;
         var typePointer = new TypePointerMetadata(testType);
         var method = (MethodMetadata)testType.GetMethods("method1")[0];
         var methodPointer = new TypePointerMetadata(method.Type);
@@ -1104,6 +1150,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Test {
                 public method1(): void { }
 
@@ -1114,7 +1162,8 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var testType = (TypeMetadata)rootNamespace.FindType("Test")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var testType = (TypeMetadata)test1Ns.FindType("Test")!;
         var typePointer = new TypePointerMetadata(testType);
         var method = (MethodMetadata)testType.GetMethods("method1")[0];
         var methodPointer = new TypePointerMetadata(method.Type);
@@ -1152,6 +1201,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Point {
                 public constructor(x: i32) {
                     this.x = x;
@@ -1170,7 +1221,8 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
         var fieldPointer = new TypePointerMetadata(field.Type);
@@ -1218,6 +1270,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Point {
                 public constructor(x: i32) {
                     this.x = x;
@@ -1234,7 +1288,8 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
         var fieldPointer = new TypePointerMetadata(field.Type);
@@ -1322,6 +1377,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Point {
                 public constructor(x: i32) {
                     this.x = x;
@@ -1338,7 +1395,8 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
         var fieldPointer = new TypePointerMetadata(field.Type);
@@ -1427,6 +1485,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Point {
                 public constructor(x: i32, y: i32) {
                     this.x = x;
@@ -1445,7 +1505,8 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var pointType = (TypeMetadata)rootNamespace.FindType("Point")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
         var pointPointerType = new TypePointerMetadata(pointType);
         var xField = (FieldMetadata)pointType.GetFields("<>_x")[0];
         var xFieldPointer = new TypePointerMetadata(xField.Type);
@@ -1574,6 +1635,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Test1 {
                 x: i32;
 
@@ -1599,9 +1662,10 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Type = (TypeMetadata)rootNamespace.FindType("Test1")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Type = (TypeMetadata)test1Ns.FindType("Test1")!;
         var test1PointerType = new TypePointerMetadata(test1Type);
-        var test2Type = (TypeMetadata)rootNamespace.FindType("Test2")!;
+        var test2Type = (TypeMetadata)test1Ns.FindType("Test2")!;
         var test2PointerType = new TypePointerMetadata(test2Type);
 
         // Test1 members
@@ -1790,6 +1854,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public main(): void {
                 test1();
             }
@@ -1834,6 +1900,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Test {
                 public static test(): void { }
             }
@@ -1844,7 +1912,8 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var testType = (TypeMetadata)rootNamespace.FindType("Test")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var testType = (TypeMetadata)test1Ns.FindType("Test")!;
         var testMethod = (MethodMetadata)testType.GetMethods("test")[0];
 
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
@@ -1880,6 +1949,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {}
 
             public main(): void {
@@ -1926,6 +1997,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(callback: () => void): void {
                 callback();
             }
@@ -1958,6 +2031,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Interface = {
                 method(): void;
             }
@@ -1971,7 +2046,8 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var interfaceType = (AliasMetadata)rootNamespace.FindType("Interface")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var interfaceType = (AliasMetadata)test1Ns.FindType("Interface")!;
         var interfacePointer = new TypePointerMetadata(interfaceType);
 
         var method = (InterfaceMethodMetadata)interfaceType.GetMember("method")!;
@@ -2004,6 +2080,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(obj: {}): bool {
                 return obj is i8;
             }
@@ -2037,6 +2115,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(obj: {}): i8 {
                 return (i8)obj;
             }
@@ -2070,6 +2150,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Test { }
 
             public test(obj: {}): Test {
@@ -2084,7 +2166,8 @@ public class IrGeneratorTests
         var any = rootNamespace.FindType("{ }")!;
         var anyPointer = new TypePointerMetadata(any);
 
-        var testType = (TypeMetadata)rootNamespace.FindType("Test")!;
+        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var testType = (TypeMetadata)test1Ns.FindType("Test")!;
         var testPointer = new TypePointerMetadata(testType);
 
         var expected = new[]
@@ -2108,6 +2191,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: bool, b: bool): i32 {
                 if (a && b) {
                     return 1;
@@ -2167,6 +2252,8 @@ public class IrGeneratorTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(x: i32): void { }
             public test(x: bool): void { }
             """;

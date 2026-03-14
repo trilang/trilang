@@ -76,6 +76,8 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
                 => CompareMemberAccessExpressionNode(x1, y1),
             (MethodDeclaration x1, MethodDeclaration y1)
                 => CompareMethodDeclarationNode(x1, y1),
+            (Namespace x1, Namespace y1)
+                => CompareNamespace(x1, y1),
             (NewArrayExpression x1, NewArrayExpression y1)
                 => CompareNewArrayExpressionNode(x1, y1),
             (NewObjectExpression x1, NewObjectExpression y1)
@@ -471,6 +473,14 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
 
         if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
             throw new Exception("Metadata doesn't match.");
+
+        return true;
+    }
+
+    private bool CompareNamespace(Namespace x, Namespace y)
+    {
+        if (!x.Parts.SequenceEqual(y.Parts))
+            throw new Exception($"Namespace: Parts mismatch. {string.Join(".", x.Parts)} != {string.Join(".", y.Parts)}.");
 
         return true;
     }

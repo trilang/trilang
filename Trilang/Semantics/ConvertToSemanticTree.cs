@@ -296,7 +296,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         return new SemanticTree(
             node.SourceFile,
             node.SourceSpan,
-            (Namespace?)node.Namespace?.Transform(this),
+            (Namespace)node.Namespace.Transform(this),
             node.UseNodes.Select(u => (Use)u.Transform(this)).ToList(),
             declarations);
     }

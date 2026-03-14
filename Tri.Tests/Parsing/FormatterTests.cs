@@ -10,19 +10,25 @@ public class FormatterTests
     [Test]
     public void FormatEmptyFunctionTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default)
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default)
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
             }
             """;
@@ -33,29 +39,35 @@ public class FormatterTests
     [Test]
     public void FormatTwoFunctionsWithParametersTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default)),
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default)
-            ),
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default)),
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default)
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
             }
 
@@ -69,21 +81,27 @@ public class FormatterTests
     [Test]
     public void FormatEmptyReturnTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(default)
-                ])
-            ),
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(default)
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 return;
             }
@@ -95,32 +113,38 @@ public class FormatterTests
     [Test]
     public void FormatAdditionTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.Addition,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.Addition,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x + y;
             }
@@ -132,32 +156,38 @@ public class FormatterTests
     [Test]
     public void FormatSubtractionTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.Subtraction,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.Subtraction,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x - y;
             }
@@ -169,32 +199,38 @@ public class FormatterTests
     [Test]
     public void FormatMultiplicationTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.Multiplication,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.Multiplication,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x * y;
             }
@@ -206,32 +242,38 @@ public class FormatterTests
     [Test]
     public void FormatDivisionTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.Division,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.Division,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x / y;
             }
@@ -243,32 +285,38 @@ public class FormatterTests
     [Test]
     public void FormatBitwiseAndTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.BitwiseAnd,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.BitwiseAnd,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x & y;
             }
@@ -280,32 +328,38 @@ public class FormatterTests
     [Test]
     public void FormatBitwiseOrTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.BitwiseOr,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.BitwiseOr,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x | y;
             }
@@ -317,32 +371,38 @@ public class FormatterTests
     [Test]
     public void FormatBitwiseXorTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.BitwiseXor,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.BitwiseXor,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x ^ y;
             }
@@ -354,32 +414,38 @@ public class FormatterTests
     [Test]
     public void FormatConditionalAndTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.ConditionalAnd,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.ConditionalAnd,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x && y;
             }
@@ -391,32 +457,38 @@ public class FormatterTests
     [Test]
     public void FormatConditionalOrTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.ConditionalOr,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.ConditionalOr,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x || y;
             }
@@ -428,32 +500,38 @@ public class FormatterTests
     [Test]
     public void FormatEqualityTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.Equality,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.Equality,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x == y;
             }
@@ -465,32 +543,38 @@ public class FormatterTests
     [Test]
     public void FormatInequalityTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.Inequality,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.Inequality,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x != y;
             }
@@ -502,31 +586,37 @@ public class FormatterTests
     [Test]
     public void FormatLessThanTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add", [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add", [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.LessThan,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.LessThan,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x < y;
             }
@@ -538,32 +628,38 @@ public class FormatterTests
     [Test]
     public void FormatLessThanOrEqualTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.LessThanOrEqual,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.LessThanOrEqual,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x <= y;
             }
@@ -575,32 +671,38 @@ public class FormatterTests
     [Test]
     public void FormatGreaterThanTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.GreaterThan,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.GreaterThan,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x > y;
             }
@@ -612,32 +714,38 @@ public class FormatterTests
     [Test]
     public void FormatGreaterThanOrEqualTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.GreaterThanOrEqual,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.GreaterThanOrEqual,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x >= y;
             }
@@ -649,28 +757,34 @@ public class FormatterTests
     [Test]
     public void FormatUnaryPlusTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new UnaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            UnaryExpressionKind.UnaryPlus,
-                            new MemberAccessExpressionNode(default, "x")
+                            new UnaryExpressionNode(
+                                default,
+                                UnaryExpressionKind.UnaryPlus,
+                                new MemberAccessExpressionNode(default, "x")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 return +x;
             }
@@ -682,28 +796,34 @@ public class FormatterTests
     [Test]
     public void FormatUnaryMinusTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new UnaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            UnaryExpressionKind.UnaryMinus,
-                            new MemberAccessExpressionNode(default, "x")
+                            new UnaryExpressionNode(
+                                default,
+                                UnaryExpressionKind.UnaryMinus,
+                                new MemberAccessExpressionNode(default, "x")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 return -x;
             }
@@ -715,28 +835,34 @@ public class FormatterTests
     [Test]
     public void FormatLogicalNotTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new UnaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            UnaryExpressionKind.LogicalNot,
-                            new MemberAccessExpressionNode(default, "x")
+                            new UnaryExpressionNode(
+                                default,
+                                UnaryExpressionKind.LogicalNot,
+                                new MemberAccessExpressionNode(default, "x")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 return !x;
             }
@@ -748,28 +874,34 @@ public class FormatterTests
     [Test]
     public void FormatBitwiseNotTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new UnaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            UnaryExpressionKind.BitwiseNot,
-                            new MemberAccessExpressionNode(default, "x")
+                            new UnaryExpressionNode(
+                                default,
+                                UnaryExpressionKind.BitwiseNot,
+                                new MemberAccessExpressionNode(default, "x")
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 return ~x;
             }
@@ -781,43 +913,49 @@ public class FormatterTests
     [Test]
     public void FormatIfTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new IfStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new IfStatementNode(
                             default,
-                            BinaryExpressionKind.LessThan,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 0)
-                        ),
-                        new BlockStatementNode(default, [
-                            new ReturnStatementNode(
+                            new BinaryExpressionNode(
                                 default,
-                                new UnaryExpressionNode(
+                                BinaryExpressionKind.LessThan,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 0)
+                            ),
+                            new BlockStatementNode(default, [
+                                new ReturnStatementNode(
                                     default,
-                                    UnaryExpressionKind.UnaryMinus,
-                                    new MemberAccessExpressionNode(default, "x")
+                                    new UnaryExpressionNode(
+                                        default,
+                                        UnaryExpressionKind.UnaryMinus,
+                                        new MemberAccessExpressionNode(default, "x")
+                                    )
                                 )
-                            )
-                        ])
-                    ),
-                    new ReturnStatementNode(
-                        default,
-                        new MemberAccessExpressionNode(default, "x")
-                    )
-                ])
-            ),
-        ]);
+                            ])
+                        ),
+                        new ReturnStatementNode(
+                            default,
+                            new MemberAccessExpressionNode(default, "x")
+                        )
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 if (x < 0) {
                     return -x;
@@ -832,45 +970,51 @@ public class FormatterTests
     [Test]
     public void FormatIfElseTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new IfStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new IfStatementNode(
                             default,
-                            BinaryExpressionKind.LessThan,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 0)
-                        ),
-                        new BlockStatementNode(default, [
-                            new ReturnStatementNode(
+                            new BinaryExpressionNode(
                                 default,
-                                new UnaryExpressionNode(
+                                BinaryExpressionKind.LessThan,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 0)
+                            ),
+                            new BlockStatementNode(default, [
+                                new ReturnStatementNode(
                                     default,
-                                    UnaryExpressionKind.UnaryMinus,
+                                    new UnaryExpressionNode(
+                                        default,
+                                        UnaryExpressionKind.UnaryMinus,
+                                        new MemberAccessExpressionNode(default, "x")
+                                    )
+                                )
+                            ]),
+                            new BlockStatementNode(default, [
+                                new ReturnStatementNode(
+                                    default,
                                     new MemberAccessExpressionNode(default, "x")
                                 )
-                            )
-                        ]),
-                        new BlockStatementNode(default, [
-                            new ReturnStatementNode(
-                                default,
-                                new MemberAccessExpressionNode(default, "x")
-                            )
-                        ])
-                    )
-                ])
-            ),
-        ]);
+                            ])
+                        )
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 if (x < 0) {
                     return -x;
@@ -886,50 +1030,56 @@ public class FormatterTests
     [Test]
     public void FormatFunctionCallTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [
-                    new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                    new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            BinaryExpressionKind.Addition,
-                            new MemberAccessExpressionNode(default, "x"),
-                            new MemberAccessExpressionNode(default, "y")
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.Addition,
+                                new MemberAccessExpressionNode(default, "x"),
+                                new MemberAccessExpressionNode(default, "y")
+                            )
                         )
-                    )
-                ])),
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new CallExpressionNode(
+                    ])),
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            new MemberAccessExpressionNode(default, "add"),
-                            [
-                                new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 1),
-                                new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 2),
-                            ]
+                            new CallExpressionNode(
+                                default,
+                                new MemberAccessExpressionNode(default, "add"),
+                                [
+                                    new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 1),
+                                    new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 2),
+                                ]
+                            )
                         )
-                    )
-                ])),
-        ]);
+                    ])),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32, y: i32): void {
                 return x + y;
             }
@@ -954,29 +1104,35 @@ public class FormatterTests
     [TestCase(BinaryExpressionKind.BitwiseXorAssignment, "^=")]
     public void FormatAssignmentTest(BinaryExpressionKind kind, string @operator)
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ExpressionStatementNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ExpressionStatementNode(
                             default,
-                            kind,
-                            new MemberAccessExpressionNode(default, "x"),
-                            LiteralExpressionNode.Integer(default, 1)
+                            new BinaryExpressionNode(
+                                default,
+                                kind,
+                                new MemberAccessExpressionNode(default, "x"),
+                                LiteralExpressionNode.Integer(default, 1)
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         var expected =
             $$"""
+              namespace Test1;
+
               public add(x: i32): void {
                   x {{@operator}} 1;
               }
@@ -988,30 +1144,36 @@ public class FormatterTests
     [Test]
     public void FormatWhileTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new WhileNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new WhileNode(
                             default,
-                            BinaryExpressionKind.LessThan,
-                            new MemberAccessExpressionNode(default, "x"),
-                            LiteralExpressionNode.Integer(default, 0)
-                        ),
-                        new BlockStatementNode(default)
-                    )
-                ])
-            ),
-        ]);
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.LessThan,
+                                new MemberAccessExpressionNode(default, "x"),
+                                LiteralExpressionNode.Integer(default, 0)
+                            ),
+                            new BlockStatementNode(default)
+                        )
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 while (x < 0) {
                 }
@@ -1024,32 +1186,38 @@ public class FormatterTests
     [Test]
     public void FormatBreakTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new WhileNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new WhileNode(
                             default,
-                            BinaryExpressionKind.LessThan,
-                            new MemberAccessExpressionNode(default, "x"),
-                            LiteralExpressionNode.Integer(default, 0)
-                        ),
-                        new BlockStatementNode(default, [
-                            new BreakNode(default)
-                        ])
-                    )
-                ])
-            ),
-        ]);
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.LessThan,
+                                new MemberAccessExpressionNode(default, "x"),
+                                LiteralExpressionNode.Integer(default, 0)
+                            ),
+                            new BlockStatementNode(default, [
+                                new BreakNode(default)
+                            ])
+                        )
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 while (x < 0) {
                     break;
@@ -1063,32 +1231,38 @@ public class FormatterTests
     [Test]
     public void FormatContinueTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new WhileNode(
-                        default,
-                        new BinaryExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new WhileNode(
                             default,
-                            BinaryExpressionKind.LessThan,
-                            new MemberAccessExpressionNode(default, "x"),
-                            LiteralExpressionNode.Integer(default, 0)
-                        ),
-                        new BlockStatementNode(default, [
-                            new ContinueNode(default)
-                        ])
-                    )
-                ])
-            ),
-        ]);
+                            new BinaryExpressionNode(
+                                default,
+                                BinaryExpressionKind.LessThan,
+                                new MemberAccessExpressionNode(default, "x"),
+                                LiteralExpressionNode.Integer(default, 0)
+                            ),
+                            new BlockStatementNode(default, [
+                                new ContinueNode(default)
+                            ])
+                        )
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32): void {
                 while (x < 0) {
                     continue;
@@ -1102,24 +1276,30 @@ public class FormatterTests
     [Test]
     public void FormatArrayTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        LiteralExpressionNode.Integer(default, 0)
-                    )
-                ])
-            ),
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
+                            default,
+                            LiteralExpressionNode.Integer(default, 0)
+                        )
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32[]): void {
                 return 0;
             }
@@ -1131,28 +1311,34 @@ public class FormatterTests
     [Test]
     public void FormatArrayAccessTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "add",
-                [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new ArrayAccessExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            new MemberAccessExpressionNode(default, "x"),
-                            LiteralExpressionNode.Integer(default, 0)
+                            new ArrayAccessExpressionNode(
+                                default,
+                                new MemberAccessExpressionNode(default, "x"),
+                                LiteralExpressionNode.Integer(default, 0)
+                            )
                         )
-                    )
-                ])
-            ),
-        ]);
+                    ])
+                ),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public add(x: i32[]): void {
                 return x[0];
             }
@@ -1164,12 +1350,18 @@ public class FormatterTests
     [Test]
     public void FormatPrivateTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(default, AccessModifier.Private, "MyType", [], [], [], [], [])
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(default, AccessModifier.Private, "MyType", [], [], [], [], [])
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             private type MyType {
             }
             """;
@@ -1180,12 +1372,18 @@ public class FormatterTests
     [Test]
     public void FormatPublicTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(default, AccessModifier.Public, "MyType", [], [], [], [], [])
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(default, AccessModifier.Public, "MyType", [], [], [], [], [])
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type MyType {
             }
             """;
@@ -1196,13 +1394,19 @@ public class FormatterTests
     [Test]
     public void FormatTwoTypesTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(default, AccessModifier.Private, "MyType1", [], [], [], [], []),
-            new TypeDeclarationNode(default, AccessModifier.Public, "MyType2", [], [], [], [], []),
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(default, AccessModifier.Private, "MyType1", [], [], [], [], []),
+                new TypeDeclarationNode(default, AccessModifier.Public, "MyType2", [], [], [], [], []),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             private type MyType1 {
             }
 
@@ -1216,24 +1420,30 @@ public class FormatterTests
     [Test]
     public void FormatPointTypeWithPropertiesTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclarationNode(default, "x", new TypeRefNode(default, "i32")),
-                    new PropertyDeclarationNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                [],
-                []
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclarationNode(default, "x", new TypeRefNode(default, "i32")),
+                        new PropertyDeclarationNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    [],
+                    []
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type Point {
                 x: i32;
                 y: i32;
@@ -1246,48 +1456,54 @@ public class FormatterTests
     [Test]
     public void FormatPropertyWithGetterSetterTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclarationNode(
-                        default,
-                        "x",
-                        new TypeRefNode(default, "i32"),
-                        new PropertyGetterNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclarationNode(
                             default,
-                            AccessModifier.Private,
-                            new BlockStatementNode(default, [
-                                new ReturnStatementNode(default, LiteralExpressionNode.Integer(default, 0))
-                            ])
-                        ),
-                        new PropertySetterNode(
-                            default,
-                            AccessModifier.Private,
-                            new BlockStatementNode(default, [
-                                new ExpressionStatementNode(
-                                    default,
-                                    new BinaryExpressionNode(
+                            "x",
+                            new TypeRefNode(default, "i32"),
+                            new PropertyGetterNode(
+                                default,
+                                AccessModifier.Private,
+                                new BlockStatementNode(default, [
+                                    new ReturnStatementNode(default, LiteralExpressionNode.Integer(default, 0))
+                                ])
+                            ),
+                            new PropertySetterNode(
+                                default,
+                                AccessModifier.Private,
+                                new BlockStatementNode(default, [
+                                    new ExpressionStatementNode(
                                         default,
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(default, "field"),
-                                        new MemberAccessExpressionNode(default, "value")
+                                        new BinaryExpressionNode(
+                                            default,
+                                            BinaryExpressionKind.Assignment,
+                                            new MemberAccessExpressionNode(default, "field"),
+                                            new MemberAccessExpressionNode(default, "value")
+                                        )
                                     )
-                                )
-                            ])
-                        )),
-                ],
-                [],
-                []
-            )
-        ]);
+                                ])
+                            )),
+                    ],
+                    [],
+                    []
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 {
                     private get {
@@ -1306,43 +1522,49 @@ public class FormatterTests
     [Test]
     public void FormatPropertyWithEmptyGetterTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclarationNode(
-                        default,
-                        "x",
-                        new TypeRefNode(default, "i32"),
-                        new PropertyGetterNode(default, AccessModifier.Private, null),
-                        new PropertySetterNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclarationNode(
                             default,
-                            AccessModifier.Private,
-                            new BlockStatementNode(default, [
-                                new ExpressionStatementNode(
-                                    default,
-                                    new BinaryExpressionNode(
+                            "x",
+                            new TypeRefNode(default, "i32"),
+                            new PropertyGetterNode(default, AccessModifier.Private, null),
+                            new PropertySetterNode(
+                                default,
+                                AccessModifier.Private,
+                                new BlockStatementNode(default, [
+                                    new ExpressionStatementNode(
                                         default,
-                                        BinaryExpressionKind.Assignment,
-                                        new MemberAccessExpressionNode(default, "field"),
-                                        new MemberAccessExpressionNode(default, "value")
+                                        new BinaryExpressionNode(
+                                            default,
+                                            BinaryExpressionKind.Assignment,
+                                            new MemberAccessExpressionNode(default, "field"),
+                                            new MemberAccessExpressionNode(default, "value")
+                                        )
                                     )
-                                )
-                            ])
-                        )
-                    ),
-                ],
-                [],
-                []
-            )
-        ]);
+                                ])
+                            )
+                        ),
+                    ],
+                    [],
+                    []
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 {
                     private get;
@@ -1359,34 +1581,40 @@ public class FormatterTests
     [Test]
     public void FormatPropertyWithEmptySetterTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclarationNode(
-                        default,
-                        "x",
-                        new TypeRefNode(default, "i32"),
-                        new PropertyGetterNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclarationNode(
                             default,
-                            AccessModifier.Private,
-                            new BlockStatementNode(default, [
-                                new ReturnStatementNode(default, LiteralExpressionNode.Integer(default, 0))
-                            ])
-                        ),
-                        new PropertySetterNode(default, AccessModifier.Private, null)),
-                ],
-                [],
-                []
-            )
-        ]);
+                            "x",
+                            new TypeRefNode(default, "i32"),
+                            new PropertyGetterNode(
+                                default,
+                                AccessModifier.Private,
+                                new BlockStatementNode(default, [
+                                    new ReturnStatementNode(default, LiteralExpressionNode.Integer(default, 0))
+                                ])
+                            ),
+                            new PropertySetterNode(default, AccessModifier.Private, null)),
+                    ],
+                    [],
+                    []
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type Point {
                 x: i32 {
                     private get {
@@ -1403,49 +1631,53 @@ public class FormatterTests
     [Test]
     public void FormatPointTypeWithEverythingTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Point",
-                [],
-                [],
-                [
-                    new PropertyDeclarationNode(default, "x", new TypeRefNode(default, "i32")),
-                    new PropertyDeclarationNode(default, "y", new TypeRefNode(default, "i32")),
-                ],
-                [
-                    new ConstructorDeclarationNode(
-                        default,
-                        AccessModifier.Public,
-                        [
-                            new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                            new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                        ],
-                        new BlockStatementNode(default))
-                ],
-                [
-                    new MethodDeclarationNode(
-                        default,
-                        AccessModifier.Public,
-                        false,
-                        "toString",
-                        [],
-                        new TypeRefNode(default, "string"),
-                        new BlockStatementNode(default)),
-                    new MethodDeclarationNode(
-                        default,
-                        AccessModifier.Public,
-                        false,
-                        "distance",
-                        [new ParameterNode(default, "other", new TypeRefNode(default, "Point"))],
-                        new TypeRefNode(default, "string"),
-                        new BlockStatementNode(default)),
-                ])
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    [],
+                    [
+                        new PropertyDeclarationNode(default, "x", new TypeRefNode(default, "i32")),
+                        new PropertyDeclarationNode(default, "y", new TypeRefNode(default, "i32")),
+                    ],
+                    [
+                        new ConstructorDeclarationNode(
+                            default,
+                            AccessModifier.Public,
+                            [
+                                new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                                new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                            ],
+                            new BlockStatementNode(default))
+                    ],
+                    [
+                        new MethodDeclarationNode(
+                            default,
+                            AccessModifier.Public,
+                            false,
+                            "toString",
+                            [],
+                            new TypeRefNode(default, "string"),
+                            new BlockStatementNode(default)),
+                        new MethodDeclarationNode(
+                            default,
+                            AccessModifier.Public,
+                            false,
+                            "distance",
+                            [new ParameterNode(default, "other", new TypeRefNode(default, "Point"))],
+                            new TypeRefNode(default, "string"),
+                            new BlockStatementNode(default)),
+                    ])
+            ]);
         var formatted = tree.ToString();
         const string expected =
-            "public type Point {\n    x: i32;\n    y: i32;\n    public constructor(x: i32, y: i32) {\n    }\n    \n    public toString(): string {\n    }\n    \n    public distance(other: Point): string {\n    }\n}";
+            "namespace Test1;\n\npublic type Point {\n    x: i32;\n    y: i32;\n    public constructor(x: i32, y: i32) {\n    }\n    \n    public toString(): string {\n    }\n    \n    public distance(other: Point): string {\n    }\n}";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1453,21 +1685,27 @@ public class FormatterTests
     [Test]
     public void FormatTypeWithInterfacesTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "MyType",
-                [],
-                [new TypeRefNode(default, "Interface1"), new TypeRefNode(default, "Interface2")],
-                [],
-                [],
-                []
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "MyType",
+                    [],
+                    [new TypeRefNode(default, "Interface1"), new TypeRefNode(default, "Interface2")],
+                    [],
+                    [],
+                    []
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type MyType : Interface1, Interface2 {
             }
             """;
@@ -1478,11 +1716,15 @@ public class FormatterTests
     [Test]
     public void FormatTypeAliasTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(default, AccessModifier.Public, "MyType", [], new TypeRefNode(default, "i32"))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(default, AccessModifier.Public, "MyType", [], new TypeRefNode(default, "i32"))
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type MyType = i32;";
+        const string expected = "namespace Test1;\n\npublic type MyType = i32;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1490,21 +1732,25 @@ public class FormatterTests
     [Test]
     public void FormatFunctionTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "MyType",
-                [],
-                new FunctionTypeNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
                     default,
-                    [new TypeRefNode(default, "i32"), new TypeRefNode(default, "i32")],
-                    new TypeRefNode(default, "i32")
+                    AccessModifier.Public,
+                    "MyType",
+                    [],
+                    new FunctionTypeNode(
+                        default,
+                        [new TypeRefNode(default, "i32"), new TypeRefNode(default, "i32")],
+                        new TypeRefNode(default, "i32")
+                    )
                 )
-            )
-        ]);
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type MyType = (i32, i32) => i32;";
+        const string expected = "namespace Test1;\n\npublic type MyType = (i32, i32) => i32;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1512,25 +1758,31 @@ public class FormatterTests
     [Test]
     public void FormatVariableDeclarationTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new VariableDeclarationNode(
-                        default,
-                        "x",
-                        new TypeRefNode(default, "i32"),
-                        LiteralExpressionNode.Integer(default, 0)
-                    )
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new VariableDeclarationNode(
+                            default,
+                            "x",
+                            new TypeRefNode(default, "i32"),
+                            LiteralExpressionNode.Integer(default, 0)
+                        )
+                    ]))
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 var x: i32 = 0;
             }
@@ -1542,25 +1794,31 @@ public class FormatterTests
     [Test]
     public void FormatVariableDeclarationWithInlineTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new VariableDeclarationNode(
-                        default,
-                        "x",
-                        new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
-                        LiteralExpressionNode.Integer(default, 0)
-                    )
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new VariableDeclarationNode(
+                            default,
+                            "x",
+                            new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
+                            LiteralExpressionNode.Integer(default, 0)
+                        )
+                    ]))
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 var x: () => void = 0;
             }
@@ -1572,29 +1830,35 @@ public class FormatterTests
     [Test]
     public void FormatVariableDeclarationWithInlineTypeAndParametersTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new VariableDeclarationNode(
-                        default,
-                        "x",
-                        new FunctionTypeNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new VariableDeclarationNode(
                             default,
-                            [new TypeRefNode(default, "i32"), new TypeRefNode(default, "f64")],
-                            new TypeRefNode(default, "void")
-                        ),
-                        LiteralExpressionNode.Integer(default, 0)
-                    )
-                ]))
-        ]);
+                            "x",
+                            new FunctionTypeNode(
+                                default,
+                                [new TypeRefNode(default, "i32"), new TypeRefNode(default, "f64")],
+                                new TypeRefNode(default, "void")
+                            ),
+                            LiteralExpressionNode.Integer(default, 0)
+                        )
+                    ]))
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 var x: (i32, f64) => void = 0;
             }
@@ -1606,31 +1870,35 @@ public class FormatterTests
     [Test]
     public void FormatAliasInterfaceTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Point",
-                [],
-                new InterfaceNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
                     default,
-                    [
-                        new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
-                        new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
-                    ],
-                    [
-                        new InterfaceMethodNode(
-                            default,
-                            "distance",
-                            [new TypeRefNode(default, "Point")],
-                            new TypeRefNode(default, "f64")
-                        )
-                    ]
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    new InterfaceNode(
+                        default,
+                        [
+                            new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
+                            new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
+                        ],
+                        [
+                            new InterfaceMethodNode(
+                                default,
+                                "distance",
+                                [new TypeRefNode(default, "Point")],
+                                new TypeRefNode(default, "f64")
+                            )
+                        ]
+                    )
                 )
-            )
-        ]);
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type Point = {\n    x: i32;\n    y: i32;\n    \n    distance(Point): f64;\n}";
+        const string expected = "namespace Test1;\n\npublic type Point = {\n    x: i32;\n    y: i32;\n    \n    distance(Point): f64;\n}";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1638,31 +1906,35 @@ public class FormatterTests
     [Test]
     public void FormatAliasInterfaceTypeWithGettersSettersTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Point",
-                [],
-                new InterfaceNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
                     default,
-                    [
-                        new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), AccessModifier.Public, AccessModifier.Public),
-                        new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), AccessModifier.Private, AccessModifier.Private),
-                    ],
-                    [
-                        new InterfaceMethodNode(
-                            default,
-                            "distance",
-                            [new TypeRefNode(default, "Point")],
-                            new TypeRefNode(default, "f64")
-                        )
-                    ]
+                    AccessModifier.Public,
+                    "Point",
+                    [],
+                    new InterfaceNode(
+                        default,
+                        [
+                            new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), AccessModifier.Public, AccessModifier.Public),
+                            new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), AccessModifier.Private, AccessModifier.Private),
+                        ],
+                        [
+                            new InterfaceMethodNode(
+                                default,
+                                "distance",
+                                [new TypeRefNode(default, "Point")],
+                                new TypeRefNode(default, "f64")
+                            )
+                        ]
+                    )
                 )
-            )
-        ]);
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type Point = {\n    x: i32 { public get; public set; }\n    y: i32 { private get; private set; }\n    \n    distance(Point): f64;\n}";
+        const string expected = "namespace Test1;\n\npublic type Point = {\n    x: i32 { public get; public set; }\n    y: i32 { private get; private set; }\n    \n    distance(Point): f64;\n}";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1670,33 +1942,39 @@ public class FormatterTests
     [Test]
     public void FormatInlineInterfaceTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new VariableDeclarationNode(
-                        default,
-                        "p",
-                        new InterfaceNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new VariableDeclarationNode(
                             default,
-                            [
-                                new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
-                                new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
-                            ],
-                            []
-                        ),
-                        LiteralExpressionNode.Integer(default, 0)
-                    )
-                ])
-            )
-        ]);
+                            "p",
+                            new InterfaceNode(
+                                default,
+                                [
+                                    new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
+                                    new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
+                                ],
+                                []
+                            ),
+                            LiteralExpressionNode.Integer(default, 0)
+                        )
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 var p: { x: i32; y: i32; } = 0;
             }
@@ -1708,32 +1986,38 @@ public class FormatterTests
     [Test]
     public void FormatMultipleMemberAccessTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new MemberAccessExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
                             new MemberAccessExpressionNode(
                                 default,
-                                new MemberAccessExpressionNode(default, "a"),
-                                "b"
-                            ),
-                            "c"
+                                new MemberAccessExpressionNode(
+                                    default,
+                                    new MemberAccessExpressionNode(default, "a"),
+                                    "b"
+                                ),
+                                "c"
+                            )
                         )
-                    )
-                ])
-            )
-        ]);
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         var expected =
             """
+            namespace Test1;
+
             public main(): void {
                 return a.b.c;
             }
@@ -1745,24 +2029,30 @@ public class FormatterTests
     [Test]
     public void FormatThisExpressionTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new MemberAccessExpressionNode(default, "this")
-                    )
-                ])
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
+                            default,
+                            new MemberAccessExpressionNode(default, "this")
+                        )
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 return this;
             }
@@ -1774,32 +2064,38 @@ public class FormatterTests
     [Test]
     public void FormatThisExpressionWithMemberAccessTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new MemberAccessExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
                             new MemberAccessExpressionNode(
                                 default,
-                                new MemberAccessExpressionNode(default, "this"),
-                                "a"
-                            ),
-                            "b"
+                                new MemberAccessExpressionNode(
+                                    default,
+                                    new MemberAccessExpressionNode(default, "this"),
+                                    "a"
+                                ),
+                                "b"
+                            )
                         )
-                    )
-                ])
-            )
-        ]);
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 return this.a.b;
             }
@@ -1811,30 +2107,36 @@ public class FormatterTests
     [Test]
     public void FormatNewOperatorTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new VariableDeclarationNode(
-                        default,
-                        "p",
-                        new TypeRefNode(default, "Point"),
-                        new NewObjectExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new VariableDeclarationNode(
                             default,
+                            "p",
                             new TypeRefNode(default, "Point"),
-                            [LiteralExpressionNode.Integer(default, 1), LiteralExpressionNode.Integer(default, 2)]
+                            new NewObjectExpressionNode(
+                                default,
+                                new TypeRefNode(default, "Point"),
+                                [LiteralExpressionNode.Integer(default, 1), LiteralExpressionNode.Integer(default, 2)]
+                            )
                         )
-                    )
-                ])
-            )
-        ]);
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 var p: Point = new Point(1, 2);
             }
@@ -1846,21 +2148,25 @@ public class FormatterTests
     [Test]
     public void FormatDiscriminatedUnionOfTypesTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Numbers",
-                [],
-                new DiscriminatedUnionNode([
-                    new TypeRefNode(default, "i8"),
-                    new TypeRefNode(default, "i16"),
-                    new TypeRefNode(default, "i32"),
-                    new TypeRefNode(default, "i64"),
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "Numbers",
+                    [],
+                    new DiscriminatedUnionNode([
+                        new TypeRefNode(default, "i8"),
+                        new TypeRefNode(default, "i16"),
+                        new TypeRefNode(default, "i32"),
+                        new TypeRefNode(default, "i64"),
+                    ]))
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type Numbers = i8 | i16 | i32 | i64;";
+        const string expected = "namespace Test1;\n\npublic type Numbers = i8 | i16 | i32 | i64;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1868,19 +2174,23 @@ public class FormatterTests
     [Test]
     public void FormatDiscriminatedUnionOfFunctionsTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "F",
-                [],
-                new DiscriminatedUnionNode([
-                    new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
-                    new FunctionTypeNode(default, [new TypeRefNode(default, "i32"), new TypeRefNode(default, "i32")], new TypeRefNode(default, "i32"))
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "F",
+                    [],
+                    new DiscriminatedUnionNode([
+                        new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
+                        new FunctionTypeNode(default, [new TypeRefNode(default, "i32"), new TypeRefNode(default, "i32")], new TypeRefNode(default, "i32"))
+                    ]))
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type F = () => void | (i32, i32) => i32;";
+        const string expected = "namespace Test1;\n\npublic type F = () => void | (i32, i32) => i32;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1888,26 +2198,30 @@ public class FormatterTests
     [Test]
     public void FormatDiscriminatedUnionOfInterfacesTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "I",
-                [],
-                new DiscriminatedUnionNode([
-                    new InterfaceNode(default, [], []),
-                    new InterfaceNode(
-                        default,
-                        [
-                            new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
-                            new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
-                        ],
-                        []
-                    ),
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "I",
+                    [],
+                    new DiscriminatedUnionNode([
+                        new InterfaceNode(default, [], []),
+                        new InterfaceNode(
+                            default,
+                            [
+                                new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
+                                new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
+                            ],
+                            []
+                        ),
+                    ]))
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type I = { } | { x: i32; y: i32; };";
+        const string expected = "namespace Test1;\n\npublic type I = { } | { x: i32; y: i32; };";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1915,20 +2229,24 @@ public class FormatterTests
     [Test]
     public void FormatDiscriminatedUnionTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "T",
-                [],
-                new DiscriminatedUnionNode([
-                    new InterfaceNode(default, [], []),
-                    new TypeRefNode(default, "i32"),
-                    new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "T",
+                    [],
+                    new DiscriminatedUnionNode([
+                        new InterfaceNode(default, [], []),
+                        new TypeRefNode(default, "i32"),
+                        new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
+                    ]))
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type T = { } | i32 | () => void;";
+        const string expected = "namespace Test1;\n\npublic type T = { } | i32 | () => void;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1936,20 +2254,26 @@ public class FormatterTests
     [Test]
     public void FormatNullTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(default, AccessModifier.Public, "main", [], new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new VariableDeclarationNode(
-                        default,
-                        "x",
-                        new DiscriminatedUnionNode([new TypeRefNode(default, "i32"), new TypeRefNode(default, "null")]),
-                        new NullExpressionNode(default)
-                    )
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(default, AccessModifier.Public, "main", [], new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new VariableDeclarationNode(
+                            default,
+                            "x",
+                            new DiscriminatedUnionNode([new TypeRefNode(default, "i32"), new TypeRefNode(default, "null")]),
+                            new NullExpressionNode(default)
+                        )
+                    ]))
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 var x: i32 | null = null;
             }
@@ -1961,19 +2285,23 @@ public class FormatterTests
     [Test]
     public void FormatTupleTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "T",
-                [],
-                new TupleTypeNode(default, [
-                    new TypeRefNode(default, "bool"),
-                    new TypeRefNode(default, "i32"),
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "T",
+                    [],
+                    new TupleTypeNode(default, [
+                        new TypeRefNode(default, "bool"),
+                        new TypeRefNode(default, "i32"),
+                    ]))
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type T = (bool, i32);";
+        const string expected = "namespace Test1;\n\npublic type T = (bool, i32);";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -1981,19 +2309,23 @@ public class FormatterTests
     [Test]
     public void FormatNestedTupleTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "T",
-                [],
-                new TupleTypeNode(default, [
-                    new TupleTypeNode(default, [new TypeRefNode(default, "bool"), new TypeRefNode(default, "i8")]),
-                    new TypeRefNode(default, "i32"),
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "T",
+                    [],
+                    new TupleTypeNode(default, [
+                        new TupleTypeNode(default, [new TypeRefNode(default, "bool"), new TypeRefNode(default, "i8")]),
+                        new TypeRefNode(default, "i32"),
+                    ]))
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type T = ((bool, i8), i32);";
+        const string expected = "namespace Test1;\n\npublic type T = ((bool, i8), i32);";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -2001,26 +2333,32 @@ public class FormatterTests
     [Test]
     public void FormatTupleExpressionTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new TupleExpressionNode(default, [
-                            LiteralExpressionNode.True(default),
-                            LiteralExpressionNode.Integer(default, 1)
-                        ])
-                    )
-                ]))
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
+                            default,
+                            new TupleExpressionNode(default, [
+                                LiteralExpressionNode.True(default),
+                                LiteralExpressionNode.Integer(default, 1)
+                            ])
+                        )
+                    ]))
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 return (true, 1);
             }
@@ -2032,28 +2370,34 @@ public class FormatterTests
     [Test]
     public void FormatNewArrayTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "main",
-                [],
-                new TypeRefNode(default, "void"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new NewArrayExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            new ArrayTypeNode(default, new TypeRefNode(default, "i32")),
-                            LiteralExpressionNode.Integer(default, 10)
+                            new NewArrayExpressionNode(
+                                default,
+                                new ArrayTypeNode(default, new TypeRefNode(default, "i32")),
+                                LiteralExpressionNode.Integer(default, 10)
+                            )
                         )
-                    )
-                ])
-            )
-        ]);
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public main(): void {
                 return new i32[10];
             }
@@ -2065,21 +2409,27 @@ public class FormatterTests
     [Test]
     public void FormatGenericTypeTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "List",
-                [new TypeRefNode(default, "T1, T2")],
-                [],
-                [],
-                [],
-                []
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "List",
+                    [new TypeRefNode(default, "T1, T2")],
+                    [],
+                    [],
+                    [],
+                    []
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type List<T1, T2> {
             }
             """;
@@ -2090,17 +2440,21 @@ public class FormatterTests
     [Test]
     public void FormatGenericTypeNodeTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Test",
-                [],
-                new GenericApplicationNode(default, "List", [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")])
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "Test",
+                    [],
+                    new GenericApplicationNode(default, "List", [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")])
+                )
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type Test = List<T1, T2>;";
+        const string expected = "namespace Test1;\n\npublic type Test = List<T1, T2>;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -2108,17 +2462,21 @@ public class FormatterTests
     [Test]
     public void FormatGenericTypeAliasTest()
     {
-        var tree = new SyntaxTree(file, [
-            new AliasDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "T",
-                [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")],
-                new DiscriminatedUnionNode([new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")])
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "T",
+                    [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")],
+                    new DiscriminatedUnionNode([new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")])
+                )
+            ]);
         var formatted = tree.ToString();
-        const string expected = "public type T<T1, T2> = T1 | T2;";
+        const string expected = "namespace Test1;\n\npublic type T<T1, T2> = T1 | T2;";
 
         Assert.That(formatted, Is.EqualTo(expected));
     }
@@ -2126,31 +2484,37 @@ public class FormatterTests
     [Test]
     public void FormatStaticMethodTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "Test",
-                [],
-                [],
-                [],
-                [],
-                [
-                    new MethodDeclarationNode(
-                        default,
-                        AccessModifier.Public,
-                        true,
-                        "method",
-                        [],
-                        new TypeRefNode(default, "void"),
-                        new BlockStatementNode(default)
-                    )
-                ]
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "Test",
+                    [],
+                    [],
+                    [],
+                    [],
+                    [
+                        new MethodDeclarationNode(
+                            default,
+                            AccessModifier.Public,
+                            true,
+                            "method",
+                            [],
+                            new TypeRefNode(default, "void"),
+                            new BlockStatementNode(default)
+                        )
+                    ]
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type Test {
                 public static method(): void {
                 }
@@ -2163,21 +2527,27 @@ public class FormatterTests
     [Test]
     public void FormatIfDirectiveTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(default, AccessModifier.Public, "Type1", [], [], [], [], []),
-            new IfDirectiveNode(
-                default,
-                "DEBUG",
-                [
-                    new TypeDeclarationNode(default, AccessModifier.Public, "Type2", [], [], [], [], []),
-                    new TypeDeclarationNode(default, AccessModifier.Public, "Type3", [], [], [], [], []),
-                ],
-                []),
-            new TypeDeclarationNode(default, AccessModifier.Public, "Type4", [], [], [], [], []),
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(default, AccessModifier.Public, "Type1", [], [], [], [], []),
+                new IfDirectiveNode(
+                    default,
+                    "DEBUG",
+                    [
+                        new TypeDeclarationNode(default, AccessModifier.Public, "Type2", [], [], [], [], []),
+                        new TypeDeclarationNode(default, AccessModifier.Public, "Type3", [], [], [], [], []),
+                    ],
+                    []),
+                new TypeDeclarationNode(default, AccessModifier.Public, "Type4", [], [], [], [], []),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type Type1 {
             }
 
@@ -2201,24 +2571,30 @@ public class FormatterTests
     [Test]
     public void FormatIfDirectiveWithElseTest()
     {
-        var tree = new SyntaxTree(file, [
-            new TypeDeclarationNode(default, AccessModifier.Public, "Type1", [], [], [], [], []),
-            new IfDirectiveNode(
-                default,
-                "DEBUG",
-                [
-                    new TypeDeclarationNode(default, AccessModifier.Public, "Type2", [], [], [], [], []),
-                    new TypeDeclarationNode(default, AccessModifier.Public, "Type3", [], [], [], [], []),
-                ],
-                [
-                    new TypeDeclarationNode(default, AccessModifier.Public, "Type5", [], [], [], [], []),
-                    new TypeDeclarationNode(default, AccessModifier.Public, "Type6", [], [], [], [], []),
-                ]),
-            new TypeDeclarationNode(default, AccessModifier.Public, "Type4", [], [], [], [], []),
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new TypeDeclarationNode(default, AccessModifier.Public, "Type1", [], [], [], [], []),
+                new IfDirectiveNode(
+                    default,
+                    "DEBUG",
+                    [
+                        new TypeDeclarationNode(default, AccessModifier.Public, "Type2", [], [], [], [], []),
+                        new TypeDeclarationNode(default, AccessModifier.Public, "Type3", [], [], [], [], []),
+                    ],
+                    [
+                        new TypeDeclarationNode(default, AccessModifier.Public, "Type5", [], [], [], [], []),
+                        new TypeDeclarationNode(default, AccessModifier.Public, "Type6", [], [], [], [], []),
+                    ]),
+                new TypeDeclarationNode(default, AccessModifier.Public, "Type4", [], [], [], [], []),
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public type Type1 {
             }
 
@@ -2250,27 +2626,33 @@ public class FormatterTests
     [Test]
     public void FormatAsExpressionTest()
     {
-        var tree = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                default,
-                AccessModifier.Public,
-                "test",
-                [new ParameterNode(default, "a", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "bool"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new IsExpressionNode(
-                            new MemberAccessExpressionNode(default, "a"),
-                            new TypeRefNode(default, "i8")
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [new ParameterNode(default, "a", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "bool"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
+                            default,
+                            new IsExpressionNode(
+                                new MemberAccessExpressionNode(default, "a"),
+                                new TypeRefNode(default, "i8")
+                            )
                         )
-                    )
-                ])
-            )
-        ]);
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public test(a: i32): bool {
                 return a is i8;
             }
@@ -2282,28 +2664,34 @@ public class FormatterTests
     [Test]
     public void FormatCastExpressionTest()
     {
-        var tree = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "test",
-                [new ParameterNode(default, "a", new TypeRefNode(default, "i32"))],
-                new TypeRefNode(default, "i8"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        new CastExpressionNode(
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [new ParameterNode(default, "a", new TypeRefNode(default, "i32"))],
+                    new TypeRefNode(default, "i8"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
                             default,
-                            new TypeRefNode(default, "i8"),
-                            new MemberAccessExpressionNode(default, "a")
+                            new CastExpressionNode(
+                                default,
+                                new TypeRefNode(default, "i8"),
+                                new MemberAccessExpressionNode(default, "a")
+                            )
                         )
-                    )
-                ])
-            )
-        ]);
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public test(a: i32): i8 {
                 return (i8)a;
             }
@@ -2315,24 +2703,30 @@ public class FormatterTests
     [Test]
     public void FormatFloatingNumberTest()
     {
-        var tree = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                default,
-                AccessModifier.Public,
-                "test",
-                [],
-                new TypeRefNode(default, "f64"),
-                new BlockStatementNode(default, [
-                    new ReturnStatementNode(
-                        default,
-                        LiteralExpressionNode.Float(default, 3.14)
-                    )
-                ])
-            )
-        ]);
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [],
+                    new TypeRefNode(default, "f64"),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
+                            default,
+                            LiteralExpressionNode.Float(default, 3.14)
+                        )
+                    ])
+                )
+            ]);
         var formatted = tree.ToString();
         const string expected =
             """
+            namespace Test1;
+
             public test(): f64 {
                 return 3.14;
             }

@@ -15,7 +15,7 @@ public class Parser
     public SyntaxTree Parse(IReadOnlyList<Token> tokens, ParserOptions options)
     {
         var context = new ParserContext(tokens, options.Diagnostics, this);
-        var namespaceNode = TryParseNamespaceNode(context);
+        var namespaceNode = ParseNamespaceNode(context);
         var useNodes = ParseUseNodes(context);
         var declarations = ParseDeclarations(context);
 
@@ -64,11 +64,15 @@ public class Parser
         return new UseNode(useKeyword.SourceSpan.Combine(semiColonSpan), parts);
     }
 
-    private NamespaceNode? TryParseNamespaceNode(ParserContext context)
+    private NamespaceNode ParseNamespaceNode(ParserContext context)
     {
         var (hasNamespace, namespaceToken) = context.Reader.Check(Namespace);
         if (!hasNamespace)
-            return null;
+        {
+            context.Diagnostics.ExpectedNamespace(namespaceToken.SourceSpan);
+
+            return new NamespaceNode(namespaceToken.SourceSpan, ["<>_invalid_namespace"]);
+        }
 
         var parts = new List<string>
         {

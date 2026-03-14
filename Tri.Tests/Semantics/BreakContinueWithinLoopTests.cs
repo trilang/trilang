@@ -33,6 +33,8 @@ public class BreakContinueWithinLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 break;
             }
@@ -48,7 +50,7 @@ public class BreakContinueWithinLoopTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(32, 2, 11))),
+                new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(50, 4, 11))),
             "The 'break' keyword can only be used within a loop.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -59,6 +61,8 @@ public class BreakContinueWithinLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 continue;
             }
@@ -74,7 +78,7 @@ public class BreakContinueWithinLoopTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(26, 2, 5), new SourcePosition(35, 2, 14))),
+                new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(53, 4, 14))),
             "The 'continue' keyword can only be used within a loop.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -85,6 +89,8 @@ public class BreakContinueWithinLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     while (false) {
@@ -111,6 +117,8 @@ public class BreakContinueWithinLoopTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     while (false) {

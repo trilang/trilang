@@ -26,28 +26,30 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingOpenParenFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test): void { }");
 
-        var expected = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23)),
-                AccessModifier.Public,
-                "test",
-                [],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(18, 1, 19)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(22, 1, 23))
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(default)
                 )
-            )
-        ]);
+            ]);
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourceSpan(new SourcePosition(11, 1, 12), new SourcePosition(11, 1, 12))),
+            new SourceLocation(file, new SourcePosition(29, 3, 12).ToSpan()),
             "Expected '('."
         );
 
@@ -58,37 +60,39 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingParamColonFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(x i32): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x i32): void { }");
 
-        var expected = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(28, 1, 29)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(17, 1, 18)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(17, 1, 18)),
-                            "i32"
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
+                            )
                         )
-                    )
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(24, 1, 25)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(25, 1, 26), new SourcePosition(28, 1, 29))
+                    ],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(default)
                 )
-            )
-        ]);
+            ]);
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourcePosition(14, 1, 15).ToSpan()),
+            new SourceLocation(file, new SourcePosition(32, 3, 15).ToSpan()),
             "Expected ':'.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -98,37 +102,41 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingParamTypeFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(x: ): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: ): void { }");
 
-        var expected = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(26, 1, 27)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(15, 1, 16)),
-                        "x",
-                        new FakeTypeNode(
-                            new SourcePosition(15, 1, 16).ToSpan(),
-                            "<>_0"
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new FakeTypeNode(
+                                default,
+                                "<>_0"
+                            )
                         )
+                    ],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27))
                     )
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(18, 1, 19), new SourcePosition(22, 1, 23)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27))
                 )
-            )
-        ]);
+            ]);
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourcePosition(15, 1, 16).ToSpan()),
+            new SourceLocation(file, new SourcePosition(33, 3, 16).ToSpan()),
             "Expected a type.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -138,45 +146,44 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingCommaFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(x: i32 y: i32): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: i32 y: i32): void { }");
 
-        var expected = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(36, 1, 37)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)),
-                        "x",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)),
-                            "i32"
-                        )
-                    ),
-                    new ParameterNode(
-                        new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(25, 1, 26)),
-                        "y",
-                        new TypeRefNode(
-                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(25, 1, 26)),
-                            "i32"
-                        )
-                    ),
-                ],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(32, 1, 33)),
-                    "void"
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new ParameterNode(
+                            default,
+                            "x",
+                            new TypeRefNode(
+                                default,
+                                "i32"
+                            )
+                        ),
+                        new ParameterNode(
+                            default,
+                            "y",
+                            new TypeRefNode(
+                                default,
+                                "i32"
+                            )
+                        ),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default)
                 ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(33, 1, 34), new SourcePosition(36, 1, 37))
-                )
-            ),
-        ]);
+            ]);
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
+            new SourceLocation(file, new SourcePosition(37, 3, 20).ToSpan()),
             "Expected ','."
         );
 
@@ -187,35 +194,39 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingCloseParenFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test( : void { return; }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test( : void { return; }");
 
-        var expected = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
-                AccessModifier.Public,
-                "test",
-                [],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(31, 1, 32)),
-                    [
-                        new ReturnStatementNode(
-                            new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(29, 1, 30))
-                        )
-                    ]
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new ReturnStatementNode(
+                                new SourceSpan(new SourcePosition(22, 1, 23), new SourcePosition(29, 1, 30))
+                            )
+                        ]
+                    )
                 )
-            )
-        ]);
+            ]);
 
         var diagnostic = new[]
         {
             new Diagnostic(
                 DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
-                new SourceLocation(file, new SourcePosition(13, 1, 14).ToSpan()),
+                new SourceLocation(file, new SourcePosition(31, 3, 14).ToSpan()),
                 "Expected ')'."),
         };
 
@@ -226,33 +237,35 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingReturnColonFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test() void { return; }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test() void { return; }");
 
-        var expected = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(30, 1, 31)),
-                AccessModifier.Public,
-                "test",
-                [],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(14, 1, 15), new SourcePosition(18, 1, 19)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(19, 1, 20), new SourcePosition(30, 1, 31)),
-                    [
-                        new ReturnStatementNode(
-                            new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(28, 1, 29))
-                        )
-                    ]
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new ReturnStatementNode(default)
+                        ]
+                    )
                 )
-            )
-        ]);
+            ]);
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourcePosition(14, 1, 15).ToSpan()),
+            new SourceLocation(file, new SourcePosition(32, 3, 15).ToSpan()),
             "Expected ':'."
         );
 
@@ -263,42 +276,46 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingReturnTypeFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(): { return; }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(): { return; }");
 
-        var expected = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(26, 1, 27)),
-                AccessModifier.Public,
-                "test",
-                [],
-                new InterfaceNode(
-                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(17, 1, 18)),
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
                     [],
-                    []
-                ),
-                new BlockStatementNode(
-                    new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(26, 1, 27)),
-                    [
-                        new ReturnStatementNode(
-                            new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(24, 1, 25))
-                        )
-                    ]
+                    new InterfaceNode(
+                        default,
+                        [],
+                        []
+                    ),
+                    new BlockStatementNode(
+                        default,
+                        [
+                            new ReturnStatementNode(
+                                new SourceSpan(new SourcePosition(17, 1, 18), new SourcePosition(24, 1, 25))
+                            )
+                        ]
+                    )
                 )
-            )
-        ]);
+            ]);
 
         var diagnostic = new[]
         {
             new Diagnostic(
                 DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
-                new SourceLocation(file, new SourcePosition(17, 1, 18).ToSpan()),
+                new SourceLocation(file, new SourcePosition(35, 3, 18).ToSpan()),
                 "Expected '}'."
             ),
             new Diagnostic(
                 DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
-                new SourceLocation(file, new SourcePosition(17, 1, 18).ToSpan()),
+                new SourceLocation(file, new SourcePosition(35, 3, 18).ToSpan()),
                 "Expected '{'."
             )
         };
@@ -310,36 +327,40 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingBlockInFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(): void");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(): void");
 
-        var expected = new SyntaxTree(file, [
-            new FunctionDeclarationNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(19, 1, 20)),
-                AccessModifier.Public,
-                "test",
-                [],
-                new TypeRefNode(
-                    new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)),
-                    "void"
-                ),
-                new BlockStatementNode(
-                    new SourcePosition(19, 1, 20).ToSpan()
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [],
+                    new TypeRefNode(
+                        default,
+                        "void"
+                    ),
+                    new BlockStatementNode(
+                        new SourcePosition(19, 1, 20).ToSpan()
+                    )
                 )
-            )
-        ]);
+            ]);
 
         var diagnostic = new[]
         {
             new Diagnostic(
                 DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
-                new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
+                new SourceLocation(file, new SourcePosition(37, 3, 20).ToSpan()),
                 "Expected '{'."
             ),
             new Diagnostic(
                 DiagnosticId.P0001MissingToken,
                 DiagnosticSeverity.Error,
-                new SourceLocation(file, new SourcePosition(19, 1, 20).ToSpan()),
+                new SourceLocation(file, new SourcePosition(37, 3, 20).ToSpan()),
                 "Expected '}'."
             )
         };
@@ -351,18 +372,22 @@ public class ParseFunctionTests
     [Test]
     public void ParseEmptyFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(): void { }");
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(23, 1, 24)),
-                AccessModifier.Public,
-                "test",
-                [],
-                new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(19, 1, 20)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(23, 1, 24)))
-            )
-        ]);
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default)
+                )
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -371,20 +396,24 @@ public class ParseFunctionTests
     [Test]
     public void ParseSingleParameterFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(x: i32): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: i32): void { }");
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(29, 1, 30)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)), "x", new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")),
-                ],
-                new TypeRefNode(new SourceSpan(new SourcePosition(21, 1, 22), new SourcePosition(25, 1, 26)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(26, 1, 27), new SourcePosition(29, 1, 30)))
-            )
-        ]);
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default)
+                )
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -393,22 +422,26 @@ public class ParseFunctionTests
     [Test]
     public void ParseMultipleParametersFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(x: i32, y: i32, z: i32): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: i32, y: i32, z: i32): void { }");
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(45, 1, 46)),
-                AccessModifier.Public,
-                "test",
-                [
-                    new ParameterNode(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(18, 1, 19)), "x", new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")),
-                    new ParameterNode(new SourceSpan(new SourcePosition(20, 1, 21), new SourcePosition(26, 1, 27)), "y", new TypeRefNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27)), "i32")),
-                    new ParameterNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(34, 1, 35)), "z", new TypeRefNode(new SourceSpan(new SourcePosition(31, 1, 32), new SourcePosition(34, 1, 35)), "i32")),
-                ],
-                new TypeRefNode(new SourceSpan(new SourcePosition(37, 1, 38), new SourcePosition(41, 1, 42)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(42, 1, 43), new SourcePosition(45, 1, 46)))
-            )
-        ]);
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "z", new TypeRefNode(default, "i32")),
+                    ],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default)
+                )
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -417,18 +450,22 @@ public class ParseFunctionTests
     [Test]
     public void ParseArrayTypeTest()
     {
-        var (tree, diagnostics) = Parse("public test(x: i32[]): void { }");
+        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: i32[]): void { }");
 
-        var expected = new SyntaxTree(file, [
-            FunctionDeclarationNode.Create(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(31, 1, 32)),
-                AccessModifier.Public,
-                "test",
-                [new ParameterNode(new SourceSpan(new SourcePosition(12, 1, 13), new SourcePosition(20, 1, 21)), "x", new ArrayTypeNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(20, 1, 21)), new TypeRefNode(new SourceSpan(new SourcePosition(15, 1, 16), new SourcePosition(18, 1, 19)), "i32")))],
-                new TypeRefNode(new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(27, 1, 28)), "void"),
-                new BlockStatementNode(new SourceSpan(new SourcePosition(28, 1, 29), new SourcePosition(31, 1, 32)))
-            )
-        ]);
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
+                    new TypeRefNode(default, "void"),
+                    new BlockStatementNode(default)
+                )
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.Empty);

@@ -43,7 +43,12 @@ public class AddImplicitReturnStatementsTests
     [Test]
     public void AddReturnToEmptyVoidMethodTest()
     {
-        var tree = Parse("public test(): void { }");
+        var tree = Parse(
+            """
+            namespace Test1;
+
+            public test(): void { }
+            """);
 
         var function = tree.Find<FunctionDeclaration>()!;
         var expected = new BlockStatement(null, [new ReturnStatement(null)]);
@@ -56,6 +61,8 @@ public class AddImplicitReturnStatementsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) { }
             }
@@ -95,6 +102,8 @@ public class AddImplicitReturnStatementsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 if (true) { }
 
@@ -136,6 +145,8 @@ public class AddImplicitReturnStatementsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 if (true) {
                     return;
@@ -184,6 +195,8 @@ public class AddImplicitReturnStatementsTests
     {
         var tree = Parse(
             """
+            namespace Test1;
+
             public test(): void {
                 {
                     return;

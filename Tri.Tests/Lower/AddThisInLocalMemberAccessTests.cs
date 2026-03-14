@@ -47,6 +47,8 @@ public class AddThisInLocalMemberAccessTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Test {
                 count: i32;
 
@@ -59,9 +61,10 @@ public class AddThisInLocalMemberAccessTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var typeMetadata = new TypeMetadata(null, "Test")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         var propertyMetadata = CreatePropertyMetadata(typeMetadata,
             "count",
@@ -95,6 +98,8 @@ public class AddThisInLocalMemberAccessTests
     {
         const string code =
             """
+            namespace Test1;
+
             public type Test {
                 public print(): void { }
 
@@ -107,9 +112,10 @@ public class AddThisInLocalMemberAccessTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var typeMetadata = new TypeMetadata(null, "Test")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         var methodMetadata = new MethodMetadata(
             null,

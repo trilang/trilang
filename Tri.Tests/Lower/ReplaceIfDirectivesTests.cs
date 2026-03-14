@@ -51,6 +51,8 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
+            namespace Test1;
+
             #if D1
 
             public type Type1 { }
@@ -68,9 +70,10 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var type1Metadata = new TypeMetadata(null, "Type1")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         type1Metadata.AddConstructor(
             new ConstructorMetadata(
@@ -82,7 +85,7 @@ public class ReplaceIfDirectivesTests
 
         var type3Metadata = new TypeMetadata(null, "Type3")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         type3Metadata.AddConstructor(
             new ConstructorMetadata(
@@ -92,16 +95,21 @@ public class ReplaceIfDirectivesTests
                 [],
                 CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(null, AccessModifier.Public, "Type1", [], [], [], [], [])
-            {
-                Metadata = type1Metadata,
-            },
-            new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
-            {
-                Metadata = type3Metadata,
-            },
-        ]);
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(null, AccessModifier.Public, "Type1", [], [], [], [], [])
+                {
+                    Metadata = type1Metadata,
+                },
+                new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
+                {
+                    Metadata = type3Metadata,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -111,6 +119,8 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
+            namespace Test1;
+
             #if D1
 
             public type Type1 { }
@@ -127,9 +137,10 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var type2Metadata = new TypeMetadata(null, "Type2")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         type2Metadata.AddConstructor(
             new ConstructorMetadata(
@@ -141,7 +152,7 @@ public class ReplaceIfDirectivesTests
 
         var type3Metadata = new TypeMetadata(null, "Type3")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         type3Metadata.AddConstructor(
             new ConstructorMetadata(
@@ -151,16 +162,21 @@ public class ReplaceIfDirectivesTests
                 [],
                 CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(null, AccessModifier.Public, "Type2", [], [], [], [], [])
-            {
-                Metadata = type2Metadata,
-            },
-            new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
-            {
-                Metadata = type3Metadata,
-            },
-        ]);
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(null, AccessModifier.Public, "Type2", [], [], [], [], [])
+                {
+                    Metadata = type2Metadata,
+                },
+                new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
+                {
+                    Metadata = type3Metadata,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -170,6 +186,8 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
+            namespace Test1;
+
             #if D1
 
             public type Type1 { }
@@ -182,9 +200,10 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var typeMetadata = new TypeMetadata(null, "Type3")
         {
-            Namespace = rootNamespace,
+            Namespace = test1Ns,
         };
         typeMetadata.AddConstructor(
             new ConstructorMetadata(
@@ -194,12 +213,17 @@ public class ReplaceIfDirectivesTests
                 [],
                 CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
-        var expected = new SemanticTree(file, null, null, [], [
-            new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
-            {
-                Metadata = typeMetadata,
-            },
-        ]);
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new TypeDeclaration(null, AccessModifier.Public, "Type3", [], [], [], [], [])
+                {
+                    Metadata = typeMetadata,
+                },
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -209,6 +233,8 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(callback: () => void): i32 {
                 callback();
 
@@ -223,67 +249,74 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
             CreateFunctionType([], builtInTypes.Void, rootNamespace));
-        var expected = new SemanticTree(file, null, null, [], [
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "callback",
-                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
-                        {
-                            Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
-                        }
-                    )
-                    {
-                        Metadata = parameterMetadata,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new CallExpression(
-                            null,
-                            new MemberAccessExpression(null, "callback")
-                            {
-                                Reference = parameterMetadata,
-                                AccessKind = MemberAccessKind.Read,
-                            },
-                            []
-                        )
-                    ),
-                    new ReturnStatement(
-                        null,
-                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
-                        {
-                            ReturnTypeMetadata = builtInTypes.I32,
-                        }
-                    )
-                ])
-            )
-            {
-                Metadata = new FunctionMetadata(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new FunctionDeclaration(
                     null,
-                    AccessModifierMetadata.Public,
+                    AccessModifier.Public,
                     "test",
-                    [parameterMetadata],
-                    CreateFunctionType([
-                            CreateFunctionType([], builtInTypes.Void, rootNamespace)
-                        ],
-                        builtInTypes.I32,
-                        rootNamespace))
+                    [
+                        new Parameter(
+                            null,
+                            "callback",
+                            new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
+                            {
+                                Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
+                            }
+                        )
+                        {
+                            Metadata = parameterMetadata,
+                        }
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new BlockStatement(null, [
+                        new ExpressionStatement(
+                            null,
+                            new CallExpression(
+                                null,
+                                new MemberAccessExpression(null, "callback")
+                                {
+                                    Reference = parameterMetadata,
+                                    AccessKind = MemberAccessKind.Read,
+                                },
+                                []
+                            )
+                        ),
+                        new ReturnStatement(
+                            null,
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                            {
+                                ReturnTypeMetadata = builtInTypes.I32,
+                            }
+                        )
+                    ])
+                )
                 {
-                    Namespace = rootNamespace,
+                    Metadata = new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [parameterMetadata],
+                        CreateFunctionType(
+                            [
+                                CreateFunctionType([], builtInTypes.Void, rootNamespace)
+                            ],
+                            builtInTypes.I32,
+                            rootNamespace))
+                    {
+                        Namespace = test1Ns,
+                    }
                 }
-            }
-        ]);
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -293,6 +326,8 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(callback: () => void): i32 {
                 callback();
 
@@ -307,69 +342,75 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
             CreateFunctionType([], builtInTypes.Void, rootNamespace));
-        var expected = new SemanticTree(file, null, null, [], [
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "callback",
-                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
-                        {
-                            Metadata = CreateFunctionType([],
-                                builtInTypes.Void,
-                                rootNamespace)
-                        }
-                    )
-                    {
-                        Metadata = parameterMetadata,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new CallExpression(
-                            null,
-                            new MemberAccessExpression(null, "callback")
-                            {
-                                Reference = parameterMetadata,
-                                AccessKind = MemberAccessKind.Read,
-                            },
-                            []
-                        )
-                    ),
-                    new ReturnStatement(
-                        null,
-                        new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
-                        {
-                            ReturnTypeMetadata = builtInTypes.I32
-                        }
-                    )
-                ])
-            )
-            {
-                Metadata = new FunctionMetadata(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new FunctionDeclaration(
                     null,
-                    AccessModifierMetadata.Public,
+                    AccessModifier.Public,
                     "test",
-                    [parameterMetadata],
-                    CreateFunctionType([
-                            CreateFunctionType([], builtInTypes.Void, rootNamespace)
-                        ],
-                        builtInTypes.I32,
-                        rootNamespace))
+                    [
+                        new Parameter(
+                            null,
+                            "callback",
+                            new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
+                            {
+                                Metadata = CreateFunctionType([],
+                                    builtInTypes.Void,
+                                    rootNamespace)
+                            }
+                        )
+                        {
+                            Metadata = parameterMetadata,
+                        }
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new BlockStatement(null, [
+                        new ExpressionStatement(
+                            null,
+                            new CallExpression(
+                                null,
+                                new MemberAccessExpression(null, "callback")
+                                {
+                                    Reference = parameterMetadata,
+                                    AccessKind = MemberAccessKind.Read,
+                                },
+                                []
+                            )
+                        ),
+                        new ReturnStatement(
+                            null,
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
+                            {
+                                ReturnTypeMetadata = builtInTypes.I32
+                            }
+                        )
+                    ])
+                )
                 {
-                    Namespace = rootNamespace,
+                    Metadata = new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [parameterMetadata],
+                        CreateFunctionType([
+                                CreateFunctionType([], builtInTypes.Void, rootNamespace)
+                            ],
+                            builtInTypes.I32,
+                            rootNamespace))
+                    {
+                        Namespace = test1Ns,
+                    }
                 }
-            }
-        ]);
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -379,6 +420,8 @@ public class ReplaceIfDirectivesTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(callback: () => void): i32 {
                 callback();
 
@@ -393,67 +436,73 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var test1Ns = rootNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
             CreateFunctionType([], builtInTypes.Void, rootNamespace));
-        var expected = new SemanticTree(file, null, null, [], [
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(
-                        null,
-                        "callback",
-                        new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
-                        {
-                            Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
-                        }
-                    )
-                    {
-                        Metadata = parameterMetadata,
-                    }
-                ],
-                new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new CallExpression(
-                            null,
-                            new MemberAccessExpression(null, "callback")
-                            {
-                                Reference = parameterMetadata,
-                                AccessKind = MemberAccessKind.Read,
-                            },
-                            []
-                        )
-                    ),
-                    new ReturnStatement(
-                        null,
-                        new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
-                        {
-                            ReturnTypeMetadata = builtInTypes.I32,
-                        }
-                    )
-                ])
-            )
-            {
-                Metadata = new FunctionMetadata(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new FunctionDeclaration(
                     null,
-                    AccessModifierMetadata.Public,
+                    AccessModifier.Public,
                     "test",
-                    [parameterMetadata],
-                    CreateFunctionType([
-                            CreateFunctionType([], builtInTypes.Void, rootNamespace)
-                        ],
-                        builtInTypes.I32,
-                        rootNamespace))
+                    [
+                        new Parameter(
+                            null,
+                            "callback",
+                            new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
+                            {
+                                Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
+                            }
+                        )
+                        {
+                            Metadata = parameterMetadata,
+                        }
+                    ],
+                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new BlockStatement(null, [
+                        new ExpressionStatement(
+                            null,
+                            new CallExpression(
+                                null,
+                                new MemberAccessExpression(null, "callback")
+                                {
+                                    Reference = parameterMetadata,
+                                    AccessKind = MemberAccessKind.Read,
+                                },
+                                []
+                            )
+                        ),
+                        new ReturnStatement(
+                            null,
+                            new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
+                            {
+                                ReturnTypeMetadata = builtInTypes.I32,
+                            }
+                        )
+                    ])
+                )
                 {
-                    Namespace = rootNamespace,
+                    Metadata = new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [parameterMetadata],
+                        CreateFunctionType([
+                                CreateFunctionType([], builtInTypes.Void, rootNamespace)
+                            ],
+                            builtInTypes.I32,
+                            rootNamespace))
+                    {
+                        Namespace = test1Ns,
+                    }
                 }
-            }
-        ]);
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }

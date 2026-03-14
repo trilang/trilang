@@ -32,6 +32,8 @@ public class PrivateInterfacePropertiesTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test = {
                 x: i32 { private get; }
             }
@@ -47,7 +49,7 @@ public class PrivateInterfacePropertiesTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(48, 2, 28))),
+                new SourceSpan(new SourcePosition(43, 4, 5), new SourcePosition(66, 4, 28))),
             "The getter of the interface property 'x' cannot be private.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -58,6 +60,8 @@ public class PrivateInterfacePropertiesTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test = {
                 x: i32 { private set; }
             }
@@ -73,7 +77,7 @@ public class PrivateInterfacePropertiesTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(48, 2, 28))),
+                new SourceSpan(new SourcePosition(43, 4, 5), new SourcePosition(66, 4, 28))),
             "The setter of the interface property 'x' cannot be private.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -84,6 +88,8 @@ public class PrivateInterfacePropertiesTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test = {
                 x: i32 { private get; private set; }
             }
@@ -101,14 +107,14 @@ public class PrivateInterfacePropertiesTests
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
-                    new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(61, 2, 41))),
+                    new SourceSpan(new SourcePosition(43, 4, 5), new SourcePosition(79, 4, 41))),
                 "The getter of the interface property 'x' cannot be private."),
             new Diagnostic(
                 DiagnosticId.S0022InterfacePropertyCantBePrivate,
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
-                    new SourceSpan(new SourcePosition(25, 2, 5), new SourcePosition(61, 2, 41))),
+                    new SourceSpan(new SourcePosition(43, 4, 5), new SourcePosition(79, 4, 41))),
                 "The setter of the interface property 'x' cannot be private.")
         };
 

@@ -35,6 +35,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public add(a: i32, b: i32): i32 {
                 return a + b;
             }
@@ -72,6 +74,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 if (true) {
                     return;
@@ -121,6 +125,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 if (true) {
                     return;
@@ -178,6 +184,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 if (true) {
                     if (false) {
@@ -233,6 +241,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     return;
@@ -284,6 +294,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     while (false) {
@@ -343,6 +355,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     break;
@@ -391,6 +405,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     while (false) {
@@ -449,6 +465,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     continue;
@@ -497,6 +515,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     while (false) {
@@ -555,6 +575,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(): void {
                 while (true) {
                     if (false) {
@@ -611,6 +633,8 @@ public class ControlFlowAnalyzerTests
     {
         const string code =
             """
+            namespace Test1;
+
             public test(a: i32): i32 {
                 if (a > 0) {
                     if (a > 10) {

@@ -55,6 +55,8 @@ public class ReplaceCompoundAssignmentsTests
     {
         var tree = Parse(
             $$"""
+              namespace Test1;
+
               public test(x: i32): void {
                   x {{op}} 1;
               }
@@ -63,38 +65,47 @@ public class ReplaceCompoundAssignmentsTests
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
         var parameterMetadata = new ParameterMetadata(null, "x", builtInTypes.I32);
-        var expected = new SemanticTree(file, null, null, [], [
-            new FunctionDeclaration(
-                null,
-                AccessModifier.Public,
-                "test",
-                [
-                    new Parameter(null, "x", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
-                    {
-                        Metadata = parameterMetadata,
-                    }
-                ],
-                new TypeRef(null, "void") { Metadata = builtInTypes.Void },
-                new BlockStatement(null, [
-                    new ExpressionStatement(
-                        null,
-                        new BinaryExpression(
+        var expected = new SemanticTree(
+            file,
+            null,
+            new Namespace(null, ["Test1"]),
+            [],
+            [
+                new FunctionDeclaration(
+                    null,
+                    AccessModifier.Public,
+                    "test",
+                    [
+                        new Parameter(null, "x", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
+                        {
+                            Metadata = parameterMetadata,
+                        }
+                    ],
+                    new TypeRef(null, "void") { Metadata = builtInTypes.Void },
+                    new BlockStatement(null, [
+                        new ExpressionStatement(
                             null,
-                            Assignment,
-                            new MemberAccessExpression(null, "x")
-                            {
-                                Reference = parameterMetadata,
-                                AccessKind = MemberAccessKind.Write,
-                            },
                             new BinaryExpression(
                                 null,
-                                kind,
+                                Assignment,
                                 new MemberAccessExpression(null, "x")
                                 {
                                     Reference = parameterMetadata,
-                                    AccessKind = MemberAccessKind.Read,
+                                    AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                new BinaryExpression(
+                                    null,
+                                    kind,
+                                    new MemberAccessExpression(null, "x")
+                                    {
+                                        Reference = parameterMetadata,
+                                        AccessKind = MemberAccessKind.Read,
+                                    },
+                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                    {
+                                        ReturnTypeMetadata = builtInTypes.I32,
+                                    }
+                                )
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32,
                                 }
@@ -103,25 +114,21 @@ public class ReplaceCompoundAssignmentsTests
                                 ReturnTypeMetadata = builtInTypes.I32,
                             }
                         )
-                        {
-                            ReturnTypeMetadata = builtInTypes.I32,
-                        }
-                    )
-                ])
-            )
-            {
-                Metadata = new FunctionMetadata(
-                    null,
-                    AccessModifierMetadata.Public,
-                    "test",
-                    [parameterMetadata],
-                    CreateFunctionType([builtInTypes.I32], builtInTypes.Void, rootNamespace)
+                    ])
                 )
                 {
-                    Namespace = rootNamespace,
+                    Metadata = new FunctionMetadata(
+                        null,
+                        AccessModifierMetadata.Public,
+                        "test",
+                        [parameterMetadata],
+                        CreateFunctionType([builtInTypes.I32], builtInTypes.Void, rootNamespace)
+                    )
+                    {
+                        Namespace = rootNamespace,
+                    }
                 }
-            }
-        ]);
+            ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }

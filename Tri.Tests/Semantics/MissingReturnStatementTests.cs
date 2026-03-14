@@ -30,7 +30,12 @@ public class MissingReturnStatementTests
     [Test]
     public void MissingReturnInFunctionTest()
     {
-        var (tree, diagnostics) = Parse("public test(): i32 { }");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public test(): i32 { }
+            """);
 
         var semantic = new SemanticAnalysis();
         semantic.Analyze(
@@ -42,7 +47,7 @@ public class MissingReturnStatementTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(22, 1, 23))),
+                new SourceSpan(new SourcePosition(18, 3, 1), new SourcePosition(40, 3, 23))),
             "Not all paths return a value.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -53,6 +58,8 @@ public class MissingReturnStatementTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): i32 {
                 if (false) {
                     return 1;
@@ -70,7 +77,7 @@ public class MissingReturnStatementTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(63, 5, 2))),
+                new SourceSpan(new SourcePosition(18, 3, 1), new SourcePosition(81, 7, 2))),
             "Not all paths return a value.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -81,6 +88,8 @@ public class MissingReturnStatementTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): i32 {
                 if (false) {
                     return 1;
@@ -104,6 +113,8 @@ public class MissingReturnStatementTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): i32 {
                 if (false) {
                     return 1;
@@ -127,6 +138,8 @@ public class MissingReturnStatementTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): i32 {
                 while (false) {
                     return 1;
@@ -144,7 +157,7 @@ public class MissingReturnStatementTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(66, 5, 2))),
+                new SourceSpan(new SourcePosition(18, 3, 1), new SourcePosition(84, 7, 2))),
             "Not all paths return a value.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -155,6 +168,8 @@ public class MissingReturnStatementTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public test(): i32 {
                 while (false) { }
 

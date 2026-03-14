@@ -36,20 +36,20 @@ public class ParseNamespaceTests
         var expected = new SyntaxTree(
             file,
             new NamespaceNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(15, 1, 16)),
+                default,
                 ["Test"]),
             [],
             [
                 new FunctionDeclarationNode(
-                    new SourceSpan(new SourcePosition(17, 3, 1), new SourcePosition(40, 3, 24)),
+                    default,
                     AccessModifier.Public,
                     "main",
                     [],
                     new TypeRefNode(
-                        new SourceSpan(new SourcePosition(32, 3, 16), new SourcePosition(36, 3, 20)),
+                        default,
                         "void"),
                     new BlockStatementNode(
-                        new SourceSpan(new SourcePosition(37, 3, 21), new SourcePosition(40, 3, 24)),
+                        default,
                         [])
                 )
             ]);
@@ -71,20 +71,20 @@ public class ParseNamespaceTests
         var expected = new SyntaxTree(
             file,
             new NamespaceNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(44, 1, 45)),
+                default,
                 ["Test", "SubNamespace", "SubSubNamespace"]),
             [],
             [
                 new FunctionDeclarationNode(
-                    new SourceSpan(new SourcePosition(46, 3, 1), new SourcePosition(69, 3, 24)),
+                    default,
                     AccessModifier.Public,
                     "main",
                     [],
                     new TypeRefNode(
-                        new SourceSpan(new SourcePosition(61, 3, 16), new SourcePosition(65, 3, 20)),
+                        default,
                         "void"),
                     new BlockStatementNode(
-                        new SourceSpan(new SourcePosition(66, 3, 21), new SourcePosition(69, 3, 24)),
+                        default,
                         [])
                 )
             ]);
@@ -98,6 +98,8 @@ public class ParseNamespaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             use Test;
 
             public main(): void { }
@@ -105,23 +107,23 @@ public class ParseNamespaceTests
 
         var expected = new SyntaxTree(
             file,
-            null,
+            new NamespaceNode(default, ["Test1"]),
             [
                 new UseNode(
-                    new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(9, 1, 10)),
+                    default,
                     ["Test"])
             ],
             [
                 new FunctionDeclarationNode(
-                    new SourceSpan(new SourcePosition(11, 3, 1), new SourcePosition(34, 3, 24)),
+                    default,
                     AccessModifier.Public,
                     "main",
                     [],
                     new TypeRefNode(
-                        new SourceSpan(new SourcePosition(26, 3, 16), new SourcePosition(30, 3, 20)),
+                        default,
                         "void"),
                     new BlockStatementNode(
-                        new SourceSpan(new SourcePosition(31, 3, 21), new SourcePosition(34, 3, 24)),
+                        default,
                         [])
                 )
             ]);
@@ -135,6 +137,8 @@ public class ParseNamespaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             use Test.SubNamespace.SubSubNamespace;
 
             public main(): void { }
@@ -142,23 +146,23 @@ public class ParseNamespaceTests
 
         var expected = new SyntaxTree(
             file,
-            null,
+            new NamespaceNode(default, ["Test1"]),
             [
                 new UseNode(
-                    new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(38, 1, 39)),
+                    default,
                     ["Test", "SubNamespace", "SubSubNamespace"])
             ],
             [
                 new FunctionDeclarationNode(
-                    new SourceSpan(new SourcePosition(40, 3, 1), new SourcePosition(63, 3, 24)),
+                    default,
                     AccessModifier.Public,
                     "main",
                     [],
                     new TypeRefNode(
-                        new SourceSpan(new SourcePosition(55, 3, 16), new SourcePosition(59, 3, 20)),
+                        default,
                         "void"),
                     new BlockStatementNode(
-                        new SourceSpan(new SourcePosition(60, 3, 21), new SourcePosition(63, 3, 24)),
+                        default,
                         [])
                 )
             ]);
@@ -172,6 +176,8 @@ public class ParseNamespaceTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             use Test.1.SubSubNamespace;
 
             public main(): void { }
@@ -179,23 +185,23 @@ public class ParseNamespaceTests
 
         var expected = new SyntaxTree(
             file,
-            null,
+            new NamespaceNode(default, ["Test1"]),
             [
                 new UseNode(
-                    new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(27, 1, 28)),
+                    default,
                     ["Test", "<namespace>", "SubSubNamespace"])
             ],
             [
                 new FunctionDeclarationNode(
-                    new SourceSpan(new SourcePosition(29, 3, 1), new SourcePosition(52, 3, 24)),
+                    default,
                     AccessModifier.Public,
                     "main",
                     [],
                     new TypeRefNode(
-                        new SourceSpan(new SourcePosition(44, 3, 16), new SourcePosition(48, 3, 20)),
+                        default,
                         "void"),
                     new BlockStatementNode(
-                        new SourceSpan(new SourcePosition(49, 3, 21), new SourcePosition(52, 3, 24)),
+                        default,
                         [])
                 )
             ]);
@@ -205,7 +211,7 @@ public class ParseNamespaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(9, 1, 10), new SourcePosition(10, 1, 11))),
+                new SourceSpan(new SourcePosition(27, 3, 10), new SourcePosition(28, 3, 11))),
             "Expected a namespace part.");
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -227,24 +233,24 @@ public class ParseNamespaceTests
         var expected = new SyntaxTree(
             file,
             new NamespaceNode(
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(15, 1, 16)),
+                default,
                 ["Test"]),
             [
                 new UseNode(
-                    new SourceSpan(new SourcePosition(17, 3, 1), new SourcePosition(36, 3, 20)),
+                    default,
                     ["OtherNamespace"])
             ],
             [
                 new FunctionDeclarationNode(
-                    new SourceSpan(new SourcePosition(38, 5, 1), new SourcePosition(61, 5, 24)),
+                    default,
                     AccessModifier.Public,
                     "main",
                     [],
                     new TypeRefNode(
-                        new SourceSpan(new SourcePosition(53, 5, 16), new SourcePosition(57, 5, 20)),
+                        default,
                         "void"),
                     new BlockStatementNode(
-                        new SourceSpan(new SourcePosition(58, 5, 21), new SourcePosition(61, 5, 24)),
+                        default,
                         [])
                 )
             ]);

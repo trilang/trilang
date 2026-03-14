@@ -32,6 +32,8 @@ public class ThisInStaticMethodsTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public static test(): Test {
                     return this;
@@ -49,7 +51,7 @@ public class ThisInStaticMethodsTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(67, 3, 16), new SourcePosition(71, 3, 20))),
+                new SourceSpan(new SourcePosition(85, 5, 16), new SourcePosition(89, 5, 20))),
             "The 'this' keyword cannot be used in a static method.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

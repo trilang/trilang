@@ -32,6 +32,8 @@ public class CheckStaticAndInstanceMembersAccessTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public s(): void { }
             }
@@ -51,7 +53,7 @@ public class CheckStaticAndInstanceMembersAccessTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(73, 6, 5), new SourcePosition(79, 6, 11))),
+                new SourceSpan(new SourcePosition(91, 8, 5), new SourcePosition(97, 8, 11))),
             "The instance method 's' cannot be called as a static one.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -62,6 +64,8 @@ public class CheckStaticAndInstanceMembersAccessTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public static s(): void { }
             }
@@ -81,7 +85,7 @@ public class CheckStaticAndInstanceMembersAccessTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(87, 6, 5), new SourcePosition(90, 6, 8))),
+                new SourceSpan(new SourcePosition(105, 8, 5), new SourcePosition(108, 8, 8))),
             "The static method 's' cannot be called as an instance one.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -92,6 +96,8 @@ public class CheckStaticAndInstanceMembersAccessTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test {
                 public method1(): void { }
 
@@ -115,6 +121,8 @@ public class CheckStaticAndInstanceMembersAccessTests
     {
         var (tree, diagnostics) = Parse(
             """
+            namespace Test1;
+
             public type Test = Test;
 
             public func(): void {
@@ -132,7 +140,7 @@ public class CheckStaticAndInstanceMembersAccessTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(0, 1, 1), new SourcePosition(24, 1, 25))),
+                new SourceSpan(new SourcePosition(18, 3, 1), new SourcePosition(42, 3, 25))),
             "The cyclic type alias detected: 'Test'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
