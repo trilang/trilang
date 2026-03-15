@@ -4,34 +4,49 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
-internal class RestrictFieldAccess : Visitor, ISemanticPass
+internal class RestrictFieldAccess : ISemanticPass
 {
+    private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
 
     public RestrictFieldAccess(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
-        : base(directives)
     {
+        this.directives = directives;
         this.diagnostics = diagnostics;
     }
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees)
     {
+        var visitor = new RestrictFieldAccessVisitor(directives, diagnostics);
         foreach (var tree in semanticTrees)
-            tree.Accept(this);
-    }
-
-    public override void VisitMemberAccess(MemberAccessExpression node)
-    {
-        base.VisitMemberAccess(node);
-
-        if (node.IsFirstMember)
-            return;
-
-        if (node.Reference is FieldMetadata)
-            diagnostics.FieldNotAccessible(node);
+            tree.Accept(visitor);
     }
 
     public string Name => nameof(RestrictFieldAccess);
 
     public IEnumerable<string> DependsOn => [nameof(TypeChecker)];
+
+    private sealed class RestrictFieldAccessVisitor : Visitor
+    {
+        private readonly SemanticDiagnosticReporter diagnostics;
+
+        public RestrictFieldAccessVisitor(
+            ISet<string> directives,
+            SemanticDiagnosticReporter diagnostics)
+            : base(directives)
+        {
+            this.diagnostics = diagnostics;
+        }
+
+        public override void VisitMemberAccess(MemberAccessExpression node)
+        {
+            base.VisitMemberAccess(node);
+
+            if (node.IsFirstMember)
+                return;
+
+            if (node.Reference is FieldMetadata)
+                diagnostics.FieldNotAccessible(node);
+        }
+    }
 }

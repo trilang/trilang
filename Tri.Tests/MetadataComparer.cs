@@ -2,7 +2,6 @@ using Trilang.Metadata;
 
 namespace Tri.Tests;
 
-// TODO: compare namespaces
 // TODO: compare `definition`
 // ReSharper disable all UnusedParameter.Local
 internal class MetadataComparer : IEqualityComparer<IMetadata>
@@ -229,7 +228,15 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
     }
 
     private bool CompareNamespaceMetadata(NamespaceMetadata x, NamespaceMetadata y)
-        => object.ReferenceEquals(x, y);
+    {
+        if (x.Name != y.Name)
+            throw new Exception($"Namespace Name doesn't match. {x.Name} != {y.Name}.");
+
+        if (Equals(x.Parent, y.Parent))
+            throw new Exception("Parent Namespace doesn't match.");
+
+        return true;
+    }
 
     private bool CompareParameterMetadata(ParameterMetadata x, ParameterMetadata y)
     {

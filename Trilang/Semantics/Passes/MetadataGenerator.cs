@@ -6,8 +6,9 @@ using Trilang.Semantics.Providers;
 
 namespace Trilang.Semantics.Passes;
 
-internal class MetadataGenerator : Visitor, ISemanticPass
+internal class MetadataGenerator : ISemanticPass
 {
+    private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly MetadataProviderMap metadataProviderMap;
@@ -26,8 +27,8 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         MetadataProviderMap metadataProviderMap,
         NamespaceMetadata rootNamespace,
         BuiltInTypes builtInTypes)
-        : base(directives)
     {
+        this.directives = directives;
         this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
         this.metadataProviderMap = metadataProviderMap;
@@ -60,8 +61,9 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         PopulateTypes();
         PopulateFunctions();
 
+        var visitor = new MetadataGeneratorVisitor(directives, diagnostics, symbolTableMap, this);
         foreach (var semanticTree in treesToAnalyze)
-            semanticTree.Accept(this);
+            semanticTree.Accept(visitor);
 
         CreateClosedGenericTypes();
     }
@@ -654,104 +656,123 @@ internal class MetadataGenerator : Visitor, ISemanticPass
         return metadata;
     }
 
-    public override void VisitArrayType(ArrayType node)
-    {
-        if (node.Metadata is not null)
-            return;
-
-        GetOrCreateType(node);
-
-        base.VisitArrayType(node);
-    }
-
-    public override void VisitDiscriminatedUnion(DiscriminatedUnion node)
-    {
-        if (node.Metadata is not null)
-            return;
-
-        GetOrCreateType(node);
-
-        base.VisitDiscriminatedUnion(node);
-    }
-
-    public override void VisitFunctionType(FunctionType node)
-    {
-        if (node.Metadata is not null)
-            return;
-
-        GetOrCreateType(node);
-
-        base.VisitFunctionType(node);
-    }
-
-    public override void VisitGenericType(GenericApplication node)
-    {
-        if (node.Metadata is not null)
-            return;
-
-        GetOrCreateType(node);
-
-        base.VisitGenericType(node);
-    }
-
-    public override void VisitInterface(Interface node)
-    {
-        if (node.Metadata is not null)
-            return;
-
-        GetOrCreateType(node);
-
-        base.VisitInterface(node);
-    }
-
-    public override void VisitTupleType(TupleType node)
-    {
-        if (node.Metadata is not null)
-            return;
-
-        GetOrCreateType(node);
-
-        base.VisitTupleType(node);
-    }
-
-    public override void VisitTypeRef(TypeRef node)
-    {
-        if (node.Metadata is not null)
-            return;
-
-        GetOrCreateType(node);
-
-        base.VisitTypeRef(node);
-    }
-
-    public override void VisitVariable(VariableDeclaration node)
-    {
-        base.VisitVariable(node);
-
-        Debug.Assert(node.Type.Metadata is not null);
-
-        var symbolTable = symbolTableMap.Get(node);
-        var metadata = new VariableMetadata(node.GetLocation(), node.Name, node.Type.Metadata);
-
-        // TODO: optimize? it will query the same symbols in the same scope multiple times
-        var symbols = symbolTable.GetId(node.Name);
-
-        // we don't need to check all symbols, just the first one
-        // all other will be checked in other passes of the tree
-        if (symbols[0].Node != node)
-        {
-            metadata.MarkAsInvalid();
-            diagnostics.VariableAlreadyDefined(node);
-        }
-
-        node.Metadata = metadata;
-    }
-
     public string Name
         => nameof(MetadataGenerator);
 
     public IEnumerable<string> DependsOn
         => [nameof(SymbolFinder)];
+
+    private sealed class MetadataGeneratorVisitor : Visitor
+    {
+        private readonly SemanticDiagnosticReporter diagnostics;
+        private readonly SymbolTableMap symbolTableMap;
+        private readonly MetadataGenerator generator;
+
+        public MetadataGeneratorVisitor(
+            ISet<string> directives,
+            SemanticDiagnosticReporter diagnostics,
+            SymbolTableMap symbolTableMap,
+            MetadataGenerator generator)
+            : base(directives)
+        {
+            this.diagnostics = diagnostics;
+            this.symbolTableMap = symbolTableMap;
+            this.generator = generator;
+        }
+
+        public override void VisitArrayType(ArrayType node)
+        {
+            if (node.Metadata is not null)
+                return;
+
+            generator.GetOrCreateType(node);
+
+            base.VisitArrayType(node);
+        }
+
+        public override void VisitDiscriminatedUnion(DiscriminatedUnion node)
+        {
+            if (node.Metadata is not null)
+                return;
+
+            generator.GetOrCreateType(node);
+
+            base.VisitDiscriminatedUnion(node);
+        }
+
+        public override void VisitFunctionType(FunctionType node)
+        {
+            if (node.Metadata is not null)
+                return;
+
+            generator.GetOrCreateType(node);
+
+            base.VisitFunctionType(node);
+        }
+
+        public override void VisitGenericType(GenericApplication node)
+        {
+            if (node.Metadata is not null)
+                return;
+
+            generator.GetOrCreateType(node);
+
+            base.VisitGenericType(node);
+        }
+
+        public override void VisitInterface(Interface node)
+        {
+            if (node.Metadata is not null)
+                return;
+
+            generator.GetOrCreateType(node);
+
+            base.VisitInterface(node);
+        }
+
+        public override void VisitTupleType(TupleType node)
+        {
+            if (node.Metadata is not null)
+                return;
+
+            generator.GetOrCreateType(node);
+
+            base.VisitTupleType(node);
+        }
+
+        public override void VisitTypeRef(TypeRef node)
+        {
+            if (node.Metadata is not null)
+                return;
+
+            generator.GetOrCreateType(node);
+
+            base.VisitTypeRef(node);
+        }
+
+        public override void VisitVariable(VariableDeclaration node)
+        {
+            base.VisitVariable(node);
+
+            Debug.Assert(node.Type.Metadata is not null);
+
+            var symbolTable = symbolTableMap.Get(node);
+            var metadata = new VariableMetadata(node.GetLocation(), node.Name, node.Type.Metadata);
+
+            // TODO: optimize? it will query the same symbols in the same scope multiple times
+            var symbols = symbolTable.GetId(node.Name);
+
+            // we don't need to check all symbols, just the first one
+            // all other will be checked in other passes of the tree
+            if (symbols[0].Node != node)
+            {
+                metadata.MarkAsInvalid();
+                diagnostics.VariableAlreadyDefined(node);
+            }
+
+            node.Metadata = metadata;
+        }
+    }
 
     private sealed class NamespaceMetadataGenerator : Visitor
     {

@@ -3,37 +3,52 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
-internal class ThisOutsideOfType : Visitor, ISemanticPass
+internal class ThisOutsideOfType : ISemanticPass
 {
+    private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
 
     public ThisOutsideOfType(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
-        : base(directives)
     {
+        this.directives = directives;
         this.diagnostics = diagnostics;
     }
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees)
     {
+        var visitor = new ThisOutsideOfTypeVisitor(directives, diagnostics);
         foreach (var tree in semanticTrees)
-            tree.Accept(this);
-    }
-
-    public override void VisitMemberAccess(MemberAccessExpression node)
-    {
-        if (!node.IsThis)
-            return;
-
-        var type = node.FindInParent<TypeDeclaration>();
-        if (type is not null)
-            return;
-
-        diagnostics.ThisOutsideOfType(node);
-
-        base.VisitMemberAccess(node);
+            tree.Accept(visitor);
     }
 
     public string Name => nameof(ThisOutsideOfType);
 
     public IEnumerable<string> DependsOn => [];
+
+    private sealed class ThisOutsideOfTypeVisitor : Visitor
+    {
+        private readonly SemanticDiagnosticReporter diagnostics;
+
+        public ThisOutsideOfTypeVisitor(
+            ISet<string> directives,
+            SemanticDiagnosticReporter diagnostics)
+            : base(directives)
+        {
+            this.diagnostics = diagnostics;
+        }
+
+        public override void VisitMemberAccess(MemberAccessExpression node)
+        {
+            if (!node.IsThis)
+                return;
+
+            var type = node.FindInParent<TypeDeclaration>();
+            if (type is not null)
+                return;
+
+            diagnostics.ThisOutsideOfType(node);
+
+            base.VisitMemberAccess(node);
+        }
+    }
 }
