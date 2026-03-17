@@ -2450,7 +2450,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "Test",
                     [],
-                    new GenericApplicationNode(default, "List", [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")])
+                    new GenericApplicationNode(
+                        default,
+                        new TypeRefNode(default, "List"),
+                        [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")])
                 )
             ]);
         var formatted = tree.ToString();

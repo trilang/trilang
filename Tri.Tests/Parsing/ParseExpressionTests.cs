@@ -266,10 +266,7 @@ public class ParseExpressionTests
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 new UnaryExpressionNode(
                                     default,
                                     UnaryExpressionKind.BitwiseNot,
@@ -419,10 +416,7 @@ public class ParseExpressionTests
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 new BinaryExpressionNode(
                                     default,
                                     BinaryExpressionKind.BitwiseOr,
@@ -477,10 +471,7 @@ public class ParseExpressionTests
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 new BinaryExpressionNode(
                                     default,
                                     BinaryExpressionKind.BitwiseXor,
@@ -969,10 +960,7 @@ public class ParseExpressionTests
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 new BinaryExpressionNode(
                                     default,
                                     BinaryExpressionKind.Multiplication,
@@ -1338,16 +1326,10 @@ public class ParseExpressionTests
                         new ParameterNode(
                             default,
                             "a",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "i8"
-                    ),
+                    new TypeRefNode(default, "i8"),
                     new BlockStatementNode(
                         default,
                         [
@@ -1519,10 +1501,7 @@ public class ParseExpressionTests
                                 default,
                                 new CastExpressionNode(
                                     default,
-                                    new TypeRefNode(
-                                        default,
-                                        "i8"
-                                    ),
+                                    new TypeRefNode(default, "i8"),
                                     new FakeExpressionNode(
                                         new SourcePosition(41, 2, 16).ToSpan()
                                     )

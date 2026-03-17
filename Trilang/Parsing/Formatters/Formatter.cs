@@ -285,7 +285,7 @@ public partial class Formatter : INodeVisitor
 
     public void VisitGenericType(GenericApplicationNode node)
     {
-        writer.Write(node.PrefixName);
+        node.Type.Accept(this);
         writer.Write('<');
 
         for (var i = 0; i < node.TypeArguments.Count; i++)

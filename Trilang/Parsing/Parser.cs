@@ -1177,9 +1177,8 @@ public class Parser
             if (!hasNew)
                 return null;
 
-            var type = c.Parser.TryParseGenericTypeNode(c) ??
-                       c.Parser.TryParseTypeNode(c) ??
-                       c.Parser.ParseFakeType(c, OpenParen) as IInlineTypeNode;
+            var type = c.Parser.TryParseGenericOrTypeNode(c) ??
+                       c.Parser.ParseFakeType(c, OpenParen);
 
             if (!c.Reader.Check(OpenParen))
                 return null;
@@ -1286,8 +1285,7 @@ public class Parser
     private IInlineTypeNode? TryParseInlineTypeNode(ParserContext context)
         => TryParseNull(context) ??
            TryParseArrayType(context) ??
-           TryParseGenericTypeNode(context) ??
-           TryParseTypeNode(context) ??
+           TryParseGenericOrTypeNode(context) ??
            TryParseTupleOrFunctionType(context) ??
            TryParseInterface(context);
 
@@ -1317,15 +1315,15 @@ public class Parser
                 new TypeRefNode(id.SourceSpan, id.Identifier));
         });
 
-    private GenericApplicationNode? TryParseGenericTypeNode(ParserContext context)
+    private IInlineTypeNode? TryParseGenericOrTypeNode(ParserContext context)
         => context.Reader.Scoped(context, static c =>
         {
-            var (hasToken, token) = c.Reader.Check(Identifier);
-            if (!hasToken)
+            var type = c.Parser.TryParseTypeNode(c);
+            if (type is null)
                 return null;
 
             if (!c.Reader.Check(Less))
-                return null;
+                return type as IInlineTypeNode;
 
             var typeArguments = new List<IInlineTypeNode>();
             var typeArgument = c.Parser.TryParseDiscriminatedUnion(c) ??
@@ -1356,8 +1354,8 @@ public class Parser
             var greaterSignSpan = c.Reader.Expect(Greater);
 
             return new GenericApplicationNode(
-                token.SourceSpan.Combine(greaterSignSpan),
-                token.Identifier,
+                type.SourceSpan.Combine(greaterSignSpan),
+                type,
                 typeArguments);
         });
 

@@ -181,10 +181,8 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        "List",
-                        [new TypeRefNode(default, "i32"), new TypeRefNode(default, "bool")]
-                    )
-                )
+                        new TypeRefNode(default, "List"),
+                        [new TypeRefNode(default, "i32"), new TypeRefNode(default, "bool")]))
             ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -207,10 +205,13 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        "List",
+                        new TypeRefNode(default, "List"),
                         [
                             new TypeRefNode(default, "i32"),
-                            new GenericApplicationNode(default, "List", [new TypeRefNode(default, "bool")])
+                            new GenericApplicationNode(
+                                default,
+                                new TypeRefNode(default, "List"),
+                                [new TypeRefNode(default, "bool")])
                         ]
                     )
                 )
@@ -237,15 +238,8 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        "List",
-                        [
-                            new FakeTypeNode(
-                                default,
-                                "<>_0"
-                            )
-                        ]
-                    )
-                )
+                        new TypeRefNode(default, "List"),
+                        [new FakeTypeNode(default, "<>_0")]))
             ]);
 
         var diagnostic = new Diagnostic(
@@ -275,16 +269,10 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        "List",
+                        new TypeRefNode(default, "List"),
                         [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                            new FakeTypeNode(
-                                default,
-                                "<>_0"
-                            )
+                            new TypeRefNode(default, "i32"),
+                            new FakeTypeNode(default, "<>_0")
                         ]
                     )
                 )
@@ -317,13 +305,8 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        "List",
-                        [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                        ]
+                        new TypeRefNode(default, "List"),
+                        [new TypeRefNode(default, "i32")]
                     )
                 )
             ]);

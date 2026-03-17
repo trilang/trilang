@@ -75,10 +75,7 @@ public class ParseFunctionTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
                     new TypeRefNode(
@@ -161,18 +158,12 @@ public class ParseFunctionTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         ),
                         new ParameterNode(
                             default,
                             "y",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         ),
                     ],
                     new TypeRefNode(default, "void"),

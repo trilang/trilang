@@ -173,18 +173,12 @@ public class ParseTypeTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         ),
                         new PropertyDeclarationNode(
                             default,
                             "y",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         ),
                     ],
                     [],
@@ -238,10 +232,7 @@ public class ParseTypeTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
+                            new TypeRefNode(default, "i32"),
                             new PropertyGetterNode(
                                 default,
                                 AccessModifier.Private,
@@ -369,10 +360,7 @@ public class ParseTypeTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
+                            new TypeRefNode(default, "i32"),
                             new PropertyGetterNode(
                                 default,
                                 AccessModifier.Private,
@@ -534,10 +522,7 @@ public class ParseTypeTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         ),
                     ],
                     [],
@@ -630,10 +615,7 @@ public class ParseTypeTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         ),
                     ],
                     [],
@@ -737,10 +719,7 @@ public class ParseTypeTests
                             false,
                             "<>_0",
                             [],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -789,10 +768,7 @@ public class ParseTypeTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(
                                 new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(52, 2, 33))
                             )
@@ -843,10 +819,7 @@ public class ParseTypeTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(
                                 default,
                                 [
@@ -903,10 +876,7 @@ public class ParseTypeTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(
                                 new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(52, 2, 33))
                             )
@@ -968,10 +938,7 @@ public class ParseTypeTests
                                     new VariableDeclarationNode(
                                         default,
                                         "x",
-                                        new TypeRefNode(
-                                            default,
-                                            "i32"
-                                        ),
+                                        new TypeRefNode(default, "i32"),
                                         new LiteralExpressionNode(
                                             default,
                                             LiteralExpressionKind.Integer,
@@ -1035,10 +1002,7 @@ public class ParseTypeTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -1087,10 +1051,7 @@ public class ParseTypeTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(
                                 new SourceSpan(new SourcePosition(50, 2, 31), new SourcePosition(53, 3, 2))
                             )
@@ -1144,24 +1105,15 @@ public class ParseTypeTests
                                 new ParameterNode(
                                     default,
                                     "a",
-                                    new TypeRefNode(
-                                        default,
-                                        "i32"
-                                    )
+                                    new TypeRefNode(default, "i32")
                                 ),
                                 new ParameterNode(
                                     default,
                                     "b",
-                                    new TypeRefNode(
-                                        default,
-                                        "i32"
-                                    )
+                                    new TypeRefNode(default, "i32")
                                 ),
                             ],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -1213,16 +1165,10 @@ public class ParseTypeTests
                                 new ParameterNode(
                                     default,
                                     "a",
-                                    new TypeRefNode(
-                                        default,
-                                        "i32"
-                                    )
+                                    new TypeRefNode(default, "i32")
                                 ),
                             ],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -1280,10 +1226,7 @@ public class ParseTypeTests
                                     )
                                 ),
                             ],
-                            new TypeRefNode(
-                                default,
-                                "string"
-                            ),
+                            new TypeRefNode(default, "string"),
                             new BlockStatementNode(
                                 new SourceSpan(new SourcePosition(53, 2, 34), new SourcePosition(56, 2, 37))
                             )
@@ -1520,10 +1463,7 @@ public class ParseTypeTests
                     AccessModifier.Public,
                     "<>_0",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "i32"
-                    )
+                    new TypeRefNode(default, "i32")
                 )
             ]);
 
@@ -1584,10 +1524,7 @@ public class ParseTypeTests
                     AccessModifier.Public,
                     "MyType",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "i32"
-                    )
+                    new TypeRefNode(default, "i32")
                 )
             ]);
 
@@ -1673,19 +1610,10 @@ public class ParseTypeTests
                     new FunctionTypeNode(
                         default,
                         [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, "i32")
                         ],
-                        new TypeRefNode(
-                            default,
-                            "i32"
-                        )
+                        new TypeRefNode(default, "i32")
                     )
                 )
             ]);
@@ -1754,10 +1682,7 @@ public class ParseTypeTests
                     AccessModifier.Public,
                     "F",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "i32"
-                    )
+                    new TypeRefNode(default, "i32")
                 ),
                 new FakeDeclarationNode(default)
             ]);
@@ -1798,19 +1723,10 @@ public class ParseTypeTests
                     new FunctionTypeNode(
                         default,
                         [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, "i32")
                         ],
-                        new TypeRefNode(
-                            default,
-                            "i32"
-                        )
+                        new TypeRefNode(default, "i32")
                     )
                 )
             ]);
@@ -1846,19 +1762,10 @@ public class ParseTypeTests
                     new FunctionTypeNode(
                         default,
                         [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, "i32")
                         ],
-                        new TypeRefNode(
-                            default,
-                            "i32"
-                        )
+                        new TypeRefNode(default, "i32")
                     )
                 )
             ]);
@@ -1894,14 +1801,8 @@ public class ParseTypeTests
                     new TupleTypeNode(
                         default,
                         [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
+                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, "i32"),
                         ]
                     )
                 ),
@@ -1944,14 +1845,8 @@ public class ParseTypeTests
                     new FunctionTypeNode(
                         default,
                         [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, "i32")
                         ],
                         new FakeTypeNode(
                             default,
@@ -1992,19 +1887,10 @@ public class ParseTypeTests
                     new FunctionTypeNode(
                         default,
                         [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, "i32")
                         ],
-                        new TypeRefNode(
-                            default,
-                            "i32"
-                        )
+                        new TypeRefNode(default, "i32")
                     )
                 )
             ]);
@@ -2074,14 +1960,8 @@ public class ParseTypeTests
                     new FunctionTypeNode(
                         default,
                         [
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            ),
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, "i32")
                         ],
                         new TypeRefNode(
                             default,
@@ -2358,20 +2238,14 @@ public class ParseTypeTests
                             new InterfacePropertyNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
                             new InterfacePropertyNode(
                                 default,
                                 "y",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
@@ -2447,10 +2321,7 @@ public class ParseTypeTests
                             new InterfacePropertyNode(
                                 default,
                                 "y",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
@@ -2516,20 +2387,14 @@ public class ParseTypeTests
                             new InterfacePropertyNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
                             new InterfacePropertyNode(
                                 default,
                                 "y",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
@@ -2603,20 +2468,14 @@ public class ParseTypeTests
                             new InterfacePropertyNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
                             new InterfacePropertyNode(
                                 default,
                                 "y",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
@@ -2682,20 +2541,14 @@ public class ParseTypeTests
                             new InterfacePropertyNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
                             new InterfacePropertyNode(
                                 default,
                                 "y",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
@@ -2761,20 +2614,14 @@ public class ParseTypeTests
                             new InterfacePropertyNode(
                                 default,
                                 "x",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
                             new InterfacePropertyNode(
                                 default,
                                 "y",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 null,
                                 null
                             ),
@@ -3243,10 +3090,7 @@ public class ParseTypeTests
                     AccessModifier.Public,
                     "T",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "i32"
-                    )
+                    new TypeRefNode(default, "i32")
                 )
             ]);
 
@@ -3271,10 +3115,7 @@ public class ParseTypeTests
                     AccessModifier.Public,
                     "T",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "i32"
-                    )
+                    new TypeRefNode(default, "i32")
                 )
             ]);
 
@@ -3501,22 +3342,13 @@ public class ParseTypeTests
                     "T",
                     [],
                     new DiscriminatedUnionNode([
-                        new TypeRefNode(
-                            default,
-                            "i32"
-                        ),
+                        new TypeRefNode(default, "i32"),
                         new FunctionTypeNode(
                             default,
                             [],
                             new DiscriminatedUnionNode([
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
-                                new TypeRefNode(
-                                    default,
-                                    "null"
-                                ),
+                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, "null"),
                             ])
                         )
                     ])
@@ -3543,22 +3375,13 @@ public class ParseTypeTests
                     "T",
                     [],
                     new DiscriminatedUnionNode([
-                        new TypeRefNode(
-                            default,
-                            "i32"
-                        ),
+                        new TypeRefNode(default, "i32"),
                         new FunctionTypeNode(
                             default,
                             [],
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         ),
-                        new TypeRefNode(
-                            default,
-                            "null"
-                        ),
+                        new TypeRefNode(default, "null"),
                     ])
                 ),
             ]);

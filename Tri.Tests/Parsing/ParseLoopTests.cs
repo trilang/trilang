@@ -49,10 +49,7 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
                     new TypeRefNode(default, "void"),
@@ -104,10 +101,7 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
                     new TypeRefNode(
@@ -174,10 +168,7 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
                     new TypeRefNode(
@@ -235,10 +226,7 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
                     new TypeRefNode(
@@ -306,10 +294,7 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
                     new TypeRefNode(
@@ -397,10 +382,7 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
                     new TypeRefNode(
@@ -468,10 +450,7 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(
-                                default,
-                                "i32"
-                            )
+                            new TypeRefNode(default, "i32")
                         )
                     ],
                     new TypeRefNode(

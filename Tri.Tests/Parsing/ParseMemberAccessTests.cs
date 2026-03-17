@@ -93,10 +93,7 @@ public class ParseMemberAccessTests
                             "x",
                             new ArrayTypeNode(
                                 default,
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                )
+                                new TypeRefNode(default, "i32")
                             )
                         )
                     ],
@@ -110,10 +107,7 @@ public class ParseMemberAccessTests
                             new VariableDeclarationNode(
                                 default,
                                 "a",
-                                new TypeRefNode(
-                                    default,
-                                    "i32"
-                                ),
+                                new TypeRefNode(default, "i32"),
                                 new ArrayAccessExpressionNode(
                                     default,
                                     new MemberAccessExpressionNode(
@@ -713,22 +707,13 @@ public class ParseMemberAccessTests
                             new TupleTypeNode(
                                 default,
                                 [
-                                    new TypeRefNode(
-                                        default,
-                                        "i32"
-                                    ),
-                                    new TypeRefNode(
-                                        default,
-                                        "string"
-                                    ),
+                                    new TypeRefNode(default, "i32"),
+                                    new TypeRefNode(default, "string"),
                                 ]
                             )
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "i32"
-                    ),
+                    new TypeRefNode(default, "i32"),
                     new BlockStatementNode(
                         default,
                         [

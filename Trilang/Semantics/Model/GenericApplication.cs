@@ -6,13 +6,13 @@ public class GenericApplication : IInlineType
 {
     public GenericApplication(
         SourceSpan? sourceSpan,
-        string prefixName,
+        TypeRef type,
         IReadOnlyList<IInlineType> typeArguments)
     {
         SourceSpan = sourceSpan;
-        PrefixName = prefixName;
+        Type = type;
         TypeArguments = typeArguments;
-        Name = $"{prefixName}<{string.Join(", ", typeArguments.Select(t => t.Name))}>";
+        Name = $"{type.Name}<{string.Join(", ", typeArguments.Select(t => t.Name))}>";
 
         foreach (var typeArgument in TypeArguments)
             typeArgument.Parent = this;
@@ -28,19 +28,19 @@ public class GenericApplication : IInlineType
         => transformer.TransformGenericType(this);
 
     public IInlineType Clone()
-        => new GenericApplication(SourceSpan, PrefixName, TypeArguments.Select(t => t.Clone()).ToArray())
+        => new GenericApplication(SourceSpan, Type, TypeArguments.Select(t => t.Clone()).ToArray())
         {
             Metadata = Metadata,
         };
 
     public string GetOpenGenericName()
-        => $"{PrefixName}<{new string(',', TypeArguments.Count - 1)}>";
+        => $"{Type.Name}<{new string(',', TypeArguments.Count - 1)}>";
 
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
 
-    public string PrefixName { get; }
+    public TypeRef Type { get; }
 
     public IReadOnlyList<IInlineType> TypeArguments { get; }
 

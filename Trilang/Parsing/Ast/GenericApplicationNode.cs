@@ -6,11 +6,11 @@ public class GenericApplicationNode : IInlineTypeNode
 {
     public GenericApplicationNode(
         SourceSpan sourceSpan,
-        string prefixName,
+        TypeRefNode type,
         IReadOnlyList<IInlineTypeNode> typeArguments)
     {
         SourceSpan = sourceSpan;
-        PrefixName = prefixName;
+        Type = type;
         TypeArguments = typeArguments;
     }
 
@@ -30,7 +30,7 @@ public class GenericApplicationNode : IInlineTypeNode
 
     public SourceSpan SourceSpan { get; }
 
-    public string PrefixName { get; }
+    public TypeRefNode Type { get; }
 
     public IReadOnlyList<IInlineTypeNode> TypeArguments { get; }
 }
