@@ -202,6 +202,7 @@ public class Lexer
                 (')', _) => (TokenKind.CloseParen, 1),
                 ('{', _) => (TokenKind.OpenBrace, 1),
                 ('}', _) => (TokenKind.CloseBrace, 1),
+                ('[', ']') => (TokenKind.OpenCloseBracket, 2),
                 ('[', _) => (TokenKind.OpenBracket, 1),
                 (']', _) => (TokenKind.CloseBracket, 1),
 

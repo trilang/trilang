@@ -130,7 +130,12 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeMissingGreaterTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type List<T { }");
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type List<T { }
+            """);
 
         var expected = new SyntaxTree(
             file,

@@ -192,6 +192,7 @@ public class LexerTests
     [TestCase("}", TokenKind.CloseBrace)]
     [TestCase("[", TokenKind.OpenBracket)]
     [TestCase("]", TokenKind.CloseBracket)]
+    [TestCase("[]", TokenKind.OpenCloseBracket)]
     [TestCase(":", TokenKind.Colon)]
     [TestCase(";", TokenKind.SemiColon)]
     [TestCase(",", TokenKind.Comma)]

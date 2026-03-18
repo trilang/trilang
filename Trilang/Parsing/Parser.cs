@@ -202,7 +202,7 @@ public class Parser
 
             c.Reader.Expect(Colon);
 
-            var returnType = c.Parser.TryParseDiscriminatedUnion(c) ??
+            var returnType = c.Parser.TryParseInlineTypeNode(c) ??
                              c.Parser.ParseFakeType(c, OpenBrace, CloseBrace);
 
             var block = c.Parser.ParseBlock(c);
@@ -263,7 +263,7 @@ public class Parser
 
         context.Reader.Expect(Colon);
 
-        var type = TryParseDiscriminatedUnion(context) ??
+        var type = TryParseInlineTypeNode(context) ??
                    ParseFakeType(context, Comma, CloseParen);
 
         return new ParameterNode(span.Combine(type.SourceSpan), name, type);
@@ -350,7 +350,7 @@ public class Parser
         var genericArguments = TryParseGenericTypeArguments(context);
         if (context.Reader.Check(Equal))
         {
-            var type = TryParseDiscriminatedUnion(context) ??
+            var type = TryParseInlineTypeNode(context) ??
                        ParseFakeType(context, SemiColon);
 
             if (type is InterfaceNode)
@@ -374,7 +374,7 @@ public class Parser
         var interfaces = new List<TypeRefNode>();
         if (context.Reader.Check(Colon))
         {
-            var @interface = TryParseTypeNode(context);
+            var @interface = TryParseTypeRef(context) as TypeRefNode;
             if (@interface is null)
             {
                 context.Diagnostics.ExpectedInterface(context.Reader.Span.Start);
@@ -389,7 +389,7 @@ public class Parser
                 var hasComma = context.Reader.Check(Comma);
                 var comma = context.Reader.Token;
 
-                @interface = TryParseTypeNode(context);
+                @interface = TryParseTypeRef(context) as TypeRefNode;
                 if (@interface is null)
                 {
                     if (hasComma)
@@ -470,8 +470,8 @@ public class Parser
         if (!context.Reader.Check(Less))
             return arguments;
 
-        var type = TryParseTypeNode(context) as IInlineTypeNode ??
-                   ParseFakeType(context, Comma, Greater);
+        var type = TryParseTypeRef(context) as TypeRefNode ??
+                   ParseFakeType(context, Comma, Greater) as IInlineTypeNode;
 
         arguments.Add(type);
 
@@ -480,7 +480,7 @@ public class Parser
             var hasComma = context.Reader.Check(Comma);
             var comma = context.Reader.Token;
 
-            type = TryParseTypeNode(context);
+            type = TryParseTypeRef(context) as TypeRefNode;
             if (type is null)
             {
                 if (!hasComma)
@@ -529,7 +529,7 @@ public class Parser
 
         context.Reader.Expect(Colon);
 
-        var type = TryParseDiscriminatedUnion(context) ??
+        var type = TryParseInlineTypeNode(context) ??
                    ParseFakeType(context, SemiColon, OpenBrace);
 
         var (hasSemicolon, semiColon) = context.Reader.Check(SemiColon);
@@ -626,7 +626,7 @@ public class Parser
 
         context.Reader.Expect(Colon);
 
-        var returnType = TryParseDiscriminatedUnion(context) ??
+        var returnType = TryParseInlineTypeNode(context) ??
                          ParseFakeType(context, OpenBrace);
 
         var block = ParseBlock(context);
@@ -711,7 +711,7 @@ public class Parser
 
         context.Reader.Expect(Colon);
 
-        var type = TryParseDiscriminatedUnion(context) ??
+        var type = TryParseInlineTypeNode(context) ??
                    ParseFakeType(context, Equal, SemiColon);
 
         context.Reader.Expect(Equal);
@@ -936,7 +936,7 @@ public class Parser
         if (!context.Reader.Check(Is))
             return expression;
 
-        var type = TryParseDiscriminatedUnion(context) ??
+        var type = TryParseInlineTypeNode(context) ??
                    ParseFakeType(context, Comma, CloseParen, SemiColon);
 
         return new IsExpressionNode(expression, type);
@@ -949,7 +949,7 @@ public class Parser
             if (!hasOpenParen)
                 return null;
 
-            var type = c.Parser.TryParseDiscriminatedUnion(c);
+            var type = c.Parser.TryParseInlineTypeNode(c);
             if (type is null)
                 return null;
 
@@ -1177,7 +1177,7 @@ public class Parser
             if (!hasNew)
                 return null;
 
-            var type = c.Parser.TryParseGenericOrTypeNode(c) ??
+            var type = c.Parser.TryParseTypeRef(c) ??
                        c.Parser.ParseFakeType(c, OpenParen);
 
             if (!c.Reader.Check(OpenParen))
@@ -1199,7 +1199,7 @@ public class Parser
             if (!hasNew)
                 return null;
 
-            var type = c.Parser.TryParseTypeNode(c) as IInlineTypeNode ??
+            var type = c.Parser.TryParseTypeRef(c) ??
                        c.Parser.ParseFakeType(c, OpenBracket, CloseBracket);
 
             if (!c.Reader.Check(OpenBracket))
@@ -1255,17 +1255,14 @@ public class Parser
         return new FakeTypeNode(span, name);
     }
 
-    private IInlineTypeNode? TryParseDiscriminatedUnion(ParserContext context)
-    {
-        var hasFirstPipe = context.Reader.Check(Pipe);
-        var type = TryParseInlineTypeNode(context);
-        if (type is null)
-        {
-            if (!hasFirstPipe)
-                return null;
+    private IInlineTypeNode? TryParseInlineTypeNode(ParserContext context)
+        => TryParseUnionType(context);
 
-            type = ParseFakeType(context, Pipe, SemiColon);
-        }
+    private IInlineTypeNode? TryParseUnionType(ParserContext context)
+    {
+        var type = TryParsePostfixType(context);
+        if (type is null)
+            return null;
 
         if (!context.Reader.Token.Is(Pipe))
             return type;
@@ -1273,8 +1270,8 @@ public class Parser
         var types = new List<IInlineTypeNode> { type };
         while (context.Reader.Check(Pipe))
         {
-            type = TryParseInlineTypeNode(context) ??
-                   ParseFakeType(context, Pipe, SemiColon);
+            type = TryParsePostfixType(context) ??
+                   ParseFakeType(context, Pipe);
 
             types.Add(type);
         }
@@ -1282,12 +1279,29 @@ public class Parser
         return new DiscriminatedUnionNode(types);
     }
 
-    private IInlineTypeNode? TryParseInlineTypeNode(ParserContext context)
+    private IInlineTypeNode? TryParsePostfixType(ParserContext context)
+    {
+        var type = TryParsePrimaryType(context);
+        if (type is null)
+            return null;
+
+        while (true)
+        {
+            var (hasOpenCloseBracket, openCloseBracket) = context.Reader.Check(OpenCloseBracket);
+            if (!hasOpenCloseBracket)
+                break;
+
+            type = new ArrayTypeNode(type.SourceSpan.Combine(openCloseBracket.SourceSpan), type);
+        }
+
+        return type;
+    }
+
+    private IInlineTypeNode? TryParsePrimaryType(ParserContext context)
         => TryParseNull(context) ??
-           TryParseArrayType(context) ??
-           TryParseGenericOrTypeNode(context) ??
-           TryParseTupleOrFunctionType(context) ??
-           TryParseInterface(context);
+           TryParseParenType(context) ??
+           TryParseInterface(context) ??
+           TryParseTypeRef(context);
 
     private IInlineTypeNode? TryParseNull(ParserContext context)
     {
@@ -1298,86 +1312,89 @@ public class Parser
         return new TypeRefNode(token.SourceSpan, "null");
     }
 
-    private IInlineTypeNode? TryParseArrayType(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
+    private IInlineTypeNode? TryParseParenType(ParserContext context)
+    {
+        var (typesSpan, types) = TryParseTypeList(context);
+        if (types is null)
+            return null;
+
+        var isFunctionType = context.Reader.Check(EqualGreater).Result;
+        if (!isFunctionType && types.Count == 0)
         {
-            var (hasId, id) = c.Reader.Check(Identifier);
-            if (!hasId)
-                return null;
+            context.Diagnostics.MissingToken(context.Reader.Span.Start, EqualGreater);
+            isFunctionType = true;
+        }
 
-            if (!c.Reader.Check(OpenBracket))
-                return null;
-
-            var closeBracketSpan = c.Reader.Expect(CloseBracket);
-
-            return new ArrayTypeNode(
-                id.SourceSpan.Combine(closeBracketSpan),
-                new TypeRefNode(id.SourceSpan, id.Identifier));
-        });
-
-    private IInlineTypeNode? TryParseGenericOrTypeNode(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
+        if (isFunctionType)
         {
-            var type = c.Parser.TryParseTypeNode(c);
-            if (type is null)
-                return null;
+            var returnType = TryParseInlineTypeNode(context) ??
+                             ParseFakeType(context, Comma, CloseParen, SemiColon, CloseBrace);
 
-            if (!c.Reader.Check(Less))
-                return type as IInlineTypeNode;
+            return new FunctionTypeNode(
+                typesSpan.Combine(returnType.SourceSpan),
+                types,
+                returnType);
+        }
 
-            var typeArguments = new List<IInlineTypeNode>();
-            var typeArgument = c.Parser.TryParseDiscriminatedUnion(c) ??
-                               c.Parser.ParseFakeType(c, Comma, Greater);
+        if (types.Count == 1)
+            return types[0];
 
-            typeArguments.Add(typeArgument);
+        return new TupleTypeNode(typesSpan, types);
+    }
 
-            while (true)
+    private IInlineTypeNode? TryParseTypeRef(ParserContext context)
+    {
+        var (hasToken, token) = context.Reader.Check(Identifier);
+        if (!hasToken)
+            return null;
+
+        var type = new TypeRefNode(token.SourceSpan, token.Identifier);
+
+        if (!context.Reader.Check(Less))
+            return type;
+
+        var typeArguments = new List<IInlineTypeNode>();
+        var typeArgument = TryParseInlineTypeNode(context) ??
+                           ParseFakeType(context, Comma, Greater);
+
+        typeArguments.Add(typeArgument);
+
+        while (true)
+        {
+            var hasComma = context.Reader.Check(Comma);
+            var comma = context.Reader.Token;
+
+            typeArgument = TryParseInlineTypeNode(context);
+            if (typeArgument is null)
             {
-                var hasComma = c.Reader.Check(Comma);
-                var comma = c.Reader.Token;
-
-                typeArgument = c.Parser.TryParseDiscriminatedUnion(c);
-                if (typeArgument is null)
-                {
-                    if (!hasComma)
-                        break;
-
-                    typeArgument = c.Parser.ParseFakeType(c, Comma, Greater);
-                }
-
                 if (!hasComma)
-                    c.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
+                    break;
 
-                typeArguments.Add(typeArgument);
+                typeArgument = ParseFakeType(context, Comma, Greater);
             }
 
-            var greaterSignSpan = c.Reader.Expect(Greater);
+            if (!hasComma)
+                context.Diagnostics.MissingToken(comma.SourceSpan.Start, Comma);
 
-            return new GenericApplicationNode(
-                type.SourceSpan.Combine(greaterSignSpan),
-                type,
-                typeArguments);
-        });
+            typeArguments.Add(typeArgument);
+        }
 
-    private TypeRefNode? TryParseTypeNode(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var (hasToken, token) = c.Reader.Check(Identifier);
-            if (!hasToken)
-                return null;
+        var greaterSignSpan = context.Reader.Expect(Greater);
 
-            return new TypeRefNode(token.SourceSpan, token.Identifier);
-        });
+        return new GenericApplicationNode(
+            type.SourceSpan.Combine(greaterSignSpan),
+            type,
+            typeArguments);
+    }
 
-    private (SourceSpan, IReadOnlyList<IInlineTypeNode>?) TryParseParenTypes(
-        ParserContext context)
+    private (SourceSpan, IReadOnlyList<IInlineTypeNode>?) TryParseTypeList(ParserContext context)
     {
         var (hasOpenParen, openParen) = context.Reader.Check(OpenParen);
         if (!hasOpenParen)
             return (default, null);
 
         var types = new List<IInlineTypeNode>();
-        var type = TryParseDiscriminatedUnion(context);
+        var type = TryParseInlineTypeNode(context);
         if (type is not null)
         {
             types.Add(type);
@@ -1387,7 +1404,7 @@ public class Parser
                 var hasComma = context.Reader.Check(Comma);
                 var comma = context.Reader.Token;
 
-                type = TryParseDiscriminatedUnion(context);
+                type = TryParseInlineTypeNode(context);
                 if (type is null)
                 {
                     if (!hasComma)
@@ -1408,54 +1425,22 @@ public class Parser
         return (openParen.SourceSpan.Combine(closeParenSpan), types);
     }
 
-    private IInlineTypeNode? TryParseTupleOrFunctionType(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var (typesSpan, types) = c.Parser.TryParseParenTypes(c);
-            if (types is null)
-                return null;
-
-            var isFunctionType = c.Reader.Check(EqualGreater).Result;
-            if (!isFunctionType && types.Count == 0)
-            {
-                c.Diagnostics.MissingToken(c.Reader.Span.Start, EqualGreater);
-                isFunctionType = true;
-            }
-
-            if (isFunctionType)
-            {
-                var returnType = c.Parser.TryParseDiscriminatedUnion(c) ??
-                                 c.Parser.ParseFakeType(c, Comma, CloseParen, SemiColon, CloseBrace);
-
-                return new FunctionTypeNode(
-                    typesSpan.Combine(returnType.SourceSpan),
-                    types,
-                    returnType);
-            }
-
-            if (types.Count == 1)
-                return types[0];
-
-            return new TupleTypeNode(typesSpan, types);
-        });
-
     private InterfaceNode? TryParseInterface(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var (hasOpenBrace, openBrace) = c.Reader.Check(OpenBrace);
-            if (!hasOpenBrace)
-                return null;
+    {
+        var (hasOpenBrace, openBrace) = context.Reader.Check(OpenBrace);
+        if (!hasOpenBrace)
+            return null;
 
-            // TODO: relax ordering
-            var properties = c.Parser.TryParseInterfaceProperties(c);
-            var methods = c.Parser.TryParseInterfaceMethods(c);
-            var closeBraceSpan = c.Reader.Expect(CloseBrace);
+        // TODO: relax ordering
+        var properties = TryParseInterfaceProperties(context);
+        var methods = TryParseInterfaceMethods(context);
+        var closeBraceSpan = context.Reader.Expect(CloseBrace);
 
-            return new InterfaceNode(
-                openBrace.SourceSpan.Combine(closeBraceSpan),
-                properties,
-                methods);
-        });
+        return new InterfaceNode(
+            openBrace.SourceSpan.Combine(closeBraceSpan),
+            properties,
+            methods);
+    }
 
     private List<InterfacePropertyNode> TryParseInterfaceProperties(ParserContext context)
     {
@@ -1483,7 +1468,7 @@ public class Parser
             if (!c.Reader.Check(Colon))
                 return null;
 
-            var type = c.Parser.TryParseDiscriminatedUnion(c) ??
+            var type = c.Parser.TryParseInlineTypeNode(c) ??
                        c.Parser.ParseFakeType(c, SemiColon, OpenBrace, CloseBrace);
 
             var (hasSemiColon, semiColon) = c.Reader.Check(SemiColon);
@@ -1562,7 +1547,7 @@ public class Parser
             if (name is null)
                 return null;
 
-            var (_, parameters) = c.Parser.TryParseParenTypes(c);
+            var (_, parameters) = c.Parser.TryParseTypeList(c);
             if (parameters is null)
             {
                 parameters = [];
@@ -1572,7 +1557,7 @@ public class Parser
 
             c.Reader.Expect(Colon);
 
-            var returnType = c.Parser.TryParseDiscriminatedUnion(c) ??
+            var returnType = c.Parser.TryParseInlineTypeNode(c) ??
                              c.Parser.ParseFakeType(c, SemiColon, CloseBrace);
 
             var semiColonSpan = c.Reader.Expect(SemiColon);
