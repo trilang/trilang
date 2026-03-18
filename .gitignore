@@ -38,7 +38,7 @@ coverage.cobertura.xml
 *.design
 *.pfx
 
-[Pp]laylist\
+[Pp]laylist/
 *.playlist
 
 Thumbs.db
