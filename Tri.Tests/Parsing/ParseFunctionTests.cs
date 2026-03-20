@@ -38,10 +38,7 @@ public class ParseFunctionTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 )
             ]);
@@ -75,13 +72,10 @@ public class ParseFunctionTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 )
             ]);
@@ -120,10 +114,7 @@ public class ParseFunctionTests
                             )
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         new SourceSpan(new SourcePosition(23, 1, 24), new SourcePosition(26, 1, 27))
                     )
@@ -158,15 +149,15 @@ public class ParseFunctionTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         ),
                         new ParameterNode(
                             default,
                             "y",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         ),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 ),
             ]);
@@ -197,10 +188,7 @@ public class ParseFunctionTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -240,10 +228,7 @@ public class ParseFunctionTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -330,10 +315,7 @@ public class ParseFunctionTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         new SourcePosition(19, 1, 20).ToSpan()
                     )
@@ -375,7 +357,7 @@ public class ParseFunctionTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 )
             ]);
@@ -399,9 +381,9 @@ public class ParseFunctionTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 )
             ]);
@@ -425,11 +407,11 @@ public class ParseFunctionTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "z", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "z", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 )
             ]);
@@ -452,8 +434,8 @@ public class ParseFunctionTests
                     default,
                     AccessModifier.Public,
                     "test",
-                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, ["i32"])))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 )
             ]);

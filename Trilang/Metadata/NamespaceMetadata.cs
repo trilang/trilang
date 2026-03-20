@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Trilang.Metadata;
 
-public class NamespaceMetadata : IEquatable<NamespaceMetadata>
+public class NamespaceMetadata : IMetadata, IEquatable<NamespaceMetadata>
 {
     private readonly HashSet<NamespaceMetadata> children;
     private readonly Dictionary<string, ITypeMetadata> types;
@@ -119,7 +119,7 @@ public class NamespaceMetadata : IEquatable<NamespaceMetadata>
         return current;
     }
 
-    public NamespaceMetadata? FindNamespace(IReadOnlyList<string> parts)
+    public NamespaceMetadata? FindNamespace(IEnumerable<string> parts)
     {
         var current = GetRoot();
 
@@ -175,6 +175,12 @@ public class NamespaceMetadata : IEquatable<NamespaceMetadata>
                 q.Enqueue(child);
         }
     }
+
+    public SourceLocation? Definition
+        => null;
+
+    public bool IsInvalid
+        => false;
 
     public NamespaceMetadata? Parent { get; }
 

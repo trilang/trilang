@@ -214,10 +214,7 @@ public class ParseDirectiveTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [

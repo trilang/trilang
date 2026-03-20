@@ -1,13 +1,17 @@
+using System.Diagnostics;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
 public class TypeRefNode : IInlineTypeNode
 {
-    public TypeRefNode(SourceSpan sourceSpan, string name)
+    public TypeRefNode(SourceSpan sourceSpan, IReadOnlyList<string> parts)
     {
+        if (parts.Count == 0)
+            throw new ArgumentException("Type must have at least one part", nameof(parts));
+
         SourceSpan = sourceSpan;
-        Name = name;
+        Parts = parts;
     }
 
     public override string ToString()
@@ -26,5 +30,5 @@ public class TypeRefNode : IInlineTypeNode
 
     public SourceSpan SourceSpan { get; }
 
-    public string Name { get; }
+    public IReadOnlyList<string> Parts { get; }
 }

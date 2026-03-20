@@ -44,13 +44,13 @@ public class ParseMemberAccessTests
                     default,
                     AccessModifier.Public,
                     "test",
-                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, ["i32"])))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "a",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new ArrayAccessExpressionNode(
                                 default,
                                 new MemberAccessExpressionNode(default, "x"),
@@ -93,21 +93,18 @@ public class ParseMemberAccessTests
                             "x",
                             new ArrayTypeNode(
                                 default,
-                                new TypeRefNode(default, "i32")
+                                new TypeRefNode(default, ["i32"])
                             )
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "a",
-                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, ["i32"]),
                                 new ArrayAccessExpressionNode(
                                     default,
                                     new MemberAccessExpressionNode(
@@ -156,7 +153,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ExpressionStatementNode(
                             default,
@@ -200,7 +197,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ExpressionStatementNode(
                             default,
@@ -252,7 +249,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -295,7 +292,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -339,10 +336,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -386,7 +380,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -433,7 +427,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ExpressionStatementNode(
                             default,
@@ -475,7 +469,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -483,7 +477,7 @@ public class ParseMemberAccessTests
                                 default,
                                 new NewObjectExpressionNode(
                                     default,
-                                    new TypeRefNode(default, "Test"),
+                                    new TypeRefNode(default, ["Test"]),
                                     []
                                 ),
                                 "a"
@@ -518,7 +512,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -526,7 +520,7 @@ public class ParseMemberAccessTests
                                 default,
                                 new NewArrayExpressionNode(
                                     default,
-                                    new ArrayTypeNode(default, new TypeRefNode(default, "i32")),
+                                    new ArrayTypeNode(default, new TypeRefNode(default, ["i32"])),
                                     LiteralExpressionNode.Integer(default, 0)
                                 ),
                                 "size"
@@ -561,7 +555,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -604,7 +598,7 @@ public class ParseMemberAccessTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -656,12 +650,12 @@ public class ParseMemberAccessTests
                             default,
                             "t",
                             new TupleTypeNode(default, [
-                                new TypeRefNode(default, "i32"),
-                                new TypeRefNode(default, "string")
+                                new TypeRefNode(default, ["i32"]),
+                                new TypeRefNode(default, ["string"])
                             ])
                         )
                     ],
-                    new TypeRefNode(default, "i32"),
+                    new TypeRefNode(default, ["i32"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -707,13 +701,13 @@ public class ParseMemberAccessTests
                             new TupleTypeNode(
                                 default,
                                 [
-                                    new TypeRefNode(default, "i32"),
-                                    new TypeRefNode(default, "string"),
+                                    new TypeRefNode(default, ["i32"]),
+                                    new TypeRefNode(default, ["string"]),
                                 ]
                             )
                         )
                     ],
-                    new TypeRefNode(default, "i32"),
+                    new TypeRefNode(default, ["i32"]),
                     new BlockStatementNode(
                         default,
                         [

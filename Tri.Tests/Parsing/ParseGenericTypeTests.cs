@@ -37,7 +37,7 @@ public class ParseGenericTypeTests
                     default,
                     AccessModifier.Public,
                     "List",
-                    [new TypeRefNode(default, "T")],
+                    [new TypeRefNode(default, ["T"])],
                     [],
                     [],
                     [],
@@ -101,10 +101,7 @@ public class ParseGenericTypeTests
                     AccessModifier.Public,
                     "List",
                     [
-                        new TypeRefNode(
-                            default,
-                            "T"
-                        ),
+                        new TypeRefNode(default, ["T"]),
                         new FakeTypeNode(
                             default,
                             "<>_0"
@@ -147,10 +144,7 @@ public class ParseGenericTypeTests
                     AccessModifier.Public,
                     "List",
                     [
-                        new TypeRefNode(
-                            default,
-                            "T"
-                        )
+                        new TypeRefNode(default, ["T"])
                     ],
                     [],
                     [],
@@ -186,8 +180,8 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        new TypeRefNode(default, "List"),
-                        [new TypeRefNode(default, "i32"), new TypeRefNode(default, "bool")]))
+                        new TypeRefNode(default, ["List"]),
+                        [new TypeRefNode(default, ["i32"]), new TypeRefNode(default, ["bool"])]))
             ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
@@ -210,13 +204,13 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        new TypeRefNode(default, "List"),
+                        new TypeRefNode(default, ["List"]),
                         [
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new GenericApplicationNode(
                                 default,
-                                new TypeRefNode(default, "List"),
-                                [new TypeRefNode(default, "bool")])
+                                new TypeRefNode(default, ["List"]),
+                                [new TypeRefNode(default, ["bool"])])
                         ]
                     )
                 )
@@ -243,7 +237,7 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        new TypeRefNode(default, "List"),
+                        new TypeRefNode(default, ["List"]),
                         [new FakeTypeNode(default, "<>_0")]))
             ]);
 
@@ -274,9 +268,9 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        new TypeRefNode(default, "List"),
+                        new TypeRefNode(default, ["List"]),
                         [
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new FakeTypeNode(default, "<>_0")
                         ]
                     )
@@ -310,8 +304,8 @@ public class ParseGenericTypeTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        new TypeRefNode(default, "List"),
-                        [new TypeRefNode(default, "i32")]
+                        new TypeRefNode(default, ["List"]),
+                        [new TypeRefNode(default, ["i32"])]
                     )
                 )
             ]);
@@ -340,10 +334,10 @@ public class ParseGenericTypeTests
                     default,
                     AccessModifier.Public,
                     "T",
-                    [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")],
+                    [new TypeRefNode(default, ["T1"]), new TypeRefNode(default, ["T2"])],
                     new DiscriminatedUnionNode([
-                        new TypeRefNode(default, "T1"),
-                        new TypeRefNode(default, "T2")
+                        new TypeRefNode(default, ["T1"]),
+                        new TypeRefNode(default, ["T2"])
                     ])
                 )
             ]);
@@ -373,14 +367,8 @@ public class ParseGenericTypeTests
                         )
                     ],
                     new DiscriminatedUnionNode([
-                        new TypeRefNode(
-                            default,
-                            "T1"
-                        ),
-                        new TypeRefNode(
-                            default,
-                            "T2"
-                        )
+                        new TypeRefNode(default, ["T1"]),
+                        new TypeRefNode(default, ["T2"])
                     ])
                 )
             ]);
@@ -410,24 +398,15 @@ public class ParseGenericTypeTests
                     AccessModifier.Public,
                     "T",
                     [
-                        new TypeRefNode(
-                            default,
-                            "T1"
-                        ),
+                        new TypeRefNode(default, ["T1"]),
                         new FakeTypeNode(
                             default,
                             "<>_0"
                         )
                     ],
                     new DiscriminatedUnionNode([
-                        new TypeRefNode(
-                            default,
-                            "T1"
-                        ),
-                        new TypeRefNode(
-                            default,
-                            "T2"
-                        )
+                        new TypeRefNode(default, ["T1"]),
+                        new TypeRefNode(default, ["T2"])
                     ])
                 )
             ]);
@@ -457,24 +436,12 @@ public class ParseGenericTypeTests
                     AccessModifier.Public,
                     "T",
                     [
-                        new TypeRefNode(
-                            default,
-                            "T1"
-                        ),
-                        new TypeRefNode(
-                            default,
-                            "T2"
-                        )
+                        new TypeRefNode(default, ["T1"]),
+                        new TypeRefNode(default, ["T2"])
                     ],
                     new DiscriminatedUnionNode([
-                        new TypeRefNode(
-                            default,
-                            "T1"
-                        ),
-                        new TypeRefNode(
-                            default,
-                            "T2"
-                        )
+                        new TypeRefNode(default, ["T1"]),
+                        new TypeRefNode(default, ["T2"])
                     ])
                 )
             ]);

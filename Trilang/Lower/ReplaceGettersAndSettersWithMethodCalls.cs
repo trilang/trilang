@@ -59,7 +59,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
                 new VariableDeclaration(
                     null,
                     name,
-                    new TypeRef(null, variableMetadata.Type.ToString()!)
+                    new TypeRef(null, [variableMetadata.Type.ToString()!])
                     {
                         Metadata = variableMetadata.Type
                     },

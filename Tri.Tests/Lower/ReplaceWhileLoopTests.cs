@@ -75,12 +75,12 @@ public class ReplaceWhileLoopTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
+                        new Parameter(null, "a", new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 })
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,
@@ -229,12 +229,12 @@ public class ReplaceWhileLoopTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
+                        new Parameter(null, "a", new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 })
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,
@@ -403,12 +403,12 @@ public class ReplaceWhileLoopTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
+                        new Parameter(null, "a", new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 })
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,
@@ -585,12 +585,12 @@ public class ReplaceWhileLoopTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
+                        new Parameter(null, "a", new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 })
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,

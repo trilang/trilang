@@ -4,8 +4,7 @@ namespace Trilang.Semantics.Providers;
 
 public interface IMetadataProvider
 {
-    // TODO: introduce query?
-    IReadOnlyList<ITypeMetadata> FindTypes(string name);
+    QueryTypesResult QueryTypes(Query query);
 
     bool DefineType(string name, ITypeMetadata type);
 

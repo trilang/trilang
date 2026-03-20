@@ -6,12 +6,12 @@ internal static class MetadataProviderExtensions
 {
     public static T GetOrDefine<T>(this IMetadataProvider provider, T type)
         where T : IAnonymousTypeMetadata
-        => provider.FindTypes(type.ToString()!) switch
+        => provider.QueryTypes(Query.From(type.ToString()!)) switch // TODO:
         {
-            [] => provider.DefineType(type.ToString()!, type)
+            { IsTypeNotFound: true } => provider.DefineType(type.ToString()!, type)
                 ? type
                 : throw new InvalidOperationException(),
-            [T existingType] => existingType,
+            { IsSuccess: true, Types: [T existingType] } => existingType,
             _ => throw new InvalidOperationException(),
         };
 }

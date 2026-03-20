@@ -20,7 +20,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 )
             ]);
@@ -49,17 +49,17 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)),
                 FunctionDeclarationNode.Create(
                     default,
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default)
                 ),
             ]);
@@ -91,7 +91,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(default)
                     ])
@@ -123,10 +123,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -166,10 +166,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -209,10 +209,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -252,10 +252,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -295,10 +295,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -338,10 +338,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -381,10 +381,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -424,10 +424,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -467,10 +467,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -510,10 +510,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -553,10 +553,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -595,10 +595,10 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add", [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -638,10 +638,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -681,10 +681,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -724,10 +724,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -766,8 +766,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -805,8 +805,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -844,8 +844,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -883,8 +883,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -922,8 +922,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new IfStatementNode(
                             default,
@@ -979,8 +979,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new IfStatementNode(
                             default,
@@ -1040,10 +1040,10 @@ public class FormatterTests
                     AccessModifier.Public,
                     "add",
                     [
-                        new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                        new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                        new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -1060,7 +1060,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -1113,8 +1113,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ExpressionStatementNode(
                             default,
@@ -1153,8 +1153,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new WhileNode(
                             default,
@@ -1195,8 +1195,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new WhileNode(
                             default,
@@ -1240,8 +1240,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new WhileNode(
                             default,
@@ -1285,8 +1285,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, ["i32"])))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -1320,8 +1320,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "add",
-                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, "i32")))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, ["i32"])))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -1432,8 +1432,8 @@ public class FormatterTests
                     [],
                     [],
                     [
-                        new PropertyDeclarationNode(default, "x", new TypeRefNode(default, "i32")),
-                        new PropertyDeclarationNode(default, "y", new TypeRefNode(default, "i32")),
+                        new PropertyDeclarationNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new PropertyDeclarationNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
                     [],
                     []
@@ -1471,7 +1471,7 @@ public class FormatterTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new PropertyGetterNode(
                                 default,
                                 AccessModifier.Private,
@@ -1537,7 +1537,7 @@ public class FormatterTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new PropertyGetterNode(default, AccessModifier.Private, null),
                             new PropertySetterNode(
                                 default,
@@ -1596,7 +1596,7 @@ public class FormatterTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new PropertyGetterNode(
                                 default,
                                 AccessModifier.Private,
@@ -1643,16 +1643,16 @@ public class FormatterTests
                     [],
                     [],
                     [
-                        new PropertyDeclarationNode(default, "x", new TypeRefNode(default, "i32")),
-                        new PropertyDeclarationNode(default, "y", new TypeRefNode(default, "i32")),
+                        new PropertyDeclarationNode(default, "x", new TypeRefNode(default, ["i32"])),
+                        new PropertyDeclarationNode(default, "y", new TypeRefNode(default, ["i32"])),
                     ],
                     [
                         new ConstructorDeclarationNode(
                             default,
                             AccessModifier.Public,
                             [
-                                new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                                new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                                new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                                new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                             ],
                             new BlockStatementNode(default))
                     ],
@@ -1663,15 +1663,15 @@ public class FormatterTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(default)),
                         new MethodDeclarationNode(
                             default,
                             AccessModifier.Public,
                             false,
                             "distance",
-                            [new ParameterNode(default, "other", new TypeRefNode(default, "Point"))],
-                            new TypeRefNode(default, "string"),
+                            [new ParameterNode(default, "other", new TypeRefNode(default, ["Point"]))],
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(default)),
                     ])
             ]);
@@ -1695,7 +1695,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "MyType",
                     [],
-                    [new TypeRefNode(default, "Interface1"), new TypeRefNode(default, "Interface2")],
+                    [new TypeRefNode(default, ["Interface1"]), new TypeRefNode(default, ["Interface2"])],
                     [],
                     [],
                     []
@@ -1721,7 +1721,7 @@ public class FormatterTests
             new NamespaceNode(default, ["Test1"]),
             [],
             [
-                new AliasDeclarationNode(default, AccessModifier.Public, "MyType", [], new TypeRefNode(default, "i32"))
+                new AliasDeclarationNode(default, AccessModifier.Public, "MyType", [], new TypeRefNode(default, ["i32"]))
             ]);
         var formatted = tree.ToString();
         const string expected = "namespace Test1;\n\npublic type MyType = i32;";
@@ -1744,8 +1744,8 @@ public class FormatterTests
                     [],
                     new FunctionTypeNode(
                         default,
-                        [new TypeRefNode(default, "i32"), new TypeRefNode(default, "i32")],
-                        new TypeRefNode(default, "i32")
+                        [new TypeRefNode(default, ["i32"]), new TypeRefNode(default, ["i32"])],
+                        new TypeRefNode(default, ["i32"])
                     )
                 )
             ]);
@@ -1768,12 +1768,12 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             LiteralExpressionNode.Integer(default, 0)
                         )
                     ]))
@@ -1804,12 +1804,12 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
+                            new FunctionTypeNode(default, [], new TypeRefNode(default, ["void"])),
                             LiteralExpressionNode.Integer(default, 0)
                         )
                     ]))
@@ -1840,15 +1840,15 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
                             new FunctionTypeNode(
                                 default,
-                                [new TypeRefNode(default, "i32"), new TypeRefNode(default, "f64")],
-                                new TypeRefNode(default, "void")
+                                [new TypeRefNode(default, ["i32"]), new TypeRefNode(default, ["f64"])],
+                                new TypeRefNode(default, ["void"])
                             ),
                             LiteralExpressionNode.Integer(default, 0)
                         )
@@ -1883,15 +1883,15 @@ public class FormatterTests
                     new InterfaceNode(
                         default,
                         [
-                            new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
-                            new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
+                            new InterfacePropertyNode(default, "x", new TypeRefNode(default, ["i32"]), null, null),
+                            new InterfacePropertyNode(default, "y", new TypeRefNode(default, ["i32"]), null, null),
                         ],
                         [
                             new InterfaceMethodNode(
                                 default,
                                 "distance",
-                                [new TypeRefNode(default, "Point")],
-                                new TypeRefNode(default, "f64")
+                                [new TypeRefNode(default, ["Point"])],
+                                new TypeRefNode(default, ["f64"])
                             )
                         ]
                     )
@@ -1919,15 +1919,15 @@ public class FormatterTests
                     new InterfaceNode(
                         default,
                         [
-                            new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), AccessModifier.Public, AccessModifier.Public),
-                            new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), AccessModifier.Private, AccessModifier.Private),
+                            new InterfacePropertyNode(default, "x", new TypeRefNode(default, ["i32"]), AccessModifier.Public, AccessModifier.Public),
+                            new InterfacePropertyNode(default, "y", new TypeRefNode(default, ["i32"]), AccessModifier.Private, AccessModifier.Private),
                         ],
                         [
                             new InterfaceMethodNode(
                                 default,
                                 "distance",
-                                [new TypeRefNode(default, "Point")],
-                                new TypeRefNode(default, "f64")
+                                [new TypeRefNode(default, ["Point"])],
+                                new TypeRefNode(default, ["f64"])
                             )
                         ]
                     )
@@ -1952,7 +1952,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
@@ -1960,8 +1960,8 @@ public class FormatterTests
                             new InterfaceNode(
                                 default,
                                 [
-                                    new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
-                                    new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
+                                    new InterfacePropertyNode(default, "x", new TypeRefNode(default, ["i32"]), null, null),
+                                    new InterfacePropertyNode(default, "y", new TypeRefNode(default, ["i32"]), null, null),
                                 ],
                                 []
                             ),
@@ -1996,7 +1996,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -2039,7 +2039,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -2074,7 +2074,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -2117,15 +2117,15 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "p",
-                            new TypeRefNode(default, "Point"),
+                            new TypeRefNode(default, ["Point"]),
                             new NewObjectExpressionNode(
                                 default,
-                                new TypeRefNode(default, "Point"),
+                                new TypeRefNode(default, ["Point"]),
                                 [LiteralExpressionNode.Integer(default, 1), LiteralExpressionNode.Integer(default, 2)]
                             )
                         )
@@ -2159,10 +2159,10 @@ public class FormatterTests
                     "Numbers",
                     [],
                     new DiscriminatedUnionNode([
-                        new TypeRefNode(default, "i8"),
-                        new TypeRefNode(default, "i16"),
-                        new TypeRefNode(default, "i32"),
-                        new TypeRefNode(default, "i64"),
+                        new TypeRefNode(default, ["i8"]),
+                        new TypeRefNode(default, ["i16"]),
+                        new TypeRefNode(default, ["i32"]),
+                        new TypeRefNode(default, ["i64"]),
                     ]))
             ]);
         var formatted = tree.ToString();
@@ -2185,8 +2185,8 @@ public class FormatterTests
                     "F",
                     [],
                     new DiscriminatedUnionNode([
-                        new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
-                        new FunctionTypeNode(default, [new TypeRefNode(default, "i32"), new TypeRefNode(default, "i32")], new TypeRefNode(default, "i32"))
+                        new FunctionTypeNode(default, [], new TypeRefNode(default, ["void"])),
+                        new FunctionTypeNode(default, [new TypeRefNode(default, ["i32"]), new TypeRefNode(default, ["i32"])], new TypeRefNode(default, ["i32"]))
                     ]))
             ]);
         var formatted = tree.ToString();
@@ -2213,8 +2213,8 @@ public class FormatterTests
                         new InterfaceNode(
                             default,
                             [
-                                new InterfacePropertyNode(default, "x", new TypeRefNode(default, "i32"), null, null),
-                                new InterfacePropertyNode(default, "y", new TypeRefNode(default, "i32"), null, null),
+                                new InterfacePropertyNode(default, "x", new TypeRefNode(default, ["i32"]), null, null),
+                                new InterfacePropertyNode(default, "y", new TypeRefNode(default, ["i32"]), null, null),
                             ],
                             []
                         ),
@@ -2241,8 +2241,8 @@ public class FormatterTests
                     [],
                     new DiscriminatedUnionNode([
                         new InterfaceNode(default, [], []),
-                        new TypeRefNode(default, "i32"),
-                        new FunctionTypeNode(default, [], new TypeRefNode(default, "void")),
+                        new TypeRefNode(default, ["i32"]),
+                        new FunctionTypeNode(default, [], new TypeRefNode(default, ["void"])),
                     ]))
             ]);
         var formatted = tree.ToString();
@@ -2259,12 +2259,12 @@ public class FormatterTests
             new NamespaceNode(default, ["Test1"]),
             [],
             [
-                FunctionDeclarationNode.Create(default, AccessModifier.Public, "main", [], new TypeRefNode(default, "void"),
+                FunctionDeclarationNode.Create(default, AccessModifier.Public, "main", [], new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new DiscriminatedUnionNode([new TypeRefNode(default, "i32"), new TypeRefNode(default, "null")]),
+                            new DiscriminatedUnionNode([new TypeRefNode(default, ["i32"]), new TypeRefNode(default, ["null"])]),
                             new NullExpressionNode(default)
                         )
                     ]))
@@ -2296,8 +2296,8 @@ public class FormatterTests
                     "T",
                     [],
                     new TupleTypeNode(default, [
-                        new TypeRefNode(default, "bool"),
-                        new TypeRefNode(default, "i32"),
+                        new TypeRefNode(default, ["bool"]),
+                        new TypeRefNode(default, ["i32"]),
                     ]))
             ]);
         var formatted = tree.ToString();
@@ -2320,8 +2320,8 @@ public class FormatterTests
                     "T",
                     [],
                     new TupleTypeNode(default, [
-                        new TupleTypeNode(default, [new TypeRefNode(default, "bool"), new TypeRefNode(default, "i8")]),
-                        new TypeRefNode(default, "i32"),
+                        new TupleTypeNode(default, [new TypeRefNode(default, ["bool"]), new TypeRefNode(default, ["i8"])]),
+                        new TypeRefNode(default, ["i32"]),
                     ]))
             ]);
         var formatted = tree.ToString();
@@ -2343,7 +2343,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -2380,13 +2380,13 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
                             new NewArrayExpressionNode(
                                 default,
-                                new ArrayTypeNode(default, new TypeRefNode(default, "i32")),
+                                new ArrayTypeNode(default, new TypeRefNode(default, ["i32"])),
                                 LiteralExpressionNode.Integer(default, 10)
                             )
                         )
@@ -2418,7 +2418,7 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "List",
-                    [new TypeRefNode(default, "T1, T2")],
+                    [new TypeRefNode(default, ["T1, T2"])],
                     [],
                     [],
                     [],
@@ -2452,8 +2452,8 @@ public class FormatterTests
                     [],
                     new GenericApplicationNode(
                         default,
-                        new TypeRefNode(default, "List"),
-                        [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")])
+                        new TypeRefNode(default, ["List"]),
+                        [new TypeRefNode(default, ["T1"]), new TypeRefNode(default, ["T2"])])
                 )
             ]);
         var formatted = tree.ToString();
@@ -2474,8 +2474,8 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "T",
-                    [new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")],
-                    new DiscriminatedUnionNode([new TypeRefNode(default, "T1"), new TypeRefNode(default, "T2")])
+                    [new TypeRefNode(default, ["T1"]), new TypeRefNode(default, ["T2"])],
+                    new DiscriminatedUnionNode([new TypeRefNode(default, ["T1"]), new TypeRefNode(default, ["T2"])])
                 )
             ]);
         var formatted = tree.ToString();
@@ -2507,7 +2507,7 @@ public class FormatterTests
                             true,
                             "method",
                             [],
-                            new TypeRefNode(default, "void"),
+                            new TypeRefNode(default, ["void"]),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -2638,14 +2638,14 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "test",
-                    [new ParameterNode(default, "a", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "bool"),
+                    [new ParameterNode(default, "a", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["bool"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
                             new IsExpressionNode(
                                 new MemberAccessExpressionNode(default, "a"),
-                                new TypeRefNode(default, "i8")
+                                new TypeRefNode(default, ["i8"])
                             )
                         )
                     ])
@@ -2676,14 +2676,14 @@ public class FormatterTests
                     default,
                     AccessModifier.Public,
                     "test",
-                    [new ParameterNode(default, "a", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "i8"),
+                    [new ParameterNode(default, "a", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["i8"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
                             new CastExpressionNode(
                                 default,
-                                new TypeRefNode(default, "i8"),
+                                new TypeRefNode(default, ["i8"]),
                                 new MemberAccessExpressionNode(default, "a")
                             )
                         )
@@ -2716,7 +2716,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(default, "f64"),
+                    new TypeRefNode(default, ["f64"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -2753,7 +2753,7 @@ public class FormatterTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, []))
             ]);
         var formatted = tree.ToString();

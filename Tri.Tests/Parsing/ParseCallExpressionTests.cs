@@ -45,10 +45,7 @@ public class ParseCallExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -99,10 +96,7 @@ public class ParseCallExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -160,17 +154,14 @@ public class ParseCallExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, ["i32"]),
                                 new BinaryExpressionNode(
                                     default,
                                     BinaryExpressionKind.Addition,

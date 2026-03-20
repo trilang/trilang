@@ -74,6 +74,7 @@ public class SemanticAnalysis
                 options.Diagnostics,
                 symbolTableMap,
                 metadataProviderMap,
+                rootNamespace,
                 options.BuiltInTypes),
             new UnresolvedMemberAccess(options.Directives, options.Diagnostics),
             new VariableUsedBeforeDeclared(options.Directives, options.Diagnostics, symbolTableMap),

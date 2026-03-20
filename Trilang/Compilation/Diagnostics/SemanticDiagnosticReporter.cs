@@ -331,4 +331,20 @@ public class SemanticDiagnosticReporter
             DiagnosticId.S0028UnknownNamespace,
             node.GetLocation(),
             $"Unknown namespace: {string.Join(".", node.Parts)}.");
+
+    public void UnknownNamespace(IInlineType inlineType)
+    {
+        if (inlineType is TypeRef typeRef)
+            diagnostics.Error(
+                DiagnosticId.S0028UnknownNamespace,
+                typeRef.GetLocation(),
+                $"Namespace '{string.Join(".", typeRef.Parts)}' not found.");
+        else if (inlineType is GenericApplication genericApplication)
+            diagnostics.Error(
+                DiagnosticId.S0028UnknownNamespace,
+                genericApplication.GetLocation(),
+                $"Namespace '{string.Join(".", genericApplication.Type.Parts)}' not found.");
+        else
+            throw new ArgumentException($"Unknown inline type: {inlineType.GetType()}.");
+    }
 }

@@ -45,17 +45,14 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, ["i32"]),
                                 LiteralExpressionNode.Integer(default, 5)
                             )
                         ])
@@ -88,12 +85,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new UnaryExpressionNode(
                                 default,
                                 UnaryExpressionKind.UnaryPlus,
@@ -130,12 +127,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new UnaryExpressionNode(
                                 default,
                                 UnaryExpressionKind.UnaryMinus,
@@ -172,12 +169,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new UnaryExpressionNode(
                                 default,
                                 UnaryExpressionKind.LogicalNot,
@@ -214,12 +211,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new UnaryExpressionNode(
                                 default,
                                 UnaryExpressionKind.BitwiseNot,
@@ -256,17 +253,14 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, ["i32"]),
                                 new UnaryExpressionNode(
                                     default,
                                     UnaryExpressionKind.BitwiseNot,
@@ -312,12 +306,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new BinaryExpressionNode(
                                 default,
                                 kind,
@@ -355,14 +349,14 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, ["i32"]),
                                 new BinaryExpressionNode(
                                     default,
                                     BinaryExpressionKind.BitwiseAnd,
@@ -406,17 +400,14 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, ["i32"]),
                                 new BinaryExpressionNode(
                                     default,
                                     BinaryExpressionKind.BitwiseOr,
@@ -461,17 +452,14 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, ["i32"]),
                                 new BinaryExpressionNode(
                                     default,
                                     BinaryExpressionKind.BitwiseXor,
@@ -516,12 +504,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "bool"),
+                            new TypeRefNode(default, ["bool"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.ConditionalAnd,
@@ -559,12 +547,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "bool"),
+                            new TypeRefNode(default, ["bool"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.ConditionalOr,
@@ -602,12 +590,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "bool"),
+                            new TypeRefNode(default, ["bool"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.Equality,
@@ -645,12 +633,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "bool"),
+                            new TypeRefNode(default, ["bool"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.Inequality,
@@ -688,12 +676,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "bool"),
+                            new TypeRefNode(default, ["bool"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.LessThan,
@@ -731,12 +719,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "bool"),
+                            new TypeRefNode(default, ["bool"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.LessThanOrEqual,
@@ -774,12 +762,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "bool"),
+                            new TypeRefNode(default, ["bool"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.GreaterThan,
@@ -817,12 +805,12 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "bool"),
+                            new TypeRefNode(default, ["bool"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.GreaterThanOrEqual,
@@ -860,7 +848,7 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ExpressionStatementNode(
                             default,
@@ -909,7 +897,7 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ExpressionStatementNode(
                             default,
@@ -950,17 +938,14 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "x",
-                                new TypeRefNode(default, "i32"),
+                                new TypeRefNode(default, ["i32"]),
                                 new BinaryExpressionNode(
                                     default,
                                     BinaryExpressionKind.Multiplication,
@@ -1011,13 +996,13 @@ public class ParseExpressionTests
                     default,
                     AccessModifier.Public,
                     "main",
-                    [new ParameterNode(default, "y", new TypeRefNode(default, "i32"))],
-                    new TypeRefNode(default, "void"),
+                    [new ParameterNode(default, "y", new TypeRefNode(default, ["i32"]))],
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new BinaryExpressionNode(
                                 default,
                                 BinaryExpressionKind.Multiplication,
@@ -1048,7 +1033,7 @@ public class ParseExpressionTests
         var variableDeclarationNode = new VariableDeclarationNode(
             default,
             "x",
-            new TypeRefNode(default, "i32"),
+            new TypeRefNode(default, ["i32"]),
             new BinaryExpressionNode(
                 default,
                 BinaryExpressionKind.ConditionalOr,
@@ -1104,7 +1089,7 @@ public class ParseExpressionTests
                 FunctionDeclarationNode.Create(
                     default,
                     AccessModifier.Public,
-                    "main", [], new TypeRefNode(default, "void"), new BlockStatementNode(default, [variableDeclarationNode])
+                    "main", [], new TypeRefNode(default, ["void"]), new BlockStatementNode(default, [variableDeclarationNode])
                 )
             ]);
 
@@ -1133,7 +1118,7 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -1172,10 +1157,7 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -1232,7 +1214,7 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
@@ -1240,7 +1222,7 @@ public class ParseExpressionTests
                                 default,
                                 new ArrayTypeNode(
                                     default,
-                                    new TypeRefNode(default, "i32")
+                                    new TypeRefNode(default, ["i32"])
                                 ),
                                 LiteralExpressionNode.Integer(
                                     default,
@@ -1280,16 +1262,16 @@ public class ParseExpressionTests
                         new ParameterNode(
                             default,
                             "a",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(default, "i8"),
+                    new TypeRefNode(default, ["i8"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
                             new IsExpressionNode(
                                 new MemberAccessExpressionNode(default, "a"),
-                                new TypeRefNode(default, "i8")
+                                new TypeRefNode(default, ["i8"])
                             )
                         )
                     ])
@@ -1326,10 +1308,10 @@ public class ParseExpressionTests
                         new ParameterNode(
                             default,
                             "a",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(default, "i8"),
+                    new TypeRefNode(default, ["i8"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -1385,10 +1367,10 @@ public class ParseExpressionTests
                         new ParameterNode(
                             default,
                             "a",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(default, "i8"),
+                    new TypeRefNode(default, ["i8"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -1396,7 +1378,7 @@ public class ParseExpressionTests
                                 default,
                                 new CastExpressionNode(
                                     default,
-                                    new TypeRefNode(default, "i8"),
+                                    new TypeRefNode(default, ["i8"]),
                                     new MemberAccessExpressionNode(default, "a")
                                 )
                             )
@@ -1434,10 +1416,10 @@ public class ParseExpressionTests
                         new ParameterNode(
                             default,
                             "a",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(default, "i8"),
+                    new TypeRefNode(default, ["i8"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -1445,7 +1427,7 @@ public class ParseExpressionTests
                                 default,
                                 new CastExpressionNode(
                                     default,
-                                    new TypeRefNode(default, "i8"),
+                                    new TypeRefNode(default, ["i8"]),
                                     new MemberAccessExpressionNode(default, "a")
                                 )
                             )
@@ -1490,10 +1472,10 @@ public class ParseExpressionTests
                         new ParameterNode(
                             default,
                             "a",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(default, "i8"),
+                    new TypeRefNode(default, ["i8"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -1501,7 +1483,7 @@ public class ParseExpressionTests
                                 default,
                                 new CastExpressionNode(
                                     default,
-                                    new TypeRefNode(default, "i8"),
+                                    new TypeRefNode(default, ["i8"]),
                                     new FakeExpressionNode(
                                         new SourcePosition(41, 2, 16).ToSpan()
                                     )
@@ -1544,7 +1526,7 @@ public class ParseExpressionTests
                     AccessModifier.Public,
                     "test",
                     [],
-                    new TypeRefNode(default, "f64"),
+                    new TypeRefNode(default, ["f64"]),
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,

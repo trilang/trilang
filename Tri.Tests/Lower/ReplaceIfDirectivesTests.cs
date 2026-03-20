@@ -268,7 +268,7 @@ public class ReplaceIfDirectivesTests
                         new Parameter(
                             null,
                             "callback",
-                            new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
+                            new FunctionType(null, [], new TypeRef(null, ["void"]) { Metadata = builtInTypes.Void })
                             {
                                 Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
                             }
@@ -277,7 +277,7 @@ public class ReplaceIfDirectivesTests
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,
@@ -361,7 +361,7 @@ public class ReplaceIfDirectivesTests
                         new Parameter(
                             null,
                             "callback",
-                            new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
+                            new FunctionType(null, [], new TypeRef(null, ["void"]) { Metadata = builtInTypes.Void })
                             {
                                 Metadata = CreateFunctionType([],
                                     builtInTypes.Void,
@@ -372,7 +372,7 @@ public class ReplaceIfDirectivesTests
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,
@@ -455,7 +455,7 @@ public class ReplaceIfDirectivesTests
                         new Parameter(
                             null,
                             "callback",
-                            new FunctionType(null, [], new TypeRef(null, "void") { Metadata = builtInTypes.Void })
+                            new FunctionType(null, [], new TypeRef(null, ["void"]) { Metadata = builtInTypes.Void })
                             {
                                 Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
                             }
@@ -464,7 +464,7 @@ public class ReplaceIfDirectivesTests
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,

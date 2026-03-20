@@ -173,12 +173,12 @@ public class ParseTypeDeclarationTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         ),
                         new PropertyDeclarationNode(
                             default,
                             "y",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         ),
                     ],
                     [],
@@ -232,7 +232,7 @@ public class ParseTypeDeclarationTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new PropertyGetterNode(
                                 default,
                                 AccessModifier.Private,
@@ -276,7 +276,7 @@ public class ParseTypeDeclarationTests
                         new PropertyDeclarationNode(
                             default,
                             "y",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new PropertyGetterNode(
                                 default,
                                 AccessModifier.Private,
@@ -360,7 +360,7 @@ public class ParseTypeDeclarationTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new PropertyGetterNode(
                                 default,
                                 AccessModifier.Private,
@@ -433,7 +433,7 @@ public class ParseTypeDeclarationTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32"),
+                            new TypeRefNode(default, ["i32"]),
                             new PropertyGetterNode(
                                 default,
                                 AccessModifier.Private,
@@ -522,7 +522,7 @@ public class ParseTypeDeclarationTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         ),
                     ],
                     [],
@@ -615,7 +615,7 @@ public class ParseTypeDeclarationTests
                         new PropertyDeclarationNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         ),
                     ],
                     [],
@@ -667,7 +667,7 @@ public class ParseTypeDeclarationTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(default, [])
                         ),
                         new MethodDeclarationNode(
@@ -675,8 +675,8 @@ public class ParseTypeDeclarationTests
                             AccessModifier.Public,
                             false,
                             "distance",
-                            [new ParameterNode(default, "other", new TypeRefNode(default, "Point"))],
-                            new TypeRefNode(default, "f32"),
+                            [new ParameterNode(default, "other", new TypeRefNode(default, ["Point"]))],
+                            new TypeRefNode(default, ["f32"]),
                             new BlockStatementNode(default, [])
                         )
                     ]
@@ -719,7 +719,7 @@ public class ParseTypeDeclarationTests
                             false,
                             "<>_0",
                             [],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -768,7 +768,7 @@ public class ParseTypeDeclarationTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(
                                 new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(52, 2, 33))
                             )
@@ -819,7 +819,7 @@ public class ParseTypeDeclarationTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(
                                 default,
                                 [
@@ -876,7 +876,7 @@ public class ParseTypeDeclarationTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(
                                 new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(52, 2, 33))
                             )
@@ -938,7 +938,7 @@ public class ParseTypeDeclarationTests
                                     new VariableDeclarationNode(
                                         default,
                                         "x",
-                                        new TypeRefNode(default, "i32"),
+                                        new TypeRefNode(default, ["i32"]),
                                         new LiteralExpressionNode(
                                             default,
                                             LiteralExpressionKind.Integer,
@@ -1002,7 +1002,7 @@ public class ParseTypeDeclarationTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -1051,7 +1051,7 @@ public class ParseTypeDeclarationTests
                             false,
                             "toString",
                             [],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(
                                 new SourceSpan(new SourcePosition(50, 2, 31), new SourcePosition(53, 3, 2))
                             )
@@ -1105,15 +1105,15 @@ public class ParseTypeDeclarationTests
                                 new ParameterNode(
                                     default,
                                     "a",
-                                    new TypeRefNode(default, "i32")
+                                    new TypeRefNode(default, ["i32"])
                                 ),
                                 new ParameterNode(
                                     default,
                                     "b",
-                                    new TypeRefNode(default, "i32")
+                                    new TypeRefNode(default, ["i32"])
                                 ),
                             ],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -1165,10 +1165,10 @@ public class ParseTypeDeclarationTests
                                 new ParameterNode(
                                     default,
                                     "a",
-                                    new TypeRefNode(default, "i32")
+                                    new TypeRefNode(default, ["i32"])
                                 ),
                             ],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -1226,7 +1226,7 @@ public class ParseTypeDeclarationTests
                                     )
                                 ),
                             ],
-                            new TypeRefNode(default, "string"),
+                            new TypeRefNode(default, ["string"]),
                             new BlockStatementNode(
                                 new SourceSpan(new SourcePosition(53, 2, 34), new SourcePosition(56, 2, 37))
                             )
@@ -1274,8 +1274,8 @@ public class ParseTypeDeclarationTests
                             default,
                             AccessModifier.Public,
                             [
-                                new ParameterNode(default, "x", new TypeRefNode(default, "i32")),
-                                new ParameterNode(default, "y", new TypeRefNode(default, "i32")),
+                                new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
+                                new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
                             ],
                             new BlockStatementNode(default, [])
                         )
@@ -1303,7 +1303,7 @@ public class ParseTypeDeclarationTests
                     AccessModifier.Public,
                     "Point",
                     [],
-                    [new TypeRefNode(default, "Interface1"), new TypeRefNode(default, "Interface2")],
+                    [new TypeRefNode(default, ["Interface1"]), new TypeRefNode(default, ["Interface2"])],
                     [],
                     [],
                     []
@@ -1362,14 +1362,8 @@ public class ParseTypeDeclarationTests
                     "Point",
                     [],
                     [
-                        new TypeRefNode(
-                            default,
-                            "Interface1"
-                        ),
-                        new TypeRefNode(
-                            default,
-                            "Interface2"
-                        )
+                        new TypeRefNode(default, ["Interface1"]),
+                        new TypeRefNode(default, ["Interface2"])
                     ],
                     [],
                     [],
@@ -1404,10 +1398,7 @@ public class ParseTypeDeclarationTests
                     "Point",
                     [],
                     [
-                        new TypeRefNode(
-                            default,
-                            "Interface1"
-                        ),
+                        new TypeRefNode(default, ["Interface1"]),
                     ],
                     [],
                     [],
@@ -1456,7 +1447,7 @@ public class ParseTypeDeclarationTests
                             true,
                             "test",
                             [],
-                            new TypeRefNode(default, "void"),
+                            new TypeRefNode(default, ["void"]),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -1503,7 +1494,7 @@ public class ParseTypeDeclarationTests
                             true,
                             "test",
                             [],
-                            new TypeRefNode(default, "void"),
+                            new TypeRefNode(default, ["void"]),
                             new BlockStatementNode(default)
                         )
                     ]
@@ -1513,7 +1504,7 @@ public class ParseTypeDeclarationTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new ExpressionStatementNode(
                             default,

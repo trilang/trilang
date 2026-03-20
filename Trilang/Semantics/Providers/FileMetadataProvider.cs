@@ -15,18 +15,27 @@ public class FileMetadataProvider : IMetadataProvider
     public void AddUse(NamespaceMetadata use)
         => uses.Add(use);
 
-    public IReadOnlyList<ITypeMetadata> FindTypes(string name)
+    public QueryTypesResult QueryTypes(Query query)
+        => query switch
+        {
+            ByName byName => ByName(byName),
+            ByQualifiedName byQualifiedName => ByQualifiedName(byQualifiedName),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(query))
+        };
+
+    private QueryTypesResult ByName(ByName query)
     {
         var found = new List<ITypeMetadata>();
 
-        var type = Namespace.FindType(name);
+        var type = Namespace.FindType(query.Name);
         var typeExistsInPrimaryNamespace = type is not null;
         if (typeExistsInPrimaryNamespace)
             found.Add(type!);
 
         foreach (var use in uses)
         {
-            type = use.FindType(name);
+            type = use.FindType(query.Name);
             if (type is not null)
                 found.Add(type);
         }
@@ -35,7 +44,7 @@ public class FileMetadataProvider : IMetadataProvider
         {
             for (var ns = Namespace.Parent; ns is not null; ns = ns.Parent)
             {
-                type = ns.FindType(name);
+                type = ns.FindType(query.Name);
                 if (type is not null)
                 {
                     found.Add(type);
@@ -44,7 +53,26 @@ public class FileMetadataProvider : IMetadataProvider
             }
         }
 
-        return found;
+        return found.Count switch
+        {
+            0 => QueryTypesResult.TypeNotFound(),
+            1 => QueryTypesResult.Success(found),
+            _ => QueryTypesResult.MultipleTypesFound(found)
+        };
+    }
+
+    private QueryTypesResult ByQualifiedName(ByQualifiedName query)
+    {
+        var parts = query.Parts;
+        var ns = Namespace.FindNamespace(parts.Take(parts.Count - 1));
+        if (ns is null)
+            return QueryTypesResult.NamespaceNotFound();
+
+        var type = ns.FindType(parts[^1]);
+
+        return type is null
+            ? QueryTypesResult.TypeNotFound()
+            : QueryTypesResult.Success([type]);
     }
 
     public bool DefineType(string name, ITypeMetadata type)

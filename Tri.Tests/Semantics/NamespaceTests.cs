@@ -10,7 +10,7 @@ using static Tri.Tests.Factory;
 
 namespace Tri.Tests.Semantics;
 
-public class MetadataProviderAnalyzerTests
+public class NamespaceTests
 {
     private static SyntaxTree Parse(DiagnosticCollection diagnostics, string filePath, string code)
     {
@@ -841,5 +841,180 @@ public class MetadataProviderAnalyzerTests
         Assert.That(
             memberAccessExpression.Reference,
             Is.EqualTo(testFunction).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void ResolveFullyQualifiedNameTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            public type MyType = i32;
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace Test1;
+
+            public test(obj: NS1.MyType): void { }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, rootNamespace, _) = semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var ns1Provider = rootNamespace.FindNamespace(["Test1"])!;
+        var testFunction = ns1Provider.Functions[0];
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNs = NamespaceMetadata.CreateRoot(builtInTypes);
+        var ns1Ns = rootNs.CreateChild(["NS1"]);
+        var myType = new AliasMetadata(null, "MyType", [], builtInTypes.I32)
+        {
+            Namespace = ns1Ns,
+        };
+
+        var test1Ns = rootNs.CreateChild(["Test1"]);
+        var expected = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "test",
+            [new ParameterMetadata(null, "obj", myType)],
+            CreateFunctionType([myType], builtInTypes.Void, rootNs))
+        {
+            Namespace = test1Ns,
+        };
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(testFunction, Is.EqualTo(expected).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void ResolveFullyQualifiedNameForStaticTypeTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            public type MyType {
+                public static test(): void { }
+            }
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace Test1;
+
+            public test(): void {
+                NS1.MyType.test();
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var tree = semanticTrees[^1];
+        var member = tree.Find<MemberAccessExpression>(x => x.Name == "test")!;
+
+        var ns1 = rootNamespace.FindNamespace(["NS1"])!;
+        var myType = (TypeMetadata)ns1.FindType("MyType")!;
+        var method = myType.Methods[0];
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(member.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void ResolveFullyQualifiedNameForStaticTypeMissingNamespaceTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace Test1;
+
+            public test(): void {
+                NS1.MyType.test();
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [file1],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                new SourceFile("file1.tri"),
+                new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(47, 4, 8))),
+            "Unknown symbol: 'NS1'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void ResolveFullyQualifiedNameForStaticMissingTypeTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            public type MyType2 = i32;
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace Test1;
+
+            public test(): void {
+                NS1.MyType.test();
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0008UnknownMember,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                new SourceFile("file2.tri"),
+                new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(54, 4, 15))),
+            "Unknown symbol: 'MyType'.");
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

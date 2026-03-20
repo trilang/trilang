@@ -38,6 +38,17 @@ public partial class Formatter : INodeVisitor
         writer.Write('>');
     }
 
+    private void WriteQualifiedName(IReadOnlyList<string> parts)
+    {
+        for (var i = 0; i < parts.Count; i++)
+        {
+            if (i > 0)
+                writer.Write('.');
+
+            writer.Write(parts[i]);
+        }
+    }
+
     public void VisitArrayAccess(ArrayAccessExpressionNode node)
     {
         node.Member.Accept(this);
@@ -511,7 +522,7 @@ public partial class Formatter : INodeVisitor
     public void VisitNamespace(NamespaceNode node)
     {
         writer.Write("namespace ");
-        writer.Write(string.Join('.', node.Parts));
+        WriteQualifiedName(node.Parts);
         writer.Write(';');
     }
 
@@ -693,9 +704,7 @@ public partial class Formatter : INodeVisitor
     }
 
     public void VisitTypeNode(TypeRefNode node)
-    {
-        writer.Write(node.Name);
-    }
+        => WriteQualifiedName(node.Parts);
 
     public void VisitUnaryExpression(UnaryExpressionNode node)
     {
@@ -715,7 +724,7 @@ public partial class Formatter : INodeVisitor
     public void VisitUse(UseNode node)
     {
         writer.Write("use ");
-        writer.Write(string.Join('.', node.Parts));
+        WriteQualifiedName(node.Parts);
         writer.Write(';');
     }
 

@@ -49,10 +49,10 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -101,13 +101,10 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -168,13 +165,10 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -226,13 +220,10 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -294,13 +285,10 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -382,13 +370,10 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
@@ -450,13 +435,10 @@ public class ParseLoopTests
                         new ParameterNode(
                             default,
                             "x",
-                            new TypeRefNode(default, "i32")
+                            new TypeRefNode(default, ["i32"])
                         )
                     ],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [

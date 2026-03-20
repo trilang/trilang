@@ -2,21 +2,21 @@ using Trilang.Lexing;
 
 namespace Trilang.Parsing;
 
-internal readonly struct CheckResult
+internal readonly struct MatchResult
 {
-    public CheckResult(bool result, Token token)
+    public MatchResult(bool result, Token token)
     {
         Result = result;
         Token = token;
     }
 
-    public static implicit operator bool(CheckResult result)
+    public static implicit operator bool(MatchResult result)
         => result.Result;
 
-    public static bool operator true(CheckResult result)
+    public static bool operator true(MatchResult result)
         => result.Result;
 
-    public static bool operator false(CheckResult result)
+    public static bool operator false(MatchResult result)
         => !result.Result;
 
     public void Deconstruct(out bool result, out Token token)

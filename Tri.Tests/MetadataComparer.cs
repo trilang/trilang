@@ -232,7 +232,7 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         if (x.Name != y.Name)
             throw new Exception($"Namespace Name doesn't match. {x.Name} != {y.Name}.");
 
-        if (Equals(x.Parent, y.Parent))
+        if (!Equals(x.Parent, y.Parent))
             throw new Exception("Parent Namespace doesn't match.");
 
         return true;

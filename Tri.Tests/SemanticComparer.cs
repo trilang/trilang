@@ -652,8 +652,8 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
 
     private bool CompareTypeNode(TypeRef x, TypeRef y)
     {
-        if (x.Name != y.Name)
-            throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
+        if (!x.Parts.SequenceEqual(y.Parts))
+            throw new Exception($"Type: Parts mismatch. {string.Join(".", x.Parts)} != {string.Join(".", y.Parts)}.");
 
         if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
             throw new Exception("Metadata doesn't match.");

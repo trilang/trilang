@@ -16,17 +16,25 @@ public class GenericMetadataProvider : IMetadataProvider
     public override string ToString()
         => $"{genericMetadata} Provider";
 
-    public IReadOnlyList<ITypeMetadata> FindTypes(string name)
+    public QueryTypesResult QueryTypes(Query query)
+        => query switch
+        {
+            ByName byName => FindTypes(byName),
+
+            _ => parent.QueryTypes(query),
+        };
+
+    private QueryTypesResult FindTypes(ByName query)
     {
         var arguments = genericMetadata.GenericArguments
             .OfType<TypeArgumentMetadata>()
-            .Where(x => x.Name == name)
+            .Where(x => x.Name == query.Name)
             .ToArray();
 
         if (arguments.Length > 0)
-            return arguments;
+            return QueryTypesResult.Success(arguments);
 
-        return parent.FindTypes(name);
+        return parent.QueryTypes(query);
     }
 
     public bool DefineType(string name, ITypeMetadata type)

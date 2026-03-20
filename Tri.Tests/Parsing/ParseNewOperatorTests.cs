@@ -45,13 +45,13 @@ public class ParseNewOperatorTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "p",
-                            new TypeRefNode(default, "Point"),
-                            new NewObjectExpressionNode(default, new TypeRefNode(default, "Point"), [])
+                            new TypeRefNode(default, ["Point"]),
+                            new NewObjectExpressionNode(default, new TypeRefNode(default, ["Point"]), [])
                         )
                     ])
                 )
@@ -83,15 +83,15 @@ public class ParseNewOperatorTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(default, "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(default, [
                         new VariableDeclarationNode(
                             default,
                             "p",
-                            new TypeRefNode(default, "Point"),
+                            new TypeRefNode(default, ["Point"]),
                             new NewObjectExpressionNode(
                                 default,
-                                new TypeRefNode(default, "Point"),
+                                new TypeRefNode(default, ["Point"]),
                                 [
                                     LiteralExpressionNode.Integer(default, 1),
                                     LiteralExpressionNode.Integer(default, 2)
@@ -128,20 +128,14 @@ public class ParseNewOperatorTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "p",
-                                new TypeRefNode(
-                                    default,
-                                    "Point"
-                                ),
+                                new TypeRefNode(default, ["Point"]),
                                 new NewObjectExpressionNode(
                                     default,
                                     new FakeTypeNode(
@@ -188,26 +182,17 @@ public class ParseNewOperatorTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "p",
-                                new TypeRefNode(
-                                    default,
-                                    "Point"
-                                ),
+                                new TypeRefNode(default, ["Point"]),
                                 new NewObjectExpressionNode(
                                     default,
-                                    new TypeRefNode(
-                                        default,
-                                        "Point"
-                                    ),
+                                    new TypeRefNode(default, ["Point"]),
                                     [
                                         LiteralExpressionNode.Integer(
                                             default,
@@ -256,26 +241,17 @@ public class ParseNewOperatorTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"
-                    ),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [
                             new VariableDeclarationNode(
                                 default,
                                 "p",
-                                new TypeRefNode(
-                                    default,
-                                    "Point"
-                                ),
+                                new TypeRefNode(default, ["Point"]),
                                 new NewObjectExpressionNode(
                                     default,
-                                    new TypeRefNode(
-                                        default,
-                                        "Point"
-                                    ),
+                                    new TypeRefNode(default, ["Point"]),
                                     []
                                 )
                             )

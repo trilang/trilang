@@ -45,9 +45,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [])
@@ -80,9 +78,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [])
@@ -119,9 +115,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [])
@@ -158,9 +152,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [])
@@ -197,9 +189,7 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [])
@@ -246,13 +236,38 @@ public class ParseNamespaceTests
                     AccessModifier.Public,
                     "main",
                     [],
-                    new TypeRefNode(
-                        default,
-                        "void"),
+                    new TypeRefNode(default, ["void"]),
                     new BlockStatementNode(
                         default,
                         [])
                 )
+            ]);
+
+        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void ParseFullyQualifiedNameTest()
+    {
+        var (tree, diagnostics) = Parse(
+            """
+            namespace Test1;
+
+            public type T = Some.NS.TestType;
+            """);
+
+        var expected = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new AliasDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "T",
+                    [],
+                    new TypeRefNode(default, ["Some", "NS", "TestType"]))
             ]);
 
         Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));

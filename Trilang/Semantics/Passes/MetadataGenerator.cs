@@ -166,8 +166,8 @@ internal class MetadataGenerator : ISemanticPass
             {
                 // TODO: support generic interfaces
                 var interfaceMetadata = default(InterfaceMetadata);
-                var types = metadataProvider.FindTypes(@interface.Name);
-                if (types is [AliasMetadata aliasMetadata])
+                var result = metadataProvider.QueryTypes(Query.From(@interface));
+                if (result is { IsSuccess: true, Types: [AliasMetadata aliasMetadata] })
                 {
                     interfaceMetadata = aliasMetadata.UnpackAlias() as InterfaceMetadata;
 
@@ -177,14 +177,13 @@ internal class MetadataGenerator : ISemanticPass
                         diagnostics.UnknownType(@interface);
                     }
                 }
-                else if (types is [_] or [])
-                {
-                    diagnostics.UnknownType(@interface);
-                    interfaceMetadata = InterfaceMetadata.Invalid();
-                }
                 else
                 {
-                    diagnostics.MultipleMembersFound(@interface, types);
+                    if (result.IsMultipleTypesFound)
+                        diagnostics.MultipleMembersFound(@interface, result.Types);
+                    else
+                        diagnostics.UnknownType(@interface);
+
                     interfaceMetadata = InterfaceMetadata.Invalid();
                 }
 
@@ -461,10 +460,14 @@ internal class MetadataGenerator : ISemanticPass
     private ITypeMetadata GetOrCreateType(IInlineType inlineType)
     {
         var metadataProvider = metadataProviderMap.Get(inlineType);
-        var types = metadataProvider.FindTypes(inlineType.Name);
+        var result = metadataProvider.QueryTypes(Query.From(inlineType));
         var metadata = default(ITypeMetadata);
 
-        if (types is [])
+        if (result.IsSuccess)
+        {
+            metadata = result.Types[0];
+        }
+        else if (result.IsTypeNotFound)
         {
             if (inlineType is ArrayType arrayType)
             {
@@ -500,13 +503,13 @@ internal class MetadataGenerator : ISemanticPass
                 throw new ArgumentOutOfRangeException(nameof(inlineType));
             }
         }
-        else if (types is [var type])
-        {
-            metadata = type;
-        }
         else
         {
-            diagnostics.MultipleMembersFound(inlineType, types);
+            if (result.IsMultipleTypesFound)
+                diagnostics.MultipleMembersFound(inlineType, result.Types);
+            else if (result.IsNamespaceNotFound)
+                diagnostics.UnknownNamespace(inlineType);
+
             metadata = TypeMetadata.Invalid(inlineType.Name);
         }
 
@@ -557,19 +560,20 @@ internal class MetadataGenerator : ISemanticPass
         var openGenericName = genericApplication.GetOpenGenericName();
         var openGeneric = default(IGenericMetadata);
 
-        var types = metadataProvider.FindTypes(openGenericName);
-        if (types is [IGenericMetadata genericMetadata])
+        var result = metadataProvider.QueryTypes(Query.From(openGenericName));
+        if (result is { IsSuccess: true, Types: [IGenericMetadata genericMetadata] })
         {
             openGeneric = genericMetadata;
         }
-        else if (types is [_] or [])
-        {
-            diagnostics.UnknownType(genericApplication);
-            openGeneric = TypeMetadata.Invalid(openGenericName);
-        }
         else
         {
-            diagnostics.MultipleMembersFound(genericApplication, types);
+            if (result.IsMultipleTypesFound)
+                diagnostics.MultipleMembersFound(genericApplication, result.Types);
+            else if (result.IsNamespaceNotFound)
+                diagnostics.UnknownNamespace(genericApplication);
+            else
+                diagnostics.UnknownType(genericApplication);
+
             openGeneric = TypeMetadata.Invalid(openGenericName);
         }
 

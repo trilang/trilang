@@ -44,7 +44,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
                 new VariableDeclaration(
                     null,
                     variableName,
-                    new TypeRef(null, builtInTypes.Bool.Name)
+                    new TypeRef(null, [builtInTypes.Bool.Name])
                     {
                         Metadata = builtInTypes.Bool,
                     },
@@ -97,7 +97,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
                 new VariableDeclaration(
                     null,
                     variableName,
-                    new TypeRef(null, builtInTypes.Bool.Name)
+                    new TypeRef(null, [builtInTypes.Bool.Name])
                     {
                         Metadata = builtInTypes.Bool,
                     },

@@ -1,13 +1,17 @@
+using System.Diagnostics;
 using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
 public class TypeRef : IInlineType
 {
-    public TypeRef(SourceSpan? sourceSpan, string name)
+    public TypeRef(SourceSpan? sourceSpan, IReadOnlyList<string> parts)
     {
+        if (parts.Count == 0)
+            throw new ArgumentException("TypeRef must have at least one part", nameof(parts));
+
         SourceSpan = sourceSpan;
-        Name = name;
+        Parts = parts;
     }
 
     public void Accept(IVisitor visitor)
@@ -20,7 +24,7 @@ public class TypeRef : IInlineType
         => transformer.TransformTypeNode(this);
 
     public IInlineType Clone()
-        => new TypeRef(SourceSpan, Name)
+        => new TypeRef(SourceSpan, Parts)
         {
             Metadata = Metadata,
         };
@@ -29,7 +33,10 @@ public class TypeRef : IInlineType
 
     public SourceSpan? SourceSpan { get; }
 
-    public string Name { get; }
+    public IReadOnlyList<string> Parts { get; }
+
+    public string Name
+        => Parts[^1];
 
     public ITypeMetadata? Metadata { get; set; }
 }

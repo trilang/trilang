@@ -472,8 +472,8 @@ internal class SyntaxComparer : IEqualityComparer<ISyntaxNode>
 
     private void CompareTypeNode(TypeRefNode x, TypeRefNode y, List<string> errors)
     {
-        if (x.Name != y.Name)
-            errors.Add($"TypeNode: Name mismatch. {x.Name} != {y.Name}.");
+        if (!x.Parts.SequenceEqual(y.Parts))
+            errors.Add($"TypeRef: Parts mismatch. {string.Join(".", x.Parts)} != {string.Join(".", y.Parts)}.");
     }
 
     private void CompareUnaryExpressionNode(UnaryExpressionNode x, UnaryExpressionNode y, List<string> errors)

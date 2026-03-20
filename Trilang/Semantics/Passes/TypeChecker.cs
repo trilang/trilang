@@ -14,19 +14,21 @@ internal class TypeChecker : ISemanticPass
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly MetadataProviderMap metadataProviderMap;
+    private readonly NamespaceMetadata rootNamespace;
     private readonly BuiltInTypes builtInTypes;
 
-    public TypeChecker(
-        ISet<string> directives,
+    public TypeChecker(ISet<string> directives,
         SemanticDiagnosticReporter diagnostics,
         SymbolTableMap symbolTableMap,
         MetadataProviderMap metadataProviderMap,
+        NamespaceMetadata rootNamespace,
         BuiltInTypes builtInTypes)
     {
         this.directives = directives;
         this.diagnostics = diagnostics;
         this.symbolTableMap = symbolTableMap;
         this.metadataProviderMap = metadataProviderMap;
+        this.rootNamespace = rootNamespace;
         this.builtInTypes = builtInTypes;
     }
 
@@ -37,6 +39,7 @@ internal class TypeChecker : ISemanticPass
             diagnostics,
             symbolTableMap,
             metadataProviderMap,
+            rootNamespace,
             builtInTypes);
 
         foreach (var tree in semanticTrees)
@@ -52,19 +55,21 @@ internal class TypeChecker : ISemanticPass
         private readonly SemanticDiagnosticReporter diagnostics;
         private readonly SymbolTableMap symbolTableMap;
         private readonly MetadataProviderMap metadataProviderMap;
+        private readonly NamespaceMetadata rootNamespace;
         private readonly BuiltInTypes builtInTypes;
 
-        public TypeCheckerVisitor(
-            ISet<string> directives,
+        public TypeCheckerVisitor(ISet<string> directives,
             SemanticDiagnosticReporter diagnostics,
             SymbolTableMap symbolTableMap,
             MetadataProviderMap metadataProviderMap,
+            NamespaceMetadata rootNamespace,
             BuiltInTypes builtInTypes)
             : base(directives)
         {
             this.diagnostics = diagnostics;
             this.symbolTableMap = symbolTableMap;
             this.metadataProviderMap = metadataProviderMap;
+            this.rootNamespace = rootNamespace;
             this.builtInTypes = builtInTypes;
         }
 
@@ -339,8 +344,8 @@ internal class TypeChecker : ISemanticPass
             // static access
             var metadataProvider = metadataProviderMap.Get(node);
             var function = metadataProvider.FindFunctions(node.Name);
-            var types = metadataProvider.FindTypes(node.Name);
-            var members = function.Cast<IMetadata>().Concat(types).ToArray();
+            var result = metadataProvider.QueryTypes(Query.From(node.Name));
+            var members = function.Cast<IMetadata>().Concat(result.Types).ToArray();
 
             node.Reference = members.Length switch
             {
@@ -348,11 +353,32 @@ internal class TypeChecker : ISemanticPass
                 > 1 => new AggregateMetadata(members),
                 _ => null,
             };
+
+            // resolve namespaces for fully-qualified names
+            if (node.Reference is null)
+            {
+                var foundNamespace = rootNamespace.FindNamespace([node.Name]);
+                if (foundNamespace is not null)
+                    node.Reference = foundNamespace;
+            }
         }
 
         private void VisitNestedMemberAccess(MemberAccessExpression node)
         {
             node.Member!.Accept(this);
+
+            if (node.Member is MemberAccessExpression { Reference: NamespaceMetadata ns })
+            {
+                var type = ns.FindType(node.Name) as IMetadata;
+                if (type is null)
+                {
+                    diagnostics.UnknownSymbol(node);
+                    type = new InvalidMemberMetadata(node.Name);
+                }
+
+                node.Reference = type;
+                return;
+            }
 
             var returnTypeMetadata = node.Member.ReturnTypeMetadata!;
             var memberMetadata = returnTypeMetadata.GetMember(node.Name);

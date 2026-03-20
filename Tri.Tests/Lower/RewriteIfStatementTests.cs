@@ -72,12 +72,12 @@ public class RewriteIfStatementTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
+                        new Parameter(null, "a", new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 })
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new IfStatement(
                             null,
@@ -186,12 +186,12 @@ public class RewriteIfStatementTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, "i32") { Metadata = builtInTypes.I32 })
+                        new Parameter(null, "a", new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 })
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, "i32") { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new IfStatement(
                             null,

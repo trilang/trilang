@@ -23,14 +23,14 @@ internal sealed class TokenReader
             index++;
     }
 
-    public CheckResult Check(TokenKind kind)
+    public MatchResult Match(TokenKind kind)
     {
         var token = Token;
         var result = token.Is(kind);
         if (result)
             Advance();
 
-        return new CheckResult(result, token);
+        return new MatchResult(result, token);
     }
 
     public SourceSpan SkipTo(params Span<TokenKind> tokenKinds)
@@ -76,7 +76,7 @@ internal sealed class TokenReader
 
     public SourceSpan Expect(TokenKind kind)
     {
-        var (result, token) = Check(kind);
+        var (result, token) = Match(kind);
         if (!result)
         {
             var position = Token.SourceSpan.Start;
