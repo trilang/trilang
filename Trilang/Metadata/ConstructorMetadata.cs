@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMetadata>
+public class ConstructorMetadata : IFunctionMetadata
 {
     public ConstructorMetadata(
         SourceLocation? definition,
@@ -23,46 +23,6 @@ public class ConstructorMetadata : IFunctionMetadata, IEquatable<ConstructorMeta
             AccessModifierMetadata.Public,
             [],
             FunctionTypeMetadata.Invalid());
-
-    public static bool operator ==(ConstructorMetadata? left, ConstructorMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(ConstructorMetadata? left, ConstructorMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(ConstructorMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return DeclaringType.Equals(other.DeclaringType) &&
-               AccessModifier == other.AccessModifier &&
-               Parameters.SequenceEqual(other.Parameters) &&
-               Type.Equals(other.Type);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((ConstructorMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(AccessModifier, Parameters, Type);
 
     public override string ToString()
         => $"ctor: {Type}";

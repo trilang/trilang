@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata, IEquatable<DiscriminatedUnionMetadata>
+public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata
 {
     private readonly List<ITypeMetadata> types;
 
@@ -9,44 +9,6 @@ public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata, IEquatable<Dis
         Definition = definition;
         this.types = [.. types];
     }
-
-    public static bool operator ==(DiscriminatedUnionMetadata? left, DiscriminatedUnionMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(DiscriminatedUnionMetadata? left, DiscriminatedUnionMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(DiscriminatedUnionMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return types.SequenceEqual(other.types) &&
-               Equals(Namespace, other.Namespace);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((DiscriminatedUnionMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(types);
 
     public override string ToString()
         => string.Join(" | ", types);

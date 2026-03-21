@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class FunctionTypeMetadata : IAnonymousTypeMetadata, IEquatable<FunctionTypeMetadata>
+public class FunctionTypeMetadata : IAnonymousTypeMetadata
 {
     public const string FunctionField = "function";
     public const string ContextField = "context";
@@ -24,45 +24,6 @@ public class FunctionTypeMetadata : IAnonymousTypeMetadata, IEquatable<FunctionT
         {
             IsInvalid = true
         };
-
-    public static bool operator ==(FunctionTypeMetadata? left, FunctionTypeMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(FunctionTypeMetadata? left, FunctionTypeMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(FunctionTypeMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return parameterTypes.SequenceEqual(other.parameterTypes) &&
-               ReturnType.Equals(other.ReturnType) &&
-               Equals(Namespace, other.Namespace);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((FunctionTypeMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(ParameterTypes, ReturnType);
 
     public override string ToString()
         => $"({string.Join(", ", parameterTypes)}) => {ReturnType}";

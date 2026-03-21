@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;

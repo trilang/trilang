@@ -442,7 +442,7 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
         if (x.Name != y.Name)
             throw new Exception($"Member doesn't match. {x.Name} != {y.Name}.");
 
-        if (!Equals(x.Reference, y.Reference))
+        if (!new MetadataComparer().Equals(x.Reference, y.Reference))
             throw new Exception("Reference doesn't match.");
 
         if (x.AccessKind != y.AccessKind)

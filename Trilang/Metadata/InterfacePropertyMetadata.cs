@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfacePropertyMetadata>
+public class InterfacePropertyMetadata : IMetadata
 {
     public InterfacePropertyMetadata(
         SourceLocation? definition,
@@ -17,47 +17,6 @@ public class InterfacePropertyMetadata : IMetadata, IEquatable<InterfaceProperty
         GetterModifier = getterModifier;
         SetterModifier = setterModifier;
     }
-
-    public static bool operator ==(InterfacePropertyMetadata? left, InterfacePropertyMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(InterfacePropertyMetadata? left, InterfacePropertyMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(InterfacePropertyMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return DeclaringType.Equals(other.DeclaringType) &&
-               Name == other.Name &&
-               Type.Equals(other.Type) &&
-               GetterModifier == other.GetterModifier &&
-               SetterModifier == other.SetterModifier;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((InterfacePropertyMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(DeclaringType, Name, Type, GetterModifier, SetterModifier);
 
     public override string ToString()
         => $"{Name}: {Type}";

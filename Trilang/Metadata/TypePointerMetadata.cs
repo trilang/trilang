@@ -1,48 +1,10 @@
 namespace Trilang.Metadata;
 
 // TODO: anonymous type?
-public class TypePointerMetadata : ITypeMetadata, IEquatable<TypePointerMetadata>
+public class TypePointerMetadata : ITypeMetadata
 {
     public TypePointerMetadata(ITypeMetadata type)
         => Type = type;
-
-    public static bool operator ==(TypePointerMetadata? left, TypePointerMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(TypePointerMetadata? left, TypePointerMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(TypePointerMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return Type.Equals(other.Type) &&
-               Equals(Namespace, other.Namespace);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((TypePointerMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Type);
 
     public override string ToString()
         => $"{Type}*";

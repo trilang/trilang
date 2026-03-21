@@ -2386,9 +2386,9 @@ public class MetadataGeneratorTests
             CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, ns));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(functions[0].Metadata, Is.EqualTo(function1));
-        Assert.That(functions[1].Metadata, Is.EqualTo(function2));
-        Assert.That(functions[2].Metadata, Is.EqualTo(function3));
+        Assert.That(functions[0].Metadata, Is.EqualTo(function1).Using(new MetadataComparer()));
+        Assert.That(functions[1].Metadata, Is.EqualTo(function2).Using(new MetadataComparer()));
+        Assert.That(functions[2].Metadata, Is.EqualTo(function3).Using(new MetadataComparer()));
     }
 
     [Test]

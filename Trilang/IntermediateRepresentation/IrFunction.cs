@@ -23,12 +23,15 @@ public record IrFunction(string Name, IrCode Code)
             if (!visited.Add(block))
                 continue;
 
-            sb.Append(block);
+            sb.AppendLine(block.ToString());
 
             foreach (var next in block.Next)
                 if (!visited.Contains(next))
                     queue.Enqueue(next);
         }
+
+        if (sb[^1] == '\n')
+            sb.Remove(sb.Length - 1, 1);
 
         return sb.ToString();
     }

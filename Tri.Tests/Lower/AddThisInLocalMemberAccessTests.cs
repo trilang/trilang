@@ -66,9 +66,28 @@ public class AddThisInLocalMemberAccessTests
         {
             Namespace = test1Ns,
         };
-        var propertyMetadata = CreatePropertyMetadata(typeMetadata,
+        typeMetadata.AddConstructor(new ConstructorMetadata(
+            null,
+            typeMetadata,
+            AccessModifierMetadata.Public,
+            [],
+            CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+        typeMetadata.AddField(new FieldMetadata(typeMetadata, "<>_count", builtInTypes.I32));
+        var propertyMetadata = CreatePropertyMetadata(
+            typeMetadata,
             "count",
             builtInTypes.I32);
+        typeMetadata.AddProperty(propertyMetadata);
+        typeMetadata.AddMethod(propertyMetadata.Getter!);
+        typeMetadata.AddMethod(propertyMetadata.Setter!);
+        typeMetadata.AddMethod(new MethodMetadata(
+            null,
+            typeMetadata,
+            AccessModifierMetadata.Public,
+            false,
+            "getCount",
+            [],
+            CreateFunctionType([], builtInTypes.I32, rootNamespace)));
 
         var expected = new CallExpression(
             null,
@@ -117,6 +136,12 @@ public class AddThisInLocalMemberAccessTests
         {
             Namespace = test1Ns,
         };
+        typeMetadata.AddConstructor(new ConstructorMetadata(
+            null,
+            typeMetadata,
+            AccessModifierMetadata.Public,
+            [],
+            CreateFunctionType([], builtInTypes.Void, rootNamespace)));
         var methodMetadata = new MethodMetadata(
             null,
             typeMetadata,
@@ -125,6 +150,15 @@ public class AddThisInLocalMemberAccessTests
             "print",
             [],
             CreateFunctionType([], builtInTypes.Void, rootNamespace));
+        typeMetadata.AddMethod(methodMetadata);
+        typeMetadata.AddMethod(new MethodMetadata(
+            null,
+            typeMetadata,
+            AccessModifierMetadata.Public,
+            false,
+            "test",
+            [],
+            CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
         var expected = new MemberAccessExpression(
             null,

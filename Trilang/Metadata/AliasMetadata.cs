@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Trilang.Metadata;
 
-public class AliasMetadata : IGenericMetadata, IEquatable<AliasMetadata>
+public class AliasMetadata : IGenericMetadata
 {
     private readonly List<ITypeMetadata> genericArguments;
 
@@ -22,45 +22,6 @@ public class AliasMetadata : IGenericMetadata, IEquatable<AliasMetadata>
         this.genericArguments = [.. genericArguments];
         Type = type;
     }
-
-    public static bool operator ==(AliasMetadata? left, AliasMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(AliasMetadata? left, AliasMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(AliasMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return Name == other.Name &&
-               genericArguments.SequenceEqual(other.genericArguments) &&
-               Equals(Namespace, other.Namespace);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((AliasMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Name);
 
     public override string ToString()
     {

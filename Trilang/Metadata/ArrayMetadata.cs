@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class ArrayMetadata : IAnonymousTypeMetadata, IEquatable<ArrayMetadata>
+public class ArrayMetadata : IAnonymousTypeMetadata
 {
     private readonly List<FieldMetadata> fields;
     private readonly List<PropertyMetadata> properties;
@@ -18,44 +18,6 @@ public class ArrayMetadata : IAnonymousTypeMetadata, IEquatable<ArrayMetadata>
 
     public static ArrayMetadata Invalid()
         => new ArrayMetadata(null, null) { IsInvalid = true };
-
-    public static bool operator ==(ArrayMetadata? left, ArrayMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(ArrayMetadata? left, ArrayMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(ArrayMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return Equals(ItemMetadata, other.ItemMetadata) &&
-               Equals(Namespace, other.Namespace);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((ArrayMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(ItemMetadata);
 
     public override string ToString()
         => $"{ItemMetadata}[]";

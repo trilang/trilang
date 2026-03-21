@@ -7,7 +7,6 @@ using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
-using static Tri.Tests.Factory;
 
 namespace Tri.Tests.Semantics;
 
@@ -55,18 +54,11 @@ public class ControlFlowAnalyzerTests
             returnStatement
         ]);
         var expected = new ControlFlowGraph(entry, entry);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "add",
-            [new ParameterMetadata(null, "a", builtInTypes.I32), new ParameterMetadata(null, "b", builtInTypes.I32)],
-            CreateFunctionType([builtInTypes.I32, builtInTypes.I32], builtInTypes.I32, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -106,18 +98,11 @@ public class ControlFlowAnalyzerTests
         thenBlock.AddNext(endBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -165,18 +150,11 @@ public class ControlFlowAnalyzerTests
         elseBlock.AddNext(endBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -222,18 +200,11 @@ public class ControlFlowAnalyzerTests
         innerEndBlock.AddNext(outerEndBlock);
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -275,18 +246,11 @@ public class ControlFlowAnalyzerTests
         bodyBlock.AddNext(conditionBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -336,18 +300,11 @@ public class ControlFlowAnalyzerTests
         innerEndBlock.AddNext(outerEndBlock);
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -386,18 +343,11 @@ public class ControlFlowAnalyzerTests
         bodyBlock.AddNext(endBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -446,18 +396,11 @@ public class ControlFlowAnalyzerTests
         innerEndBlock.AddNext(outerEndBlock);
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -496,18 +439,11 @@ public class ControlFlowAnalyzerTests
         bodyBlock.AddNext(conditionBlock);
 
         var expected = new ControlFlowGraph(entry, endBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -556,18 +492,11 @@ public class ControlFlowAnalyzerTests
         innerEndBlock.AddNext(outerEndBlock);
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -614,18 +543,11 @@ public class ControlFlowAnalyzerTests
         endIfBlock.AddNext(loopcondBlock);
 
         var expected = new ControlFlowGraph(entry, loopendBlock);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
     [Test]
@@ -677,17 +599,10 @@ public class ControlFlowAnalyzerTests
         else0Block.AddNext(end0Block);
 
         var expected = new ControlFlowGraph(entry, end0Block);
-        var rootNamespace = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var function = new FunctionMetadata(
-            null,
-            AccessModifierMetadata.Public,
-            "test",
-            [new ParameterMetadata(null, "a", builtInTypes.I32)],
-            CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace));
 
         Assert.That(graphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions,
-            Contains.Key(function).WithValue(expected).Using(ControlFlowGraphComparer.Instance));
+            graphs.Functions.First().Value,
+            Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 }

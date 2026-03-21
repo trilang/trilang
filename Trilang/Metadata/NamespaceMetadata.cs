@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Trilang.Metadata;
 
-public class NamespaceMetadata : IMetadata, IEquatable<NamespaceMetadata>
+public class NamespaceMetadata : IMetadata
 {
     private readonly HashSet<NamespaceMetadata> children;
     private readonly Dictionary<string, ITypeMetadata> types;
@@ -44,41 +44,6 @@ public class NamespaceMetadata : IMetadata, IEquatable<NamespaceMetadata>
 
         return root;
     }
-
-    public static bool operator ==(NamespaceMetadata? left, NamespaceMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(NamespaceMetadata? left, NamespaceMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(NamespaceMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        return Name == other.Name &&
-               Equals(Parent, other.Parent);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((NamespaceMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Name, Parent);
 
     public override string ToString()
     {

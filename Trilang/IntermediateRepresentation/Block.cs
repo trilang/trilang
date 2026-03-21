@@ -87,8 +87,15 @@ public class Block : IEquatable<Block>
 
         sb.AppendLine();
 
-        foreach (var instruction in instructions)
-            sb.Append('\t').AppendLine(instruction.ToString());
+        for (var i = 0; i < instructions.Count; i++)
+        {
+            sb.Append('\t');
+
+            if (i == instructions.Count - 1)
+                sb.Append(instructions[i]);
+            else
+                sb.AppendLine(instructions[i].ToString());
+        }
 
         return sb.ToString();
     }

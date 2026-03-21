@@ -93,7 +93,7 @@ public class TypeCheckerTests
         var semanticTree = semanticTrees.Single();
         var function = semanticTree.Find<FunctionDeclaration>();
         Assert.That(function, Is.Not.Null);
-        Assert.That(function.Metadata, Is.EqualTo(expected));
+        Assert.That(function.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
         Assert.That(
             function.Parameters[0].Type.Metadata,
             Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));

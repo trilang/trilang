@@ -46,14 +46,14 @@ public class NamespaceTests
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var ns1Provider = rootProvider.FindNamespace(["NS1"])!;
-        var expected = new AliasMetadata(null, "MyType", [], builtInTypes.I32)
-        {
-            Namespace = ns1Provider,
-        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(rootProvider.Types, Does.Not.Contain(expected));
-        Assert.That(ns1Provider.Types, Does.Contain(expected));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
     }
 
     [Test]
@@ -87,20 +87,20 @@ public class NamespaceTests
 
         var ns1Provider = rootProvider.FindNamespace(["NS1"])!;
         var ns2Provider = rootProvider.FindNamespace(["NS2"])!;
-        var myType1 = new AliasMetadata(null, "MyType1", [], builtInTypes.I32)
-        {
-            Namespace = ns1Provider,
-        };
-        var myType2 = new AliasMetadata(null, "MyType2", [], myType1)
-        {
-            Namespace = ns2Provider,
-        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType1));
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType2));
-        Assert.That(ns1Provider.Types, Does.Contain(myType1));
-        Assert.That(ns2Provider.Types, Does.Contain(myType2));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType1" }));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType1" }));
+        Assert.That(
+            ns2Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
     }
 
     [Test]
@@ -176,32 +176,32 @@ public class NamespaceTests
 
         var ns1Provider = rootProvider.FindNamespace(["NS1"])!;
         var ns2Provider = rootProvider.FindNamespace(["NS2"])!;
-        var myType1 = new AliasMetadata(null, "MyType1", [], builtInTypes.I32)
-        {
-            Namespace = ns1Provider,
-        };
-        var myType2 = new AliasMetadata(null, "MyType2", [], builtInTypes.I32)
-        {
-            Namespace = ns2Provider,
-        };
-        var test1 = new AliasMetadata(null, "Test1", [], myType2)
-        {
-            Namespace = ns1Provider,
-        };
-        var test2 = new AliasMetadata(null, "Test2", [], myType1)
-        {
-            Namespace = ns2Provider,
-        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType1));
-        Assert.That(rootProvider.Types, Does.Not.Contain(test1));
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType2));
-        Assert.That(rootProvider.Types, Does.Not.Contain(test2));
-        Assert.That(ns1Provider.Types, Does.Contain(myType1));
-        Assert.That(ns1Provider.Types, Does.Contain(test1));
-        Assert.That(ns2Provider.Types, Does.Contain(myType2));
-        Assert.That(ns2Provider.Types, Does.Contain(test2));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType1" }));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "Test1" }));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "Test2" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType1" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "Test1" }));
+        Assert.That(
+            ns2Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
+        Assert.That(
+            ns2Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "Test2" }));
     }
 
     [Test]
@@ -235,20 +235,20 @@ public class NamespaceTests
 
         var ns1Ns2Ns3Provider = rootProvider.FindNamespace(["NS1", "NS2", "NS3"])!;
         var testProvider = rootProvider.FindNamespace(["Test"])!;
-        var myType = new AliasMetadata(null, "MyType", [], builtInTypes.I32)
-        {
-            Namespace = ns1Ns2Ns3Provider,
-        };
-        var myType2 = new AliasMetadata(null, "MyType2", [], myType)
-        {
-            Namespace = testProvider,
-        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType));
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType2));
-        Assert.That(ns1Ns2Ns3Provider.Types, Does.Contain(myType));
-        Assert.That(testProvider.Types, Does.Contain(myType2));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
+        Assert.That(
+            ns1Ns2Ns3Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
+        Assert.That(
+            testProvider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
     }
 
     [Test]
@@ -319,22 +319,26 @@ public class NamespaceTests
 
         var ns1Provider = rootProvider.FindNamespace(["NS1"])!;
         var ns1Ns2Ns3Provider = rootProvider.FindNamespace(["NS1", "NS2", "NS3"])!;
-        var myType = new AliasMetadata(null, "MyType", [], builtInTypes.I32)
-        {
-            Namespace = ns1Provider,
-        };
-        var myType2 = new AliasMetadata(null, "MyType2", [], myType)
-        {
-            Namespace = ns1Ns2Ns3Provider,
-        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType));
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType2));
-        Assert.That(ns1Provider.Types, Does.Contain(myType));
-        Assert.That(ns1Provider.Types, Does.Not.Contain(myType2));
-        Assert.That(ns1Ns2Ns3Provider.Types, Does.Not.Contain(myType));
-        Assert.That(ns1Ns2Ns3Provider.Types, Does.Contain(myType2));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
+        Assert.That(
+            ns1Ns2Ns3Provider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
+        Assert.That(
+            ns1Ns2Ns3Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
     }
 
     [Test]
@@ -366,21 +370,17 @@ public class NamespaceTests
 
         var ns1Provider = rootProvider.FindNamespace(["NS1"])!;
         var ns2Provider = rootProvider.FindNamespace(["NS2"])!;
-        var myType1 = new AliasMetadata(null, "MyType", [], builtInTypes.I32)
-        {
-            Namespace = ns1Provider,
-        };
-        var myType2 = new AliasMetadata(null, "MyType", [], builtInTypes.I32)
-        {
-            Namespace = ns2Provider,
-        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType1));
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType2));
-        Assert.That(ns1Provider.Types, Does.Contain(myType1));
-        Assert.That(ns2Provider.Types, Does.Contain(myType2));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
+        Assert.That(
+            ns2Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType" }));
     }
 
     [Test]
@@ -470,20 +470,20 @@ public class NamespaceTests
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var ns1Provider = rootProvider.FindNamespace(["NS1"])!;
-        var myType1 = new AliasMetadata(null, "MyType1", [], builtInTypes.I32)
-        {
-            Namespace = ns1Provider,
-        };
-        var myType2 = new AliasMetadata(null, "MyType2", [], builtInTypes.I32)
-        {
-            Namespace = ns1Provider,
-        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType1));
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType2));
-        Assert.That(ns1Provider.Types, Does.Contain(myType1));
-        Assert.That(ns1Provider.Types, Does.Contain(myType2));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType1" }));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType1" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType2" }));
     }
 
     [Test]
@@ -506,20 +506,20 @@ public class NamespaceTests
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
         var ns1Provider = rootProvider.FindNamespace(["NS1"])!;
-        var myType1 = new AliasMetadata(null, "MyType1", [], builtInTypes.I32)
-        {
-            Namespace = ns1Provider,
-        };
-        var anonType = new DiscriminatedUnionMetadata(null, [builtInTypes.I32, builtInTypes.Bool])
-        {
-            Namespace = rootProvider,
-        };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(rootProvider.Types, Does.Not.Contain(myType1));
-        Assert.That(rootProvider.Types, Does.Contain(anonType));
-        Assert.That(ns1Provider.Types, Does.Contain(myType1));
-        Assert.That(ns1Provider.Types, Does.Not.Contain(anonType));
+        Assert.That(
+            rootProvider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType1" }));
+        Assert.That(
+            rootProvider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is DiscriminatedUnionMetadata));
+        Assert.That(
+            ns1Provider.Types,
+            Has.One.Matches<ITypeMetadata>(x => x is AliasMetadata { Name: "MyType1" }));
+        Assert.That(
+            ns1Provider.Types,
+            Has.None.Matches<ITypeMetadata>(x => x is DiscriminatedUnionMetadata));
     }
 
     [Test]

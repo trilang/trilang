@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;

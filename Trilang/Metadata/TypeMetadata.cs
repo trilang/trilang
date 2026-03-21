@@ -3,7 +3,7 @@ using System.Text;
 namespace Trilang.Metadata;
 
 // TODO: immutable metadata
-public class TypeMetadata : IGenericMetadata, IEquatable<TypeMetadata>
+public class TypeMetadata : IGenericMetadata
 {
     public static readonly TypeMetadata InvalidType = Invalid("<>_invalid_type");
 
@@ -55,45 +55,6 @@ public class TypeMetadata : IGenericMetadata, IEquatable<TypeMetadata>
 
     public static TypeMetadata Invalid(string name)
         => new TypeMetadata(null, name) { IsInvalid = true };
-
-    public static bool operator ==(TypeMetadata? left, TypeMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(TypeMetadata? left, TypeMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(TypeMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return Name == other.Name &&
-               genericArguments.SequenceEqual(other.genericArguments) &&
-               Equals(Namespace, other.Namespace);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((TypeMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Name);
 
     public override string ToString()
     {

@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
+public class PropertyMetadata : IMetadata
 {
     public PropertyMetadata(
         SourceLocation? definition,
@@ -17,47 +17,6 @@ public class PropertyMetadata : IMetadata, IEquatable<PropertyMetadata>
         Getter = getter;
         Setter = setter;
     }
-
-    public static bool operator ==(PropertyMetadata? left, PropertyMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(PropertyMetadata? left, PropertyMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(PropertyMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        return Equals(DeclaringType, other.DeclaringType) &&
-               Name == other.Name &&
-               Type.Equals(other.Type) &&
-               Getter == other.Getter &&
-               Setter == other.Setter;
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((PropertyMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(Name, Type, Getter, Setter);
 
     public override string ToString()
         => $"{Name}: {Type}";

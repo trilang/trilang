@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class InterfaceMetadata : IAnonymousTypeMetadata, IEquatable<InterfaceMetadata>
+public class InterfaceMetadata : IAnonymousTypeMetadata
 {
     private readonly List<InterfacePropertyMetadata> properties;
     private readonly List<InterfaceMethodMetadata> methods;
@@ -21,55 +21,6 @@ public class InterfaceMetadata : IAnonymousTypeMetadata, IEquatable<InterfaceMet
 
     public static InterfaceMetadata Invalid()
         => new InterfaceMetadata(null, [], []) { IsInvalid = true };
-
-    public static bool operator ==(InterfaceMetadata? left, InterfaceMetadata? right)
-        => Equals(left, right);
-
-    public static bool operator !=(InterfaceMetadata? left, InterfaceMetadata? right)
-        => !Equals(left, right);
-
-    public bool Equals(InterfaceMetadata? other)
-    {
-        if (other is null)
-            return false;
-
-        if (ReferenceEquals(this, other))
-            return true;
-
-        if (IsInvalid || other.IsInvalid)
-            return false;
-
-        foreach (var (p1, p2) in properties.Zip(other.properties))
-        {
-            if (p1.Name != p2.Name || !p1.Type.Equals(p2.Type))
-                return false;
-        }
-
-        foreach (var (m1, m2) in methods.Zip(other.methods))
-        {
-            if (m1.Name != m2.Name || !m1.Type.Equals(m2.Type))
-                return false;
-        }
-
-        return Equals(Namespace, other.Namespace);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-            return false;
-
-        if (ReferenceEquals(this, obj))
-            return true;
-
-        if (obj.GetType() != GetType())
-            return false;
-
-        return Equals((InterfaceMetadata)obj);
-    }
-
-    public override int GetHashCode()
-        => HashCode.Combine(properties, methods);
 
     public override string ToString()
     {

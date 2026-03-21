@@ -70,22 +70,17 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
-                new LoadConst(new Register(0, builtInTypes.I32), 1),
-                new LoadConst(new Register(1, builtInTypes.I32), 2),
-                new BinaryOperation(
-                    new Register(2, builtInTypes.I32),
-                    @operator,
-                    new Register(0, builtInTypes.I32),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new Return(new Register(2, builtInTypes.I32)),
-            ]))
-        };
+        var expected =
+            $"""
+             function test_0_2af2b3192b419145:
+             entry:
+             	ldc	#0: i32, 1
+             	ldc	#1: i32, 2
+             	{@operator.ToString().ToLower()}	#2: i32, #0: i32, #1: i32
+             	ret	#2: i32
+             """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -110,22 +105,17 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_0_cd2fd49bc6b014bd", new Block("entry", [
-                new LoadConst(new Register(0, builtInTypes.I32), 1),
-                new LoadConst(new Register(1, builtInTypes.I32), 2),
-                new BinaryOperation(
-                    new Register(2, builtInTypes.Bool),
-                    @operator,
-                    new Register(0, builtInTypes.I32),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new Return(new Register(2, builtInTypes.Bool)),
-            ]))
-        };
+        var expected =
+            $"""
+             function test_0_cd2fd49bc6b014bd:
+             entry:
+             	ldc	#0: i32, 1
+             	ldc	#1: i32, 2
+             	{@operator.ToString().ToLower()}	#2: bool, #0: i32, #1: i32
+             	ret	#2: bool
+             """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -144,16 +134,16 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new LoadConst(new Register(1, builtInTypes.I32), 1),
-                new Move(new Register(2, builtInTypes.I32), new Register(1, builtInTypes.I32)),
-            ]))
-        };
+        const string expected =
+            """
+            function test_1_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: i32, 0
+            	ldc	#1: i32, 1
+            	mov	#2: i32, #1: i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -180,22 +170,17 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new LoadConst(new Register(1, builtInTypes.I32), 1),
-                new BinaryOperation(
-                    new Register(2, builtInTypes.I32),
-                    @operator,
-                    new Register(0, builtInTypes.I32),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new Move(new Register(3, builtInTypes.I32), new Register(2, builtInTypes.I32)),
-            ]))
-        };
+        var expected =
+            $"""
+             function test_1_f22f9ef8659fbbff:
+             entry:
+             	ldp	#0: i32, 0
+             	ldc	#1: i32, 1
+             	{@operator.ToString().ToLower()}	#2: i32, #0: i32, #1: i32
+             	mov	#3: i32, #2: i32
+             """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -217,25 +202,20 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new LoadConst(new Register(1, builtInTypes.I32), 1),
-                new BinaryOperation(
-                    new Register(2, builtInTypes.I32),
-                    Add,
-                    new Register(0, builtInTypes.I32),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new Move(new Register(4, builtInTypes.I32), new Register(2, builtInTypes.I32)),
-                new LoadConst(new Register(3, builtInTypes.I32), 10),
-                new Move(new Register(5, builtInTypes.I32), new Register(3, builtInTypes.I32)),
-                new Return(new Register(5, builtInTypes.I32)),
-            ]))
-        };
+        const string expected =
+            """
+            function test_1_35acf129a21c9365:
+            entry:
+            	ldp	#0: i32, 0
+            	ldc	#1: i32, 1
+            	add	#2: i32, #0: i32, #1: i32
+            	mov	#4: i32, #2: i32
+            	ldc	#3: i32, 10
+            	mov	#5: i32, #3: i32
+            	ret	#5: i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -254,22 +234,17 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_2_e24cc7bc82aab685", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new BinaryOperation(
-                    new Register(2, builtInTypes.I32),
-                    Add,
-                    new Register(0, builtInTypes.I32),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new Return(new Register(2, builtInTypes.I32)),
-            ]))
-        };
+        const string expected =
+            """
+            function test_2_e24cc7bc82aab685:
+            entry:
+            	ldp	#0: i32, 0
+            	ldp	#1: i32, 1
+            	add	#2: i32, #0: i32, #1: i32
+            	ret	#2: i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -291,24 +266,19 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
-                new LoadConst(new Register(0, builtInTypes.I32), 1),
-                new Move(new Register(1, builtInTypes.I32), new Register(0, builtInTypes.I32)),
-                new LoadConst(new Register(2, builtInTypes.I32), 2),
-                new Move(new Register(3, builtInTypes.I32), new Register(2, builtInTypes.I32)),
-                new BinaryOperation(
-                    new Register(4, builtInTypes.I32),
-                    Add,
-                    new Register(1, builtInTypes.I32),
-                    new Register(3, builtInTypes.I32)
-                ),
-                new Return(new Register(4, builtInTypes.I32)),
-            ]))
-        };
+        const string expected =
+            """
+            function test_0_2af2b3192b419145:
+            entry:
+            	ldc	#0: i32, 1
+            	mov	#1: i32, #0: i32
+            	ldc	#2: i32, 2
+            	mov	#3: i32, #2: i32
+            	add	#4: i32, #1: i32, #3: i32
+            	ret	#4: i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -327,15 +297,15 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_0_5b9bc4ba528108e4", new Block("entry", [
-                new LoadConst(new Register(0, builtInTypes.Null), null),
-                new Return(new Register(0, builtInTypes.Null)),
-            ]))
-        };
+        const string expected =
+            """
+            function test_0_5b9bc4ba528108e4:
+            entry:
+            	ldc	#0: null, 
+            	ret	#0: null
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -354,20 +324,16 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new UnaryOperation(
-                    new Register(1, builtInTypes.I32),
-                    UnaryInstructionKind.Neg,
-                    new Register(0, builtInTypes.I32)
-                ),
-                new Return(new Register(1, builtInTypes.I32)),
-            ]))
-        };
+        const string expected =
+            """
+            function test_1_35acf129a21c9365:
+            entry:
+            	ldp	#0: i32, 0
+            	neg	#1: i32, #0: i32
+            	ret	#1: i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -386,20 +352,16 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_7772fb92073661c5", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.Bool), 0),
-                new UnaryOperation(
-                    new Register(1, builtInTypes.Bool),
-                    UnaryInstructionKind.Not,
-                    new Register(0, builtInTypes.Bool)
-                ),
-                new Return(new Register(1, builtInTypes.Bool)),
-            ]))
-        };
+        const string expected =
+            """
+            function test_1_7772fb92073661c5:
+            entry:
+            	ldp	#0: bool, 0
+            	not	#1: bool, #0: bool
+            	ret	#1: bool
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -418,20 +380,16 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_35acf129a21c9365", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new UnaryOperation(
-                    new Register(1, builtInTypes.I32),
-                    UnaryInstructionKind.Not,
-                    new Register(0, builtInTypes.I32)
-                ),
-                new Return(new Register(1, builtInTypes.I32)),
-            ]))
-        };
+        const string expected =
+            """
+            function test_1_35acf129a21c9365:
+            entry:
+            	ldp	#0: i32, 0
+            	not	#1: i32, #0: i32
+            	ret	#1: i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -447,45 +405,27 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var arrayType = (ArrayMetadata)rootNamespace.FindType("i32[]")!;
-        var arrayPointerType = new TypePointerMetadata(arrayType);
-        var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_38a40cc70c225276", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadConst(new Register(1, builtInTypes.I32), 0),
-                new GetElementPointer(
-                    new Register(2, new TypePointerMetadata(builtInTypes.I32)),
-                    new Register(0, arrayPointerType),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new Load(
-                    new Register(3, builtInTypes.I32),
-                    new Register(2, new TypePointerMetadata(builtInTypes.I32))
-                ),
-                new Return(new Register(3, builtInTypes.I32)),
-            ])),
-            new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new GetMemberPointer(
-                    new Register(1, new TypePointerMetadata(arraySize.Type)),
-                    new Register(0, arrayPointerType),
-                    arraySize
-                ),
-                new Load(
-                    new Register(2, arraySize.Type),
-                    new Register(1, new TypePointerMetadata(arraySize.Type))
-                ),
-                new Return(new Register(2, arraySize.Type)),
-            ])),
-        };
+        const string expected =
+            """
+            function test_1_38a40cc70c225276:
+            entry:
+            	ldp	#0: i32[]*, 0
+            	ldc	#1: i32, 0
+            	get	#2: i32*, #0: i32[]*, #1: i32
+            	ld	#3: i32, #2: i32*
+            	ret	#3: i32
+            function array_i32_<>_get_size_0_2ae1af192b331746:
+            entry:
+            	ldp	#0: i32[]*, 0
+            	get	#1: i64*, #0: i32[]*, <>_size: i64
+            	ld	#2: i64, #1: i64*
+            	ret	#2: i64
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -501,52 +441,29 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var arrayType = (ArrayMetadata)rootNamespace.FindType("i32[]")!;
-        var arrayPointerType = new TypePointerMetadata(arrayType);
-        var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_2_e9c73c3fbe34f858", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new LoadConst(new Register(2, builtInTypes.I32), 2),
-                new BinaryOperation(
-                    new Register(3, builtInTypes.I32),
-                    Add,
-                    new Register(1, builtInTypes.I32),
-                    new Register(2, builtInTypes.I32)
-                ),
-                new GetElementPointer(
-                    new Register(4, new TypePointerMetadata(builtInTypes.I32)),
-                    new Register(0, arrayPointerType),
-                    new Register(3, builtInTypes.I32)
-                ),
-                new Load(
-                    new Register(5, builtInTypes.I32),
-                    new Register(4, new TypePointerMetadata(builtInTypes.I32))
-                ),
-                new Return(new Register(5, builtInTypes.I32)),
-            ])),
-            new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new GetMemberPointer(
-                    new Register(1, new TypePointerMetadata(arraySize.Type)),
-                    new Register(0, arrayPointerType),
-                    arraySize
-                ),
-                new Load(
-                    new Register(2, arraySize.Type),
-                    new Register(1, new TypePointerMetadata(arraySize.Type))
-                ),
-                new Return(new Register(2, arraySize.Type)),
-            ])),
-        };
+        const string expected =
+            """
+            function test_2_e9c73c3fbe34f858:
+            entry:
+            	ldp	#0: i32[]*, 0
+            	ldp	#1: i32, 1
+            	ldc	#2: i32, 2
+            	add	#3: i32, #1: i32, #2: i32
+            	get	#4: i32*, #0: i32[]*, #3: i32
+            	ld	#5: i32, #4: i32*
+            	ret	#5: i32
+            function array_i32_<>_get_size_0_2ae1af192b331746:
+            entry:
+            	ldp	#0: i32[]*, 0
+            	get	#1: i64*, #0: i32[]*, <>_size: i64
+            	ld	#2: i64, #1: i64*
+            	ret	#2: i64
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -562,45 +479,27 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var arrayType = (ArrayMetadata)rootNamespace.FindType("i32[]")!;
-        var arrayPointerType = new TypePointerMetadata(arrayType);
-        var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_cf03852a6cca2be2", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new LoadConst(new Register(1, builtInTypes.I32), 0),
-                new GetElementPointer(
-                    new Register(2, new TypePointerMetadata(builtInTypes.I32)),
-                    new Register(0, arrayPointerType),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new LoadConst(new Register(3, builtInTypes.I32), 10),
-                new Store(
-                    new Register(2, new TypePointerMetadata(builtInTypes.I32)),
-                    new Register(3, builtInTypes.I32)
-                ),
-            ])),
-            new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new GetMemberPointer(
-                    new Register(1, new TypePointerMetadata(arraySize.Type)),
-                    new Register(0, arrayPointerType),
-                    arraySize
-                ),
-                new Load(
-                    new Register(2, arraySize.Type),
-                    new Register(1, new TypePointerMetadata(arraySize.Type))
-                ),
-                new Return(new Register(2, arraySize.Type)),
-            ])),
-        };
+        const string expected =
+            """
+            function test_1_cf03852a6cca2be2:
+            entry:
+            	ldp	#0: i32[]*, 0
+            	ldc	#1: i32, 0
+            	get	#2: i32*, #0: i32[]*, #1: i32
+            	ldc	#3: i32, 10
+            	st	#2: i32*, #3: i32
+            function array_i32_<>_get_size_0_2ae1af192b331746:
+            entry:
+            	ldp	#0: i32[]*, 0
+            	get	#1: i64*, #0: i32[]*, <>_size: i64
+            	ld	#2: i64, #1: i64*
+            	ret	#2: i64
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -618,42 +517,26 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var arrayType = (ArrayMetadata)rootNamespace.FindType("i32[]")!;
-        var arrayPointerType = new TypePointerMetadata(arrayType);
-        var arraySize = (FieldMetadata)arrayType.GetMember("<>_size")!;
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_0_e29ec11cb667c068", new Block("entry", [
-                new LoadConst(new Register(0, builtInTypes.I32), 10),
-                new ArrayAlloc(
-                    new Register(1, arrayPointerType),
-                    8,
-                    4,
-                    new Register(0, builtInTypes.I32)
-                ),
-                new Move(new Register(2, arrayPointerType), new Register(1, arrayPointerType)),
-                new Return(new Register(2, arrayPointerType)),
-            ])),
-            new IrFunction("array_i32_<>_get_size_0_2ae1af192b331746", new Block("entry", [
-                new LoadParameter(new Register(0, arrayPointerType), 0),
-                new GetMemberPointer(
-                    new Register(1, new TypePointerMetadata(arraySize.Type)),
-                    new Register(0, arrayPointerType),
-                    arraySize
-                ),
-                new Load(
-                    new Register(2, arraySize.Type),
-                    new Register(1, new TypePointerMetadata(arraySize.Type))
-                ),
-                new Return(new Register(2, arraySize.Type)),
-            ])),
-        };
+        const string expected =
+            """
+            function test_0_e29ec11cb667c068:
+            entry:
+            	ldc	#0: i32, 10
+            	alloc	#1: i32[]*, 8, 4, #0: i32
+            	mov	#2: i32[]*, #1: i32[]*
+            	ret	#2: i32[]*
+            function array_i32_<>_get_size_0_2ae1af192b331746:
+            entry:
+            	ldp	#0: i32[]*, 0
+            	get	#1: i64*, #0: i32[]*, <>_size: i64
+            	ld	#2: i64, #1: i64*
+            	ret	#2: i64
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -673,46 +556,28 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
-        var pointPointerType = new TypePointerMetadata(pointType);
-        var ctor = pointType.Constructors.First();
-        var ctorPointer = new TypePointerMetadata(ctor.Type);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("Point_ctor_d5a01a8bf898461f", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new LoadParameter(new Register(2, builtInTypes.I32), 2),
-            ])),
-            new IrFunction("test_0_8a439296ced9ed11", new Block("entry", [
-                new Alloc(new Register(0, pointPointerType), 0),
-                new GetMemberPointer(
-                    new Register(1, ctorPointer),
-                    new Register(0, pointPointerType),
-                    ctor
-                ),
-                new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
-                new LoadConst(new Register(3, builtInTypes.I32), 1),
-                new LoadConst(new Register(4, builtInTypes.I32), 2),
-                new Call(
-                    new Register(5, builtInTypes.Void),
-                    new Register(2, ctor.Type),
-                    [
-                        new Register(3, builtInTypes.I32),
-                        new Register(4, builtInTypes.I32)
-                    ],
-                    false
-                ),
-                new Return(new Register(0, pointPointerType)),
-            ]))
-        };
+        const string expected =
+            """
+            function Point_ctor_d5a01a8bf898461f:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	ldp	#2: i32, 2
+            function test_0_8a439296ced9ed11:
+            entry:
+            	alloc	#0: Point*, 0
+            	get	#1: (i32, i32) => void*, #0: Point*, ctor: (i32, i32) => void
+            	ld	#2: (i32, i32) => void, #1: (i32, i32) => void*
+            	ldc	#3: i32, 1
+            	ldc	#4: i32, 2
+            	call	#5: void, #2: (i32, i32) => void, (#3: i32, #4: i32)
+            	ret	#0: Point*
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -735,46 +600,25 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var endBlock = new Block("if_0_end");
-        var entryBlock = new Block(
-            "entry",
-            [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new BinaryOperation(
-                    new Register(2, builtInTypes.Bool),
-                    Ge,
-                    new Register(0, builtInTypes.I32),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new Branch(new Register(2, builtInTypes.Bool), "if_0_then", "if_0_else"),
-            ],
-            [
-                new Block(
-                    "if_0_then",
-                    [
-                        new Return(new Register(0, builtInTypes.I32)),
-                        new Jump("if_0_end"),
-                    ],
-                    [endBlock]
-                ),
-                new Block(
-                    "if_0_else",
-                    [
-                        new Return(new Register(1, builtInTypes.I32)),
-                        new Jump("if_0_end"),
-                    ],
-                    [endBlock]
-                ),
-            ]
-        );
+        const string expected =
+            """
+            function max_2_e24cc7bc82aab685:
+            entry:
+            	ldp	#0: i32, 0
+            	ldp	#1: i32, 1
+            	ge	#2: bool, #0: i32, #1: i32
+            	br	#2: bool, if_0_then, if_0_else
+            if_0_then: <- entry
+            	ret	#0: i32
+            	jmp	if_0_end
+            if_0_else: <- entry
+            	ret	#1: i32
+            	jmp	if_0_end
+            if_0_end: <- if_0_then, if_0_else
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("max_2_e24cc7bc82aab685", entryBlock)
-        };
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -798,48 +642,26 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var endBlock = new Block("if_0_end", [
-            new Phi(
-                new Register(7, builtInTypes.I32),
-                [new Register(2, builtInTypes.I32), new Register(6, builtInTypes.I32)]
-            ),
-            new Return(new Register(7, builtInTypes.I32)),
-        ]);
-        var entryBlock = new Block(
-            "entry",
-            [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new LoadConst(new Register(1, builtInTypes.I32), 0),
-                new Move(new Register(2, builtInTypes.I32), new Register(1, builtInTypes.I32)),
-                new LoadConst(new Register(3, builtInTypes.I32), 0),
-                new BinaryOperation(
-                    new Register(4, builtInTypes.Bool),
-                    Gt,
-                    new Register(0, builtInTypes.I32),
-                    new Register(3, builtInTypes.I32)
-                ),
-                new Branch(new Register(4, builtInTypes.Bool), "if_0_then", "if_0_end"),
-            ],
-            [
-                new Block(
-                    "if_0_then",
-                    [
-                        new LoadConst(new Register(5, builtInTypes.I32), 10),
-                        new Move(new Register(6, builtInTypes.I32), new Register(5, builtInTypes.I32)),
-                        new Jump("if_0_end"),
-                    ],
-                    [endBlock]
-                ),
-                endBlock
-            ]
-        );
+        const string expected =
+            """
+            function max_1_35acf129a21c9365:
+            entry:
+            	ldp	#0: i32, 0
+            	ldc	#1: i32, 0
+            	mov	#2: i32, #1: i32
+            	ldc	#3: i32, 0
+            	gt	#4: bool, #0: i32, #3: i32
+            	br	#4: bool, if_0_then, if_0_end
+            if_0_then: <- entry
+            	ldc	#5: i32, 10
+            	mov	#6: i32, #5: i32
+            	jmp	if_0_end
+            if_0_end: <- entry, if_0_then
+            	phi	#7: i32, #2: i32, #6: i32
+            	ret	#7: i32
+            """;
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("max_1_35acf129a21c9365", entryBlock)
-        };
-
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -866,73 +688,37 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var endBlock0 = new Block("if_0_end");
-        var endBlock1 = new Block("if_1_end", [new Jump("if_0_end")], [endBlock0]);
-        var entryBlock = new Block(
-            "entry",
-            [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                new LoadConst(new Register(1, builtInTypes.I32), 0),
-                new BinaryOperation(
-                    new Register(2, builtInTypes.Bool),
-                    Gt,
-                    new Register(0, builtInTypes.I32),
-                    new Register(1, builtInTypes.I32)
-                ),
-                new Branch(new Register(2, builtInTypes.Bool), "if_0_then", "if_0_else"),
-            ],
-            [
-                new Block(
-                    "if_0_then",
-                    [
-                        new LoadConst(new Register(3, builtInTypes.I32), 10),
-                        new BinaryOperation(
-                            new Register(4, builtInTypes.Bool),
-                            Gt,
-                            new Register(0, builtInTypes.I32),
-                            new Register(3, builtInTypes.I32)
-                        ),
-                        new Branch(new Register(4, builtInTypes.Bool), "if_1_then", "if_1_else"),
-                    ],
-                    [
-                        new Block(
-                            "if_1_then",
-                            [
-                                new LoadConst(new Register(5, builtInTypes.I32), 1),
-                                new Return(new Register(5, builtInTypes.I32)),
-                                new Jump("if_1_end"),
-                            ],
-                            [endBlock1]
-                        ),
-                        new Block(
-                            "if_1_else",
-                            [
-                                new LoadConst(new Register(6, builtInTypes.I32), 2),
-                                new Return(new Register(6, builtInTypes.I32)),
-                                new Jump("if_1_end"),
-                            ],
-                            [endBlock1]
-                        ),
-                    ]
-                ),
-                new Block(
-                    "if_0_else",
-                    [
-                        new LoadConst(new Register(7, builtInTypes.I32), 0),
-                        new Return(new Register(7, builtInTypes.I32)),
-                        new Jump("if_0_end"),
-                    ],
-                    [endBlock0]
-                ),
-            ]
-        );
+        const string expected =
+            """
+            function max_1_35acf129a21c9365:
+            entry:
+            	ldp	#0: i32, 0
+            	ldc	#1: i32, 0
+            	gt	#2: bool, #0: i32, #1: i32
+            	br	#2: bool, if_0_then, if_0_else
+            if_0_then: <- entry
+            	ldc	#3: i32, 10
+            	gt	#4: bool, #0: i32, #3: i32
+            	br	#4: bool, if_1_then, if_1_else
+            if_0_else: <- entry
+            	ldc	#7: i32, 0
+            	ret	#7: i32
+            	jmp	if_0_end
+            if_1_then: <- if_0_then
+            	ldc	#5: i32, 1
+            	ret	#5: i32
+            	jmp	if_1_end
+            if_1_else: <- if_0_then
+            	ldc	#6: i32, 2
+            	ret	#6: i32
+            	jmp	if_1_end
+            if_0_end: <- if_1_end, if_0_else
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("max_1_35acf129a21c9365", entryBlock)
-        };
+            if_1_end: <- if_1_then, if_1_else
+            	jmp	if_0_end
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -958,59 +744,31 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var endBlock = new Block("if_0_end", [
-            new Phi(
-                new Register(10, builtInTypes.I32),
-                [new Register(8, builtInTypes.I32), new Register(9, builtInTypes.I32)]
-            ),
-            new Return(new Register(10, builtInTypes.I32))
-        ]);
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_35acf129a21c9365", new Block(
-                "entry",
-                [
-                    new LoadParameter(new Register(0, builtInTypes.I32), 0),
-                    new LoadConst(new Register(1, builtInTypes.I32), 0),
-                    new Move(new Register(2, builtInTypes.I32), new Register(1, builtInTypes.I32)),
-                    new LoadConst(new Register(3, builtInTypes.I32), 0),
-                    new BinaryOperation(
-                        new Register(4, builtInTypes.Bool),
-                        Gt,
-                        new Register(0, builtInTypes.I32),
-                        new Register(3, builtInTypes.I32)
-                    ),
-                    new Branch(new Register(4, builtInTypes.Bool), "if_0_then", "if_0_else"),
-                ],
-                [
-                    new Block(
-                        "if_0_then",
-                        [
-                            new LoadConst(new Register(5, builtInTypes.I32), 1),
-                            new Move(new Register(9, builtInTypes.I32), new Register(5, builtInTypes.I32)),
-                            new Jump("if_0_end"),
-                        ],
-                        [endBlock]
-                    ),
-                    new Block(
-                        "if_0_else",
-                        [
-                            new LoadConst(new Register(6, builtInTypes.I32), 1),
-                            new UnaryOperation(
-                                new Register(7, builtInTypes.I32),
-                                UnaryInstructionKind.Neg,
-                                new Register(6, builtInTypes.I32)
-                            ),
-                            new Move(new Register(8, builtInTypes.I32), new Register(7, builtInTypes.I32)),
-                            new Jump("if_0_end"),
-                        ],
-                        [endBlock]
-                    ),
-                ]
-            ))
-        };
+        const string expected =
+            """
+            function test_1_35acf129a21c9365:
+            entry:
+            	ldp	#0: i32, 0
+            	ldc	#1: i32, 0
+            	mov	#2: i32, #1: i32
+            	ldc	#3: i32, 0
+            	gt	#4: bool, #0: i32, #3: i32
+            	br	#4: bool, if_0_then, if_0_else
+            if_0_then: <- entry
+            	ldc	#5: i32, 1
+            	mov	#9: i32, #5: i32
+            	jmp	if_0_end
+            if_0_else: <- entry
+            	ldc	#6: i32, 1
+            	neg	#7: i32, #6: i32
+            	mov	#8: i32, #7: i32
+            	jmp	if_0_end
+            if_0_end: <- if_0_then, if_0_else
+            	phi	#10: i32, #8: i32, #9: i32
+            	ret	#10: i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1034,60 +792,28 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var loopEnd = new Block(
-            "loop_0_end", [
-                new Return(new Register(6, builtInTypes.I32))
-            ]
-        );
-        var ifThen = new Block(
-            "if_0_then",
-            [
-                new LoadConst(new Register(4, builtInTypes.I32), 1),
-                new BinaryOperation(
-                    new Register(5, builtInTypes.I32),
-                    Add,
-                    new Register(6, builtInTypes.I32),
-                    new Register(4, builtInTypes.I32)
-                ),
-                new Move(new Register(7, builtInTypes.I32), new Register(5, builtInTypes.I32)),
-                new Jump("loop_0_start"),
-            ]
-        );
-        var loopStart = new Block(
-            "loop_0_start",
-            [
-                new Phi(
-                    new Register(6, builtInTypes.I32),
-                    [new Register(1, builtInTypes.I32), new Register(7, builtInTypes.I32)]
-                ),
-                new LoadConst(new Register(2, builtInTypes.I32), 10),
-                new BinaryOperation(
-                    new Register(3, builtInTypes.Bool),
-                    Lt,
-                    new Register(6, builtInTypes.I32),
-                    new Register(2, builtInTypes.I32)
-                ),
-                new Branch(new Register(3, builtInTypes.Bool), "if_0_then", "loop_0_end"),
-            ],
-            [ifThen, loopEnd]
-        );
-        ifThen.AddNext(loopStart);
-        var entry = new Block(
-            "entry",
-            [
-                new LoadConst(new Register(0, builtInTypes.I32), 0),
-                new Move(new Register(1, builtInTypes.I32), new Register(0, builtInTypes.I32)),
-                new Jump("loop_0_start"),
-            ],
-            [loopStart]
-        );
+        const string expected =
+            """
+            function test_0_2af2b3192b419145:
+            entry:
+            	ldc	#0: i32, 0
+            	mov	#1: i32, #0: i32
+            	jmp	loop_0_start
+            loop_0_start: <- entry, if_0_then
+            	phi	#6: i32, #1: i32, #7: i32
+            	ldc	#2: i32, 10
+            	lt	#3: bool, #6: i32, #2: i32
+            	br	#3: bool, if_0_then, loop_0_end
+            if_0_then: <- loop_0_start
+            	ldc	#4: i32, 1
+            	add	#5: i32, #6: i32, #4: i32
+            	mov	#7: i32, #5: i32
+            	jmp	loop_0_start
+            loop_0_end: <- loop_0_start
+            	ret	#6: i32
+            """;
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_0_2af2b3192b419145", entry)
-        };
-
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1109,40 +835,25 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var testType = (TypeMetadata)test1Ns.FindType("Test")!;
-        var typePointer = new TypePointerMetadata(testType);
-        var method = (MethodMetadata)testType.GetMethods("method1")[0];
-        var methodPointer = new TypePointerMetadata(method.Type);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("Test_method1_0_2af2b3192b419145", new Block("entry", [
-                new LoadParameter(new Register(0, new TypePointerMetadata(testType)), 0),
-                new LoadConst(new Register(1, builtInTypes.I32), 0),
-                new Return(new Register(1, builtInTypes.I32)),
-            ])),
-            new IrFunction("Test_method2_0_3173c900e37ae1df", new Block("entry", [
-                new LoadParameter(new Register(0, typePointer), 0),
-                new GetMemberPointer(
-                    new Register(1, methodPointer),
-                    new Register(0, typePointer),
-                    method
-                ),
-                new Load(new Register(2, method.Type), new Register(1, methodPointer)),
-                new Call(
-                    new Register(3, builtInTypes.I32),
-                    new Register(2, method.Type),
-                    [],
-                    false
-                ),
-            ])),
-        };
+        const string expected =
+            """
+            function Test_method1_0_2af2b3192b419145:
+            entry:
+            	ldp	#0: Test*, 0
+            	ldc	#1: i32, 0
+            	ret	#1: i32
+            function Test_method2_0_3173c900e37ae1df:
+            entry:
+            	ldp	#0: Test*, 0
+            	get	#1: () => i32*, #0: Test*, method1: () => i32
+            	ld	#2: () => i32, #1: () => i32*
+            	call	#3: i32, #2: () => i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1162,38 +873,23 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var testType = (TypeMetadata)test1Ns.FindType("Test")!;
-        var typePointer = new TypePointerMetadata(testType);
-        var method = (MethodMetadata)testType.GetMethods("method1")[0];
-        var methodPointer = new TypePointerMetadata(method.Type);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("Test_method1_0_3173c900e37ae1df", new Block("entry", [
-                new LoadParameter(new Register(0, new TypePointerMetadata(testType)), 0),
-            ])),
-            new IrFunction("Test_method2_0_3173c900e37ae1df", new Block("entry", [
-                new LoadParameter(new Register(0, typePointer), 0),
-                new GetMemberPointer(
-                    new Register(1, methodPointer),
-                    new Register(0, typePointer),
-                    method
-                ),
-                new Load(new Register(2, method.Type), new Register(1, methodPointer)),
-                new Call(
-                    new Register(3, builtInTypes.Void),
-                    new Register(2, method.Type),
-                    [],
-                    false
-                ),
-            ])),
-        };
+        const string expected =
+            """
+            function Test_method1_0_3173c900e37ae1df:
+            entry:
+            	ldp	#0: Test*, 0
+            function Test_method2_0_3173c900e37ae1df:
+            entry:
+            	ldp	#0: Test*, 0
+            	get	#1: () => void*, #0: Test*, method1: () => void
+            	ld	#2: () => void, #1: () => void*
+            	call	#3: void, #2: () => void
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1221,48 +917,33 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
-        var pointPointerType = new TypePointerMetadata(pointType);
-        var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
-        var fieldPointer = new TypePointerMetadata(field.Type);
-        var setter = (MethodMetadata)pointType.GetMethods("<>_set_x")[0];
-        var setterPointer = new TypePointerMetadata(setter.Type);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
-                new Load(new Register(2, builtInTypes.I32), new Register(1, fieldPointer)),
-                new Return(new Register(2, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
-                new Store(new Register(2, fieldPointer), new Register(1, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(new Register(2, setterPointer), new Register(0, pointPointerType), setter),
-                new Load(new Register(3, setter.Type), new Register(2, setterPointer)),
-                new Call(
-                    new Register(4, builtInTypes.Void),
-                    new Register(3, setter.Type),
-                    [
-                        new Register(1, builtInTypes.I32)
-                    ],
-                    false
-                ),
-            ])),
-        };
+        const string expected =
+            """
+            function Point_<>_get_x_0_2af2b3192b419145:
+            entry:
+            	ldp	#0: Point*, 0
+            	get	#1: i32*, #0: Point*, <>_x: i32
+            	ld	#2: i32, #1: i32*
+            	ret	#2: i32
+            function Point_<>_set_x_1_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	get	#2: i32*, #0: Point*, <>_x: i32
+            	st	#2: i32*, #1: i32
+            function Point_ctor_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	get	#2: (i32) => void*, #0: Point*, <>_set_x: (i32) => void
+            	ld	#3: (i32) => void, #2: (i32) => void*
+            	call	#4: void, #3: (i32) => void, (#1: i32)
+            """;
 
-        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1288,88 +969,45 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
-        var pointPointerType = new TypePointerMetadata(pointType);
-        var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
-        var fieldPointer = new TypePointerMetadata(field.Type);
-        var getter = (MethodMetadata)pointType.GetMethods("<>_get_x")[0];
-        var getterPointer = new TypePointerMetadata(getter.Type);
-        var setter = (MethodMetadata)pointType.GetMethods("<>_set_x")[0];
-        var setterPointer = new TypePointerMetadata(setter.Type);
-        var ctor = pointType.GetConstructor([builtInTypes.I32])!;
-        var ctorPointer = new TypePointerMetadata(ctor.Type);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
-                new Load(new Register(2, builtInTypes.I32), new Register(1, fieldPointer)),
-                new Return(new Register(2, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
-                new Store(new Register(2, fieldPointer), new Register(1, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(
-                    new Register(2, setterPointer),
-                    new Register(0, pointPointerType),
-                    setter
-                ),
-                new Load(new Register(3, setter.Type), new Register(2, setterPointer)),
-                new Call(
-                    new Register(4, builtInTypes.Void),
-                    new Register(3, setter.Type),
-                    [
-                        new Register(1, builtInTypes.I32)
-                    ],
-                    false
-                ),
-            ])),
-            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
-                new Alloc(new Register(0, pointPointerType), 4),
-                new GetMemberPointer(
-                    new Register(1, ctorPointer),
-                    new Register(0, pointPointerType),
-                    ctor
-                ),
-                new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
-                new LoadConst(new Register(3, builtInTypes.I32), 1),
-                new Call(
-                    new Register(4, builtInTypes.Void),
-                    new Register(2, ctor.Type),
-                    [
-                        new Register(3, builtInTypes.I32)
-                    ],
-                    false
-                ),
-                new Move(new Register(5, pointPointerType), new Register(0, pointPointerType)),
-                new GetMemberPointer(
-                    new Register(6, getterPointer),
-                    new Register(5, pointPointerType),
-                    getter
-                ),
-                new Load(new Register(7, getter.Type), new Register(6, getterPointer)),
-                new Call(
-                    new Register(8, builtInTypes.I32),
-                    new Register(7, getter.Type),
-                    [],
-                    false
-                ),
-                new Return(new Register(8, builtInTypes.I32)),
-            ])),
-        };
+        const string expected =
+            """
+            function Point_ctor_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	get	#2: (i32) => void*, #0: Point*, <>_set_x: (i32) => void
+            	ld	#3: (i32) => void, #2: (i32) => void*
+            	call	#4: void, #3: (i32) => void, (#1: i32)
+            function test_0_2af2b3192b419145:
+            entry:
+            	alloc	#0: Point*, 4
+            	get	#1: (i32) => void*, #0: Point*, ctor: (i32) => void
+            	ld	#2: (i32) => void, #1: (i32) => void*
+            	ldc	#3: i32, 1
+            	call	#4: void, #2: (i32) => void, (#3: i32)
+            	mov	#5: Point*, #0: Point*
+            	get	#6: () => i32*, #5: Point*, <>_get_x: () => i32
+            	ld	#7: () => i32, #6: () => i32*
+            	call	#8: i32, #7: () => i32
+            	ret	#8: i32
+            function Point_<>_get_x_0_2af2b3192b419145:
+            entry:
+            	ldp	#0: Point*, 0
+            	get	#1: i32*, #0: Point*, <>_x: i32
+            	ld	#2: i32, #1: i32*
+            	ret	#2: i32
+            function Point_<>_set_x_1_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	get	#2: i32*, #0: Point*, <>_x: i32
+            	st	#2: i32*, #1: i32
+            """;
 
-        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1395,89 +1033,46 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
-        var pointPointerType = new TypePointerMetadata(pointType);
-        var field = (FieldMetadata)pointType.GetFields("<>_x")[0];
-        var fieldPointer = new TypePointerMetadata(field.Type);
-        var getter = (MethodMetadata)pointType.GetMethods("<>_get_x")[0];
-        var getterPointer = new TypePointerMetadata(getter.Type);
-        var setter = (MethodMetadata)pointType.GetMethods("<>_set_x")[0];
-        var setterPointer = new TypePointerMetadata(setter.Type);
-        var ctor = pointType.GetConstructor([builtInTypes.I32])!;
-        var ctorPointer = new TypePointerMetadata(ctor.Type);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new GetMemberPointer(new Register(1, fieldPointer), new Register(0, pointPointerType), field),
-                new Load(new Register(2, builtInTypes.I32), new Register(1, fieldPointer)),
-                new Return(new Register(2, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(new Register(2, fieldPointer), new Register(0, pointPointerType), field),
-                new Store(new Register(2, fieldPointer), new Register(1, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_ctor_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(new Register(2, setterPointer), new Register(0, pointPointerType), setter),
-                new Load(new Register(3, setter.Type), new Register(2, setterPointer)),
-                new Call(
-                    new Register(4, builtInTypes.Void),
-                    new Register(3, setter.Type),
-                    [
-                        new Register(1, builtInTypes.I32)
-                    ],
-                    false
-                ),
-            ])),
-            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
-                new Alloc(new Register(0, pointPointerType), 4),
-                new GetMemberPointer(
-                    new Register(1, ctorPointer),
-                    new Register(0, pointPointerType),
-                    ctor
-                ),
-                new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
-                new LoadConst(new Register(3, builtInTypes.I32), 1),
-                new Call(
-                    new Register(4, builtInTypes.Void),
-                    new Register(2, ctor.Type),
-                    [
-                        new Register(3, builtInTypes.I32)
-                    ],
-                    false
-                ),
-                new Move(new Register(5, pointPointerType), new Register(0, pointPointerType)),
-                new GetMemberPointer(
-                    new Register(6, getterPointer),
-                    new Register(5, pointPointerType),
-                    getter
-                ),
-                new Load(new Register(7, getter.Type), new Register(6, getterPointer)),
-                new Call(
-                    new Register(8, builtInTypes.I32),
-                    new Register(7, getter.Type),
-                    [],
-                    false
-                ),
-                new UnaryOperation(
-                    new Register(9, builtInTypes.I32),
-                    UnaryInstructionKind.Neg,
-                    new Register(8, builtInTypes.I32)
-                ),
-                new Return(new Register(9, builtInTypes.I32)),
-            ])),
-        };
+        const string expected =
+            """
+            function Point_ctor_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	get	#2: (i32) => void*, #0: Point*, <>_set_x: (i32) => void
+            	ld	#3: (i32) => void, #2: (i32) => void*
+            	call	#4: void, #3: (i32) => void, (#1: i32)
+            function test_0_2af2b3192b419145:
+            entry:
+            	alloc	#0: Point*, 4
+            	get	#1: (i32) => void*, #0: Point*, ctor: (i32) => void
+            	ld	#2: (i32) => void, #1: (i32) => void*
+            	ldc	#3: i32, 1
+            	call	#4: void, #2: (i32) => void, (#3: i32)
+            	mov	#5: Point*, #0: Point*
+            	get	#6: () => i32*, #5: Point*, <>_get_x: () => i32
+            	ld	#7: () => i32, #6: () => i32*
+            	call	#8: i32, #7: () => i32
+            	neg	#9: i32, #8: i32
+            	ret	#9: i32
+            function Point_<>_get_x_0_2af2b3192b419145:
+            entry:
+            	ldp	#0: Point*, 0
+            	get	#1: i32*, #0: Point*, <>_x: i32
+            	ld	#2: i32, #1: i32*
+            	ret	#2: i32
+            function Point_<>_set_x_1_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	get	#2: i32*, #0: Point*, <>_x: i32
+            	st	#2: i32*, #1: i32
+            """;
 
-        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1505,129 +1100,66 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var pointType = (TypeMetadata)test1Ns.FindType("Point")!;
-        var pointPointerType = new TypePointerMetadata(pointType);
-        var xField = (FieldMetadata)pointType.GetFields("<>_x")[0];
-        var xFieldPointer = new TypePointerMetadata(xField.Type);
-        var yField = (FieldMetadata)pointType.GetFields("<>_y")[0];
-        var yFieldPointer = new TypePointerMetadata(yField.Type);
-        var xGetter = (MethodMetadata)pointType.GetMethods("<>_get_x")[0];
-        var xGetterPointer = new TypePointerMetadata(xGetter.Type);
-        var xSetter = (MethodMetadata)pointType.GetMethods("<>_set_x")[0];
-        var xSetterPointer = new TypePointerMetadata(xSetter.Type);
-        var yGetter = (MethodMetadata)pointType.GetMethods("<>_get_y")[0];
-        var yGetterPointer = new TypePointerMetadata(yGetter.Type);
-        var ySetter = (MethodMetadata)pointType.GetMethods("<>_set_y")[0];
-        var ySetterPointer = new TypePointerMetadata(ySetter.Type);
-        var ctor = pointType.GetConstructor([builtInTypes.I32, builtInTypes.I32])!;
-        var ctorPointer = new TypePointerMetadata(ctor.Type);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("Point_<>_get_x_0_2af2b3192b419145", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new GetMemberPointer(new Register(1, xFieldPointer), new Register(0, pointPointerType), xField),
-                new Load(new Register(2, builtInTypes.I32), new Register(1, xFieldPointer)),
-                new Return(new Register(2, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(new Register(2, xFieldPointer), new Register(0, pointPointerType), xField),
-                new Store(new Register(2, xFieldPointer), new Register(1, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_<>_get_y_0_2af2b3192b419145", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new GetMemberPointer(new Register(1, yFieldPointer), new Register(0, pointPointerType), yField),
-                new Load(new Register(2, builtInTypes.I32), new Register(1, yFieldPointer)),
-                new Return(new Register(2, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_<>_set_y_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(new Register(2, yFieldPointer), new Register(0, pointPointerType), yField),
-                new Store(new Register(2, yFieldPointer), new Register(1, builtInTypes.I32)),
-            ])),
-            new IrFunction("Point_ctor_d5a01a8bf898461f", new Block("entry", [
-                new LoadParameter(new Register(0, pointPointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new LoadParameter(new Register(2, builtInTypes.I32), 2),
-                new GetMemberPointer(new Register(3, xSetterPointer), new Register(0, pointPointerType), xSetter),
-                new Load(new Register(4, xSetter.Type), new Register(3, xSetterPointer)),
-                new Call(
-                    new Register(5, builtInTypes.Void),
-                    new Register(4, xSetter.Type),
-                    [
-                        new Register(1, builtInTypes.I32)
-                    ],
-                    false
-                ),
-                new GetMemberPointer(new Register(6, ySetterPointer), new Register(0, pointPointerType), ySetter),
-                new Load(new Register(7, ySetter.Type), new Register(6, ySetterPointer)),
-                new Call(
-                    new Register(8, builtInTypes.Void),
-                    new Register(7, ySetter.Type),
-                    [
-                        new Register(2, builtInTypes.I32)
-                    ],
-                    false
-                ),
-            ])),
-            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
-                new Alloc(new Register(0, pointPointerType), 8),
-                new GetMemberPointer(new Register(1, ctorPointer), new Register(0, pointPointerType), ctor),
-                new Load(new Register(2, ctor.Type), new Register(1, ctorPointer)),
-                new LoadConst(new Register(3, builtInTypes.I32), 1),
-                new LoadConst(new Register(4, builtInTypes.I32), 2),
-                new Call(
-                    new Register(5, builtInTypes.Void),
-                    new Register(2, ctor.Type),
-                    [
-                        new Register(3, builtInTypes.I32),
-                        new Register(4, builtInTypes.I32),
-                    ],
-                    false
-                ),
-                new Move(new Register(6, pointPointerType), new Register(0, pointPointerType)),
-                new GetMemberPointer(
-                    new Register(7, xGetterPointer),
-                    new Register(6, pointPointerType),
-                    xGetter
-                ),
-                new Load(new Register(8, xGetter.Type), new Register(7, xGetterPointer)),
-                new Call(
-                    new Register(9, builtInTypes.I32),
-                    new Register(8, xGetter.Type),
-                    [],
-                    false
-                ),
-                new GetMemberPointer(
-                    new Register(10, yGetterPointer),
-                    new Register(6, pointPointerType),
-                    yGetter
-                ),
-                new Load(new Register(11, yGetter.Type), new Register(10, yGetterPointer)),
-                new Call(
-                    new Register(12, builtInTypes.I32),
-                    new Register(11, yGetter.Type),
-                    [],
-                    false
-                ),
-                new BinaryOperation(
-                    new Register(13, builtInTypes.I32),
-                    Add,
-                    new Register(9, builtInTypes.I32),
-                    new Register(12, builtInTypes.I32)
-                ),
-                new Return(new Register(13, builtInTypes.I32)),
-            ])),
-        };
+        const string expected =
+            """
+            function Point_ctor_d5a01a8bf898461f:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	ldp	#2: i32, 2
+            	get	#3: (i32) => void*, #0: Point*, <>_set_x: (i32) => void
+            	ld	#4: (i32) => void, #3: (i32) => void*
+            	call	#5: void, #4: (i32) => void, (#1: i32)
+            	get	#6: (i32) => void*, #0: Point*, <>_set_y: (i32) => void
+            	ld	#7: (i32) => void, #6: (i32) => void*
+            	call	#8: void, #7: (i32) => void, (#2: i32)
+            function test_0_2af2b3192b419145:
+            entry:
+            	alloc	#0: Point*, 8
+            	get	#1: (i32, i32) => void*, #0: Point*, ctor: (i32, i32) => void
+            	ld	#2: (i32, i32) => void, #1: (i32, i32) => void*
+            	ldc	#3: i32, 1
+            	ldc	#4: i32, 2
+            	call	#5: void, #2: (i32, i32) => void, (#3: i32, #4: i32)
+            	mov	#6: Point*, #0: Point*
+            	get	#7: () => i32*, #6: Point*, <>_get_x: () => i32
+            	ld	#8: () => i32, #7: () => i32*
+            	call	#9: i32, #8: () => i32
+            	get	#10: () => i32*, #6: Point*, <>_get_y: () => i32
+            	ld	#11: () => i32, #10: () => i32*
+            	call	#12: i32, #11: () => i32
+            	add	#13: i32, #9: i32, #12: i32
+            	ret	#13: i32
+            function Point_<>_get_x_0_2af2b3192b419145:
+            entry:
+            	ldp	#0: Point*, 0
+            	get	#1: i32*, #0: Point*, <>_x: i32
+            	ld	#2: i32, #1: i32*
+            	ret	#2: i32
+            function Point_<>_set_x_1_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	get	#2: i32*, #0: Point*, <>_x: i32
+            	st	#2: i32*, #1: i32
+            function Point_<>_get_y_0_2af2b3192b419145:
+            entry:
+            	ldp	#0: Point*, 0
+            	get	#1: i32*, #0: Point*, <>_y: i32
+            	ld	#2: i32, #1: i32*
+            	ret	#2: i32
+            function Point_<>_set_y_1_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Point*, 0
+            	ldp	#1: i32, 1
+            	get	#2: i32*, #0: Point*, <>_y: i32
+            	st	#2: i32*, #1: i32
+            """;
 
-        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1662,191 +1194,72 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var test1Type = (TypeMetadata)test1Ns.FindType("Test1")!;
-        var test1PointerType = new TypePointerMetadata(test1Type);
-        var test2Type = (TypeMetadata)test1Ns.FindType("Test2")!;
-        var test2PointerType = new TypePointerMetadata(test2Type);
-
-        // Test1 members
-        var test1XField = (FieldMetadata)test1Type.GetFields("<>_x")[0];
-        var test1XFieldPointer = new TypePointerMetadata(test1XField.Type);
-        var test1XGetter = (MethodMetadata)test1Type.GetMethods("<>_get_x")[0];
-        var test1XGetterPointer = new TypePointerMetadata(test1XGetter.Type);
-        var test1XSetter = (MethodMetadata)test1Type.GetMethods("<>_set_x")[0];
-        var test1XSetterPointer = new TypePointerMetadata(test1XSetter.Type);
-        var test1Ctor = test1Type.GetConstructor([builtInTypes.I32])!;
-        var test1CtorPointer = new TypePointerMetadata(test1Ctor.Type);
-
-        // Test2 members
-        var test2ObjField = (FieldMetadata)test2Type.GetFields("<>_obj")[0];
-        var test2ObjFieldPointer = new TypePointerMetadata(test2ObjField.Type);
-        var test2ObjGetter = (MethodMetadata)test2Type.GetMethods("<>_get_obj")[0];
-        var test2ObjGetterPointer = new TypePointerMetadata(test2ObjGetter.Type);
-        var test2ObjSetter = (MethodMetadata)test2Type.GetMethods("<>_set_obj")[0];
-        var test2ObjSetterPointer = new TypePointerMetadata(test2ObjSetter.Type);
-        var test2Ctor = test2Type.GetConstructor([test1Type])!;
-        var test2CtorPointer = new TypePointerMetadata(test2Ctor.Type);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            // Test1
-            new IrFunction("Test1_<>_get_x_0_2af2b3192b419145", new Block("entry", [
-                new LoadParameter(new Register(0, test1PointerType), 0),
-                new GetMemberPointer(
-                    new Register(1, test1XFieldPointer),
-                    new Register(0, test1PointerType),
-                    test1XField
-                ),
-                new Load(new Register(2, builtInTypes.I32), new Register(1, test1XFieldPointer)),
-                new Return(new Register(2, builtInTypes.I32)),
-            ])),
-            new IrFunction("Test1_<>_set_x_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, test1PointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(
-                    new Register(2, test1XFieldPointer),
-                    new Register(0, test1PointerType),
-                    test1XField
-                ),
-                new Store(new Register(2, test1XFieldPointer), new Register(1, builtInTypes.I32)),
-            ])),
-            new IrFunction("Test1_ctor_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, test1PointerType), 0),
-                new LoadParameter(new Register(1, builtInTypes.I32), 1),
-                new GetMemberPointer(
-                    new Register(2, test1XSetterPointer),
-                    new Register(0, test1PointerType),
-                    test1XSetter
-                ),
-                new Load(new Register(3, test1XSetter.Type), new Register(2, test1XSetterPointer)),
-                new Call(
-                    new Register(4, builtInTypes.Void),
-                    new Register(3, test1XSetter.Type),
-                    [
-                        new Register(1, builtInTypes.I32)
-                    ],
-                    false
-                ),
-            ])),
+        const string expected =
+            """
+            function Test1_ctor_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Test1*, 0
+            	ldp	#1: i32, 1
+            	get	#2: (i32) => void*, #0: Test1*, <>_set_x: (i32) => void
+            	ld	#3: (i32) => void, #2: (i32) => void*
+            	call	#4: void, #3: (i32) => void, (#1: i32)
+            function Test2_ctor_d0266fe934ea148e:
+            entry:
+            	ldp	#0: Test2*, 0
+            	ldp	#1: Test1*, 1
+            	get	#2: (Test1) => void*, #0: Test2*, <>_set_obj: (Test1) => void
+            	ld	#3: (Test1) => void, #2: (Test1) => void*
+            	call	#4: void, #3: (Test1) => void, (#1: Test1*)
+            function test_0_2af2b3192b419145:
+            entry:
+            	alloc	#0: Test1*, 4
+            	get	#1: (i32) => void*, #0: Test1*, ctor: (i32) => void
+            	ld	#2: (i32) => void, #1: (i32) => void*
+            	ldc	#3: i32, 1
+            	call	#4: void, #2: (i32) => void, (#3: i32)
+            	mov	#5: Test1*, #0: Test1*
+            	alloc	#6: Test2*, 8
+            	get	#7: (Test1) => void*, #6: Test2*, ctor: (Test1) => void
+            	ld	#8: (Test1) => void, #7: (Test1) => void*
+            	call	#9: void, #8: (Test1) => void, (#5: Test1*)
+            	mov	#10: Test2*, #6: Test2*
+            	get	#11: () => Test1*, #10: Test2*, <>_get_obj: () => Test1
+            	ld	#12: () => Test1, #11: () => Test1*
+            	call	#13: Test1*, #12: () => Test1
+            	get	#14: () => i32*, #13: Test1*, <>_get_x: () => i32
+            	ld	#15: () => i32, #14: () => i32*
+            	call	#16: i32, #15: () => i32
+            	ret	#16: i32
+            function Test1_<>_get_x_0_2af2b3192b419145:
+            entry:
+            	ldp	#0: Test1*, 0
+            	get	#1: i32*, #0: Test1*, <>_x: i32
+            	ld	#2: i32, #1: i32*
+            	ret	#2: i32
+            function Test1_<>_set_x_1_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: Test1*, 0
+            	ldp	#1: i32, 1
+            	get	#2: i32*, #0: Test1*, <>_x: i32
+            	st	#2: i32*, #1: i32
+            function Test2_<>_get_obj_0_df4563aec012855c:
+            entry:
+            	ldp	#0: Test2*, 0
+            	get	#1: Test1**, #0: Test2*, <>_obj: Test1
+            	ld	#2: Test1*, #1: Test1**
+            	ret	#2: Test1*
+            function Test2_<>_set_obj_1_d0266fe934ea148e:
+            entry:
+            	ldp	#0: Test2*, 0
+            	ldp	#1: Test1*, 1
+            	get	#2: Test1**, #0: Test2*, <>_obj: Test1
+            	st	#2: Test1**, #1: Test1*
+            """;
 
-            // Test2
-            new IrFunction("Test2_<>_get_obj_0_df4563aec012855c", new Block("entry", [
-                new LoadParameter(new Register(0, test2PointerType), 0),
-                new GetMemberPointer(
-                    new Register(1, new TypePointerMetadata(test2ObjFieldPointer)),
-                    new Register(0, test2PointerType),
-                    test2ObjField
-                ),
-                new Load(
-                    new Register(2, test2ObjFieldPointer),
-                    new Register(1, new TypePointerMetadata(test2ObjFieldPointer))
-                ),
-                new Return(new Register(2, test2ObjFieldPointer)),
-            ])),
-            new IrFunction("Test2_<>_set_obj_1_d0266fe934ea148e", new Block("entry", [
-                new LoadParameter(new Register(0, test2PointerType), 0),
-                new LoadParameter(new Register(1, test1PointerType), 1),
-                new GetMemberPointer(
-                    new Register(2, new TypePointerMetadata(test2ObjFieldPointer)),
-                    new Register(0, test2PointerType),
-                    test2ObjField
-                ),
-                new Store(
-                    new Register(2, new TypePointerMetadata(test2ObjFieldPointer)),
-                    new Register(1, test1PointerType)
-                ),
-            ])),
-            new IrFunction("Test2_ctor_d0266fe934ea148e", new Block("entry", [
-                new LoadParameter(new Register(0, test2PointerType), 0),
-                new LoadParameter(new Register(1, test1PointerType), 1),
-                new GetMemberPointer(
-                    new Register(2, test2ObjSetterPointer),
-                    new Register(0, test2PointerType),
-                    test2ObjSetter
-                ),
-                new Load(new Register(3, test2ObjSetter.Type), new Register(2, test2ObjSetterPointer)),
-                new Call(
-                    new Register(4, builtInTypes.Void),
-                    new Register(3, test2ObjSetter.Type),
-                    [
-                        new Register(1, test1PointerType)
-                    ],
-                    false
-                ),
-            ])),
-
-            // test
-            new IrFunction("test_0_2af2b3192b419145", new Block("entry", [
-                new Alloc(new Register(0, test1PointerType), 4),
-                new GetMemberPointer(
-                    new Register(1, test1CtorPointer),
-                    new Register(0, test1PointerType),
-                    test1Ctor
-                ),
-                new Load(new Register(2, test1Ctor.Type), new Register(1, test1CtorPointer)),
-                new LoadConst(new Register(3, builtInTypes.I32), 1),
-                new Call(
-                    new Register(4, builtInTypes.Void),
-                    new Register(2, test1Ctor.Type),
-                    [
-                        new Register(3, builtInTypes.I32)
-                    ],
-                    false
-                ),
-                new Move(new Register(5, test1PointerType), new Register(0, test1PointerType)),
-
-                new Alloc(new Register(6, test2PointerType), 8),
-                new GetMemberPointer(
-                    new Register(7, test2CtorPointer),
-                    new Register(6, test2PointerType),
-                    test2Ctor
-                ),
-                new Load(new Register(8, test2Ctor.Type), new Register(7, test2CtorPointer)),
-                new Call(
-                    new Register(9, builtInTypes.Void),
-                    new Register(8, test2Ctor.Type),
-                    [
-                        new Register(5, test1PointerType)
-                    ],
-                    false
-                ),
-                new Move(new Register(10, test2PointerType), new Register(6, test2PointerType)),
-
-                new GetMemberPointer(
-                    new Register(11, test2ObjGetterPointer),
-                    new Register(10, test2PointerType),
-                    test2ObjGetter
-                ),
-                new Load(new Register(12, test2ObjGetter.Type), new Register(11, test2ObjGetterPointer)),
-                new Call(
-                    new Register(13, test1PointerType),
-                    new Register(12, test2ObjGetter.Type),
-                    [],
-                    false
-                ),
-
-                new GetMemberPointer(
-                    new Register(14, test1XGetterPointer),
-                    new Register(13, test1PointerType),
-                    test1XGetter
-                ),
-                new Load(new Register(15, test1XGetter.Type), new Register(14, test1XGetterPointer)),
-                new Call(
-                    new Register(16, builtInTypes.I32),
-                    new Register(15, test1XGetter.Type),
-                    [],
-                    false
-                ),
-
-                new Return(new Register(16, builtInTypes.I32)),
-            ])),
-        };
-
-        Assert.That(functions, Is.EquivalentTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1864,35 +1277,22 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var functionType = (FunctionTypeMetadata)rootNamespace.FindType("() => void")!;
-        var functionPointer = new TypePointerMetadata(functionType);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("main_0_3173c900e37ae1df", new Block("entry", [
-                new GetMemberPointer(
-                    new Register(0, functionPointer),
-                    null,
-                    new FunctionMetadata(
-                        null,
-                        AccessModifierMetadata.Public,
-                        "test1",
-                        [],
-                        functionType)),
-                new Load(new Register(1, functionType), new Register(0, functionPointer)),
-                new Call(
-                    new Register(2, builtInTypes.Void),
-                    new Register(1, functionType),
-                    [],
-                    true)
-            ])),
-            new IrFunction("test1_0_3173c900e37ae1df", new Block("entry", [])),
-        };
+        const string expected =
+            """
+            function main_0_3173c900e37ae1df:
+            entry:
+            	get	#0: () => void*, test1: () => void
+            	ld	#1: () => void, #0: () => void*
+            	call	#2: void, #1: () => void
+            function test1_0_3173c900e37ae1df:
+            entry:
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+            """;
+
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1912,36 +1312,22 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var testType = (TypeMetadata)test1Ns.FindType("Test")!;
-        var testMethod = (MethodMetadata)testType.GetMethods("test")[0];
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("Test_test_s_0_3173c900e37ae1df", new Block("entry", [])),
-            new IrFunction("main_0_3173c900e37ae1df", new Block("entry", [
-                new GetMemberPointer(
-                    new Register(0, new TypePointerMetadata(testMethod.Type)),
-                    null,
-                    testMethod
-                ),
-                new Load(
-                    new Register(1, testMethod.Type),
-                    new Register(0, new TypePointerMetadata(testMethod.Type))
-                ),
-                new Call(
-                    new Register(2, builtInTypes.Void),
-                    new Register(1, testMethod.Type),
-                    [],
-                    true
-                )
-            ])),
-        };
+        const string expected =
+            """
+            function Test_test_s_0_3173c900e37ae1df:
+            entry:
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+            function main_0_3173c900e37ae1df:
+            entry:
+            	get	#0: () => void*, test: () => void
+            	ld	#1: () => void, #0: () => void*
+            	call	#2: void, #1: () => void
+            """;
+
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -1960,36 +1346,23 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var functionType = (FunctionTypeMetadata)rootNamespace.FindType("() => void")!;
-        var functionPointer = new TypePointerMetadata(functionType);
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_0_3173c900e37ae1df", new Block("entry", [])),
-            new IrFunction("main_0_3173c900e37ae1df", new Block("entry", [
-                new GetMemberPointer(
-                    new Register(0, functionPointer),
-                    null,
-                    new FunctionMetadata(
-                        null,
-                        AccessModifierMetadata.Public,
-                        "test",
-                        [],
-                        functionType)),
-                new Load(new Register(1, functionType), new Register(0, functionPointer)),
-                new Move(new Register(2, functionType), new Register(1, functionType)),
-                new Call(
-                    new Register(3, builtInTypes.Void),
-                    new Register(2, functionType),
-                    [],
-                    false)
-            ]))
-        };
+        const string expected =
+            """
+            function test_0_3173c900e37ae1df:
+            entry:
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+            function main_0_3173c900e37ae1df:
+            entry:
+            	get	#0: () => void*, test: () => void
+            	ld	#1: () => void, #0: () => void*
+            	mov	#2: () => void, #1: () => void
+            	call	#3: void, #2: () => void
+            """;
+
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -2005,25 +1378,18 @@ public class IrGeneratorTests
             """;
         var (tree, rootNamespace, builtInTypes) = Parse(code);
 
-        var functionType = (FunctionTypeMetadata)rootNamespace.FindType("() => void")!;
-
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_2662accf658c5c8b", new Block("entry", [
-                new LoadParameter(new Register(0, functionType), 0),
-                new Call(
-                    new Register(1, builtInTypes.Void),
-                    new Register(0, functionType),
-                    [],
-                    false
-                )
-            ])),
-        };
+        const string expected =
+            """
+            function test_1_2662accf658c5c8b:
+            entry:
+            	ldp	#0: () => void, 0
+            	call	#1: void, #0: () => void
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -2046,33 +1412,17 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var interfaceType = (AliasMetadata)test1Ns.FindType("Interface")!;
-        var interfacePointer = new TypePointerMetadata(interfaceType);
+        const string expected =
+            """
+            function test_1_cf064f170ff86101:
+            entry:
+            	ldp	#0: Interface*, 0
+            	get	#1: () => void*, #0: Interface*, method: () => void
+            	ld	#2: () => void, #1: () => void*
+            	call	#3: void, #2: () => void
+            """;
 
-        var method = (InterfaceMethodMetadata)interfaceType.GetMember("method")!;
-        var methodPointer = new TypePointerMetadata(method.Type);
-
-        var expected = new List<IrFunction>
-        {
-            new IrFunction("test_1_cf064f170ff86101", new Block("entry", [
-                new LoadParameter(new Register(0, interfacePointer), 0),
-                new GetMemberPointer(
-                    new Register(1, methodPointer),
-                    new Register(0, interfacePointer),
-                    method
-                ),
-                new Load(new Register(2, method.Type), new Register(1, methodPointer)),
-                new Call(
-                    new Register(3, builtInTypes.Void),
-                    new Register(2, method.Type),
-                    [],
-                    false
-                ),
-            ])),
-        };
-
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -2091,23 +1441,16 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var any = rootNamespace.FindType("{ }")!;
-        var anyPointer = new TypePointerMetadata(any);
+        const string expected =
+            """
+            function test_1_31fc2f6c0e066efc:
+            entry:
+            	ldp	#0: { }*, 0
+            	is	#1: bool, #0: { }*, i8
+            	ret	#1: bool
+            """;
 
-        var expected = new[]
-        {
-            new IrFunction("test_1_31fc2f6c0e066efc", new Block("entry", [
-                new LoadParameter(new Register(0, anyPointer), 0),
-                new IsType(
-                    new Register(1, builtInTypes.Bool),
-                    new Register(0, anyPointer),
-                    builtInTypes.I8
-                ),
-                new Return(new Register(1, builtInTypes.Bool)),
-            ])),
-        };
-
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -2126,23 +1469,16 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var any = rootNamespace.FindType("{ }")!;
-        var anyPointer = new TypePointerMetadata(any);
+        const string expected =
+            """
+            function test_1_2baa3d192bdd861d:
+            entry:
+            	ldp	#0: { }*, 0
+            	cast	#1: i8, #0: { }*, i8
+            	ret	#1: i8
+            """;
 
-        var expected = new[]
-        {
-            new IrFunction("test_1_2baa3d192bdd861d", new Block("entry", [
-                new LoadParameter(new Register(0, anyPointer), 0),
-                new Cast(
-                    new Register(1, builtInTypes.I8),
-                    new Register(0, anyPointer),
-                    builtInTypes.I8
-                ),
-                new Return(new Register(1, builtInTypes.I8)),
-            ])),
-        };
-
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -2163,27 +1499,16 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var any = rootNamespace.FindType("{ }")!;
-        var anyPointer = new TypePointerMetadata(any);
+        const string expected =
+            """
+            function test_1_695e7ecb50fc0a40:
+            entry:
+            	ldp	#0: { }*, 0
+            	cast	#1: Test*, #0: { }*, Test
+            	ret	#1: Test*
+            """;
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var testType = (TypeMetadata)test1Ns.FindType("Test")!;
-        var testPointer = new TypePointerMetadata(testType);
-
-        var expected = new[]
-        {
-            new IrFunction("test_1_695e7ecb50fc0a40", new Block("entry", [
-                new LoadParameter(new Register(0, anyPointer), 0),
-                new Cast(
-                    new Register(1, testPointer),
-                    new Register(0, anyPointer),
-                    testType
-                ),
-                new Return(new Register(1, testPointer)),
-            ])),
-        };
-
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -2206,45 +1531,30 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new[]
-        {
-            new IrFunction("test_2_2471114b9902d8e5", new Block(
-                "entry",
-                [
-                    new LoadParameter(new Register(0, builtInTypes.Bool), 0),
-                    new LoadParameter(new Register(1, builtInTypes.Bool), 1),
-                    new Move(new Register(2, builtInTypes.Bool), new Register(0, builtInTypes.Bool)),
-                    new Branch(new Register(2, builtInTypes.Bool), "if_1_then", "if_1_end"),
-                ],
-                [
-                    new Block("if_1_then", [
-                        new Move(new Register(5, builtInTypes.Bool), new Register(1, builtInTypes.Bool)),
-                        new Jump("if_1_end"),
-                    ]),
-                    new Block("if_1_end", [
-                        new Phi(
-                            new Register(6, builtInTypes.Bool),
-                            [
-                                new Register(2, builtInTypes.Bool),
-                                new Register(5, builtInTypes.Bool),
-                            ]
-                        ),
-                        new Branch(new Register(6, builtInTypes.Bool), "if_0_then", "if_0_end"),
-                    ]),
-                    new Block("if_0_then", [
-                        new LoadConst(new Register(3, builtInTypes.I32), 1),
-                        new Return(new Register(3, builtInTypes.I32)),
-                        new Jump("if_0_end"),
-                    ]),
-                    new Block("if_0_end", [
-                        new LoadConst(new Register(4, builtInTypes.I32), 0),
-                        new Return(new Register(4, builtInTypes.I32)),
-                    ]),
-                ]
-            )),
-        };
+        const string expected =
+            """
+            function test_2_2471114b9902d8e5:
+            entry:
+            	ldp	#0: bool, 0
+            	ldp	#1: bool, 1
+            	mov	#2: bool, #0: bool
+            	br	#2: bool, if_1_then, if_1_end
+            if_1_then: <- entry
+            	mov	#5: bool, #1: bool
+            	jmp	if_1_end
+            if_1_end: <- entry, if_1_then
+            	phi	#6: bool, #2: bool, #5: bool
+            	br	#6: bool, if_0_then, if_0_end
+            if_0_then: <- if_1_end
+            	ldc	#3: i32, 1
+            	ret	#3: i32
+            	jmp	if_0_end
+            if_0_end: <- if_1_end, if_0_then
+            	ldc	#4: i32, 0
+            	ret	#4: i32
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -2262,16 +1572,16 @@ public class IrGeneratorTests
         var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
         var functions = ir.Generate([tree], rootNamespace);
 
-        var expected = new[]
-        {
-            new IrFunction("test_1_f22f9ef8659fbbff", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.I32), 0)
-            ])),
-            new IrFunction("test_1_c79f1eebc0a6b477", new Block("entry", [
-                new LoadParameter(new Register(0, builtInTypes.Bool), 0)
-            ])),
-        };
+        const string expected =
+            """
+            function test_1_f22f9ef8659fbbff:
+            entry:
+            	ldp	#0: i32, 0
+            function test_1_c79f1eebc0a6b477:
+            entry:
+            	ldp	#0: bool, 0
+            """;
 
-        Assert.That(functions, Is.EqualTo(expected).Using(IrFunctionComparer.Instance));
+        Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 }

@@ -145,7 +145,7 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         private void CheckType(MemberAccessExpression node, TypeMetadata type)
         {
             var enclosingType = node.FindInParent<TypeDeclaration>()?.Metadata;
-            if (type.Equals(enclosingType))
+            if (ReferenceEquals(type, enclosingType))
                 return;
 
             // TODO: check static access
