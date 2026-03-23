@@ -160,7 +160,7 @@ internal class MetadataGenerator : ISemanticPass
             var type = node.Metadata!;
             var root = node.GetRoot();
             var metadataProvider = metadataProviderMap.Get(node);
-            var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
+            var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
 
             foreach (var @interface in node.Interfaces)
             {
@@ -321,7 +321,15 @@ internal class MetadataGenerator : ISemanticPass
             if (!symbol.IsGenericApplication)
                 continue;
 
-            CreateGenericApplication((GenericApplication)symbol.Node);
+            var genericApplication = (GenericApplication)symbol.Node;
+            ResolveInlineType(genericApplication);
+
+            var metadataProvider = metadataProviderMap.Get(genericApplication);
+            var factory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
+            var metadata = factory.CreateGenericApplication(genericApplication);
+
+            genericApplication.Metadata = metadata;
+            genericToProcess.Add(metadata);
         }
     }
 
@@ -394,7 +402,7 @@ internal class MetadataGenerator : ISemanticPass
             var root = function.GetRoot();
             var metadata = function.Metadata!;
             var metadataProvider = metadataProviderMap.Get(function);
-            var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
+            var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
 
             foreach (var functionParameter in function.Parameters)
             {
@@ -452,13 +460,15 @@ internal class MetadataGenerator : ISemanticPass
             if (generic.ClosedGeneric is not null)
                 continue;
 
-            var map = new TypeArgumentMap(builtInTypes, generic);
+            var map = new TypeArgumentMap(builtInTypes, diagnostics, generic);
             map.Map();
         }
     }
 
     private ITypeMetadata GetOrCreateType(IInlineType inlineType)
     {
+        ResolveInlineType(inlineType);
+
         var metadataProvider = metadataProviderMap.Get(inlineType);
         var result = metadataProvider.QueryTypes(Query.From(inlineType));
         var metadata = default(ITypeMetadata);
@@ -469,39 +479,11 @@ internal class MetadataGenerator : ISemanticPass
         }
         else if (result.IsTypeNotFound)
         {
-            if (inlineType is ArrayType arrayType)
-            {
-                metadata = CreateArray(arrayType);
-            }
-            else if (inlineType is DiscriminatedUnion discriminatedUnion)
-            {
-                metadata = CreateDiscriminatedUnion(discriminatedUnion);
-            }
-            else if (inlineType is FunctionType functionType)
-            {
-                metadata = CreateFunctionType(functionType);
-            }
-            else if (inlineType is GenericApplication genericApplication)
-            {
-                metadata = CreateGenericApplication(genericApplication);
-            }
-            else if (inlineType is Interface @interface)
-            {
-                metadata = CreateInterface(@interface);
-            }
-            else if (inlineType is TupleType tupleType)
-            {
-                metadata = CreateTuple(tupleType);
-            }
-            else if (inlineType is TypeRef)
-            {
-                metadata = TypeMetadata.Invalid(inlineType.Name);
-                diagnostics.UnknownType(inlineType);
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(inlineType));
-            }
+            var factory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
+            metadata = factory.Create(inlineType);
+
+            if (metadata is GenericApplicationMetadata genericApplication)
+                genericToProcess.Add(genericApplication);
         }
         else
         {
@@ -518,146 +500,56 @@ internal class MetadataGenerator : ISemanticPass
         return metadata;
     }
 
-    private ArrayMetadata CreateArray(ArrayType arrayType)
+    private void ResolveInlineType(IInlineType inlineType)
     {
-        var metadataProvider = metadataProviderMap.Get(arrayType);
-        var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
-        var metadata = metadataFactory.CreateArrayMetadata(
-            arrayType.GetLocation(),
-            GetOrCreateType(arrayType.ElementType));
-
-        return metadata;
-    }
-
-    private DiscriminatedUnionMetadata CreateDiscriminatedUnion(DiscriminatedUnion discriminatedUnion)
-    {
-        var metadataProvider = metadataProviderMap.Get(discriminatedUnion);
-        var metadata = new DiscriminatedUnionMetadata(
-            discriminatedUnion.GetLocation(),
-            discriminatedUnion.Types.Select(GetOrCreateType));
-
-        return metadataProvider.GetOrDefine(metadata);
-    }
-
-    private FunctionTypeMetadata CreateFunctionType(FunctionType functionType)
-    {
-        var metadataProvider = metadataProviderMap.Get(functionType);
-        var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
-
-        return metadataFactory.CreateFunctionType(
-            functionType.GetLocation(),
-            functionType.ParameterTypes.Select(GetOrCreateType),
-            GetOrCreateType(functionType.ReturnType));
-    }
-
-    private ITypeMetadata CreateGenericApplication(GenericApplication genericApplication)
-    {
-        var metadataProvider = metadataProviderMap.Get(genericApplication);
-
-        foreach (var argumentNode in genericApplication.TypeArguments)
-            GetOrCreateType(argumentNode);
-
-        var openGenericName = genericApplication.GetOpenGenericName();
-        var openGeneric = default(IGenericMetadata);
-
-        var result = metadataProvider.QueryTypes(Query.From(openGenericName));
-        if (result is { IsSuccess: true, Types: [IGenericMetadata genericMetadata] })
+        if (inlineType is ArrayType arrayType)
         {
-            openGeneric = genericMetadata;
+            if (arrayType.ElementType.Metadata is null)
+                GetOrCreateType(arrayType.ElementType);
         }
-        else
+        else if (inlineType is DiscriminatedUnion discriminatedUnion)
         {
-            if (result.IsMultipleTypesFound)
-                diagnostics.MultipleMembersFound(genericApplication, result.Types);
-            else if (result.IsNamespaceNotFound)
-                diagnostics.UnknownNamespace(genericApplication);
-            else
-                diagnostics.UnknownType(genericApplication);
-
-            openGeneric = TypeMetadata.Invalid(openGenericName);
+            foreach (var type in discriminatedUnion.Types)
+                if (type.Metadata is null)
+                    GetOrCreateType(type);
         }
-
-        var metadata = new GenericApplicationMetadata(
-            genericApplication.GetLocation(),
-            openGeneric,
-            genericApplication.TypeArguments.Select(x => x.Metadata!));
-
-        metadata = metadataProvider.GetOrDefine(metadata);
-
-        genericToProcess.Add(metadata);
-
-        return metadata;
-    }
-
-    private InterfaceMetadata CreateInterface(Interface @interface)
-    {
-        var metadataProvider = metadataProviderMap.Get(@interface);
-        var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
-        var metadata = new InterfaceMetadata(@interface.GetLocation());
-
-        foreach (var property in @interface.Properties)
+        else if (inlineType is FunctionType functionType)
         {
-            var propertyMetadata = new InterfacePropertyMetadata(
-                metadata.Definition! with { Span = property.SourceSpan.GetValueOrDefault() },
-                metadata,
-                property.Name,
-                GetOrCreateType(property.Type),
-                property.GetterModifier?.ToMetadata() ?? AccessModifierMetadata.Public,
-                property.SetterModifier?.ToMetadata());
+            foreach (var parameter in functionType.ParameterTypes)
+                if (parameter.Metadata is null)
+                    GetOrCreateType(parameter);
 
-            if (!metadata.GetProperties(property.Name).IsEmpty)
+            if (functionType.ReturnType.Metadata is null)
+                GetOrCreateType(functionType.ReturnType);
+        }
+        else if (inlineType is GenericApplication genericApplication)
+        {
+            foreach (var argument in genericApplication.TypeArguments)
+                if (argument.Metadata is null)
+                    GetOrCreateType(argument);
+        }
+        else if (inlineType is Interface @interface)
+        {
+            foreach (var property in @interface.Properties)
+                if (property.Metadata is null)
+                    GetOrCreateType(property.Type);
+
+            foreach (var method in @interface.Methods)
             {
-                propertyMetadata.MarkAsInvalid();
-                diagnostics.InterfacePropertyAlreadyDefined(property);
-            }
+                foreach (var parameter in method.ParameterTypes)
+                    if (parameter.Metadata is null)
+                        GetOrCreateType(parameter);
 
-            metadata.AddProperty(propertyMetadata);
-            property.Metadata = propertyMetadata;
-        }
-
-        foreach (var methods in @interface.Methods.GroupBy(x => x.Name))
-        {
-            foreach (var method in methods)
-            {
-                var parameters = new ITypeMetadata[method.ParameterTypes.Count];
-                for (var i = 0; i < method.ParameterTypes.Count; i++)
-                    parameters[i] = GetOrCreateType(method.ParameterTypes[i]);
-
-                var functionType = metadataFactory.CreateFunctionType(
-                    null,
-                    parameters,
-                    GetOrCreateType(method.ReturnType));
-
-                // TODO: generic?
-                var methodMetadata = new InterfaceMethodMetadata(
-                    metadata.Definition! with { Span = method.SourceSpan.GetValueOrDefault() },
-                    metadata,
-                    method.Name,
-                    functionType);
-
-                if (metadata.GetMethods(method.Name).MatchFunction(parameters).Any())
-                {
-                    methodMetadata.MarkAsInvalid();
-                    diagnostics.InterfaceMethodAlreadyDefined(method);
-                }
-
-                metadata.AddMethod(methodMetadata);
-                method.Metadata = methodMetadata;
+                if (method.ReturnType.Metadata is null)
+                    GetOrCreateType(method.ReturnType);
             }
         }
-
-        return metadataProvider.GetOrDefine(metadata);
-    }
-
-    private TupleMetadata CreateTuple(TupleType tupleType)
-    {
-        var metadataProvider = metadataProviderMap.Get(tupleType);
-        var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
-        var metadata = metadataFactory.CreateTupleMetadata(
-            tupleType.GetLocation(),
-            tupleType.Types.Select(GetOrCreateType));
-
-        return metadata;
+        else if (inlineType is TupleType tupleType)
+        {
+            foreach (var type in tupleType.Types)
+                if (type.Metadata is null)
+                    GetOrCreateType(type);
+        }
     }
 
     public string Name

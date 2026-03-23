@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Providers;
 
@@ -6,12 +7,17 @@ namespace Trilang.Semantics.Passes;
 internal class TypeArgumentMap
 {
     private readonly BuiltInTypes builtInTypes;
+    private readonly SemanticDiagnosticReporter diagnostics;
     private readonly GenericApplicationMetadata genericApplication;
     private readonly Dictionary<ITypeMetadata, ITypeMetadata> map;
 
-    public TypeArgumentMap(BuiltInTypes builtInTypes, GenericApplicationMetadata genericApplication)
+    public TypeArgumentMap(
+        BuiltInTypes builtInTypes,
+        SemanticDiagnosticReporter diagnostics,
+        GenericApplicationMetadata genericApplication)
     {
         this.builtInTypes = builtInTypes;
+        this.diagnostics = diagnostics;
         this.genericApplication = genericApplication;
         this.map = genericApplication.OpenGeneric.GenericArguments
             .Zip(genericApplication.Arguments)
@@ -89,7 +95,7 @@ internal class TypeArgumentMap
     private ArrayMetadata Map(ArrayMetadata arrayMetadata)
     {
         var provider = new FileMetadataProvider(arrayMetadata.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, provider);
+        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
         var itemType = Map(arrayMetadata.ItemMetadata!);
         var metadata = metadataFactory.CreateArrayMetadata(arrayMetadata.Definition, itemType);
@@ -119,7 +125,7 @@ internal class TypeArgumentMap
     private FunctionTypeMetadata Map(FunctionTypeMetadata functionType)
     {
         var provider = new FileMetadataProvider(functionType.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, provider);
+        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
         var parameterTypes = functionType.ParameterTypes.Select(Map).ToList();
         var returnType = Map(functionType.ReturnType);
@@ -145,7 +151,7 @@ internal class TypeArgumentMap
 
         metadata = provider.GetOrDefine(metadata);
 
-        var nestedMap = new TypeArgumentMap(builtInTypes, metadata);
+        var nestedMap = new TypeArgumentMap(builtInTypes, diagnostics, metadata);
         nestedMap.Map();
 
         return metadata;
@@ -182,7 +188,7 @@ internal class TypeArgumentMap
     private TupleMetadata Map(TupleMetadata tuple)
     {
         var provider = new FileMetadataProvider(tuple.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, provider);
+        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
         var types = tuple.Types.Select(Map);
         var metadata = metadataFactory.CreateTupleMetadata(tuple.Definition, types);

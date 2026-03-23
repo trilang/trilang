@@ -515,7 +515,7 @@ internal class TypeChecker : ISemanticPass
             base.VisitTuple(node);
 
             var metadataProvider = metadataProviderMap.Get(node);
-            var metadataFactory = new MetadataFactory(builtInTypes, metadataProvider);
+            var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
 
             // we can't generate metadata for this tuple in GenerateMetadata
             // because we don't know the types of the expressions yet
