@@ -308,6 +308,8 @@ public class NamespaceTests
             """
             namespace NS1.NS2.NS3;
 
+            use NS1;
+
             public type MyType2 = MyType;
             """);
 
@@ -706,15 +708,7 @@ public class NamespaceTests
             [file1, file2, file3, file4, file5],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var diagnostic = new Diagnostic(
-            DiagnosticId.S0024MultipleOverloads,
-            DiagnosticSeverity.Error,
-            new SourceLocation(
-                new SourceFile("file5.tri"),
-                new SourceSpan(new SourcePosition(85, 8, 5), new SourcePosition(89, 8, 9))),
-            "Multiple overloads found for 'test'.");
-
-        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
     [Test]
@@ -835,7 +829,7 @@ public class NamespaceTests
         var memberAccessExpression = tree.Find<MemberAccessExpression>()!;
 
         var ns1Provider = rootNamespace.FindNamespace(["NS1"])!;
-        var testFunction = ns1Provider.Functions[0];
+        var testFunction = ns1Provider.FindFunction("test").First();
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(
@@ -872,8 +866,8 @@ public class NamespaceTests
                 new SemanticDiagnosticReporter(diagnostics),
                 new BuiltInTypes()));
 
-        var ns1Provider = rootNamespace.FindNamespace(["Test1"])!;
-        var testFunction = ns1Provider.Functions[0];
+        var test1Provider = rootNamespace.FindNamespace(["Test1"])!;
+        var testFunction = test1Provider.FindFunction("test").First();
 
         var builtInTypes = new BuiltInTypes();
         var rootNs = NamespaceMetadata.CreateRoot(builtInTypes);
@@ -1016,5 +1010,279 @@ public class NamespaceTests
             "Unknown symbol: 'MyType'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void ArrayWithSameTypesFromDifferentNamespacesTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            public type MyType { }
+            public type A = MyType[];
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace NS2;
+
+            public type MyType { }
+            public type A = MyType[];
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, rootNamespace, _) = semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var ns1 = rootNamespace.FindNamespace(["NS1"])!;
+        var ns2 = rootNamespace.FindNamespace(["NS2"])!;
+        var alias1 = (AliasMetadata)ns1.FindType("A")!;
+        var alias2 = (AliasMetadata)ns2.FindType("A")!;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(alias1.Type, Is.Not.EqualTo(alias2.Type));
+        Assert.That(
+            rootNamespace.Types,
+            Has.Exactly(2).Matches<ITypeMetadata>(x => x is ArrayMetadata));
+    }
+
+    [Test]
+    public void DuWithSameTypesFromDifferentNamespacesTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            public type MyType { }
+            public type DU = MyType | null;
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace NS2;
+
+            public type MyType { }
+            public type DU = MyType | null;
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, rootNamespace, _) = semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var ns1 = rootNamespace.FindNamespace(["NS1"])!;
+        var ns2 = rootNamespace.FindNamespace(["NS2"])!;
+        var alias1 = (AliasMetadata)ns1.FindType("DU")!;
+        var alias2 = (AliasMetadata)ns2.FindType("DU")!;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(alias1.Type, Is.Not.EqualTo(alias2.Type));
+        Assert.That(
+            rootNamespace.Types,
+            Has.Exactly(3).Matches<ITypeMetadata>(x => x is DiscriminatedUnionMetadata));
+    }
+
+    [Test]
+    public void FunctionTypeWithSameTypesFromDifferentNamespacesTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            public type MyType { }
+            public type FT = () => MyType;
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace NS2;
+
+            public type MyType { }
+            public type FT = () => MyType;
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, rootNamespace, _) = semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var ns1 = rootNamespace.FindNamespace(["NS1"])!;
+        var ns2 = rootNamespace.FindNamespace(["NS2"])!;
+        var alias1 = (AliasMetadata)ns1.FindType("FT")!;
+        var alias2 = (AliasMetadata)ns2.FindType("FT")!;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(alias1.Type, Is.Not.EqualTo(alias2.Type));
+        Assert.That(
+            rootNamespace.Types,
+            Has.Exactly(3).Matches<ITypeMetadata>(x => x is FunctionTypeMetadata));
+    }
+
+    [Test]
+    public void GenericWithSameTypesFromDifferentNamespacesTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS0;
+
+            public type Generic<T> = T;
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace NS1;
+
+            use NS0;
+
+            public type MyType { }
+            public type Closed = Generic<MyType>;
+            """);
+        var file3 = Parse(
+            diagnostics,
+            "file3.tri",
+            """
+            namespace NS2;
+
+            use NS0;
+
+            public type MyType { }
+            public type Closed = Generic<MyType>;
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, rootNamespace, _) = semantic.Analyze(
+            [file1, file2, file3],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var ns1 = rootNamespace.FindNamespace(["NS1"])!;
+        var ns2 = rootNamespace.FindNamespace(["NS2"])!;
+        var alias1 = (AliasMetadata)ns1.FindType("Closed")!;
+        var alias2 = (AliasMetadata)ns2.FindType("Closed")!;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(alias1.Type, Is.Not.EqualTo(alias2.Type));
+        Assert.That(
+            rootNamespace.Types,
+            Has.Exactly(2).Matches<ITypeMetadata>(x => x is GenericApplicationMetadata));
+    }
+
+    [Test]
+    public void InterfaceWithSameTypesFromDifferentNamespacesTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            public type MyType { }
+            public type Interface1 = {
+                obj: MyType;
+            }
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace NS2;
+
+            public type MyType { }
+            public type Interface1 = {
+                obj: MyType;
+            }
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, rootNamespace, _) = semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var ns1 = rootNamespace.FindNamespace(["NS1"])!;
+        var ns2 = rootNamespace.FindNamespace(["NS2"])!;
+        var alias1 = (AliasMetadata)ns1.FindType("Interface1")!;
+        var alias2 = (AliasMetadata)ns2.FindType("Interface1")!;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(alias1.Type, Is.Not.EqualTo(alias2.Type));
+        Assert.That(
+            rootNamespace.Types,
+            Has.Exactly(3).Matches<ITypeMetadata>(x => x is InterfaceMetadata));
+    }
+
+    [Test]
+    public void TupleWithSameTypesFromDifferentNamespacesTest()
+    {
+        var diagnostics = new DiagnosticCollection();
+        var file1 = Parse(
+            diagnostics,
+            "file1.tri",
+            """
+            namespace NS1;
+
+            public type MyType { }
+            public type T = (MyType, i32);
+            """);
+        var file2 = Parse(
+            diagnostics,
+            "file2.tri",
+            """
+            namespace NS2;
+
+            public type MyType { }
+            public type T = (MyType, i32);
+            """);
+
+        var semantic = new SemanticAnalysis();
+        var (_, _, rootNamespace, _) = semantic.Analyze(
+            [file1, file2],
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                new SemanticDiagnosticReporter(diagnostics),
+                new BuiltInTypes()));
+
+        var ns1 = rootNamespace.FindNamespace(["NS1"])!;
+        var ns2 = rootNamespace.FindNamespace(["NS2"])!;
+        var alias1 = (AliasMetadata)ns1.FindType("T")!;
+        var alias2 = (AliasMetadata)ns2.FindType("T")!;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(alias1.Type, Is.Not.EqualTo(alias2.Type));
+        Assert.That(
+            rootNamespace.Types,
+            Has.Exactly(2).Matches<ITypeMetadata>(x => x is TupleMetadata));
     }
 }

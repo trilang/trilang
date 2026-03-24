@@ -33,9 +33,6 @@ public class GenericApplication : IInlineType
             Metadata = Metadata,
         };
 
-    public string GetOpenGenericName()
-        => $"{Type.Name}<{new string(',', TypeArguments.Count - 1)}>";
-
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }

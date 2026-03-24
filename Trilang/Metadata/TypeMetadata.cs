@@ -3,7 +3,7 @@ using System.Text;
 namespace Trilang.Metadata;
 
 // TODO: immutable metadata
-public class TypeMetadata : IGenericMetadata
+public class TypeMetadata : IGenericMetadata, INamedMetadata
 {
     public static readonly TypeMetadata InvalidType = Invalid("<>_invalid_type");
 

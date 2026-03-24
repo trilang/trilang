@@ -82,19 +82,19 @@ internal class TypeArgumentMap
         if (type.IsInvalid)
             metadata.MarkAsInvalid();
 
-        // TODO: query?
-        var @namespace = type.Namespace!;
-        if (@namespace.FindType(metadata.Name) is not null)
+        var provider = new MetadataProvider(type.Namespace!);
+        var result = provider.QueryTypes(Query.From(metadata));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
             throw new InvalidOperationException($"The '{metadata.Name}' alias is already defined.");
 
-        @namespace.AddType(metadata.ToString(), metadata);
+        provider.DefineType(metadata);
 
         return metadata;
     }
 
     private ArrayMetadata Map(ArrayMetadata arrayMetadata)
     {
-        var provider = new FileMetadataProvider(arrayMetadata.Namespace!);
+        var provider = new MetadataProvider(arrayMetadata.Namespace!);
         var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
         var itemType = Map(arrayMetadata.ItemMetadata!);
@@ -108,23 +108,24 @@ internal class TypeArgumentMap
 
     private DiscriminatedUnionMetadata Map(DiscriminatedUnionMetadata discriminatedUnion)
     {
-        var provider = new FileMetadataProvider(discriminatedUnion.Namespace!);
+        var provider = new MetadataProvider(discriminatedUnion.Namespace!);
+        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
         var types = new ITypeMetadata[discriminatedUnion.Types.Count];
         for (var i = 0; i < discriminatedUnion.Types.Count; i++)
             types[i] = Map(discriminatedUnion.Types[i]);
 
-        var metadata = new DiscriminatedUnionMetadata(discriminatedUnion.Definition, types);
+        var metadata = metadataFactory.CreateDiscriminatedUnion(discriminatedUnion.Definition, types);
 
         if (discriminatedUnion.IsInvalid)
             metadata.MarkAsInvalid();
 
-        return provider.GetOrDefine(metadata);
+        return metadata;
     }
 
     private FunctionTypeMetadata Map(FunctionTypeMetadata functionType)
     {
-        var provider = new FileMetadataProvider(functionType.Namespace!);
+        var provider = new MetadataProvider(functionType.Namespace!);
         var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
         var parameterTypes = functionType.ParameterTypes.Select(Map).ToList();
@@ -142,14 +143,13 @@ internal class TypeArgumentMap
 
     private GenericApplicationMetadata Map(GenericApplicationMetadata genericApplicationMetadata)
     {
-        var provider = new FileMetadataProvider(genericApplicationMetadata.Namespace!);
+        var provider = new MetadataProvider(genericApplicationMetadata.Namespace!);
+        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
-        var metadata = new GenericApplicationMetadata(
+        var metadata = metadataFactory.CreateGenericApplication(
             genericApplicationMetadata.Definition,
             genericApplicationMetadata.OpenGeneric,
             genericApplicationMetadata.Arguments.Select(Map).ToList());
-
-        metadata = provider.GetOrDefine(metadata);
 
         var nestedMap = new TypeArgumentMap(builtInTypes, diagnostics, metadata);
         nestedMap.Map();
@@ -159,7 +159,8 @@ internal class TypeArgumentMap
 
     private InterfaceMetadata Map(InterfaceMetadata interfaceMetadata)
     {
-        var provider = new FileMetadataProvider(interfaceMetadata.Namespace!);
+        var provider = new MetadataProvider(interfaceMetadata.Namespace!);
+        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
         var properties = interfaceMetadata.Properties
             .Select(x => new InterfacePropertyMetadata(
@@ -178,19 +179,20 @@ internal class TypeArgumentMap
                 Map(x.Type)));
 
         var metadata = new InterfaceMetadata(interfaceMetadata.Definition, properties, methods);
+        metadata = metadataFactory.CreateInterface(metadata);
 
         if (interfaceMetadata.IsInvalid)
             metadata.MarkAsInvalid();
 
-        return provider.GetOrDefine(metadata);
+        return metadata;
     }
 
     private TupleMetadata Map(TupleMetadata tuple)
     {
-        var provider = new FileMetadataProvider(tuple.Namespace!);
+        var provider = new MetadataProvider(tuple.Namespace!);
         var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
 
-        var types = tuple.Types.Select(Map);
+        var types = tuple.Types.Select(Map).ToArray();
         var metadata = metadataFactory.CreateTupleMetadata(tuple.Definition, types);
 
         if (tuple.IsInvalid)
@@ -216,12 +218,12 @@ internal class TypeArgumentMap
             [],
             []);
 
-        // TODO: query?
-        var @namespace = type.Namespace!;
-        if (@namespace.FindType(metadata.ToString()) is not null)
+        var provider = new MetadataProvider(type.Namespace!);
+        var result = provider.QueryTypes(Query.From(metadata));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
             throw new InvalidOperationException($"The '{metadata.Name}' type is already defined.");
 
-        @namespace.AddType(metadata.ToString(), metadata);
+        provider.DefineType(metadata);
 
         foreach (var @interface in type.Interfaces)
             metadata.AddInterface(Map(@interface));
@@ -255,11 +257,8 @@ internal class TypeArgumentMap
                     constructor.Parameters.Select(Map).ToList(),
                     Map(constructor.Type)));
 
-        foreach (var methods in type.Methods.GroupBy(x => x.Name))
-        {
-            foreach (var method in methods)
-                metadata.AddMethod(Map(metadata, method));
-        }
+        foreach (var method in type.Methods)
+            metadata.AddMethod(Map(metadata, method));
 
         if (type.IsInvalid)
             metadata.MarkAsInvalid();

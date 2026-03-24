@@ -37,12 +37,12 @@ public class GenericMetadataProvider : IMetadataProvider
         return parent.QueryTypes(query);
     }
 
-    public bool DefineType(string name, ITypeMetadata type)
+    public void DefineType(ITypeMetadata type)
     {
         if (type is TypeArgumentMetadata)
-            return true;
+            return;
 
-        return parent.DefineType(name, type);
+        parent.DefineType(type);
     }
 
     public IReadOnlyList<FunctionMetadata> FindFunctions(string name)

@@ -6,7 +6,7 @@ public interface IMetadataProvider
 {
     QueryTypesResult QueryTypes(Query query);
 
-    bool DefineType(string name, ITypeMetadata type);
+    void DefineType(ITypeMetadata type);
 
     IReadOnlyList<FunctionMetadata> FindFunctions(string name);
 

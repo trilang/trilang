@@ -2,7 +2,7 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-public class AliasDeclaration : IDeclaration
+public class AliasDeclaration : IGenericDeclaration
 {
     public AliasDeclaration(
         SourceSpan? sourceSpan,
@@ -22,7 +22,7 @@ public class AliasDeclaration : IDeclaration
 
         Type.Parent = this;
 
-        FullName = genericArguments.Count > 0
+        FullName = IsGeneric
             ? $"{Name}<{new string(',', genericArguments.Count - 1)}>"
             : Name;
     }
@@ -47,6 +47,8 @@ public class AliasDeclaration : IDeclaration
     public string FullName { get; }
 
     public IReadOnlyList<TypeRef> GenericArguments { get; }
+
+    public bool IsGeneric => GenericArguments.Count > 0;
 
     public IInlineType Type { get; }
 

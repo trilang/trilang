@@ -5,8 +5,8 @@ namespace Trilang.Metadata;
 
 public class NamespaceMetadata : IMetadata
 {
-    private readonly HashSet<NamespaceMetadata> children;
-    private readonly Dictionary<string, ITypeMetadata> types;
+    private readonly Dictionary<string, NamespaceMetadata> children;
+    private readonly List<ITypeMetadata> types; // TODO: hashset/dictionary?
     private readonly List<FunctionMetadata> functions;
 
     private NamespaceMetadata(NamespaceMetadata? parent, string name)
@@ -22,25 +22,25 @@ public class NamespaceMetadata : IMetadata
     {
         var root = new NamespaceMetadata(null, string.Empty);
 
-        root.AddType(builtInTypes.Void.Name, builtInTypes.Void);
-        root.AddType(builtInTypes.Null.Name, builtInTypes.Null);
+        root.AddType(builtInTypes.Void);
+        root.AddType(builtInTypes.Null);
 
-        root.AddType(builtInTypes.I8.Name, builtInTypes.I8);
-        root.AddType(builtInTypes.I16.Name, builtInTypes.I16);
-        root.AddType(builtInTypes.I32.Name, builtInTypes.I32);
-        root.AddType(builtInTypes.I64.Name, builtInTypes.I64);
+        root.AddType(builtInTypes.I8);
+        root.AddType(builtInTypes.I16);
+        root.AddType(builtInTypes.I32);
+        root.AddType(builtInTypes.I64);
 
-        root.AddType(builtInTypes.U8.Name, builtInTypes.U8);
-        root.AddType(builtInTypes.U16.Name, builtInTypes.U16);
-        root.AddType(builtInTypes.U32.Name, builtInTypes.U32);
-        root.AddType(builtInTypes.U64.Name, builtInTypes.U64);
+        root.AddType(builtInTypes.U8);
+        root.AddType(builtInTypes.U16);
+        root.AddType(builtInTypes.U32);
+        root.AddType(builtInTypes.U64);
 
-        root.AddType(builtInTypes.F32.Name, builtInTypes.F32);
-        root.AddType(builtInTypes.F64.Name, builtInTypes.F64);
+        root.AddType(builtInTypes.F32);
+        root.AddType(builtInTypes.F64);
 
-        root.AddType(builtInTypes.Bool.Name, builtInTypes.Bool);
-        root.AddType(builtInTypes.Char.Name, builtInTypes.Char);
-        root.AddType(builtInTypes.String.Name, builtInTypes.String);
+        root.AddType(builtInTypes.Bool);
+        root.AddType(builtInTypes.Char);
+        root.AddType(builtInTypes.String);
 
         return root;
     }
@@ -56,7 +56,7 @@ public class NamespaceMetadata : IMetadata
         return $"{Parent}.{Name}";
     }
 
-    private NamespaceMetadata GetRoot()
+    public NamespaceMetadata GetRoot()
     {
         var current = this;
         while (!current.IsRoot)
@@ -71,11 +71,10 @@ public class NamespaceMetadata : IMetadata
 
         foreach (var part in parts)
         {
-            var child = current.children.FirstOrDefault(c => c.Name == part);
-            if (child is null)
+            if (!current.children.TryGetValue(part, out var child))
             {
                 child = new NamespaceMetadata(current, part);
-                current.children.Add(child);
+                current.children.Add(child.Name, child);
             }
 
             current = child;
@@ -89,30 +88,27 @@ public class NamespaceMetadata : IMetadata
         var current = GetRoot();
 
         foreach (var part in parts)
-        {
-            current = current.children.FirstOrDefault(c => c.Name == part);
-            if (current is null)
+            if (!current.children.TryGetValue(part, out current))
                 return null;
-        }
 
         return current;
     }
 
-    public bool AddType(string name, ITypeMetadata type)
+    public void AddType(ITypeMetadata type)
     {
         Debug.Assert(type is not TypeArgumentMetadata, "Generic arguments shouldn't be added a namespace.");
         Debug.Assert(type.Namespace is null, "Type already belongs to another namespace");
 
         if (!IsRoot && type is IAnonymousTypeMetadata)
-            return Parent.AddType(name, type);
+        {
+            Parent.AddType(type);
+            return;
+        }
 
         type.Namespace = this;
 
-        return types.TryAdd(name, type);
+        types.Add(type);
     }
-
-    public ITypeMetadata? FindType(string name)
-        => types.GetValueOrDefault(name);
 
     public void AddFunction(FunctionMetadata function)
     {
@@ -133,10 +129,10 @@ public class NamespaceMetadata : IMetadata
 
         while (q.TryDequeue(out var current))
         {
-            foreach (var type in current.types.Values)
+            foreach (var type in current.types)
                 yield return type;
 
-            foreach (var child in current.children)
+            foreach (var (_, child) in current.children)
                 q.Enqueue(child);
         }
     }
@@ -155,12 +151,6 @@ public class NamespaceMetadata : IMetadata
 
     public string Name { get; }
 
-    public IReadOnlyCollection<NamespaceMetadata> Children
-        => children;
-
     public IReadOnlyCollection<ITypeMetadata> Types
-        => types.Values;
-
-    public IReadOnlyList<FunctionMetadata> Functions
-        => functions;
+        => types;
 }

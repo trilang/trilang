@@ -344,7 +344,7 @@ internal class TypeChecker : ISemanticPass
             // static access
             var metadataProvider = metadataProviderMap.Get(node);
             var function = metadataProvider.FindFunctions(node.Name);
-            var result = metadataProvider.QueryTypes(Query.From(node.Name));
+            var result = metadataProvider.QueryTypes(new ByName(node.Name));
             var members = function.Cast<IMetadata>().Concat(result.Types).ToArray();
 
             node.Reference = members.Length switch
@@ -369,8 +369,14 @@ internal class TypeChecker : ISemanticPass
 
             if (node.Member is MemberAccessExpression { Reference: NamespaceMetadata ns })
             {
-                var type = ns.FindType(node.Name) as IMetadata;
-                if (type is null)
+                var provider = new MetadataProvider(ns);
+                var result = provider.QueryTypes(new ByName(node.Name));
+                var type = default(IMetadata);
+                if (result.IsSuccess)
+                {
+                    type = result.Types[0];
+                }
+                else
                 {
                     diagnostics.UnknownSymbol(node);
                     type = new InvalidMemberMetadata(node.Name);
@@ -519,9 +525,8 @@ internal class TypeChecker : ISemanticPass
 
             // we can't generate metadata for this tuple in GenerateMetadata
             // because we don't know the types of the expressions yet
-            var types = node.Expressions.Select(x => x.ReturnTypeMetadata!);
+            var types = node.Expressions.Select(x => x.ReturnTypeMetadata!).ToArray();
             var tuple = metadataFactory.CreateTupleMetadata(null, types);
-            tuple = metadataProvider.GetOrDefine(tuple);
 
             node.ReturnTypeMetadata = tuple;
         }

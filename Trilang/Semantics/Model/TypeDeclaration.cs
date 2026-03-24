@@ -2,7 +2,7 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-public class TypeDeclaration : IDeclaration
+public class TypeDeclaration : IGenericDeclaration
 {
     public TypeDeclaration(
         SourceSpan? sourceSpan,
@@ -38,7 +38,7 @@ public class TypeDeclaration : IDeclaration
         foreach (var method in methods)
             method.Parent = this;
 
-        FullName = genericArguments.Count > 0
+        FullName = IsGeneric
             ? $"{Name}<{new string(',', genericArguments.Count - 1)}>"
             : Name;
     }
@@ -63,6 +63,8 @@ public class TypeDeclaration : IDeclaration
     public string FullName { get; }
 
     public IReadOnlyList<TypeRef> GenericArguments { get; }
+
+    public bool IsGeneric => GenericArguments.Count > 0;
 
     public IReadOnlyList<TypeRef> Interfaces { get; }
 

@@ -26,22 +26,27 @@ internal class MetadataFactory
         {
             ArrayType arrayType => CreateArrayMetadata(
                 arrayType.GetLocation(),
-                arrayType.ElementType.Metadata ?? throw new InvalidOperationException()),
+                arrayType.ElementType.Metadata.Required()),
 
-            DiscriminatedUnion discriminatedUnion => CreateDiscriminatedUnion(discriminatedUnion),
+            DiscriminatedUnion discriminatedUnion => CreateDiscriminatedUnion(
+                discriminatedUnion.GetLocation(),
+                discriminatedUnion.Types.Select(t => t.Metadata.Required()).ToArray()),
 
             FunctionType functionType => CreateFunctionType(
                 functionType.GetLocation(),
-                functionType.ParameterTypes.Select(t => t.Metadata ?? throw new InvalidOperationException()),
-                functionType.ReturnType.Metadata ?? throw new InvalidOperationException()),
+                functionType.ParameterTypes.Select(t => t.Metadata.Required()).ToArray(),
+                functionType.ReturnType.Metadata.Required()),
 
-            GenericApplication genericApplication => CreateGenericApplication(genericApplication),
+            GenericApplication genericApplication => CreateGenericApplication(
+                genericApplication.GetLocation(),
+                (IGenericMetadata)genericApplication.Type.Metadata.Required(),
+                genericApplication.TypeArguments.Select(x => x.Metadata.Required()).ToArray()),
 
             Interface @interface => CreateInterface(@interface),
 
             TupleType tupleType => CreateTupleMetadata(
                 tupleType.GetLocation(),
-                tupleType.Types.Select(t => t.Metadata ?? throw new InvalidOperationException())),
+                tupleType.Types.Select(t => t.Metadata.Required()).ToArray()),
 
             TypeRef typeRef => CreateTypeRef(typeRef),
 
@@ -50,6 +55,10 @@ internal class MetadataFactory
 
     public ArrayMetadata CreateArrayMetadata(SourceLocation? definition, ITypeMetadata itemMetadata)
     {
+        var result = provider.QueryTypes(new GetArray(itemMetadata));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+            return (ArrayMetadata)result.Types[0];
+
         var metadata = new ArrayMetadata(definition, itemMetadata);
         var sizeField = new FieldMetadata(metadata, "<>_size", builtInTypes.I64);
         var sizeProperty = CreatePropertyMetadata(
@@ -63,32 +72,62 @@ internal class MetadataFactory
         metadata.AddProperty(sizeProperty);
         metadata.AddMethod(sizeProperty.Getter!);
 
-        return provider.GetOrDefine(metadata);
+        provider.DefineType(metadata);
+
+        return metadata;
     }
 
-    private DiscriminatedUnionMetadata CreateDiscriminatedUnion(DiscriminatedUnion discriminatedUnion)
+    public DiscriminatedUnionMetadata CreateDiscriminatedUnion(
+        SourceLocation? definition,
+        IReadOnlyList<ITypeMetadata> types)
     {
-        var metadata = new DiscriminatedUnionMetadata(
-            discriminatedUnion.GetLocation(),
-            discriminatedUnion.Types.Select(t => t.Metadata ?? throw new InvalidOperationException()));
+        var result = provider.QueryTypes(new GetUnion(types));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+            return (DiscriminatedUnionMetadata)result.Types[0];
 
-        return provider.GetOrDefine(metadata);
+        var metadata = new DiscriminatedUnionMetadata(definition, types);
+
+        provider.DefineType(metadata);
+
+        return metadata;
     }
 
     public FunctionTypeMetadata CreateFunctionType(
         SourceLocation? definition,
-        IEnumerable<ITypeMetadata> parameterTypes,
+        IReadOnlyList<ITypeMetadata> parameterTypes,
         ITypeMetadata returnType)
     {
         // TODO: Move to BuildInTypes?
-        var emptyInterface = new InterfaceMetadata(null, [], []);
-        emptyInterface = provider.GetOrDefine(emptyInterface);
+        var emptyInterface = default(InterfaceMetadata);
+        var result = provider.QueryTypes(new GetInterface([], []));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+        {
+            emptyInterface = (InterfaceMetadata)result.Types[0];
+        }
+        else
+        {
+            emptyInterface = new InterfaceMetadata(null, [], []);
+            provider.DefineType(emptyInterface);
+        }
 
-        var nullableEmptyInterface = new DiscriminatedUnionMetadata(null, [
-            emptyInterface,
-            builtInTypes.Null
-        ]);
-        nullableEmptyInterface = provider.GetOrDefine(nullableEmptyInterface);
+        var nullableEmptyInterface = default(DiscriminatedUnionMetadata);
+        result = provider.QueryTypes(new GetUnion([emptyInterface, builtInTypes.Null]));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+        {
+            nullableEmptyInterface = (DiscriminatedUnionMetadata)result.Types[0];
+        }
+        else
+        {
+            nullableEmptyInterface = new DiscriminatedUnionMetadata(null, [
+                emptyInterface,
+                builtInTypes.Null
+            ]);
+            provider.DefineType(nullableEmptyInterface);
+        }
+
+        result = provider.QueryTypes(new GetFunctionType(parameterTypes, returnType));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+            return (FunctionTypeMetadata)result.Types[0];
 
         var metadata = new FunctionTypeMetadata(definition, parameterTypes, returnType);
         metadata.AddField(
@@ -102,44 +141,42 @@ internal class MetadataFactory
                 FunctionTypeMetadata.ContextField,
                 nullableEmptyInterface));
 
-        return provider.GetOrDefine(metadata);
+        provider.DefineType(metadata);
+
+        return metadata;
     }
 
-    public GenericApplicationMetadata CreateGenericApplication(GenericApplication genericApplication)
+    public GenericApplicationMetadata CreateGenericApplication(
+        SourceLocation? definition,
+        IGenericMetadata openGeneric,
+        IReadOnlyList<ITypeMetadata> arguments)
     {
-        var openGenericName = genericApplication.GetOpenGenericName();
-        var openGeneric = default(IGenericMetadata);
+        var getGenericApplication = new GetGenericApplication(openGeneric, arguments);
+        var result = provider.QueryTypes(getGenericApplication);
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+            return (GenericApplicationMetadata)result.Types[0];
 
-        var result = provider.QueryTypes(Query.From(openGenericName));
-        if (result is { IsSuccess: true, Types: [IGenericMetadata genericMetadata] })
-        {
-            openGeneric = genericMetadata;
-        }
-        else
-        {
-            if (result.IsMultipleTypesFound)
-                diagnostics.MultipleMembersFound(genericApplication, result.Types);
-            else if (result.IsNamespaceNotFound)
-                diagnostics.UnknownNamespace(genericApplication);
-            else
-                diagnostics.UnknownType(genericApplication);
+        var metadata = new GenericApplicationMetadata(definition, openGeneric, arguments);
 
-            openGeneric = TypeMetadata.Invalid(openGenericName);
-        }
-
-        var metadata = new GenericApplicationMetadata(
-            genericApplication.GetLocation(),
-            openGeneric,
-            genericApplication.TypeArguments.Select(x => x.Metadata ??
-                                                         throw new InvalidOperationException()));
-
-        metadata = provider.GetOrDefine(metadata);
+        provider.DefineType(metadata);
 
         return metadata;
     }
 
     private InterfaceMetadata CreateInterface(Interface @interface)
     {
+        var byInterface = new GetInterface(
+            @interface.Properties.Select(x => new GetInterfaceProperty(
+                x.Name,
+                x.Type.Metadata.Required())).ToArray(),
+            @interface.Methods.Select(x => new GetInterfaceMethod(
+                x.Name,
+                x.ParameterTypes.Select(t => t.Metadata.Required()).ToArray(),
+                x.ReturnType.Metadata.Required())).ToArray());
+        var result = provider.QueryTypes(byInterface);
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+            return (InterfaceMetadata)result.Types[0];
+
         var metadata = new InterfaceMetadata(@interface.GetLocation());
 
         foreach (var property in @interface.Properties)
@@ -148,7 +185,7 @@ internal class MetadataFactory
                 metadata.Definition! with { Span = property.SourceSpan.GetValueOrDefault() },
                 metadata,
                 property.Name,
-                property.Type.Metadata ?? throw new InvalidOperationException(),
+                property.Type.Metadata.Required(),
                 property.GetterModifier?.ToMetadata() ?? AccessModifierMetadata.Public,
                 property.SetterModifier?.ToMetadata());
 
@@ -162,45 +199,65 @@ internal class MetadataFactory
             property.Metadata = propertyMetadata;
         }
 
-        foreach (var methods in @interface.Methods.GroupBy(x => x.Name))
+        foreach (var method in @interface.Methods)
         {
-            foreach (var method in methods)
+            var parameters = new ITypeMetadata[method.ParameterTypes.Count];
+            for (var i = 0; i < method.ParameterTypes.Count; i++)
+                parameters[i] = method.ParameterTypes[i].Metadata.Required();
+
+            var functionType = CreateFunctionType(
+                null,
+                parameters,
+                method.ReturnType.Metadata.Required());
+
+            // TODO: generic?
+            var methodMetadata = new InterfaceMethodMetadata(
+                metadata.Definition! with { Span = method.SourceSpan.GetValueOrDefault() },
+                metadata,
+                method.Name,
+                functionType);
+
+            if (metadata.GetMethods(method.Name).MatchFunction(parameters).Any())
             {
-                var parameters = new ITypeMetadata[method.ParameterTypes.Count];
-                for (var i = 0; i < method.ParameterTypes.Count; i++)
-                    parameters[i] = method.ParameterTypes[i].Metadata ??
-                                    throw new InvalidOperationException();
-
-                var functionType = CreateFunctionType(
-                    null,
-                    parameters,
-                    method.ReturnType.Metadata ?? throw new InvalidOperationException());
-
-                // TODO: generic?
-                var methodMetadata = new InterfaceMethodMetadata(
-                    metadata.Definition! with { Span = method.SourceSpan.GetValueOrDefault() },
-                    metadata,
-                    method.Name,
-                    functionType);
-
-                if (metadata.GetMethods(method.Name).MatchFunction(parameters).Any())
-                {
-                    methodMetadata.MarkAsInvalid();
-                    diagnostics.InterfaceMethodAlreadyDefined(method);
-                }
-
-                metadata.AddMethod(methodMetadata);
-                method.Metadata = methodMetadata;
+                methodMetadata.MarkAsInvalid();
+                diagnostics.InterfaceMethodAlreadyDefined(method);
             }
+
+            metadata.AddMethod(methodMetadata);
+            method.Metadata = methodMetadata;
         }
 
-        return provider.GetOrDefine(metadata);
+        provider.DefineType(metadata);
+
+        return metadata;
+    }
+
+    public InterfaceMetadata CreateInterface(InterfaceMetadata metadata)
+    {
+        var byInterface = new GetInterface(
+            metadata.Properties
+                .Select(x => new GetInterfaceProperty(x.Name, x.Type))
+                .ToArray(),
+            metadata.Methods
+                .Select(x => new GetInterfaceMethod(x.Name, x.Type.ParameterTypes, x.Type.ReturnType))
+                .ToArray());
+        var result = provider.QueryTypes(byInterface);
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+            return (InterfaceMetadata)result.Types[0];
+
+        provider.DefineType(metadata);
+
+        return metadata;
     }
 
     public TupleMetadata CreateTupleMetadata(
         SourceLocation? definition,
-        IEnumerable<ITypeMetadata> types)
+        IReadOnlyList<ITypeMetadata> types)
     {
+        var result = provider.QueryTypes(new GetTuple(types));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+            return (TupleMetadata)result.Types[0];
+
         var metadata = new TupleMetadata(definition);
 
         var typeItems = types as ITypeMetadata[] ?? types.ToArray();
@@ -220,7 +277,9 @@ internal class MetadataFactory
             metadata.AddProperty(itemProperty);
         }
 
-        return provider.GetOrDefine(metadata);
+        provider.DefineType(metadata);
+
+        return metadata;
     }
 
     private ITypeMetadata CreateTypeRef(TypeRef typeRef)

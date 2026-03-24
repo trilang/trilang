@@ -1219,8 +1219,8 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
-        var type = generic!.ClosedGeneric;
+        var generic = (GenericApplicationMetadata)rootNamespace.FindType("List<i32>")!;
+        var type = generic.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = CreateArrayMetadata(builtInTypes.I32, ns);
@@ -1253,8 +1253,8 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
-        var type = generic!.ClosedGeneric;
+        var generic = (GenericApplicationMetadata)rootNamespace.FindType("List<i32>")!;
+        var type = generic.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = CreateTupleMetadata([builtInTypes.I32, builtInTypes.I32], ns);
@@ -1289,8 +1289,8 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
-        var type = generic!.ClosedGeneric;
+        var generic = (GenericApplicationMetadata)rootNamespace.FindType("List<i32>")!;
+        var type = generic.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = new DiscriminatedUnionMetadata(null, [builtInTypes.I32, builtInTypes.I32])
@@ -1326,8 +1326,8 @@ public class MetadataGeneratorTests
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
-        var type = generic!.ClosedGeneric;
+        var generic = (GenericApplicationMetadata)rootNamespace.FindType("List<i32>")!;
+        var type = generic.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = CreateFunctionType([], builtInTypes.I32, ns);
@@ -1358,8 +1358,8 @@ public class MetadataGeneratorTests
             [tree],
             new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
 
-        var generic = rootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
-        var type = generic!.ClosedGeneric;
+        var generic = (GenericApplicationMetadata)rootNamespace.FindType("List<i32>")!;
+        var type = generic.ClosedGeneric;
         var property = type!.GetMember("prop") as PropertyMetadata;
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
         var expected = new InterfaceMetadata(null)
@@ -1400,9 +1400,8 @@ public class MetadataGeneratorTests
 
         var type = rootNamespace.FindType("((i32) => void) => void");
         var ns = NamespaceMetadata.CreateRoot(new BuiltInTypes());
-        var expected = CreateFunctionType([
-                CreateFunctionType([builtInTypes.I32], builtInTypes.Void, ns)
-            ],
+        var expected = CreateFunctionType(
+            [CreateFunctionType([builtInTypes.I32], builtInTypes.Void, ns)],
             builtInTypes.Void,
             ns);
 

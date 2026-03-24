@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Trilang.Metadata;
 
-public class AliasMetadata : IGenericMetadata
+public class AliasMetadata : IGenericMetadata, INamedMetadata
 {
     private readonly List<ITypeMetadata> genericArguments;
 
