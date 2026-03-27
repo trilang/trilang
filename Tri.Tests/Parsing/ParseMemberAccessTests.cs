@@ -35,33 +35,30 @@ public class ParseMemberAccessTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [new ParameterNode(default, "x", new ArrayTypeNode(default, new TypeRefNode(default, ["i32"])))],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "a",
-                            new TypeRefNode(default, ["i32"]),
-                            new ArrayAccessExpressionNode(
-                                default,
-                                new MemberAccessExpressionNode(default, "x"),
-                                LiteralExpressionNode.Integer(default, 0)
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      ArrayType
+                        TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: a
+                        TypeRef: i32
+                        ArrayAccess
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 0
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -78,49 +75,28 @@ public class ParseMemberAccessTests
             """;
         var (tree, diagnostics) = Parse(code);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "x",
-                            new ArrayTypeNode(
-                                default,
-                                new TypeRefNode(default, ["i32"])
-                            )
-                        )
-                    ],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "a",
-                                new TypeRefNode(default, ["i32"]),
-                                new ArrayAccessExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "x"
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        0
-                                    )
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      ArrayType
+                        TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: a
+                        TypeRef: i32
+                        ArrayAccess
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 0
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -128,7 +104,7 @@ public class ParseMemberAccessTests
             new SourceLocation(file, new SourcePosition(68, 4, 21).ToSpan()),
             "Expected ']'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -143,36 +119,27 @@ public class ParseMemberAccessTests
                 x[0] = 1;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ExpressionStatementNode(
-                            default,
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.Assignment,
-                                new ArrayAccessExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(default, "x"),
-                                    LiteralExpressionNode.Integer(default, 0)
-                                ),
-                                LiteralExpressionNode.Integer(default, 1)
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ExpressionStatement
+                        BinaryExpression: Assignment
+                          ArrayAccess
+                            MemberAccess
+                              Name: x
+                            Literal: Integer = 0
+                          Literal: Integer = 1
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -187,44 +154,31 @@ public class ParseMemberAccessTests
                 a.b[0].c = 1;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ExpressionStatementNode(
-                            default,
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.Assignment,
-                                new MemberAccessExpressionNode(
-                                    default,
-                                    new ArrayAccessExpressionNode(
-                                        default,
-                                        new MemberAccessExpressionNode(
-                                            default,
-                                            new MemberAccessExpressionNode(default, "a"),
-                                            "b"
-                                        ),
-                                        LiteralExpressionNode.Integer(default, 0)
-                                    ),
-                                    "c"
-                                ),
-                                LiteralExpressionNode.Integer(default, 1)
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ExpressionStatement
+                        BinaryExpression: Assignment
+                          MemberAccess
+                            ArrayAccess
+                              MemberAccess
+                                MemberAccess
+                                  Name: a
+                                Name: b
+                              Literal: Integer = 0
+                            Name: c
+                          Literal: Integer = 1
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -239,34 +193,27 @@ public class ParseMemberAccessTests
                 return a[0][1];
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new ArrayAccessExpressionNode(
-                                default,
-                                new ArrayAccessExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(default, "a"),
-                                    LiteralExpressionNode.Integer(default, 0)
-                                ),
-                                LiteralExpressionNode.Integer(default, 1)
-                            )
-                        )
-                    ]))
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        ArrayAccess
+                          ArrayAccess
+                            MemberAccess
+                              Name: a
+                            Literal: Integer = 0
+                          Literal: Integer = 1
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -281,36 +228,27 @@ public class ParseMemberAccessTests
                 return a.b.c;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        MemberAccess
+                          MemberAccess
+                            MemberAccess
+                              Name: a
+                            Name: b
+                          Name: c
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new MemberAccessExpressionNode(
-                                default,
-                                new MemberAccessExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(default, "a"),
-                                    "b"
-                                ),
-                                "c"
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -326,28 +264,20 @@ public class ParseMemberAccessTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ReturnStatementNode(
-                                default,
-                                new FakeExpressionNode(default)
-                            ),
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        FakeExpression
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0013ExpectedIdentifier,
@@ -355,7 +285,7 @@ public class ParseMemberAccessTests
             new SourceLocation(file, new SourceSpan(new SourcePosition(55, 4, 16), new SourcePosition(56, 4, 17))),
             "Expected an identifier.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -370,39 +300,28 @@ public class ParseMemberAccessTests
                 return a.b().c;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new MemberAccessExpressionNode(
-                                default,
-                                new CallExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        new MemberAccessExpressionNode(default, "a"),
-                                        "b"
-                                    ),
-                                    []
-                                ),
-                                "c"
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        MemberAccess
+                          Call
+                            MemberAccess
+                              MemberAccess
+                                Name: a
+                              Name: b
+                          Name: c
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -417,34 +336,29 @@ public class ParseMemberAccessTests
                 f(1)(2);
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ExpressionStatementNode(
-                            default,
-                            new CallExpressionNode(
-                                default,
-                                new CallExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(default, "f"),
-                                    [LiteralExpressionNode.Integer(default, 1)]
-                                ),
-                                [LiteralExpressionNode.Integer(default, 2)]
-                            )
-                        )
-                    ]))
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ExpressionStatement
+                        Call
+                          Call
+                            MemberAccess
+                              Name: f
+                            Parameters
+                              Literal: Integer = 1
+                          Parameters
+                            Literal: Integer = 2
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -459,35 +373,25 @@ public class ParseMemberAccessTests
                 return new Test().a;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new MemberAccessExpressionNode(
-                                default,
-                                new NewObjectExpressionNode(
-                                    default,
-                                    new TypeRefNode(default, ["Test"]),
-                                    []
-                                ),
-                                "a"
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        MemberAccess
+                          NewObject
+                            TypeRef: Test
+                          Name: a
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -502,35 +406,27 @@ public class ParseMemberAccessTests
                 return new i32[0].size;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new MemberAccessExpressionNode(
-                                default,
-                                new NewArrayExpressionNode(
-                                    default,
-                                    new ArrayTypeNode(default, new TypeRefNode(default, ["i32"])),
-                                    LiteralExpressionNode.Integer(default, 0)
-                                ),
-                                "size"
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        MemberAccess
+                          NewArray
+                            ArrayType
+                              TypeRef: i32
+                            Literal: Integer = 0
+                          Name: size
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -545,35 +441,25 @@ public class ParseMemberAccessTests
                 return 1.toString();
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new CallExpressionNode(
-                                default,
-                                new MemberAccessExpressionNode(
-                                    default,
-                                    LiteralExpressionNode.Integer(default, 1),
-                                    "toString"
-                                ),
-                                []
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        Call
+                          MemberAccess
+                            Literal: Integer = 1
+                            Name: toString
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -588,40 +474,27 @@ public class ParseMemberAccessTests
                 return 1 + 2.toString();
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.Addition,
-                                LiteralExpressionNode.Integer(default, 1),
-                                new CallExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        LiteralExpressionNode.Integer(default, 2),
-                                        "toString"
-                                    ),
-                                    []
-                                )
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        BinaryExpression: Addition
+                          Literal: Integer = 1
+                          Call
+                            MemberAccess
+                              Literal: Integer = 2
+                              Name: toString
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -636,40 +509,31 @@ public class ParseMemberAccessTests
                 return t.0;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "t",
-                            new TupleTypeNode(default, [
-                                new TypeRefNode(default, ["i32"]),
-                                new TypeRefNode(default, ["string"])
-                            ])
-                        )
-                    ],
-                    new TypeRefNode(default, ["i32"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new MemberAccessExpressionNode(
-                                default,
-                                new MemberAccessExpressionNode(default, "t"),
-                                "0"
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: t
+                      TupleType
+                        Types
+                          TypeRef: i32
+                          TypeRef: string
+                  TypeRef: i32
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        MemberAccess
+                          MemberAccess
+                            Name: t
+                          Name: 0
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -685,54 +549,32 @@ public class ParseMemberAccessTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "t",
-                            new TupleTypeNode(
-                                default,
-                                [
-                                    new TypeRefNode(default, ["i32"]),
-                                    new TypeRefNode(default, ["string"]),
-                                ]
-                            )
-                        )
-                    ],
-                    new TypeRefNode(default, ["i32"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ReturnStatementNode(
-                                default,
-                                new MemberAccessExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "t"
-                                    ),
-                                    "0"
-                                )
-                            ),
-                            new ExpressionStatementNode(
-                                default,
-                                new MemberAccessExpressionNode(
-                                    default,
-                                    "x"
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: t
+                      TupleType
+                        Types
+                          TypeRef: i32
+                          TypeRef: string
+                  TypeRef: i32
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        MemberAccess
+                          MemberAccess
+                            Name: t
+                          Name: 0
+                      ExpressionStatement
+                        MemberAccess
+                          Name: x
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -740,7 +582,7 @@ public class ParseMemberAccessTests
             new SourceLocation(file, new SourcePosition(69, 4, 15).ToSpan()),
             "Expected ';'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

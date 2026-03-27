@@ -35,42 +35,26 @@ public class ParseCallExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ExpressionStatementNode(
-                                default,
-                                new CallExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "print"
-                                    ),
-                                    [
-                                        LiteralExpressionNode.String(
-                                            default,
-                                            "Hello, World!"
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ExpressionStatement
+                        Call
+                          MemberAccess
+                            Name: print
+                          Parameters
+                            Literal: String = Hello, World!
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -86,49 +70,28 @@ public class ParseCallExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ExpressionStatementNode(
-                                default,
-                                new CallExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "sum"
-                                    ),
-                                    [
-                                        LiteralExpressionNode.Integer(
-                                            default,
-                                            1
-                                        ),
-                                        LiteralExpressionNode.Integer(
-                                            default,
-                                            2
-                                        ),
-                                        LiteralExpressionNode.Integer(
-                                            default,
-                                            3
-                                        ),
-                                    ])
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ExpressionStatement
+                        Call
+                          MemberAccess
+                            Name: sum
+                          Parameters
+                            Literal: Integer = 1
+                            Literal: Integer = 2
+                            Literal: Integer = 3
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -144,59 +107,31 @@ public class ParseCallExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "x",
-                                new TypeRefNode(default, ["i32"]),
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.Addition,
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        1
-                                    ),
-                                    new CallExpressionNode(
-                                        default,
-                                        new MemberAccessExpressionNode(
-                                            default,
-                                            "sum"
-                                        ),
-                                        [
-                                            LiteralExpressionNode.Integer(
-                                                default,
-                                                1
-                                            ),
-                                            LiteralExpressionNode.Integer(
-                                                default,
-                                                2
-                                            ),
-                                            LiteralExpressionNode.Integer(
-                                                default,
-                                                3
-                                            ),
-                                        ])
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        BinaryExpression: Addition
+                          Literal: Integer = 1
+                          Call
+                            MemberAccess
+                              Name: sum
+                            Parameters
+                              Literal: Integer = 1
+                              Literal: Integer = 2
+                              Literal: Integer = 3
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

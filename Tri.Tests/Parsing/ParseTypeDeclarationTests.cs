@@ -28,24 +28,17 @@ public class ParseTypeDeclarationTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -54,22 +47,15 @@ public class ParseTypeDeclarationTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "<>_0",
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: <>_0
+                  AccessModifier: public
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0005ExpectedTypeName,
@@ -77,7 +63,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(30, 3, 13).ToSpan()),
             "Expected a type name.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -86,22 +72,15 @@ public class ParseTypeDeclarationTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -109,7 +88,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(36, 3, 19).ToSpan()),
             "Expected '{'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -118,22 +97,15 @@ public class ParseTypeDeclarationTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point {");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0014ExpectedTypeMember,
@@ -141,7 +113,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(37, 3, 20).ToSpan()),
             "Expected a type member (a property, a method or a constructor).");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -158,35 +130,22 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [
-                        new PropertyDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        ),
-                        new PropertyDeclarationNode(
-                            default,
-                            "y",
-                            new TypeRefNode(default, ["i32"])
-                        ),
-                    ],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Properties
+                    Property: x
+                      TypeRef: i32
+                    Property: y
+                      TypeRef: i32
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -217,114 +176,56 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [
-                        new PropertyDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new PropertyGetterNode(
-                                default,
-                                AccessModifier.Private,
-                                new BlockStatementNode(
-                                    default,
-                                    [
-                                        new ReturnStatementNode(
-                                            default,
-                                            new MemberAccessExpressionNode(
-                                                default,
-                                                "field"
-                                            )
-                                        )
-                                    ])
-                            ),
-                            new PropertySetterNode(
-                                default,
-                                AccessModifier.Private,
-                                new BlockStatementNode(
-                                    default,
-                                    [
-                                        new ExpressionStatementNode(
-                                            default,
-                                            new BinaryExpressionNode(
-                                                default,
-                                                BinaryExpressionKind.Assignment,
-                                                new MemberAccessExpressionNode(
-                                                    default,
-                                                    "field"
-                                                ),
-                                                new MemberAccessExpressionNode(
-                                                    default,
-                                                    "value"
-                                                )
-                                            )
-                                        )
-                                    ]
-                                )
-                            )
-                        ),
-                        new PropertyDeclarationNode(
-                            default,
-                            "y",
-                            new TypeRefNode(default, ["i32"]),
-                            new PropertyGetterNode(
-                                default,
-                                AccessModifier.Private,
-                                new BlockStatementNode(
-                                    default,
-                                    [
-                                        new ReturnStatementNode(
-                                            default,
-                                            new MemberAccessExpressionNode(
-                                                default,
-                                                "field"
-                                            )
-                                        )
-                                    ]
-                                )
-                            ),
-                            new PropertySetterNode(
-                                default,
-                                AccessModifier.Private,
-                                new BlockStatementNode(
-                                    default,
-                                    [
-                                        new ExpressionStatementNode(
-                                            default,
-                                            new BinaryExpressionNode(
-                                                default,
-                                                BinaryExpressionKind.Assignment,
-                                                new MemberAccessExpressionNode(
-                                                    default,
-                                                    "field"
-                                                ),
-                                                new MemberAccessExpressionNode(
-                                                    default,
-                                                    "value"
-                                                )
-                                            )
-                                        )
-                                    ]
-                                )
-                            )
-                        ),
-                    ],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Properties
+                    Property: x
+                      TypeRef: i32
+                      Getter
+                        AccessModifier: private
+                        BlockStatement
+                          Statements
+                            ReturnStatement
+                              MemberAccess
+                                Name: field
+                      Setter
+                        AccessModifier: private
+                        BlockStatement
+                          Statements
+                            ExpressionStatement
+                              BinaryExpression: Assignment
+                                MemberAccess
+                                  Name: field
+                                MemberAccess
+                                  Name: value
+                    Property: y
+                      TypeRef: i32
+                      Getter
+                        AccessModifier: private
+                        BlockStatement
+                          Statements
+                            ReturnStatement
+                              MemberAccess
+                                Name: field
+                      Setter
+                        AccessModifier: private
+                        BlockStatement
+                          Statements
+                            ExpressionStatement
+                              BinaryExpression: Assignment
+                                MemberAccess
+                                  Name: field
+                                MemberAccess
+                                  Name: value
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -345,59 +246,32 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [
-                        new PropertyDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new PropertyGetterNode(
-                                default,
-                                AccessModifier.Private,
-                                null
-                            ),
-                            new PropertySetterNode(
-                                default,
-                                AccessModifier.Private,
-                                new BlockStatementNode(
-                                    default,
-                                    [
-                                        new ExpressionStatementNode(
-                                            default,
-                                            new BinaryExpressionNode(
-                                                default,
-                                                BinaryExpressionKind.Assignment,
-                                                new MemberAccessExpressionNode(
-                                                    default,
-                                                    "field"
-                                                ),
-                                                new MemberAccessExpressionNode(
-                                                    default,
-                                                    "value"
-                                                )
-                                            )
-                                        )
-                                    ]
-                                )
-                            )
-                        ),
-                    ],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Properties
+                    Property: x
+                      TypeRef: i32
+                      Getter
+                        AccessModifier: private
+                      Setter
+                        AccessModifier: private
+                        BlockStatement
+                          Statements
+                            ExpressionStatement
+                              BinaryExpression: Assignment
+                                MemberAccess
+                                  Name: field
+                                MemberAccess
+                                  Name: value
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -418,41 +292,29 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [
-                        new PropertyDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new PropertyGetterNode(
-                                default,
-                                AccessModifier.Private,
-                                new BlockStatementNode(default, [
-                                    new ReturnStatementNode(
-                                        default,
-                                        new MemberAccessExpressionNode(default, "field")
-                                    )
-                                ])
-                            ),
-                            new PropertySetterNode(default, AccessModifier.Private, null)
-                        ),
-                    ],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Properties
+                    Property: x
+                      TypeRef: i32
+                      Getter
+                        AccessModifier: private
+                        BlockStatement
+                          Statements
+                            ReturnStatement
+                              MemberAccess
+                                Name: field
+                      Setter
+                        AccessModifier: private
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -468,22 +330,15 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0014ExpectedTypeMember,
@@ -491,7 +346,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourceSpan(new SourcePosition(42, 4, 5), new SourcePosition(49, 5, 1))),
             "Expected a type member (a property, a method or a constructor).");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -507,28 +362,18 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [
-                        new PropertyDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        ),
-                    ],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Properties
+                    Property: x
+                      TypeRef: i32
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -536,7 +381,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(44, 4, 7).ToSpan()),
             "Expected ':'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -552,31 +397,18 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [
-                        new PropertyDeclarationNode(
-                            default,
-                            "x",
-                            new FakeTypeNode(
-                                default,
-                                "<>_0"
-                            )
-                        ),
-                    ],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Properties
+                    Property: x
+                      FakeType: <>_0
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -584,7 +416,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(45, 4, 8).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -600,28 +432,18 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [
-                        new PropertyDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        ),
-                    ],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Properties
+                    Property: x
+                      TypeRef: i32
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -629,7 +451,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(49, 5, 1).ToSpan()),
             "Expected ';'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -647,43 +469,26 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(default, [])
-                        ),
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "distance",
-                            [new ParameterNode(default, "other", new TypeRefNode(default, ["Point"]))],
-                            new TypeRefNode(default, ["f32"]),
-                            new BlockStatementNode(default, [])
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+                    Method: distance
+                      AccessModifier: public
+                      TypeRef: f32
+                      BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -699,32 +504,20 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "<>_0",
-                            [],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(default)
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: <>_0
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0007ExpectedMethodName,
@@ -732,7 +525,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(49, 4, 12).ToSpan()),
             "Expected a method name.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -748,34 +541,20 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(52, 2, 33))
-                            )
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -783,7 +562,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(57, 4, 20).ToSpan()),
             "Expected '('.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -799,37 +578,22 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(
-                                default,
-                                [
-                                    new ReturnStatementNode(default)
-                                ]
-                            )
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+                        Statements
+                          ReturnStatement
+            """;
 
         var diagnostic = new[]
         {
@@ -840,7 +604,7 @@ public class ParseTypeDeclarationTests
                 "Expected ')'.")
         };
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
@@ -856,34 +620,20 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(49, 2, 30), new SourcePosition(52, 2, 33))
-                            )
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -891,7 +641,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(60, 4, 23).ToSpan()),
             "Expected ':'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -907,50 +657,24 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [],
-                            new InterfaceNode(
-                                default,
-                                [],
-                                []
-                            ),
-                            new BlockStatementNode(
-                                default,
-                                [
-                                    new VariableDeclarationNode(
-                                        default,
-                                        "x",
-                                        new TypeRefNode(default, ["i32"]),
-                                        new LiteralExpressionNode(
-                                            default,
-                                            LiteralExpressionKind.Integer,
-                                            1
-                                        )
-                                    )
-                                ]
-                            )
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      Interface
+                      BlockStatement
+                        Statements
+                          Variable: x
+                            TypeRef: i32
+                            Literal: Integer = 1
+            """;
 
         var diagnostic = new[]
         {
@@ -966,7 +690,7 @@ public class ParseTypeDeclarationTests
                 "Expected '{'."),
         };
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
@@ -982,32 +706,20 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(default)
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -1015,7 +727,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(68, 4, 31).ToSpan()),
             "Expected '{'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1031,34 +743,20 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(50, 2, 31), new SourcePosition(53, 3, 2))
-                            )
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0014ExpectedTypeMember,
@@ -1066,7 +764,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(71, 5, 2).ToSpan()),
             "Expected a type member (a property, a method or a constructor).");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1082,43 +780,20 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [
-                                new ParameterNode(
-                                    default,
-                                    "a",
-                                    new TypeRefNode(default, ["i32"])
-                                ),
-                                new ParameterNode(
-                                    default,
-                                    "b",
-                                    new TypeRefNode(default, ["i32"])
-                                ),
-                            ],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(default)
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -1126,7 +801,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourceSpan(new SourcePosition(65, 4, 28), new SourcePosition(65, 4, 28))),
             "Expected ','.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1142,38 +817,20 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [
-                                new ParameterNode(
-                                    default,
-                                    "a",
-                                    new TypeRefNode(default, ["i32"])
-                                ),
-                            ],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(default)
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -1181,7 +838,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(60, 4, 23).ToSpan()),
             "Expected ':'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1197,43 +854,20 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            false,
-                            "toString",
-                            [
-                                new ParameterNode(
-                                    default,
-                                    "a",
-                                    new FakeTypeNode(
-                                        default,
-                                        "<>_0"
-                                    )
-                                ),
-                            ],
-                            new TypeRefNode(default, ["string"]),
-                            new BlockStatementNode(
-                                new SourceSpan(new SourcePosition(53, 2, 34), new SourcePosition(56, 2, 37))
-                            )
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Methods
+                    Method: toString
+                      AccessModifier: public
+                      TypeRef: string
+                      BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -1241,7 +875,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(61, 4, 24).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1257,34 +891,21 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [
-                        new ConstructorDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            [
-                                new ParameterNode(default, "x", new TypeRefNode(default, ["i32"])),
-                                new ParameterNode(default, "y", new TypeRefNode(default, ["i32"])),
-                            ],
-                            new BlockStatementNode(default, [])
-                        )
-                    ],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Constructors
+                    Constructor
+                      AccessModifier: public
+                      BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1293,24 +914,20 @@ public class ParseTypeDeclarationTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point : Interface1, Interface2 { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [new TypeRefNode(default, ["Interface1"]), new TypeRefNode(default, ["Interface2"])],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Interfaces
+                    TypeRef: Interface1
+                    TypeRef: Interface2
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1319,22 +936,15 @@ public class ParseTypeDeclarationTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point : { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0006ExpectedInterface,
@@ -1342,7 +952,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(38, 3, 21).ToSpan()),
             "Expected an interface.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1351,25 +961,18 @@ public class ParseTypeDeclarationTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point : Interface1 Interface2 { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [
-                        new TypeRefNode(default, ["Interface1"]),
-                        new TypeRefNode(default, ["Interface2"])
-                    ],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Interfaces
+                    TypeRef: Interface1
+                    TypeRef: Interface2
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -1378,7 +981,7 @@ public class ParseTypeDeclarationTests
             "Expected ','."
         );
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1387,24 +990,17 @@ public class ParseTypeDeclarationTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point : Interface1, { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Point",
-                    [],
-                    [
-                        new TypeRefNode(default, ["Interface1"]),
-                    ],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Point
+                  AccessModifier: public
+                  Interfaces
+                    TypeRef: Interface1
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0006ExpectedInterface,
@@ -1412,7 +1008,7 @@ public class ParseTypeDeclarationTests
             new SourceLocation(file, new SourcePosition(50, 3, 33).ToSpan()),
             "Expected an interface.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1427,34 +1023,23 @@ public class ParseTypeDeclarationTests
                 public static test(): void { }
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Test",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            true,
-                            "test",
-                            [],
-                            new TypeRefNode(default, ["void"]),
-                            new BlockStatementNode(default)
-                        )
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Test
+                  AccessModifier: public
+                  Methods
+                    Method: test
+                      AccessModifier: public
+                      Static: true
+                      TypeRef: void
+                      BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1474,55 +1059,34 @@ public class ParseTypeDeclarationTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "Test",
-                    [],
-                    [],
-                    [],
-                    [],
-                    [
-                        new MethodDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            true,
-                            "test",
-                            [],
-                            new TypeRefNode(default, ["void"]),
-                            new BlockStatementNode(default)
-                        )
-                    ]
-                ),
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ExpressionStatementNode(
-                            default,
-                            new CallExpressionNode(
-                                default,
-                                new MemberAccessExpressionNode(
-                                    default,
-                                    new MemberAccessExpressionNode(default, "Test"),
-                                    "test"
-                                ),
-                                []
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: Test
+                  AccessModifier: public
+                  Methods
+                    Method: test
+                      AccessModifier: public
+                      Static: true
+                      TypeRef: void
+                      BlockStatement
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ExpressionStatement
+                        Call
+                          MemberAccess
+                            MemberAccess
+                              Name: Test
+                            Name: test
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

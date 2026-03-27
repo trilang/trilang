@@ -28,24 +28,19 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type List<T> { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "List",
-                    [new TypeRefNode(default, ["T"])],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: List
+                  AccessModifier: public
+                  Generic Arguments
+                    TypeRef: T
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -54,27 +49,17 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type List<> { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "List",
-                    [
-                        new FakeTypeNode(
-                            default,
-                            "<>_0"
-                        )
-                    ],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: List
+                  AccessModifier: public
+                  Generic Arguments
+                    FakeType: <>_0
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -82,7 +67,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(35, 3, 18).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -91,28 +76,18 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type List<T,> { }");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "List",
-                    [
-                        new TypeRefNode(default, ["T"]),
-                        new FakeTypeNode(
-                            default,
-                            "<>_0"
-                        )
-                    ],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: List
+                  AccessModifier: public
+                  Generic Arguments
+                    TypeRef: T
+                    FakeType: <>_0
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -120,7 +95,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(37, 3, 20).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -134,24 +109,17 @@ public class ParseGenericTypeTests
             public type List<T { }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new TypeDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "List",
-                    [
-                        new TypeRefNode(default, ["T"])
-                    ],
-                    [],
-                    [],
-                    [],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: List
+                  AccessModifier: public
+                  Generic Arguments
+                    TypeRef: T
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -159,7 +127,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(37, 3, 20).ToSpan()),
             "Expected '>'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -168,23 +136,22 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<i32, bool>;");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [],
-                    new GenericApplicationNode(
-                        default,
-                        new TypeRefNode(default, ["List"]),
-                        [new TypeRefNode(default, ["i32"]), new TypeRefNode(default, ["bool"])]))
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  GenericApplication
+                    TypeRef: List
+                    TypeArguments
+                      TypeRef: i32
+                      TypeRef: bool
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -192,31 +159,25 @@ public class ParseGenericTypeTests
     public void ParseNestedGenericTypeAliasTest()
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<i32, List<bool>>;");
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [],
-                    new GenericApplicationNode(
-                        default,
-                        new TypeRefNode(default, ["List"]),
-                        [
-                            new TypeRefNode(default, ["i32"]),
-                            new GenericApplicationNode(
-                                default,
-                                new TypeRefNode(default, ["List"]),
-                                [new TypeRefNode(default, ["bool"])])
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  GenericApplication
+                    TypeRef: List
+                    TypeArguments
+                      TypeRef: i32
+                      GenericApplication
+                        TypeRef: List
+                        TypeArguments
+                          TypeRef: bool
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -225,21 +186,19 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<>;");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [],
-                    new GenericApplicationNode(
-                        default,
-                        new TypeRefNode(default, ["List"]),
-                        [new FakeTypeNode(default, "<>_0")]))
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  GenericApplication
+                    TypeRef: List
+                    TypeArguments
+                      FakeType: <>_0
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -247,7 +206,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(39, 3, 22).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -256,26 +215,20 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<i32, >;");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [],
-                    new GenericApplicationNode(
-                        default,
-                        new TypeRefNode(default, ["List"]),
-                        [
-                            new TypeRefNode(default, ["i32"]),
-                            new FakeTypeNode(default, "<>_0")
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  GenericApplication
+                    TypeRef: List
+                    TypeArguments
+                      TypeRef: i32
+                      FakeType: <>_0
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -283,7 +236,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(44, 3, 27).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -292,23 +245,19 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<i32;");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [],
-                    new GenericApplicationNode(
-                        default,
-                        new TypeRefNode(default, ["List"]),
-                        [new TypeRefNode(default, ["i32"])]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  GenericApplication
+                    TypeRef: List
+                    TypeArguments
+                      TypeRef: i32
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -316,7 +265,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(42, 3, 25).ToSpan()),
             "Expected '>'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -325,24 +274,21 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T<T1, T2> = T1 | T2;");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [new TypeRefNode(default, ["T1"]), new TypeRefNode(default, ["T2"])],
-                    new DiscriminatedUnionNode([
-                        new TypeRefNode(default, ["T1"]),
-                        new TypeRefNode(default, ["T2"])
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  DiscriminatedUnion
+                    Types
+                      TypeRef: T1
+                      TypeRef: T2
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -351,27 +297,19 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T<> = T1 | T2;");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [
-                        new FakeTypeNode(
-                            default,
-                            "<>_0"
-                        )
-                    ],
-                    new DiscriminatedUnionNode([
-                        new TypeRefNode(default, ["T1"]),
-                        new TypeRefNode(default, ["T2"])
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  DiscriminatedUnion
+                    Types
+                      TypeRef: T1
+                      TypeRef: T2
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -379,7 +317,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(32, 3, 15).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -388,28 +326,19 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T<T1, > = T1 | T2;");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [
-                        new TypeRefNode(default, ["T1"]),
-                        new FakeTypeNode(
-                            default,
-                            "<>_0"
-                        )
-                    ],
-                    new DiscriminatedUnionNode([
-                        new TypeRefNode(default, ["T1"]),
-                        new TypeRefNode(default, ["T2"])
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  DiscriminatedUnion
+                    Types
+                      TypeRef: T1
+                      TypeRef: T2
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -417,7 +346,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(36, 3, 19).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -426,25 +355,19 @@ public class ParseGenericTypeTests
     {
         var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T<T1, T2 = T1 | T2;");
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [
-                        new TypeRefNode(default, ["T1"]),
-                        new TypeRefNode(default, ["T2"])
-                    ],
-                    new DiscriminatedUnionNode([
-                        new TypeRefNode(default, ["T1"]),
-                        new TypeRefNode(default, ["T2"])
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  DiscriminatedUnion
+                    Types
+                      TypeRef: T1
+                      TypeRef: T2
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -452,7 +375,7 @@ public class ParseGenericTypeTests
             new SourceLocation(file, new SourcePosition(39, 3, 22).ToSpan()),
             "Expected '>'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

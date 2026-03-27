@@ -34,32 +34,23 @@ public class ParseExpressionTests
                 var x: i32 = 5;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        Literal: Integer = 5
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "x",
-                                new TypeRefNode(default, ["i32"]),
-                                LiteralExpressionNode.Integer(default, 5)
-                            )
-                        ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -74,34 +65,24 @@ public class ParseExpressionTests
                 var x: i32 = +2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        UnaryExpression: UnaryPlus
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new UnaryExpressionNode(
-                                default,
-                                UnaryExpressionKind.UnaryPlus,
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -116,34 +97,24 @@ public class ParseExpressionTests
                 var x: i32 = -2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        UnaryExpression: UnaryMinus
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new UnaryExpressionNode(
-                                default,
-                                UnaryExpressionKind.UnaryMinus,
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -158,34 +129,24 @@ public class ParseExpressionTests
                 var x: i32 = !2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        UnaryExpression: LogicalNot
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new UnaryExpressionNode(
-                                default,
-                                UnaryExpressionKind.LogicalNot,
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -200,34 +161,24 @@ public class ParseExpressionTests
                 var x: i32 = ~2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        UnaryExpression: BitwiseNot
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new UnaryExpressionNode(
-                                default,
-                                UnaryExpressionKind.BitwiseNot,
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -242,40 +193,25 @@ public class ParseExpressionTests
                 var x: i32 = ~+2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        UnaryExpression: BitwiseNot
+                          UnaryExpression: UnaryPlus
+                            Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "x",
-                                new TypeRefNode(default, ["i32"]),
-                                new UnaryExpressionNode(
-                                    default,
-                                    UnaryExpressionKind.BitwiseNot,
-                                    new UnaryExpressionNode(
-                                        default,
-                                        UnaryExpressionKind.UnaryPlus,
-                                        LiteralExpressionNode.Integer(default, 2)
-                                    )
-                                )
-                            )
-                        ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -295,35 +231,25 @@ public class ParseExpressionTests
                   var x: i32 = 2 {{@operator}} 2;
               }
               """);
+        var expected =
+            $"""
+             SyntaxTree
+               Namespace
+                 Parts: Test1
+               Declarations
+                 Function: main
+                   AccessModifier: public
+                   TypeRef: void
+                   BlockStatement
+                     Statements
+                       Variable: x
+                         TypeRef: i32
+                         BinaryExpression: {kind}
+                           Literal: Integer = 2
+                           Literal: Integer = 2
+             """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new BinaryExpressionNode(
-                                default,
-                                kind,
-                                LiteralExpressionNode.Integer(default, 2),
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -338,43 +264,25 @@ public class ParseExpressionTests
                 var x: i32 = 2 & 2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        BinaryExpression: BitwiseAnd
+                          Literal: Integer = 2
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "x",
-                                new TypeRefNode(default, ["i32"]),
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.BitwiseAnd,
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        2
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        2
-                                    )
-                                )
-                            )
-                        ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -389,44 +297,25 @@ public class ParseExpressionTests
                 var x: i32 = 2 | 2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        BinaryExpression: BitwiseOr
+                          Literal: Integer = 2
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "x",
-                                new TypeRefNode(default, ["i32"]),
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.BitwiseOr,
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        2
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        2
-                                    )
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -441,44 +330,25 @@ public class ParseExpressionTests
                 var x: i32 = 2 ^ 2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        BinaryExpression: BitwiseXor
+                          Literal: Integer = 2
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "x",
-                                new TypeRefNode(default, ["i32"]),
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.BitwiseXor,
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        2
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        2
-                                    )
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -493,35 +363,25 @@ public class ParseExpressionTests
                 var x: bool = true && true;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: bool
+                        BinaryExpression: ConditionalAnd
+                          Literal: Boolean = True
+                          Literal: Boolean = True
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["bool"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.ConditionalAnd,
-                                LiteralExpressionNode.True(default),
-                                LiteralExpressionNode.True(default)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -536,35 +396,25 @@ public class ParseExpressionTests
                 var x: bool = true || true;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: bool
+                        BinaryExpression: ConditionalOr
+                          Literal: Boolean = True
+                          Literal: Boolean = True
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["bool"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.ConditionalOr,
-                                LiteralExpressionNode.True(default),
-                                LiteralExpressionNode.True(default)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -579,35 +429,25 @@ public class ParseExpressionTests
                 var x: bool = true == true;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: bool
+                        BinaryExpression: Equality
+                          Literal: Boolean = True
+                          Literal: Boolean = True
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["bool"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.Equality,
-                                LiteralExpressionNode.True(default),
-                                LiteralExpressionNode.True(default)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -622,35 +462,25 @@ public class ParseExpressionTests
                 var x: bool = true != true;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: bool
+                        BinaryExpression: Inequality
+                          Literal: Boolean = True
+                          Literal: Boolean = True
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["bool"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.Inequality,
-                                LiteralExpressionNode.True(default),
-                                LiteralExpressionNode.True(default)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -665,35 +495,25 @@ public class ParseExpressionTests
                 var x: bool = 2 < 2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: bool
+                        BinaryExpression: LessThan
+                          Literal: Integer = 2
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["bool"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.LessThan,
-                                LiteralExpressionNode.Integer(default, 2),
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -708,35 +528,25 @@ public class ParseExpressionTests
                 var x: bool = 2 <= 2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: bool
+                        BinaryExpression: LessThanOrEqual
+                          Literal: Integer = 2
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["bool"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.LessThanOrEqual,
-                                LiteralExpressionNode.Integer(default, 2),
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -751,35 +561,25 @@ public class ParseExpressionTests
                 var x: bool = 2 > 2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: bool
+                        BinaryExpression: GreaterThan
+                          Literal: Integer = 2
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["bool"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.GreaterThan,
-                                LiteralExpressionNode.Integer(default, 2),
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -794,35 +594,25 @@ public class ParseExpressionTests
                 var x: bool = 2 >= 2;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: bool
+                        BinaryExpression: GreaterThanOrEqual
+                          Literal: Integer = 2
+                          Literal: Integer = 2
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["bool"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.GreaterThanOrEqual,
-                                LiteralExpressionNode.Integer(default, 2),
-                                LiteralExpressionNode.Integer(default, 2)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -837,33 +627,25 @@ public class ParseExpressionTests
                 x = 1;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ExpressionStatement
+                        BinaryExpression: Assignment
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 1
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ExpressionStatementNode(
-                            default,
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.Assignment,
-                                new MemberAccessExpressionNode(default, "x"),
-                                LiteralExpressionNode.Integer(default, 1)
-                            )
-                        )
-                    ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -887,32 +669,25 @@ public class ParseExpressionTests
               }
               """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ExpressionStatementNode(
-                            default,
-                            new BinaryExpressionNode(
-                                default,
-                                kind,
-                                new MemberAccessExpressionNode(default, "x"),
-                                LiteralExpressionNode.Integer(default, 1)
-                            )
-                        )
-                    ])
-                )
-            ]);
+        var expected =
+            $$"""
+              SyntaxTree
+                Namespace
+                  Parts: Test1
+                Declarations
+                  Function: main
+                    AccessModifier: public
+                    TypeRef: void
+                    BlockStatement
+                      Statements
+                        ExpressionStatement
+                          BinaryExpression: {{kind}}
+                            MemberAccess
+                              Name: x
+                            Literal: Integer = 1
+              """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -927,51 +702,27 @@ public class ParseExpressionTests
                 var x: i32 = (1 + 2) * 3;
             }
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        BinaryExpression: Multiplication
+                          BinaryExpression: Addition
+                            Literal: Integer = 1
+                            Literal: Integer = 2
+                          Literal: Integer = 3
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "x",
-                                new TypeRefNode(default, ["i32"]),
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.Multiplication,
-                                    new BinaryExpressionNode(
-                                        default,
-                                        BinaryExpressionKind.Addition,
-                                        LiteralExpressionNode.Integer(
-                                            default,
-                                            1
-                                        ),
-                                        LiteralExpressionNode.Integer(
-                                            default,
-                                            2
-                                        )
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        3
-                                    )
-                                )
-                            )
-                        ])
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -987,34 +738,29 @@ public class ParseExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [new ParameterNode(default, "y", new TypeRefNode(default, ["i32"]))],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"]),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.Multiplication,
-                                LiteralExpressionNode.Integer(default, 2),
-                                new MemberAccessExpressionNode(default, "y")
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  Parameters
+                    Parameter: y
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        BinaryExpression: Multiplication
+                          Literal: Integer = 2
+                          MemberAccess
+                            Name: y
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1030,70 +776,41 @@ public class ParseExpressionTests
             }
             """);
 
-        var variableDeclarationNode = new VariableDeclarationNode(
-            default,
-            "x",
-            new TypeRefNode(default, ["i32"]),
-            new BinaryExpressionNode(
-                default,
-                BinaryExpressionKind.ConditionalOr,
-                LiteralExpressionNode.True(default),
-                new BinaryExpressionNode(
-                    default,
-                    BinaryExpressionKind.ConditionalAnd,
-                    LiteralExpressionNode.True(default),
-                    new BinaryExpressionNode(
-                        default,
-                        BinaryExpressionKind.BitwiseOr,
-                        LiteralExpressionNode.False(default),
-                        new BinaryExpressionNode(
-                            default,
-                            BinaryExpressionKind.BitwiseXor,
-                            LiteralExpressionNode.False(default),
-                            new BinaryExpressionNode(
-                                default,
-                                BinaryExpressionKind.BitwiseAnd,
-                                LiteralExpressionNode.False(default),
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.Equality,
-                                    LiteralExpressionNode.True(default),
-                                    new BinaryExpressionNode(
-                                        default,
-                                        BinaryExpressionKind.LessThan,
-                                        new BinaryExpressionNode(
-                                            default,
-                                            BinaryExpressionKind.Addition,
-                                            LiteralExpressionNode.Integer(default, 1),
-                                            new BinaryExpressionNode(
-                                                default,
-                                                BinaryExpressionKind.Multiplication,
-                                                LiteralExpressionNode.Integer(default, 2),
-                                                LiteralExpressionNode.Integer(default, 3)
-                                            )
-                                        ),
-                                        LiteralExpressionNode.Integer(default, 10)
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        );
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main", [], new TypeRefNode(default, ["void"]), new BlockStatementNode(default, [variableDeclarationNode])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        BinaryExpression: ConditionalOr
+                          Literal: Boolean = True
+                          BinaryExpression: ConditionalAnd
+                            Literal: Boolean = True
+                            BinaryExpression: BitwiseOr
+                              Literal: Boolean = False
+                              BinaryExpression: BitwiseXor
+                                Literal: Boolean = False
+                                BinaryExpression: BitwiseAnd
+                                  Literal: Boolean = False
+                                  BinaryExpression: Equality
+                                    Literal: Boolean = True
+                                    BinaryExpression: LessThan
+                                      BinaryExpression: Addition
+                                        Literal: Integer = 1
+                                        BinaryExpression: Multiplication
+                                          Literal: Integer = 2
+                                          Literal: Integer = 3
+                                      Literal: Integer = 10
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1108,30 +825,26 @@ public class ParseExpressionTests
                 return (1, 2);
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new TupleExpressionNode(default, [
-                                LiteralExpressionNode.Integer(default, 1),
-                                LiteralExpressionNode.Integer(default, 2),
-                            ])
-                        )
-                    ])
-                )
-            ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        TupleExpression
+                          Expressions
+                            Literal: Integer = 1
+                            Literal: Integer = 2
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1147,41 +860,25 @@ public class ParseExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ReturnStatementNode(
-                                default,
-                                new TupleExpressionNode(
-                                    default,
-                                    [
-                                        LiteralExpressionNode.Integer(
-                                            default,
-                                            1
-                                        ),
-                                        LiteralExpressionNode.Integer(
-                                            default,
-                                            2
-                                        ),
-                                    ]
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        TupleExpression
+                          Expressions
+                            Literal: Integer = 1
+                            Literal: Integer = 2
+            """;
 
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
@@ -1189,7 +886,6 @@ public class ParseExpressionTests
             "Expected ')'."
         );
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1204,37 +900,26 @@ public class ParseExpressionTests
                 return new i32[10];
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new NewArrayExpressionNode(
-                                default,
-                                new ArrayTypeNode(
-                                    default,
-                                    new TypeRefNode(default, ["i32"])
-                                ),
-                                LiteralExpressionNode.Integer(
-                                    default,
-                                    10
-                                )
-                            )
-                        )
-                    ])
-                )
-            ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        NewArray
+                          ArrayType
+                            TypeRef: i32
+                          Literal: Integer = 10
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1249,36 +934,29 @@ public class ParseExpressionTests
                 return a is i8;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "a",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["i8"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            new IsExpressionNode(
-                                new MemberAccessExpressionNode(default, "a"),
-                                new TypeRefNode(default, ["i8"])
-                            )
-                        )
-                    ])
-                )
-            ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: a
+                      TypeRef: i32
+                  TypeRef: i8
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        IsExpression
+                          MemberAccess
+                            Name: a
+                          TypeRef: i8
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1295,51 +973,34 @@ public class ParseExpressionTests
             """;
         var (tree, diagnostics) = Parse(code);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "a",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["i8"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ReturnStatementNode(
-                                default,
-                                new IsExpressionNode(
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "a"
-                                    ),
-                                    new FakeTypeNode(
-                                        default,
-                                        "<>_0"
-                                    )
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: a
+                      TypeRef: i32
+                  TypeRef: i8
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        IsExpression
+                          MemberAccess
+                            Name: a
+                          FakeType: <>_0
+            """;
 
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(59, 4, 16).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1354,40 +1015,29 @@ public class ParseExpressionTests
                 return (i8)a;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "a",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["i8"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ReturnStatementNode(
-                                default,
-                                new CastExpressionNode(
-                                    default,
-                                    new TypeRefNode(default, ["i8"]),
-                                    new MemberAccessExpressionNode(default, "a")
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: a
+                      TypeRef: i32
+                  TypeRef: i8
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        Cast
+                          TypeRef: i8
+                          MemberAccess
+                            Name: a
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -1403,39 +1053,28 @@ public class ParseExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "a",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["i8"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ReturnStatementNode(
-                                default,
-                                new CastExpressionNode(
-                                    default,
-                                    new TypeRefNode(default, ["i8"]),
-                                    new MemberAccessExpressionNode(default, "a")
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: a
+                      TypeRef: i32
+                  TypeRef: i8
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        Cast
+                          TypeRef: i8
+                          MemberAccess
+                            Name: a
+            """;
 
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
@@ -1443,7 +1082,6 @@ public class ParseExpressionTests
             "Expected ')'."
         );
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1459,41 +1097,27 @@ public class ParseExpressionTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "a",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["i8"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new ReturnStatementNode(
-                                default,
-                                new CastExpressionNode(
-                                    default,
-                                    new TypeRefNode(default, ["i8"]),
-                                    new FakeExpressionNode(
-                                        new SourcePosition(41, 2, 16).ToSpan()
-                                    )
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: a
+                      TypeRef: i32
+                  TypeRef: i8
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        Cast
+                          TypeRef: i8
+                          FakeExpression
+            """;
 
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         var diagnostic = new Diagnostic(
             DiagnosticId.P0009ExpectedExpression,
             DiagnosticSeverity.Error,
@@ -1501,7 +1125,6 @@ public class ParseExpressionTests
             "Expected an expression."
         );
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -1516,27 +1139,23 @@ public class ParseExpressionTests
                 return 3.14;
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [],
-                    new TypeRefNode(default, ["f64"]),
-                    new BlockStatementNode(default, [
-                        new ReturnStatementNode(
-                            default,
-                            LiteralExpressionNode.Float(default, 3.14)
-                        )
-                    ])
-                )
-            ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  TypeRef: f64
+                  BlockStatement
+                    Statements
+                      ReturnStatement
+                        Literal: Float = 3.14
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

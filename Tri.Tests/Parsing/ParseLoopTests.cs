@@ -36,42 +36,29 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new WhileNode(
-                                default,
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.GreaterThan,
-                                    new MemberAccessExpressionNode(default, "x"),
-                                    LiteralExpressionNode.Integer(default, 0)
-                                ),
-                                new BlockStatementNode(default)
-                            )
-                        ]
-                    )
-                ),
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      While
+                        BinaryExpression: GreaterThan
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 0
+                        BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -88,46 +75,27 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new WhileNode(
-                                default,
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.GreaterThan,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "x"
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        0
-                                    )
-                                ),
-                                new BlockStatementNode(default)
-                            )
-                        ]
-                    )
-                ),
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      While
+                        BinaryExpression: GreaterThan
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 0
+                        BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -135,7 +103,7 @@ public class ParseLoopTests
             new SourceLocation(file, new SourcePosition(56, 4, 11).ToSpan()),
             "Expected '('.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -152,37 +120,24 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new WhileNode(
-                                default,
-                                new FakeExpressionNode(default),
-                                new BlockStatementNode(
-                                    new SourceSpan(new SourcePosition(42, 2, 15), new SourcePosition(49, 3, 6))
-                                )
-                            )
-                        ]
-                    )
-                ),
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      While
+                        FakeExpression
+                        BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0009ExpectedExpression,
@@ -190,7 +145,7 @@ public class ParseLoopTests
             new SourceLocation(file, new SourceSpan(new SourcePosition(57, 4, 12), new SourcePosition(58, 4, 13))),
             "Expected an expression.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -207,46 +162,27 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new WhileNode(
-                                default,
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.GreaterThan,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "x"
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        0
-                                    )
-                                ),
-                                new BlockStatementNode(default)
-                            )
-                        ]
-                    )
-                ),
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      While
+                        BinaryExpression: GreaterThan
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 0
+                        BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -254,7 +190,7 @@ public class ParseLoopTests
             new SourceLocation(file, new SourcePosition(63, 4, 18).ToSpan()),
             "Expected ')'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -272,53 +208,29 @@ public class ParseLoopTests
 
         var (tree, diagnostics) = Parse(source);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new WhileNode(
-                                default,
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.GreaterThan,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "x"
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        0
-                                    )
-                                ),
-                                new BlockStatementNode(
-                                    default,
-                                    [
-                                        new FakeStatementNode(
-                                            new SourcePosition(53, 3, 8).ToSpan()
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    )
-                ),
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      While
+                        BinaryExpression: GreaterThan
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 0
+                        BlockStatement
+                          Statements
+                            FakeStatement
+            """;
 
         var diagnostic = new[]
         {
@@ -339,7 +251,7 @@ public class ParseLoopTests
                 "Expected '}'."),
         };
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
@@ -357,54 +269,31 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new WhileNode(
-                                default,
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.GreaterThan,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "x"
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        0
-                                    )
-                                ),
-                                new BlockStatementNode(
-                                    default,
-                                    [
-                                        new BreakNode(
-                                            new SourceSpan(new SourcePosition(56, 3, 9), new SourcePosition(62, 3, 15))
-                                        )
-                                    ]
-                                )
-                            )
-                        ])
-                ),
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      While
+                        BinaryExpression: GreaterThan
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 0
+                        BlockStatement
+                          Statements
+                            Break
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -422,52 +311,31 @@ public class ParseLoopTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "test",
-                    [
-                        new ParameterNode(
-                            default,
-                            "x",
-                            new TypeRefNode(default, ["i32"])
-                        )
-                    ],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new WhileNode(
-                                default,
-                                new BinaryExpressionNode(
-                                    default,
-                                    BinaryExpressionKind.GreaterThan,
-                                    new MemberAccessExpressionNode(
-                                        default,
-                                        "x"
-                                    ),
-                                    LiteralExpressionNode.Integer(
-                                        default,
-                                        0
-                                    )
-                                ),
-                                new BlockStatementNode(
-                                    default,
-                                    [
-                                        new ContinueNode(default)
-                                    ]
-                                )
-                            )
-                        ])
-                ),
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      While
+                        BinaryExpression: GreaterThan
+                          MemberAccess
+                            Name: x
+                          Literal: Integer = 0
+                        BlockStatement
+                          Statements
+                            Continue
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

@@ -33,26 +33,19 @@ public class ParseNamespaceTests
             public main(): void { }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(
-                default,
-                ["Test"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -66,26 +59,19 @@ public class ParseNamespaceTests
             public main(): void { }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(
-                default,
-                ["Test", "SubNamespace", "SubSubNamespace"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test.SubNamespace.SubSubNamespace
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -101,28 +87,22 @@ public class ParseNamespaceTests
             public main(): void { }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [
-                new UseNode(
-                    default,
-                    ["Test"])
-            ],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              UseNodes
+                Use
+                  Parts: Test
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -138,28 +118,22 @@ public class ParseNamespaceTests
             public main(): void { }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [
-                new UseNode(
-                    default,
-                    ["Test", "SubNamespace", "SubSubNamespace"])
-            ],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              UseNodes
+                Use
+                  Parts: Test.SubNamespace.SubSubNamespace
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -175,26 +149,20 @@ public class ParseNamespaceTests
             public main(): void { }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [
-                new UseNode(
-                    default,
-                    ["Test", "<namespace>", "SubSubNamespace"])
-            ],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              UseNodes
+                Use
+                  Parts: Test.<namespace>.SubSubNamespace
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0015ExpectedNamespacePart,
@@ -204,7 +172,7 @@ public class ParseNamespaceTests
                 new SourceSpan(new SourcePosition(27, 3, 10), new SourcePosition(28, 3, 11))),
             "Expected a namespace part.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -220,30 +188,22 @@ public class ParseNamespaceTests
             public main(): void { }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(
-                default,
-                ["Test"]),
-            [
-                new UseNode(
-                    default,
-                    ["OtherNamespace"])
-            ],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test
+              UseNodes
+                Use
+                  Parts: OtherNamespace
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -257,20 +217,18 @@ public class ParseNamespaceTests
             public type T = Some.NS.TestType;
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new AliasDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "T",
-                    [],
-                    new TypeRefNode(default, ["Some", "NS", "TestType"]))
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                TypeAlias: T
+                  AccessModifier: public
+                  TypeRef: Some.NS.TestType
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

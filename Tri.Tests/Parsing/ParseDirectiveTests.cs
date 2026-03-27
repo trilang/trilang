@@ -36,30 +36,21 @@ public class ParseDirectiveTests
 
             #endif
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new IfDirectiveNode(
-                    default,
-                    "D1",
-                    [
-                        new TypeDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            "Type1",
-                            [],
-                            [],
-                            [],
-                            [],
-                            [])
-                    ],
-                    []
-                )
-            ]);
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                IfDirective
+                  DirectiveName: D1
+                  Then
+                    Type: Type1
+                      AccessModifier: public
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -80,40 +71,23 @@ public class ParseDirectiveTests
 
             #endif
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new IfDirectiveNode(
-                    default,
-                    "D1",
-                    [
-                        new TypeDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            "Type1",
-                            [],
-                            [],
-                            [],
-                            [],
-                            [])
-                    ],
-                    [
-                        new TypeDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            "Type2",
-                            [],
-                            [],
-                            [],
-                            [],
-                            [])
-                    ]
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                IfDirective
+                  DirectiveName: D1
+                  Then
+                    Type: Type1
+                      AccessModifier: public
+                  Else
+                    Type: Type2
+                      AccessModifier: public
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -138,54 +112,27 @@ public class ParseDirectiveTests
 
             #endif
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new IfDirectiveNode(
-                    default,
-                    "D1",
-                    [
-                        new TypeDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            "Type1",
-                            [],
-                            [],
-                            [],
-                            [],
-                            []),
-                        new IfDirectiveNode(
-                            default,
-                            "D2",
-                            [
-                                new TypeDeclarationNode(
-                                    default,
-                                    AccessModifier.Public,
-                                    "Type2",
-                                    [],
-                                    [],
-                                    [],
-                                    [],
-                                    [])
-                            ],
-                            []),
-                        new TypeDeclarationNode(
-                            default,
-                            AccessModifier.Public,
-                            "Type3",
-                            [],
-                            [],
-                            [],
-                            [],
-                            []),
-                    ],
-                    []
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                IfDirective
+                  DirectiveName: D1
+                  Then
+                    Type: Type1
+                      AccessModifier: public
+                    IfDirective
+                      DirectiveName: D2
+                      Then
+                        Type: Type2
+                          AccessModifier: public
+                    Type: Type3
+                      AccessModifier: public
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -204,63 +151,36 @@ public class ParseDirectiveTests
             #endif
             }
             """);
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new IfDirectiveNode(
-                                default,
-                                "D1",
-                                [
-                                    new ExpressionStatementNode(
-                                        default,
-                                        new CallExpressionNode(
-                                            default,
-                                            new MemberAccessExpressionNode(
-                                                default,
-                                                "print"
-                                            ),
-                                            [
-                                                LiteralExpressionNode.String(
-                                                    default,
-                                                    "D1")
-                                            ]
-                                        )
-                                    )
-                                ],
-                                [
-                                    new ExpressionStatementNode(
-                                        default,
-                                        new CallExpressionNode(
-                                            default,
-                                            new MemberAccessExpressionNode(
-                                                default,
-                                                "print"
-                                            ),
-                                            [
-                                                LiteralExpressionNode.String(
-                                                    default,
-                                                    "Empty")
-                                            ]
-                                        )
-                                    )
-                                ]
-                            )
-                        ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      IfDirective
+                        DirectiveName: D1
+                        Then
+                          ExpressionStatement
+                            Call
+                              MemberAccess
+                                Name: print
+                              Parameters
+                                Literal: String = D1
+                        Else
+                          ExpressionStatement
+                            Call
+                              MemberAccess
+                                Name: print
+                              Parameters
+                                Literal: String = Empty
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -275,21 +195,17 @@ public class ParseDirectiveTests
             #else
             #endif
             """);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                IfDirective
+                  DirectiveName: D1
+            """;
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new IfDirectiveNode(
-                    default,
-                    "D1",
-                    [],
-                    []
-                )
-            ]);
-
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 }

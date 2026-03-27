@@ -35,29 +35,24 @@ public class ParseNewOperatorTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "p",
-                            new TypeRefNode(default, ["Point"]),
-                            new NewObjectExpressionNode(default, new TypeRefNode(default, ["Point"]), [])
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: p
+                        TypeRef: Point
+                        NewObject
+                          TypeRef: Point
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -73,36 +68,27 @@ public class ParseNewOperatorTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                FunctionDeclarationNode.Create(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(default, [
-                        new VariableDeclarationNode(
-                            default,
-                            "p",
-                            new TypeRefNode(default, ["Point"]),
-                            new NewObjectExpressionNode(
-                                default,
-                                new TypeRefNode(default, ["Point"]),
-                                [
-                                    LiteralExpressionNode.Integer(default, 1),
-                                    LiteralExpressionNode.Integer(default, 2)
-                                ]
-                            )
-                        )
-                    ])
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: p
+                        TypeRef: Point
+                        NewObject
+                          TypeRef: Point
+                          Parameters
+                            Literal: Integer = 1
+                            Literal: Integer = 2
+            """;
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
 
@@ -118,37 +104,22 @@ public class ParseNewOperatorTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "p",
-                                new TypeRefNode(default, ["Point"]),
-                                new NewObjectExpressionNode(
-                                    default,
-                                    new FakeTypeNode(
-                                        default,
-                                        "<>_0"
-                                    ),
-                                    []
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: p
+                        TypeRef: Point
+                        NewObject
+                          FakeType: <>_0
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0003ExpectedType,
@@ -156,7 +127,7 @@ public class ParseNewOperatorTests
             new SourceLocation(file, new SourcePosition(63, 4, 24).ToSpan()),
             "Expected a type.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -172,42 +143,25 @@ public class ParseNewOperatorTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "p",
-                                new TypeRefNode(default, ["Point"]),
-                                new NewObjectExpressionNode(
-                                    default,
-                                    new TypeRefNode(default, ["Point"]),
-                                    [
-                                        LiteralExpressionNode.Integer(
-                                            default,
-                                            1
-                                        ),
-                                        new FakeExpressionNode(
-                                            new SourcePosition(54, 2, 33).ToSpan()
-                                        )
-                                    ]
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: p
+                        TypeRef: Point
+                        NewObject
+                          TypeRef: Point
+                          Parameters
+                            Literal: Integer = 1
+                            FakeExpression
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0009ExpectedExpression,
@@ -215,7 +169,7 @@ public class ParseNewOperatorTests
             new SourceLocation(file, new SourcePosition(72, 4, 33).ToSpan()),
             "Expected an expression.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 
@@ -231,34 +185,22 @@ public class ParseNewOperatorTests
             }
             """);
 
-        var expected = new SyntaxTree(
-            file,
-            new NamespaceNode(default, ["Test1"]),
-            [],
-            [
-                new FunctionDeclarationNode(
-                    default,
-                    AccessModifier.Public,
-                    "main",
-                    [],
-                    new TypeRefNode(default, ["void"]),
-                    new BlockStatementNode(
-                        default,
-                        [
-                            new VariableDeclarationNode(
-                                default,
-                                "p",
-                                new TypeRefNode(default, ["Point"]),
-                                new NewObjectExpressionNode(
-                                    default,
-                                    new TypeRefNode(default, ["Point"]),
-                                    []
-                                )
-                            )
-                        ]
-                    )
-                )
-            ]);
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: p
+                        TypeRef: Point
+                        NewObject
+                          TypeRef: Point
+            """;
 
         var diagnostic = new Diagnostic(
             DiagnosticId.P0001MissingToken,
@@ -266,7 +208,7 @@ public class ParseNewOperatorTests
             new SourceLocation(file, new SourcePosition(69, 4, 30).ToSpan()),
             "Expected ')'.");
 
-        Assert.That(tree, Is.EqualTo(expected).Using(SyntaxComparer.Instance));
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }
