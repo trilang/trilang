@@ -5,21 +5,16 @@ namespace Tri.Tests;
 
 internal static class Factory
 {
-    public static ArrayMetadata CreateArrayMetadata(
-        ITypeMetadata itemMetadata,
-        NamespaceMetadata ns)
+    public static ArrayMetadata CreateArrayMetadata(ITypeMetadata itemMetadata, RootNamespaceMetadata ns)
     {
         var metadata = new ArrayMetadata(null, itemMetadata)
         {
             Namespace = ns,
         };
 
-        var i64 = new TypeMetadata(null, "i64", [], [], [], [], [], [], true)
-        {
-            Namespace = ns,
-        };
+        var i64 = ns.FindType("i64")!;
         var sizeField = new FieldMetadata(metadata, "<>_size", i64);
-        var sizeProperty = CreatePropertyMetadata(metadata, "size", i64);
+        var sizeProperty = CreatePropertyMetadata(ns, metadata, "size", i64);
 
         metadata.AddField(sizeField);
         metadata.AddProperty(sizeProperty);
@@ -31,8 +26,11 @@ internal static class Factory
     public static FunctionTypeMetadata CreateFunctionType(
         IEnumerable<ITypeMetadata> parameterTypes,
         ITypeMetadata returnType,
-        NamespaceMetadata ns)
+        RootNamespaceMetadata ns)
     {
+        var @void = ns.FindType("void")!;
+        var @null = ns.FindType("null")!;
+
         var metadata = new FunctionTypeMetadata(null, parameterTypes, returnType)
         {
             Namespace = ns,
@@ -41,29 +39,19 @@ internal static class Factory
             new FieldMetadata(
                 metadata,
                 FunctionTypeMetadata.FunctionField,
-                new TypePointerMetadata(
-                    new TypeMetadata(null, "void", [], [], [], [], [], [], true)
-                    {
-                        Namespace = ns,
-                    })));
+                new TypePointerMetadata(@void)));
         metadata.AddField(
             new FieldMetadata(
                 metadata,
                 FunctionTypeMetadata.ContextField,
-                new DiscriminatedUnionMetadata(null, [
-                    new InterfaceMetadata(null, [], []),
-                    new TypeMetadata(null, "null", [], [], [], [], [], [], true)
-                    {
-                        Namespace = ns,
-                    }
-                ])));
+                new DiscriminatedUnionMetadata(
+                    null,
+                    [new InterfaceMetadata(null, [], []), @null])));
 
         return metadata;
     }
 
-    public static TupleMetadata CreateTupleMetadata(
-        IReadOnlyList<ITypeMetadata> types,
-        NamespaceMetadata ns)
+    public static TupleMetadata CreateTupleMetadata(IReadOnlyList<ITypeMetadata> types, RootNamespaceMetadata ns)
     {
         var metadata = new TupleMetadata(null)
         {
@@ -74,7 +62,7 @@ internal static class Factory
         {
             var type = types[i];
             var itemField = new FieldMetadata(metadata, $"<>_{i}", type);
-            var itemProperty = CreatePropertyMetadata(metadata, i.ToString(), type);
+            var itemProperty = CreatePropertyMetadata(ns, metadata, i.ToString(), type);
 
             metadata.AddType(type);
             metadata.AddField(itemField);
@@ -85,6 +73,7 @@ internal static class Factory
     }
 
     public static PropertyMetadata CreatePropertyMetadata(
+        RootNamespaceMetadata ns,
         ITypeMetadata declaringType,
         string name,
         ITypeMetadata type,
@@ -98,16 +87,16 @@ internal static class Factory
 
         if (!hasGetter && !hasSetter)
         {
-            getter = GenerateGetter(declaringType, name, type, AccessModifierMetadata.Public);
-            setter = GenerateSetter(declaringType, name, type, AccessModifierMetadata.Private);
+            getter = GenerateGetter(ns, declaringType, name, type, AccessModifierMetadata.Public);
+            setter = GenerateSetter(ns, declaringType, name, type, AccessModifierMetadata.Private);
         }
         else
         {
             if (hasGetter)
-                getter = GenerateGetter(declaringType, name, type, getterModifier!.Value);
+                getter = GenerateGetter(ns, declaringType, name, type, getterModifier!.Value);
 
             if (hasSetter)
-                setter = GenerateSetter(declaringType, name, type, setterModifier!.Value);
+                setter = GenerateSetter(ns, declaringType, name, type, setterModifier!.Value);
         }
 
         var metadata = new PropertyMetadata(
@@ -122,12 +111,13 @@ internal static class Factory
     }
 
     private static MethodMetadata GenerateGetter(
+        RootNamespaceMetadata ns,
         ITypeMetadata declaringType,
         string name,
         ITypeMetadata type,
         AccessModifierMetadata getterModifier)
     {
-        var functionType = CreateFunctionType([], type, GetRoot(declaringType.Namespace!));
+        var functionType = CreateFunctionType([], type, ns);
 
         return new MethodMetadata(
             null,
@@ -140,18 +130,14 @@ internal static class Factory
     }
 
     private static MethodMetadata GenerateSetter(
+        RootNamespaceMetadata ns,
         ITypeMetadata declaringType,
         string name,
         ITypeMetadata type,
         AccessModifierMetadata setterModifier)
     {
-        var ns = GetRoot(declaringType.Namespace!);
-        var functionType = CreateFunctionType([type],
-            new TypeMetadata(null, "void", [], [], [], [], [], [], true)
-            {
-                Namespace = ns,
-            },
-            ns);
+        var @void = ns.FindType("void")!;
+        var functionType = CreateFunctionType([type], @void, ns);
 
         return new MethodMetadata(
             null,
@@ -161,16 +147,5 @@ internal static class Factory
             $"<>_set_{name}",
             [new ParameterMetadata(null, MemberAccessExpression.Value, type)],
             functionType);
-    }
-
-    private static NamespaceMetadata GetRoot(NamespaceMetadata ns)
-    {
-        while (true)
-        {
-            if (ns.Parent is null)
-                return ns;
-
-            ns = ns.Parent;
-        }
     }
 }

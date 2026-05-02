@@ -4,11 +4,14 @@ namespace Trilang.Semantics.Providers;
 
 public class MetadataProvider : IMetadataProvider
 {
+    private readonly CompilationContext compilationContext;
+    private readonly INamespaceMetadata @namespace;
     private readonly HashSet<NamespaceMetadata> uses;
 
-    public MetadataProvider(NamespaceMetadata @namespace)
+    public MetadataProvider(CompilationContext compilationContext, INamespaceMetadata @namespace)
     {
-        Namespace = @namespace;
+        this.compilationContext = compilationContext;
+        this.@namespace = @namespace;
         uses = [];
     }
 
@@ -43,8 +46,8 @@ public class MetadataProvider : IMetadataProvider
     private QueryTypesResult GetArray(GetArray query)
     {
         var found = new List<ITypeMetadata>();
-        var root = Namespace.GetRoot();
-        foreach (var type in root.Types)
+
+        foreach (var type in compilationContext.RootNamespace.EnumerateAllTypes())
         {
             if (type is not ArrayMetadata array)
                 continue;
@@ -59,9 +62,8 @@ public class MetadataProvider : IMetadataProvider
     private QueryTypesResult GetFunctionType(GetFunctionType query)
     {
         var found = new List<ITypeMetadata>();
-        var root = Namespace.GetRoot();
 
-        foreach (var type in root.Types)
+        foreach (var type in compilationContext.RootNamespace.EnumerateAllTypes())
         {
             if (type is not FunctionTypeMetadata functionType)
                 continue;
@@ -77,9 +79,8 @@ public class MetadataProvider : IMetadataProvider
     private QueryTypesResult GetGenericApplication(GetGenericApplication query)
     {
         var found = new List<ITypeMetadata>();
-        var root = Namespace.GetRoot();
 
-        foreach (var type in root.Types)
+        foreach (var type in compilationContext.RootNamespace.EnumerateAllTypes())
         {
             if (type is not GenericApplicationMetadata generic)
                 continue;
@@ -95,9 +96,8 @@ public class MetadataProvider : IMetadataProvider
     private QueryTypesResult GetInterface(GetInterface query)
     {
         var found = new List<ITypeMetadata>();
-        var root = Namespace.GetRoot();
 
-        foreach (var type in root.Types)
+        foreach (var type in compilationContext.RootNamespace.EnumerateAllTypes())
         {
             if (type is not InterfaceMetadata @interface)
                 continue;
@@ -145,7 +145,7 @@ public class MetadataProvider : IMetadataProvider
     {
         var found = new List<ITypeMetadata>();
         var result = QueryTypes(query.BaseQuery);
-        if (result.IsTypeNotFound || result.IsNamespaceNotFound)
+        if (result is { IsSuccess: false, IsMultipleTypesFound: false })
             return result;
 
         foreach (var type in result.Types)
@@ -164,7 +164,7 @@ public class MetadataProvider : IMetadataProvider
     {
         var found = new List<ITypeMetadata>();
         var result = QueryTypes(query.BaseQuery);
-        if (result.IsTypeNotFound || result.IsNamespaceNotFound)
+        if (result is { IsSuccess: false, IsMultipleTypesFound: false })
             return result;
 
         foreach (var type in result.Types)
@@ -183,7 +183,7 @@ public class MetadataProvider : IMetadataProvider
     {
         var found = new List<ITypeMetadata>();
 
-        var type = Namespace.Types.OfType<INamedMetadata>().FirstOrDefault(x => x.Name == query.Name);
+        var type = @namespace.Types.OfType<INamedMetadata>().FirstOrDefault(x => x.Name == query.Name);
         var typeExistsInPrimaryNamespace = type is not null;
         if (typeExistsInPrimaryNamespace)
             found.Add(type!);
@@ -195,10 +195,15 @@ public class MetadataProvider : IMetadataProvider
                 found.Add(type);
         }
 
-        var root = Namespace.GetRoot();
-        type = root.Types.OfType<INamedMetadata>().FirstOrDefault(x => x.Name == query.Name);
-        if (type is not null)
-            found.Add(type);
+        if (@namespace != compilationContext.RootNamespace)
+        {
+            type = compilationContext.RootNamespace.EnumerateAllTypes()
+                .OfType<INamedMetadata>()
+                .FirstOrDefault(x => x.Name == query.Name);
+
+            if (type is not null)
+                found.Add(type);
+        }
 
         return Result(found);
     }
@@ -206,12 +211,17 @@ public class MetadataProvider : IMetadataProvider
     private QueryTypesResult ByQualifiedName(ByQualifiedName query)
     {
         var parts = query.Parts;
-        var ns = Namespace.FindNamespace(parts.Take(parts.Count - 1));
-        if (ns is null)
+        var namespaceResult = compilationContext.FindNamespace(query.Package, parts.Take(parts.Count - 1));
+        if (!namespaceResult.IsSuccess)
+        {
+            if (namespaceResult.IsPackageNotFound)
+                return QueryTypesResult.PackageNotFound();
+
             return QueryTypesResult.NamespaceNotFound();
+        }
 
         var name = parts[^1];
-        var type = ns.Types.OfType<INamedMetadata>().FirstOrDefault(x => x.Name == name);
+        var type = namespaceResult.Namespace.Types.OfType<INamedMetadata>().FirstOrDefault(x => x.Name == name);
 
         return type is null
             ? QueryTypesResult.TypeNotFound()
@@ -221,9 +231,8 @@ public class MetadataProvider : IMetadataProvider
     private QueryTypesResult GetTuple(GetTuple query)
     {
         var found = new List<ITypeMetadata>();
-        var root = Namespace.GetRoot();
 
-        foreach (var type in root.Types)
+        foreach (var type in compilationContext.RootNamespace.EnumerateAllTypes())
         {
             if (type is not TupleMetadata tuple)
                 continue;
@@ -238,9 +247,8 @@ public class MetadataProvider : IMetadataProvider
     private QueryTypesResult GetUnion(GetUnion query)
     {
         var found = new List<ITypeMetadata>();
-        var root = Namespace.GetRoot();
 
-        foreach (var type in root.Types)
+        foreach (var type in compilationContext.RootNamespace.EnumerateAllTypes())
         {
             if (type is not DiscriminatedUnionMetadata union)
                 continue;
@@ -253,11 +261,16 @@ public class MetadataProvider : IMetadataProvider
     }
 
     public void DefineType(ITypeMetadata type)
-        => Namespace.AddType(type);
+    {
+        if (type is IAnonymousTypeMetadata)
+            compilationContext.RootNamespace.AddType(type);
+        else
+            @namespace.AddType(type);
+    }
 
     public IReadOnlyList<FunctionMetadata> FindFunctions(string name)
     {
-        var found = Namespace.FindFunction(name).ToList();
+        var found = @namespace.FindFunction(name).ToList();
 
         foreach (var use in uses)
         foreach (var function in use.FindFunction(name))
@@ -267,7 +280,5 @@ public class MetadataProvider : IMetadataProvider
     }
 
     public void AddFunction(FunctionMetadata function)
-        => Namespace.AddFunction(function);
-
-    public NamespaceMetadata Namespace { get; }
+        => @namespace.AddFunction(function);
 }

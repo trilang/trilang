@@ -29,7 +29,7 @@ public class InterfaceMetadata : IAnonymousTypeMetadata
 
         var combinedSignatures = propertyNames.Concat(methodNames).ToList();
 
-        return combinedSignatures.Any()
+        return combinedSignatures.Count != 0
             ? $"{{ {string.Join(" ", combinedSignatures)} }}"
             : "{ }";
     }
@@ -71,7 +71,7 @@ public class InterfaceMetadata : IAnonymousTypeMetadata
 
     public TypeLayout? Layout { get; set; }
 
-    public NamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace { get; set; }
 
     public IReadOnlyList<InterfacePropertyMetadata> Properties
         => properties;

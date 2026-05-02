@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Compilation;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
@@ -15,8 +16,9 @@ internal class SymbolFinder : ISemanticPass
         this.map = map;
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    public void Analyze(Project project)
     {
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
         var visitor = new SymbolFinderVisitor(directives, map);
         foreach (var tree in semanticTrees)
             tree.Accept(visitor, new SymbolTable());
@@ -353,7 +355,7 @@ internal class SymbolFinder : ISemanticPass
         {
             map.Add(node, context);
 
-            node.Namespace?.Accept(this, context);
+            node.Namespace.Accept(this, context);
 
             foreach (var use in node.UseNodes)
                 use.Accept(this, context);

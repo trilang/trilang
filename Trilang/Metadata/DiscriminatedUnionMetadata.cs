@@ -28,7 +28,7 @@ public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata
 
     public TypeLayout? Layout { get; set; }
 
-    public NamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace { get; set; }
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;

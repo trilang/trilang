@@ -1,55 +1,16 @@
-using Trilang;
-using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Lower;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Semantics;
 using Trilang.Semantics.Model;
-using Trilang.Semantics.Passes.ControlFlow;
 using static Tri.Tests.Factory;
+using static Tri.Tests.Helpers;
 
-namespace Tri.Tests.Lower;
+namespace Tri.Tests.Lowering;
 
 public class ReplaceIfDirectivesTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static SemanticTree Parse(string code, IReadOnlyList<string> directives)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(
-                directives.ToHashSet(),
-                new SemanticDiagnosticReporter(diagnostics),
-                builtInTypes));
-
-        Assert.That(diagnostics.Diagnostics, Is.Empty);
-
-        var semanticTree = semanticTrees.Single();
-
-        var lowering = new Lowering(builtInTypes);
-        lowering.Lower(semanticTree, new LoweringOptions(directives.ToHashSet(), new ControlFlowGraphMap()));
-
-        return semanticTree;
-    }
-
     [Test]
     public void ReplaceIfDirectiveWithThenDeclarationsTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -64,13 +25,13 @@ public class ReplaceIfDirectivesTests
             #endif
 
             public type Type3 { }
-            """;
-
-        var tree = Parse(code, ["D1"]);
+            """);
+        var (tree, diagnostics, _) = Lower(file, ["D1"]);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
-        var test1Ns = rootNamespace.CreateChild(["Test1"]);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var packageNs = NamespaceMetadata.CreateForPackage();
+        var test1Ns = packageNs.CreateChild(["Test1"]);
         var type1Metadata = new TypeMetadata(null, "Type1")
         {
             Namespace = test1Ns,
@@ -111,13 +72,14 @@ public class ReplaceIfDirectivesTests
                 },
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
     public void ReplaceIfDirectiveWithElseDeclarationsTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -132,12 +94,13 @@ public class ReplaceIfDirectivesTests
             #endif
 
             public type Type3 { }
-            """;
-        var tree = Parse(code, []);
+            """);
+        var (tree, diagnostics, _) = Lower(file, []);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
-        var test1Ns = rootNamespace.CreateChild(["Test1"]);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var packageNs = NamespaceMetadata.CreateForPackage();
+        var test1Ns = packageNs.CreateChild(["Test1"]);
         var type2Metadata = new TypeMetadata(null, "Type2")
         {
             Namespace = test1Ns,
@@ -178,13 +141,14 @@ public class ReplaceIfDirectivesTests
                 },
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
     public void RemoveIfDirectiveDeclarationsTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -195,12 +159,13 @@ public class ReplaceIfDirectivesTests
             #endif
 
             public type Type3 { }
-            """;
-        var tree = Parse(code, []);
+            """);
+        var (tree, diagnostics, _) = Lower(file, []);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
-        var test1Ns = rootNamespace.CreateChild(["Test1"]);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var packageNs = NamespaceMetadata.CreateForPackage();
+        var test1Ns = packageNs.CreateChild(["Test1"]);
         var typeMetadata = new TypeMetadata(null, "Type3")
         {
             Namespace = test1Ns,
@@ -225,13 +190,14 @@ public class ReplaceIfDirectivesTests
                 },
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
     public void ReplaceIfDirectiveWithThenStatementsTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -244,12 +210,13 @@ public class ReplaceIfDirectivesTests
                 return 2;
             #endif
             }
-            """;
-        var tree = Parse(code, ["D1"]);
+            """);
+        var (tree, diagnostics, _) = Lower(file, ["D1"]);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
-        var test1Ns = rootNamespace.CreateChild(["Test1"]);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var packageNs = NamespaceMetadata.CreateForPackage();
+        var test1Ns = packageNs.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
@@ -268,7 +235,7 @@ public class ReplaceIfDirectivesTests
                         new Parameter(
                             null,
                             "callback",
-                            new FunctionType(null, [], new TypeRef(null, ["void"]) { Metadata = builtInTypes.Void })
+                            new FunctionType(null, [], new TypeRef(null, null, ["void"]) { Metadata = builtInTypes.Void })
                             {
                                 Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
                             }
@@ -277,7 +244,7 @@ public class ReplaceIfDirectivesTests
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,
@@ -307,9 +274,7 @@ public class ReplaceIfDirectivesTests
                         "test",
                         [parameterMetadata],
                         CreateFunctionType(
-                            [
-                                CreateFunctionType([], builtInTypes.Void, rootNamespace)
-                            ],
+                            [CreateFunctionType([], builtInTypes.Void, rootNamespace)],
                             builtInTypes.I32,
                             rootNamespace))
                     {
@@ -318,13 +283,14 @@ public class ReplaceIfDirectivesTests
                 }
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
     public void ReplaceIfDirectiveWithElseStatementsTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -337,12 +303,13 @@ public class ReplaceIfDirectivesTests
                 return 2;
             #endif
             }
-            """;
-        var tree = Parse(code, []);
+            """);
+        var (tree, diagnostics, _) = Lower(file, []);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
-        var test1Ns = rootNamespace.CreateChild(["Test1"]);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var packageNs = NamespaceMetadata.CreateForPackage();
+        var test1Ns = packageNs.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
@@ -361,18 +328,16 @@ public class ReplaceIfDirectivesTests
                         new Parameter(
                             null,
                             "callback",
-                            new FunctionType(null, [], new TypeRef(null, ["void"]) { Metadata = builtInTypes.Void })
+                            new FunctionType(null, [], new TypeRef(null, null, ["void"]) { Metadata = builtInTypes.Void })
                             {
-                                Metadata = CreateFunctionType([],
-                                    builtInTypes.Void,
-                                    rootNamespace)
+                                Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace)
                             }
                         )
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,
@@ -401,9 +366,8 @@ public class ReplaceIfDirectivesTests
                         AccessModifierMetadata.Public,
                         "test",
                         [parameterMetadata],
-                        CreateFunctionType([
-                                CreateFunctionType([], builtInTypes.Void, rootNamespace)
-                            ],
+                        CreateFunctionType(
+                            [CreateFunctionType([], builtInTypes.Void, rootNamespace)],
                             builtInTypes.I32,
                             rootNamespace))
                     {
@@ -412,13 +376,14 @@ public class ReplaceIfDirectivesTests
                 }
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
     public void RemoveIfDirectiveWithStatementsTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -431,12 +396,13 @@ public class ReplaceIfDirectivesTests
 
                 return 2;
             }
-            """;
-        var tree = Parse(code, []);
+            """);
+        var (tree, diagnostics, _) = Lower(file, []);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
-        var test1Ns = rootNamespace.CreateChild(["Test1"]);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var packageNs = NamespaceMetadata.CreateForPackage();
+        var test1Ns = packageNs.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,
             "callback",
@@ -455,7 +421,7 @@ public class ReplaceIfDirectivesTests
                         new Parameter(
                             null,
                             "callback",
-                            new FunctionType(null, [], new TypeRef(null, ["void"]) { Metadata = builtInTypes.Void })
+                            new FunctionType(null, [], new TypeRef(null, null, ["void"]) { Metadata = builtInTypes.Void })
                             {
                                 Metadata = CreateFunctionType([], builtInTypes.Void, rootNamespace),
                             }
@@ -464,7 +430,7 @@ public class ReplaceIfDirectivesTests
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new ExpressionStatement(
                             null,
@@ -493,9 +459,8 @@ public class ReplaceIfDirectivesTests
                         AccessModifierMetadata.Public,
                         "test",
                         [parameterMetadata],
-                        CreateFunctionType([
-                                CreateFunctionType([], builtInTypes.Void, rootNamespace)
-                            ],
+                        CreateFunctionType(
+                            [CreateFunctionType([], builtInTypes.Void, rootNamespace)],
                             builtInTypes.I32,
                             rootNamespace))
                     {
@@ -504,6 +469,7 @@ public class ReplaceIfDirectivesTests
                 }
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

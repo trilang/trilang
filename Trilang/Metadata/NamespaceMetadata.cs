@@ -1,9 +1,8 @@
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Trilang.Metadata;
 
-public class NamespaceMetadata : IMetadata
+public class NamespaceMetadata : INamespaceMetadata
 {
     private readonly Dictionary<string, NamespaceMetadata> children;
     private readonly List<ITypeMetadata> types; // TODO: hashset/dictionary?
@@ -18,56 +17,20 @@ public class NamespaceMetadata : IMetadata
         functions = [];
     }
 
-    public static NamespaceMetadata CreateRoot(BuiltInTypes builtInTypes)
-    {
-        var root = new NamespaceMetadata(null, string.Empty);
-
-        root.AddType(builtInTypes.Void);
-        root.AddType(builtInTypes.Null);
-
-        root.AddType(builtInTypes.I8);
-        root.AddType(builtInTypes.I16);
-        root.AddType(builtInTypes.I32);
-        root.AddType(builtInTypes.I64);
-
-        root.AddType(builtInTypes.U8);
-        root.AddType(builtInTypes.U16);
-        root.AddType(builtInTypes.U32);
-        root.AddType(builtInTypes.U64);
-
-        root.AddType(builtInTypes.F32);
-        root.AddType(builtInTypes.F64);
-
-        root.AddType(builtInTypes.Bool);
-        root.AddType(builtInTypes.Char);
-        root.AddType(builtInTypes.String);
-
-        return root;
-    }
+    public static NamespaceMetadata CreateForPackage()
+        => new NamespaceMetadata(null, string.Empty);
 
     public override string ToString()
     {
-        if (IsRoot)
-            return "Root Namespace";
-
-        if (Parent.IsRoot)
+        if (Parent?.Parent is null)
             return Name;
 
         return $"{Parent}.{Name}";
     }
 
-    public NamespaceMetadata GetRoot()
-    {
-        var current = this;
-        while (!current.IsRoot)
-            current = current.Parent;
-
-        return current;
-    }
-
     public NamespaceMetadata CreateChild(IReadOnlyList<string> parts)
     {
-        var current = GetRoot();
+        var current = this;
 
         foreach (var part in parts)
         {
@@ -83,27 +46,14 @@ public class NamespaceMetadata : IMetadata
         return current;
     }
 
-    public NamespaceMetadata? FindNamespace(IEnumerable<string> parts)
-    {
-        var current = GetRoot();
-
-        foreach (var part in parts)
-            if (!current.children.TryGetValue(part, out current))
-                return null;
-
-        return current;
-    }
+    public NamespaceMetadata? GetNamespace(string part)
+        => children.GetValueOrDefault(part);
 
     public void AddType(ITypeMetadata type)
     {
         Debug.Assert(type is not TypeArgumentMetadata, "Generic arguments shouldn't be added a namespace.");
-        Debug.Assert(type.Namespace is null, "Type already belongs to another namespace");
-
-        if (!IsRoot && type is IAnonymousTypeMetadata)
-        {
-            Parent.AddType(type);
-            return;
-        }
+        Debug.Assert(type is not IAnonymousTypeMetadata, "Anonymous types can only be added to root namespace.");
+        Debug.Assert(type.Namespace is null, "Type already belongs to another namespace.");
 
         type.Namespace = this;
 
@@ -144,10 +94,6 @@ public class NamespaceMetadata : IMetadata
         => false;
 
     public NamespaceMetadata? Parent { get; }
-
-    [MemberNotNullWhen(false, nameof(Parent))]
-    public bool IsRoot
-        => Parent is null;
 
     public string Name { get; }
 

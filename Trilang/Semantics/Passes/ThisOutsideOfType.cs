@@ -1,3 +1,4 @@
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Semantics.Model;
 
@@ -14,8 +15,9 @@ internal class ThisOutsideOfType : ISemanticPass
         this.diagnostics = diagnostics.ForSemantic();
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    public void Analyze(Project project)
     {
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
         var visitor = new ThisOutsideOfTypeVisitor(directives, diagnostics);
         foreach (var tree in semanticTrees)
             tree.Accept(visitor);

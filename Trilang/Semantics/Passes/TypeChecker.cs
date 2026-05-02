@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
@@ -14,28 +15,31 @@ internal class TypeChecker : ISemanticPass
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly MetadataProviderMap metadataProviderMap;
+    private readonly CompilationContext compilationContext;
 
     public TypeChecker(
         ISet<string> directives,
         DiagnosticCollection diagnostics,
         SymbolTableMap symbolTableMap,
-        MetadataProviderMap metadataProviderMap)
+        MetadataProviderMap metadataProviderMap,
+        CompilationContext compilationContext)
     {
         this.directives = directives;
         this.diagnostics = diagnostics.ForSemantic();
         this.symbolTableMap = symbolTableMap;
         this.metadataProviderMap = metadataProviderMap;
+        this.compilationContext = compilationContext;
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    public void Analyze(Project project)
     {
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
         var visitor = new TypeCheckerVisitor(
             directives,
             diagnostics,
             symbolTableMap,
             metadataProviderMap,
-            rootNamespace,
-            builtInTypes);
+            compilationContext);
 
         foreach (var tree in semanticTrees)
             tree.Accept(visitor);
@@ -50,22 +54,21 @@ internal class TypeChecker : ISemanticPass
         private readonly SemanticDiagnosticReporter diagnostics;
         private readonly SymbolTableMap symbolTableMap;
         private readonly MetadataProviderMap metadataProviderMap;
-        private readonly NamespaceMetadata rootNamespace;
+        private readonly CompilationContext compilationContext;
         private readonly BuiltInTypes builtInTypes;
 
         public TypeCheckerVisitor(ISet<string> directives,
             SemanticDiagnosticReporter diagnostics,
             SymbolTableMap symbolTableMap,
             MetadataProviderMap metadataProviderMap,
-            NamespaceMetadata rootNamespace,
-            BuiltInTypes builtInTypes)
+            CompilationContext compilationContext)
             : base(directives)
         {
             this.diagnostics = diagnostics;
             this.symbolTableMap = symbolTableMap;
             this.metadataProviderMap = metadataProviderMap;
-            this.rootNamespace = rootNamespace;
-            this.builtInTypes = builtInTypes;
+            this.compilationContext = compilationContext;
+            builtInTypes = compilationContext.BuiltInTypes;
         }
 
         public override void VisitArrayAccess(ArrayAccessExpression node)
@@ -352,9 +355,10 @@ internal class TypeChecker : ISemanticPass
             // resolve namespaces for fully-qualified names
             if (node.Reference is null)
             {
-                var foundNamespace = rootNamespace.FindNamespace([node.Name]);
-                if (foundNamespace is not null)
-                    node.Reference = foundNamespace;
+                // TODO: add support of package prefix `::`
+                var namespaceResult = compilationContext.FindNamespace([node.Name]);
+                if (namespaceResult.IsSuccess)
+                    node.Reference = namespaceResult.Namespace;
             }
         }
 
@@ -364,7 +368,7 @@ internal class TypeChecker : ISemanticPass
 
             if (node.Member is MemberAccessExpression { Reference: NamespaceMetadata ns })
             {
-                var provider = new MetadataProvider(ns);
+                var provider = new MetadataProvider(compilationContext, ns);
                 var result = provider.QueryTypes(new ByName(node.Name));
                 var type = default(IMetadata);
                 if (result.IsSuccess)

@@ -50,6 +50,10 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
     public static readonly DiagnosticId S0026MissingArgument = ForSemantic(26);
     public static readonly DiagnosticId S0027MultipleMembersFound = ForSemantic(27);
     public static readonly DiagnosticId S0028UnknownNamespace = ForSemantic(28);
+    public static readonly DiagnosticId S0029UnknownPackage = ForSemantic(29);
+
+    public static readonly DiagnosticId C0001DuplicateDependency = ForCompiler(1);
+    public static readonly DiagnosticId C0002CyclicDependency = ForCompiler(2);
 
     private static DiagnosticId ForLexer(int id)
         => new DiagnosticId(DiagnosticCategory.Lexer, id);
@@ -59,6 +63,9 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
 
     private static DiagnosticId ForSemantic(int id)
         => new DiagnosticId(DiagnosticCategory.Semantic, id);
+
+    private static DiagnosticId ForCompiler(int id)
+        => new DiagnosticId(DiagnosticCategory.Compiler, id);
 
     public override string ToString()
     {

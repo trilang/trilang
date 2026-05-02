@@ -1,45 +1,35 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
 public class SymbolFinderTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void FunctionWithParametersInRootScopeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1; public add(a: i32, b: i32): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            public add(a: i32, b: i32): void { }
+            """);
+        var (project, diagnostics) = Parse(file);
 
-        var semanticTree = semanticTrees.Single();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var function = semanticTree.Find<FunctionDeclaration>()!;
         var a = function.Parameters[0];
         var b = function.Parameters[1];
@@ -57,19 +47,28 @@ public class SymbolFinderTests
     [Test]
     public void FunctionWithSameParametersInRootScopeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1; public add(a: i32, a: i32): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
 
-        var semantic = new SemanticAnalysis();
+            public add(a: i32, a: i32): void { }
+            """);
+        var (project, diagnostics) = Parse(file);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(36, 1, 37), new SourcePosition(42, 1, 43))),
+                new SourceSpan(new SourcePosition(37, 3, 20), new SourcePosition(43, 3, 26))),
             "The 'a' parameter is already defined.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -78,7 +77,7 @@ public class SymbolFinderTests
     [Test]
     public void FunctionWithVariablesInRootScopeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -87,13 +86,17 @@ public class SymbolFinderTests
                 var b: i32 = 2;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var function = semanticTree.Find<FunctionDeclaration>()!;
         var variables = semanticTree.Where<VariableDeclaration>().ToArray();
         var a = variables[0];
@@ -112,7 +115,7 @@ public class SymbolFinderTests
     [Test]
     public void FunctionWithSameVariablesInRootScopeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -121,11 +124,15 @@ public class SymbolFinderTests
                 var a: i32 = 2;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,
@@ -141,7 +148,7 @@ public class SymbolFinderTests
     [Test]
     public void IfScopeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -151,13 +158,17 @@ public class SymbolFinderTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var a = semanticTree.Find<VariableDeclaration>()!;
 
@@ -171,7 +182,7 @@ public class SymbolFinderTests
     [Test]
     public void IfElseScopeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -183,13 +194,17 @@ public class SymbolFinderTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var variables = semanticTree.Where<VariableDeclaration>().ToArray();
         var a = variables[0];
@@ -211,7 +226,7 @@ public class SymbolFinderTests
     [Test]
     public void SameVariableInMultipleScopesTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -224,13 +239,17 @@ public class SymbolFinderTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var function = semanticTree.Find<FunctionDeclaration>()!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var variables = semanticTree.Where<VariableDeclaration>().ToArray();
@@ -260,18 +279,22 @@ public class SymbolFinderTests
     [Test]
     public void TypeDeclarationDuplicateTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type Point { }
             public type Point { }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,
@@ -287,7 +310,7 @@ public class SymbolFinderTests
     [Test]
     public void CtorDeclarationVariableTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -295,13 +318,17 @@ public class SymbolFinderTests
                 public constructor(a: i32) { }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var type = semanticTree.Find<TypeDeclaration>()!;
         var ctor = semanticTree.Find<ConstructorDeclaration>()!;
         var parameter = ctor.Parameters[0];
@@ -317,7 +344,7 @@ public class SymbolFinderTests
     [Test]
     public void MethodDeclarationVariableTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -325,13 +352,17 @@ public class SymbolFinderTests
                 public test(a: i32): void { }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var type = semanticTree.Find<TypeDeclaration>()!;
         var method = semanticTree.Find<MethodDeclaration>()!;
         var parameter = method.Parameters[0];
@@ -347,18 +378,22 @@ public class SymbolFinderTests
     [Test]
     public void TypeAliasDuplicateTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type MyInt = i32;
             public type MyInt = i32;
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,
@@ -374,7 +409,7 @@ public class SymbolFinderTests
     [Test]
     public void TypeIdsInSymbolTableTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -391,13 +426,17 @@ public class SymbolFinderTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var type = semanticTree.Find<TypeDeclaration>()!;
         var typeSymbolTable = map.Get(type);
         Assert.That(typeSymbolTable.Ids, Has.Count.EqualTo(4));
@@ -418,7 +457,7 @@ public class SymbolFinderTests
     [Test]
     public void FieldInGetterTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -434,13 +473,17 @@ public class SymbolFinderTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, map, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (map, _) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var property = semanticTree.Find<PropertyDeclaration>()!;
         var getter = semanticTree.Find<PropertyGetter>();
         Assert.That(getter, Is.Not.Null);

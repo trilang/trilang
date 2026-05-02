@@ -1,51 +1,12 @@
-using Trilang;
-using Trilang.Compilation.Diagnostics;
 using Trilang.IntermediateRepresentation;
 using Trilang.IntermediateRepresentation.Instructions;
-using Trilang.Lexing;
-using Trilang.Lower;
-using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Semantics;
-using Trilang.Semantics.Model;
+using static Tri.Tests.Helpers;
 using static Trilang.IntermediateRepresentation.Instructions.BinaryInstructionKind;
 
 namespace Tri.Tests.IntermediateRepresentation;
 
 public class IrGeneratorTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SemanticTree, NamespaceMetadata, BuiltInTypes) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(
-                new HashSet<string>(),
-                new SemanticDiagnosticReporter(diagnostics),
-                builtInTypes));
-
-        Assert.That(diagnostics.Diagnostics, Is.Empty);
-
-        var semanticTree = semanticTrees.Single();
-        var lowering = new Lowering(builtInTypes);
-        lowering.Lower(semanticTree, LoweringOptions.Default);
-
-        return (semanticTree, rootNamespace, builtInTypes);
-    }
-
     [Test]
     [TestCase("+", Add)]
     [TestCase("-", Sub)]
@@ -65,10 +26,10 @@ public class IrGeneratorTests
                   return 1 {{op}} 2;
               }
               """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         var expected =
             $"""
@@ -80,6 +41,7 @@ public class IrGeneratorTests
              	ret	#2: i32
              """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -100,10 +62,10 @@ public class IrGeneratorTests
                   return 1 {{op}} 2;
               }
               """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         var expected =
             $"""
@@ -115,6 +77,7 @@ public class IrGeneratorTests
              	ret	#2: bool
              """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -129,10 +92,10 @@ public class IrGeneratorTests
                 x = 1;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -141,8 +104,10 @@ public class IrGeneratorTests
             	ldp	#0: i32, 0
             	ldc	#1: i32, 1
             	mov	#2: i32, #1: i32
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -165,10 +130,10 @@ public class IrGeneratorTests
                   x {{op}} 1;
               }
               """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         var expected =
             $"""
@@ -178,8 +143,10 @@ public class IrGeneratorTests
              	ldc	#1: i32, 1
              	{@operator.ToString().ToLower()}	#2: i32, #0: i32, #1: i32
              	mov	#3: i32, #2: i32
+             	ret
              """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -197,10 +164,10 @@ public class IrGeneratorTests
                 return x;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -215,6 +182,7 @@ public class IrGeneratorTests
             	ret	#5: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -229,10 +197,10 @@ public class IrGeneratorTests
                 return a + b;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -244,6 +212,7 @@ public class IrGeneratorTests
             	ret	#2: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -261,10 +230,10 @@ public class IrGeneratorTests
                 return a + b;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -278,6 +247,7 @@ public class IrGeneratorTests
             	ret	#4: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -292,19 +262,20 @@ public class IrGeneratorTests
                 return null;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
             function test_0_5b9bc4ba528108e4:
             entry:
-            	ldc	#0: null, 
+            	ldc	#0: null, null
             	ret	#0: null
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -319,10 +290,10 @@ public class IrGeneratorTests
                 return -a;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -333,6 +304,7 @@ public class IrGeneratorTests
             	ret	#1: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -347,10 +319,10 @@ public class IrGeneratorTests
                 return !a;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -361,6 +333,7 @@ public class IrGeneratorTests
             	ret	#1: bool
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -375,10 +348,10 @@ public class IrGeneratorTests
                 return ~a;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -389,6 +362,7 @@ public class IrGeneratorTests
             	ret	#1: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -403,10 +377,10 @@ public class IrGeneratorTests
                 return a[0];
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -425,6 +399,7 @@ public class IrGeneratorTests
             	ret	#2: i64
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -439,10 +414,10 @@ public class IrGeneratorTests
                 return a[index + 2];
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -463,6 +438,7 @@ public class IrGeneratorTests
             	ret	#2: i64
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -477,10 +453,10 @@ public class IrGeneratorTests
                 a[0] = 10;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -491,6 +467,7 @@ public class IrGeneratorTests
             	get	#2: i32*, #0: i32[]*, #1: i32
             	ldc	#3: i32, 10
             	st	#2: i32*, #3: i32
+            	ret
             function array_i32_<>_get_size_0_2ae1af192b331746:
             entry:
             	ldp	#0: i32[]*, 0
@@ -499,6 +476,7 @@ public class IrGeneratorTests
             	ret	#2: i64
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -515,10 +493,10 @@ public class IrGeneratorTests
                 return a;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -536,6 +514,7 @@ public class IrGeneratorTests
             	ret	#2: i64
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -554,10 +533,10 @@ public class IrGeneratorTests
                 return new Point(1, 2);
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -566,6 +545,7 @@ public class IrGeneratorTests
             	ldp	#0: Point*, 0
             	ldp	#1: i32, 1
             	ldp	#2: i32, 2
+            	ret
             function test_0_8a439296ced9ed11:
             entry:
             	alloc	#0: Point*, 0
@@ -577,6 +557,7 @@ public class IrGeneratorTests
             	ret	#0: Point*
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -595,10 +576,10 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -618,6 +599,7 @@ public class IrGeneratorTests
 
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -637,10 +619,10 @@ public class IrGeneratorTests
                 return b;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -661,6 +643,7 @@ public class IrGeneratorTests
             	ret	#7: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -683,10 +666,10 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -718,6 +701,7 @@ public class IrGeneratorTests
             	jmp	if_0_end
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -739,10 +723,10 @@ public class IrGeneratorTests
                 return b;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -768,6 +752,7 @@ public class IrGeneratorTests
             	ret	#10: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -787,10 +772,10 @@ public class IrGeneratorTests
                 return i;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -813,6 +798,7 @@ public class IrGeneratorTests
             	ret	#6: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -833,10 +819,10 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -851,8 +837,10 @@ public class IrGeneratorTests
             	get	#1: () => i32*, #0: Test*, method1: () => i32
             	ld	#2: () => i32, #1: () => i32*
             	call	#3: i32, #2: () => i32
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -871,24 +859,27 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
             function Test_method1_0_3173c900e37ae1df:
             entry:
             	ldp	#0: Test*, 0
+            	ret
             function Test_method2_0_3173c900e37ae1df:
             entry:
             	ldp	#0: Test*, 0
             	get	#1: () => void*, #0: Test*, method1: () => void
             	ld	#2: () => void, #1: () => void*
             	call	#3: void, #2: () => void
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -915,10 +906,10 @@ public class IrGeneratorTests
                 }
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -941,8 +932,10 @@ public class IrGeneratorTests
             	get	#2: (i32) => void*, #0: Point*, <>_set_x: (i32) => void
             	ld	#3: (i32) => void, #2: (i32) => void*
             	call	#4: void, #3: (i32) => void, (#1: i32)
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -967,10 +960,10 @@ public class IrGeneratorTests
                 return p.x;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -981,6 +974,7 @@ public class IrGeneratorTests
             	get	#2: (i32) => void*, #0: Point*, <>_set_x: (i32) => void
             	ld	#3: (i32) => void, #2: (i32) => void*
             	call	#4: void, #3: (i32) => void, (#1: i32)
+            	ret
             function test_0_2af2b3192b419145:
             entry:
             	alloc	#0: Point*, 4
@@ -1007,6 +1001,7 @@ public class IrGeneratorTests
             	st	#2: i32*, #1: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1031,10 +1026,10 @@ public class IrGeneratorTests
                 return -p.x;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1045,6 +1040,7 @@ public class IrGeneratorTests
             	get	#2: (i32) => void*, #0: Point*, <>_set_x: (i32) => void
             	ld	#3: (i32) => void, #2: (i32) => void*
             	call	#4: void, #3: (i32) => void, (#1: i32)
+            	ret
             function test_0_2af2b3192b419145:
             entry:
             	alloc	#0: Point*, 4
@@ -1072,6 +1068,7 @@ public class IrGeneratorTests
             	st	#2: i32*, #1: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1098,10 +1095,10 @@ public class IrGeneratorTests
                 return p.x + p.y;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1116,6 +1113,7 @@ public class IrGeneratorTests
             	get	#6: (i32) => void*, #0: Point*, <>_set_y: (i32) => void
             	ld	#7: (i32) => void, #6: (i32) => void*
             	call	#8: void, #7: (i32) => void, (#2: i32)
+            	ret
             function test_0_2af2b3192b419145:
             entry:
             	alloc	#0: Point*, 8
@@ -1159,6 +1157,7 @@ public class IrGeneratorTests
             	st	#2: i32*, #1: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1192,10 +1191,10 @@ public class IrGeneratorTests
                 return test2.obj.x;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1206,6 +1205,7 @@ public class IrGeneratorTests
             	get	#2: (i32) => void*, #0: Test1*, <>_set_x: (i32) => void
             	ld	#3: (i32) => void, #2: (i32) => void*
             	call	#4: void, #3: (i32) => void, (#1: i32)
+            	ret
             function Test2_ctor_d0266fe934ea148e:
             entry:
             	ldp	#0: Test2*, 0
@@ -1213,6 +1213,7 @@ public class IrGeneratorTests
             	get	#2: (Test1) => void*, #0: Test2*, <>_set_obj: (Test1) => void
             	ld	#3: (Test1) => void, #2: (Test1) => void*
             	call	#4: void, #3: (Test1) => void, (#1: Test1*)
+            	ret
             function test_0_2af2b3192b419145:
             entry:
             	alloc	#0: Test1*, 4
@@ -1259,6 +1260,7 @@ public class IrGeneratorTests
             	st	#2: Test1**, #1: Test1*
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1275,10 +1277,10 @@ public class IrGeneratorTests
 
             public test1(): void { }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1287,11 +1289,13 @@ public class IrGeneratorTests
             	get	#0: () => void*, test1: () => void
             	ld	#1: () => void, #0: () => void*
             	call	#2: void, #1: () => void
+            	ret
             function test1_0_3173c900e37ae1df:
             entry:
-
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1310,23 +1314,25 @@ public class IrGeneratorTests
                 Test.test();
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
             function Test_test_s_0_3173c900e37ae1df:
             entry:
-
+            	ret
             function main_0_3173c900e37ae1df:
             entry:
             	get	#0: () => void*, test: () => void
             	ld	#1: () => void, #0: () => void*
             	call	#2: void, #1: () => void
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1344,24 +1350,26 @@ public class IrGeneratorTests
                 f();
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
             function test_0_3173c900e37ae1df:
             entry:
-
+            	ret
             function main_0_3173c900e37ae1df:
             entry:
             	get	#0: () => void*, test: () => void
             	ld	#1: () => void, #0: () => void*
             	mov	#2: () => void, #1: () => void
             	call	#3: void, #2: () => void
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1376,10 +1384,10 @@ public class IrGeneratorTests
                 callback();
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1387,8 +1395,10 @@ public class IrGeneratorTests
             entry:
             	ldp	#0: () => void, 0
             	call	#1: void, #0: () => void
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1407,10 +1417,10 @@ public class IrGeneratorTests
                 p.method();
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1420,8 +1430,10 @@ public class IrGeneratorTests
             	get	#1: () => void*, #0: Interface*, method: () => void
             	ld	#2: () => void, #1: () => void*
             	call	#3: void, #2: () => void
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1436,10 +1448,10 @@ public class IrGeneratorTests
                 return obj is i8;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1450,6 +1462,7 @@ public class IrGeneratorTests
             	ret	#1: bool
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1464,10 +1477,10 @@ public class IrGeneratorTests
                 return (i8)obj;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1478,6 +1491,7 @@ public class IrGeneratorTests
             	ret	#1: i8
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1494,10 +1508,10 @@ public class IrGeneratorTests
                 return (Test)obj;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1508,6 +1522,7 @@ public class IrGeneratorTests
             	ret	#1: Test*
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1526,10 +1541,10 @@ public class IrGeneratorTests
                 return 0;
             }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
@@ -1554,6 +1569,7 @@ public class IrGeneratorTests
             	ret	#4: i32
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 
@@ -1567,21 +1583,24 @@ public class IrGeneratorTests
             public test(x: i32): void { }
             public test(x: bool): void { }
             """;
-        var (tree, rootNamespace, builtInTypes) = Parse(code);
+        var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), builtInTypes);
-        var functions = ir.Generate([tree], rootNamespace);
+        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var functions = ir.Generate([tree]);
 
         const string expected =
             """
             function test_1_f22f9ef8659fbbff:
             entry:
             	ldp	#0: i32, 0
+            	ret
             function test_1_c79f1eebc0a6b477:
             entry:
             	ldp	#0: bool, 0
+            	ret
             """;
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(functions.Dump(), Is.EqualTo(expected).NoClip);
     }
 }

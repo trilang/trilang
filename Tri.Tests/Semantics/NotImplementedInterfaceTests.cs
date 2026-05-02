@@ -1,36 +1,17 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
 public class NotImplementedInterfaceTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void EverythingIsImplementedInTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -46,20 +27,24 @@ public class NotImplementedInterfaceTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
 
         Assert.That(
             () => semantic.Analyze(
-                [tree],
-                new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes())),
+                project,
+                new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext)),
             Throws.Nothing);
     }
 
     [Test]
     public void NotImplementedPropertyTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -74,11 +59,15 @@ public class NotImplementedInterfaceTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0021MemberIsNotImplemented,
@@ -94,7 +83,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementPropertyWithIncorrectTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -110,19 +99,22 @@ public class NotImplementedInterfaceTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0021MemberIsNotImplemented,
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(120, 9, 5),
-            new SourcePosition(126, 9, 11))),
+                new SourceSpan(new SourcePosition(120, 9, 5), new SourcePosition(126, 9, 11))),
             "The 'x' property is not of the correct type. Expected 'i8', got 'i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -131,7 +123,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void NotImplementedMethodTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -144,11 +136,15 @@ public class NotImplementedInterfaceTests
                 x: i32;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0021MemberIsNotImplemented,
@@ -156,7 +152,7 @@ public class NotImplementedInterfaceTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(84, 8, 1),
-            new SourcePosition(129, 10, 2))),
+                    new SourcePosition(129, 10, 2))),
             "The 'toString' method is not implemented.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -165,7 +161,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementMethodWithIncorrectReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -181,11 +177,15 @@ public class NotImplementedInterfaceTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0021MemberIsNotImplemented,
@@ -193,7 +193,7 @@ public class NotImplementedInterfaceTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(132, 10, 5),
-            new SourcePosition(180, 12, 6))),
+                    new SourcePosition(180, 12, 6))),
             "The 'toString' method is not of the correct type. Expected '() => string', got '() => i32'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -202,7 +202,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void ImplementMethodWithIncorrectParametersTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -218,11 +218,15 @@ public class NotImplementedInterfaceTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0021MemberIsNotImplemented,
@@ -230,7 +234,7 @@ public class NotImplementedInterfaceTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(132, 10, 5),
-            new SourcePosition(203, 12, 6))
+                    new SourcePosition(203, 12, 6))
             ),
             "The 'toString' method is not of the correct type. Expected '() => string', got '(i32) => string'.");
 
@@ -240,7 +244,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsMethodAsPrivateTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -253,11 +257,15 @@ public class NotImplementedInterfaceTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0021MemberIsNotImplemented,
@@ -265,7 +273,7 @@ public class NotImplementedInterfaceTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(104, 8, 5),
-            new SourcePosition(134, 9, 6))),
+                    new SourcePosition(134, 9, 6))),
             "The implementation of the interface method 'method' is not public.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -274,7 +282,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsGetterAsPrivateTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -286,11 +294,15 @@ public class NotImplementedInterfaceTests
                 x: i32 { private get; public set; }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0021MemberIsNotImplemented,
@@ -298,7 +310,7 @@ public class NotImplementedInterfaceTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(123, 8, 5),
-            new SourcePosition(158, 8, 40))),
+                    new SourcePosition(158, 8, 40))),
             "The implementation of an interface property getter 'x' cannot be private.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -307,7 +319,7 @@ public class NotImplementedInterfaceTests
     [Test]
     public void TypeImplementsSetterAsPrivateTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -319,11 +331,15 @@ public class NotImplementedInterfaceTests
                 x: i32 { public get; private set; }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0021MemberIsNotImplemented,
@@ -331,7 +347,7 @@ public class NotImplementedInterfaceTests
             new SourceLocation(
                 file,
                 new SourceSpan(new SourcePosition(123, 8, 5),
-            new SourcePosition(158, 8, 40))),
+                    new SourcePosition(158, 8, 40))),
             "The implementation of an interface property setter 'x' cannot be private.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

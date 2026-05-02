@@ -1,3 +1,4 @@
+using Trilang.Compilation;
 using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
@@ -11,8 +12,9 @@ internal class MemberAccessKindAnalyser : ISemanticPass
         this.directives = directives;
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    public void Analyze(Project project)
     {
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
         var visitor = new MemberAccessKindAnalyserVisitor(directives);
         foreach (var tree in semanticTrees)
             tree.Accept(visitor);

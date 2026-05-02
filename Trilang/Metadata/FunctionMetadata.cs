@@ -39,5 +39,5 @@ public class FunctionMetadata : IFunctionMetadata
 
     public FunctionTypeMetadata Type { get; set; }
 
-    public NamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace { get; set; }
 }

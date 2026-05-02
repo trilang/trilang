@@ -1,36 +1,17 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
 public class RestrictFieldAccessTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void AccessFunctionContextFieldTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -38,11 +19,18 @@ public class RestrictFieldAccessTests
                 return callback.context;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0014MemberNotAccessible,

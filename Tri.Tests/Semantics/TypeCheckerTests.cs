@@ -1,62 +1,46 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using static Tri.Tests.Factory;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
 public class TypeCheckerTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void SetMetadataForFunctionReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public main(): void {
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expected = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "main",
             [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace))
+            CreateFunctionType([], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace))
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var function = semanticTree.Find<FunctionDeclaration>();
         Assert.That(function, Is.Not.Null);
         Assert.That(function.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -65,47 +49,51 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionParameterTypesTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public main(a: i32, b: bool): void { }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expected = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "main",
             [
-                new ParameterMetadata(null, "a", builtInTypes.I32),
-                new ParameterMetadata(null, "b", builtInTypes.Bool)
+                new ParameterMetadata(null, "a", compilationContext.BuiltInTypes.I32),
+                new ParameterMetadata(null, "b", compilationContext.BuiltInTypes.Bool)
             ],
-            CreateFunctionType([builtInTypes.I32, builtInTypes.Bool],
-                builtInTypes.Void,
-                rootNamespace));
+            CreateFunctionType(
+                [compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.Bool],
+                compilationContext.BuiltInTypes.Void,
+                compilationContext.RootNamespace));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var function = semanticTree.Find<FunctionDeclaration>();
         Assert.That(function, Is.Not.Null);
         Assert.That(function.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
         Assert.That(
             function.Parameters[0].Type.Metadata,
-            Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
         Assert.That(
             function.Parameters[1].Type.Metadata,
-            Is.EqualTo(builtInTypes.Bool).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.Bool).Using(new MetadataComparer()));
     }
 
     [Test]
     public void SetMetadataForVariableTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -113,23 +101,29 @@ public class TypeCheckerTests
                 var a: i32 = 1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var variable = semanticTree.Find<VariableDeclaration>();
         Assert.That(variable, Is.Not.Null);
-        Assert.That(variable.Type.Metadata, Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+        Assert.That(variable.Type.Metadata, Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void SetMetadataForIncorrectVariableTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -137,12 +131,15 @@ public class TypeCheckerTests
                 var a: xxx = 1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0003UnknownType,
@@ -158,7 +155,7 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -174,14 +171,17 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var expected = new TypeMetadata(null, "Point")
         {
             Namespace = test1Ns,
@@ -192,18 +192,22 @@ public class TypeCheckerTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace)));
 
-        var xProperty = CreatePropertyMetadata(expected,
+        var xProperty = CreatePropertyMetadata(
+            compilationContext.RootNamespace,
+            expected,
             "x",
-            builtInTypes.I32);
+            compilationContext.BuiltInTypes.I32);
         expected.AddProperty(xProperty);
         expected.AddMethod(xProperty.Getter!);
         expected.AddMethod(xProperty.Setter!);
 
-        var yProperty = CreatePropertyMetadata(expected,
+        var yProperty = CreatePropertyMetadata(
+            compilationContext.RootNamespace,
+            expected,
             "y",
-            builtInTypes.I32);
+            compilationContext.BuiltInTypes.I32);
         expected.AddProperty(yProperty);
         expected.AddMethod(yProperty.Getter!);
         expected.AddMethod(yProperty.Setter!);
@@ -215,17 +219,17 @@ public class TypeCheckerTests
             false,
             "toString",
             [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+            CreateFunctionType([], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace)));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,
             AccessModifierMetadata.Public,
             false,
             "distance",
-            [new ParameterMetadata(null, "other", builtInTypes.I32)],
-            CreateFunctionType([builtInTypes.I32], builtInTypes.I32, rootNamespace)));
+            [new ParameterMetadata(null, "other", compilationContext.BuiltInTypes.I32)],
+            CreateFunctionType([compilationContext.BuiltInTypes.I32], compilationContext.BuiltInTypes.I32, compilationContext.RootNamespace)));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var type = semanticTree.Find<TypeDeclaration>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -234,25 +238,28 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForAliasType()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type MyInt = i32;
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
-        var expected = new AliasMetadata(null, "MyInt", [], builtInTypes.I32)
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
+        var expected = new AliasMetadata(null, "MyInt", [], compilationContext.BuiltInTypes.I32, false)
         {
             Namespace = test1Ns,
         };
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var node = semanticTree.Find<AliasDeclaration>();
         Assert.That(node, Is.Not.Null);
         Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -261,23 +268,26 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type MyF = (i32, bool) => f64;
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var expected = CreateFunctionType([builtInTypes.I32, builtInTypes.Bool],
-            builtInTypes.F64,
-            rootNamespace);
-        var semanticTree = semanticTrees.Single();
+        var expected = CreateFunctionType([compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.Bool],
+            compilationContext.BuiltInTypes.F64,
+            compilationContext.RootNamespace);
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var type = semanticTree.Find<FunctionType>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -286,7 +296,7 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForFunctionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -294,27 +304,30 @@ public class TypeCheckerTests
                 return 0;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expected = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "add",
             [
-                new ParameterMetadata(null, "a", builtInTypes.I32),
-                new ParameterMetadata(null, "b", builtInTypes.I32)
+                new ParameterMetadata(null, "a", compilationContext.BuiltInTypes.I32),
+                new ParameterMetadata(null, "b", compilationContext.BuiltInTypes.I32)
             ],
-            CreateFunctionType([builtInTypes.I32, builtInTypes.I32], builtInTypes.I32, rootNamespace))
+            CreateFunctionType([compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32], compilationContext.BuiltInTypes.I32, compilationContext.RootNamespace))
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var node = semanticTree.Find<FunctionDeclaration>();
         Assert.That(node, Is.Not.Null);
         Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -323,7 +336,7 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForForwardDefinedFunctionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -333,24 +346,27 @@ public class TypeCheckerTests
 
             public test2(): void { }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expected = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test2",
             [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace))
+            CreateFunctionType([], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace))
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var node = semanticTree.Find<FunctionDeclaration>(x => x.Name == "test2");
         Assert.That(node, Is.Not.Null);
         Assert.That(node.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -363,7 +379,7 @@ public class TypeCheckerTests
     [Test]
     public void LiteralNumberTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -371,26 +387,29 @@ public class TypeCheckerTests
                 return 1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void LiteralFloatTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -398,26 +417,29 @@ public class TypeCheckerTests
                 return 3.14;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.F64).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.F64).Using(new MetadataComparer()));
     }
 
     [Test]
     public void LiteralBoolTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -425,26 +447,29 @@ public class TypeCheckerTests
                 return true;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.Bool).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.Bool).Using(new MetadataComparer()));
     }
 
     [Test]
     public void LiteralCharTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -452,26 +477,29 @@ public class TypeCheckerTests
                 return 'x';
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.Char).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.Char).Using(new MetadataComparer()));
     }
 
     [Test]
     public void LiteralStringTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -479,26 +507,29 @@ public class TypeCheckerTests
                 return "xxx";
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.String).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.String).Using(new MetadataComparer()));
     }
 
     [Test]
     public void ReturnStatementTypeDoesntMatchTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -506,12 +537,15 @@ public class TypeCheckerTests
                 return 1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0004ReturnTypeMismatch,
@@ -527,7 +561,7 @@ public class TypeCheckerTests
     [Test]
     public void UnaryPlusTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -535,26 +569,29 @@ public class TypeCheckerTests
                 return -1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void UnaryMinusTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -562,26 +599,29 @@ public class TypeCheckerTests
                 return -1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void LogicalNotTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -589,26 +629,29 @@ public class TypeCheckerTests
                 return !true;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.Bool).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.Bool).Using(new MetadataComparer()));
     }
 
     [Test]
     public void BinaryExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -616,25 +659,28 @@ public class TypeCheckerTests
                 return 1 + 2;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var binaryNode = semanticTree.Find<BinaryExpression>();
         Assert.That(binaryNode, Is.Not.Null);
         Assert.That(
             binaryNode.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void LogicalNotIncorrectOperandTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -642,12 +688,15 @@ public class TypeCheckerTests
                 return !1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0010IncompatibleUnaryOperator,
@@ -663,7 +712,7 @@ public class TypeCheckerTests
     [Test]
     public void VariableExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -671,26 +720,29 @@ public class TypeCheckerTests
                 return a;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnNode = semanticTree.Find<ReturnStatement>();
         Assert.That(returnNode, Is.Not.Null);
         Assert.That(returnNode.Expression, Is.Not.Null);
         Assert.That(
             returnNode.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void VariableDeclarationIncorrectTypesTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -698,12 +750,15 @@ public class TypeCheckerTests
                 var a: i32 = true;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0005TypeMismatch,
@@ -719,7 +774,7 @@ public class TypeCheckerTests
     [Test]
     public void IfIncorrectConditionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -728,12 +783,15 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0005TypeMismatch,
@@ -749,7 +807,7 @@ public class TypeCheckerTests
     [Test]
     public void FunctionCallIncorrectParameterTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -761,12 +819,15 @@ public class TypeCheckerTests
                 return add(true);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0005TypeMismatch,
@@ -782,7 +843,7 @@ public class TypeCheckerTests
     [Test]
     public void WhileNonBoolConditionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -791,12 +852,15 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0005TypeMismatch,
@@ -812,7 +876,7 @@ public class TypeCheckerTests
     [Test]
     public void ReturnInConstructorTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -822,21 +886,24 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
 
         Assert.That(
             () => semantic.Analyze(
-                [tree],
-                new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes)),
+                project,
+                new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext)),
             Throws.Nothing);
     }
 
     [Test]
     public void ReturnWithExpressionInConstructorTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -846,12 +913,15 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0004ReturnTypeMismatch,
@@ -867,7 +937,7 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForInterfaceTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -877,19 +947,22 @@ public class TypeCheckerTests
                 distance(Point): f64;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var interfaceType = new InterfaceMetadata(null)
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
-        var expected = new AliasMetadata(null, "Point", [], interfaceType)
+        var expected = new AliasMetadata(null, "Point", [], interfaceType, false)
         {
             Namespace = test1Ns,
         };
@@ -899,7 +972,7 @@ public class TypeCheckerTests
                 null,
                 interfaceType,
                 "x",
-                builtInTypes.I32,
+                compilationContext.BuiltInTypes.I32,
                 AccessModifierMetadata.Public,
                 null));
         interfaceType.AddProperty(
@@ -907,7 +980,7 @@ public class TypeCheckerTests
                 null,
                 interfaceType,
                 "y",
-                builtInTypes.I32,
+                compilationContext.BuiltInTypes.I32,
                 AccessModifierMetadata.Public,
                 null));
         interfaceType.AddMethod(
@@ -915,9 +988,12 @@ public class TypeCheckerTests
                 null,
                 interfaceType,
                 "distance",
-                CreateFunctionType([expected], builtInTypes.F64, rootNamespace)));
+                CreateFunctionType(
+                    [expected],
+                    compilationContext.BuiltInTypes.F64,
+                    compilationContext.RootNamespace)));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var type = semanticTree.Find<AliasDeclaration>();
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Metadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -926,7 +1002,7 @@ public class TypeCheckerTests
     [Test]
     public void SetReturnTypeForVariableWithFunctionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -938,17 +1014,21 @@ public class TypeCheckerTests
                 var x: (i32, i32) => i32 = add;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var expected = CreateFunctionType([builtInTypes.I32, builtInTypes.I32],
-            builtInTypes.I32,
-            rootNamespace);
-        var semanticTree = semanticTrees.Single();
+        var expected = CreateFunctionType(
+            [compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32],
+            compilationContext.BuiltInTypes.I32,
+            compilationContext.RootNamespace);
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.ReturnTypeMetadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -957,7 +1037,7 @@ public class TypeCheckerTests
     [Test]
     public void CallNonFunctionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -965,12 +1045,15 @@ public class TypeCheckerTests
                 a();
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0007ExpectedFunction,
@@ -986,7 +1069,7 @@ public class TypeCheckerTests
     [Test]
     public void ThisReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -996,16 +1079,19 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var thisNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "this");
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var pointType = test1Ns.FindType("Point");
         Assert.That(thisNode, Is.Not.Null);
         Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
@@ -1014,7 +1100,7 @@ public class TypeCheckerTests
     [Test]
     public void ThisWithMultipleMembersReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1026,23 +1112,28 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var thisNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "a");
         Assert.That(thisNode, Is.Not.Null);
-        Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+        Assert.That(
+            thisNode.ReturnTypeMetadata,
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void ThisWithIncorrectPropertyNameTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1054,12 +1145,15 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0008UnknownMember,
@@ -1075,7 +1169,7 @@ public class TypeCheckerTests
     [Test]
     public void InterfaceMemberAccessReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1087,29 +1181,34 @@ public class TypeCheckerTests
                 return a.x;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var aNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "a");
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var pointType = test1Ns.FindType("Point");
         Assert.That(aNode, Is.Not.Null);
         Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
 
         var xNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "x");
         Assert.That(xNode, Is.Not.Null);
-        Assert.That(xNode.ReturnTypeMetadata, Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+        Assert.That(
+            xNode.ReturnTypeMetadata,
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void InterfaceMemberAccessIncorrectPropertyTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1121,12 +1220,15 @@ public class TypeCheckerTests
                 return a.c;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0008UnknownMember,
@@ -1142,7 +1244,7 @@ public class TypeCheckerTests
     [Test]
     public void AliasFunctionTypeMemberAccessReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1156,16 +1258,19 @@ public class TypeCheckerTests
                 return a.f;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var aNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "a");
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var pointType = test1Ns.FindType("Test");
         Assert.That(aNode, Is.Not.Null);
         Assert.That(aNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
@@ -1179,7 +1284,7 @@ public class TypeCheckerTests
     [Test]
     public void NewOperatorSetCtorTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1192,21 +1297,24 @@ public class TypeCheckerTests
                 var a: Point = new Point(1, 2);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var type = test1Ns.FindType("Point") as TypeMetadata;
         Assert.That(type, Is.Not.Null);
 
-        var ctor = type.GetConstructor([builtInTypes.I32, builtInTypes.I32]);
+        var ctor = type.GetConstructor([compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32]);
         Assert.That(ctor, Is.Not.Null);
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var newOp = semanticTree.Find<NewObjectExpression>();
         Assert.That(newOp, Is.Not.Null);
         Assert.That(newOp.Metadata, Is.EqualTo(ctor));
@@ -1215,7 +1323,7 @@ public class TypeCheckerTests
     [Test]
     public void NewOperatorForInterfaceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1228,12 +1336,15 @@ public class TypeCheckerTests
                 var a: Point = new Point(1, 2);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0009CantCreateObject,
@@ -1249,7 +1360,7 @@ public class TypeCheckerTests
     [Test]
     public void NewOperatorMissingConstructorTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1262,12 +1373,15 @@ public class TypeCheckerTests
                 var a: Point = new Point(2);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0008UnknownMember,
@@ -1283,37 +1397,40 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForDiscriminatedUnionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type DU = {} | i32 | () => void;
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var du = new DiscriminatedUnionMetadata(null, [
             new InterfaceMetadata(null)
             {
-                Namespace = rootNamespace,
+                Namespace = compilationContext.RootNamespace,
             },
-            builtInTypes.I32,
-            CreateFunctionType([], builtInTypes.Void, rootNamespace)
+            compilationContext.BuiltInTypes.I32,
+            CreateFunctionType([], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace)
         ])
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
-        var alias = new AliasMetadata(null, "DU", [], du)
+        var alias = new AliasMetadata(null, "DU", [], du, false)
         {
             Namespace = test1Ns,
         };
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var aliasNode = semanticTree.Find<AliasDeclaration>();
         Assert.That(aliasNode, Is.Not.Null);
         Assert.That(aliasNode.Metadata, Is.EqualTo(alias).Using(new MetadataComparer()));
@@ -1326,7 +1443,7 @@ public class TypeCheckerTests
     [Test]
     public void AccessArrayElementTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1334,23 +1451,28 @@ public class TypeCheckerTests
                 return a[1];
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var arrayAccess = semanticTree.Find<ArrayAccessExpression>();
         Assert.That(arrayAccess, Is.Not.Null);
-        Assert.That(arrayAccess.ReturnTypeMetadata, Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+        Assert.That(
+            arrayAccess.ReturnTypeMetadata,
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void UseArrayAccessorOnNotArrayTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1358,12 +1480,15 @@ public class TypeCheckerTests
                 return a[1];
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0006ExpectedArray,
@@ -1379,7 +1504,7 @@ public class TypeCheckerTests
     [Test]
     public void UseArrayAccessorWithNonNumberTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1387,12 +1512,15 @@ public class TypeCheckerTests
                 return a["xxx"];
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0005TypeMismatch,
@@ -1408,7 +1536,7 @@ public class TypeCheckerTests
     [Test]
     public void GenerateMetadataForExpressionTupleTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1416,23 +1544,28 @@ public class TypeCheckerTests
                 return (1, 2);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (_, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var expected = CreateTupleMetadata([builtInTypes.I32, builtInTypes.I32], rootNamespace);
+        var expected = CreateTupleMetadata(
+            [compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32],
+            compilationContext.RootNamespace);
 
-        var actual = rootNamespace.FindType("(i32, i32)");
+        var actual = compilationContext.RootNamespace.FindType("(i32, i32)");
         Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
     }
 
     [Test]
     public void NewArrayReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1440,15 +1573,18 @@ public class TypeCheckerTests
                 return new i32[10];
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var expected = CreateArrayMetadata(builtInTypes.I32, rootNamespace);
-        var semanticTree = semanticTrees.Single();
+        var expected = CreateArrayMetadata(compilationContext.BuiltInTypes.I32, compilationContext.RootNamespace);
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var newArray = semanticTree.Find<NewArrayExpression>();
         Assert.That(newArray, Is.Not.Null);
         Assert.That(newArray.ReturnTypeMetadata, Is.EqualTo(expected).Using(new MetadataComparer()));
@@ -1457,7 +1593,7 @@ public class TypeCheckerTests
     [Test]
     public void GenericPropertyTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1465,14 +1601,17 @@ public class TypeCheckerTests
                 x: T;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var property = semanticTree.Find<PropertyDeclaration>();
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Metadata, Is.Not.Null);
@@ -1484,7 +1623,7 @@ public class TypeCheckerTests
     [Test]
     public void GenericArrayPropertyTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1492,42 +1631,48 @@ public class TypeCheckerTests
                 x: T[];
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var property = semanticTree.Find<PropertyDeclaration>();
         Assert.That(property, Is.Not.Null);
         Assert.That(property.Metadata, Is.Not.Null);
 
         var typeArrayMetadata = CreateArrayMetadata(new TypeArgumentMetadata(null, "T"),
-            rootNamespace);
+            compilationContext.RootNamespace);
         Assert.That(property.Metadata.Type, Is.EqualTo(typeArrayMetadata).Using(new MetadataComparer()));
     }
 
     [Test]
     public void SetMetadataForClosedGenericTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type List<T> {}
             public type Test = List<i32>;
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var closedType = rootNamespace.FindType("List<i32>");
-        var semanticTree = semanticTrees.Single();
+        var closedType = compilationContext.RootNamespace.FindType("List<i32>");
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var genericTypeNode = semanticTree.Find<GenericApplication>();
         Assert.That(closedType, Is.Not.Null);
         Assert.That(genericTypeNode, Is.Not.Null);
@@ -1537,7 +1682,7 @@ public class TypeCheckerTests
     [Test]
     public void FindCtorInGenericTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1549,18 +1694,21 @@ public class TypeCheckerTests
                 var x: Test<i32> = new Test<i32>();
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var closedGeneric = rootNamespace.FindType("Test<i32>") as GenericApplicationMetadata;
+        var closedGeneric = compilationContext.RootNamespace.FindType("Test<i32>") as GenericApplicationMetadata;
         var closedType = closedGeneric!.ClosedGeneric as TypeMetadata;
         var ctor = closedType!.GetConstructor([]);
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var newObj = semanticTree.Find<NewObjectExpression>();
         Assert.That(newObj, Is.Not.Null);
         Assert.That(newObj.Metadata, Is.EqualTo(ctor));
@@ -1569,7 +1717,7 @@ public class TypeCheckerTests
     [Test]
     public void SetMetadataForClosedGenericTypeFieldTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1582,26 +1730,29 @@ public class TypeCheckerTests
                 return x.a;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnStmt = semanticTree.Find<ReturnStatement>();
         Assert.That(returnStmt, Is.Not.Null);
         Assert.That(returnStmt.Expression, Is.Not.Null);
         Assert.That(
             returnStmt.Expression.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.I32).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
     }
 
     [Test]
     public void MemberAccessNestedCallTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1619,21 +1770,24 @@ public class TypeCheckerTests
                 return a.b().c;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
 
         Assert.That(
             () => semantic.Analyze(
-                [tree],
-                new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes)),
+                project,
+                new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext)),
             Throws.Nothing);
     }
 
     [Test]
     public void SetMetadataForStaticClassTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1646,21 +1800,24 @@ public class TypeCheckerTests
                 Test.test();
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var type = test1Ns.FindType("Test");
         Assert.That(type, Is.Not.Null);
 
-        var functionType = rootNamespace.FindType("() => void");
+        var functionType = compilationContext.RootNamespace.FindType("() => void");
         Assert.That(functionType, Is.Not.Null);
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var staticTypeMember = semanticTree.Find<MemberAccessExpression>(x => x.Name == "Test");
         Assert.That(staticTypeMember, Is.Not.Null);
         Assert.That(staticTypeMember.ReturnTypeMetadata, Is.EqualTo(type));
@@ -1673,7 +1830,7 @@ public class TypeCheckerTests
     [Test]
     public void TupleMemberAccessTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1681,25 +1838,28 @@ public class TypeCheckerTests
                 return a.1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var tupleMember = semanticTree.Find<MemberAccessExpression>();
         Assert.That(tupleMember, Is.Not.Null);
         Assert.That(
             tupleMember.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.String).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.String).Using(new MetadataComparer()));
     }
 
     [Test]
     public void TupleMemberAccessIndexOutsideTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1707,12 +1867,15 @@ public class TypeCheckerTests
                 return a.2;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0008UnknownMember,
@@ -1728,7 +1891,7 @@ public class TypeCheckerTests
     [Test]
     public void CastExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1736,25 +1899,28 @@ public class TypeCheckerTests
                 return (i8)a;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var castExp = semanticTree.Find<CastExpression>();
         Assert.That(castExp, Is.Not.Null);
         Assert.That(
             castExp.ReturnTypeMetadata,
-            Is.EqualTo(builtInTypes.I8).Using(new MetadataComparer()));
+            Is.EqualTo(compilationContext.BuiltInTypes.I8).Using(new MetadataComparer()));
     }
 
     [Test]
     public void UseMethodBeforeDeclarationTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1766,18 +1932,21 @@ public class TypeCheckerTests
                 public method2(): void {}
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var type = (TypeMetadata)test1Ns.FindType("Test")!;
         var method = (MethodMetadata)type.GetMethods("method2")[0];
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
@@ -1786,7 +1955,7 @@ public class TypeCheckerTests
     [Test]
     public void UseMethodBeforeDeclarationInCtorTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1798,18 +1967,21 @@ public class TypeCheckerTests
                 public method2(): void {}
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var type = (TypeMetadata)test1Ns.FindType("Test")!;
         var method = (MethodMetadata)type.GetMethods("method2")[0];
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var memberAccess = semanticTree.Find<MemberAccessExpression>()!;
         Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
     }
@@ -1817,7 +1989,7 @@ public class TypeCheckerTests
     [Test]
     public void UsePropertyBeforeDeclarationTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1829,18 +2001,21 @@ public class TypeCheckerTests
                 prop: i32;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var test1Ns = rootNamespace.FindNamespace(["Test1"])!;
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var type = test1Ns.FindType("Test")!;
         var method = type.GetMember("prop")!;
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var memberAccess = semanticTree.Find<MemberAccessExpression>();
         Assert.That(memberAccess, Is.Not.Null);
         Assert.That(memberAccess.Reference, Is.EqualTo(method).Using(new MetadataComparer()));
@@ -1849,7 +2024,7 @@ public class TypeCheckerTests
     [Test]
     public void CallFunctionOverloadTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1862,33 +2037,36 @@ public class TypeCheckerTests
                 test(true);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var members = semanticTree.Where<MemberAccessExpression>().ToArray();
         var calls = semanticTree.Where<CallExpression>().ToArray();
         var function1 = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
-            [new ParameterMetadata(null, "x", builtInTypes.I32)],
-            CreateFunctionType([builtInTypes.I32], builtInTypes.Void, rootNamespace))
+            [new ParameterMetadata(null, "x", compilationContext.BuiltInTypes.I32)],
+            CreateFunctionType([compilationContext.BuiltInTypes.I32], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace))
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
         var function2 = new FunctionMetadata(
             null,
             AccessModifierMetadata.Public,
             "test",
-            [new ParameterMetadata(null, "x", builtInTypes.Bool)],
-            CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, rootNamespace))
+            [new ParameterMetadata(null, "x", compilationContext.BuiltInTypes.Bool)],
+            CreateFunctionType([compilationContext.BuiltInTypes.Bool], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace))
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -1901,7 +2079,7 @@ public class TypeCheckerTests
     [Test]
     public void CallMethodOverloadTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1916,14 +2094,17 @@ public class TypeCheckerTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var members = semanticTree.Where<MemberAccessExpression>().ToArray();
         var calls = semanticTree.Where<CallExpression>().ToArray();
         var type = new TypeMetadata(null, "Test");
@@ -1933,16 +2114,16 @@ public class TypeCheckerTests
             AccessModifierMetadata.Public,
             false,
             "method",
-            [new ParameterMetadata(null, "x", builtInTypes.I32)],
-            CreateFunctionType([builtInTypes.I32], builtInTypes.Void, rootNamespace));
+            [new ParameterMetadata(null, "x", compilationContext.BuiltInTypes.I32)],
+            CreateFunctionType([compilationContext.BuiltInTypes.I32], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace));
         var method2 = new MethodMetadata(
             null,
             type,
             AccessModifierMetadata.Public,
             false,
             "method",
-            [new ParameterMetadata(null, "x", builtInTypes.Bool)],
-            CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, rootNamespace));
+            [new ParameterMetadata(null, "x", compilationContext.BuiltInTypes.Bool)],
+            CreateFunctionType([compilationContext.BuiltInTypes.Bool], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace));
         type.AddMethod(method1);
         type.AddMethod(method2);
 
@@ -1956,7 +2137,7 @@ public class TypeCheckerTests
     [Test]
     public void CallMethodOverloadOutsideTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1971,19 +2152,22 @@ public class TypeCheckerTests
                 o.method(true);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var members = semanticTree.Where<MemberAccessExpression>().ToArray();
         var calls = semanticTree.Where<CallExpression>().ToArray();
         var type = new TypeMetadata(null, "Test")
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
         var method1 = new MethodMetadata(
             null,
@@ -1991,16 +2175,16 @@ public class TypeCheckerTests
             AccessModifierMetadata.Public,
             false,
             "method",
-            [new ParameterMetadata(null, "x", builtInTypes.I32)],
-            CreateFunctionType([builtInTypes.I32], builtInTypes.Void, rootNamespace));
+            [new ParameterMetadata(null, "x", compilationContext.BuiltInTypes.I32)],
+            CreateFunctionType([compilationContext.BuiltInTypes.I32], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace));
         var method2 = new MethodMetadata(
             null,
             type,
             AccessModifierMetadata.Public,
             false,
             "method",
-            [new ParameterMetadata(null, "x", builtInTypes.Bool)],
-            CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, rootNamespace));
+            [new ParameterMetadata(null, "x", compilationContext.BuiltInTypes.Bool)],
+            CreateFunctionType([compilationContext.BuiltInTypes.Bool], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace));
         type.AddMethod(method1);
         type.AddMethod(method2);
 
@@ -2014,7 +2198,7 @@ public class TypeCheckerTests
     [Test]
     public void CallInterfaceMethodOverloadOutsideTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -2028,30 +2212,33 @@ public class TypeCheckerTests
                 o.method(true);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var members = semanticTree.Where<MemberAccessExpression>().ToArray();
         var calls = semanticTree.Where<CallExpression>().ToArray();
         var type = new InterfaceMetadata(null)
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
         var method1 = new InterfaceMethodMetadata(
             null,
             type,
             "method",
-            CreateFunctionType([builtInTypes.I32], builtInTypes.Void, rootNamespace));
+            CreateFunctionType([compilationContext.BuiltInTypes.I32], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace));
         var method2 = new InterfaceMethodMetadata(
             null,
             type,
             "method",
-            CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, rootNamespace));
+            CreateFunctionType([compilationContext.BuiltInTypes.Bool], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace));
         type.AddMethod(method1);
         type.AddMethod(method2);
 
@@ -2065,7 +2252,7 @@ public class TypeCheckerTests
     [Test]
     public void PassFunctionGroupAsParameterTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -2077,14 +2264,17 @@ public class TypeCheckerTests
                 test(f);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, rootNamespace, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var call = semanticTree.Find<CallExpression>()!;
         var parameter = (MemberAccessExpression)call.Parameters[0];
 
@@ -2092,10 +2282,10 @@ public class TypeCheckerTests
             null,
             AccessModifierMetadata.Public,
             "f",
-            [new ParameterMetadata(null, "x", builtInTypes.Bool)],
-            CreateFunctionType([builtInTypes.Bool], builtInTypes.Void, rootNamespace))
+            [new ParameterMetadata(null, "x", compilationContext.BuiltInTypes.Bool)],
+            CreateFunctionType([compilationContext.BuiltInTypes.Bool], compilationContext.BuiltInTypes.Void, compilationContext.RootNamespace))
         {
-            Namespace = rootNamespace,
+            Namespace = compilationContext.RootNamespace,
         };
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -2105,7 +2295,7 @@ public class TypeCheckerTests
     [Test]
     public void PassFunctionGroupAsParameterFailTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -2117,12 +2307,15 @@ public class TypeCheckerTests
                 test(f);
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0023NoSuitableOverload,

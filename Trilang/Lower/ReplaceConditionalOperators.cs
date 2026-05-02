@@ -44,7 +44,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
                 new VariableDeclaration(
                     null,
                     variableName,
-                    new TypeRef(null, [builtInTypes.Bool.Name])
+                    new TypeRef(null, null, [builtInTypes.Bool.Name])
                     {
                         Metadata = builtInTypes.Bool,
                     },
@@ -97,7 +97,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
                 new VariableDeclaration(
                     null,
                     variableName,
-                    new TypeRef(null, [builtInTypes.Bool.Name])
+                    new TypeRef(null, null, [builtInTypes.Bool.Name])
                     {
                         Metadata = builtInTypes.Bool,
                     },
@@ -397,7 +397,7 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
 
     public ISemanticNode TransformTree(SemanticTree node)
     {
-        node.Namespace?.Transform(this);
+        node.Namespace.Transform(this);
 
         foreach (var use in node.UseNodes)
             use.Transform(this);

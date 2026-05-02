@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Compilation;
 using Trilang.Lexing;
 using Trilang.Parsing.Ast;
 using static Trilang.Lexing.TokenKind;
@@ -7,23 +8,32 @@ namespace Trilang.Parsing;
 
 public class Parser
 {
+    private readonly Lexer lexer;
     private int nameCounter;
 
     public Parser()
-        => nameCounter = 0;
-
-    public SyntaxTree Parse(IReadOnlyList<Token> tokens, ParserOptions options)
     {
-        var context = new ParserContext(tokens, options.Diagnostics, this);
+        nameCounter = 0;
+        lexer = new Lexer();
+    }
+
+    public void Parse(CompilationUnit compilationUnit, ParserOptions options)
+    {
+        var tokens = lexer.Tokenize(compilationUnit.File, new LexerOptions(options.Diagnostics));
+        var context = new ParserContext(
+            tokens,
+            options.Diagnostics.ForParser(compilationUnit.File),
+            this);
         var namespaceNode = ParseNamespaceNode(context);
         var useNodes = ParseUseNodes(context);
         var declarations = ParseDeclarations(context);
-
-        return new SyntaxTree(
-            options.SourceFile,
+        var tree = new SyntaxTree(
+            compilationUnit.File,
             namespaceNode,
             useNodes,
             declarations);
+
+        compilationUnit.SyntaxTree = tree;
     }
 
     private string GetGeneratedName()
@@ -45,23 +55,54 @@ public class Parser
         return useNodes;
     }
 
+    private (SourceSpan span, string? Package, List<string> Parts) ParseFullyQualifiedName(ParserContext context)
+    {
+        var package = default(string?);
+        var parts = new List<string>();
+
+        var (span, packageName) = TryParseId(context);
+        if (packageName is null)
+            return (default, packageName, parts);
+
+        var (hasDoubleColon, _) = context.Reader.Match(ColonColon);
+        if (hasDoubleColon)
+        {
+            package = packageName;
+
+            var (_, part) = ParseNamespacePart(context);
+            parts.Add(part);
+        }
+        else
+        {
+            parts.Add(packageName);
+        }
+
+        var end = span;
+        while (context.Reader.Match(Dot))
+        {
+            (end, var part) = ParseNamespacePart(context);
+            parts.Add(part);
+        }
+
+        return (span.Combine(end), package, parts);
+    }
+
     private UseNode? ParseUseNode(ParserContext context)
     {
         var (hasUse, useKeyword) = context.Reader.Match(Use);
         if (!hasUse)
             return null;
 
-        var parts = new List<string>
+        var (_, package, parts) = ParseFullyQualifiedName(context);
+        if (parts.Count == 0)
         {
-            ParseNamespacePart(context)
-        };
-
-        while (context.Reader.Match(Dot))
-            parts.Add(ParseNamespacePart(context));
+            parts.Add("<invalid_namespace>");
+            context.Diagnostics.ExpectedNamespace(context.Reader.SkipTo(SemiColon));
+        }
 
         var semiColonSpan = context.Reader.Expect(SemiColon);
 
-        return new UseNode(useKeyword.SourceSpan.Combine(semiColonSpan), parts);
+        return new UseNode(useKeyword.SourceSpan.Combine(semiColonSpan), package, parts);
     }
 
     private NamespaceNode ParseNamespaceNode(ParserContext context)
@@ -74,27 +115,30 @@ public class Parser
             return new NamespaceNode(namespaceToken.SourceSpan, ["<>_invalid_namespace"]);
         }
 
-        var parts = new List<string>
-        {
-            ParseNamespacePart(context)
-        };
+        var (_, part) = ParseNamespacePart(context);
+        var parts = new List<string> { part };
 
         while (context.Reader.Match(Dot))
-            parts.Add(ParseNamespacePart(context));
+        {
+            (_, part) = ParseNamespacePart(context);
+
+            parts.Add(part);
+        }
 
         var semiColonSpan = context.Reader.Expect(SemiColon);
 
         return new NamespaceNode(namespaceToken.SourceSpan.Combine(semiColonSpan), parts);
     }
 
-    private string ParseNamespacePart(ParserContext context)
+    private (SourceSpan, string) ParseNamespacePart(ParserContext context)
     {
-        var (_, part) = TryParseId(context);
-        if (part is null)
-            context.Diagnostics.ExpectedNamespacePart(
-                context.Reader.SkipTo(Dot, SemiColon));
+        var (span, part) = TryParseId(context);
+        if (part is not null)
+            return (span, part);
 
-        return part ?? "<namespace>";
+        context.Diagnostics.ExpectedNamespacePart(context.Reader.SkipTo(Dot, SemiColon));
+
+        return (span, "<invalid_namespace>");
     }
 
     private IReadOnlyList<IDeclarationNode> ParseDeclarations(ParserContext context)
@@ -997,13 +1041,13 @@ public class Parser
         {
             if (context.Reader.Match(Dot))
             {
-                var (hasId, id) = context.Reader.Match(Identifier);
-                if (hasId)
+                var (idSpan, id) = TryParseId(context);
+                if (id is not null)
                 {
                     member = new MemberAccessExpressionNode(
-                        member.SourceSpan.Combine(id.SourceSpan),
+                        member.SourceSpan.Combine(idSpan),
                         member,
-                        id.Identifier);
+                        id);
                 }
                 else
                 {
@@ -1304,7 +1348,7 @@ public class Parser
         if (!hasNull)
             return null;
 
-        return new TypeRefNode(token.SourceSpan, ["null"]);
+        return new TypeRefNode(token.SourceSpan, null, ["null"]);
     }
 
     private IInlineTypeNode? TryParseParenType(ParserContext context)
@@ -1339,24 +1383,11 @@ public class Parser
 
     private IInlineTypeNode? TryParseTypeRef(ParserContext context)
     {
-        var (hasId, id) = context.Reader.Match(Identifier);
-        if (!hasId)
+        var (span, package, parts) = ParseFullyQualifiedName(context);
+        if (parts.Count == 0)
             return null;
 
-        var parts = new List<string> { id.Identifier };
-        while (context.Reader.Match(Dot))
-        {
-            (hasId, id) = context.Reader.Match(Identifier);
-            if (!hasId)
-            {
-                context.Diagnostics.ExpectedIdentifier(context.Reader.Span);
-                break;
-            }
-
-            parts.Add(id.Identifier);
-        }
-
-        var type = new TypeRefNode(id.SourceSpan, parts);
+        var type = new TypeRefNode(span, package, parts);
 
         if (!context.Reader.Match(Less))
             return type;

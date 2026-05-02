@@ -1,37 +1,18 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
 public class BreakContinueWithinLoopTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void BreakIsNotInLoopTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -39,11 +20,18 @@ public class BreakContinueWithinLoopTests
                 break;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0012BreakOutsideLoop,
@@ -59,7 +47,7 @@ public class BreakContinueWithinLoopTests
     [Test]
     public void ContinueIsNotInLoopTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -67,11 +55,18 @@ public class BreakContinueWithinLoopTests
                 continue;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+       var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0013ContinueOutsideLoop,
@@ -87,7 +82,7 @@ public class BreakContinueWithinLoopTests
     [Test]
     public void BreakInNestedLoopTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -99,13 +94,20 @@ public class BreakContinueWithinLoopTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var breakNode = semanticTree.Find<Break>();
         var loop = semanticTree.Where<While>().Last();
         Assert.That(breakNode, Is.Not.Null);
@@ -115,7 +117,7 @@ public class BreakContinueWithinLoopTests
     [Test]
     public void ContinueInNestedLoopTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -127,13 +129,20 @@ public class BreakContinueWithinLoopTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+       var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var continueNode = semanticTree.Find<Continue>();
         var loop = semanticTree.Where<While>().Last();
         Assert.That(continueNode, Is.Not.Null);

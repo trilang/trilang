@@ -1,67 +1,34 @@
 using Trilang;
-using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Lower;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using static Tri.Tests.Factory;
+using static Tri.Tests.Helpers;
 
-namespace Tri.Tests.Lower;
+namespace Tri.Tests.Lowering;
 
 public class AddThisInLocalMemberAccessTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static SemanticTree Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
-
-        Assert.That(diagnostics.Diagnostics, Is.Empty);
-
-        var semanticTree = semanticTrees.Single();
-
-        var lowering = new Lowering(builtInTypes);
-        lowering.Lower(semanticTree, LoweringOptions.Default);
-
-        return semanticTree;
-    }
-
     [Test]
     public void AddThisBeforePropertyTest()
     {
-        const string code =
-            """
-            namespace Test1;
+        var (tree, diagnostics, _) = Lower(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public type Test {
-                count: i32;
+                public type Test {
+                    count: i32;
 
-                public getCount(): i32 {
-                    return count;
+                    public getCount(): i32 {
+                        return count;
+                    }
                 }
-            }
-            """;
-        var tree = Parse(code);
+                """));
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
-        var test1Ns = rootNamespace.CreateChild(["Test1"]);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var packageNs = NamespaceMetadata.CreateForPackage();
+        var test1Ns = packageNs.CreateChild(["Test1"]);
         var typeMetadata = new TypeMetadata(null, "Test")
         {
             Namespace = test1Ns,
@@ -74,6 +41,7 @@ public class AddThisInLocalMemberAccessTests
             CreateFunctionType([], builtInTypes.Void, rootNamespace)));
         typeMetadata.AddField(new FieldMetadata(typeMetadata, "<>_count", builtInTypes.I32));
         var propertyMetadata = CreatePropertyMetadata(
+            rootNamespace,
             typeMetadata,
             "count",
             builtInTypes.I32);
@@ -108,6 +76,7 @@ public class AddThisInLocalMemberAccessTests
 
         var method = tree.Find<MethodDeclaration>();
         var returnStatement = method?.Body.Find<ReturnStatement>();
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(returnStatement, Is.Not.Null);
         Assert.That(returnStatement.Expression, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
@@ -115,23 +84,24 @@ public class AddThisInLocalMemberAccessTests
     [Test]
     public void AddThisBeforeMethodTest()
     {
-        const string code =
-            """
-            namespace Test1;
+        var (tree, diagnostics, _) = Lower(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public type Test {
-                public print(): void { }
+                public type Test {
+                    public print(): void { }
 
-                public test(): void {
-                    print();
+                    public test(): void {
+                        print();
+                    }
                 }
-            }
-            """;
-        var tree = Parse(code);
+                """));
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
-        var test1Ns = rootNamespace.CreateChild(["Test1"]);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var packageNs = NamespaceMetadata.CreateForPackage();
+        var test1Ns = packageNs.CreateChild(["Test1"]);
         var typeMetadata = new TypeMetadata(null, "Test")
         {
             Namespace = test1Ns,
@@ -174,6 +144,7 @@ public class AddThisInLocalMemberAccessTests
         };
 
         var returnStatement = tree.Find<CallExpression>();
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(returnStatement, Is.Not.Null);
         Assert.That(returnStatement.Member, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }

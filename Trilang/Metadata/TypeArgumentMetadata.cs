@@ -29,7 +29,7 @@ public class TypeArgumentMetadata : ITypeMetadata
 
     public TypeLayout? Layout { get; set; }
 
-    public NamespaceMetadata? Namespace
+    public INamespaceMetadata? Namespace
     {
         get => throw new NotSupportedException();
         set => throw new NotSupportedException();

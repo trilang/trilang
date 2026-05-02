@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Compilation;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 
@@ -23,8 +24,9 @@ internal class ControlFlowAnalyzer : ISemanticPass
         loopCounter = 0;
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    public void Analyze(Project project)
     {
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
         foreach (var tree in semanticTrees)
         {
             foreach (var function in GetFunctions(tree))

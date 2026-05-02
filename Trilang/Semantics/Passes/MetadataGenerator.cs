@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
@@ -12,6 +13,7 @@ internal class MetadataGenerator : ISemanticPass
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly MetadataProviderMap metadataProviderMap;
+    private readonly CompilationContext compilationContext;
 
     private readonly HashSet<TypeDeclaration> typesToProcess;
     private readonly HashSet<AliasDeclaration> aliasToProcess;
@@ -22,12 +24,14 @@ internal class MetadataGenerator : ISemanticPass
         ISet<string> directives,
         DiagnosticCollection diagnostics,
         SymbolTableMap symbolTableMap,
-        MetadataProviderMap metadataProviderMap)
+        MetadataProviderMap metadataProviderMap,
+        CompilationContext compilationContext)
     {
         this.directives = directives;
         this.diagnostics = diagnostics.ForSemantic();
         this.symbolTableMap = symbolTableMap;
         this.metadataProviderMap = metadataProviderMap;
+        this.compilationContext = compilationContext;
 
         typesToProcess = [];
         aliasToProcess = [];
@@ -35,16 +39,28 @@ internal class MetadataGenerator : ISemanticPass
         genericToProcess = [];
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    public void Analyze(Project project)
     {
-        var treesToAnalyze = semanticTrees as SemanticTree[] ??
-                             semanticTrees.ToArray();
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!).ToArray();
 
-        var rootProvider = new MetadataProvider(rootNamespace);
-        CreateNamespaces(treesToAnalyze, rootProvider);
-        AddUses(treesToAnalyze, rootProvider);
+        var packageNamespace = NamespaceMetadata.CreateForPackage();
+        var currentPackage = new PackageMetadata(project.Name, packageNamespace);
+        compilationContext.AddPackage(currentPackage);
 
-        var (types, functions) = CollectTypesAndFunctions(treesToAnalyze);
+        foreach (var dependency in project.Dependencies)
+        {
+            var dependencyPackage = compilationContext.GetPackage(dependency.Name);
+            Debug.Assert(dependencyPackage is not null, $"Dependency package '{dependency.Name}' not found");
+
+            currentPackage.AddDependency(dependencyPackage);
+        }
+
+        compilationContext.CurrentPackage = currentPackage;
+
+        CreateNamespaces(semanticTrees);
+        AddUses(semanticTrees);
+
+        var (types, functions) = CollectTypesAndFunctions(semanticTrees);
 
         CreateAliases(types);
         CreateTypes(types);
@@ -55,29 +71,38 @@ internal class MetadataGenerator : ISemanticPass
         PopulateTypes();
         PopulateFunctions();
 
-        var visitor = new MetadataGeneratorVisitor(directives, diagnostics, symbolTableMap, this);
-        foreach (var semanticTree in treesToAnalyze)
+        var visitor = new MetadataGeneratorVisitor(
+            directives,
+            diagnostics,
+            symbolTableMap,
+            this);
+
+        foreach (var semanticTree in semanticTrees)
             semanticTree.Accept(visitor);
 
         CreateClosedGenericTypes();
+
+        Debug.Assert(packageNamespace.Types.Count == 0, "Package namespace should be empty");
     }
 
-    private void CreateNamespaces(
-        SemanticTree[] treesToAnalyze,
-        MetadataProvider rootProvider)
+    private void CreateNamespaces(SemanticTree[] treesToAnalyze)
     {
-        var visitor = new NamespaceMetadataGenerator(directives, rootProvider, metadataProviderMap);
+        var visitor = new NamespaceMetadataGenerator(
+            directives,
+            metadataProviderMap,
+            compilationContext);
+
         foreach (var tree in treesToAnalyze)
             tree.Accept(visitor);
     }
 
-    private void AddUses(SemanticTree[] treesToAnalyze, MetadataProvider rootProvider)
+    private void AddUses(SemanticTree[] treesToAnalyze)
     {
         var addNamespaceUses = new AddNamespaceUses(
             directives,
             diagnostics,
-            rootProvider,
-            metadataProviderMap);
+            metadataProviderMap,
+            compilationContext);
 
         foreach (var tree in treesToAnalyze)
             tree.Accept(addNamespaceUses);
@@ -155,6 +180,8 @@ internal class MetadataGenerator : ISemanticPass
 
     private void PopulateTypes()
     {
+        var builtInTypes = compilationContext.BuiltInTypes;
+
         foreach (var node in typesToProcess)
         {
             var type = node.Metadata!;
@@ -313,6 +340,8 @@ internal class MetadataGenerator : ISemanticPass
 
     private void CreateGeneric(IReadOnlyList<TypeDescriptor> types)
     {
+        var builtInTypes = compilationContext.BuiltInTypes;
+
         foreach (var symbol in types)
         {
             if (!symbol.IsGenericApplication)
@@ -400,6 +429,8 @@ internal class MetadataGenerator : ISemanticPass
 
     private void PopulateFunctions()
     {
+        var builtInTypes = compilationContext.BuiltInTypes;
+
         foreach (var function in functionsToProcess)
         {
             var root = function.GetRoot();
@@ -463,7 +494,7 @@ internal class MetadataGenerator : ISemanticPass
             if (generic.ClosedGeneric is not null)
                 continue;
 
-            var map = new TypeArgumentMap(builtInTypes, diagnostics, generic);
+            var map = new TypeArgumentMap(diagnostics, compilationContext, generic);
             map.Map();
         }
     }
@@ -472,6 +503,7 @@ internal class MetadataGenerator : ISemanticPass
     {
         ResolveInlineType(inlineType);
 
+        var builtInTypes = compilationContext.BuiltInTypes;
         var metadataProvider = metadataProviderMap.Get(inlineType);
         var result = metadataProvider.QueryTypes(Query.From(inlineType));
         var metadata = default(ITypeMetadata);
@@ -699,23 +731,24 @@ internal class MetadataGenerator : ISemanticPass
 
     private sealed class NamespaceMetadataGenerator : Visitor
     {
-        private readonly MetadataProvider rootProvider;
         private readonly MetadataProviderMap map;
+        private readonly CompilationContext compilationContext;
 
         public NamespaceMetadataGenerator(
             ISet<string> directives,
-            MetadataProvider rootProvider,
-            MetadataProviderMap map) : base(directives)
+            MetadataProviderMap map,
+            CompilationContext compilationContext)
+            : base(directives)
         {
-            this.rootProvider = rootProvider;
             this.map = map;
+            this.compilationContext = compilationContext;
         }
 
         public override void VisitNamespace(Namespace node)
         {
-            var @namespace = rootProvider.Namespace.CreateChild(node.Parts);
+            var @namespace = compilationContext.CurrentPackage!.Namespace.CreateChild(node.Parts);
 
-            map.Add(node.Parent!, new MetadataProvider(@namespace));
+            map.Add(node.Parent!, new MetadataProvider(compilationContext, @namespace));
 
             base.VisitNamespace(node);
         }
@@ -723,7 +756,7 @@ internal class MetadataGenerator : ISemanticPass
         public override void VisitTree(SemanticTree node)
         {
             // at this point, we add this file is in a root namespace
-            map.Add(node, new MetadataProvider(rootProvider.Namespace));
+            map.Add(node, new MetadataProvider(compilationContext, compilationContext.CurrentPackage!.Namespace));
 
             base.VisitTree(node);
         }
@@ -732,32 +765,37 @@ internal class MetadataGenerator : ISemanticPass
     private sealed class AddNamespaceUses : Visitor
     {
         private readonly SemanticDiagnosticReporter diagnostics;
-        private readonly MetadataProvider rootProvider;
         private readonly MetadataProviderMap map;
+        private readonly CompilationContext compilationContext;
 
         public AddNamespaceUses(
             ISet<string> directives,
             SemanticDiagnosticReporter diagnostics,
-            MetadataProvider rootProvider,
-            MetadataProviderMap map) : base(directives)
+            MetadataProviderMap map,
+            CompilationContext compilationContext)
+            : base(directives)
         {
             this.diagnostics = diagnostics;
-            this.rootProvider = rootProvider;
             this.map = map;
+            this.compilationContext = compilationContext;
         }
 
         public override void VisitUse(Use node)
         {
-            var @namespace = rootProvider.Namespace.FindNamespace(node.Parts);
-            if (@namespace is null)
+            var namespaceResult = compilationContext.FindNamespace(node.Package, node.Parts);
+            if (!namespaceResult.IsSuccess)
             {
-                diagnostics.UnknownNamespace(node);
+                if (namespaceResult.IsPackageNotFound)
+                    diagnostics.UnknownPackage(node);
+                else
+                    diagnostics.UnknownNamespace(node);
+
                 return;
             }
 
-            // we know it always be FileMetadataProvider
+            // we know it always be MetadataProvider
             var provider = (MetadataProvider)map.Get(node);
-            provider.AddUse(@namespace);
+            provider.AddUse(namespaceResult.Namespace);
 
             base.VisitUse(node);
         }

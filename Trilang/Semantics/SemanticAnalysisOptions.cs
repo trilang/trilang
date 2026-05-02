@@ -5,5 +5,5 @@ namespace Trilang.Semantics;
 
 public record SemanticAnalysisOptions(
     ISet<string> Directives,
-    SemanticDiagnosticReporter Diagnostics,
-    BuiltInTypes BuiltInTypes);
+    DiagnosticCollection Diagnostics,
+    CompilationContext CompilationContext);

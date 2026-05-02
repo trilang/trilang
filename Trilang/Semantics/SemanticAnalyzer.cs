@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Compilation;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes;
@@ -6,19 +7,10 @@ using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Trilang.Semantics;
 
-public class SemanticAnalysis
+public class SemanticAnalyzer
 {
-    public SemanticAnalysisResult Analyze(
-        IEnumerable<Parsing.Ast.SyntaxTree> syntaxTrees,
-        SemanticAnalysisOptions options)
+    public SemanticAnalysisResult Analyze(Project project, SemanticAnalysisOptions options)
     {
-        var converter = new ConvertToSemanticTree(options.BuiltInTypes);
-        var semanticTrees = syntaxTrees
-            .Select(x => x.Transform(converter))
-            .Cast<SemanticTree>()
-            .ToArray();
-
-        var rootNamespace = NamespaceMetadata.CreateRoot(options.BuiltInTypes);
         var symbolTableMap = new SymbolTableMap();
         var metadataProviderMap = new MetadataProviderMap();
         var controlFlowGraphMap = new ControlFlowGraphMap();
@@ -27,28 +19,27 @@ public class SemanticAnalysis
             symbolTableMap,
             metadataProviderMap,
             controlFlowGraphMap,
-            rootNamespace,
-            options.BuiltInTypes);
+            options.CompilationContext);
 
-        foreach (var pass in GetSortedPasses(semanticPasses))
-            pass.Analyze(semanticTrees);
+        var converter = new ConvertToSemanticTree(options.CompilationContext.BuiltInTypes);
+        foreach (var sourceFile in project.SourceFiles)
+            sourceFile.SemanticTree = (SemanticTree)sourceFile.SyntaxTree!.Transform(converter);
 
-        return new SemanticAnalysisResult(
-            semanticTrees,
-            symbolTableMap,
-            rootNamespace,
-            controlFlowGraphMap);
+        foreach (var pass in semanticPasses)
+            pass.Analyze(project);
+
+        return new SemanticAnalysisResult(symbolTableMap, controlFlowGraphMap);
     }
 
-    private ISemanticPass[] CreateSemanticPasses(
+    private List<ISemanticPass> CreateSemanticPasses(
         SemanticAnalysisOptions options,
         SymbolTableMap symbolTableMap,
         MetadataProviderMap metadataProviderMap,
         ControlFlowGraphMap controlFlowGraphMap,
-        NamespaceMetadata rootNamespace,
-        BuiltInTypes builtInTypes)
-        =>
-        [
+        CompilationContext compilationContext)
+    {
+        var semanticPasses = new ISemanticPass[]
+        {
             new BreakContinueWithinLoop(options.Directives, options.Diagnostics),
             new CheckAccessModifiers(options.Directives, options.Diagnostics),
             new CheckStaticAndInstanceMembersAccess(options.Directives, options.Diagnostics),
@@ -59,12 +50,11 @@ public class SemanticAnalysis
                 options.Diagnostics,
                 symbolTableMap,
                 metadataProviderMap,
-                rootNamespace,
-                builtInTypes),
-            new MissingReturnStatement(options.Diagnostics, controlFlowGraphMap, builtInTypes),
+                compilationContext),
+            new MissingReturnStatement(options.Diagnostics, controlFlowGraphMap, compilationContext),
             new NotImplementedInterface(options.Directives, options.Diagnostics),
-            new CyclicAlias(options.Diagnostics, rootNamespace),
-            new PrivateInterfaceProperties(options.Diagnostics, rootNamespace),
+            new CyclicAlias(options.Diagnostics, compilationContext),
+            new PrivateInterfaceProperties(options.Diagnostics, compilationContext),
             new RestrictFieldAccess(options.Directives, options.Diagnostics),
             new SymbolFinder(options.Directives, symbolTableMap),
             new ThisInStaticMethods(options.Directives, options.Diagnostics),
@@ -74,11 +64,13 @@ public class SemanticAnalysis
                 options.Diagnostics,
                 symbolTableMap,
                 metadataProviderMap,
-                rootNamespace,
-                options.BuiltInTypes),
+                compilationContext),
             new UnresolvedMemberAccess(options.Directives, options.Diagnostics),
             new VariableUsedBeforeDeclared(options.Directives, options.Diagnostics, symbolTableMap),
-        ];
+        };
+
+        return GetSortedPasses(semanticPasses);
+    }
 
     private List<ISemanticPass> GetSortedPasses(ISemanticPass[] semanticPasses)
     {
@@ -115,14 +107,14 @@ public class SemanticAnalysis
             if (value == 0)
                 queue.Enqueue(key);
 
-        while (queue.Count > 0)
+        while (queue.TryDequeue(out var current))
         {
-            var current = queue.Dequeue();
             result.Add(passMap[current]);
 
             foreach (var neighbor in graph[current])
             {
                 inDegree[neighbor]--;
+
                 if (inDegree[neighbor] == 0)
                     queue.Enqueue(neighbor);
             }

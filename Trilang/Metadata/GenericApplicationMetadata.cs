@@ -38,7 +38,7 @@ public class GenericApplicationMetadata : IAnonymousTypeMetadata
     // TODO: generate
     public TypeLayout? Layout { get; set; }
 
-    public NamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace { get; set; }
 
     public IGenericMetadata OpenGeneric { get; }
 

@@ -1,51 +1,16 @@
-using Trilang;
-using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Lower;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using static Tri.Tests.Factory;
+using static Tri.Tests.Helpers;
 
-namespace Tri.Tests.Lower;
+namespace Tri.Tests.Lowering;
 
 public class ReplaceConditionalOperatorsTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static SemanticTree Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
-
-        Assert.That(diagnostics.Diagnostics, Is.Empty);
-
-        var semanticTree = semanticTrees.Single();
-
-        var lowering = new Lowering(builtInTypes);
-        lowering.Lower(semanticTree, LoweringOptions.Default);
-
-        return semanticTree;
-    }
-
     [Test]
     public void ReplaceConditionalAndTest()
     {
-        var tree = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -57,9 +22,10 @@ public class ReplaceConditionalOperatorsTests
                 return 0;
             }
             """);
+        var (tree, diagnostics, _) = Lower(file);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var aParameter = new ParameterMetadata(null, "a", builtInTypes.Bool);
         var bParameter = new ParameterMetadata(null, "b", builtInTypes.Bool);
         var expected = new SemanticTree(
@@ -73,16 +39,16 @@ public class ReplaceConditionalOperatorsTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool })
+                        new Parameter(null, "a", new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool })
                         {
                             Metadata = aParameter,
                         },
-                        new Parameter(null, "b", new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool })
+                        new Parameter(null, "b", new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool })
                         {
                             Metadata = bParameter,
                         },
                     ],
-                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new IfStatement(
                             null,
@@ -90,7 +56,7 @@ public class ReplaceConditionalOperatorsTests
                                 new VariableDeclaration(
                                     null,
                                     "cond_0",
-                                    new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool },
+                                    new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool },
                                     new MemberAccessExpression(null, "a")
                                     {
                                         AccessKind = MemberAccessKind.Read,
@@ -179,7 +145,8 @@ public class ReplaceConditionalOperatorsTests
                         AccessModifierMetadata.Public,
                         "test",
                         [aParameter, bParameter],
-                        CreateFunctionType([builtInTypes.Bool, builtInTypes.Bool],
+                        CreateFunctionType(
+                            [builtInTypes.Bool, builtInTypes.Bool],
                             builtInTypes.I32,
                             rootNamespace))
                     {
@@ -188,13 +155,14 @@ public class ReplaceConditionalOperatorsTests
                 }
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
     public void ReplaceConditionalOrTest()
     {
-        var tree = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -206,9 +174,10 @@ public class ReplaceConditionalOperatorsTests
                 return 0;
             }
             """);
+        var (tree, diagnostics, _) = Lower(file);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var aParameter = new ParameterMetadata(null, "a", builtInTypes.Bool);
         var bParameter = new ParameterMetadata(null, "b", builtInTypes.Bool);
         var expected = new SemanticTree(
@@ -222,16 +191,16 @@ public class ReplaceConditionalOperatorsTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool })
+                        new Parameter(null, "a", new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool })
                         {
                             Metadata = aParameter,
                         },
-                        new Parameter(null, "b", new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool })
+                        new Parameter(null, "b", new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool })
                         {
                             Metadata = bParameter,
                         },
                     ],
-                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new IfStatement(
                             null,
@@ -239,7 +208,7 @@ public class ReplaceConditionalOperatorsTests
                                 new VariableDeclaration(
                                     null,
                                     "cond_0",
-                                    new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool },
+                                    new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool },
                                     new MemberAccessExpression(null, "a")
                                     {
                                         AccessKind = MemberAccessKind.Read,
@@ -335,7 +304,8 @@ public class ReplaceConditionalOperatorsTests
                         AccessModifierMetadata.Public,
                         "test",
                         [aParameter, bParameter],
-                        CreateFunctionType([builtInTypes.Bool, builtInTypes.Bool],
+                        CreateFunctionType(
+                            [builtInTypes.Bool, builtInTypes.Bool],
                             builtInTypes.I32,
                             rootNamespace))
                     {
@@ -344,13 +314,14 @@ public class ReplaceConditionalOperatorsTests
                 }
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
     public void ReplaceNestedConditionalAndTest()
     {
-        var tree = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -362,9 +333,10 @@ public class ReplaceConditionalOperatorsTests
                 return 0;
             }
             """);
+        var (tree, diagnostics, _) = Lower(file);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var aParameter = new ParameterMetadata(null, "a", builtInTypes.Bool);
         var bParameter = new ParameterMetadata(null, "b", builtInTypes.Bool);
         var cParameter = new ParameterMetadata(null, "c", builtInTypes.Bool);
@@ -379,20 +351,20 @@ public class ReplaceConditionalOperatorsTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool })
+                        new Parameter(null, "a", new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool })
                         {
                             Metadata = aParameter,
                         },
-                        new Parameter(null, "b", new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool })
+                        new Parameter(null, "b", new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool })
                         {
                             Metadata = bParameter,
                         },
-                        new Parameter(null, "c", new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool })
+                        new Parameter(null, "c", new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool })
                         {
                             Metadata = cParameter,
                         }
                     ],
-                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new IfStatement(
                             null,
@@ -400,12 +372,12 @@ public class ReplaceConditionalOperatorsTests
                                 new VariableDeclaration(
                                     null,
                                     "cond_1",
-                                    new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool },
+                                    new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool },
                                     new ExpressionBlock([
                                         new VariableDeclaration(
                                             null,
                                             "cond_0",
-                                            new TypeRef(null, ["bool"]) { Metadata = builtInTypes.Bool },
+                                            new TypeRef(null, null, ["bool"]) { Metadata = builtInTypes.Bool },
                                             new MemberAccessExpression(null, "a")
                                             {
                                                 AccessKind = MemberAccessKind.Read,
@@ -543,7 +515,8 @@ public class ReplaceConditionalOperatorsTests
                         AccessModifierMetadata.Public,
                         "test",
                         [aParameter, bParameter, cParameter],
-                        CreateFunctionType([builtInTypes.Bool, builtInTypes.Bool, builtInTypes.Bool],
+                        CreateFunctionType(
+                            [builtInTypes.Bool, builtInTypes.Bool, builtInTypes.Bool],
                             builtInTypes.I32,
                             rootNamespace))
                     {
@@ -552,6 +525,7 @@ public class ReplaceConditionalOperatorsTests
                 }
             ]);
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

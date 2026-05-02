@@ -1,3 +1,4 @@
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
@@ -14,8 +15,9 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
         this.diagnostics = diagnostics.ForSemantic();
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    public void Analyze(Project project)
     {
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
         foreach (var tree in semanticTrees)
             tree.Accept(new CheckAccessModifiersVisitor(directives, diagnostics, tree.SourceFile));
     }

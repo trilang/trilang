@@ -7,24 +7,26 @@ namespace Trilang.IntermediateRepresentation;
 
 public class IrGenerator
 {
-    private readonly BuiltInTypes builtInTypes;
+    private readonly CompilationContext compilationContext;
     private readonly SsaTransformer ssaTransformer;
     private readonly TypeLayoutGenerator layoutGenerator;
     private readonly IrDiscoveryPhase discoveryPhase;
 
-    public IrGenerator(ISet<string> directives, BuiltInTypes builtInTypes)
+    public IrGenerator(ISet<string> directives, CompilationContext compilationContext)
     {
-        this.builtInTypes = builtInTypes;
+        this.compilationContext = compilationContext;
         ssaTransformer = new SsaTransformer();
-        layoutGenerator = new TypeLayoutGenerator(builtInTypes);
+        layoutGenerator = new TypeLayoutGenerator(compilationContext.BuiltInTypes);
         discoveryPhase = new IrDiscoveryPhase(directives);
     }
 
-    public IReadOnlyList<IrFunction> Generate(
-        IEnumerable<SemanticTree> semanticTrees,
-        NamespaceMetadata rootNamespace)
+    public IReadOnlyList<IrFunction> Generate(IEnumerable<SemanticTree> semanticTrees)
     {
-        var types = rootNamespace.EnumerateAllTypes().ToArray();
+        // TODO: performance?
+        var types = compilationContext.Packages
+            .SelectMany(x => x.Namespace.EnumerateAllTypes())
+            .Concat(compilationContext.RootNamespace.Types)
+            .ToArray();
 
         layoutGenerator.Generate(types);
 
@@ -49,7 +51,7 @@ public class IrGenerator
 
     private IrFunction GenerateFunction(FunctionMetadata function, BlockStatement body)
     {
-        var builder = new IrBuilder(builtInTypes);
+        var builder = new IrBuilder(compilationContext.BuiltInTypes);
 
         for (var i = 0; i < function.Parameters.Count; i++)
         {
@@ -67,7 +69,7 @@ public class IrGenerator
 
     private IrFunction GenerateMethod(MethodMetadata function, BlockStatement body)
     {
-        var builder = new IrBuilder(builtInTypes);
+        var builder = new IrBuilder(compilationContext.BuiltInTypes);
 
         var parameterIndex = 0;
         if (!function.IsStatic)
@@ -86,7 +88,7 @@ public class IrGenerator
 
     private IrFunction GenerateConstructor(ConstructorMetadata function, BlockStatement body)
     {
-        var builder = new IrBuilder(builtInTypes);
+        var builder = new IrBuilder(compilationContext.BuiltInTypes);
 
         var parameterIndex = 0;
         builder.LoadParameter(MemberAccessExpression.This, function.DeclaringType, parameterIndex++);

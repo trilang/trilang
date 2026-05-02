@@ -52,6 +52,8 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
                 => CompareParameterMetadata(x1, y1),
             (PropertyMetadata x1, PropertyMetadata y1)
                 => ComparePropertyMetadata(x1, y1),
+            (RootNamespaceMetadata x1, RootNamespaceMetadata y1)
+                => CompareRootNamespaceMetadata(x1, y1),
             (TupleMetadata x1, TupleMetadata y1)
                 => CompareTupleMetadata(x1, y1),
             (TypeArgumentMetadata x1, TypeArgumentMetadata y1)
@@ -80,6 +82,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
         if (!Equals(x.Namespace, y.Namespace))
             throw new Exception("Namespace doesn't match.");
+
+        if (x.IsCompilerGenerated != y.IsCompilerGenerated)
+            throw new Exception($"IsCompilerGenerated doesn't match. {x.IsCompilerGenerated} != {y.IsCompilerGenerated}.");
 
         return true;
     }
@@ -266,6 +271,11 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         return true;
     }
 
+    private bool CompareRootNamespaceMetadata(RootNamespaceMetadata x, RootNamespaceMetadata y)
+    {
+        return true;
+    }
+
     private bool CompareTupleMetadata(TupleMetadata x, TupleMetadata y)
     {
         if (!x.Types.SequenceEqual(y.Types, this))
@@ -321,6 +331,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
         if (!x.Methods.SequenceEqual(y.Methods, this))
             throw new Exception("Methods don't match.");
+
+        if (x.IsCompilerGenerated != y.IsCompilerGenerated)
+            throw new Exception($"IsCompilerGenerated doesn't match. {x.IsCompilerGenerated} != {y.IsCompilerGenerated}.");
 
         return true;
     }

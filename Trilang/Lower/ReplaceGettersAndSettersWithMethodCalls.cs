@@ -59,7 +59,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
                 new VariableDeclaration(
                     null,
                     name,
-                    new TypeRef(null, [variableMetadata.Type.ToString()!])
+                    new TypeRef(null, null, [variableMetadata.Type.ToString()!])
                     {
                         Metadata = variableMetadata.Type
                     },
@@ -361,7 +361,7 @@ internal class ReplaceGettersAndSettersWithMethodCalls : ITransformer<ISemanticN
 
     public ISemanticNode TransformTree(SemanticTree node)
     {
-        node.Namespace?.Transform(this);
+        node.Namespace.Transform(this);
 
         foreach (var use in node.UseNodes)
             use.Transform(this);

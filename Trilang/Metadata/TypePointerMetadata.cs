@@ -12,16 +12,18 @@ public class TypePointerMetadata : ITypeMetadata
     public IMetadata? GetMember(string name)
         => Type.GetMember(name);
 
-    public bool IsInvalid => false;
+    public bool IsInvalid
+        => false;
 
-    public SourceLocation? Definition => Type.Definition;
+    public SourceLocation? Definition
+        => Type.Definition;
 
     public bool IsValueType
         => true;
 
     public TypeLayout? Layout { get; set; }
 
-    public NamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace { get; set; }
 
     public ITypeMetadata Type { get; }
 }

@@ -1,54 +1,39 @@
 using Trilang;
-using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Passes.ControlFlow;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
 public class ControlFlowAnalyzerTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void BuildControlFlowGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
             public add(a: i32, b: i32): i32 {
                 return a + b;
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
         var entry = new SemanticBlock("entry", (BlockStatement)returnStatement.Parent!, [
             returnStatement
@@ -64,7 +49,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void IfStatementControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -73,16 +58,21 @@ public class ControlFlowAnalyzerTests
                     return;
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var block = semanticTree.Find<BlockStatement>()!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
         var entry = new SemanticBlock("entry", block, [
@@ -108,7 +98,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void IfStatementWithElseControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -119,16 +109,21 @@ public class ControlFlowAnalyzerTests
                     return;
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var returnStatements = semanticTree.Where<ReturnStatement>().ToList();
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var entry = new SemanticBlock("entry", (BlockStatement)ifStatement.Parent!, [ifStatement]);
@@ -160,7 +155,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void NestedIfStatementControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -171,16 +166,21 @@ public class ControlFlowAnalyzerTests
                     }
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var ifs = semanticTree.Where<IfStatement>().ToList();
         var outerIf = ifs[0];
         var innerIf = ifs[1];
@@ -210,7 +210,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void WhileControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -219,16 +219,21 @@ public class ControlFlowAnalyzerTests
                     return;
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var block = semanticTree.Find<BlockStatement>()!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
         var entry = new SemanticBlock("entry", block);
@@ -256,7 +261,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void NestedWhileControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -267,16 +272,21 @@ public class ControlFlowAnalyzerTests
                     }
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var whileNodes = semanticTree.Where<While>().ToArray();
         var outerWhile = whileNodes[0];
         var innerWhile = whileNodes[1];
@@ -310,7 +320,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void BreakControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -319,16 +329,21 @@ public class ControlFlowAnalyzerTests
                     break;
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var whileStatement = semanticTree.Find<While>()!;
         var breakStatement = semanticTree.Find<Break>()!;
 
@@ -353,7 +368,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void NestedLoopBreakControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -364,16 +379,21 @@ public class ControlFlowAnalyzerTests
                     }
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var outerWhile = semanticTree.Find<While>()!;
         var innerWhile = semanticTree.Where<While>().Skip(1).First();
         var breakStatement = semanticTree.Find<Break>()!;
@@ -406,7 +426,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void ContinueControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -415,16 +435,21 @@ public class ControlFlowAnalyzerTests
                     continue;
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var whileStatement = semanticTree.Find<While>()!;
         var continueStatement = semanticTree.Find<Continue>()!;
 
@@ -449,7 +474,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void NestedLoopContinueControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -460,16 +485,21 @@ public class ControlFlowAnalyzerTests
                     }
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var outerWhile = semanticTree.Find<While>()!;
         var innerWhile = semanticTree.Where<While>().Skip(1).First();
         var continueStatement = semanticTree.Find<Continue>()!;
@@ -502,7 +532,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void IfInsideWhileControlGraphTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -513,16 +543,21 @@ public class ControlFlowAnalyzerTests
                     }
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var whileStatement = semanticTree.Find<While>()!;
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var returnStatement = semanticTree.Find<ReturnStatement>()!;
@@ -553,7 +588,7 @@ public class ControlFlowAnalyzerTests
     [Test]
     public void NestedIfWithElseTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -568,16 +603,21 @@ public class ControlFlowAnalyzerTests
                     return 0;
                 }
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (project, diagnostics) = Parse(file);
 
         var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, graphs) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        var (_, graphs) = semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
-        var semanticTree = semanticTrees.Single();
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var ifs = semanticTree.Where<IfStatement>().ToList();
         var returns = semanticTree.Where<ReturnStatement>().ToList();
 

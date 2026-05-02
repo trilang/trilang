@@ -4,6 +4,7 @@ using Trilang.Semantics.Providers;
 
 namespace Trilang.Semantics.Passes;
 
+// TODO: generate closed types in root namespace?
 internal class TypeArgumentMap
 {
     private readonly SemanticDiagnosticReporter diagnostics;
@@ -77,16 +78,13 @@ internal class TypeArgumentMap
             type.Definition,
             type.Name,
             type.GenericArguments.Select(Map),
-            Map(type.Type!));
+            Map(type.Type!),
+            true);
 
         if (type.IsInvalid)
             metadata.MarkAsInvalid();
 
-        var provider = new MetadataProvider(type.Namespace!);
-        var result = provider.QueryTypes(Query.From(metadata));
-        if (result.IsSuccess || result.IsMultipleTypesFound)
-            throw new InvalidOperationException($"The '{metadata.Name}' alias is already defined.");
-
+        var provider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
         provider.DefineType(metadata);
 
         return metadata;
@@ -94,8 +92,8 @@ internal class TypeArgumentMap
 
     private ArrayMetadata Map(ArrayMetadata arrayMetadata)
     {
-        var provider = new MetadataProvider(arrayMetadata.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
+        var provider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
+        var metadataFactory = new MetadataFactory(compilationContext.BuiltInTypes, diagnostics, provider);
 
         var itemType = Map(arrayMetadata.ItemMetadata!);
         var metadata = metadataFactory.CreateArrayMetadata(arrayMetadata.Definition, itemType);
@@ -108,8 +106,8 @@ internal class TypeArgumentMap
 
     private DiscriminatedUnionMetadata Map(DiscriminatedUnionMetadata discriminatedUnion)
     {
-        var provider = new MetadataProvider(discriminatedUnion.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
+        var provider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
+        var metadataFactory = new MetadataFactory(compilationContext.BuiltInTypes, diagnostics, provider);
 
         var types = new ITypeMetadata[discriminatedUnion.Types.Count];
         for (var i = 0; i < discriminatedUnion.Types.Count; i++)
@@ -125,8 +123,8 @@ internal class TypeArgumentMap
 
     private FunctionTypeMetadata Map(FunctionTypeMetadata functionType)
     {
-        var provider = new MetadataProvider(functionType.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
+        var provider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
+        var metadataFactory = new MetadataFactory(compilationContext.BuiltInTypes, diagnostics, provider);
 
         var parameterTypes = functionType.ParameterTypes.Select(Map).ToList();
         var returnType = Map(functionType.ReturnType);
@@ -143,15 +141,15 @@ internal class TypeArgumentMap
 
     private GenericApplicationMetadata Map(GenericApplicationMetadata genericApplicationMetadata)
     {
-        var provider = new MetadataProvider(genericApplicationMetadata.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
+        var provider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
+        var metadataFactory = new MetadataFactory(compilationContext.BuiltInTypes, diagnostics, provider);
 
         var metadata = metadataFactory.CreateGenericApplication(
             genericApplicationMetadata.Definition,
             genericApplicationMetadata.OpenGeneric,
             genericApplicationMetadata.Arguments.Select(Map).ToList());
 
-        var nestedMap = new TypeArgumentMap(builtInTypes, diagnostics, metadata);
+        var nestedMap = new TypeArgumentMap(diagnostics, compilationContext, metadata);
         nestedMap.Map();
 
         return metadata;
@@ -159,8 +157,8 @@ internal class TypeArgumentMap
 
     private InterfaceMetadata Map(InterfaceMetadata interfaceMetadata)
     {
-        var provider = new MetadataProvider(interfaceMetadata.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
+        var provider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
+        var metadataFactory = new MetadataFactory(compilationContext.BuiltInTypes, diagnostics, provider);
 
         var properties = interfaceMetadata.Properties
             .Select(x => new InterfacePropertyMetadata(
@@ -189,8 +187,8 @@ internal class TypeArgumentMap
 
     private TupleMetadata Map(TupleMetadata tuple)
     {
-        var provider = new MetadataProvider(tuple.Namespace!);
-        var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
+        var provider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
+        var metadataFactory = new MetadataFactory(compilationContext.BuiltInTypes, diagnostics, provider);
 
         var types = tuple.Types.Select(Map).ToArray();
         var metadata = metadataFactory.CreateTupleMetadata(tuple.Definition, types);
@@ -216,13 +214,14 @@ internal class TypeArgumentMap
             [],
             [],
             [],
-            []);
+            [],
+            type.IsValueType,
+            true);
 
-        var provider = new MetadataProvider(type.Namespace!);
-        var result = provider.QueryTypes(Query.From(metadata));
-        if (result.IsSuccess || result.IsMultipleTypesFound)
-            throw new InvalidOperationException($"The '{metadata.Name}' type is already defined.");
-
+        // we aren't checking for duplicates because closed generic types
+        // are generated based on generic applications.
+        // generic applications are anonymous types and deduplicated automatically.
+        var provider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
         provider.DefineType(metadata);
 
         foreach (var @interface in type.Interfaces)

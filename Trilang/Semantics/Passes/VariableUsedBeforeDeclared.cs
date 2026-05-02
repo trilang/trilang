@@ -1,3 +1,4 @@
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Semantics.Model;
 
@@ -19,8 +20,9 @@ internal class VariableUsedBeforeDeclared : ISemanticPass
         this.symbolTableMap = symbolTableMap;
     }
 
-    public void Analyze(IEnumerable<SemanticTree> semanticTrees)
+    public void Analyze(Project project)
     {
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
         var visitor = new VariableUsedBeforeDeclaredVisitor(directives, diagnostics, symbolTableMap);
         foreach (var tree in semanticTrees)
             tree.Accept(visitor);

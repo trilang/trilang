@@ -1,4 +1,4 @@
-using Trilang.Semantics.Model;
+using Trilang.Compilation;
 
 namespace Trilang.Semantics.Passes;
 
@@ -8,5 +8,5 @@ internal interface ISemanticPass
 
     IEnumerable<string> DependsOn { get; }
 
-    void Analyze(IEnumerable<SemanticTree> semanticTrees);
+    void Analyze(Project project);
 }

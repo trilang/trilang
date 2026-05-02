@@ -185,7 +185,10 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
 
             var thisMember = new MemberAccessExpression(null, MemberAccessExpression.This)
             {
-                Reference = new ParameterMetadata(null, MemberAccessExpression.This, currentField.DeclaringType),
+                Reference = new ParameterMetadata(
+                    null,
+                    MemberAccessExpression.This,
+                    currentField.DeclaringType),
                 AccessKind = MemberAccessKind.Read,
             };
 
@@ -306,7 +309,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
 
     public ISemanticNode TransformTree(SemanticTree node)
     {
-        node.Namespace?.Transform(this);
+        node.Namespace.Transform(this);
 
         foreach (var use in node.UseNodes)
             use.Transform(this);

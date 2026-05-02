@@ -31,9 +31,6 @@ public class CompilerOptions
         directives = [];
     }
 
-    public bool HasDirective(string name)
-        => directives.Contains(name);
-
     public void AddDirective(string name)
         => directives.Add(name);
 

@@ -1,51 +1,16 @@
-using Trilang;
-using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Lower;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Semantics;
 using Trilang.Semantics.Model;
 using static Tri.Tests.Factory;
+using static Tri.Tests.Helpers;
 
-namespace Tri.Tests.Lower;
+namespace Tri.Tests.Lowering;
 
 public class RewriteIfStatementTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static SemanticTree Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        var builtInTypes = new BuiltInTypes();
-        var semantic = new SemanticAnalysis();
-        var (semanticTrees, _, _, _) = semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), builtInTypes));
-
-        Assert.That(diagnostics.Diagnostics, Is.Empty);
-
-        var semanticTree = semanticTrees.Single();
-
-        var lowering = new Lowering(builtInTypes);
-        lowering.Lower(semanticTree, LoweringOptions.Default);
-
-        return semanticTree;
-    }
-
     [Test]
     public void RewriteIfElseStatementTest()
     {
-        var tree = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -57,9 +22,10 @@ public class RewriteIfStatementTests
                 }
             }
             """);
+        var (tree, diagnostics, _) = Lower(file);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
         var expected = new SemanticTree(
             file,
@@ -72,12 +38,12 @@ public class RewriteIfStatementTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 })
+                        new Parameter(null, "a", new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 })
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new IfStatement(
                             null,
@@ -153,13 +119,14 @@ public class RewriteIfStatementTests
             ]);
 
 
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 
     [Test]
     public void RewriteIfWithoutElseStatementTest()
     {
-        var tree = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -171,9 +138,10 @@ public class RewriteIfStatementTests
                 return -a;
             }
             """);
+        var (tree, diagnostics, _) = Lower(file);
 
         var builtInTypes = new BuiltInTypes();
-        var rootNamespace = NamespaceMetadata.CreateRoot(builtInTypes);
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
         var expected = new SemanticTree(
             file,
@@ -186,12 +154,12 @@ public class RewriteIfStatementTests
                     AccessModifier.Public,
                     "test",
                     [
-                        new Parameter(null, "a", new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 })
+                        new Parameter(null, "a", new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 })
                         {
                             Metadata = parameterMetadata,
                         }
                     ],
-                    new TypeRef(null, ["i32"]) { Metadata = builtInTypes.I32 },
+                    new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
                     new BlockStatement(null, [
                         new IfStatement(
                             null,
@@ -262,7 +230,7 @@ public class RewriteIfStatementTests
                 }
             ]);
 
-
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

@@ -5,4 +5,5 @@ public enum DiagnosticCategory
     Lexer,
     Parser,
     Semantic,
+    Compiler,
 }

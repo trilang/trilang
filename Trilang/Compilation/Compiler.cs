@@ -1,12 +1,12 @@
+using System.Diagnostics;
 using Trilang.Compilation.Diagnostics;
 using Trilang.IntermediateRepresentation;
-using Trilang.Lexing;
 using Trilang.Lower;
 using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Trilang.Compilation;
 
@@ -15,81 +15,154 @@ public class Compiler
     public void Compile(CompilerOptions options)
     {
         var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var parser = new Parser();
-        var semantic = new SemanticAnalysis();
-        var buildInTypes = new BuiltInTypes();
-        var semanticOptions = new SemanticAnalysisOptions(
-            options.Directives,
-            new SemanticDiagnosticReporter(diagnostics),
-            buildInTypes);
-        var lowering = new Lowering(buildInTypes);
+        var projectLoader = new ProjectLoader(diagnostics);
+        var projects = projectLoader.LoadInfo(options.Path);
 
-        var syntaxTrees = new List<SyntaxTree>();
-        var project = Project.Load(options.Path);
-        foreach (var sourceFile in project.SourceFiles)
+        if (diagnostics.HasErrors)
         {
-            var lexerOptions = new LexerOptions(
-                new LexerDiagnosticReporter(diagnostics, sourceFile));
-            var parserOptions = new ParserOptions(
-                sourceFile,
-                new ParserDiagnosticReporter(diagnostics, sourceFile));
-
-            var code = File.ReadAllText(sourceFile.FilePath);
-            var tokens = lexer.Tokenize(code, lexerOptions);
-            var tree = parser.Parse(tokens, parserOptions);
-
-            syntaxTrees.Add(tree);
-        }
-
-        var semanticResult = semantic.Analyze(syntaxTrees, semanticOptions);
-
-        if (diagnostics.Diagnostics.Count > 0)
-        {
-            foreach (var diagnostic in diagnostics.Diagnostics)
-            {
-                var (start, end) = diagnostic.Location.Span;
-                var span = start != end
-                    ? $"{start.Line}:{start.Column} - {end.Line}:{end.Column}"
-                    : $"{start.Line}:{start.Column}";
-
-                // $"{diagnostic.File}({span}): {diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}"
-                var originalColor = Console.ForegroundColor;
-
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Write($"{diagnostic.Location.File}({span})");
-
-                Console.ForegroundColor = originalColor;
-                Console.Write(": ");
-
-                Console.ForegroundColor = diagnostic.Severity switch
-                {
-                    DiagnosticSeverity.Info => originalColor,
-                    DiagnosticSeverity.Warning => ConsoleColor.Yellow,
-                    DiagnosticSeverity.Error => ConsoleColor.Red,
-                    _ => throw new ArgumentOutOfRangeException(),
-                };
-                Console.WriteLine($"{diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}");
-                Console.ForegroundColor = originalColor;
-
-                // TODO: print source code with error
-            }
+            PrintErrors(diagnostics);
 
             return;
         }
 
-        foreach (var semanticTree in semanticResult.SemanticTrees)
+        var builtInTypes = new BuiltInTypes();
+        var compilationContexts = new List<CompilationContext>();
+        var functions = new List<IrFunction>();
+
+        foreach (var projectInfo in projects)
+        {
+            var project = projectLoader.LoadProject(projectInfo);
+
+            var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+            var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+            foreach (var dependencyInfo in project.Dependencies)
+            {
+                // TODO: handle two projects with the same name in different dependencies
+                var dependency = compilationContexts.Single(x => x.CurrentPackage!.Name == dependencyInfo.Name);
+                rootNamespace.AddImported(dependency.RootNamespace);
+                compilationContext.AddPackage(dependency.CurrentPackage!);
+            }
+
+            Parse(diagnostics, project);
+
+            var (_, controlFlowGraphs) = SemanticAnalysis(project, diagnostics, compilationContext, options);
+
+            Lower(compilationContext, project, controlFlowGraphs, options);
+
+            functions.AddRange(GenerateIr(compilationContext, project, options));
+
+            Debug.Assert(compilationContext.CurrentPackage is not null);
+            compilationContexts.Add(compilationContext);
+        }
+
+        if (diagnostics.HasErrors)
+        {
+            PrintErrors(diagnostics);
+
+            return;
+        }
+
+        PrintIr(options, functions);
+        OutputBinary(options);
+    }
+
+    private void PrintErrors(DiagnosticCollection diagnostics)
+    {
+        foreach (var diagnostic in diagnostics.Diagnostics)
+        {
+            // $"{diagnostic.File}({span}): {diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}"
+            var originalColor = Console.ForegroundColor;
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            var location = diagnostic.Location;
+            if (location is not null)
+            {
+                var (start, end) = location.Span;
+                var span = start != end
+                    ? $"{start.Line}:{start.Column} - {end.Line}:{end.Column}"
+                    : $"{start.Line}:{start.Column}";
+
+                Console.Write($"{location.File}({span})");
+            }
+
+            Console.ForegroundColor = originalColor;
+            Console.Write(": ");
+
+            Console.ForegroundColor = diagnostic.Severity switch
+            {
+                DiagnosticSeverity.Info => originalColor,
+                DiagnosticSeverity.Warning => ConsoleColor.Yellow,
+                DiagnosticSeverity.Error => ConsoleColor.Red,
+                _ => throw new ArgumentOutOfRangeException(),
+            };
+            Console.WriteLine($"{diagnostic.Severity} {diagnostic.Id} - {diagnostic.Message}");
+            Console.ForegroundColor = originalColor;
+
+            // TODO: print source code with error
+        }
+    }
+
+    private void Parse(DiagnosticCollection diagnostics, Project project)
+    {
+        var parser = new Parser();
+
+        foreach (var compilationUnit in project.SourceFiles)
+        {
+            var parserOptions = new ParserOptions(diagnostics);
+            parser.Parse(compilationUnit, parserOptions);
+        }
+    }
+
+    private SemanticAnalysisResult SemanticAnalysis(
+        Project project,
+        DiagnosticCollection diagnostics,
+        CompilationContext compilationContext,
+        CompilerOptions options)
+    {
+        var semanticOptions = new SemanticAnalysisOptions(options.Directives, diagnostics, compilationContext);
+        var semantic = new SemanticAnalyzer();
+        var semanticResult = semantic.Analyze(project, semanticOptions);
+
+        return semanticResult;
+    }
+
+    private static void Lower(
+        CompilationContext compilationContext,
+        Project project,
+        ControlFlowGraphMap controlFlowGraphs,
+        CompilerOptions options)
+    {
+        var lowering = new Lowering(compilationContext.BuiltInTypes);
+        foreach (var compilationUnit in project.SourceFiles)
             lowering.Lower(
-                semanticTree,
-                new LoweringOptions(options.Directives, semanticResult.ControlFlowGraphs));
+                compilationUnit.SemanticTree!,
+                new LoweringOptions(options.Directives, controlFlowGraphs));
+    }
 
-        var ir = new IrGenerator(options.Directives, buildInTypes);
-        var functions = ir.Generate(semanticResult.SemanticTrees, semanticResult.RootNamespace);
+    private IReadOnlyList<IrFunction> GenerateIr(
+        CompilationContext compilationContext,
+        Project project,
+        CompilerOptions options)
+    {
+        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
+        var ir = new IrGenerator(options.Directives, compilationContext);
+        var functions = ir.Generate(semanticTrees);
 
-        if (options.PrintIr)
-            foreach (var function in functions)
-                Console.WriteLine(function);
+        return functions;
+    }
 
+    private void PrintIr(CompilerOptions options, IReadOnlyList<IrFunction> functions)
+    {
+        if (!options.PrintIr)
+            return;
+
+        foreach (var function in functions)
+            Console.WriteLine(function);
+    }
+
+    private void OutputBinary(CompilerOptions options)
+    {
         if (options.OperatingSystem == CompilerOptionOs.Linux)
         {
             var elfWriter = new ElfWriter();

@@ -1,36 +1,17 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
 public class CheckAccessModifiersTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void PrivateCtorTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -42,14 +23,18 @@ public class CheckAccessModifiersTests
                 var x: Test = new Test();
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
+            project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
-                new SemanticDiagnosticReporter(diagnostics),
-                new BuiltInTypes()));
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0014MemberNotAccessible,
@@ -65,7 +50,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void IgnorePrivateCtorInTheSameTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -77,20 +62,27 @@ public class CheckAccessModifiersTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
 
         Assert.That(
             () => semantic.Analyze(
-                [tree],
-                new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes())),
+                project,
+                new SemanticAnalysisOptions(
+                    new HashSet<string>(),
+                    diagnostics,
+                    compilationContext)),
             Throws.Nothing);
     }
 
     [Test]
     public void PrivateGetterTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -104,11 +96,18 @@ public class CheckAccessModifiersTests
                 return p.x;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0014MemberNotAccessible,
@@ -124,7 +123,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void PrivateSetterTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -138,11 +137,18 @@ public class CheckAccessModifiersTests
                 p.x = 1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0014MemberNotAccessible,
@@ -158,7 +164,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void PrivateGetterInTheSameTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -170,20 +176,27 @@ public class CheckAccessModifiersTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
 
         Assert.That(
             () => semantic.Analyze(
-                [tree],
-                new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes())),
+                project,
+                new SemanticAnalysisOptions(
+                    new HashSet<string>(),
+                    diagnostics,
+                    compilationContext)),
             Throws.Nothing);
     }
 
     [Test]
     public void PrivateSetterInTheSameTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -195,20 +208,27 @@ public class CheckAccessModifiersTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
 
         Assert.That(
             () => semantic.Analyze(
-                [tree],
-                new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes())),
+                project,
+                new SemanticAnalysisOptions(
+                    new HashSet<string>(),
+                    diagnostics,
+                    compilationContext)),
             Throws.Nothing);
     }
 
     [Test]
     public void MissingGetterTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -220,11 +240,18 @@ public class CheckAccessModifiersTests
                 return p.x;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0008UnknownMember,
@@ -240,7 +267,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void MissingSetterTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -252,11 +279,18 @@ public class CheckAccessModifiersTests
                 p.x = 1;
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0008UnknownMember,
@@ -272,7 +306,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void PublicMethodTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -286,11 +320,18 @@ public class CheckAccessModifiersTests
                 var s: string = p.toString();
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
@@ -298,7 +339,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void PrivateMethodTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -312,11 +353,18 @@ public class CheckAccessModifiersTests
                 var s: string = p.toString();
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+       var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0014MemberNotAccessible,
@@ -332,7 +380,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void PrivateMethodInTheSameTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -346,11 +394,18 @@ public class CheckAccessModifiersTests
                 }
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
@@ -358,7 +413,7 @@ public class CheckAccessModifiersTests
     [Test]
     public void PrivateFunctionInTheSameFileTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -368,11 +423,18 @@ public class CheckAccessModifiersTests
                 test();
             }
             """);
+        var (project, diagnostics) = Parse(file);
 
-        var semantic = new SemanticAnalysis();
+       var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [tree],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }

@@ -141,7 +141,7 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
 
     public TypeLayout? Layout { get; set; }
 
-    public NamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace { get; set; }
 
     public string Name { get; }
 

@@ -46,7 +46,7 @@ public class FunctionTypeMetadata : IAnonymousTypeMetadata
 
     public TypeLayout? Layout { get; set; }
 
-    public NamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace { get; set; }
 
     public IReadOnlyCollection<FieldMetadata> Fields => fields;
 

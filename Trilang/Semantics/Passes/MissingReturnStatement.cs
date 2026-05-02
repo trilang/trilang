@@ -1,3 +1,4 @@
+using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
@@ -10,15 +11,21 @@ internal class MissingReturnStatement : ISemanticPass
 {
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly ControlFlowGraphMap map;
+    private readonly CompilationContext compilationContext;
 
-    public MissingReturnStatement(DiagnosticCollection diagnostics, ControlFlowGraphMap map)
+    public MissingReturnStatement(
+        DiagnosticCollection diagnostics,
+        ControlFlowGraphMap map,
+        CompilationContext compilationContext)
     {
         this.diagnostics = diagnostics.ForSemantic();
         this.map = map;
+        this.compilationContext = compilationContext;
     }
 
-    public void Analyze(IEnumerable<SemanticTree> _)
+    public void Analyze(Project _)
     {
+        var builtInTypes = compilationContext.BuiltInTypes;
         var visited = new HashSet<SemanticBlock>();
         var q = new Queue<SemanticBlock>();
 

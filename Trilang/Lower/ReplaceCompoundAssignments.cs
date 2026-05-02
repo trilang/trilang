@@ -313,7 +313,7 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
 
     public ISemanticNode TransformTree(SemanticTree node)
     {
-        node.Namespace?.Transform(this);
+        node.Namespace.Transform(this);
 
         foreach (var use in node.UseNodes)
             use.Transform(this);

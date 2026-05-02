@@ -1,57 +1,44 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
 using Trilang.Metadata;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
 using Trilang.Semantics;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
 public class MultifileSemanticTests
 {
-    private static SyntaxTree Parse(
-        DiagnosticCollection diagnostics,
-        string filePath,
-        string code)
-    {
-        var file = new SourceFile(filePath);
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return tree;
-    }
-
     [Test]
     public void UseTypeFromOtherFileTest()
     {
-        var diagnostics = new DiagnosticCollection();
-        var file1 = Parse(
-            diagnostics,
-            "point.tri",
-            """
-            namespace Test1;
+        var (project, diagnostics) = Parse(
+            new SourceFile(
+                "point.tri",
+                """
+                namespace Test1;
 
-            public type Point {}
-            """);
-        var file2 = Parse(diagnostics, "test.tri",
-            """
-            namespace Test1;
+                public type Point {}
+                """),
+            new SourceFile(
+                "test.tri",
+                """
+                namespace Test1;
 
-            public main(): void {
-                var p: Point = new Point();
-            }
-            """);
+                public main(): void {
+                    var p: Point = new Point();
+                }
+                """));
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [file1, file2],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
@@ -59,28 +46,35 @@ public class MultifileSemanticTests
     [Test]
     public void ForwardDeclareTypeFromOtherFileTest()
     {
-        var diagnostics = new DiagnosticCollection();
-        var file1 = Parse(diagnostics, "test.tri",
-            """
-            namespace Test1;
+        var (project, diagnostics) = Parse([
+            new SourceFile(
+                "test.tri",
+                """
+                namespace Test1;
 
-            public main(): void {
-                var p: Point = new Point();
-            }
-            """);
-        var file2 = Parse(
-            diagnostics,
-            "point.tri",
-            """
-            namespace Test1;
+                public main(): void {
+                    var p: Point = new Point();
+                }
+                """),
+            new SourceFile(
+                "point.tri",
+                """
+                namespace Test1;
 
-            public type Point {}
-            """);
+                public type Point {}
+                """)
+        ]);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [file1, file2],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }
@@ -88,34 +82,38 @@ public class MultifileSemanticTests
     [Test]
     public void DuplicateTypeDeclarationTest()
     {
-        var diagnostics = new DiagnosticCollection();
-        var file1 = Parse(
-            diagnostics,
+        var file1 = new SourceFile(
             "point1.tri",
             """
             namespace Test1;
 
             public type Point {}
             """);
-        var file2 = Parse(
-            diagnostics,
+        var file2 = new SourceFile(
             "point2.tri",
             """
             namespace Test1;
 
             public type Point {}
             """);
+        var (project, diagnostics) = Parse([file1, file2]);
 
-        var semantic = new SemanticAnalysis();
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
         semantic.Analyze(
-            [file1, file2],
-            new SemanticAnalysisOptions(new HashSet<string>(), new SemanticDiagnosticReporter(diagnostics), new BuiltInTypes()));
+            project,
+            new SemanticAnalysisOptions(
+                new HashSet<string>(),
+                diagnostics,
+                compilationContext));
 
         var diagnostic = new Diagnostic(
             DiagnosticId.S0002AlreadyDefined,
             DiagnosticSeverity.Error,
             new SourceLocation(
-                new SourceFile("point2.tri"),
+                file2,
                 new SourceSpan(new SourcePosition(18, 3, 1), new SourcePosition(38, 3, 21))),
             "The 'Point' type is already defined.");
 
