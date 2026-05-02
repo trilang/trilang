@@ -4,21 +4,21 @@ public class BuiltInTypes
 {
     public BuiltInTypes()
     {
-        Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true);
-        Null = new TypeMetadata(null, "null", [], [], [], [], [], [], true);
-        I8 = new TypeMetadata(null, "i8", [], [], [], [], [], [], true);
-        I16 = new TypeMetadata(null, "i16", [], [], [], [], [], [], true);
-        I32 = new TypeMetadata(null, "i32", [], [], [], [], [], [], true);
-        I64 = new TypeMetadata(null, "i64", [], [], [], [], [], [], true);
-        U8 = new TypeMetadata(null, "u8", [], [], [], [], [], [], true);
-        U16 = new TypeMetadata(null, "u16", [], [], [], [], [], [], true);
-        U32 = new TypeMetadata(null, "u32", [], [], [], [], [], [], true);
-        U64 = new TypeMetadata(null, "u64", [], [], [], [], [], [], true);
-        F32 = new TypeMetadata(null, "f32", [], [], [], [], [], [], true);
-        F64 = new TypeMetadata(null, "f64", [], [], [], [], [], [], true);
-        Char = new TypeMetadata(null, "char", [], [], [], [], [], [], true);
-        Bool = new TypeMetadata(null, "bool", [], [], [], [], [], [], true);
-        String = new TypeMetadata(null, "string", [], [], [], [], [], [], false);
+        Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true, true);
+        Null = new TypeMetadata(null, "null", [], [], [], [], [], [], true, true);
+        I8 = new TypeMetadata(null, "i8", [], [], [], [], [], [], true, true);
+        I16 = new TypeMetadata(null, "i16", [], [], [], [], [], [], true, true);
+        I32 = new TypeMetadata(null, "i32", [], [], [], [], [], [], true, true);
+        I64 = new TypeMetadata(null, "i64", [], [], [], [], [], [], true, true);
+        U8 = new TypeMetadata(null, "u8", [], [], [], [], [], [], true, true);
+        U16 = new TypeMetadata(null, "u16", [], [], [], [], [], [], true, true);
+        U32 = new TypeMetadata(null, "u32", [], [], [], [], [], [], true, true);
+        U64 = new TypeMetadata(null, "u64", [], [], [], [], [], [], true, true);
+        F32 = new TypeMetadata(null, "f32", [], [], [], [], [], [], true, true);
+        F64 = new TypeMetadata(null, "f64", [], [], [], [], [], [], true, true);
+        Char = new TypeMetadata(null, "char", [], [], [], [], [], [], true, true);
+        Bool = new TypeMetadata(null, "bool", [], [], [], [], [], [], true, true);
+        String = new TypeMetadata(null, "string", [], [], [], [], [], [], false, true);
     }
 
     public TypeMetadata Void { get; }

@@ -23,7 +23,8 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
         IEnumerable<PropertyMetadata> properties,
         IEnumerable<ConstructorMetadata> constructors,
         IEnumerable<MethodMetadata> methods,
-        bool isValueType)
+        bool isValueType,
+        bool isCompilerGenerated)
     {
         Definition = definition;
         Name = name;
@@ -34,10 +35,11 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
         this.constructors = [.. constructors];
         this.methods = [.. methods];
         IsValueType = isValueType;
+        IsCompilerGenerated = isCompilerGenerated;
     }
 
     public TypeMetadata(SourceLocation? definition, string name)
-        : this(definition, name, [], [], [], [], [], [], false)
+        : this(definition, name, [], [], [], [], [], [], false, false)
     {
     }
 
@@ -49,12 +51,12 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
         IEnumerable<FieldMetadata> fields,
         IEnumerable<PropertyMetadata> properties,
         IEnumerable<ConstructorMetadata> constructors,
-        IEnumerable<MethodMetadata> methods) : this(definition, name, genericArguments, interfaces, fields, properties, constructors, methods, false)
+        IEnumerable<MethodMetadata> methods) : this(definition, name, genericArguments, interfaces, fields, properties, constructors, methods, false, false)
     {
     }
 
     public static TypeMetadata Invalid(string name)
-        => new TypeMetadata(null, name) { IsInvalid = true };
+        => new TypeMetadata(null, name, [], [], [], [], [], [], false, true) { IsInvalid = true };
 
     public override string ToString()
     {
@@ -142,6 +144,8 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
     public NamespaceMetadata? Namespace { get; set; }
 
     public string Name { get; }
+
+    public bool IsCompilerGenerated { get; }
 
     public IReadOnlyList<ITypeMetadata> GenericArguments => genericArguments;
 

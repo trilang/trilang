@@ -7,7 +7,7 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
     private readonly List<ITypeMetadata> genericArguments;
 
     public AliasMetadata(SourceLocation? definition, string name)
-        : this(definition, name, [], null)
+        : this(definition, name, [], null, false)
     {
     }
 
@@ -15,12 +15,14 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
         SourceLocation? definition,
         string name,
         IEnumerable<ITypeMetadata> genericArguments,
-        ITypeMetadata? type)
+        ITypeMetadata? type,
+        bool isCompilerGenerated)
     {
         Definition = definition;
         Name = name;
         this.genericArguments = [.. genericArguments];
         Type = type;
+        IsCompilerGenerated = isCompilerGenerated;
     }
 
     public override string ToString()
@@ -30,7 +32,7 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
 
         var sb = new StringBuilder();
 
-        if (genericArguments.Any(x => x is not TypeArgumentMetadata))
+        if (IsCompilerGenerated)
             sb.Append("<>_");
 
         sb.Append(Name);
@@ -82,9 +84,11 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
 
     public TypeLayout? Layout { get; set; }
 
-    public NamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace { get; set; }
 
     public string Name { get; }
+
+    public bool IsCompilerGenerated { get; }
 
     public IReadOnlyList<ITypeMetadata> GenericArguments
         => genericArguments;
