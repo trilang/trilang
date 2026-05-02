@@ -1,34 +1,23 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseFunctionTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseMissingOpenParenFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
 
-       const string expected =
+            public test): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
             """
             SyntaxTree
               Namespace
@@ -53,7 +42,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingParamColonFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x i32): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(x i32): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -83,7 +78,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingParamTypeFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: ): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(x: ): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -113,7 +114,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingCommaFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: i32 y: i32): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(x: i32 y: i32): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -146,7 +153,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingCloseParenFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test( : void { return; }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test( : void { return; }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -178,7 +191,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingReturnColonFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test() void { return; }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test() void { return; }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -208,7 +227,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingReturnTypeFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(): { return; }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(): { return; }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -247,7 +272,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseMissingBlockInFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(): void");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(): void
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -284,7 +315,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseEmptyFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -305,7 +342,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseSingleParameterFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: i32): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(x: i32): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -329,7 +372,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseMultipleParametersFunctionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: i32, y: i32, z: i32): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(x: i32, y: i32, z: i32): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -357,7 +406,13 @@ public class ParseFunctionTests
     [Test]
     public void ParseArrayTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(x: i32[]): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(x: i32[]): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """

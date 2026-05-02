@@ -11,10 +11,10 @@ internal class CheckStaticAndInstanceMembersAccess : ISemanticPass
 
     public CheckStaticAndInstanceMembersAccess(
         ISet<string> directives,
-        SemanticDiagnosticReporter diagnostics)
+        DiagnosticCollection diagnostics)
     {
         this.directives = directives;
-        this.diagnostics = diagnostics;
+        this.diagnostics = diagnostics.ForSemantic();
     }
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees)

@@ -1,32 +1,15 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseLoopTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseWhileTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -35,6 +18,7 @@ public class ParseLoopTests
                 }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -65,7 +49,7 @@ public class ParseLoopTests
     [Test]
     public void ParseWhileMissingOpenParenTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -74,6 +58,7 @@ public class ParseLoopTests
                 }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -110,7 +95,7 @@ public class ParseLoopTests
     [Test]
     public void ParseWhileMissingConditionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -119,6 +104,7 @@ public class ParseLoopTests
                 }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -152,7 +138,7 @@ public class ParseLoopTests
     [Test]
     public void ParseWhileMissingCloseParenTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -161,6 +147,7 @@ public class ParseLoopTests
                 }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -197,16 +184,16 @@ public class ParseLoopTests
     [Test]
     public void ParseWhileMissingBlockTest()
     {
-        var source = """
-                     namespace Test1;
+        var file = CreateFile(
+            """
+            namespace Test1;
 
-                     public test(x: i32): void {
-                         while (x > 0)
-                            ;
-                     }
-                     """;
-
-        var (tree, diagnostics) = Parse(source);
+            public test(x: i32): void {
+                while (x > 0)
+                   ;
+            }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -258,7 +245,7 @@ public class ParseLoopTests
     [Test]
     public void ParseBreakTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -268,6 +255,7 @@ public class ParseLoopTests
                 }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -300,7 +288,7 @@ public class ParseLoopTests
     [Test]
     public void ParseContinueTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -310,6 +298,7 @@ public class ParseLoopTests
                 }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """

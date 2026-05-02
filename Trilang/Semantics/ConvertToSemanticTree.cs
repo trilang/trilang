@@ -339,7 +339,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
     }
 
     public ISemanticNode TransformTypeNode(TypeRefNode node)
-        => new TypeRef(node.SourceSpan, node.Parts);
+        => new TypeRef(node.SourceSpan, node.Package, node.Parts);
 
     public ISemanticNode TransformUnaryExpression(UnaryExpressionNode node)
     {
@@ -350,7 +350,7 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
     }
 
     public ISemanticNode TransformUse(UseNode node)
-        => new Use(node.SourceSpan, node.Parts);
+        => new Use(node.SourceSpan, node.Package, node.Parts);
 
     public ISemanticNode TransformVariable(VariableDeclarationNode node)
     {

@@ -5,5 +5,6 @@ public enum QueryTypesReason
     Success,
     TypeNotFound,
     MultipleTypesFound,
-    NamespaceNotFound
+    NamespaceNotFound,
+    PackageNotFound,
 }

@@ -1,32 +1,15 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseMemberAccessTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseArrayAccessTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -34,6 +17,7 @@ public class ParseMemberAccessTests
                 var a: i32 = x[0];
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -65,15 +49,15 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseArrayAccessMissingCloseTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
             public test(x: i32[]): void {
                 var a: i32 = x[0;
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -111,7 +95,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseSetArrayTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -119,6 +103,7 @@ public class ParseMemberAccessTests
                 x[0] = 1;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -146,7 +131,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseSetNestedArrayTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -154,6 +139,7 @@ public class ParseMemberAccessTests
                 a.b[0].c = 1;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -185,7 +171,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMultipleArrayAccessTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -193,6 +179,7 @@ public class ParseMemberAccessTests
                 return a[0][1];
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -220,7 +207,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMultipleMemberAccessTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -228,6 +215,7 @@ public class ParseMemberAccessTests
                 return a.b.c;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -255,7 +243,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMultipleMemberAccessMissingExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -263,6 +251,7 @@ public class ParseMemberAccessTests
                 return a.b.;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -292,7 +281,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMemberAccessNestedCallTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -300,6 +289,7 @@ public class ParseMemberAccessTests
                 return a.b().c;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -328,7 +318,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMultipleCallsTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -336,6 +326,7 @@ public class ParseMemberAccessTests
                 f(1)(2);
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -365,7 +356,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMemberAccessAfterCtorTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -373,6 +364,7 @@ public class ParseMemberAccessTests
                 return new Test().a;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -398,7 +390,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseMemberAccessAfterNewArrayTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -406,6 +398,7 @@ public class ParseMemberAccessTests
                 return new i32[0].size;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -433,7 +426,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseCallExpWithBinaryExpTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -441,6 +434,7 @@ public class ParseMemberAccessTests
                 return 1.toString();
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -466,7 +460,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseCallExpWithParenExpTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -474,6 +468,7 @@ public class ParseMemberAccessTests
                 return 1 + 2.toString();
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -501,7 +496,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseTupleMemberAccessTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -509,6 +504,7 @@ public class ParseMemberAccessTests
                 return t.0;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -540,7 +536,7 @@ public class ParseMemberAccessTests
     [Test]
     public void ParseTupleMemberAccessWithIncorrectIndexTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -548,6 +544,7 @@ public class ParseMemberAccessTests
                 return t.0x;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """

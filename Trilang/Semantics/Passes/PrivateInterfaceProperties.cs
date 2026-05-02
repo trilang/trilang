@@ -7,14 +7,10 @@ namespace Trilang.Semantics.Passes;
 internal class PrivateInterfaceProperties : ISemanticPass
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly NamespaceMetadata rootNamespace;
 
-    public PrivateInterfaceProperties(
-        SemanticDiagnosticReporter diagnostics,
-        NamespaceMetadata rootNamespace)
+    public PrivateInterfaceProperties(DiagnosticCollection diagnostics)
     {
-        this.diagnostics = diagnostics;
-        this.rootNamespace = rootNamespace;
+        this.diagnostics = diagnostics.ForSemantic();
     }
 
     public void Analyze(IEnumerable<SemanticTree> _)

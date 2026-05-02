@@ -8,10 +8,10 @@ internal class ThisOutsideOfType : ISemanticPass
     private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
 
-    public ThisOutsideOfType(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
+    public ThisOutsideOfType(ISet<string> directives, DiagnosticCollection diagnostics)
     {
         this.directives = directives;
-        this.diagnostics = diagnostics;
+        this.diagnostics = diagnostics.ForSemantic();
     }
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees)

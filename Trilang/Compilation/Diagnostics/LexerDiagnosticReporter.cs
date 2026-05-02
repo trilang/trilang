@@ -1,25 +1,16 @@
 namespace Trilang.Compilation.Diagnostics;
 
-public class LexerDiagnosticReporter
+internal readonly record struct LexerDiagnosticReporter(DiagnosticCollection Diagnostics, SourceFile File)
 {
-    private readonly DiagnosticCollection diagnostics;
-    private readonly SourceFile file;
-
-    public LexerDiagnosticReporter(DiagnosticCollection diagnostics, SourceFile file)
-    {
-        this.diagnostics = diagnostics;
-        this.file = file;
-    }
-
     public void UnsupportedCharacter(SourceSpan span, char character)
-        => diagnostics.Error(
+        => Diagnostics.Error(
             DiagnosticId.L0001UnsupportedCharacter,
-            new SourceLocation(file, span),
+            new SourceLocation(File, span),
             $"Unsupported character '{character}'.");
 
     public void MissingEndQuoteForStringLiteral(SourceSpan span)
-        => diagnostics.Error(
+        => Diagnostics.Error(
             DiagnosticId.L0002MissingEndQuoteForStringLiteral,
-            new SourceLocation(file, span),
+            new SourceLocation(File, span),
             "Missing end quote for string literal.");
 }

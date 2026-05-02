@@ -8,10 +8,10 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
 {
     private readonly SemanticDiagnosticReporter diagnostics;
 
-    public CheckAccessModifiers(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
+    public CheckAccessModifiers(ISet<string> directives, DiagnosticCollection diagnostics)
         : base(directives)
     {
-        this.diagnostics = diagnostics;
+        this.diagnostics = diagnostics.ForSemantic();
     }
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees)

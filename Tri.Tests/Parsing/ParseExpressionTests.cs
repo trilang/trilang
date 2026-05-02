@@ -1,39 +1,24 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
 using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseExpressionTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseVariableTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = 5;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = 5;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -57,14 +42,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseUnaryPlusTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = +2;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = +2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -89,14 +75,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseUnaryMinusTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = -2;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = -2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -121,14 +108,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseLogicalNotTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = !2;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = !2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -153,14 +141,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseBitwiseNotTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = ~2;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = ~2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -185,14 +174,15 @@ public class ParseExpressionTests
     [Test]
     public void MultipleUnaryOperatorsTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = ~+2;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = ~+2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -223,14 +213,15 @@ public class ParseExpressionTests
     [TestCase("%", BinaryExpressionKind.Modulus)]
     public void ParseBinaryNumberTest(string @operator, BinaryExpressionKind kind)
     {
-        var (tree, diagnostics) = Parse(
-            $$"""
-              namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                $$"""
+                  namespace Test1;
 
-              public main(): void {
-                  var x: i32 = 2 {{@operator}} 2;
-              }
-              """);
+                  public main(): void {
+                      var x: i32 = 2 {{@operator}} 2;
+                  }
+                  """));
         var expected =
             $"""
              SyntaxTree
@@ -256,14 +247,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseBitwiseAndTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = 2 & 2;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = 2 & 2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -289,14 +281,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseBitwiseOrTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = 2 | 2;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = 2 | 2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -322,14 +315,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseBitwiseXorTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = 2 ^ 2;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = 2 ^ 2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -355,14 +349,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseLogicalAndTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: bool = true && true;
-            }
-            """);
+                public main(): void {
+                    var x: bool = true && true;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -388,14 +383,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseLogicalOrTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: bool = true || true;
-            }
-            """);
+                public main(): void {
+                    var x: bool = true || true;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -421,14 +417,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseEqualityTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: bool = true == true;
-            }
-            """);
+                public main(): void {
+                    var x: bool = true == true;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -454,14 +451,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseInequalityTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: bool = true != true;
-            }
-            """);
+                public main(): void {
+                    var x: bool = true != true;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -487,14 +485,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseLessThanTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: bool = 2 < 2;
-            }
-            """);
+                public main(): void {
+                    var x: bool = 2 < 2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -520,14 +519,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseLessThanOrEqualTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: bool = 2 <= 2;
-            }
-            """);
+                public main(): void {
+                    var x: bool = 2 <= 2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -553,14 +553,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseGreaterThanTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: bool = 2 > 2;
-            }
-            """);
+                public main(): void {
+                    var x: bool = 2 > 2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -586,14 +587,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseGreaterThanOrEqualTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: bool = 2 >= 2;
-            }
-            """);
+                public main(): void {
+                    var x: bool = 2 >= 2;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -619,14 +621,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseAssignmentTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                x = 1;
-            }
-            """);
+                public main(): void {
+                    x = 1;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -660,14 +663,15 @@ public class ParseExpressionTests
     [TestCase("^=", BinaryExpressionKind.BitwiseXorAssignment)]
     public void ParseAssignment2Test(string @operator, BinaryExpressionKind kind)
     {
-        var (tree, diagnostics) = Parse(
-            $$"""
-              namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                $$"""
+                  namespace Test1;
 
-              public main(): void {
-                  x {{@operator}} 1;
-              }
-              """);
+                  public main(): void {
+                      x {{@operator}} 1;
+                  }
+                  """));
 
         var expected =
             $$"""
@@ -694,14 +698,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseParenTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = (1 + 2) * 3;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = (1 + 2) * 3;
+                }
+                """));
         const string expected =
             """
             SyntaxTree
@@ -729,14 +734,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseVariableExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(y: i32): void {
-                var x: i32 = 2 * y;
-            }
-            """);
+                public main(y: i32): void {
+                    var x: i32 = 2 * y;
+                }
+                """));
 
         const string expected =
             """
@@ -767,14 +773,15 @@ public class ParseExpressionTests
     [Test]
     public void ParsePrecedenceTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = true || true && false | false ^ false & true == 1 + 2 * 3 < 10;
-            }
-            """);
+                public main(): void {
+                    var x: i32 = true || true && false | false ^ false & true == 1 + 2 * 3 < 10;
+                }
+                """));
 
         const string expected =
             """
@@ -817,14 +824,15 @@ public class ParseExpressionTests
     [Test]
     public void TupleExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                return (1, 2);
-            }
-            """);
+                public main(): void {
+                    return (1, 2);
+                }
+                """));
 
         const string expected =
             """
@@ -851,7 +859,7 @@ public class ParseExpressionTests
     [Test]
     public void TupleExpressionMissingCloseParenTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -859,6 +867,7 @@ public class ParseExpressionTests
                 return (1, 2;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -883,8 +892,7 @@ public class ParseExpressionTests
             DiagnosticId.P0001MissingToken,
             DiagnosticSeverity.Error,
             new SourceLocation(file, new SourcePosition(56, 4, 17).ToSpan()),
-            "Expected ')'."
-        );
+            "Expected ')'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
@@ -892,14 +900,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseNewArrayTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                return new i32[10];
-            }
-            """);
+                public main(): void {
+                    return new i32[10];
+                }
+                """));
 
         const string expected =
             """
@@ -926,14 +935,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseAsExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public test(a: i32): i8 {
-                return a is i8;
-            }
-            """);
+                public test(a: i32): i8 {
+                    return a is i8;
+                }
+                """));
 
         const string expected =
             """
@@ -963,15 +973,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseAsExpressionMissingTypeTest()
     {
-        const string code =
+        var file = CreateFile(
             """
             namespace Test1;
 
             public test(a: i32): i8 {
                 return a is;
             }
-            """;
-        var (tree, diagnostics) = Parse(code);
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1007,14 +1017,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseCastExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public test(a: i32): i8 {
-                return (i8)a;
-            }
-            """);
+                public test(a: i32): i8 {
+                    return (i8)a;
+                }
+                """));
 
         const string expected =
             """
@@ -1044,7 +1055,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseCastExpressionMissingCloseParenTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1052,6 +1063,7 @@ public class ParseExpressionTests
                 return (i8 a;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1088,7 +1100,7 @@ public class ParseExpressionTests
     [Test]
     public void ParseCastExpressionMissingExpressionTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1096,6 +1108,7 @@ public class ParseExpressionTests
                 return (i8);
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1131,14 +1144,15 @@ public class ParseExpressionTests
     [Test]
     public void ParseFloatingNumberTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public test(): f64 {
-                return 3.14;
-            }
-            """);
+                public test(): f64 {
+                    return 3.14;
+                }
+                """));
 
         const string expected =
             """

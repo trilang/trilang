@@ -1,39 +1,21 @@
-using Trilang;
-using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseCallExpressionTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseCallStatementTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                print("Hello, World!");
-            }
-            """);
+                public main(): void {
+                    print("Hello, World!");
+                }
+                """));
 
         const string expected =
             """
@@ -61,14 +43,15 @@ public class ParseCallExpressionTests
     [Test]
     public void ParseCallStatementMultipleParamsTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                sum(1, 2, 3);
-            }
-            """);
+                public main(): void {
+                    sum(1, 2, 3);
+                }
+                """));
 
         const string expected =
             """
@@ -98,14 +81,15 @@ public class ParseCallExpressionTests
     [Test]
     public void ParseCallExpressionMultipleParamsTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var x: i32 = 1 + sum(1, 2, 3);
-            }
-            """);
+                public main(): void {
+                    var x: i32 = 1 + sum(1, 2, 3);
+                }
+                """));
 
         const string expected =
             """

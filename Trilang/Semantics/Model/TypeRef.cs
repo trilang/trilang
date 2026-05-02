@@ -4,12 +4,13 @@ namespace Trilang.Semantics.Model;
 
 public class TypeRef : IInlineType
 {
-    public TypeRef(SourceSpan? sourceSpan, IReadOnlyList<string> parts)
+    public TypeRef(SourceSpan? sourceSpan, string? package, IReadOnlyList<string> parts)
     {
         if (parts.Count == 0)
             throw new ArgumentException("TypeRef must have at least one part", nameof(parts));
 
         SourceSpan = sourceSpan;
+        Package = package;
         Parts = parts;
     }
 
@@ -23,7 +24,7 @@ public class TypeRef : IInlineType
         => transformer.TransformTypeNode(this);
 
     public IInlineType Clone()
-        => new TypeRef(SourceSpan, Parts)
+        => new TypeRef(SourceSpan, Package, Parts)
         {
             Metadata = Metadata,
         };
@@ -31,6 +32,8 @@ public class TypeRef : IInlineType
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public string? Package { get; }
 
     public IReadOnlyList<string> Parts { get; }
 

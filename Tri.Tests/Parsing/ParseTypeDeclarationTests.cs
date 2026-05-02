@@ -1,32 +1,16 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseTypeDeclarationTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point { }");
+        var (tree, diagnostics) = ParseFile(
+            CreateFile("namespace Test1;\n\npublic type Point { }"));
 
         const string expected =
             """
@@ -45,7 +29,8 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseTypeMissingNameTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type { }");
+        var file = CreateFile("namespace Test1;\n\npublic type { }");
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -70,7 +55,8 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseTypeMissingOpenBraceTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point }");
+        var file = CreateFile("namespace Test1;\n\npublic type Point }");
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -95,7 +81,8 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseTypeMissingCloseBraceTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point {");
+        var file = CreateFile("namespace Test1;\n\npublic type Point {");
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -120,15 +107,16 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParsePropertiesTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public type Point {
-                x: i32;
-                y: i32;
-            }
-            """);
+                public type Point {
+                    x: i32;
+                    y: i32;
+                }
+                """));
 
         const string expected =
             """
@@ -152,29 +140,30 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParsePropertiesWithBlocksTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public type Point {
-                x: i32 {
-                    private get {
-                        return field;
+                public type Point {
+                    x: i32 {
+                        private get {
+                            return field;
+                        }
+                        private set {
+                            field = value;
+                        }
                     }
-                    private set {
-                        field = value;
+                    y: i32 {
+                        private get{
+                            return field;
+                        }
+                        private set {
+                            field = value;
+                        }
                     }
                 }
-                y: i32 {
-                    private get{
-                        return field;
-                    }
-                    private set {
-                        field = value;
-                    }
-                }
-            }
-            """);
+                """));
 
         const string expected =
             """
@@ -232,19 +221,20 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseEmptyGetterTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public type Point {
-                x: i32 {
-                    private get;
-                    private set {
-                        field = value;
+                public type Point {
+                    x: i32 {
+                        private get;
+                        private set {
+                            field = value;
+                        }
                     }
                 }
-            }
-            """);
+                """));
 
         const string expected =
             """
@@ -278,19 +268,20 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseEmptySetterTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public type Point {
-                x: i32 {
-                    private get {
-                        return field;
+                public type Point {
+                    x: i32 {
+                        private get {
+                            return field;
+                        }
+                        private set;
                     }
-                    private set;
                 }
-            }
-            """);
+                """));
 
         const string expected =
             """
@@ -321,7 +312,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParsePropertyMissingNameTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -329,6 +320,7 @@ public class ParseTypeDeclarationTests
                 : i32;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -353,7 +345,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParsePropertyMissingColonTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -361,6 +353,7 @@ public class ParseTypeDeclarationTests
                 x i32;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -388,7 +381,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParsePropertyMissingTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -396,6 +389,7 @@ public class ParseTypeDeclarationTests
                 x: ;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -423,7 +417,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParsePropertyMissingSemiColonTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -431,6 +425,7 @@ public class ParseTypeDeclarationTests
                 x: i32
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -458,7 +453,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodsTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -468,6 +463,7 @@ public class ParseTypeDeclarationTests
                 public distance(other: Point): f32 { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -495,7 +491,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingNameTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -503,6 +499,7 @@ public class ParseTypeDeclarationTests
                 public (): string { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -532,7 +529,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingOpenParenTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -540,6 +537,7 @@ public class ParseTypeDeclarationTests
                 public toString): string { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -569,7 +567,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingCloseParenTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -577,6 +575,7 @@ public class ParseTypeDeclarationTests
                 public toString(: string { return; }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -611,7 +610,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingColonTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -619,6 +618,7 @@ public class ParseTypeDeclarationTests
                 public toString() string { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -648,7 +648,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -656,6 +656,7 @@ public class ParseTypeDeclarationTests
                 public toString(): { var x: i32 = 1; }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -697,7 +698,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingOpenBraceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -705,6 +706,7 @@ public class ParseTypeDeclarationTests
                 public toString(): string }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -734,7 +736,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingCloseBraceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -742,6 +744,7 @@ public class ParseTypeDeclarationTests
                 public toString(): string {
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -771,7 +774,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingCommaTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -779,6 +782,7 @@ public class ParseTypeDeclarationTests
                 public toString(a: i32 b: i32): string { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -808,7 +812,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingParameterColonTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -816,6 +820,7 @@ public class ParseTypeDeclarationTests
                 public toString(a i32): string { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -845,7 +850,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseMethodMissingParameterTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -853,6 +858,7 @@ public class ParseTypeDeclarationTests
                 public toString(a: ): string { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -882,7 +888,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseCtorTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -890,6 +896,7 @@ public class ParseTypeDeclarationTests
                 public constructor(x: i32, y: i32) { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -912,7 +919,13 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseTypeWithInterfaceTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point : Interface1, Interface2 { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type Point : Interface1, Interface2 { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -934,7 +947,13 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseTypeWithMissingInterfaceTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point : { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type Point : { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -959,7 +978,13 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseTypeWithMissingCommaInInterfacesTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point : Interface1 Interface2 { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type Point : Interface1 Interface2 { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -988,7 +1013,13 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseTypeWithMissingSecondInterfaceTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type Point : Interface1, { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type Point : Interface1, { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1015,7 +1046,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseStaticMethodTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1023,6 +1054,8 @@ public class ParseTypeDeclarationTests
                 public static test(): void { }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
+
         const string expected =
             """
             SyntaxTree
@@ -1046,7 +1079,7 @@ public class ParseTypeDeclarationTests
     [Test]
     public void ParseCallStaticMethodTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1058,6 +1091,7 @@ public class ParseTypeDeclarationTests
                 Test.test();
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """

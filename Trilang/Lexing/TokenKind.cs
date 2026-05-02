@@ -1,6 +1,6 @@
 namespace Trilang.Lexing;
 
-public enum TokenKind
+internal enum TokenKind
 {
     Unsupported,
     EndOfFile,
@@ -13,6 +13,7 @@ public enum TokenKind
 
     // Symbols
     Colon,
+    ColonColon,
     SemiColon,
     Comma,
     OpenParen,
@@ -82,7 +83,7 @@ public enum TokenKind
     Namespace,
 }
 
-public static class TokenKindExtensions
+internal static class TokenKindExtensions
 {
     public static string ToDisplayString(this TokenKind kind)
         => kind switch

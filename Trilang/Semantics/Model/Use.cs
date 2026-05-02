@@ -2,9 +2,10 @@ namespace Trilang.Semantics.Model;
 
 public class Use : ISemanticNode
 {
-    public Use(SourceSpan? sourceSpan, IReadOnlyList<string> parts)
+    public Use(SourceSpan? sourceSpan, string? package, IReadOnlyList<string> parts)
     {
         SourceSpan = sourceSpan;
+        Package = package;
         Parts = parts;
     }
 
@@ -20,6 +21,8 @@ public class Use : ISemanticNode
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public string? Package { get; }
 
     public IReadOnlyList<string> Parts { get; }
 }

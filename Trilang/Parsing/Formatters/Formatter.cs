@@ -704,7 +704,15 @@ public partial class Formatter : INodeVisitor
     }
 
     public void VisitTypeNode(TypeRefNode node)
-        => WriteQualifiedName(node.Parts);
+    {
+        if (node.Package is not null)
+        {
+            writer.Write(node.Package);
+            writer.Write("::");
+        }
+
+        WriteQualifiedName(node.Parts);
+    }
 
     public void VisitUnaryExpression(UnaryExpressionNode node)
     {
@@ -724,6 +732,13 @@ public partial class Formatter : INodeVisitor
     public void VisitUse(UseNode node)
     {
         writer.Write("use ");
+
+        if (node.Package is not null)
+        {
+            writer.Write(node.Package);
+            writer.Write("::");
+        }
+
         WriteQualifiedName(node.Parts);
         writer.Write(';');
     }

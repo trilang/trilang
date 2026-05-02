@@ -14,22 +14,17 @@ internal class TypeChecker : ISemanticPass
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly MetadataProviderMap metadataProviderMap;
-    private readonly NamespaceMetadata rootNamespace;
-    private readonly BuiltInTypes builtInTypes;
 
-    public TypeChecker(ISet<string> directives,
-        SemanticDiagnosticReporter diagnostics,
+    public TypeChecker(
+        ISet<string> directives,
+        DiagnosticCollection diagnostics,
         SymbolTableMap symbolTableMap,
-        MetadataProviderMap metadataProviderMap,
-        NamespaceMetadata rootNamespace,
-        BuiltInTypes builtInTypes)
+        MetadataProviderMap metadataProviderMap)
     {
         this.directives = directives;
-        this.diagnostics = diagnostics;
+        this.diagnostics = diagnostics.ForSemantic();
         this.symbolTableMap = symbolTableMap;
         this.metadataProviderMap = metadataProviderMap;
-        this.rootNamespace = rootNamespace;
-        this.builtInTypes = builtInTypes;
     }
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees)

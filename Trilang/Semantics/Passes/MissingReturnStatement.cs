@@ -10,16 +10,11 @@ internal class MissingReturnStatement : ISemanticPass
 {
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly ControlFlowGraphMap map;
-    private readonly BuiltInTypes builtInTypes;
 
-    public MissingReturnStatement(
-        SemanticDiagnosticReporter diagnostics,
-        ControlFlowGraphMap map,
-        BuiltInTypes builtInTypes)
+    public MissingReturnStatement(DiagnosticCollection diagnostics, ControlFlowGraphMap map)
     {
+        this.diagnostics = diagnostics.ForSemantic();
         this.map = map;
-        this.builtInTypes = builtInTypes;
-        this.diagnostics = diagnostics;
     }
 
     public void Analyze(IEnumerable<SemanticTree> _)

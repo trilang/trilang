@@ -1,6 +1,6 @@
 namespace Trilang;
 
-public readonly record struct SourceFile(string FilePath)
+public record SourceFile(string FilePath, string Content)
 {
     public override string ToString()
         => Path.GetFileName(FilePath);

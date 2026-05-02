@@ -1,32 +1,21 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseGenericTypeTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseGenericTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type List<T> { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type List<T> { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -47,7 +36,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeMissingTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type List<> { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type List<> { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -74,7 +69,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeMissingSecondTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type List<T,> { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type List<T,> { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -102,12 +103,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeMissingGreaterTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type List<T { }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -134,7 +136,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseAliasToGenericTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<i32, bool>;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = List<i32, bool>;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -158,7 +166,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseNestedGenericTypeAliasTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<i32, List<bool>>;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = List<i32, List<bool>>;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
         const string expected =
             """
             SyntaxTree
@@ -184,7 +198,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseAliasToGenericTypeMissingTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<>;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = List<>;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -213,7 +233,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseAliasToGenericTypeMissingSecondTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<i32, >;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = List<i32, >;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -243,7 +269,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseAliasToGenericTypeMissingCloseAngleBracketTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = List<i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = List<i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -272,7 +304,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeAliasTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T<T1, T2> = T1 | T2;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T<T1, T2> = T1 | T2;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -295,7 +333,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeAliasMissingTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T<> = T1 | T2;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T<> = T1 | T2;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -324,7 +368,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeAliasMissingSecondTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T<T1, > = T1 | T2;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T<T1, > = T1 | T2;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -353,7 +403,13 @@ public class ParseGenericTypeTests
     [Test]
     public void ParseGenericTypeAliasMissingCloseAngleBracketTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T<T1, T2 = T1 | T2;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T<T1, T2 = T1 | T2;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """

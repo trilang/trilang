@@ -118,10 +118,7 @@ internal class MetadataFactory
         }
         else
         {
-            nullableEmptyInterface = new DiscriminatedUnionMetadata(null, [
-                emptyInterface,
-                builtInTypes.Null
-            ]);
+            nullableEmptyInterface = new DiscriminatedUnionMetadata(null, [emptyInterface, builtInTypes.Null]);
             provider.DefineType(nullableEmptyInterface);
         }
 
@@ -250,9 +247,7 @@ internal class MetadataFactory
         return metadata;
     }
 
-    public TupleMetadata CreateTupleMetadata(
-        SourceLocation? definition,
-        IReadOnlyList<ITypeMetadata> types)
+    public TupleMetadata CreateTupleMetadata(SourceLocation? definition, IReadOnlyList<ITypeMetadata> types)
     {
         var result = provider.QueryTypes(new GetTuple(types));
         if (result.IsSuccess || result.IsMultipleTypesFound)

@@ -9,10 +9,10 @@ internal class NotImplementedInterface : ISemanticPass
     private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
 
-    public NotImplementedInterface(ISet<string> directives, SemanticDiagnosticReporter diagnostics)
+    public NotImplementedInterface(ISet<string> directives, DiagnosticCollection diagnostics)
     {
         this.directives = directives;
-        this.diagnostics = diagnostics;
+        this.diagnostics = diagnostics.ForSemantic();
     }
 
     public void Analyze(IEnumerable<SemanticTree> semanticTrees)

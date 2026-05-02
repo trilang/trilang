@@ -6,18 +6,18 @@ namespace Trilang.Semantics.Passes;
 
 internal class TypeArgumentMap
 {
-    private readonly BuiltInTypes builtInTypes;
     private readonly SemanticDiagnosticReporter diagnostics;
+    private readonly CompilationContext compilationContext;
     private readonly GenericApplicationMetadata genericApplication;
     private readonly Dictionary<ITypeMetadata, ITypeMetadata> map;
 
     public TypeArgumentMap(
-        BuiltInTypes builtInTypes,
         SemanticDiagnosticReporter diagnostics,
+        CompilationContext compilationContext,
         GenericApplicationMetadata genericApplication)
     {
-        this.builtInTypes = builtInTypes;
         this.diagnostics = diagnostics;
+        this.compilationContext = compilationContext;
         this.genericApplication = genericApplication;
         this.map = genericApplication.OpenGeneric.GenericArguments
             .Zip(genericApplication.Arguments)

@@ -2,7 +2,7 @@ namespace Trilang.Compilation.Diagnostics;
 
 public enum DiagnosticSeverity
 {
-    Info,
-    Warning,
-    Error,
+    Info = 0,
+    Warning = 1,
+    Error = 2,
 }

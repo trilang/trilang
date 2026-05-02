@@ -600,7 +600,12 @@ public static class SyntaxNodeExtensions
         }
 
         public void VisitTypeNode(TypeRefNode node)
-            => WriteLine($"TypeRef: {FormatTypeParts(node.Parts)}");
+        {
+            if (node.Package is not null)
+                WriteLine($"TypeRef: {node.Package}::{FormatTypeParts(node.Parts)}");
+            else
+                WriteLine($"TypeRef: {FormatTypeParts(node.Parts)}");
+        }
 
         public void VisitUnaryExpression(UnaryExpressionNode node)
         {
@@ -614,6 +619,10 @@ public static class SyntaxNodeExtensions
         {
             WriteLine("Use");
             VisitChildren();
+
+            if (node.Package is not null)
+                WriteLine($"Package: {node.Package}");
+
             WriteLine($"Parts: {FormatTypeParts(node.Parts)}");
             EndChildren();
         }

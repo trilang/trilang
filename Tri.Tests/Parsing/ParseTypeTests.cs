@@ -1,32 +1,21 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseTypeTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseTypeAliasTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type MyType = i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type MyType = i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -46,7 +35,13 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeAliasMissingNameTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type = i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type = i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -72,7 +67,13 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeAliasMissingTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type MyType = ;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type MyType = ;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -98,7 +99,13 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeAliasMissingSemiColonTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type MyType = i32");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type MyType = i32
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -124,7 +131,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F = () => void;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F = () => void;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -145,7 +158,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeWithParametersTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F = (i32, i32) => i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F = (i32, i32) => i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -169,7 +188,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeMissingNameTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type = (i32, i32) => i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type = (i32, i32) => i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -199,7 +224,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeMissingEqualTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F (i32, i32) => i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F (i32, i32) => i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -232,7 +263,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeMissingOpenParenTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F = i32, i32) => i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F = i32, i32) => i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -267,7 +304,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeMissingCloseParenTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F = (i32, i32 => i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F = (i32, i32 => i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -300,7 +343,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeCommaTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F = (i32 i32) => i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F = (i32 i32) => i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -333,7 +382,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeArrowTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F = (i32, i32) i32;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F = (i32, i32) i32;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -371,7 +426,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F = (i32, i32) => ;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F = (i32, i32) => ;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -404,7 +465,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeSemiColonTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type F = (i32, i32) => i32");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type F = (i32, i32) => i32
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -434,12 +501,13 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayOfFunctionTypesTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = (() => i32)[];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -461,7 +529,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeInParameterTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(callback: (i32, i32) => void): void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(callback: (i32, i32) => void): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -489,7 +563,13 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeInReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic test(): (i32, i32) => void { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(): (i32, i32) => void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -514,7 +594,7 @@ public class ParseTypeTests
     [Test]
     public void ParseFunctionTypeInVariableTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -522,6 +602,7 @@ public class ParseTypeTests
                 var x: (i32, i32) => void = 0;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -550,7 +631,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -561,6 +642,7 @@ public class ParseTypeTests
                 distance(Point): f32;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -590,7 +672,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeWithGettersSettersTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -601,6 +683,7 @@ public class ParseTypeTests
                 distance(Point): f32;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -630,7 +713,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeWithGetOnlyTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -638,6 +721,7 @@ public class ParseTypeTests
                 x: i32 { public get; }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -660,7 +744,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeWithSetOnlyTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -668,6 +752,7 @@ public class ParseTypeTests
                 x: i32 { public set; }
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -690,7 +775,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeMissingCloseBraceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -700,6 +785,7 @@ public class ParseTypeTests
 
                 distance(Point): f32;
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -735,7 +821,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeMissingPropertyTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -746,6 +832,7 @@ public class ParseTypeTests
                 distance(Point): f32;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -781,7 +868,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeMissingPropertySemiColonTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -792,6 +879,7 @@ public class ParseTypeTests
                 distance(Point): f32;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -835,7 +923,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodReturnTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -846,6 +934,7 @@ public class ParseTypeTests
                 distance(Point): ;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -881,7 +970,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodColonTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -892,6 +981,7 @@ public class ParseTypeTests
                 distance(Point) f64;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -927,7 +1017,7 @@ public class ParseTypeTests
     [Test]
     public void ParseAliasInterfaceTypeMissingMethodSemiColonTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -938,6 +1028,7 @@ public class ParseTypeTests
                 distance(Point): f64
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -973,12 +1064,13 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayOfInterfacesTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = { x: i32; }[];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1002,7 +1094,13 @@ public class ParseTypeTests
     [Test]
     public void ParseDiscriminatedUnionTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = { } | i32 | () => void;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = { } | i32 | () => void;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1027,12 +1125,13 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayOfDuTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = (i32 | null)[];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1056,12 +1155,13 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayInDuTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = null | i32[];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1085,7 +1185,7 @@ public class ParseTypeTests
     [Test]
     public void ParseNullTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1093,6 +1193,7 @@ public class ParseTypeTests
                 var x: null = null;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1117,7 +1218,13 @@ public class ParseTypeTests
     [Test]
     public void ParseTupleTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = (i32, i32);");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = (i32, i32);
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1140,7 +1247,13 @@ public class ParseTypeTests
     [Test]
     public void ParseNestedTupleTypeTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = ((i32, i32), i32);");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = ((i32, i32), i32);
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1166,7 +1279,13 @@ public class ParseTypeTests
     [Test]
     public void ParseDuInTupleTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = (bool | i32, () => void);");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = (bool | i32, () => void);
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1193,7 +1312,13 @@ public class ParseTypeTests
     [Test]
     public void ParseTupleInDuTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = i32 | (bool, f64);");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = i32 | (bool, f64);
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1219,7 +1344,13 @@ public class ParseTypeTests
     [Test]
     public void ParseTypeInParenTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = (i32);");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = (i32);
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1239,9 +1370,13 @@ public class ParseTypeTests
     [Test]
     public void TupleTypeMissingTest()
     {
-        const string code = "namespace Test1;\n\npublic type T = (i32";
+        var file = CreateFile(
+            """
+            namespace Test1;
 
-        var (tree, diagnostics) = Parse(code);
+            public type T = (i32
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1275,7 +1410,13 @@ public class ParseTypeTests
     [Test]
     public void FunctionWithTupleTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic main(): (i32, i32) { }");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public main(): (i32, i32) { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1299,7 +1440,13 @@ public class ParseTypeTests
     [Test]
     public void ParseDuWithFunctionTypeAndDuTest()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = i32 | (() => i32 | null);");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = i32 | (() => i32 | null);
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1326,7 +1473,13 @@ public class ParseTypeTests
     [Test]
     public void ParseDuWithFunctionTypeAndDu2Test()
     {
-        var (tree, diagnostics) = Parse("namespace Test1;\n\npublic type T = i32 | (() => i32) | null;");
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type T = i32 | (() => i32) | null;
+            """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1351,12 +1504,13 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayOfTypesTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = i32[];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1377,12 +1531,13 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayOfTuplesTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = (i32, null)[];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1406,12 +1561,13 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayOfArraysTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = i32[][];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1433,12 +1589,13 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayInReturnOfFunctionTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = () => i32[];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1460,7 +1617,7 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayOfGenericsTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1468,6 +1625,7 @@ public class ParseTypeTests
 
             public type Test = List<i32>[];
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1495,7 +1653,7 @@ public class ParseTypeTests
     [Test]
     public void ParseArrayInGenericTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -1503,6 +1661,7 @@ public class ParseTypeTests
 
             public type Test = List<i32[]>;
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -1521,6 +1680,36 @@ public class ParseTypeTests
                     TypeArguments
                       ArrayType
                         TypeRef: i32
+            """;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+    }
+
+    [Test]
+    public void ParseFullyQualifiedTypeTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(obj: pkg::NS1.MyTest): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: obj
+                      TypeRef: pkg::NS1.MyTest
+                  TypeRef: void
+                  BlockStatement
             """;
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);

@@ -4,9 +4,10 @@ namespace Trilang.Parsing.Ast;
 
 public class UseNode : ISyntaxNode
 {
-    public UseNode(SourceSpan sourceSpan, IReadOnlyList<string> parts)
+    public UseNode(SourceSpan sourceSpan, string? package, IReadOnlyList<string> parts)
     {
         SourceSpan = sourceSpan;
+        Package = package;
         Parts = parts;
     }
 
@@ -25,6 +26,8 @@ public class UseNode : ISyntaxNode
         => transformer.TransformUse(this);
 
     public SourceSpan SourceSpan { get; }
+
+    public string? Package { get; }
 
     public IReadOnlyList<string> Parts { get; }
 }

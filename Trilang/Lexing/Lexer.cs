@@ -1,10 +1,11 @@
 namespace Trilang.Lexing;
 
-public class Lexer
+internal class Lexer
 {
-    public IReadOnlyList<Token> Tokenize(string code, LexerOptions options)
+    public IReadOnlyList<Token> Tokenize(SourceFile file, LexerOptions options)
     {
-        var diagnostics = options.Diagnostics;
+        var diagnostics = options.Diagnostics.ForLexer(file);
+        var code = file.Content;
         var position = new SourceSpanBuilder();
         var tokens = new List<Token>();
 
@@ -206,6 +207,7 @@ public class Lexer
                 ('[', _) => (TokenKind.OpenBracket, 1),
                 (']', _) => (TokenKind.CloseBracket, 1),
 
+                (':', ':') => (TokenKind.ColonColon, 2),
                 (':', _) => (TokenKind.Colon, 1),
                 (';', _) => (TokenKind.SemiColon, 1),
                 (',', _) => (TokenKind.Comma, 1),

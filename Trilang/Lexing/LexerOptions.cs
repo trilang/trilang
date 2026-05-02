@@ -2,4 +2,4 @@ using Trilang.Compilation.Diagnostics;
 
 namespace Trilang.Lexing;
 
-public record LexerOptions(LexerDiagnosticReporter Diagnostics);
+internal record LexerOptions(DiagnosticCollection Diagnostics);

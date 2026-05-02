@@ -26,6 +26,9 @@ public readonly struct QueryTypesResult
     public static QueryTypesResult NamespaceNotFound()
         => new QueryTypesResult([], QueryTypesReason.NamespaceNotFound);
 
+    public static QueryTypesResult PackageNotFound()
+        => new QueryTypesResult([], QueryTypesReason.PackageNotFound);
+
     public bool IsSuccess
         => Reason == QueryTypesReason.Success;
 
@@ -37,4 +40,7 @@ public readonly struct QueryTypesResult
 
     public bool IsNamespaceNotFound
         => Reason == QueryTypesReason.NamespaceNotFound;
+
+    public bool IsPackageNotFound
+        => Reason == QueryTypesReason.PackageNotFound;
 }

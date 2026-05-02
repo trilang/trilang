@@ -1,39 +1,23 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseNewOperatorTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseNewOperatorTest()
     {
-        var (tree, diagnostics) = Parse(
-            """
-            namespace Test1;
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
 
-            public main(): void {
-                var p: Point = new Point();
-            }
-            """);
+                public main(): void {
+                    var p: Point = new Point();
+                }
+                """));
 
         const string expected =
             """
@@ -59,7 +43,7 @@ public class ParseNewOperatorTests
     [Test]
     public void ParseNewOperatorWithParametersTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -67,6 +51,7 @@ public class ParseNewOperatorTests
                 var p: Point = new Point(1, 2);
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -95,7 +80,7 @@ public class ParseNewOperatorTests
     [Test]
     public void ParseNewOperatorMissingTypeTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -103,6 +88,7 @@ public class ParseNewOperatorTests
                 var p: Point = new ();
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -134,7 +120,7 @@ public class ParseNewOperatorTests
     [Test]
     public void ParseNewOperatorMissingArgumentTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -142,6 +128,7 @@ public class ParseNewOperatorTests
                 var p: Point = new Point(1, );
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -176,7 +163,7 @@ public class ParseNewOperatorTests
     [Test]
     public void ParseNewOperatorMissingCloseParenTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -184,6 +171,7 @@ public class ParseNewOperatorTests
                 var p: Point = new Point(;
             }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """

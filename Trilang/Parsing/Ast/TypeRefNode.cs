@@ -4,12 +4,13 @@ namespace Trilang.Parsing.Ast;
 
 public class TypeRefNode : IInlineTypeNode
 {
-    public TypeRefNode(SourceSpan sourceSpan, IReadOnlyList<string> parts)
+    public TypeRefNode(SourceSpan sourceSpan, string? package, IReadOnlyList<string> parts)
     {
         if (parts.Count == 0)
             throw new ArgumentException("Type must have at least one part", nameof(parts));
 
         SourceSpan = sourceSpan;
+        Package = package;
         Parts = parts;
     }
 
@@ -28,6 +29,8 @@ public class TypeRefNode : IInlineTypeNode
         => transformer.TransformTypeNode(this);
 
     public SourceSpan SourceSpan { get; }
+
+    public string? Package { get; }
 
     public IReadOnlyList<string> Parts { get; }
 }

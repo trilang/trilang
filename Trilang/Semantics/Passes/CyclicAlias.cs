@@ -1,19 +1,16 @@
 using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
-using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
 
 internal class CyclicAlias : ISemanticPass
 {
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly NamespaceMetadata rootNamespace;
     private readonly HashSet<ITypeMetadata> visitedTypes;
 
-    public CyclicAlias(SemanticDiagnosticReporter diagnostics, NamespaceMetadata rootNamespace)
+    public CyclicAlias(DiagnosticCollection diagnostics)
     {
-        this.diagnostics = diagnostics;
-        this.rootNamespace = rootNamespace;
+        this.diagnostics = diagnostics.ForSemantic();
         visitedTypes = [];
     }
 

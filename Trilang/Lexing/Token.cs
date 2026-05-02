@@ -1,6 +1,6 @@
 namespace Trilang.Lexing;
 
-public class Token : IEquatable<Token>
+internal class Token : IEquatable<Token>
 {
     private Token(SourceSpan sourceSpan, TokenKind kind, object? value)
     {

@@ -1,37 +1,21 @@
 using Trilang;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Lexing;
-using Trilang.Parsing;
-using Trilang.Parsing.Ast;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Parsing;
 
 public class ParseNamespaceTests
 {
-    private static readonly SourceFile file = new SourceFile("test.tri");
-
-    private static (SyntaxTree, DiagnosticCollection) Parse(string code)
-    {
-        var diagnostics = new DiagnosticCollection();
-        var lexer = new Lexer();
-        var lexerOptions = new LexerOptions(new LexerDiagnosticReporter(diagnostics, file));
-        var tokens = lexer.Tokenize(code, lexerOptions);
-        var parser = new Parser();
-        var parserOptions = new ParserOptions(file, new ParserDiagnosticReporter(diagnostics, file));
-        var tree = parser.Parse(tokens, parserOptions);
-
-        return (tree, diagnostics);
-    }
-
     [Test]
     public void ParseNamespaceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test;
 
             public main(): void { }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -52,12 +36,13 @@ public class ParseNamespaceTests
     [Test]
     public void ParseMultiPartNamespaceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test.SubNamespace.SubSubNamespace;
 
             public main(): void { }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -78,7 +63,7 @@ public class ParseNamespaceTests
     [Test]
     public void ParseUseNamespaceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -86,6 +71,7 @@ public class ParseNamespaceTests
 
             public main(): void { }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -109,7 +95,7 @@ public class ParseNamespaceTests
     [Test]
     public void ParseUseMultipartNamespaceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -117,6 +103,7 @@ public class ParseNamespaceTests
 
             public main(): void { }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -140,7 +127,7 @@ public class ParseNamespaceTests
     [Test]
     public void ParseUseInvalidNamespaceTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
@@ -148,6 +135,7 @@ public class ParseNamespaceTests
 
             public main(): void { }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -156,7 +144,7 @@ public class ParseNamespaceTests
                 Parts: Test1
               UseNodes
                 Use
-                  Parts: Test.<namespace>.SubSubNamespace
+                  Parts: Test.<invalid_namespace>.SubSubNamespace
               Declarations
                 Function: main
                   AccessModifier: public
@@ -179,7 +167,7 @@ public class ParseNamespaceTests
     [Test]
     public void ParseNamespaceAndUseTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test;
 
@@ -187,6 +175,7 @@ public class ParseNamespaceTests
 
             public main(): void { }
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -210,12 +199,13 @@ public class ParseNamespaceTests
     [Test]
     public void ParseFullyQualifiedNameTest()
     {
-        var (tree, diagnostics) = Parse(
+        var file = CreateFile(
             """
             namespace Test1;
 
             public type T = Some.NS.TestType;
             """);
+        var (tree, diagnostics) = ParseFile(file);
 
         const string expected =
             """
@@ -230,5 +220,111 @@ public class ParseNamespaceTests
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void ParseUsePackagePrefixTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            use std::io;
+
+            public main(): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              UseNodes
+                Use
+                  Package: std
+                  Parts: io
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void ParseUsePackageMultipartNamespaceTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            use mypkg::foo.bar;
+
+            public main(): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              UseNodes
+                Use
+                  Package: mypkg
+                  Parts: foo.bar
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void ParseUseInvalidPackagePrefixTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            use ::foo;
+
+            public main(): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              UseNodes
+                Use
+                  Parts: <invalid_namespace>
+              Declarations
+                Function: main
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+            """;
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.P0016ExpectedNamespace,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(22, 3, 5), new SourcePosition(27, 3, 10))),
+            "Expected a namespace.");
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
     }
 }

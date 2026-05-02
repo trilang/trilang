@@ -12,8 +12,6 @@ internal class MetadataGenerator : ISemanticPass
     private readonly SemanticDiagnosticReporter diagnostics;
     private readonly SymbolTableMap symbolTableMap;
     private readonly MetadataProviderMap metadataProviderMap;
-    private readonly NamespaceMetadata rootNamespace;
-    private readonly BuiltInTypes builtInTypes;
 
     private readonly HashSet<TypeDeclaration> typesToProcess;
     private readonly HashSet<AliasDeclaration> aliasToProcess;
@@ -22,18 +20,14 @@ internal class MetadataGenerator : ISemanticPass
 
     public MetadataGenerator(
         ISet<string> directives,
-        SemanticDiagnosticReporter diagnostics,
+        DiagnosticCollection diagnostics,
         SymbolTableMap symbolTableMap,
-        MetadataProviderMap metadataProviderMap,
-        NamespaceMetadata rootNamespace,
-        BuiltInTypes builtInTypes)
+        MetadataProviderMap metadataProviderMap)
     {
         this.directives = directives;
-        this.diagnostics = diagnostics;
+        this.diagnostics = diagnostics.ForSemantic();
         this.symbolTableMap = symbolTableMap;
         this.metadataProviderMap = metadataProviderMap;
-        this.rootNamespace = rootNamespace;
-        this.builtInTypes = builtInTypes;
 
         typesToProcess = [];
         aliasToProcess = [];

@@ -11,11 +11,11 @@ internal class VariableUsedBeforeDeclared : ISemanticPass
 
     public VariableUsedBeforeDeclared(
         ISet<string> directives,
-        SemanticDiagnosticReporter diagnostics,
+        DiagnosticCollection diagnostics,
         SymbolTableMap symbolTableMap)
     {
         this.directives = directives;
-        this.diagnostics = diagnostics;
+        this.diagnostics = diagnostics.ForSemantic();
         this.symbolTableMap = symbolTableMap;
     }
 

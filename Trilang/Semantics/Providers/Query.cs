@@ -43,7 +43,7 @@ public abstract record Query
         {
             [] => throw new InvalidOperationException(),
             [var name] => new ByName(name),
-            _ => new ByQualifiedName(typeRef.Parts),
+            _ => new ByQualifiedName(typeRef.Package, typeRef.Parts),
         };
 
     public static Query From(IGenericDeclaration node)
@@ -67,7 +67,7 @@ public abstract record Query
 
 public record ByName(string Name) : Query;
 
-public record ByQualifiedName(IReadOnlyList<string> Parts) : Query;
+public record ByQualifiedName(string? Package, IReadOnlyList<string> Parts) : Query;
 
 public record GetArray(ITypeMetadata ElementType) : Query;
 

@@ -252,7 +252,7 @@ internal abstract class Visitor : IVisitor
 
     public virtual void VisitTree(SemanticTree node)
     {
-        node.Namespace?.Accept(this);
+        node.Namespace.Accept(this);
 
         for (var i = 0; i < node.UseNodes.Count; i++)
             node.UseNodes[i].Accept(this);
