@@ -6,3 +6,7 @@ updates:
       interval: "daily"
     assignees:
       - "sys27"
+    groups:
+      nunit:
+        patterns:
+          - "NUnit*"
