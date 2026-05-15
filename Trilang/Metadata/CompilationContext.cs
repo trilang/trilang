@@ -3,6 +3,7 @@ namespace Trilang.Metadata;
 public class CompilationContext
 {
     private readonly HashSet<PackageMetadata> packages;
+    private bool isFrozen;
 
     public CompilationContext(BuiltInTypes builtInTypes, RootNamespaceMetadata rootNamespace)
     {
@@ -31,8 +32,23 @@ public class CompilationContext
 
     public void AddPackage(PackageMetadata package)
     {
+        EnsureNotFrozen();
+
         if (!packages.Add(package))
             throw new InvalidOperationException($"Package '{package.Name}' already exists.");
+    }
+
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        CurrentPackage?.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
     }
 
     public IReadOnlyCollection<PackageMetadata> Packages
@@ -42,7 +58,15 @@ public class CompilationContext
 
     public RootNamespaceMetadata RootNamespace { get; }
 
-    public PackageMetadata? CurrentPackage { get; set; }
+    public PackageMetadata? CurrentPackage
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     private sealed class PackageMetadataComparer : IEqualityComparer<PackageMetadata>
     {

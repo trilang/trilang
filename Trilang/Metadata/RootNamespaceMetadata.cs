@@ -6,6 +6,7 @@ public class RootNamespaceMetadata : INamespaceMetadata
 {
     private readonly List<ITypeMetadata> types; // TODO: hashset/dictionary?
     private readonly List<RootNamespaceMetadata> imported;
+    private bool isFrozen;
 
     private RootNamespaceMetadata(BuiltInTypes builtInTypes)
     {
@@ -38,6 +39,7 @@ public class RootNamespaceMetadata : INamespaceMetadata
 
     public void AddType(ITypeMetadata type)
     {
+        EnsureNotFrozen();
         Debug.Assert(
             type is IAnonymousTypeMetadata or INamedMetadata { IsCompilerGenerated: true },
             "Only anonymous types can be added to root namespace.");
@@ -55,7 +57,10 @@ public class RootNamespaceMetadata : INamespaceMetadata
         => throw new NotSupportedException();
 
     public void AddImported(RootNamespaceMetadata namespaceMetadata)
-        => imported.Add(namespaceMetadata);
+    {
+        EnsureNotFrozen();
+        imported.Add(namespaceMetadata);
+    }
 
     public IEnumerable<ITypeMetadata> EnumerateAllTypes()
     {
@@ -65,6 +70,20 @@ public class RootNamespaceMetadata : INamespaceMetadata
         foreach (var importedNamespace in imported)
         foreach (var type in importedNamespace.EnumerateAllTypes())
             yield return type;
+    }
+
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var type in types)
+            type.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
     }
 
     public SourceLocation? Definition

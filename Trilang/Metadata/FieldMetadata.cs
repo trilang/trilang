@@ -24,4 +24,8 @@ public class FieldMetadata : IMetadata
     public string Name { get; }
 
     public ITypeMetadata Type { get; }
+
+    public void Freeze()
+    {
+    }
 }

@@ -21,6 +21,25 @@ public class BuiltInTypes
         String = new TypeMetadata(null, "string", [], [], [], [], [], [], false, true);
     }
 
+    public void Freeze()
+    {
+        Void.Freeze();
+        Null.Freeze();
+        I8.Freeze();
+        I16.Freeze();
+        I32.Freeze();
+        I64.Freeze();
+        U8.Freeze();
+        U16.Freeze();
+        U32.Freeze();
+        U64.Freeze();
+        F32.Freeze();
+        F64.Freeze();
+        Char.Freeze();
+        Bool.Freeze();
+        String.Freeze();
+    }
+
     public TypeMetadata Void { get; }
 
     public TypeMetadata Null { get; }

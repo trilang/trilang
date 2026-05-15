@@ -4,6 +4,7 @@ public class InterfaceMetadata : IAnonymousTypeMetadata
 {
     private readonly List<InterfacePropertyMetadata> properties;
     private readonly List<InterfaceMethodMetadata> methods;
+    private bool isFrozen;
 
     public InterfaceMetadata(SourceLocation? definition) : this(definition, [], [])
     {
@@ -35,13 +36,19 @@ public class InterfaceMetadata : IAnonymousTypeMetadata
     }
 
     public void AddProperty(InterfacePropertyMetadata property)
-        => properties.Add(property);
+    {
+        EnsureNotFrozen();
+        properties.Add(property);
+    }
 
     public AggregateMetadata GetProperties(string name)
         => new AggregateMetadata(properties.Where(f => f.Name == name));
 
     public void AddMethod(InterfaceMethodMetadata method)
-        => methods.Add(method);
+    {
+        EnsureNotFrozen();
+        methods.Add(method);
+    }
 
     public AggregateMetadata GetMethods(string name)
         => new AggregateMetadata(methods.Where(m => m.Name == name));
@@ -60,18 +67,62 @@ public class InterfaceMetadata : IAnonymousTypeMetadata
     }
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
 
-    public bool IsInvalid { get; private set; }
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var property in properties)
+            property.Freeze();
+
+        foreach (var method in methods)
+            method.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
+
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public SourceLocation? Definition { get; }
 
     public bool IsValueType
         => false;
 
-    public TypeLayout? Layout { get; set; }
+    public TypeLayout? Layout
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
-    public INamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public IReadOnlyList<InterfacePropertyMetadata> Properties
         => properties;

@@ -2,7 +2,6 @@ using System.Text;
 
 namespace Trilang.Metadata;
 
-// TODO: immutable metadata
 public class TypeMetadata : IGenericMetadata, INamedMetadata
 {
     public static readonly TypeMetadata InvalidType = Invalid("<>_invalid_type");
@@ -13,6 +12,7 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
     private readonly List<PropertyMetadata> properties;
     private readonly List<ConstructorMetadata> constructors;
     private readonly List<MethodMetadata> methods;
+    private bool isFrozen;
 
     public TypeMetadata(
         SourceLocation? definition,
@@ -87,31 +87,49 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
     }
 
     public void AddGenericArgument(ITypeMetadata typeArgumentMetadata)
-        => genericArguments.Add(typeArgumentMetadata);
+    {
+        EnsureNotFrozen();
+        genericArguments.Add(typeArgumentMetadata);
+    }
 
     public void AddInterface(InterfaceMetadata interfaceMetadata)
-        => interfaces.Add(interfaceMetadata);
+    {
+        EnsureNotFrozen();
+        interfaces.Add(interfaceMetadata);
+    }
 
     public void AddField(FieldMetadata field)
-        => fields.Add(field);
+    {
+        EnsureNotFrozen();
+        fields.Add(field);
+    }
 
     public AggregateMetadata GetFields(string name)
         => new AggregateMetadata(fields.Where(f => f.Name == name));
 
     public void AddProperty(PropertyMetadata property)
-        => properties.Add(property);
+    {
+        EnsureNotFrozen();
+        properties.Add(property);
+    }
 
     public AggregateMetadata GetProperties(string name)
         => new AggregateMetadata(properties.Where(f => f.Name == name));
 
     public void AddConstructor(ConstructorMetadata constructor)
-        => constructors.Add(constructor);
+    {
+        EnsureNotFrozen();
+        constructors.Add(constructor);
+    }
 
     public ConstructorMetadata? GetConstructor(IEnumerable<ITypeMetadata> parameters)
         => constructors.FirstOrDefault(c => c.Type.ParameterTypes.SequenceEqual(parameters));
 
     public void AddMethod(MethodMetadata method)
-        => methods.Add(method);
+    {
+        EnsureNotFrozen();
+        methods.Add(method);
+    }
 
     public AggregateMetadata GetMethods(string name)
         => new AggregateMetadata(methods.Where(m => m.Name == name));
@@ -131,17 +149,70 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
     }
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
 
-    public bool IsInvalid { get; private set; }
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var genericArgument in genericArguments)
+            genericArgument.Freeze();
+
+        foreach (var field in fields)
+            field.Freeze();
+
+        foreach (var property in properties)
+            property.Freeze();
+
+        foreach (var constructor in constructors)
+            constructor.Freeze();
+
+        foreach (var method in methods)
+            method.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
+
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public SourceLocation? Definition { get; }
 
     public bool IsValueType { get; }
 
-    public TypeLayout? Layout { get; set; }
+    public TypeLayout? Layout
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
-    public INamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public string Name { get; }
 

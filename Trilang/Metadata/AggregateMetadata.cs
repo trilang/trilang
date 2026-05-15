@@ -40,4 +40,8 @@ public class AggregateMetadata : IMetadata
 
     public bool IsEmpty
         => members.Count == 0;
+
+    public void Freeze()
+    {
+    }
 }

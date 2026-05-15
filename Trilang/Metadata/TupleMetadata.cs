@@ -6,6 +6,7 @@ public class TupleMetadata : IAnonymousTypeMetadata
     private readonly List<FieldMetadata> fields;
     private readonly List<PropertyMetadata> properties;
     private readonly List<MethodMetadata> methods;
+    private bool isFrozen;
 
     public TupleMetadata(SourceLocation? definition)
     {
@@ -21,7 +22,10 @@ public class TupleMetadata : IAnonymousTypeMetadata
         => $"({string.Join(", ", types)})";
 
     public void AddType(ITypeMetadata type)
-        => types.Add(type);
+    {
+        EnsureNotFrozen();
+        types.Add(type);
+    }
 
     public IMetadata? GetMember(string name)
         => GetProperty(name) ??
@@ -32,33 +36,89 @@ public class TupleMetadata : IAnonymousTypeMetadata
         => fields.FirstOrDefault(f => f.Name == name);
 
     public void AddField(FieldMetadata field)
-        => fields.Add(field);
+    {
+        EnsureNotFrozen();
+        fields.Add(field);
+    }
 
     public PropertyMetadata? GetProperty(string name)
         => properties.FirstOrDefault(f => f.Name == name);
 
     public void AddProperty(PropertyMetadata property)
-        => properties.Add(property);
+    {
+        EnsureNotFrozen();
+        properties.Add(property);
+    }
 
     public MethodMetadata? GetMethod(string name)
         => methods.FirstOrDefault(f => f.Name == name);
 
     public void AddMethod(MethodMetadata method)
-        => methods.Add(method);
+    {
+        EnsureNotFrozen();
+        methods.Add(method);
+    }
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
 
-    public bool IsInvalid { get; private set; }
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var field in fields)
+            field.Freeze();
+
+        foreach (var property in properties)
+            property.Freeze();
+
+        foreach (var method in methods)
+            method.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
+
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public SourceLocation? Definition { get; }
 
     public bool IsValueType
         => true;
 
-    public TypeLayout? Layout { get; set; }
+    public TypeLayout? Layout
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
-    public INamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;

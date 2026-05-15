@@ -12,4 +12,8 @@ public class InvalidMemberMetadata : IMetadata
     public string Name { get; }
 
     public ITypeMetadata Type => TypeMetadata.InvalidType;
+
+    public void Freeze()
+    {
+    }
 }

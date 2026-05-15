@@ -3,6 +3,7 @@ namespace Trilang.Metadata;
 public class PackageMetadata
 {
     private readonly HashSet<PackageMetadata> dependencies;
+    private bool isFrozen;
 
     public PackageMetadata(string name, NamespaceMetadata @namespace)
     {
@@ -12,7 +13,10 @@ public class PackageMetadata
     }
 
     public void AddDependency(PackageMetadata dependency)
-        => dependencies.Add(dependency);
+    {
+        EnsureNotFrozen();
+        dependencies.Add(dependency);
+    }
 
     public FindNamespaceResult FindNamespace(IEnumerable<string> parts)
     {
@@ -26,6 +30,19 @@ public class PackageMetadata
         }
 
         return FindNamespaceResult.Success(current);
+    }
+
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        Namespace.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
     }
 
     public string Name { get; }

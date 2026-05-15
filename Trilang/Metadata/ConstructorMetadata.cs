@@ -40,4 +40,10 @@ public class ConstructorMetadata : IFunctionMetadata
     public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
     public FunctionTypeMetadata Type { get; }
+
+    public void Freeze()
+    {
+        foreach (var parameter in Parameters)
+            parameter.Freeze();
+    }
 }

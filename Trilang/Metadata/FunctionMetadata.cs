@@ -3,6 +3,7 @@ namespace Trilang.Metadata;
 public class FunctionMetadata : IFunctionMetadata
 {
     private readonly List<ParameterMetadata> parameters;
+    private bool isFrozen;
 
     public FunctionMetadata(
         SourceLocation? definition,
@@ -22,14 +23,42 @@ public class FunctionMetadata : IFunctionMetadata
         => $"{Name}: {Type}";
 
     public void AddParameter(ParameterMetadata parameter)
-        => parameters.Add(parameter);
+    {
+        EnsureNotFrozen();
+        parameters.Add(parameter);
+    }
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
+
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var parameter in parameters)
+            parameter.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
 
     public SourceLocation? Definition { get; }
 
-    public bool IsInvalid { get; private set; }
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public AccessModifierMetadata AccessModifier { get; }
 
@@ -37,7 +66,23 @@ public class FunctionMetadata : IFunctionMetadata
 
     public IReadOnlyList<ParameterMetadata> Parameters => parameters;
 
-    public FunctionTypeMetadata Type { get; set; }
+    public FunctionTypeMetadata Type
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
-    public INamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 }

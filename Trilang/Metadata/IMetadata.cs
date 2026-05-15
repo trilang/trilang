@@ -6,4 +6,6 @@ public interface IMetadata
     SourceLocation? Definition { get; }
 
     bool IsInvalid { get; }
+
+    void Freeze();
 }

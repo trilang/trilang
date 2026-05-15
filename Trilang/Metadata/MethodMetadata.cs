@@ -2,6 +2,8 @@ namespace Trilang.Metadata;
 
 public class MethodMetadata : IFunctionMetadata
 {
+    private bool isFrozen;
+
     public MethodMetadata(
         SourceLocation? definition,
         ITypeMetadata declaringType,
@@ -24,11 +26,36 @@ public class MethodMetadata : IFunctionMetadata
         => $"{Name}: {Type}";
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
+
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var parameter in Parameters)
+            parameter.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
 
     public SourceLocation? Definition { get; }
 
-    public bool IsInvalid { get; private set; }
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public ITypeMetadata DeclaringType { get; }
 

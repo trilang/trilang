@@ -5,6 +5,7 @@ namespace Trilang.Metadata;
 public class AliasMetadata : IGenericMetadata, INamedMetadata
 {
     private readonly List<ITypeMetadata> genericArguments;
+    private bool isFrozen;
 
     public AliasMetadata(SourceLocation? definition, string name)
         : this(definition, name, [], null, false)
@@ -54,7 +55,10 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
     }
 
     public void AddGenericArgument(ITypeMetadata genericArgument)
-        => genericArguments.Add(genericArgument);
+    {
+        EnsureNotFrozen();
+        genericArguments.Add(genericArgument);
+    }
 
     public IMetadata? GetMember(string name)
     {
@@ -65,9 +69,34 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
     }
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
 
-    public bool IsInvalid { get; private set; }
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var genericArgument in genericArguments)
+            genericArgument.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
+
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public SourceLocation? Definition { get; }
 
@@ -82,9 +111,25 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
         }
     }
 
-    public TypeLayout? Layout { get; set; }
+    public TypeLayout? Layout
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
-    public INamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public string Name { get; }
 
@@ -93,7 +138,15 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
     public IReadOnlyList<ITypeMetadata> GenericArguments
         => genericArguments;
 
-    public ITypeMetadata? Type { get; set; }
+    public ITypeMetadata? Type
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public bool IsGeneric => genericArguments.Count > 0;
 }

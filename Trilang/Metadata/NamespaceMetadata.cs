@@ -7,6 +7,7 @@ public class NamespaceMetadata : INamespaceMetadata
     private readonly Dictionary<string, NamespaceMetadata> children;
     private readonly List<ITypeMetadata> types; // TODO: hashset/dictionary?
     private readonly List<FunctionMetadata> functions;
+    private bool isFrozen;
 
     private NamespaceMetadata(NamespaceMetadata? parent, string name)
     {
@@ -30,6 +31,7 @@ public class NamespaceMetadata : INamespaceMetadata
 
     public NamespaceMetadata CreateChild(IReadOnlyList<string> parts)
     {
+        EnsureNotFrozen();
         var current = this;
 
         foreach (var part in parts)
@@ -51,6 +53,7 @@ public class NamespaceMetadata : INamespaceMetadata
 
     public void AddType(ITypeMetadata type)
     {
+        EnsureNotFrozen();
         Debug.Assert(type is not TypeArgumentMetadata, "Generic arguments shouldn't be added a namespace.");
         Debug.Assert(type is not IAnonymousTypeMetadata, "Anonymous types can only be added to root namespace.");
         Debug.Assert(type.Namespace is null, "Type already belongs to another namespace.");
@@ -62,6 +65,7 @@ public class NamespaceMetadata : INamespaceMetadata
 
     public void AddFunction(FunctionMetadata function)
     {
+        EnsureNotFrozen();
         Debug.Assert(function.Namespace is null, "Function already belongs to another namespace");
 
         function.Namespace = this;
@@ -85,6 +89,26 @@ public class NamespaceMetadata : INamespaceMetadata
             foreach (var (_, child) in current.children)
                 q.Enqueue(child);
         }
+    }
+
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var (_, child) in children)
+            child.Freeze();
+
+        foreach (var type in types)
+            type.Freeze();
+
+        foreach (var function in functions)
+            function.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
     }
 
     public SourceLocation? Definition

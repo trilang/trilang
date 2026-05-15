@@ -2,6 +2,8 @@ namespace Trilang.Metadata;
 
 public class PropertyMetadata : IMetadata
 {
+    private bool isFrozen;
+
     public PropertyMetadata(
         SourceLocation? definition,
         ITypeMetadata declaringType,
@@ -22,11 +24,36 @@ public class PropertyMetadata : IMetadata
         => $"{Name}: {Type}";
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
+
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        Getter?.Freeze();
+        Setter?.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
 
     public SourceLocation? Definition { get; }
 
-    public bool IsInvalid { get; private set; }
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public ITypeMetadata DeclaringType { get; }
 

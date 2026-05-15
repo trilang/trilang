@@ -3,6 +3,7 @@ namespace Trilang.Metadata;
 public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata
 {
     private readonly List<ITypeMetadata> types;
+    private bool isFrozen;
 
     public DiscriminatedUnionMetadata(SourceLocation? definition, IEnumerable<ITypeMetadata> types)
     {
@@ -17,18 +18,54 @@ public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata
         => null;
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
 
-    public bool IsInvalid { get; private set; }
+    public void Freeze()
+        => isFrozen = true;
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
+
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public SourceLocation? Definition { get; }
 
     public bool IsValueType
         => true;
 
-    public TypeLayout? Layout { get; set; }
+    public TypeLayout? Layout
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
-    public INamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public IReadOnlyList<ITypeMetadata> Types
         => types;

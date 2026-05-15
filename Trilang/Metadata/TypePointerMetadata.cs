@@ -3,6 +3,8 @@ namespace Trilang.Metadata;
 // TODO: anonymous type?
 public class TypePointerMetadata : ITypeMetadata
 {
+    private bool isFrozen;
+
     public TypePointerMetadata(ITypeMetadata type)
         => Type = type;
 
@@ -11,6 +13,15 @@ public class TypePointerMetadata : ITypeMetadata
 
     public IMetadata? GetMember(string name)
         => Type.GetMember(name);
+
+    public void Freeze()
+        => isFrozen = true;
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
 
     public bool IsInvalid
         => false;
@@ -21,9 +32,25 @@ public class TypePointerMetadata : ITypeMetadata
     public bool IsValueType
         => true;
 
-    public TypeLayout? Layout { get; set; }
+    public TypeLayout? Layout
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
-    public INamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public ITypeMetadata Type { get; }
 }

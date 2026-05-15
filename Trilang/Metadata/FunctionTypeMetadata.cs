@@ -7,6 +7,7 @@ public class FunctionTypeMetadata : IAnonymousTypeMetadata
 
     private readonly HashSet<FieldMetadata> fields;
     private readonly List<ITypeMetadata> parameterTypes;
+    private bool isFrozen;
 
     public FunctionTypeMetadata(
         SourceLocation? definition,
@@ -29,24 +30,68 @@ public class FunctionTypeMetadata : IAnonymousTypeMetadata
         => $"({string.Join(", ", parameterTypes)}) => {ReturnType}";
 
     public void AddField(FieldMetadata field)
-        => fields.Add(field);
+    {
+        EnsureNotFrozen();
+        fields.Add(field);
+    }
 
     public IMetadata? GetMember(string name)
         => fields.FirstOrDefault(f => f.Name == name);
 
     public void MarkAsInvalid()
-        => IsInvalid = true;
+    {
+        EnsureNotFrozen();
+        IsInvalid = true;
+    }
 
-    public bool IsInvalid { get; private set; }
+    public void Freeze()
+    {
+        isFrozen = true;
+
+        foreach (var field in fields)
+            field.Freeze();
+    }
+
+    private void EnsureNotFrozen()
+    {
+        if (isFrozen)
+            throw new InvalidOperationException("Cannot modify frozen metadata.");
+    }
+
+    public bool IsInvalid
+    {
+        get;
+        private set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public SourceLocation? Definition { get; }
 
     public bool IsValueType
         => true;
 
-    public TypeLayout? Layout { get; set; }
+    public TypeLayout? Layout
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
-    public INamespaceMetadata? Namespace { get; set; }
+    public INamespaceMetadata? Namespace
+    {
+        get;
+        set
+        {
+            EnsureNotFrozen();
+            field = value;
+        }
+    }
 
     public IReadOnlyCollection<FieldMetadata> Fields => fields;
 

@@ -53,7 +53,11 @@ public class Compiler
 
             Debug.Assert(compilationContext.CurrentPackage is not null);
             compilationContexts.Add(compilationContext);
+
+            compilationContext.Freeze();
         }
+
+        builtInTypes.Freeze();
 
         if (diagnostics.HasErrors)
         {
