@@ -44,6 +44,10 @@ internal class MetadataFactory
 
             Interface @interface => CreateInterface(@interface),
 
+            PointerType pointerType => CreatePointer(
+                pointerType.GetLocation(),
+                pointerType.Type.Metadata.Required()),
+
             TupleType tupleType => CreateTupleMetadata(
                 tupleType.GetLocation(),
                 tupleType.Types.Select(t => t.Metadata.Required()).ToArray()),
@@ -111,14 +115,15 @@ internal class MetadataFactory
         }
 
         var nullableEmptyInterface = default(DiscriminatedUnionMetadata);
-        result = provider.QueryTypes(new GetUnion([emptyInterface, builtInTypes.Null]));
+        var types = new ITypeMetadata[] { emptyInterface, builtInTypes.Null };
+        result = provider.QueryTypes(new GetUnion(types));
         if (result.IsSuccess || result.IsMultipleTypesFound)
         {
             nullableEmptyInterface = (DiscriminatedUnionMetadata)result.Types[0];
         }
         else
         {
-            nullableEmptyInterface = new DiscriminatedUnionMetadata(null, [emptyInterface, builtInTypes.Null]);
+            nullableEmptyInterface = new DiscriminatedUnionMetadata(null, types);
             provider.DefineType(nullableEmptyInterface);
         }
 
@@ -131,7 +136,7 @@ internal class MetadataFactory
             new FieldMetadata(
                 metadata,
                 FunctionTypeMetadata.FunctionField,
-                new TypePointerMetadata(builtInTypes.Void))); // TODO: register in provider?
+                builtInTypes.VoidPointer));
         metadata.AddField(
             new FieldMetadata(
                 metadata,
@@ -154,7 +159,6 @@ internal class MetadataFactory
             return (GenericApplicationMetadata)result.Types[0];
 
         var metadata = new GenericApplicationMetadata(definition, openGeneric, arguments);
-
         provider.DefineType(metadata);
 
         return metadata;
@@ -242,6 +246,18 @@ internal class MetadataFactory
         if (result.IsSuccess || result.IsMultipleTypesFound)
             return (InterfaceMetadata)result.Types[0];
 
+        provider.DefineType(metadata);
+
+        return metadata;
+    }
+
+    public PointerMetadata CreatePointer(SourceLocation? definition, ITypeMetadata baseType)
+    {
+        var result = provider.QueryTypes(new GetPointer(baseType));
+        if (result.IsSuccess || result.IsMultipleTypesFound)
+            return (PointerMetadata)result.Types[0];
+
+        var metadata = new PointerMetadata(definition, baseType);
         provider.DefineType(metadata);
 
         return metadata;

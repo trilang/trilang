@@ -47,7 +47,10 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
 
         public override void VisitNewObject(NewObjectExpression node)
         {
-            var ctor = node.Metadata!;
+            var ctor = node.Metadata;
+            if (ctor is null || ctor.IsInvalid)
+                return;
+
             var type = ctor.DeclaringType;
             var parentType = node.FindInParent<TypeDeclaration>()?.Metadata;
 

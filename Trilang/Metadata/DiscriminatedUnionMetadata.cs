@@ -1,3 +1,5 @@
+using Trilang.Metadata.Aggregate;
+
 namespace Trilang.Metadata;
 
 public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata
@@ -14,8 +16,8 @@ public class DiscriminatedUnionMetadata : IAnonymousTypeMetadata
     public override string ToString()
         => string.Join(" | ", types);
 
-    public IMetadata? GetMember(string name)
-        => null;
+    public AggregateMetadata GetMembers(string name)
+        => AggregateMetadata.Empty;
 
     public void MarkAsInvalid()
     {

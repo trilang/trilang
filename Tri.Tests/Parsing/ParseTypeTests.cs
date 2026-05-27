@@ -1715,4 +1715,99 @@ public class ParseTypeTests
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
     }
+
+    [Test]
+    public void ParsePointerTypeTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(obj: i32*): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: obj
+                      PointerType
+                        TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+            """;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+    }
+
+    [Test]
+    public void ParsePointerOfPointerTypeTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(obj: i32**): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: obj
+                      PointerType
+                        PointerType
+                          TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+            """;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+    }
+
+    [Test]
+    public void ParseArrayPointerTypeTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(obj: i32[]*): void { }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: obj
+                      PointerType
+                        ArrayType
+                          TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+            """;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+    }
 }

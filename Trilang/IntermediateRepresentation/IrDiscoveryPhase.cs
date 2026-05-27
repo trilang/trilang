@@ -31,7 +31,7 @@ internal class IrDiscoveryPhase : Visitor
             foreach (var property in properties)
             {
                 var declaringType = property.DeclaringType;
-                var fieldMetadata = declaringType.GetMember($"<>_{property.Name}") as FieldMetadata ??
+                var fieldMetadata = declaringType.GetMembers($"<>_{property.Name}")[0] as FieldMetadata ??
                                     throw new Exception("Internal error: field metadata is null.");
 
                 if (property.Getter is not null && !functionsToGenerate.ContainsKey(property.Getter))

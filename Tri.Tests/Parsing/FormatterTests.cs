@@ -911,6 +911,84 @@ public class FormatterTests
     }
 
     [Test]
+    public void FormatAddressOfTest()
+    {
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, null, ["i32"]))],
+                    new TypeRefNode(default, null, ["void"]),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
+                            default,
+                            new UnaryExpressionNode(
+                                default,
+                                UnaryExpressionKind.AddressOf,
+                                new MemberAccessExpressionNode(default, "x")
+                            )
+                        )
+                    ])
+                ),
+            ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            namespace Test1;
+
+            public add(x: i32): void {
+                return &x;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatDereferenceTest()
+    {
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                FunctionDeclarationNode.Create(
+                    default,
+                    AccessModifier.Public,
+                    "add",
+                    [new ParameterNode(default, "x", new TypeRefNode(default, null, ["i32"]))],
+                    new TypeRefNode(default, null, ["void"]),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
+                            default,
+                            new UnaryExpressionNode(
+                                default,
+                                UnaryExpressionKind.Dereference,
+                                new MemberAccessExpressionNode(default, "x")
+                            )
+                        )
+                    ])
+                ),
+            ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            namespace Test1;
+
+            public add(x: i32): void {
+                return *x;
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void FormatIfTest()
     {
         var tree = new SyntaxTree(
@@ -2125,8 +2203,14 @@ public class FormatterTests
                             new TypeRefNode(default, null, ["Point"]),
                             new NewObjectExpressionNode(
                                 default,
-                                new TypeRefNode(default, null, ["Point"]),
-                                [LiteralExpressionNode.Integer(default, 1), LiteralExpressionNode.Integer(default, 2)]
+                                new CallExpressionNode(
+                                    default,
+                                    new MemberAccessExpressionNode(default, "Point"),
+                                    [
+                                        LiteralExpressionNode.Integer(default, 1),
+                                        LiteralExpressionNode.Integer(default, 2)
+                                    ]
+                                )
                             )
                         )
                     ])
@@ -2384,10 +2468,13 @@ public class FormatterTests
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
-                            new NewArrayExpressionNode(
+                            new NewObjectExpressionNode(
                                 default,
-                                new ArrayTypeNode(default, new TypeRefNode(default, null, ["i32"])),
-                                LiteralExpressionNode.Integer(default, 10)
+                                new ArrayAccessExpressionNode(
+                                    default,
+                                    new MemberAccessExpressionNode(default, "i32"),
+                                    LiteralExpressionNode.Integer(default, 10)
+                                )
                             )
                         )
                     ])
@@ -2824,6 +2911,60 @@ public class FormatterTests
             namespace Test.Test2;
 
             public main(): pkg::NS1.MyType {
+            }
+            """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void FormatGenericExpressionTest()
+    {
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test", "Test2"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "main",
+                    [],
+                    new TypeRefNode(default, null, ["void"]),
+                    new BlockStatementNode(default, [
+                        new VariableDeclarationNode(
+                            default,
+                            "l",
+                            new GenericApplicationNode(
+                                default,
+                                new TypeRefNode(default, null, ["List"]),
+                                [new TypeRefNode(default, null, ["i32"])]),
+                            new NewObjectExpressionNode(
+                                default,
+                                new CallExpressionNode(
+                                    default,
+                                    new GenericExpressionNode(
+                                        default,
+                                        new MemberAccessExpressionNode(
+                                            default,
+                                            new MemberAccessExpressionNode(
+                                                default,
+                                                new MemberAccessExpressionNode(
+                                                    default,
+                                                    "System"),
+                                                "Collections"),
+                                            "List"),
+                                        [new TypeRefNode(default, null, ["i32"])]),
+                                    [])))
+                    ]))
+            ]);
+        var formatted = tree.ToString();
+        const string expected =
+            """
+            namespace Test.Test2;
+
+            public main(): void {
+                var l: List<i32> = new System.Collections.List<i32>();
             }
             """;
 

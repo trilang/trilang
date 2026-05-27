@@ -3,7 +3,7 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-public class MemberAccessExpression : IExpression
+public class MemberAccessExpression : IAccessExpression
 {
     public const string This = "this";
     public const string Field = "field";
@@ -52,35 +52,8 @@ public class MemberAccessExpression : IExpression
     public ITypeMetadata ReturnTypeMetadata
         => Reference switch
         {
-            VariableMetadata variable
-                => variable.Type,
-
-            ParameterMetadata parameter
-                => parameter.Type,
-
-            FieldMetadata field
-                => @field.Type,
-
-            PropertyMetadata property
-                => property.Type,
-
-            MethodMetadata method
-                => method.Type,
-
-            FunctionMetadata function
-                => function.Type,
-
-            InterfacePropertyMetadata interfaceProperty
-                => interfaceProperty.Type,
-
-            InterfaceMethodMetadata interfaceMethod
-                => interfaceMethod.Type,
-
-            ITypeMetadata type
-                => type,
-
-            InvalidMemberMetadata invalidMember
-                => invalidMember.Type,
+            ITypeMetadata typeMetadata => typeMetadata,
+            ITypedMetadata typedMetadata => typedMetadata.Type,
 
             _ => TypeMetadata.InvalidType,
         };

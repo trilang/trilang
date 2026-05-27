@@ -99,6 +99,13 @@ public static class SemanticNodeExtensions
                         q.Enqueue(typeArgument);
 
                     break;
+                case GenericExpression genericExpression:
+                    q.Enqueue(genericExpression.Member);
+
+                    foreach (var genericArgument in genericExpression.GenericArguments)
+                        q.Enqueue(genericArgument);
+
+                    break;
                 case GoTo:
                     break;
                 case IfDirective ifDirectiveNode:
@@ -151,20 +158,16 @@ public static class SemanticNodeExtensions
                     break;
                 case Namespace:
                     break;
-                case NewArrayExpression newArrayExpressionNode:
-                    q.Enqueue(newArrayExpressionNode.Type);
-                    q.Enqueue(newArrayExpressionNode.Size);
-                    break;
                 case NewObjectExpression newExpressionNode:
-                    q.Enqueue(newExpressionNode.Type);
-                    foreach (var parameter in newExpressionNode.Parameters)
-                        q.Enqueue(parameter);
-
+                    q.Enqueue(newExpressionNode.Member);
                     break;
                 case NullExpression:
                     break;
                 case Parameter parameterNode:
                     q.Enqueue(parameterNode.Type);
+                    break;
+                case PointerType pointerType:
+                    q.Enqueue(pointerType.Type);
                     break;
                 case PropertyDeclaration propertyDeclarationNode:
                     q.Enqueue(propertyDeclarationNode.Type);

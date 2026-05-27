@@ -44,6 +44,8 @@ public interface ITransformer<out TResult>
 
     TResult TransformGenericType(GenericApplication node);
 
+    TResult TransformGenericExpression(GenericExpression node);
+
     TResult TransformGoTo(GoTo node);
 
     TResult TransformIfDirective(IfDirective node);
@@ -68,13 +70,13 @@ public interface ITransformer<out TResult>
 
     TResult TransformNamespace(Namespace node);
 
-    TResult TransformNewArray(NewArrayExpression node);
-
     TResult TransformNewObject(NewObjectExpression node);
 
     TResult TransformNull(NullExpression node);
 
     TResult TransformParameter(Parameter node);
+
+    TResult TransformPointer(PointerType node);
 
     TResult TransformProperty(PropertyDeclaration node);
 

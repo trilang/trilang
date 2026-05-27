@@ -2,9 +2,9 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-public class CallExpression : IExpression
+public class CallExpression : IAccessExpression
 {
-    public CallExpression(SourceSpan? sourceSpan, IExpression member, IReadOnlyList<IExpression> parameters)
+    public CallExpression(SourceSpan? sourceSpan, IAccessExpression member, IReadOnlyList<IExpression> parameters)
     {
         SourceSpan = sourceSpan;
         Member = member;
@@ -25,13 +25,13 @@ public class CallExpression : IExpression
         => transformer.TransformCall(this);
 
     public IExpression Clone()
-        => new CallExpression(SourceSpan, Member.Clone(), Parameters.Select(x => x.Clone()).ToArray());
+        => new CallExpression(SourceSpan, (IAccessExpression)Member.Clone(), Parameters.Select(x => x.Clone()).ToArray());
 
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
 
-    public IExpression Member { get; }
+    public IAccessExpression Member { get; }
 
     public IReadOnlyList<IExpression> Parameters { get; }
 
@@ -40,4 +40,10 @@ public class CallExpression : IExpression
 
     public ITypeMetadata? ReturnTypeMetadata
         => Metadata?.ReturnType;
+
+    public IMetadata? Reference
+    {
+        get => Member.Reference;
+        set => Member.Reference = value;
+    }
 }

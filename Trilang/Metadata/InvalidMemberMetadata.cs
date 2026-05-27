@@ -1,17 +1,21 @@
 namespace Trilang.Metadata;
 
-public class InvalidMemberMetadata : IMetadata
+public class InvalidMemberMetadata : ITypedMetadata
 {
-    public InvalidMemberMetadata(string name)
-        => Name = name;
+    public static readonly InvalidMemberMetadata Instance = new InvalidMemberMetadata();
 
-    public SourceLocation? Definition => null;
+    private InvalidMemberMetadata()
+    {
+    }
 
-    public bool IsInvalid => true;
+    public SourceLocation? Definition
+        => null;
 
-    public string Name { get; }
+    public bool IsInvalid
+        => true;
 
-    public ITypeMetadata Type => TypeMetadata.InvalidType;
+    public ITypeMetadata Type
+        => TypeMetadata.InvalidType;
 
     public void Freeze()
     {

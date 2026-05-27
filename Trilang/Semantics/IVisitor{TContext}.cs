@@ -44,6 +44,8 @@ public interface IVisitor<in TContext>
 
     void VisitGenericType(GenericApplication node, TContext context);
 
+    void VisitGenericExpression(GenericExpression node, TContext context);
+
     void VisitGoTo(GoTo node, TContext context);
 
     void VisitIfDirective(IfDirective node, TContext context);
@@ -68,13 +70,13 @@ public interface IVisitor<in TContext>
 
     void VisitNamespace(Namespace node, TContext context);
 
-    void VisitNewArray(NewArrayExpression node, TContext context);
-
     void VisitNewObject(NewObjectExpression node, TContext context);
 
     void VisitNull(NullExpression node, TContext context);
 
     void VisitParameter(Parameter node, TContext context);
+
+    void VisitPointer(PointerType node, TContext context);
 
     void VisitProperty(PropertyDeclaration node, TContext context);
 

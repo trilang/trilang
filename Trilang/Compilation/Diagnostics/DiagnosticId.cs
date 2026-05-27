@@ -30,7 +30,7 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
     public static readonly DiagnosticId S0006ExpectedArray = ForSemantic(6);
     public static readonly DiagnosticId S0007ExpectedFunction = ForSemantic(7);
     public static readonly DiagnosticId S0008UnknownMember = ForSemantic(8);
-    public static readonly DiagnosticId S0009CantCreateObject = ForSemantic(9);
+    public static readonly DiagnosticId S0009ExpectedCtorOrArray = ForSemantic(9);
     public static readonly DiagnosticId S0010IncompatibleUnaryOperator = ForSemantic(10);
     public static readonly DiagnosticId S0011IncompatibleBinaryOperator = ForSemantic(11);
     public static readonly DiagnosticId S0012BreakOutsideLoop = ForSemantic(12);
@@ -45,12 +45,15 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
     public static readonly DiagnosticId S0021MemberIsNotImplemented = ForSemantic(21);
     public static readonly DiagnosticId S0022InterfacePropertyCantBePrivate = ForSemantic(22);
     public static readonly DiagnosticId S0023NoSuitableOverload = ForSemantic(23);
-    public static readonly DiagnosticId S0024MultipleOverloads = ForSemantic(24);
+    public static readonly DiagnosticId S0024MultipleCandidates = ForSemantic(24);
     public static readonly DiagnosticId S0025ExtraArgument = ForSemantic(25);
     public static readonly DiagnosticId S0026MissingArgument = ForSemantic(26);
     public static readonly DiagnosticId S0027MultipleMembersFound = ForSemantic(27);
     public static readonly DiagnosticId S0028UnknownNamespace = ForSemantic(28);
     public static readonly DiagnosticId S0029UnknownPackage = ForSemantic(29);
+    public static readonly DiagnosticId S0030NonGenericMember = ForSemantic(30);
+    public static readonly DiagnosticId S0031ExpectedConstructor = ForSemantic(31);
+    public static readonly DiagnosticId S0032UnresolvedMembers = ForSemantic(32);
 
     public static readonly DiagnosticId C0001DuplicateDependency = ForCompiler(1);
     public static readonly DiagnosticId C0002CyclicDependency = ForCompiler(2);

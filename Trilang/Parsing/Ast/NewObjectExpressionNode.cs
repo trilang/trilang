@@ -1,20 +1,13 @@
-using System.Diagnostics;
 using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
 public class NewObjectExpressionNode : IExpressionNode
 {
-    public NewObjectExpressionNode(
-        SourceSpan sourceSpan,
-        IInlineTypeNode type,
-        IReadOnlyList<IExpressionNode> parameters)
+    public NewObjectExpressionNode(SourceSpan sourceSpan, IExpressionNode member)
     {
-        Debug.Assert(type is TypeRefNode or GenericApplicationNode or FakeTypeNode);
-
         SourceSpan = sourceSpan;
-        Type = type;
-        Parameters = parameters;
+        Member = member;
     }
 
     public override string ToString()
@@ -33,7 +26,5 @@ public class NewObjectExpressionNode : IExpressionNode
 
     public SourceSpan SourceSpan { get; }
 
-    public IInlineTypeNode Type { get; }
-
-    public IReadOnlyList<IExpressionNode> Parameters { get; }
+    public IExpressionNode Member { get; }
 }

@@ -1,3 +1,5 @@
+using Trilang.Metadata.Aggregate;
+
 namespace Trilang.Metadata;
 
 public interface ITypeMetadata : IMetadata
@@ -8,5 +10,5 @@ public interface ITypeMetadata : IMetadata
 
     INamespaceMetadata? Namespace { get; set; }
 
-    IMetadata? GetMember(string name);
+    AggregateMetadata GetMembers(string name);
 }

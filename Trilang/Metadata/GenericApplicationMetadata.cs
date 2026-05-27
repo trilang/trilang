@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Metadata.Aggregate;
 
 namespace Trilang.Metadata;
 
@@ -26,8 +27,8 @@ public class GenericApplicationMetadata : IAnonymousTypeMetadata
             _ => throw new InvalidOperationException(),
         };
 
-    public IMetadata? GetMember(string name)
-        => ClosedGeneric?.GetMember(name);
+    public AggregateMetadata GetMembers(string name)
+        => ClosedGeneric?.GetMembers(name) ?? AggregateMetadata.Empty;
 
     public void Freeze()
     {

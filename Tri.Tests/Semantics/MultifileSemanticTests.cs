@@ -25,7 +25,7 @@ public class MultifileSemanticTests
                 namespace Test1;
 
                 public main(): void {
-                    var p: Point = new Point();
+                    var p: Point* = new Point();
                 }
                 """));
 
@@ -53,7 +53,7 @@ public class MultifileSemanticTests
                 namespace Test1;
 
                 public main(): void {
-                    var p: Point = new Point();
+                    var p: Point* = new Point();
                 }
                 """),
             new SourceFile(

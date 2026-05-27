@@ -1,7 +1,9 @@
 namespace Trilang.Metadata;
 
-public class FunctionMetadata : IFunctionMetadata
+public class FunctionMetadata : IFunctionMetadata, ITypedMetadata
 {
+    public static readonly FunctionMetadata Invalid;
+
     private readonly List<ParameterMetadata> parameters;
     private bool isFrozen;
 
@@ -17,6 +19,19 @@ public class FunctionMetadata : IFunctionMetadata
         Name = name;
         this.parameters = [..parameters];
         Type = type;
+    }
+
+    static FunctionMetadata()
+    {
+        Invalid = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "<>_invalid_function",
+            [],
+            FunctionTypeMetadata.Invalid());
+
+        Invalid.MarkAsInvalid();
+        Invalid.Freeze();
     }
 
     public override string ToString()
@@ -75,6 +90,8 @@ public class FunctionMetadata : IFunctionMetadata
             field = value;
         }
     }
+
+    ITypeMetadata ITypedMetadata.Type => Type;
 
     public INamespaceMetadata? Namespace
     {

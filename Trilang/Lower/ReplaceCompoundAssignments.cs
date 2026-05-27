@@ -14,7 +14,7 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
 
     public ISemanticNode TransformArrayAccess(ArrayAccessExpression node)
     {
-        var member = (IExpression)node.Member.Transform(this);
+        var member = (IAccessExpression)node.Member.Transform(this);
         var index = (IExpression)node.Index.Transform(this);
         if (ReferenceEquals(member, node.Member) && ReferenceEquals(index, node.Index))
             return node;
@@ -94,7 +94,7 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
 
     public ISemanticNode TransformCall(CallExpression node)
     {
-        var member = (IExpression)node.Member.Transform(this);
+        var member = (IAccessExpression)node.Member.Transform(this);
 
         var changed = false;
         var parameters = new IExpression[node.Parameters.Count];
@@ -171,6 +171,9 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
     public ISemanticNode TransformGenericType(GenericApplication node)
         => node;
 
+    public ISemanticNode TransformGenericExpression(GenericExpression node)
+        => node;
+
     public ISemanticNode TransformGoTo(GoTo node)
         => node;
 
@@ -238,34 +241,13 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
     public ISemanticNode TransformNamespace(Namespace node)
         => node;
 
-    public ISemanticNode TransformNewArray(NewArrayExpression node)
-    {
-        var size = (IExpression)node.Size.Transform(this);
-        if (ReferenceEquals(size, node.Size))
-            return node;
-
-        return new NewArrayExpression(null, node.Type, size)
-        {
-            ReturnTypeMetadata = node.ReturnTypeMetadata,
-        };
-    }
-
     public ISemanticNode TransformNewObject(NewObjectExpression node)
     {
-        var changed = false;
-        var parameters = new IExpression[node.Parameters.Count];
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            if (ReferenceEquals(node.Parameters[i], parameters[i]))
-                changed = true;
-
-            parameters[i] = (IExpression)node.Parameters[i].Transform(this);
-        }
-
-        if (!changed)
+        var member = (IAccessExpression)node.Member.Transform(this);
+        if (ReferenceEquals(member, node.Member))
             return node;
 
-        return new NewObjectExpression(null, node.Type, parameters)
+        return new NewObjectExpression(null, member)
         {
             Metadata = node.Metadata,
         };
@@ -275,6 +257,9 @@ internal class ReplaceCompoundAssignments : ITransformer<ISemanticNode>
         => node;
 
     public ISemanticNode TransformParameter(Parameter node)
+        => node;
+
+    public ISemanticNode TransformPointer(PointerType node)
         => node;
 
     public ISemanticNode TransformProperty(PropertyDeclaration node)

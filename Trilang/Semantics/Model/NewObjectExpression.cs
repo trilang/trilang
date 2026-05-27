@@ -1,22 +1,14 @@
-using System.Diagnostics;
 using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
 public class NewObjectExpression : IExpression
 {
-    public NewObjectExpression(SourceSpan? sourceSpan, IInlineType type, IReadOnlyList<IExpression> parameters)
+    public NewObjectExpression(SourceSpan? sourceSpan, IAccessExpression member)
     {
-        Debug.Assert(type is TypeRef or GenericApplication or FakeType);
-
         SourceSpan = sourceSpan;
-        Type = type;
-        Parameters = parameters;
-
-        Type.Parent = this;
-
-        foreach (var parameter in Parameters)
-            parameter.Parent = this;
+        Member = member;
+        Member.Parent = this;
     }
 
     public void Accept(IVisitor visitor)
@@ -29,7 +21,7 @@ public class NewObjectExpression : IExpression
         => transformer.TransformNewObject(this);
 
     public IExpression Clone()
-        => new NewObjectExpression(SourceSpan, Type.Clone(), Parameters.Select(x => x.Clone()).ToArray())
+        => new NewObjectExpression(SourceSpan, (IAccessExpression)Member.Clone())
         {
             Metadata = Metadata,
         };
@@ -38,12 +30,9 @@ public class NewObjectExpression : IExpression
 
     public SourceSpan? SourceSpan { get; }
 
-    public IInlineType Type { get; }
-
-    public IReadOnlyList<IExpression> Parameters { get; }
+    public IAccessExpression Member { get; }
 
     public ConstructorMetadata? Metadata { get; set; }
 
-    public ITypeMetadata? ReturnTypeMetadata
-        => Type.Metadata;
+    public ITypeMetadata? ReturnTypeMetadata { get; set; }
 }

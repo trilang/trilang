@@ -377,10 +377,12 @@ public class ParseMemberAccessTests
                   BlockStatement
                     Statements
                       ReturnStatement
-                        MemberAccess
-                          NewObject
-                            TypeRef: Test
-                          Name: a
+                        NewObject
+                          MemberAccess
+                            Call
+                              MemberAccess
+                                Name: Test
+                            Name: a
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -411,12 +413,13 @@ public class ParseMemberAccessTests
                   BlockStatement
                     Statements
                       ReturnStatement
-                        MemberAccess
-                          NewArray
-                            ArrayType
-                              TypeRef: i32
-                            Literal: Integer = 0
-                          Name: size
+                        NewObject
+                          MemberAccess
+                            ArrayAccess
+                              MemberAccess
+                                Name: i32
+                              Literal: Integer = 0
+                            Name: size
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);

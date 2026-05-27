@@ -251,6 +251,19 @@ internal class MetadataGenerator : ISemanticPass
                 }
             }
 
+            var returnType = default(ITypeMetadata);
+            if (node.IsGeneric)
+            {
+                returnType = metadataFactory.CreateGenericApplication(
+                    null,
+                    type,
+                    node.GenericArguments.Select(x => x.Metadata!).ToArray());
+            }
+            else
+            {
+                returnType = type;
+            }
+
             if (node.Constructors.Count > 0)
             {
                 foreach (var constructor in node.Constructors)
@@ -259,7 +272,7 @@ internal class MetadataGenerator : ISemanticPass
                     var functionType = metadataFactory.CreateFunctionType(
                         null,
                         parameters.Select(x => x.Type).ToArray(),
-                        builtInTypes.Void);
+                        returnType);
 
                     var constructorMetadata = new ConstructorMetadata(
                         new SourceLocation(root.SourceFile, constructor.SourceSpan.GetValueOrDefault()),
@@ -274,7 +287,7 @@ internal class MetadataGenerator : ISemanticPass
             }
             else
             {
-                var functionType = metadataFactory.CreateFunctionType(null, [], builtInTypes.Void);
+                var functionType = metadataFactory.CreateFunctionType(null, [], returnType);
                 type.AddConstructor(new ConstructorMetadata(
                     null,
                     type,
@@ -565,7 +578,7 @@ internal class MetadataGenerator : ISemanticPass
 
             var metadataProvider = metadataProviderMap.Get(genericApplication);
             var getOpenGeneric = new GetOpenGeneric(
-                Query.From(genericApplication.Type),
+                genericApplication.Type.Name,
                 genericApplication.TypeArguments.Count);
             var result = metadataProvider.QueryTypes(getOpenGeneric);
             var openGeneric = default(IGenericMetadata);
@@ -602,6 +615,12 @@ internal class MetadataGenerator : ISemanticPass
                 if (method.ReturnType.Metadata is null)
                     GetOrCreateType(method.ReturnType);
             }
+        }
+        else if (inlineType is PointerType pointerType)
+        {
+            var type = pointerType.Type;
+            if (type.Metadata is null)
+                GetOrCreateType(type);
         }
         else if (inlineType is TupleType tupleType)
         {
@@ -683,6 +702,16 @@ internal class MetadataGenerator : ISemanticPass
             generator.GetOrCreateType(node);
 
             base.VisitInterface(node);
+        }
+
+        public override void VisitPointer(PointerType node)
+        {
+            if (node.Metadata is not null)
+                return;
+
+            generator.GetOrCreateType(node);
+
+            base.VisitPointer(node);
         }
 
         public override void VisitTupleType(TupleType node)
@@ -858,19 +887,19 @@ internal class MetadataGenerator : ISemanticPass
         GenericApplication,
     }
 
-    private record TypeDescriptor(TypeKind Kind, string Name, ISemanticNode Node)
+    private record TypeDescriptor(TypeKind Kind, ISemanticNode Node)
     {
         public static TypeDescriptor TypeDeclaration(TypeDeclaration node)
-            => new TypeDescriptor(TypeKind.TypeDeclaration, node.Name, node);
+            => new TypeDescriptor(TypeKind.TypeDeclaration, node);
 
         public static TypeDescriptor Alias(AliasDeclaration node)
-            => new TypeDescriptor(TypeKind.Alias, node.FullName, node);
+            => new TypeDescriptor(TypeKind.Alias, node);
 
         public static TypeDescriptor GenericDeclaration(TypeDeclaration node)
-            => new TypeDescriptor(TypeKind.GenericDeclaration, node.FullName, node);
+            => new TypeDescriptor(TypeKind.GenericDeclaration, node);
 
         public static TypeDescriptor GenericApplication(GenericApplication node)
-            => new TypeDescriptor(TypeKind.GenericApplication, node.Name, node);
+            => new TypeDescriptor(TypeKind.GenericApplication, node);
 
         public bool IsTypeDeclaration
             => Kind == TypeKind.TypeDeclaration;

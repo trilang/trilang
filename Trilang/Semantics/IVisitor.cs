@@ -44,6 +44,8 @@ public interface IVisitor
 
     void VisitGenericType(GenericApplication node);
 
+    void VisitGenericExpression(GenericExpression node);
+
     void VisitGoTo(GoTo node);
 
     void VisitIfDirective(IfDirective node);
@@ -68,13 +70,13 @@ public interface IVisitor
 
     void VisitNamespace(Namespace node);
 
-    void VisitNewArray(NewArrayExpression node);
-
     void VisitNewObject(NewObjectExpression node);
 
     void VisitNull(NullExpression node);
 
     void VisitParameter(Parameter node);
+
+    void VisitPointer(PointerType node);
 
     void VisitProperty(PropertyDeclaration node);
 

@@ -1,18 +1,26 @@
+using Trilang.Metadata.Aggregate;
+
 namespace Trilang.Metadata;
 
-// TODO: anonymous type?
-public class TypePointerMetadata : ITypeMetadata
+public class PointerMetadata : IAnonymousTypeMetadata
 {
     private bool isFrozen;
 
-    public TypePointerMetadata(ITypeMetadata type)
-        => Type = type;
+    public PointerMetadata(SourceLocation? definition, ITypeMetadata type)
+    {
+        Definition = definition;
+        Type = type;
+    }
 
     public override string ToString()
-        => $"{Type}*";
+        => Type switch
+        {
+            DiscriminatedUnionMetadata or FunctionTypeMetadata => $"({Type})*",
+            _ => $"{Type}*",
+        };
 
-    public IMetadata? GetMember(string name)
-        => Type.GetMember(name);
+    public AggregateMetadata GetMembers(string name)
+        => Type.GetMembers(name);
 
     public void Freeze()
         => isFrozen = true;
@@ -23,11 +31,12 @@ public class TypePointerMetadata : ITypeMetadata
             throw new InvalidOperationException("Cannot modify frozen metadata.");
     }
 
-    public bool IsInvalid
-        => false;
+    public void MarkAsInvalid()
+        => IsInvalid = true;
 
-    public SourceLocation? Definition
-        => Type.Definition;
+    public bool IsInvalid { get; private set; }
+
+    public SourceLocation? Definition { get; }
 
     public bool IsValueType
         => true;

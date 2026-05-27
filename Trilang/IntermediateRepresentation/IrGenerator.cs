@@ -226,9 +226,6 @@ public class IrGenerator
             MemberAccessExpression memberAccessExpressionNode
                 => GenerateMemberAccess(builder, memberAccessExpressionNode),
 
-            NewArrayExpression newArrayExpressionNode
-                => GenerateNewArray(builder, newArrayExpressionNode),
-
             NewObjectExpression newObjectExpressionNode
                 => GenerateNewObject(builder, newObjectExpressionNode),
 
@@ -271,7 +268,7 @@ public class IrGenerator
 
         if (node.Kind == Assignment)
         {
-            if (left.Type is TypePointerMetadata)
+            if (left.Type is PointerMetadata)
             {
                 builder.Store(left, right);
 
@@ -401,24 +398,13 @@ public class IrGenerator
             }
         }
 
-        return GenerateCall(builder, delegatePointerRegister, node.Parameters, isStatic, functionType!);
-    }
-
-    private Register GenerateCall(
-        IrBuilder builder,
-        Register delegateRegister,
-        IReadOnlyList<IExpression> parameters,
-        bool isStatic,
-        FunctionTypeMetadata functionType)
-    {
-        delegateRegister = builder.Deref(delegateRegister, functionType);
-
-        var parameterRegisters = new Register[parameters.Count];
-        for (var i = 0; i < parameters.Count; i++)
+        var delegateRegister = builder.Deref(delegatePointerRegister, functionType!);
+        var parameterRegisters = new Register[node.Parameters.Count];
+        for (var i = 0; i < node.Parameters.Count; i++)
         {
-            var parameter = parameters[i];
-            var register = GenerateExpression(builder, parameter)!.Value;
-            register = builder.Deref(register, parameter.ReturnTypeMetadata!);
+            var parameter1 = node.Parameters[i];
+            var register = GenerateExpression(builder, parameter1)!.Value;
+            register = builder.Deref(register, parameter1.ReturnTypeMetadata!);
 
             parameterRegisters[i] = register;
         }
@@ -464,7 +450,7 @@ public class IrGenerator
         {
             return node.Reference switch
             {
-                FunctionMetadata
+                IFunctionMetadata
                     => builder.GetMemberPointer(node.Reference),
 
                 TypeMetadata
@@ -481,24 +467,13 @@ public class IrGenerator
         return result;
     }
 
-    private Register GenerateNewArray(IrBuilder builder, NewArrayExpression node)
-    {
-        var size = GenerateExpression(builder, node.Size)!.Value;
-        size = builder.Deref(size, node.Size.ReturnTypeMetadata!);
-
-        return builder.ArrayAlloc((ArrayMetadata)node.Type.Metadata!, size);
-    }
-
     private Register GenerateNewObject(IrBuilder builder, NewObjectExpression node)
     {
-        var constructorMetadata = node.Metadata!;
+        var call = GenerateExpression(builder, node.Member);
+        if (call is null)
+            throw new IrException("Failed to generate call to constructor."); // TODO: ???
 
-        var memory = builder.Alloc(node.ReturnTypeMetadata!);
-        var member = builder.GetMemberPointer(constructorMetadata, memory);
-
-        GenerateCall(builder, member, node.Parameters, false, constructorMetadata.Type);
-
-        return memory;
+        return call.Value;
     }
 
     private Register GenerateNull(IrBuilder builder, NullExpression node)

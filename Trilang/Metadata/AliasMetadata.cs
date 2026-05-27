@@ -1,4 +1,5 @@
 using System.Text;
+using Trilang.Metadata.Aggregate;
 
 namespace Trilang.Metadata;
 
@@ -60,13 +61,10 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
         genericArguments.Add(genericArgument);
     }
 
-    public IMetadata? GetMember(string name)
-    {
-        if (IsInvalid)
-            return null;
-
-        return Type?.GetMember(name);
-    }
+    public AggregateMetadata GetMembers(string name)
+        => IsInvalid || Type is null
+            ? AggregateMetadata.Empty
+            : Type.GetMembers(name);
 
     public void MarkAsInvalid()
     {

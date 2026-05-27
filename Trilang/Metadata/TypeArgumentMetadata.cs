@@ -1,3 +1,5 @@
+using Trilang.Metadata.Aggregate;
+
 namespace Trilang.Metadata;
 
 public class TypeArgumentMetadata : ITypeMetadata
@@ -19,8 +21,8 @@ public class TypeArgumentMetadata : ITypeMetadata
     public override string ToString()
         => Name;
 
-    public IMetadata? GetMember(string name)
-        => null;
+    public AggregateMetadata GetMembers(string name)
+        => AggregateMetadata.Empty;
 
     public void Freeze()
         => isFrozen = true;

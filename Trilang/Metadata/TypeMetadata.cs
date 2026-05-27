@@ -1,4 +1,5 @@
 using System.Text;
+using Trilang.Metadata.Aggregate;
 
 namespace Trilang.Metadata;
 
@@ -43,18 +44,6 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
     {
     }
 
-    public TypeMetadata(
-        SourceLocation? definition,
-        string name,
-        IEnumerable<ITypeMetadata> genericArguments,
-        IEnumerable<InterfaceMetadata> interfaces,
-        IEnumerable<FieldMetadata> fields,
-        IEnumerable<PropertyMetadata> properties,
-        IEnumerable<ConstructorMetadata> constructors,
-        IEnumerable<MethodMetadata> methods) : this(definition, name, genericArguments, interfaces, fields, properties, constructors, methods, false, false)
-    {
-    }
-
     public static TypeMetadata Invalid(string name)
         => new TypeMetadata(null, name, [], [], [], [], [], [], false, true) { IsInvalid = true };
 
@@ -65,7 +54,7 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
 
         var sb = new StringBuilder();
 
-        if (genericArguments.Any(x => x is not TypeArgumentMetadata))
+        if (IsCompilerGenerated)
             sb.Append("<>_");
 
         sb.Append(Name);
@@ -122,8 +111,8 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
         constructors.Add(constructor);
     }
 
-    public ConstructorMetadata? GetConstructor(IEnumerable<ITypeMetadata> parameters)
-        => constructors.FirstOrDefault(c => c.Type.ParameterTypes.SequenceEqual(parameters));
+    public AggregateMetadata GetConstructors()
+        => new AggregateMetadata(constructors);
 
     public void AddMethod(MethodMetadata method)
     {
@@ -134,18 +123,16 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
     public AggregateMetadata GetMethods(string name)
         => new AggregateMetadata(methods.Where(m => m.Name == name));
 
-    public IMetadata? GetMember(string name)
+    public AggregateMetadata GetMembers(string name)
     {
-        var aggregate = GetProperties(name)
+        var members = GetProperties(name)
             .Combine(GetMethods(name))
             .Combine(GetFields(name));
 
-        return aggregate.Members switch
-        {
-            [] => null,
-            [var single] => single,
-            _ => aggregate,
-        };
+        if (name == ConstructorMetadata.Name)
+            members = members.Combine(GetConstructors());
+
+        return members;
     }
 
     public void MarkAsInvalid()

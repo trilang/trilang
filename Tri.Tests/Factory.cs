@@ -39,7 +39,7 @@ internal static class Factory
             new FieldMetadata(
                 metadata,
                 FunctionTypeMetadata.FunctionField,
-                new TypePointerMetadata(@void)));
+                new PointerMetadata(null, @void)));
         metadata.AddField(
             new FieldMetadata(
                 metadata,

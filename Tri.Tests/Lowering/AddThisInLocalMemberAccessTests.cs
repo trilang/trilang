@@ -38,7 +38,7 @@ public class AddThisInLocalMemberAccessTests
             typeMetadata,
             AccessModifierMetadata.Public,
             [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+            CreateFunctionType([], typeMetadata, rootNamespace)));
         typeMetadata.AddField(new FieldMetadata(typeMetadata, "<>_count", builtInTypes.I32));
         var propertyMetadata = CreatePropertyMetadata(
             rootNamespace,
@@ -111,7 +111,7 @@ public class AddThisInLocalMemberAccessTests
             typeMetadata,
             AccessModifierMetadata.Public,
             [],
-            CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+            CreateFunctionType([], typeMetadata, rootNamespace)));
         var methodMetadata = new MethodMetadata(
             null,
             typeMetadata,

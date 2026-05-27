@@ -1,3 +1,5 @@
+using Trilang.Metadata.Aggregate;
+
 namespace Trilang.Metadata;
 
 public class FunctionTypeMetadata : IAnonymousTypeMetadata
@@ -35,8 +37,14 @@ public class FunctionTypeMetadata : IAnonymousTypeMetadata
         fields.Add(field);
     }
 
-    public IMetadata? GetMember(string name)
-        => fields.FirstOrDefault(f => f.Name == name);
+    public AggregateMetadata GetMembers(string name)
+    {
+        var field = fields.FirstOrDefault(f => f.Name == name);
+
+        return field is null
+            ? AggregateMetadata.Empty
+            : new AggregateMetadata([field]);
+    }
 
     public void MarkAsInvalid()
     {

@@ -1,3 +1,5 @@
+using Trilang.Metadata.Aggregate;
+
 namespace Trilang.Metadata;
 
 public class InterfaceMetadata : IAnonymousTypeMetadata
@@ -53,18 +55,9 @@ public class InterfaceMetadata : IAnonymousTypeMetadata
     public AggregateMetadata GetMethods(string name)
         => new AggregateMetadata(methods.Where(m => m.Name == name));
 
-    public IMetadata? GetMember(string name)
-    {
-        var aggregate = GetProperties(name)
+    public AggregateMetadata GetMembers(string name)
+        => GetProperties(name)
             .Combine(GetMethods(name));
-
-        return aggregate.Members switch
-        {
-            [] => null,
-            [var single] => single,
-            _ => aggregate,
-        };
-    }
 
     public void MarkAsInvalid()
     {

@@ -42,6 +42,8 @@ public interface INodeVisitor
 
     void VisitGenericType(GenericApplicationNode node);
 
+    void VisitGenericExpression(GenericExpressionNode node);
+
     void VisitIfDirective(IfDirectiveNode node);
 
     void VisitIf(IfStatementNode node);
@@ -62,13 +64,13 @@ public interface INodeVisitor
 
     void VisitNamespace(NamespaceNode node);
 
-    void VisitNewArray(NewArrayExpressionNode node);
-
     void VisitNewObject(NewObjectExpressionNode node);
 
     void VisitNull(NullExpressionNode node);
 
     void VisitParameter(ParameterNode node);
+
+    void VisitPointer(PointerTypeNode node);
 
     void VisitProperty(PropertyDeclarationNode node);
 

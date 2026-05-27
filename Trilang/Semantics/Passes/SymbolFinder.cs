@@ -183,6 +183,16 @@ internal class SymbolFinder : ISemanticPass
                 typeArgument.Accept(this, context);
         }
 
+        public void VisitGenericExpression(GenericExpression node, SymbolTable context)
+        {
+            map.Add(node, context);
+
+            node.Member.Accept(this, context);
+
+            foreach (var genericArgument in node.GenericArguments)
+                genericArgument.Accept(this, context);
+        }
+
         public void VisitGoTo(GoTo node, SymbolTable context)
             => Debug.Fail("`goto` is the compiler's internal feature and are not directly supported in the programming language.");
 
@@ -280,22 +290,11 @@ internal class SymbolFinder : ISemanticPass
         public void VisitNamespace(Namespace node, SymbolTable context)
             => map.Add(node, context);
 
-        public void VisitNewArray(NewArrayExpression node, SymbolTable context)
-        {
-            map.Add(node, context);
-
-            node.Type.Accept(this, context);
-            node.Size.Accept(this, context);
-        }
-
         public void VisitNewObject(NewObjectExpression node, SymbolTable context)
         {
             map.Add(node, context);
 
-            node.Type.Accept(this, context);
-
-            foreach (var parameter in node.Parameters)
-                parameter.Accept(this, context);
+            node.Member.Accept(this, context);
         }
 
         public void VisitNull(NullExpression node, SymbolTable context)
@@ -313,6 +312,13 @@ internal class SymbolFinder : ISemanticPass
             map.Add(node, context);
 
             context.AddId(node.Name, node);
+
+            node.Type.Accept(this, context);
+        }
+
+        public void VisitPointer(PointerType node, SymbolTable context)
+        {
+            map.Add(node, context);
 
             node.Type.Accept(this, context);
         }

@@ -185,6 +185,12 @@ public partial class Formatter : INodeVisitor
         writer.WriteLine(';');
     }
 
+    public void VisitPointer(PointerTypeNode node)
+    {
+        node.Type.Accept(this);
+        writer.Write('*');
+    }
+
     public void VisitProperty(PropertyDeclarationNode node)
     {
         writer.Write(node.Name);
@@ -308,6 +314,12 @@ public partial class Formatter : INodeVisitor
         }
 
         writer.Write('>');
+    }
+
+    public void VisitGenericExpression(GenericExpressionNode node)
+    {
+        node.Member.Accept(this);
+        WriteGenericArguments(node);
     }
 
     public void VisitIfDirective(IfDirectiveNode node)
@@ -526,30 +538,10 @@ public partial class Formatter : INodeVisitor
         writer.Write(';');
     }
 
-    public void VisitNewArray(NewArrayExpressionNode node)
-    {
-        writer.Write("new ");
-        node.Type.ElementType.Accept(this);
-        writer.Write('[');
-        node.Size.Accept(this);
-        writer.Write(']');
-    }
-
     public void VisitNewObject(NewObjectExpressionNode node)
     {
         writer.Write("new ");
-        node.Type.Accept(this);
-        writer.Write('(');
-
-        for (var i = 0; i < node.Parameters.Count; i++)
-        {
-            node.Parameters[i].Accept(this);
-
-            if (i < node.Parameters.Count - 1)
-                writer.Write(", ");
-        }
-
-        writer.Write(')');
+        node.Member.Accept(this);
     }
 
     public void VisitNull(NullExpressionNode node)
@@ -722,6 +714,8 @@ public partial class Formatter : INodeVisitor
             UnaryExpressionKind.UnaryMinus => '-',
             UnaryExpressionKind.LogicalNot => '!',
             UnaryExpressionKind.BitwiseNot => '~',
+            UnaryExpressionKind.AddressOf => '&',
+            UnaryExpressionKind.Dereference => '*',
 
             _ => throw new ArgumentOutOfRangeException(nameof(node.Kind)),
         });

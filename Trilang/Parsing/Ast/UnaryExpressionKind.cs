@@ -9,4 +9,7 @@ public enum UnaryExpressionKind
 
     LogicalNot,
     BitwiseNot,
+
+    AddressOf,
+    Dereference,
 }

@@ -30,6 +30,9 @@ public abstract record Query
                         x.ParameterTypes.Select(t => t.Metadata.Required()).ToArray(),
                         x.ReturnType.Metadata.Required())).ToArray()),
 
+            PointerType pointerType
+                => new GetPointer(pointerType.Type.Metadata.Required()),
+
             TupleType tuple => new GetTuple(
                 tuple.Types.Select(t => t.Metadata.Required()).ToArray()),
 
@@ -48,18 +51,9 @@ public abstract record Query
 
     public static Query From(IGenericDeclaration node)
     {
-        var query = (Query)new ByName(node.Name);
+        var query = new ByName(node.Name);
         if (node.IsGeneric)
-            query = new GetOpenGeneric(query, node.GenericArguments.Count);
-
-        return query;
-    }
-
-    public static Query From(IGenericMetadata node)
-    {
-        var query = (Query)new ByName(node.Name);
-        if (node.IsGeneric)
-            query = new GetClosedGeneric(query, node.GenericArguments);
+            return new GetOpenGeneric(node.Name, node.GenericArguments.Count);
 
         return query;
     }
@@ -75,9 +69,7 @@ public record GetUnion(IReadOnlyList<ITypeMetadata> Types) : Query;
 
 public record GetFunctionType(IReadOnlyList<ITypeMetadata> Parameters, ITypeMetadata ReturnType) : Query;
 
-public record GetOpenGeneric(Query BaseQuery, int TypeArgumentsCount) : Query;
-
-public record GetClosedGeneric(Query BaseQuery, IReadOnlyList<ITypeMetadata> TypeArguments) : Query;
+public record GetOpenGeneric(string Name, int? TypeArgumentsCount = null) : Query;
 
 public record GetGenericApplication(ITypeMetadata OpenGeneric, IReadOnlyList<ITypeMetadata> TypeArguments) : Query;
 
@@ -86,5 +78,7 @@ public record GetInterface(IReadOnlyList<GetInterfaceProperty> Properties, IRead
 public record GetInterfaceProperty(string Name, ITypeMetadata Type);
 
 public record GetInterfaceMethod(string Name, IReadOnlyList<ITypeMetadata> ParameterTypes, ITypeMetadata ReturnType);
+
+public record GetPointer(ITypeMetadata BaseType) : Query;
 
 public record GetTuple(IReadOnlyList<ITypeMetadata> Types) : Query;

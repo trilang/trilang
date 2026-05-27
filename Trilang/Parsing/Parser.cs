@@ -390,7 +390,8 @@ public class Parser
             context.Diagnostics.ExpectedTypeName(context.Reader.Span.Start);
         }
 
-        var genericArguments = TryParseGenericTypeArguments(context);
+        var genericArguments = ParseGenericTypeArguments(context);
+
         if (context.Reader.Match(Equal))
         {
             var type = TryParseInlineTypeNode(context) ??
@@ -505,17 +506,15 @@ public class Parser
             methods);
     }
 
-    private List<IInlineTypeNode> TryParseGenericTypeArguments(ParserContext context)
+    private IReadOnlyList<IInlineTypeNode> ParseGenericTypeArguments(ParserContext context)
     {
-        var arguments = new List<IInlineTypeNode>();
-
         if (!context.Reader.Match(Less))
-            return arguments;
+            return [];
 
         var type = TryParseTypeRef(context) as TypeRefNode ??
                    ParseFakeType(context, Comma, Greater) as IInlineTypeNode;
 
-        arguments.Add(type);
+        var arguments = new List<IInlineTypeNode> { type };
 
         while (true)
         {
@@ -1017,6 +1016,10 @@ public class Parser
             kind = UnaryExpressionKind.LogicalNot;
         else if (token.Is(Tilde))
             kind = UnaryExpressionKind.BitwiseNot;
+        else if (token.Is(Ampersand))
+            kind = UnaryExpressionKind.AddressOf;
+        else if (token.Is(Asterisk))
+            kind = UnaryExpressionKind.Dereference;
 
         if (kind != UnaryExpressionKind.Unknown)
         {
@@ -1039,63 +1042,92 @@ public class Parser
 
         while (true)
         {
-            if (context.Reader.Match(Dot))
-            {
-                var (idSpan, id) = TryParseId(context);
-                if (id is not null)
-                {
-                    member = new MemberAccessExpressionNode(
-                        member.SourceSpan.Combine(idSpan),
-                        member,
-                        id);
-                }
-                else
-                {
-                    var (hasInteger, number) = context.Reader.Match(Integer);
-                    if (hasInteger)
-                    {
-                        member = new MemberAccessExpressionNode(
-                            member.SourceSpan.Combine(number.SourceSpan),
-                            member,
-                            number.Integer.ToString());
-                    }
-                    else
-                    {
-                        member = new FakeExpressionNode(context.Reader.Token.SourceSpan);
-                        context.Diagnostics.ExpectedIdentifier(member.SourceSpan);
-                    }
-                }
-            }
-            else if (context.Reader.Match(OpenBracket))
-            {
-                var index = TryParseExpression(context) ??
-                            ParseFakeExpression(context, CloseBracket);
+            var expression = TryParseDotMemberExpression(context, member) ??
+                             TryParseArrayAccessExpression(context, member) ??
+                             TryParseCallExpression(context, member) ??
+                             TryParseGenericExpression(context, member);
 
-                var closeBracketSpan = context.Reader.Expect(CloseBracket);
-
-                member = new ArrayAccessExpressionNode(
-                    member.SourceSpan.Combine(closeBracketSpan),
-                    member,
-                    index);
-            }
-            else if (context.Reader.Match(OpenParen))
-            {
-                var arguments = TryParseCallArguments(context);
-                var closeParenSpan = context.Reader.Expect(CloseParen);
-
-                member = new CallExpressionNode(
-                    member.SourceSpan.Combine(closeParenSpan),
-                    member,
-                    arguments);
-            }
-            else
-            {
+            if (expression is null)
                 break;
-            }
+
+            member = expression;
         }
 
         return member;
     }
+
+    private IExpressionNode? TryParseDotMemberExpression(ParserContext context, IExpressionNode member)
+    {
+        if (!context.Reader.Match(Dot))
+            return null;
+
+        var (idSpan, id) = TryParseId(context);
+        if (id is not null)
+            return new MemberAccessExpressionNode(member.SourceSpan.Combine(idSpan), member, id);
+
+        var (hasInteger, number) = context.Reader.Match(Integer);
+        if (hasInteger)
+            return new MemberAccessExpressionNode(
+                member.SourceSpan.Combine(number.SourceSpan),
+                member,
+                number.Integer.ToString());
+
+        var result = new FakeExpressionNode(context.Reader.Token.SourceSpan);
+        context.Diagnostics.ExpectedIdentifier(result.SourceSpan);
+
+        return result;
+    }
+
+    private IExpressionNode? TryParseArrayAccessExpression(ParserContext context, IExpressionNode member)
+    {
+        if (!context.Reader.Match(OpenBracket))
+            return null;
+
+        var index = TryParseExpression(context) ??
+                    ParseFakeExpression(context, CloseBracket);
+
+        var closeBracketSpan = context.Reader.Expect(CloseBracket);
+
+        return new ArrayAccessExpressionNode(
+            member.SourceSpan.Combine(closeBracketSpan),
+            member,
+            index);
+    }
+
+    private IExpressionNode? TryParseCallExpression(ParserContext context, IExpressionNode member)
+    {
+        if (!context.Reader.Match(OpenParen))
+            return null;
+
+        var arguments = TryParseCallArguments(context);
+        var closeParenSpan = context.Reader.Expect(CloseParen);
+
+        return new CallExpressionNode(
+            member.SourceSpan.Combine(closeParenSpan),
+            member,
+            arguments);
+    }
+
+    private IExpressionNode? TryParseGenericExpression(ParserContext context, IExpressionNode member)
+        => context.Reader.Scoped(context, /* TODO: static */ c =>
+        {
+            if (member is not MemberAccessExpressionNode memberAccess)
+                return null;
+
+            if (!c.Reader.Match(Less))
+                return null;
+
+            var genericArguments = c.Parser.TryParseGenericApplicationArguments(c);
+            if (genericArguments is null)
+                return null;
+
+            var greaterSpan = c.Reader.Expect(Greater);
+
+            return new GenericExpressionNode(
+                member.SourceSpan.Combine(greaterSpan),
+                memberAccess,
+                genericArguments);
+        });
 
     private List<IExpressionNode> TryParseCallArguments(ParserContext context)
     {
@@ -1133,7 +1165,6 @@ public class Parser
            TryParseParenExpression(context) ??
            TryParseVariable(context) ??
            TryParseNewObjectExpression(context) ??
-           TryParseNewArrayExpression(context) ??
            TryParseNullExpression(context) ??
            TryParseLiteral(context) as IExpressionNode;
 
@@ -1216,43 +1247,12 @@ public class Parser
             if (!hasNew)
                 return null;
 
-            var type = c.Parser.TryParseTypeRef(c) ??
-                       c.Parser.ParseFakeType(c, OpenParen);
-
-            if (!c.Reader.Match(OpenParen))
-                return null;
-
-            var arguments = c.Parser.TryParseCallArguments(c);
-            var closeParenSpan = c.Reader.Expect(CloseParen);
+            var member = c.Parser.TryParseMemberExpression(c) ??
+                         c.Parser.ParseFakeExpression(c, CloseParen, SemiColon);
 
             return new NewObjectExpressionNode(
-                newKeyword.SourceSpan.Combine(closeParenSpan),
-                type,
-                arguments);
-        });
-
-    private NewArrayExpressionNode? TryParseNewArrayExpression(ParserContext context)
-        => context.Reader.Scoped(context, static c =>
-        {
-            var (hasNew, newKeyword) = c.Reader.Match(New);
-            if (!hasNew)
-                return null;
-
-            var type = c.Parser.TryParseTypeRef(c) ??
-                       c.Parser.ParseFakeType(c, OpenBracket, CloseBracket);
-
-            if (!c.Reader.Match(OpenBracket))
-                return null;
-
-            var size = c.Parser.TryParseExpression(c) ??
-                       c.Parser.ParseFakeExpression(c, CloseBracket);
-
-            var closeBraceSpan = c.Reader.Expect(CloseBracket);
-
-            return new NewArrayExpressionNode(
-                newKeyword.SourceSpan.Combine(closeBraceSpan),
-                new ArrayTypeNode(type.SourceSpan, type),
-                size);
+                newKeyword.SourceSpan.Combine(c.Reader.Token.SourceSpan.Start),
+                member);
         });
 
     private LiteralExpressionNode? TryParseLiteral(ParserContext context)
@@ -1327,10 +1327,20 @@ public class Parser
         while (true)
         {
             var (hasOpenCloseBracket, openCloseBracket) = context.Reader.Match(OpenCloseBracket);
-            if (!hasOpenCloseBracket)
-                break;
+            if (hasOpenCloseBracket)
+            {
+                type = new ArrayTypeNode(type.SourceSpan.Combine(openCloseBracket.SourceSpan), type);
+                continue;
+            }
 
-            type = new ArrayTypeNode(type.SourceSpan.Combine(openCloseBracket.SourceSpan), type);
+            var (hasAsterisk, asterisk) = context.Reader.Match(Asterisk);
+            if (hasAsterisk)
+            {
+                type = new PointerTypeNode(type.SourceSpan.Combine(asterisk.SourceSpan), type);
+                continue;
+            }
+
+            break;
         }
 
         return type;
@@ -1392,11 +1402,24 @@ public class Parser
         if (!context.Reader.Match(Less))
             return type;
 
-        var typeArguments = new List<IInlineTypeNode>();
-        var typeArgument = TryParseInlineTypeNode(context) ??
-                           ParseFakeType(context, Comma, Greater);
+        var typeArguments = TryParseGenericApplicationArguments(context) ??
+                            [ParseFakeType(context, Comma, Greater)];
 
-        typeArguments.Add(typeArgument);
+        var greaterSignSpan = context.Reader.Expect(Greater);
+
+        return new GenericApplicationNode(
+            type.SourceSpan.Combine(greaterSignSpan),
+            type,
+            typeArguments);
+    }
+
+    private List<IInlineTypeNode>? TryParseGenericApplicationArguments(ParserContext context)
+    {
+        var typeArgument = TryParseInlineTypeNode(context);
+        if (typeArgument is null)
+            return null;
+
+        var typeArguments = new List<IInlineTypeNode> { typeArgument };
 
         while (true)
         {
@@ -1417,12 +1440,7 @@ public class Parser
             typeArguments.Add(typeArgument);
         }
 
-        var greaterSignSpan = context.Reader.Expect(Greater);
-
-        return new GenericApplicationNode(
-            type.SourceSpan.Combine(greaterSignSpan),
-            type,
-            typeArguments);
+        return typeArguments;
     }
 
     private (SourceSpan, IReadOnlyList<IInlineTypeNode>?) TryParseTypeList(ParserContext context)

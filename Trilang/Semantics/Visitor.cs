@@ -126,6 +126,14 @@ internal abstract class Visitor : IVisitor
             node.TypeArguments[i].Accept(this);
     }
 
+    public virtual void VisitGenericExpression(GenericExpression node)
+    {
+        node.Member.Accept(this);
+
+        for (var i = 0; i < node.GenericArguments.Count; i++)
+            node.GenericArguments[i].Accept(this);
+    }
+
     public virtual void VisitGoTo(GoTo node)
     {
     }
@@ -205,25 +213,19 @@ internal abstract class Visitor : IVisitor
     {
     }
 
-    public virtual void VisitNewArray(NewArrayExpression node)
-    {
-        node.Type.Accept(this);
-        node.Size.Accept(this);
-    }
-
     public virtual void VisitNewObject(NewObjectExpression node)
-    {
-        node.Type.Accept(this);
-
-        for (var i = 0; i < node.Parameters.Count; i++)
-            node.Parameters[i].Accept(this);
-    }
+        => node.Member.Accept(this);
 
     public virtual void VisitNull(NullExpression node)
     {
     }
 
     public virtual void VisitParameter(Parameter node)
+    {
+        node.Type.Accept(this);
+    }
+
+    public virtual void VisitPointer(PointerType node)
     {
         node.Type.Accept(this);
     }

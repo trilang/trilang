@@ -78,8 +78,6 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
                 => CompareMethodDeclarationNode(x1, y1),
             (Namespace x1, Namespace y1)
                 => CompareNamespace(x1, y1),
-            (NewArrayExpression x1, NewArrayExpression y1)
-                => CompareNewArrayExpressionNode(x1, y1),
             (NewObjectExpression x1, NewObjectExpression y1)
                 => CompareNewObjectExpressionNode(x1, y1),
             (NullExpression x1, NullExpression y1)
@@ -485,30 +483,16 @@ internal class SemanticComparer : IEqualityComparer<ISemanticNode>
         return true;
     }
 
-    private bool CompareNewArrayExpressionNode(NewArrayExpression x, NewArrayExpression y)
-    {
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
-
-        if (!Equals(x.Size, y.Size))
-            throw new Exception("Sizes don't match.");
-
-        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
-            throw new Exception("Metadata doesn't match.");
-
-        return true;
-    }
-
     private bool CompareNewObjectExpressionNode(NewObjectExpression x, NewObjectExpression y)
     {
-        if (!Equals(x.Type, y.Type))
-            throw new Exception("Type doesn't match.");
-
-        if (!x.Parameters.SequenceEqual(y.Parameters, this))
-            throw new Exception("Arguments don't match.");
+        if (!Equals(x.Member, y.Member))
+            throw new Exception("Member doesn't match.");
 
         if (!new MetadataComparer().Equals(x.Metadata, y.Metadata))
             throw new Exception("Metadata doesn't match.");
+
+        if (!new MetadataComparer().Equals(x.ReturnTypeMetadata, y.ReturnTypeMetadata))
+            throw new Exception("ReturnTypeMetadata doesn't match.");
 
         return true;
     }

@@ -1,6 +1,6 @@
 using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Metadata;
+using Trilang.Metadata.Aggregate;
 using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
@@ -60,7 +60,7 @@ internal class UnresolvedMemberAccess : ISemanticPass
             }
 
             if (node.Reference is AggregateMetadata aggregate)
-                diagnostics.MultipleMembersFound(node, aggregate.Members);
+                diagnostics.UnresolvedMembers(node, aggregate.Members);
         }
     }
 }

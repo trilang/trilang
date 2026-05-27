@@ -2,9 +2,9 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-public class ArrayAccessExpression : IExpression
+public class ArrayAccessExpression : IAccessExpression
 {
-    public ArrayAccessExpression(SourceSpan? sourceSpan, IExpression member, IExpression index)
+    public ArrayAccessExpression(SourceSpan? sourceSpan, IAccessExpression member, IExpression index)
     {
         SourceSpan = sourceSpan;
         Member = member;
@@ -24,7 +24,7 @@ public class ArrayAccessExpression : IExpression
         => transformer.TransformArrayAccess(this);
 
     public IExpression Clone()
-        => new ArrayAccessExpression(SourceSpan, Member.Clone(), Index.Clone())
+        => new ArrayAccessExpression(SourceSpan, (IAccessExpression)Member.Clone(), Index.Clone())
         {
             ReturnTypeMetadata = ReturnTypeMetadata,
         };
@@ -33,9 +33,11 @@ public class ArrayAccessExpression : IExpression
 
     public SourceSpan? SourceSpan { get; }
 
-    public IExpression Member { get; }
+    public IAccessExpression Member { get; }
 
     public IExpression Index { get; }
 
     public ITypeMetadata? ReturnTypeMetadata { get; set; }
+
+    public IMetadata? Reference { get; set; }
 }

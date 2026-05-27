@@ -20,7 +20,7 @@ public class CheckAccessModifiersTests
             }
 
             public main(): void {
-                var x: Test = new Test();
+                var x: Test* = new Test();
             }
             """);
         var (project, diagnostics) = Parse(file);
@@ -41,7 +41,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(110, 8, 19), new SourcePosition(120, 8, 29))),
+                new SourceSpan(new SourcePosition(111, 8, 20), new SourcePosition(121, 8, 30))),
             "The constructor of 'Test' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -91,7 +91,7 @@ public class CheckAccessModifiersTests
             }
 
             public test(): i32 {
-                var p: Point = new Point();
+                var p: Point* = new Point();
 
                 return p.x;
             }
@@ -114,7 +114,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(147, 10, 12), new SourcePosition(150, 10, 15))),
+                new SourceSpan(new SourcePosition(148, 10, 12), new SourcePosition(151, 10, 15))),
             "The getter of 'x' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -132,7 +132,7 @@ public class CheckAccessModifiersTests
             }
 
             public test(): void {
-                var p: Point = new Point();
+                var p: Point* = new Point();
 
                 p.x = 1;
             }
@@ -155,7 +155,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(141, 10, 5), new SourcePosition(144, 10, 8))),
+                new SourceSpan(new SourcePosition(142, 10, 5), new SourcePosition(145, 10, 8))),
             "The setter of 'x' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

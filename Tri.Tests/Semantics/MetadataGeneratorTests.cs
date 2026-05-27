@@ -79,7 +79,10 @@ public class MetadataGeneratorTests
                 new ParameterMetadata(null, "x", compilationContext.BuiltInTypes.I32),
                 new ParameterMetadata(null, "y", compilationContext.BuiltInTypes.I32)
             ],
-            CreateFunctionType([compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32], compilationContext.BuiltInTypes.Void, expectedRoot)));
+            CreateFunctionType(
+                [compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32],
+                expected,
+                expectedRoot)));
         expected.AddMethod(new MethodMetadata(
             null,
             expected,
@@ -157,7 +160,7 @@ public class MetadataGeneratorTests
                 typeMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], expectedBuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], typeMetadata, expectedRoot)));
         var propertyMetadata = CreatePropertyMetadata(
             expectedRoot,
             typeMetadata,
@@ -216,7 +219,9 @@ public class MetadataGeneratorTests
             [],
             [],
             [],
-            [])
+            [],
+            false,
+            false)
         {
             Namespace = test1Namespace,
         };
@@ -226,7 +231,7 @@ public class MetadataGeneratorTests
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, ns)));
+                CreateFunctionType([], expected, ns)));
 
         var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
         var actual = test1Ns.FindType("Point");
@@ -595,7 +600,7 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, ns)));
+                CreateFunctionType([], expectedType, ns)));
 
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType, false)
         {
@@ -644,7 +649,7 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], expectedType, expectedRoot)));
 
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType, false)
         {
@@ -693,7 +698,7 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, ns)));
+                CreateFunctionType([], expectedType, ns)));
 
         var expectedArrayType = CreateArrayMetadata(expectedType, ns);
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType, false)
@@ -744,7 +749,7 @@ public class MetadataGeneratorTests
                 expectedType,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], expectedType, expectedRoot)));
 
         var expectedArrayType = CreateArrayMetadata(expectedType, expectedRoot);
         var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType, false)
@@ -1076,13 +1081,18 @@ public class MetadataGeneratorTests
         };
         expected.AddGenericArgument(new TypeArgumentMetadata(null, "T1"));
         expected.AddGenericArgument(new TypeArgumentMetadata(null, "T2"));
+
+        var openGenericApplication = new GenericApplicationMetadata(null, expected, expected.GenericArguments)
+        {
+            Namespace = expectedRoot,
+        };
         expected.AddConstructor(
             new ConstructorMetadata(
                 null,
                 expected,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], openGenericApplication, expectedRoot)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
@@ -1217,7 +1227,36 @@ public class MetadataGeneratorTests
 
         var expectedBuiltInTypes = new BuiltInTypes();
         var expectedRoot = RootNamespaceMetadata.Create(expectedBuiltInTypes);
-        var expected = new TypeMetadata(
+        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
+
+        var openList = new TypeMetadata(
+            null,
+            "List",
+            [new TypeArgumentMetadata(null, "T")],
+            [],
+            [],
+            [],
+            [],
+            [],
+            false,
+            false)
+        {
+            Namespace = expectedTest1,
+        };
+        var openGenericApplication = new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
+        {
+            Namespace = expectedRoot,
+        };
+        openList.AddConstructor(
+            new ConstructorMetadata(
+                null,
+                openList,
+                AccessModifierMetadata.Public,
+                [],
+                CreateFunctionType([], openGenericApplication, expectedRoot)));
+
+        var closedList = new TypeMetadata(
             null,
             "List",
             [expectedBuiltInTypes.I32],
@@ -1231,16 +1270,21 @@ public class MetadataGeneratorTests
         {
             Namespace = expectedRoot,
         };
-        expected.AddConstructor(
+        var closedGenericApplication = new GenericApplicationMetadata(null, openList, [expectedBuiltInTypes.I32])
+        {
+            Namespace = expectedRoot,
+            ClosedGeneric = closedList,
+        };
+        closedList.AddConstructor(
             new ConstructorMetadata(
                 null,
-                expected,
+                closedList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], closedGenericApplication, expectedRoot)));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(closedType!.ClosedGeneric, Is.EqualTo(expected).Using(new MetadataComparer()));
+        Assert.That(closedType!.ClosedGeneric, Is.EqualTo(closedList).Using(new MetadataComparer()));
     }
 
     [Test]
@@ -1267,7 +1311,7 @@ public class MetadataGeneratorTests
 
         var generic = compilationContext.RootNamespace.FindType("List<i32>") as GenericApplicationMetadata;
         var closedType = generic!.ClosedGeneric;
-        var property = closedType!.GetMember("Prop") as PropertyMetadata;
+        var property = closedType!.GetMembers("Prop")[0] as PropertyMetadata;
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
         Assert.That(property, Is.Not.Null);
@@ -1300,8 +1344,7 @@ public class MetadataGeneratorTests
         Assert.That(type, Is.Not.Null);
         Assert.That(type.Constructors, Has.Count.EqualTo(1));
 
-        var ctor = type.GetConstructor([]);
-        Assert.That(ctor, Is.Not.Null);
+        var ctor = (ConstructorMetadata)type.GetConstructors()[0];
         Assert.That(ctor.AccessModifier, Is.EqualTo(AccessModifierMetadata.Public));
     }
 
@@ -1332,7 +1375,7 @@ public class MetadataGeneratorTests
 
         var generic = (GenericApplicationMetadata)compilationContext.RootNamespace.FindType("List<i32>")!;
         var type = generic.ClosedGeneric;
-        var property = type!.GetMember("prop") as PropertyMetadata;
+        var property = type!.GetMembers("prop")[0] as PropertyMetadata;
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
         var expected = CreateArrayMetadata(compilationContext.BuiltInTypes.I32, ns);
 
@@ -1369,7 +1412,7 @@ public class MetadataGeneratorTests
 
         var generic = (GenericApplicationMetadata)compilationContext.RootNamespace.FindType("List<i32>")!;
         var type = generic.ClosedGeneric;
-        var property = type!.GetMember("prop") as PropertyMetadata;
+        var property = type!.GetMembers("prop")[0] as PropertyMetadata;
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
         var expected = CreateTupleMetadata([compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32], ns);
 
@@ -1408,9 +1451,11 @@ public class MetadataGeneratorTests
 
         var generic = (GenericApplicationMetadata)compilationContext.RootNamespace.FindType("List<i32>")!;
         var type = generic.ClosedGeneric;
-        var property = type!.GetMember("prop") as PropertyMetadata;
-        var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expected = new DiscriminatedUnionMetadata(null, [compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32])
+        var property = type!.GetMembers("prop")[0] as PropertyMetadata;
+
+        var expectedBuiltInTypes = new BuiltInTypes();
+        var ns = RootNamespaceMetadata.Create(expectedBuiltInTypes);
+        var expected = new DiscriminatedUnionMetadata(null, [expectedBuiltInTypes.I32, expectedBuiltInTypes.I32])
         {
             Namespace = ns,
         };
@@ -1448,7 +1493,7 @@ public class MetadataGeneratorTests
 
         var generic = (GenericApplicationMetadata)compilationContext.RootNamespace.FindType("List<i32>")!;
         var type = generic.ClosedGeneric;
-        var property = type!.GetMember("prop") as PropertyMetadata;
+        var property = type!.GetMembers("prop")[0] as PropertyMetadata;
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
         var expected = CreateFunctionType([], compilationContext.BuiltInTypes.I32, ns);
 
@@ -1483,7 +1528,7 @@ public class MetadataGeneratorTests
 
         var generic = (GenericApplicationMetadata)compilationContext.RootNamespace.FindType("List<i32>")!;
         var type = generic.ClosedGeneric;
-        var property = type!.GetMember("prop") as PropertyMetadata;
+        var property = type!.GetMembers("prop")[0] as PropertyMetadata;
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
         var expected = new InterfaceMetadata(null)
         {
@@ -1928,17 +1973,26 @@ public class MetadataGeneratorTests
         {
             Namespace = nsTest1,
         };
+        var openGenericApplication = new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
+        {
+            Namespace = nsRoot,
+        };
         openList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, nsRoot)));
+                CreateFunctionType([], openGenericApplication, nsRoot)));
 
         var closedList = new TypeMetadata(null, "List", [compilationContext.BuiltInTypes.I32], [], [], [], [], [], false, true)
         {
             Namespace = nsRoot,
+        };
+        var closedGenericApplication = new GenericApplicationMetadata(null, openList, [compilationContext.BuiltInTypes.I32])
+        {
+            Namespace = nsRoot,
+            ClosedGeneric = closedList,
         };
         closedList.AddConstructor(
             new ConstructorMetadata(
@@ -1946,7 +2000,7 @@ public class MetadataGeneratorTests
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, nsRoot)));
+                CreateFunctionType([], closedGenericApplication, nsRoot)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -1954,10 +2008,7 @@ public class MetadataGeneratorTests
                 null,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
-                new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
-                {
-                    Namespace = nsRoot,
-                },
+                openGenericApplication,
                 false
             )
             {
@@ -1971,11 +2022,7 @@ public class MetadataGeneratorTests
                 null,
                 "Test",
                 [compilationContext.BuiltInTypes.I32],
-                new GenericApplicationMetadata(null, openList, [compilationContext.BuiltInTypes.I32])
-                {
-                    Namespace = nsRoot,
-                    ClosedGeneric = closedList,
-                },
+                closedGenericApplication,
                 true
             )
             {
@@ -2031,13 +2078,17 @@ public class MetadataGeneratorTests
         {
             Namespace = expectedTest1,
         };
+        var openGenericApplication = new GenericApplicationMetadata(null, openList, openList.GenericArguments)
+        {
+            Namespace = expectedRoot,
+        };
         openList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], openGenericApplication, expectedRoot)));
 
         var closedList = new TypeMetadata(
             null,
@@ -2053,13 +2104,18 @@ public class MetadataGeneratorTests
         {
             Namespace = expectedRoot,
         };
+        var closedGenericApplication = new GenericApplicationMetadata(null, openList, [compilationContext.BuiltInTypes.I32])
+        {
+            Namespace = expectedRoot,
+            ClosedGeneric = closedList,
+        };
         closedList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], closedGenericApplication, expectedRoot)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -2084,11 +2140,7 @@ public class MetadataGeneratorTests
                 null,
                 "Test",
                 [compilationContext.BuiltInTypes.I32],
-                new GenericApplicationMetadata(null, openList, [compilationContext.BuiltInTypes.I32])
-                {
-                    Namespace = expectedRoot,
-                    ClosedGeneric = closedList,
-                },
+                closedGenericApplication,
                 true
             )
             {
@@ -2144,13 +2196,17 @@ public class MetadataGeneratorTests
         {
             Namespace = expectedTest1,
         };
+        var openGenericApplication = new GenericApplicationMetadata(null, openList, openList.GenericArguments)
+        {
+            Namespace = expectedRoot,
+        };
         openList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 openList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], openGenericApplication, expectedRoot)));
 
         var closedList = new TypeMetadata(
             null,
@@ -2166,13 +2222,22 @@ public class MetadataGeneratorTests
         {
             Namespace = expectedRoot,
         };
+        var closedGenericApplication = new GenericApplicationMetadata(
+            null,
+            openList,
+            [compilationContext.BuiltInTypes.Bool, compilationContext.BuiltInTypes.I32]
+        )
+        {
+            Namespace = expectedRoot,
+            ClosedGeneric = closedList,
+        };
         closedList.AddConstructor(
             new ConstructorMetadata(
                 null,
                 closedList,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], compilationContext.BuiltInTypes.Void, expectedRoot)));
+                CreateFunctionType([], closedGenericApplication, expectedRoot)));
 
         var expected = new GenericApplicationMetadata(
             null,
@@ -2201,15 +2266,7 @@ public class MetadataGeneratorTests
                 null,
                 "Test",
                 [compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.Bool],
-                new GenericApplicationMetadata(
-                    null,
-                    openList,
-                    [compilationContext.BuiltInTypes.Bool, compilationContext.BuiltInTypes.I32]
-                )
-                {
-                    Namespace = expectedRoot,
-                    ClosedGeneric = closedList,
-                },
+                closedGenericApplication,
                 true
             )
             {
@@ -2893,5 +2950,36 @@ public class MetadataGeneratorTests
 
         var actualDu = compilationContext.RootNamespace.FindType("i32 | null");
         Assert.That(actualDu, Is.EqualTo(expectedDu).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void GenerateMetadataForPointerTypeTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(p: i32*): void { }
+            """);
+        var (project, diagnostics) = Parse(file);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var expectedBuiltInTypes = new BuiltInTypes();
+        var ns = RootNamespaceMetadata.Create(expectedBuiltInTypes);
+        var expectedType = new PointerMetadata(null, expectedBuiltInTypes.I32)
+        {
+            Namespace = ns,
+        };
+
+        var actualType = compilationContext.RootNamespace.FindType("i32*");
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(actualType, Is.EqualTo(expectedType).Using(new MetadataComparer()));
     }
 }

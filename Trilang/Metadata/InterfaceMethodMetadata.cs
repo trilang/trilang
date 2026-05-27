@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class InterfaceMethodMetadata : IFunctionMetadata
+public class InterfaceMethodMetadata : IFunctionMetadata, ITypedMetadata
 {
     private bool isFrozen;
 
@@ -51,4 +51,6 @@ public class InterfaceMethodMetadata : IFunctionMetadata
     public string Name { get; }
 
     public FunctionTypeMetadata Type { get; }
+
+    ITypeMetadata ITypedMetadata.Type => Type;
 }

@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class FieldMetadata : IMetadata
+public class FieldMetadata : ITypedMetadata
 {
     public FieldMetadata(
         ITypeMetadata declaringType,

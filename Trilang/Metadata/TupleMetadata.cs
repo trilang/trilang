@@ -1,3 +1,5 @@
+using Trilang.Metadata.Aggregate;
+
 namespace Trilang.Metadata;
 
 public class TupleMetadata : IAnonymousTypeMetadata
@@ -27,10 +29,16 @@ public class TupleMetadata : IAnonymousTypeMetadata
         types.Add(type);
     }
 
-    public IMetadata? GetMember(string name)
-        => GetProperty(name) ??
-           GetMethod(name) ??
-           GetField(name) as IMetadata;
+    public AggregateMetadata GetMembers(string name)
+    {
+        var member = GetProperty(name) ??
+                     GetMethod(name) ??
+                     GetField(name) as IMetadata;
+
+        return member is null
+            ? AggregateMetadata.Empty
+            : new AggregateMetadata([member]);
+    }
 
     public FieldMetadata? GetField(string name)
         => fields.FirstOrDefault(f => f.Name == name);

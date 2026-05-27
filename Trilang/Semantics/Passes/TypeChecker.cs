@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
+using Trilang.Metadata.Aggregate;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Providers;
 using static Trilang.Semantics.Model.BinaryExpressionKind;
@@ -57,7 +58,8 @@ internal class TypeChecker : ISemanticPass
         private readonly CompilationContext compilationContext;
         private readonly BuiltInTypes builtInTypes;
 
-        public TypeCheckerVisitor(ISet<string> directives,
+        public TypeCheckerVisitor(
+            ISet<string> directives,
             SemanticDiagnosticReporter diagnostics,
             SymbolTableMap symbolTableMap,
             MetadataProviderMap metadataProviderMap,
@@ -71,18 +73,163 @@ internal class TypeChecker : ISemanticPass
             builtInTypes = compilationContext.BuiltInTypes;
         }
 
+        private void ResolveSingle(IExpression member)
+        {
+            if (member is IAccessExpression { Reference: AggregateMetadata aggregate } accessExpression)
+            {
+                var result = aggregate.ResolveSingle();
+                if (result is NoMatch<IMetadata>)
+                    diagnostics.NoMemberFound(accessExpression);
+                else if (result is MultipleMatches<IMetadata> multipleMembers)
+                    diagnostics.MultipleMembersFound(accessExpression, multipleMembers.Candidates);
+
+                accessExpression.Reference = result.Member;
+            }
+        }
+
+        private void ResolveFunction(CallExpression node)
+        {
+            var aggregate = (AggregateMetadata)node.Member.Reference!;
+            var result = aggregate.ResolveFunction(node.Parameters.Select(x => x.ReturnTypeMetadata!).ToArray());
+            if (result is ExtraArgument<IFunctionMetadata> extraArgument)
+            {
+                foreach (var position in extraArgument.Positions)
+                    diagnostics.ExtraArgument(node.Parameters[position]);
+            }
+            else if (result is MissingArgument<IFunctionMetadata> missingArgument)
+            {
+                foreach (var position in missingArgument.Positions)
+                    diagnostics.MissingArgument(node, missingArgument.Match.Type.ParameterTypes[position]);
+            }
+            else if (result is ArgumentMismatch<IFunctionMetadata> argumentMismatch)
+            {
+                foreach (var detail in argumentMismatch.Mismatches)
+                    diagnostics.TypeMismatch(node.Parameters[detail.Position], detail.Expected, detail.Actual);
+            }
+            else if (result is NotFunction notFunction)
+            {
+                diagnostics.ExpectedFunction(node.Member, notFunction.Candidate);
+            }
+            else if (result is NoMatch<IFunctionMetadata>)
+            {
+                diagnostics.NoSuitableOverload(node.Member);
+            }
+            else if (result is MultipleMatches<IFunctionMetadata> multipleOverloads)
+            {
+                diagnostics.MultipleCandidates(node.Member, multipleOverloads.Candidates);
+            }
+
+            node.Member.Reference = result.Member;
+        }
+
+        private void ResolveFunction(IExpression node, FunctionTypeMetadata functionType)
+        {
+            if (node is not IAccessExpression accessExpression)
+                return;
+
+            var parameters = functionType.ParameterTypes;
+            var aggregate = (AggregateMetadata)accessExpression.Reference!;
+            var result = aggregate.ResolveFunction(parameters);
+            if (result is ExtraArgument<IFunctionMetadata> extraArgument)
+            {
+                foreach (var position in extraArgument.Positions)
+                    diagnostics.ExtraArgument(accessExpression, parameters[position]);
+            }
+            else if (result is MissingArgument<IFunctionMetadata> missingArgument)
+            {
+                foreach (var position in missingArgument.Positions)
+                    diagnostics.MissingArgument(node, missingArgument.Match.Type.ParameterTypes[position]);
+            }
+            else if (result is ArgumentMismatch<IFunctionMetadata> argumentMismatch)
+            {
+                foreach (var detail in argumentMismatch.Mismatches)
+                    diagnostics.TypeMismatch(accessExpression, detail.Expected, detail.Actual);
+            }
+            else if (result is NoMatch<IFunctionMetadata>)
+            {
+                diagnostics.NoSuitableOverload(accessExpression);
+            }
+            else if (result is MultipleMatches<IFunctionMetadata> multipleMatches)
+            {
+                diagnostics.MultipleCandidates(accessExpression, multipleMatches.Candidates);
+            }
+
+            accessExpression.Reference = result.Member;
+        }
+
+        private IGenericMetadata ResolveGeneric(GenericExpression node)
+        {
+            var aggregate = node.Member.Reference as AggregateMetadata;
+            var result = aggregate!.ResolveGeneric(node.GenericArguments.Count);
+            if (result is ExtraArgument<IGenericMetadata> extraArgument)
+            {
+                foreach (var position in extraArgument.Positions)
+                    diagnostics.ExtraArgument(node.GenericArguments[position]);
+            }
+            else if (result is MissingArgument<IGenericMetadata> missingArgument)
+            {
+                foreach (var position in missingArgument.Positions)
+                    diagnostics.MissingArgument(node, missingArgument.Match.GenericArguments[position]);
+            }
+            else if (result is NotGeneric)
+            {
+                diagnostics.NonGenericMember(node);
+            }
+            else if (result is NoMatch<IGenericMetadata>)
+            {
+                diagnostics.NoSuitableOverload(node.Member);
+            }
+            else if (result is MultipleMatches<IGenericMetadata> multipleMatches)
+            {
+                diagnostics.MultipleCandidates(node.Member, multipleMatches.Candidates);
+            }
+
+            node.Member.Reference = result.Member;
+
+            return result.Member;
+        }
+
+        private void ResolveExpression(IExpression expression, IMetadata? returnType)
+        {
+            if (returnType is FunctionTypeMetadata functionType)
+                ResolveFunction(expression, functionType);
+            else
+                ResolveSingle(expression);
+        }
+
+        public override void VisitCast(CastExpression node)
+        {
+            base.VisitCast(node);
+
+            ResolveExpression(node.Expression, node.ReturnTypeMetadata);
+        }
+
         public override void VisitArrayAccess(ArrayAccessExpression node)
         {
             base.VisitArrayAccess(node);
 
+            ResolveSingle(node.Member);
+            ResolveSingle(node.Index);
+
             if (node.Member.ReturnTypeMetadata is ArrayMetadata { IsInvalid: false } typeArray)
             {
                 Debug.Assert(typeArray.ItemMetadata is not null);
+                node.Reference = typeArray;
                 node.ReturnTypeMetadata = typeArray.ItemMetadata;
+            }
+            else if (node.Member.Reference is TypeMetadata type)
+            {
+                var provider = metadataProviderMap.Get(node);
+                var factory = new MetadataFactory(builtInTypes, diagnostics, provider);
+                var array = factory.CreateArrayMetadata(node.GetLocation(), type);
+                var pointer = factory.CreatePointer(null, array);
+                node.Reference = array;
+                node.ReturnTypeMetadata = pointer;
             }
             else
             {
                 diagnostics.ExpectedArray(node.Member);
+                node.Reference = ArrayMetadata.Invalid();
                 node.ReturnTypeMetadata = ArrayMetadata.Invalid();
             }
 
@@ -97,6 +244,9 @@ internal class TypeChecker : ISemanticPass
             Debug.Assert(node.Kind != BinaryExpressionKind.Unknown);
             Debug.Assert(node.Left.ReturnTypeMetadata is not null);
             Debug.Assert(node.Right.ReturnTypeMetadata is not null);
+
+            ResolveSingle(node.Left);
+            ResolveSingle(node.Right);
 
             // TODO: more complex logic
             if (node.Kind is Addition or Subtraction or Multiplication or Division or Modulus &&
@@ -191,96 +341,114 @@ internal class TypeChecker : ISemanticPass
         {
             base.VisitCall(node);
 
-            Debug.Assert(node.Member.ReturnTypeMetadata is not null);
-
-            ResolveFunction(node.Member, node.Parameters.Select(x => x.ReturnTypeMetadata!));
-
-            if (node.Member.ReturnTypeMetadata is FunctionTypeMetadata function)
+            if (node.Member.Reference!.IsInvalid)
             {
-                var expectedCount = function.ParameterTypes.Count;
-                var actualCount = node.Parameters.Count;
-
-                if (actualCount > expectedCount)
-                    for (var i = expectedCount; i < actualCount; i++)
-                        diagnostics.ExtraArgument(node.Parameters[i]);
-
-                if (actualCount < expectedCount)
-                    for (var i = actualCount; i < expectedCount; i++)
-                        diagnostics.MissingArgument(node, function.ParameterTypes[i]);
-
-                for (var i = 0; i < Math.Min(expectedCount, actualCount); i++)
-                {
-                    var parameter = node.Parameters[i];
-                    var expected = function.ParameterTypes[i];
-                    if (expected.IsInvalid)
-                        continue;
-
-                    ResolveFunction(parameter, expected);
-                    var actual = parameter.ReturnTypeMetadata!;
-                    if (actual.IsInvalid)
-                        continue;
-
-                    if (!expected.Equals(actual))
-                        diagnostics.TypeMismatch(parameter, expected, actual);
-                }
+                node.Member.Reference = InvalidMemberMetadata.Instance;
+                return;
             }
-            else if (!node.Member.ReturnTypeMetadata.IsInvalid)
+
+            // resolve call parameters
+            // it tries to "pre-resolve" the function of the call
+            // to help resolve the correct overload in parameters.
+            // for example:
+            //
+            // public type Point {
+            //     public constructor(callback: (i32) => void) { }
+            // }
+            //
+            // public test(p: i32): void { }
+            // public test(p: bool): void { }
+            //
+            // public main(): void {
+            //     var a: Point = Point(test);
+            // }
+            var aggregate = (AggregateMetadata)node.Member.Reference;
+            var function = TryResolveSingleMember(aggregate);
+            for (var i = 0; i < node.Parameters.Count; i++)
             {
-                diagnostics.ExpectedFunction(node.Member);
+                var parameter = node.Parameters[i];
+                var returnType = function is not null && i < function.Type.ParameterTypes.Count
+                    ? function.Type.ParameterTypes[i]
+                    : null;
+
+                ResolveExpression(parameter, returnType);
             }
+
+            ResolveFunction(node);
         }
 
-        private void ResolveFunction(IExpression node, ITypeMetadata expectedType)
+        private static IFunctionMetadata? TryResolveSingleMember(AggregateMetadata aggregate)
         {
-            expectedType = expectedType.UnpackAlias()!;
+            if (aggregate.Members.Count != 1)
+                return null;
 
-            if (expectedType is not FunctionTypeMetadata functionType)
-                return;
-
-            ResolveFunction(node, functionType.ParameterTypes);
-        }
-
-        private void ResolveFunction(IExpression node, IEnumerable<ITypeMetadata> actualParameters)
-        {
-            if (node is not MemberAccessExpression member)
-                return;
-
-            if (member.Reference is not AggregateMetadata aggregate)
-                return;
-
-            var functions = aggregate.Members.OfType<IFunctionMetadata>().ToArray();
-            if (functions.Length == 1)
+            var member = aggregate.Members[0];
+            if (member is INamedMetadata named)
             {
-                member.Reference = functions[0];
-            }
-            else
-            {
-                var candidates = aggregate.MatchFunction(actualParameters).ToArray();
-                if (candidates.Length == 0)
-                {
-                    member.Reference = new InvalidMemberMetadata(member.Name);
+                var ctor = named.GetMembers(ConstructorMetadata.Name);
+                if (ctor.Members.Count != 1)
+                    return null;
 
-                    diagnostics.NoSuitableOverload(member);
-                }
-                else
-                {
-                    member.Reference = candidates[0];
-
-                    if (candidates.Length > 1)
-                        diagnostics.MultipleOverloads(member);
-                }
+                member = ctor.Members[0];
             }
+
+            if (member is IFunctionMetadata function)
+                return function;
+
+            return null;
         }
 
         public override void VisitExpressionBlock(ExpressionBlock node)
             => Debug.Fail("Expression blocks are not supported");
 
+        public override void VisitExpressionStatement(ExpressionStatement node)
+        {
+            base.VisitExpressionStatement(node);
+
+            ResolveSingle(node.Expression);
+        }
+
+        public override void VisitGenericExpression(GenericExpression node)
+        {
+            base.VisitGenericExpression(node);
+
+            var result = ResolveGeneric(node);
+            if (result.IsInvalid)
+                return;
+
+            var provider = metadataProviderMap.Get(node);
+            var factory = new MetadataFactory(builtInTypes, diagnostics, provider);
+            var genericApplication = factory.CreateGenericApplication(
+                node.GetLocation(),
+                result,
+                node.GenericArguments.Select(x => x.Metadata!).ToArray());
+
+            if (genericApplication.ClosedGeneric is null)
+            {
+                var map = new TypeArgumentMap(diagnostics, compilationContext, genericApplication);
+                map.Map();
+            }
+
+            node.Member.Reference = new AggregateMetadata([
+                genericApplication.ClosedGeneric!
+            ]);
+        }
+
         public override void VisitIf(IfStatement node)
         {
             base.VisitIf(node);
 
+            ResolveSingle(node.Condition);
+
             if (!Equals(node.Condition.ReturnTypeMetadata, builtInTypes.Bool))
                 diagnostics.TypeMismatch(node.Condition, builtInTypes.Bool, node.Condition.ReturnTypeMetadata);
+        }
+
+        public override void VisitIsExpression(IsExpression node)
+        {
+            base.VisitIsExpression(node);
+
+            ResolveSingle(node.Expression);
         }
 
         public override void VisitLiteral(LiteralExpression node)
@@ -321,20 +489,17 @@ internal class TypeChecker : ISemanticPass
             {
                 if (node.IsThis)
                 {
-                    node.Reference = new ParameterMetadata(
-                        null,
-                        MemberAccessExpression.This,
-                        ((TypeDeclaration)symbols[0].Node).Metadata!);
+                    node.Reference = new AggregateMetadata([
+                        new ParameterMetadata(
+                            null,
+                            MemberAccessExpression.This,
+                            ((TypeDeclaration)symbols[0].Node).Metadata!)
+                    ]);
 
                     return;
                 }
 
-                node.Reference = symbols switch
-                {
-                    [var symbol] => GetSymbolMetadata(symbol.Node),
-
-                    _ => new AggregateMetadata(symbols.Select(x => GetSymbolMetadata(x.Node))),
-                };
+                node.Reference = new AggregateMetadata(symbols.Select(x => GetSymbolMetadata(x.Node)));
 
                 return;
             }
@@ -342,15 +507,15 @@ internal class TypeChecker : ISemanticPass
             // static access
             var metadataProvider = metadataProviderMap.Get(node);
             var function = metadataProvider.FindFunctions(node.Name);
-            var result = metadataProvider.QueryTypes(new ByName(node.Name));
-            var members = function.Cast<IMetadata>().Concat(result.Types).ToArray();
+            var types = metadataProvider.QueryTypes(new ByName(node.Name));
+            var openGenerics = metadataProvider.QueryTypes(new GetOpenGeneric(node.Name));
+            var members = function.Cast<IMetadata>()
+                .Concat(types.Types)
+                .Concat(openGenerics.Types)
+                .ToArray();
 
-            node.Reference = members.Length switch
-            {
-                1 => members[0],
-                > 1 => new AggregateMetadata(members),
-                _ => null,
-            };
+            if (members.Length > 0)
+                node.Reference = new AggregateMetadata(members);
 
             // resolve namespaces for fully-qualified names
             if (node.Reference is null)
@@ -370,32 +535,30 @@ internal class TypeChecker : ISemanticPass
             {
                 var provider = new MetadataProvider(compilationContext, ns);
                 var result = provider.QueryTypes(new ByName(node.Name));
-                var type = default(IMetadata);
                 if (result.IsSuccess)
                 {
-                    type = result.Types[0];
-                }
-                else
-                {
-                    diagnostics.UnknownSymbol(node);
-                    type = new InvalidMemberMetadata(node.Name);
+                    node.Reference = new AggregateMetadata([result.Types[0]]);
+                    return;
                 }
 
-                node.Reference = type;
+                var @namespace = ns.GetNamespace(node.Name);
+                if (@namespace is not null)
+                {
+                    node.Reference = @namespace;
+                    return;
+                }
+
+                diagnostics.UnknownSymbol(node);
+                node.Reference = InvalidMemberMetadata.Instance;
                 return;
             }
 
+            ResolveSingle(node.Member);
+
             var returnTypeMetadata = node.Member.ReturnTypeMetadata!;
-            var memberMetadata = returnTypeMetadata.GetMember(node.Name);
-            if (memberMetadata is null)
-            {
-                memberMetadata = new InvalidMemberMetadata(node.Name);
-
-                if (!returnTypeMetadata.IsInvalid)
-                    diagnostics.UnknownMember(node, returnTypeMetadata);
-            }
-
-            node.Reference = memberMetadata;
+            node.Reference = returnTypeMetadata.IsInvalid
+                ? InvalidMemberMetadata.Instance
+                : returnTypeMetadata.GetMembers(node.Name);
         }
 
         private static IMetadata GetSymbolMetadata(ISemanticNode node)
@@ -416,50 +579,59 @@ internal class TypeChecker : ISemanticPass
                 _ => throw new InvalidOperationException(),
             };
 
-        public override void VisitNewArray(NewArrayExpression node)
-        {
-            base.VisitNewArray(node);
-
-            node.ReturnTypeMetadata = node.Type.Metadata;
-        }
-
         public override void VisitNewObject(NewObjectExpression node)
         {
             base.VisitNewObject(node);
 
-            var metadata = node.Type.Metadata;
-            if (metadata is GenericApplicationMetadata generic)
-                metadata = generic.ClosedGeneric;
-
-            node.Metadata = GetConstructorMetadata(node, metadata);
-        }
-
-        private ConstructorMetadata GetConstructorMetadata(
-            NewObjectExpression node,
-            ITypeMetadata? metadata)
-        {
-            // TODO: get ctor via GetMember?
-            if (metadata is not TypeMetadata type || type.IsValueType)
+            if (node.Member is CallExpression call)
             {
-                diagnostics.CantCreateObject(node);
+                if (call.Reference!.IsInvalid)
+                {
+                    node.ReturnTypeMetadata = TypeMetadata.InvalidType;
+                    return;
+                }
 
-                return ConstructorMetadata.Invalid();
+                if (call.Reference is not ConstructorMetadata ctor)
+                {
+                    node.ReturnTypeMetadata = TypeMetadata.InvalidType;
+                    diagnostics.ExpectedConstructor(node.Member, call.Reference!);
+
+                    return;
+                }
+
+                var provider = metadataProviderMap.Get(node);
+                var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
+                var pointer = metadataFactory.CreatePointer(null, ctor.Type.ReturnType);
+                node.ReturnTypeMetadata = pointer;
+
+                node.Metadata = ctor;
             }
-
-            var parameters = node.Parameters.Select(x => x.ReturnTypeMetadata!).ToList();
-            var ctor = type.GetConstructor(parameters);
-            if (ctor is null)
+            else if (node.Member is ArrayAccessExpression arrayAccess)
             {
-                ctor = ConstructorMetadata.Invalid();
-                diagnostics.UnknownConstructor(node, parameters);
-            }
+                if (arrayAccess.Reference is not ArrayMetadata)
+                {
+                    node.ReturnTypeMetadata = TypeMetadata.InvalidType;
 
-            return ctor;
+                    return;
+                }
+
+                node.ReturnTypeMetadata = arrayAccess.ReturnTypeMetadata;
+                node.Metadata = null; // TODO: array ctor?
+            }
+            else
+            {
+                ResolveSingle(node.Member);
+                node.ReturnTypeMetadata = TypeMetadata.InvalidType;
+                diagnostics.ExpectedCtorOrArray(node);
+            }
         }
 
         public override void VisitReturn(ReturnStatement node)
         {
             base.VisitReturn(node);
+
+            if (node.Expression is not null)
+                ResolveSingle(node.Expression);
 
             var expressionType = node.Expression?.ReturnTypeMetadata ?? builtInTypes.Void;
             if (expressionType.IsInvalid)
@@ -519,6 +691,9 @@ internal class TypeChecker : ISemanticPass
         {
             base.VisitTuple(node);
 
+            foreach (var expression in node.Expressions)
+                ResolveSingle(expression);
+
             var metadataProvider = metadataProviderMap.Get(node);
             var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
 
@@ -536,6 +711,8 @@ internal class TypeChecker : ISemanticPass
 
             Debug.Assert(node.Kind != UnaryExpressionKind.Unknown);
             Debug.Assert(node.Operand.ReturnTypeMetadata is not null);
+
+            ResolveSingle(node.Operand);
 
             // TODO: more complex logic
             if (node.Kind == UnaryMinus &&
@@ -582,6 +759,17 @@ internal class TypeChecker : ISemanticPass
             {
                 node.ReturnTypeMetadata = node.Operand.ReturnTypeMetadata;
             }
+            else if (node.Kind == AddressOf)
+            {
+                var provider = metadataProviderMap.Get(node);
+                var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
+                var pointer = metadataFactory.CreatePointer(null, node.Operand.ReturnTypeMetadata);
+                node.ReturnTypeMetadata = pointer;
+            }
+            else if (node is { Kind: Dereference, Operand.ReturnTypeMetadata: PointerMetadata pointer })
+            {
+                node.ReturnTypeMetadata = pointer.Type;
+            }
             else
             {
                 node.ReturnTypeMetadata = TypeMetadata.InvalidType;
@@ -596,7 +784,7 @@ internal class TypeChecker : ISemanticPass
             Debug.Assert(node.Expression.ReturnTypeMetadata is not null);
             Debug.Assert(node.Type.Metadata is not null);
 
-            ResolveFunction(node.Expression, node.Type.Metadata);
+            ResolveExpression(node.Expression, node.Type.Metadata);
 
             if (!node.Expression.ReturnTypeMetadata.IsInvalid &&
                 !node.Type.Metadata.IsInvalid &&
@@ -607,6 +795,8 @@ internal class TypeChecker : ISemanticPass
         public override void VisitWhile(While node)
         {
             base.VisitWhile(node);
+
+            ResolveSingle(node.Condition);
 
             if (!Equals(node.Condition.ReturnTypeMetadata, builtInTypes.Bool))
                 diagnostics.TypeMismatch(node.Condition, builtInTypes.Bool, node.Condition.ReturnTypeMetadata);

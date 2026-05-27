@@ -63,15 +63,15 @@ public record IrFunction(string Name, IrCode Code)
         return new IrFunction(name.ToString(), code);
     }
 
-    public static IrFunction FromConstructor(ConstructorMetadata method, IrCode code)
+    public static IrFunction FromConstructor(ConstructorMetadata ctor, IrCode code)
     {
-        var name = new StringBuilder(GetTypePrefix(method.DeclaringType));
+        var name = new StringBuilder(GetTypePrefix(ctor.DeclaringType));
         name.Append('_')
-            .Append(method.Name);
+            .Append(ConstructorMetadata.Name);
 
         var mangler = new Mangler();
         name.Append('_')
-            .Append(mangler.Mangle(method.Type));
+            .Append(mangler.Mangle(ctor.Type));
 
         return new IrFunction(name.ToString(), code);
     }

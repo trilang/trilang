@@ -85,7 +85,7 @@ internal class Mangler
             foreach (var genericArgument in typeMetadata.GenericArguments)
                 Mangle(genericArgument);
         }
-        else if (metadata is TypePointerMetadata typePointerMetadata)
+        else if (metadata is PointerMetadata typePointerMetadata)
         {
             AddData("pointer");
 

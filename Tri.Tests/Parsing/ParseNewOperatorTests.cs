@@ -33,7 +33,9 @@ public class ParseNewOperatorTests
                       Variable: p
                         TypeRef: Point
                         NewObject
-                          TypeRef: Point
+                          Call
+                            MemberAccess
+                              Name: Point
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -67,10 +69,12 @@ public class ParseNewOperatorTests
                       Variable: p
                         TypeRef: Point
                         NewObject
-                          TypeRef: Point
-                          Parameters
-                            Literal: Integer = 1
-                            Literal: Integer = 2
+                          Call
+                            MemberAccess
+                              Name: Point
+                            Parameters
+                              Literal: Integer = 1
+                              Literal: Integer = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -104,14 +108,14 @@ public class ParseNewOperatorTests
                       Variable: p
                         TypeRef: Point
                         NewObject
-                          FakeType: <>_0
+                          FakeExpression
             """;
 
         var diagnostic = new Diagnostic(
-            DiagnosticId.P0003ExpectedType,
+            DiagnosticId.P0009ExpectedExpression,
             DiagnosticSeverity.Error,
-            new SourceLocation(file, new SourcePosition(63, 4, 24).ToSpan()),
-            "Expected a type.");
+            new SourceLocation(file, new SourcePosition(64, 4, 25).ToSpan()),
+            "Expected an expression.");
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -144,10 +148,12 @@ public class ParseNewOperatorTests
                       Variable: p
                         TypeRef: Point
                         NewObject
-                          TypeRef: Point
-                          Parameters
-                            Literal: Integer = 1
-                            FakeExpression
+                          Call
+                            MemberAccess
+                              Name: Point
+                            Parameters
+                              Literal: Integer = 1
+                              FakeExpression
             """;
 
         var diagnostic = new Diagnostic(
@@ -187,7 +193,9 @@ public class ParseNewOperatorTests
                       Variable: p
                         TypeRef: Point
                         NewObject
-                          TypeRef: Point
+                          Call
+                            MemberAccess
+                              Name: Point
             """;
 
         var diagnostic = new Diagnostic(
@@ -198,5 +206,97 @@ public class ParseNewOperatorTests
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void ParseFullyQualifiedTypeInConstructorTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type MyType { }
+
+            public test(): void {
+                var x: MyType = new Test1.MyType();
+            }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: MyType
+                  AccessModifier: public
+                Function: test
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: MyType
+                        NewObject
+                          Call
+                            MemberAccess
+                              MemberAccess
+                                Name: Test1
+                              Name: MyType
+            """;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+    }
+
+    [Test]
+    public void ParseNewWithGenericConstructorTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type MyType<T> { }
+
+            public test(): void {
+                var x: MyType<i32> = new Test1.MyType<i32>();
+            }
+            """);
+        var (tree, diagnostics) = ParseFile(file);
+
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Type: MyType
+                  AccessModifier: public
+                  Generic Arguments
+                    TypeRef: T
+                Function: test
+                  AccessModifier: public
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        GenericApplication
+                          TypeRef: MyType
+                          TypeArguments
+                            TypeRef: i32
+                        NewObject
+                          Call
+                            GenericExpression
+                              MemberAccess
+                                MemberAccess
+                                  Name: Test1
+                                Name: MyType
+                              GenericArguments
+                                TypeRef: i32
+            """;
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
     }
 }

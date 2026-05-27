@@ -26,7 +26,7 @@ public class MetadataProvider : IMetadataProvider
             GetGenericApplication getGenericApplication => GetGenericApplication(getGenericApplication),
             GetInterface getInterface => GetInterface(getInterface),
             GetOpenGeneric getOpenGeneric => GetOpenGeneric(getOpenGeneric),
-            GetClosedGeneric getClosedGeneric => GetClosedGeneric(getClosedGeneric),
+            GetPointer getPointer => GetPointer(getPointer),
             ByName byName => ByName(byName),
             ByQualifiedName byQualifiedName => ByQualifiedName(byQualifiedName),
             GetTuple getTuple => GetTuple(getTuple),
@@ -35,13 +35,48 @@ public class MetadataProvider : IMetadataProvider
             _ => throw new ArgumentOutOfRangeException(nameof(query))
         };
 
-    private static QueryTypesResult Result(List<ITypeMetadata> found)
+    private static QueryTypesResult Result(IReadOnlyList<ITypeMetadata> found)
         => found.Count switch
         {
             0 => QueryTypesResult.TypeNotFound(),
             1 => QueryTypesResult.Success(found),
             _ => QueryTypesResult.MultipleTypesFound(found)
         };
+
+    private QueryTypesResult QueryNamedTypes(Func<INamedMetadata, bool> predicate)
+    {
+        var found = new HashSet<ITypeMetadata>();
+
+        var types = @namespace.Types
+            .OfType<INamedMetadata>()
+            .Where(predicate);
+
+        foreach (var type in types)
+            found.Add(type);
+
+        foreach (var use in uses)
+        {
+            types = use.Types
+                .OfType<INamedMetadata>()
+                .Where(predicate);
+
+            foreach (var type in types)
+                found.Add(type);
+        }
+
+        if (@namespace != compilationContext.RootNamespace)
+        {
+            types = compilationContext.RootNamespace
+                .EnumerateAllTypes()
+                .OfType<INamedMetadata>()
+                .Where(predicate);
+
+            foreach (var type in types)
+                found.Add(type);
+        }
+
+        return Result(found.ToArray());
+    }
 
     private QueryTypesResult GetArray(GetArray query)
     {
@@ -143,70 +178,42 @@ public class MetadataProvider : IMetadataProvider
 
     private QueryTypesResult GetOpenGeneric(GetOpenGeneric query)
     {
-        var found = new List<ITypeMetadata>();
-        var result = QueryTypes(query.BaseQuery);
-        if (result is { IsSuccess: false, IsMultipleTypesFound: false })
+        var result = QueryNamedTypes(x => x.Name == query.Name &&
+                                          !x.IsCompilerGenerated &&
+                                          x is IGenericMetadata { IsGeneric: true });
+
+        if (query.TypeArgumentsCount is null ||
+            result is { IsSuccess: false, IsMultipleTypesFound: false })
             return result;
 
-        foreach (var type in result.Types)
-        {
-            if (type is not IGenericMetadata generic)
-                continue;
-
-            if (generic.GenericArguments.Count == query.TypeArgumentsCount)
-                found.Add(generic);
-        }
+        var found = new List<ITypeMetadata>();
+        foreach (var type in result.Types.OfType<IGenericMetadata>())
+            if (type.GenericArguments.Count == query.TypeArgumentsCount)
+                found.Add(type);
 
         return Result(found);
     }
 
-    private QueryTypesResult GetClosedGeneric(GetClosedGeneric query)
+    private QueryTypesResult GetPointer(GetPointer query)
     {
         var found = new List<ITypeMetadata>();
-        var result = QueryTypes(query.BaseQuery);
-        if (result is { IsSuccess: false, IsMultipleTypesFound: false })
-            return result;
 
-        foreach (var type in result.Types)
+        foreach (var type in compilationContext.RootNamespace.EnumerateAllTypes())
         {
-            if (type is not IGenericMetadata generic)
+            if (type is not PointerMetadata pointer)
                 continue;
 
-            if (generic.GenericArguments.SequenceEqual(query.TypeArguments))
-                found.Add(generic);
+            if (pointer.Type == query.BaseType)
+                found.Add(pointer);
         }
 
         return Result(found);
     }
 
     private QueryTypesResult ByName(ByName query)
-    {
-        var found = new List<ITypeMetadata>();
-
-        var type = @namespace.Types.OfType<INamedMetadata>().FirstOrDefault(x => x.Name == query.Name);
-        var typeExistsInPrimaryNamespace = type is not null;
-        if (typeExistsInPrimaryNamespace)
-            found.Add(type!);
-
-        foreach (var use in uses)
-        {
-            type = use.Types.OfType<INamedMetadata>().FirstOrDefault(x => x.Name == query.Name);
-            if (type is not null)
-                found.Add(type);
-        }
-
-        if (@namespace != compilationContext.RootNamespace)
-        {
-            type = compilationContext.RootNamespace.EnumerateAllTypes()
-                .OfType<INamedMetadata>()
-                .FirstOrDefault(x => x.Name == query.Name);
-
-            if (type is not null)
-                found.Add(type);
-        }
-
-        return Result(found);
-    }
+        => QueryNamedTypes(x => x.Name == query.Name &&
+                                !x.IsCompilerGenerated &&
+                                x is not IGenericMetadata { IsGeneric: true });
 
     private QueryTypesResult ByQualifiedName(ByQualifiedName query)
     {

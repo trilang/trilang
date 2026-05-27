@@ -1,7 +1,9 @@
 namespace Trilang.Metadata;
 
-public class ConstructorMetadata : IFunctionMetadata
+public class ConstructorMetadata : IFunctionMetadata, ITypedMetadata
 {
+    public const string Name = "<>_ctor";
+
     public ConstructorMetadata(
         SourceLocation? definition,
         ITypeMetadata declaringType,
@@ -16,16 +18,14 @@ public class ConstructorMetadata : IFunctionMetadata
         Type = type;
     }
 
-    public static ConstructorMetadata Invalid()
-        => new ConstructorMetadata(
-            null,
-            TypeMetadata.InvalidType,
-            AccessModifierMetadata.Public,
-            [],
-            FunctionTypeMetadata.Invalid());
-
     public override string ToString()
-        => $"ctor: {Type}";
+        => $"{Name}: {Type}";
+
+    public void Freeze()
+    {
+        foreach (var parameter in Parameters)
+            parameter.Freeze();
+    }
 
     public SourceLocation? Definition { get; }
 
@@ -33,17 +33,11 @@ public class ConstructorMetadata : IFunctionMetadata
 
     public ITypeMetadata DeclaringType { get; }
 
-    public string Name => "ctor";
-
     public AccessModifierMetadata AccessModifier { get; }
 
     public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
     public FunctionTypeMetadata Type { get; }
 
-    public void Freeze()
-    {
-        foreach (var parameter in Parameters)
-            parameter.Freeze();
-    }
+    ITypeMetadata ITypedMetadata.Type => Type;
 }

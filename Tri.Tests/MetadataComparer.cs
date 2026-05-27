@@ -50,6 +50,8 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
                 => CompareNamespaceMetadata(x1, y1),
             (ParameterMetadata x1, ParameterMetadata y1)
                 => CompareParameterMetadata(x1, y1),
+            (PointerMetadata x1, PointerMetadata y1)
+                => ComparePointerMetadata(x1, y1),
             (PropertyMetadata x1, PropertyMetadata y1)
                 => ComparePropertyMetadata(x1, y1),
             (RootNamespaceMetadata x1, RootNamespaceMetadata y1)
@@ -254,6 +256,14 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
         return true;
     }
 
+    private bool ComparePointerMetadata(PointerMetadata x, PointerMetadata y)
+    {
+        if (!Equals(x.Type, y.Type))
+            throw new Exception("Type doesn't match.");
+
+        return true;
+    }
+
     private bool ComparePropertyMetadata(PropertyMetadata x, PropertyMetadata y)
     {
         if (x.Name != y.Name)
@@ -331,6 +341,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
         if (!x.Methods.SequenceEqual(y.Methods, this))
             throw new Exception("Methods don't match.");
+
+        if (x.IsValueType != y.IsValueType)
+            throw new Exception($"IsValueType doesn't match. {x.IsValueType} != {y.IsValueType}.");
 
         if (x.IsCompilerGenerated != y.IsCompilerGenerated)
             throw new Exception($"IsCompilerGenerated doesn't match. {x.IsCompilerGenerated} != {y.IsCompilerGenerated}.");

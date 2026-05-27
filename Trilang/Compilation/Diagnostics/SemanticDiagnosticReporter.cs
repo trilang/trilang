@@ -71,6 +71,12 @@ public readonly record struct SemanticDiagnosticReporter(DiagnosticCollection Di
             type.GetLocation(),
             $"Unknown type: '{type.Name}'.");
 
+    public void UnknownType(IAccessExpression type)
+        => Diagnostics.Error(
+            DiagnosticId.S0003UnknownType,
+            type.GetLocation(),
+            $"Unknown type.");
+
     public void ReturnTypeMismatch(
         ReturnStatement returnType,
         ITypeMetadata expected,
@@ -86,7 +92,7 @@ public readonly record struct SemanticDiagnosticReporter(DiagnosticCollection Di
             genericArgument.GetLocation(),
             $"The '{genericArgument.Name}' type argument is already defined.");
 
-    public void TypeMismatch(IExpression exp, ITypeMetadata expected, ITypeMetadata? actual)
+    public void TypeMismatch(ISemanticNode exp, ITypeMetadata expected, ITypeMetadata? actual)
         => Diagnostics.Error(
             DiagnosticId.S0005TypeMismatch,
             exp.GetLocation(),
@@ -98,23 +104,11 @@ public readonly record struct SemanticDiagnosticReporter(DiagnosticCollection Di
             array.GetLocation(),
             $"Expected an array, got '{array.ReturnTypeMetadata}'.");
 
-    public void ExpectedFunction(IExpression function)
+    public void ExpectedFunction(IExpression function, IMetadata member)
         => Diagnostics.Error(
             DiagnosticId.S0007ExpectedFunction,
             function.GetLocation(),
-            $"Expected a function, got '{function.ReturnTypeMetadata}'.");
-
-    public void UnknownMember(MemberAccessExpression member, ITypeMetadata type)
-        => Diagnostics.Error(
-            DiagnosticId.S0008UnknownMember,
-            member.GetLocation(),
-            $"The '{type}' type doesn't have '{member.Name}'.");
-
-    public void UnknownConstructor(NewObjectExpression node, IEnumerable<ITypeMetadata> parameters)
-        => Diagnostics.Error(
-            DiagnosticId.S0008UnknownMember,
-            node.GetLocation(),
-            $"The '{node.Type.Metadata}' type doesn't have '{string.Join(", ", parameters)}' constructor.");
+            $"Expected a function, got '{member}'.");
 
     public void UnknownGetter(MemberAccessExpression node, PropertyMetadata property)
         => Diagnostics.Error(
@@ -134,17 +128,17 @@ public readonly record struct SemanticDiagnosticReporter(DiagnosticCollection Di
             node.GetLocation(),
             $"Unknown symbol: '{node.Name}'.");
 
-    public void CantCreateObject(NewObjectExpression node)
+    public void ExpectedCtorOrArray(NewObjectExpression node)
         => Diagnostics.Error(
-            DiagnosticId.S0009CantCreateObject,
+            DiagnosticId.S0009ExpectedCtorOrArray,
             node.GetLocation(),
-            $"Cannot create an instance of type '{node.Type.Metadata}'");
+            "Expected a constructor call or array access.");
 
     public void IncompatibleUnaryOperand(UnaryExpression node)
         => Diagnostics.Error(
             DiagnosticId.S0010IncompatibleUnaryOperator,
             node.GetLocation(),
-            $"Incompatible operand type '{node.Operand.ReturnTypeMetadata}' for operator '{node.Kind}'.");
+            $"Incompatible operand type '{node.Operand.ReturnTypeMetadata}' for operator '{node.Kind.ToDisplayString()}'.");
 
     public void IncompatibleBinaryOperand(BinaryExpression node)
         => Diagnostics.Error(
@@ -291,35 +285,50 @@ public readonly record struct SemanticDiagnosticReporter(DiagnosticCollection Di
             property.Definition!,
             $"The setter of the interface property '{property.Name}' cannot be private.");
 
-    public void NoSuitableOverload(MemberAccessExpression node)
+    public void NoSuitableOverload(IAccessExpression node)
         => Diagnostics.Error(
             DiagnosticId.S0023NoSuitableOverload,
             node.GetLocation(),
-            $"No suitable overload found for '{node.Name}'.");
+            "No suitable overload found.");
 
-    public void MultipleOverloads(MemberAccessExpression node)
+    public void NoMemberFound(IAccessExpression node)
         => Diagnostics.Error(
-            DiagnosticId.S0024MultipleOverloads,
+            DiagnosticId.S0008UnknownMember,
             node.GetLocation(),
-            $"Multiple overloads found for '{node.Name}'.");
+            "The member was not found.");
 
-    public void ExtraArgument(IExpression node)
+    public void MultipleCandidates(IAccessExpression node, IEnumerable<IMetadata> candidates)
+        => Diagnostics.Error(
+            DiagnosticId.S0024MultipleCandidates,
+            node.GetLocation(),
+            $"Multiple candidates found:\n{string.Join("\n", candidates.Select(x => $"- {x}"))}.");
+
+    public void ExtraArgument(ISemanticNode node)
         => Diagnostics.Error(
             DiagnosticId.S0025ExtraArgument,
             node.GetLocation(),
             $"Extra argument: '{node}'.");
 
-    public void MissingArgument(CallExpression node, ITypeMetadata type)
+    public void ExtraArgument(ISemanticNode node, ITypeMetadata type)
+        => Diagnostics.Error(
+            DiagnosticId.S0025ExtraArgument,
+            node.GetLocation(),
+            $"Extra argument: '{type}'.");
+
+    public void MissingArgument(ISemanticNode node, ITypeMetadata type)
         => Diagnostics.Error(
             DiagnosticId.S0026MissingArgument,
             node.GetLocation(),
             $"Missing argument: '{type}'.");
 
-    public void MultipleMembersFound(ISemanticNode node, IEnumerable<IMetadata> types)
+    public void MultipleMembersFound(ISemanticNode node, IEnumerable<IMetadata> members)
         => Diagnostics.Error(
             DiagnosticId.S0027MultipleMembersFound,
             node.GetLocation(),
-            $"Multiple members found:\n{string.Join("\n", types.Select(x => $"{x}: {x.Definition}"))}.");
+            $"""
+             Multiple members found:
+             {string.Join("\n", members.Select(x => $"- {x}"))}.
+             """);
 
     public void UnknownNamespace(Use node)
         => Diagnostics.Error(
@@ -348,4 +357,25 @@ public readonly record struct SemanticDiagnosticReporter(DiagnosticCollection Di
             DiagnosticId.S0029UnknownPackage,
             node.GetLocation(),
             $"Unknown package: {node.Package}.");
+
+    public void NonGenericMember(GenericExpression node)
+        => Diagnostics.Error(
+            DiagnosticId.S0030NonGenericMember,
+            node.GetLocation(),
+            $"'{node.Member.Name}' is not generic.");
+
+    public void ExpectedConstructor(IAccessExpression node, IMetadata metadata)
+        => Diagnostics.Error(
+            DiagnosticId.S0031ExpectedConstructor,
+            node.GetLocation(),
+            $"Expected a constructor, got '{metadata}'.");
+
+    public void UnresolvedMembers(ISemanticNode node, IEnumerable<IMetadata> members)
+        => Diagnostics.Error(
+            DiagnosticId.S0032UnresolvedMembers,
+            node.GetLocation(),
+            $"""
+             Unresolved members:
+             {string.Join("\n", members.Select(x => $"- {x}"))}
+             """);
 }

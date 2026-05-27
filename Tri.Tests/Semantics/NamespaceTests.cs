@@ -425,8 +425,8 @@ public class NamespaceTests
                 new SourceSpan(new SourcePosition(58, 6, 23), new SourcePosition(65, 6, 30))),
             """
             Multiple members found:
-            MyType1: SourceLocation { File = file1.tri, Span = (16:3:1) - (42:3:27) }
-            MyType1: SourceLocation { File = file2.tri, Span = (16:3:1) - (42:3:27) }.
+            - MyType1
+            - MyType1.
             """);
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -541,7 +541,7 @@ public class NamespaceTests
                 use NS1;
 
                 public main(): void {
-                    var list: List<i32> = new List<i32>();
+                    var list: List<i32>* = new List<i32>();
                 }
                 """)
         ]);
@@ -1143,7 +1143,7 @@ public class NamespaceTests
         Assert.That(alias1.Type, Is.Not.EqualTo(alias2.Type));
         Assert.That(
             compilationContext.RootNamespace.Types,
-            Has.Exactly(3).Matches<ITypeMetadata>(x => x is FunctionTypeMetadata));
+            Has.Exactly(2).Matches<ITypeMetadata>(x => x is FunctionTypeMetadata));
     }
 
     [Test]
@@ -1341,6 +1341,6 @@ public class NamespaceTests
         Assert.That(genericApplication1.ClosedGeneric, Is.Not.EqualTo(genericApplication2.ClosedGeneric));
         Assert.That(
             compilationContext.RootNamespace.Types,
-            Has.Exactly(2).Matches<ITypeMetadata>(x => x is GenericApplicationMetadata));
+            Has.Exactly(4).Matches<ITypeMetadata>(x => x is GenericApplicationMetadata));
     }
 }

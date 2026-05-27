@@ -13,6 +13,7 @@ public class RootNamespaceMetadata : INamespaceMetadata
         types =
         [
             builtInTypes.Void,
+            builtInTypes.VoidPointer,
             builtInTypes.Null,
             builtInTypes.I8,
             builtInTypes.I16,

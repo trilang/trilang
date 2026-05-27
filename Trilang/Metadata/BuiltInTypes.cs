@@ -4,26 +4,28 @@ public class BuiltInTypes
 {
     public BuiltInTypes()
     {
-        Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true, true);
-        Null = new TypeMetadata(null, "null", [], [], [], [], [], [], true, true);
-        I8 = new TypeMetadata(null, "i8", [], [], [], [], [], [], true, true);
-        I16 = new TypeMetadata(null, "i16", [], [], [], [], [], [], true, true);
-        I32 = new TypeMetadata(null, "i32", [], [], [], [], [], [], true, true);
-        I64 = new TypeMetadata(null, "i64", [], [], [], [], [], [], true, true);
-        U8 = new TypeMetadata(null, "u8", [], [], [], [], [], [], true, true);
-        U16 = new TypeMetadata(null, "u16", [], [], [], [], [], [], true, true);
-        U32 = new TypeMetadata(null, "u32", [], [], [], [], [], [], true, true);
-        U64 = new TypeMetadata(null, "u64", [], [], [], [], [], [], true, true);
-        F32 = new TypeMetadata(null, "f32", [], [], [], [], [], [], true, true);
-        F64 = new TypeMetadata(null, "f64", [], [], [], [], [], [], true, true);
-        Char = new TypeMetadata(null, "char", [], [], [], [], [], [], true, true);
-        Bool = new TypeMetadata(null, "bool", [], [], [], [], [], [], true, true);
-        String = new TypeMetadata(null, "string", [], [], [], [], [], [], false, true);
+        Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true, false);
+        VoidPointer = new PointerMetadata(null, Void);
+        Null = new TypeMetadata(null, "null", [], [], [], [], [], [], true, false);
+        I8 = new TypeMetadata(null, "i8", [], [], [], [], [], [], true, false);
+        I16 = new TypeMetadata(null, "i16", [], [], [], [], [], [], true, false);
+        I32 = new TypeMetadata(null, "i32", [], [], [], [], [], [], true, false);
+        I64 = new TypeMetadata(null, "i64", [], [], [], [], [], [], true, false);
+        U8 = new TypeMetadata(null, "u8", [], [], [], [], [], [], true, false);
+        U16 = new TypeMetadata(null, "u16", [], [], [], [], [], [], true, false);
+        U32 = new TypeMetadata(null, "u32", [], [], [], [], [], [], true, false);
+        U64 = new TypeMetadata(null, "u64", [], [], [], [], [], [], true, false);
+        F32 = new TypeMetadata(null, "f32", [], [], [], [], [], [], true, false);
+        F64 = new TypeMetadata(null, "f64", [], [], [], [], [], [], true, false);
+        Char = new TypeMetadata(null, "char", [], [], [], [], [], [], true, false);
+        Bool = new TypeMetadata(null, "bool", [], [], [], [], [], [], true, false);
+        String = new TypeMetadata(null, "string", [], [], [], [], [], [], false, false);
     }
 
     public void Freeze()
     {
         Void.Freeze();
+        VoidPointer.Freeze();
         Null.Freeze();
         I8.Freeze();
         I16.Freeze();
@@ -41,6 +43,8 @@ public class BuiltInTypes
     }
 
     public TypeMetadata Void { get; }
+
+    public PointerMetadata VoidPointer { get; }
 
     public TypeMetadata Null { get; }
 

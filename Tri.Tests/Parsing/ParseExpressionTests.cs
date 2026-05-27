@@ -172,6 +172,82 @@ public class ParseExpressionTests
     }
 
     [Test]
+    public void ParseAddressOfTest()
+    {
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
+
+                public test(x: i32): void {
+                    var x: i32* = &x;
+                }
+                """));
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        PointerType
+                          TypeRef: i32
+                        UnaryExpression: AddressOf
+                          MemberAccess
+                            Name: x
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void ParseDereferenceTest()
+    {
+        var (tree, diagnostics) = ParseFile(
+            CreateFile(
+                """
+                namespace Test1;
+
+                public test(x: i32*): void {
+                    var x: i32 = *x;
+                }
+                """));
+        const string expected =
+            """
+            SyntaxTree
+              Namespace
+                Parts: Test1
+              Declarations
+                Function: test
+                  AccessModifier: public
+                  Parameters
+                    Parameter: x
+                      PointerType
+                        TypeRef: i32
+                  TypeRef: void
+                  BlockStatement
+                    Statements
+                      Variable: x
+                        TypeRef: i32
+                        UnaryExpression: Dereference
+                          MemberAccess
+                            Name: x
+            """;
+
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
     public void MultipleUnaryOperatorsTest()
     {
         var (tree, diagnostics) = ParseFile(
@@ -512,8 +588,8 @@ public class ParseExpressionTests
                           Literal: Integer = 2
             """;
 
-        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
         Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
     }
 
     [Test]
@@ -922,10 +998,11 @@ public class ParseExpressionTests
                   BlockStatement
                     Statements
                       ReturnStatement
-                        NewArray
-                          ArrayType
-                            TypeRef: i32
-                          Literal: Integer = 10
+                        NewObject
+                          ArrayAccess
+                            MemberAccess
+                              Name: i32
+                            Literal: Integer = 10
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);

@@ -42,7 +42,7 @@ public class ReplaceIfDirectivesTests
                 type1Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], type1Metadata, rootNamespace)));
 
         var type3Metadata = new TypeMetadata(null, "Type3")
         {
@@ -54,7 +54,7 @@ public class ReplaceIfDirectivesTests
                 type3Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], type3Metadata, rootNamespace)));
 
         var expected = new SemanticTree(
             file,
@@ -111,7 +111,7 @@ public class ReplaceIfDirectivesTests
                 type2Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], type2Metadata, rootNamespace)));
 
         var type3Metadata = new TypeMetadata(null, "Type3")
         {
@@ -123,7 +123,7 @@ public class ReplaceIfDirectivesTests
                 type3Metadata,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], type3Metadata, rootNamespace)));
 
         var expected = new SemanticTree(
             file,
@@ -176,7 +176,7 @@ public class ReplaceIfDirectivesTests
                 typeMetadata,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], typeMetadata, rootNamespace)));
 
         var expected = new SemanticTree(
             file,

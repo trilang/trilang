@@ -23,12 +23,9 @@ internal class IrBuilder
     private Register CreateRegister(ITypeMetadata type)
         => new Register(registerCounter++, type);
 
-    private ITypeMetadata MapToIrType(ITypeMetadata type)
-        => !type.IsValueType ? new TypePointerMetadata(type) : type;
-
     private Register BinaryInstruction(ITypeMetadata type, BinaryInstructionKind kind, Register left, Register right)
     {
-        var register = CreateRegister(MapToIrType(type));
+        var register = CreateRegister(type);
         var binaryInstruction = new BinaryOperation(register, kind, left, right);
         currentBlock.AddInstruction(binaryInstruction);
 
@@ -37,7 +34,7 @@ internal class IrBuilder
 
     private Register UnaryInstruction(ITypeMetadata type, UnaryInstructionKind kind, Register operand)
     {
-        var register = CreateRegister(MapToIrType(type));
+        var register = CreateRegister(type);
         var unaryInstruction = new UnaryOperation(register, kind, operand);
         currentBlock.AddInstruction(unaryInstruction);
 
@@ -75,7 +72,7 @@ internal class IrBuilder
 
     public Register LoadConst(ITypeMetadata type, object? value)
     {
-        var register = CreateRegister(MapToIrType(type));
+        var register = CreateRegister(type);
         var loadInstruction = new LoadConst(register, value);
         currentBlock.AddInstruction(loadInstruction);
 
@@ -84,7 +81,7 @@ internal class IrBuilder
 
     public void LoadParameter(string name, ITypeMetadata type, int index)
     {
-        var register = CreateRegister(MapToIrType(type));
+        var register = CreateRegister(type);
         var loadInstruction = new LoadParameter(register, index);
         currentBlock.AddInstruction(loadInstruction);
         AddDefinition(name, register);
@@ -92,7 +89,7 @@ internal class IrBuilder
 
     public Register Load(Register source)
     {
-        var pointer = (TypePointerMetadata)source.Type;
+        var pointer = (PointerMetadata)source.Type;
         var register = CreateRegister(pointer.Type);
         var load = new Load(register, source);
         currentBlock.AddInstruction(load);
@@ -104,7 +101,7 @@ internal class IrBuilder
     {
         var level = 0;
 
-        while (type is TypePointerMetadata pointer)
+        while (type is PointerMetadata pointer)
         {
             level++;
             type = pointer.Type;
@@ -115,8 +112,6 @@ internal class IrBuilder
 
     public Register Deref(Register source, ITypeMetadata expected)
     {
-        expected = MapToIrType(expected);
-
         var sourceLevel = GetLevel(source.Type);
         var expectedLevel = GetLevel(expected);
 
@@ -206,9 +201,9 @@ internal class IrBuilder
 
     public Register GetElementPointer(Register array, Register index)
     {
-        var pointer = (TypePointerMetadata)array.Type;
+        var pointer = (PointerMetadata)array.Type;
         var type = ((ArrayMetadata)pointer.Type).ItemMetadata!;
-        var register = CreateRegister(new TypePointerMetadata(type));
+        var register = CreateRegister(new PointerMetadata(null, type));
         var element = new GetElementPointer(register, array, index);
         currentBlock.AddInstruction(element);
 
@@ -219,7 +214,7 @@ internal class IrBuilder
     {
         var resultType = member switch
         {
-            FieldMetadata field => MapToIrType(field.Type),
+            FieldMetadata field => field.Type,
             MethodMetadata method => method.Type,
             ConstructorMetadata constructor => constructor.Type,
             FunctionMetadata function => function.Type,
@@ -228,7 +223,7 @@ internal class IrBuilder
             _ => throw new IrException($"Unsupported member type '{member.GetType().Name}'.")
         };
 
-        var register = CreateRegister(new TypePointerMetadata(resultType));
+        var register = CreateRegister(new PointerMetadata(null, resultType));
         var getMember = new GetMemberPointer(register, source, member);
         currentBlock.AddInstruction(getMember);
 
@@ -238,7 +233,7 @@ internal class IrBuilder
     public Register Call(Register function, IReadOnlyList<Register> parameters, bool isStatic)
     {
         var functionType = (FunctionTypeMetadata)function.Type;
-        var register = CreateRegister(MapToIrType(functionType.ReturnType));
+        var register = CreateRegister(functionType.ReturnType);
         var call = new Call(register, function, parameters, isStatic);
         currentBlock.AddInstruction(call);
 
@@ -247,7 +242,7 @@ internal class IrBuilder
 
     public Register Alloc(ITypeMetadata type)
     {
-        var register = CreateRegister(new TypePointerMetadata(type));
+        var register = CreateRegister(type);
         var allocate = new Alloc(register, type.Layout!.Size);
         currentBlock.AddInstruction(allocate);
 
@@ -256,7 +251,7 @@ internal class IrBuilder
 
     public Register ArrayAlloc(ArrayMetadata type, Register size)
     {
-        var register = CreateRegister(MapToIrType(type));
+        var register = CreateRegister(type);
         var allocate = new ArrayAlloc(register, type.Layout!.Size, type.ItemMetadata!.Layout!.Size, size);
         currentBlock.AddInstruction(allocate);
 
@@ -274,7 +269,7 @@ internal class IrBuilder
 
     public Register Cast(Register source, ITypeMetadata type)
     {
-        var register = CreateRegister(MapToIrType(type));
+        var register = CreateRegister(type);
         var castInstruction = new Cast(register, source, type);
         currentBlock.AddInstruction(castInstruction);
 

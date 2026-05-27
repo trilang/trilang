@@ -38,7 +38,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], point, rootNamespace)));
 
         var count = CreatePropertyMetadata(rootNamespace, point, "x", builtInTypes.I32);
         point.AddProperty(count);
@@ -171,7 +171,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 pointType,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], pointType, rootNamespace)));
 
         var xProperty = CreatePropertyMetadata(
             rootNamespace,
@@ -197,7 +197,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 testType,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], testType, rootNamespace)));
 
         var pointProperty = CreatePropertyMetadata(rootNamespace, testType, "point", pointType);
         testType.AddProperty(pointProperty);
@@ -376,7 +376,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], point, rootNamespace)));
 
         var xProperty = CreatePropertyMetadata(
             rootNamespace,
@@ -523,7 +523,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], point, rootNamespace)));
 
         var xProperty = CreatePropertyMetadata(
             rootNamespace,
@@ -715,7 +715,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], point, rootNamespace)));
 
         var xProperty = CreatePropertyMetadata(
             rootNamespace,
@@ -886,7 +886,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                 point,
                 AccessModifierMetadata.Public,
                 [],
-                CreateFunctionType([], builtInTypes.Void, rootNamespace)));
+                CreateFunctionType([], point, rootNamespace)));
 
         var xProperty = CreatePropertyMetadata(
             rootNamespace,

@@ -42,6 +42,8 @@ public interface INodeTransformer<out TResult>
 
     TResult TransformGenericType(GenericApplicationNode node);
 
+    TResult TransformGenericExpression(GenericExpressionNode node);
+
     TResult TransformIfDirective(IfDirectiveNode node);
 
     TResult TransformIf(IfStatementNode node);
@@ -62,13 +64,13 @@ public interface INodeTransformer<out TResult>
 
     TResult TransformNamespace(NamespaceNode node);
 
-    TResult TransformNewArray(NewArrayExpressionNode node);
-
     TResult TransformNewObject(NewObjectExpressionNode node);
 
     TResult TransformNull(NullExpressionNode node);
 
     TResult TransformParameter(ParameterNode node);
+
+    TResult TransformPointer(PointerTypeNode node);
 
     TResult TransformProperty(PropertyDeclarationNode node);
 

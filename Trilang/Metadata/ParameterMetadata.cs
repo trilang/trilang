@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class ParameterMetadata : IMetadata
+public class ParameterMetadata : ITypedMetadata
 {
     private bool isFrozen;
 

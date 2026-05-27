@@ -20,9 +20,10 @@ internal class CheckStaticAndInstanceMembersAccess : ISemanticPass
 
     public void Analyze(Project project)
     {
+        var visitor = new CheckStaticAndInstanceMembersAccessVisitor(directives, diagnostics);
         var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
         foreach (var tree in semanticTrees)
-            tree.Accept(new CheckStaticAndInstanceMembersAccessVisitor(directives, diagnostics));
+            tree.Accept(visitor);
     }
 
     public string Name => nameof(CheckStaticAndInstanceMembersAccess);

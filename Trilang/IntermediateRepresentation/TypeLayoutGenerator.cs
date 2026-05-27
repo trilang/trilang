@@ -110,7 +110,7 @@ internal class TypeLayoutGenerator
             TypeMetadata typeMetadata
                 => Generate(typeMetadata),
 
-            TypePointerMetadata typePointerMetadata
+            PointerMetadata typePointerMetadata
                 => Generate(typePointerMetadata),
 
             _ => throw new ArgumentOutOfRangeException(nameof(type)),
@@ -180,7 +180,7 @@ internal class TypeLayoutGenerator
         return layout;
     }
 
-    private TypeLayout Generate(TypePointerMetadata _)
+    private TypeLayout Generate(PointerMetadata _)
     {
         var layout = new TypeLayout();
 

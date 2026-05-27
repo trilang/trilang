@@ -1,6 +1,6 @@
 namespace Trilang.Metadata;
 
-public class MethodMetadata : IFunctionMetadata
+public class MethodMetadata : IFunctionMetadata, ITypedMetadata
 {
     private bool isFrozen;
 
@@ -68,4 +68,6 @@ public class MethodMetadata : IFunctionMetadata
     public IReadOnlyList<ParameterMetadata> Parameters { get; }
 
     public FunctionTypeMetadata Type { get; }
+
+    ITypeMetadata ITypedMetadata.Type => Type;
 }

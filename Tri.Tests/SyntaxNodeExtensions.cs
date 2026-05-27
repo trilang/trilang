@@ -248,6 +248,27 @@ public static class SyntaxNodeExtensions
             EndChildren();
         }
 
+        public void VisitGenericExpression(GenericExpressionNode node)
+        {
+            WriteLine("GenericExpression");
+            VisitChildren();
+
+            node.Member.Accept(this);
+
+            if (node.GenericArguments.Count > 0)
+            {
+                WriteLine("GenericArguments");
+                VisitChildren();
+
+                foreach (var genericArgument in node.GenericArguments)
+                    genericArgument.Accept(this);
+
+                EndChildren();
+            }
+
+            EndChildren();
+        }
+
         public void VisitIfDirective(IfDirectiveNode node)
         {
             WriteLine("IfDirective");
@@ -390,32 +411,11 @@ public static class SyntaxNodeExtensions
             EndChildren();
         }
 
-        public void VisitNewArray(NewArrayExpressionNode node)
-        {
-            WriteLine("NewArray");
-            VisitChildren();
-            node.Type.Accept(this);
-            node.Size.Accept(this);
-            EndChildren();
-        }
-
         public void VisitNewObject(NewObjectExpressionNode node)
         {
             WriteLine("NewObject");
             VisitChildren();
-            node.Type.Accept(this);
-
-            if (node.Parameters.Count > 0)
-            {
-                WriteLine("Parameters");
-                VisitChildren();
-
-                foreach (var param in node.Parameters)
-                    param.Accept(this);
-
-                EndChildren();
-            }
-
+            node.Member.Accept(this);
             EndChildren();
         }
 
@@ -425,6 +425,14 @@ public static class SyntaxNodeExtensions
         public void VisitParameter(ParameterNode node)
         {
             WriteLine($"Parameter: {node.Name}");
+            VisitChildren();
+            node.Type.Accept(this);
+            EndChildren();
+        }
+
+        public void VisitPointer(PointerTypeNode node)
+        {
+            WriteLine("PointerType");
             VisitChildren();
             node.Type.Accept(this);
             EndChildren();
