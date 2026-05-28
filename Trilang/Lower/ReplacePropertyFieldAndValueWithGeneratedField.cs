@@ -1,18 +1,28 @@
-using System.Diagnostics;
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
+using Trilang.Semantics.Passes;
 
 namespace Trilang.Lower;
 
 internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISemanticNode>
 {
+    private readonly DiagnosticCollection diagnostics;
     private readonly BuiltInTypes builtInTypes;
+    private readonly MetadataProviderMap metadataProviderMap;
     private FieldMetadata? currentField;
     private MethodMetadata? currentSetter;
 
-    public ReplacePropertyFieldAndValueWithGeneratedField(BuiltInTypes builtInTypes)
-        => this.builtInTypes = builtInTypes;
+    public ReplacePropertyFieldAndValueWithGeneratedField(
+        DiagnosticCollection diagnostics,
+        BuiltInTypes builtInTypes,
+        MetadataProviderMap metadataProviderMap)
+    {
+        this.diagnostics = diagnostics;
+        this.builtInTypes = builtInTypes;
+        this.metadataProviderMap = metadataProviderMap;
+    }
 
     public ISemanticNode TransformArrayAccess(ArrayAccessExpression node)
     {
@@ -69,10 +79,10 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         var parameters = new IExpression[node.Parameters.Count];
         for (var i = 0; i < parameters.Length; i++)
         {
+            parameters[i] = (IExpression)node.Parameters[i].Transform(this);
+
             if (ReferenceEquals(node.Parameters[i], parameters[i]))
                 changed = true;
-
-            parameters[i] = (IExpression)node.Parameters[i].Transform(this);
         }
 
         if (ReferenceEquals(member, node.Member) && !changed)
@@ -184,14 +194,12 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
 
         if (node.IsField)
         {
-            Debug.Assert(currentField is not null);
-
+            var metadataProvider = metadataProviderMap.Get(node);
+            var metadataFactory = new MetadataFactory(builtInTypes, diagnostics.ForSemantic(), metadataProvider);
+            var pointer = metadataFactory.CreatePointer(null, currentField!.DeclaringType);
             var thisMember = new MemberAccessExpression(null, MemberAccessExpression.This)
             {
-                Reference = new ParameterMetadata(
-                    null,
-                    MemberAccessExpression.This,
-                    currentField.DeclaringType),
+                Reference = new ParameterMetadata(null, MemberAccessExpression.This, pointer),
                 AccessKind = MemberAccessKind.Read,
             };
 
@@ -204,9 +212,7 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
 
         if (node.IsValue)
         {
-            Debug.Assert(currentSetter is not null);
-
-            var parameter = currentSetter.Parameters.First(x => x.Name == MemberAccessExpression.Value);
+            var parameter = currentSetter!.Parameters.First(x => x.Name == MemberAccessExpression.Value);
 
             return new MemberAccessExpression(null, parameter.Name)
             {
@@ -251,8 +257,14 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
         var returnTypeMetadata = propertyMetadata.Type;
         var typeMetadata = (TypeMetadata)propertyMetadata.DeclaringType;
 
-        currentField = new FieldMetadata(typeMetadata, $"<>_{propertyMetadata.Name}", returnTypeMetadata);
-        typeMetadata.AddField(currentField);
+        var hasField = HasField(propertyMetadata.Getter, node.Getter?.Body) ||
+                       HasField(propertyMetadata.Setter, node.Setter?.Body);
+
+        if (hasField)
+        {
+            currentField = new FieldMetadata(typeMetadata, $"<>_{propertyMetadata.Name}", returnTypeMetadata);
+            typeMetadata.AddField(currentField);
+        }
 
         node.Getter?.Transform(this);
         node.Setter?.Transform(this);
@@ -261,6 +273,10 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : ITransformer<ISe
 
         return node;
     }
+
+    private static bool HasField(MethodMetadata? accessor, BlockStatement? body)
+        => accessor is not null &&
+           (body is null || body.Find<MemberAccessExpression>(x => x.IsField) is not null);
 
     public ISemanticNode TransformGetter(PropertyGetter node)
     {

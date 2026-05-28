@@ -6,6 +6,7 @@ using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
 using Trilang.Semantics;
+using Trilang.Semantics.Passes;
 using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Trilang.Compilation;
@@ -45,11 +46,11 @@ public class Compiler
 
             Parse(diagnostics, project);
 
-            var (_, controlFlowGraphs) = SemanticAnalysis(project, diagnostics, compilationContext, options);
+            var (_, metadataProviderMap, controlFlowGraphs) = SemanticAnalysis(project, diagnostics, compilationContext, options);
 
-            Lower(compilationContext, project, controlFlowGraphs, options);
+            Lower(diagnostics, compilationContext, project, controlFlowGraphs, metadataProviderMap, options);
 
-            functions.AddRange(GenerateIr(compilationContext, project, options));
+            functions.AddRange(GenerateIr(diagnostics, compilationContext, project, options));
 
             Debug.Assert(compilationContext.CurrentPackage is not null);
             compilationContexts.Add(compilationContext);
@@ -132,12 +133,14 @@ public class Compiler
     }
 
     private static void Lower(
+        DiagnosticCollection diagnostics,
         CompilationContext compilationContext,
         Project project,
         ControlFlowGraphMap controlFlowGraphs,
+        MetadataProviderMap metadataProviderMap,
         CompilerOptions options)
     {
-        var lowering = new Lowering(compilationContext.BuiltInTypes);
+        var lowering = new Lowering(diagnostics, compilationContext.BuiltInTypes, metadataProviderMap);
         foreach (var compilationUnit in project.SourceFiles)
             lowering.Lower(
                 compilationUnit.SemanticTree!,
@@ -145,12 +148,13 @@ public class Compiler
     }
 
     private IReadOnlyList<IrFunction> GenerateIr(
+        DiagnosticCollection diagnostics,
         CompilationContext compilationContext,
         Project project,
         CompilerOptions options)
     {
         var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
-        var ir = new IrGenerator(options.Directives, compilationContext);
+        var ir = new IrGenerator(options.Directives, diagnostics, compilationContext);
         var functions = ir.Generate(semanticTrees);
 
         return functions;

@@ -483,17 +483,18 @@ internal class TypeChecker : ISemanticPass
 
         private void VisitFirstMemberAccess(MemberAccessExpression node)
         {
+            var metadataProvider = metadataProviderMap.Get(node);
             var symbolTable = symbolTableMap.Get(node);
             var symbols = symbolTable.GetId(node.Name);
             if (symbols is not [])
             {
                 if (node.IsThis)
                 {
+                    var type = ((TypeDeclaration)symbols[0].Node).Metadata!;
+                    var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
+                    var pointer = metadataFactory.CreatePointer(null, type);
                     node.Reference = new AggregateMetadata([
-                        new ParameterMetadata(
-                            null,
-                            MemberAccessExpression.This,
-                            ((TypeDeclaration)symbols[0].Node).Metadata!)
+                        new ParameterMetadata(null, MemberAccessExpression.This, pointer)
                     ]);
 
                     return;
@@ -505,7 +506,6 @@ internal class TypeChecker : ISemanticPass
             }
 
             // static access
-            var metadataProvider = metadataProviderMap.Get(node);
             var function = metadataProvider.FindFunctions(node.Name);
             var types = metadataProvider.QueryTypes(new ByName(node.Name));
             var openGenerics = metadataProvider.QueryTypes(new GetOpenGeneric(node.Name));
@@ -679,9 +679,8 @@ internal class TypeChecker : ISemanticPass
             var setter = node.FindInParent<PropertySetter>();
             if (setter is not null)
             {
-                var setterReturnType = ((PropertyDeclaration)setter.Parent!).Metadata!.Type;
-                if (!setterReturnType.IsInvalid && !Equals(setterReturnType, expressionType))
-                    diagnostics.ReturnTypeMismatch(node, setterReturnType, expressionType);
+                if (!Equals(builtInTypes.Void, expressionType))
+                    diagnostics.ReturnTypeMismatch(node, builtInTypes.Void, expressionType);
 
                 return;
             }

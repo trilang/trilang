@@ -1,20 +1,39 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
+using Trilang.Semantics.Passes;
+using Trilang.Semantics.Providers;
 
 namespace Trilang.IntermediateRepresentation;
 
 internal class IrDiscoveryPhase : Visitor
 {
+    private readonly DiagnosticCollection diagnostics;
+    private readonly CompilationContext compilationContext;
     private readonly Dictionary<IMetadata, BlockStatement> functionsToGenerate;
 
-    public IrDiscoveryPhase(ISet<string> directives) : base(directives)
-        => functionsToGenerate = [];
+    public IrDiscoveryPhase(
+        ISet<string> directives,
+        DiagnosticCollection diagnostics,
+        CompilationContext compilationContext) : base(directives)
+    {
+        this.diagnostics = diagnostics;
+        this.compilationContext = compilationContext;
+        functionsToGenerate = [];
+    }
 
     public IReadOnlyDictionary<IMetadata, BlockStatement> Discover(
         IEnumerable<SemanticTree> syntaxTrees,
         IEnumerable<ITypeMetadata> types)
     {
+        // we can use the root namespace here because we are only going to create pointers
+        var metadataProvider = new MetadataProvider(compilationContext, compilationContext.RootNamespace);
+        var metadataFactory = new MetadataFactory(
+            compilationContext.BuiltInTypes,
+            diagnostics.ForSemantic(),
+            metadataProvider);
+
         foreach (var tree in syntaxTrees)
             VisitTree(tree);
 
@@ -36,6 +55,8 @@ internal class IrDiscoveryPhase : Visitor
 
                 if (property.Getter is not null && !functionsToGenerate.ContainsKey(property.Getter))
                 {
+                    var pointer = metadataFactory.CreatePointer(null, declaringType);
+
                     functionsToGenerate.Add(
                         property.Getter,
                         new BlockStatement(null, [
@@ -48,7 +69,7 @@ internal class IrDiscoveryPhase : Visitor
                                         Reference = new ParameterMetadata(
                                             null,
                                             MemberAccessExpression.This,
-                                            declaringType),
+                                            pointer),
                                         AccessKind = MemberAccessKind.Read,
                                     },
                                     fieldMetadata.Name
@@ -64,8 +85,9 @@ internal class IrDiscoveryPhase : Visitor
 
                 if (property.Setter is not null && !functionsToGenerate.ContainsKey(property.Setter))
                 {
-                    var valueParameter = property.Setter.Parameters
-                        .First(x => x.Name == MemberAccessExpression.Value);
+                    var pointer = metadataFactory.CreatePointer(null, declaringType);
+                    var valueParameter = property.Setter.Parameters.First(x => x.Name == MemberAccessExpression.Value);
+
                     functionsToGenerate.Add(
                         property.Setter,
                         new BlockStatement(null, [
@@ -81,7 +103,7 @@ internal class IrDiscoveryPhase : Visitor
                                             Reference = new ParameterMetadata(
                                                 null,
                                                 MemberAccessExpression.This,
-                                                declaringType),
+                                                pointer),
                                             AccessKind = MemberAccessKind.Read,
                                         },
                                         fieldMetadata.Name

@@ -57,13 +57,15 @@ public class AddThisInLocalMemberAccessTests
             [],
             CreateFunctionType([], builtInTypes.I32, rootNamespace)));
 
+        var pointer = new PointerMetadata(null, typeMetadata);
+
         var expected = new CallExpression(
             null,
             new MemberAccessExpression(
                 null,
                 new MemberAccessExpression(null, MemberAccessExpression.This)
                 {
-                    Reference = new ParameterMetadata(null, MemberAccessExpression.This, typeMetadata),
+                    Reference = new ParameterMetadata(null, MemberAccessExpression.This, pointer),
                     AccessKind = MemberAccessKind.Read,
                 },
                 "<>_get_count")
@@ -130,11 +132,13 @@ public class AddThisInLocalMemberAccessTests
             [],
             CreateFunctionType([], builtInTypes.Void, rootNamespace)));
 
+        var pointer = new PointerMetadata(null, typeMetadata);
+
         var expected = new MemberAccessExpression(
             null,
             new MemberAccessExpression(null, MemberAccessExpression.This)
             {
-                Reference = new ParameterMetadata(null, MemberAccessExpression.This, typeMetadata),
+                Reference = new ParameterMetadata(null, MemberAccessExpression.This, pointer),
                 AccessKind = MemberAccessKind.Read,
             },
             "print")
@@ -143,9 +147,8 @@ public class AddThisInLocalMemberAccessTests
             AccessKind = MemberAccessKind.Read,
         };
 
-        var returnStatement = tree.Find<CallExpression>();
+        var returnStatement = tree.Find<CallExpression>()!;
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(returnStatement, Is.Not.Null);
         Assert.That(returnStatement.Member, Is.EqualTo(expected).Using(SemanticComparer.Instance));
     }
 }

@@ -19,8 +19,7 @@ public class MemberAccessExpression : IAccessExpression
         Member = member;
         Name = name;
 
-        if (Member is not null)
-            Member.Parent = this;
+        Member?.Parent = this;
     }
 
     public void Accept(IVisitor visitor)

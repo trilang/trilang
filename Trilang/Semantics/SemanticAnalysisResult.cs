@@ -5,4 +5,5 @@ namespace Trilang.Semantics;
 
 public record SemanticAnalysisResult(
     SymbolTableMap SymbolTableMap,
+    MetadataProviderMap MetadataProviderMap,
     ControlFlowGraphMap ControlFlowGraphs);

@@ -26,7 +26,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -65,7 +65,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -116,7 +116,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -173,7 +173,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -226,7 +226,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -279,7 +279,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -336,7 +336,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -386,7 +386,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -442,7 +442,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -492,7 +492,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -550,7 +550,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -610,7 +610,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, graphs) = semantic.Analyze(
+        var (_, _, graphs) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),

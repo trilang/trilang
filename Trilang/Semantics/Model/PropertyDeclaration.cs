@@ -2,7 +2,6 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
-// TODO: don't generate backing field if it's not needed
 public class PropertyDeclaration : ISemanticNode
 {
     public PropertyDeclaration(

@@ -25,7 +25,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -92,7 +92,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -164,7 +164,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -200,7 +200,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -245,7 +245,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -324,7 +324,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -358,7 +358,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -432,7 +432,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -479,7 +479,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _) = semantic.Analyze(
+        var (map, _, _) = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 

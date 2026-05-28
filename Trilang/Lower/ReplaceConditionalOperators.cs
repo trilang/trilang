@@ -184,10 +184,10 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
         var parameters = new IExpression[node.Parameters.Count];
         for (var i = 0; i < parameters.Length; i++)
         {
+            parameters[i] = (IExpression)node.Parameters[i].Transform(this);
+
             if (ReferenceEquals(node.Parameters[i], parameters[i]))
                 changed = true;
-
-            parameters[i] = (IExpression)node.Parameters[i].Transform(this);
         }
 
         if (ReferenceEquals(member, node.Member) && !changed)

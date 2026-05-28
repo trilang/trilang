@@ -1184,11 +1184,9 @@ public class TypeCheckerTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
-        var thisNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "this");
-        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
-        var pointType = test1Ns.FindType("Point");
+        var thisNode = semanticTree.Find<MemberAccessExpression>(m => m.Name == "this")!;
+        var pointType = rootNamespace.FindType("Point*")!;
         Assert.That(diagnostics.Diagnostics, Is.Empty);
-        Assert.That(thisNode, Is.Not.Null);
         Assert.That(thisNode.ReturnTypeMetadata, Is.EqualTo(pointType).Using(new MetadataComparer()));
     }
 
@@ -1260,6 +1258,38 @@ public class TypeCheckerTests
             "The member was not found.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void ThisIsPointerTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public type Point {
+                public getInstance(): Point* {
+                    return this;
+                }
+            }
+            """);
+        var (project, diagnostics) = Parse(file);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var pointPointer = rootNamespace.FindType("Point*");
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var returnNode = semanticTree.Find<ReturnStatement>()!;
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(
+            returnNode.Expression!.ReturnTypeMetadata,
+            Is.EqualTo(pointPointer).Using(new MetadataComparer()));
     }
 
     [Test]

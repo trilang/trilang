@@ -4,8 +4,6 @@ namespace Trilang.Semantics.Model;
 
 public class PropertySetter : ISemanticNode
 {
-    private BlockStatement? body;
-
     public PropertySetter(SourceSpan? sourceSpan, AccessModifier accessModifier, BlockStatement? body)
     {
         SourceSpan = sourceSpan;
@@ -32,13 +30,11 @@ public class PropertySetter : ISemanticNode
 
     public BlockStatement? Body
     {
-        get => body;
+        get;
         set
         {
-            body = value;
-
-            if (body is not null)
-                body.Parent = this;
+            field = value;
+            field?.Parent = this;
         }
     }
 

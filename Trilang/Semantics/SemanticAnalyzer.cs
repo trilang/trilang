@@ -28,7 +28,7 @@ public class SemanticAnalyzer
         foreach (var pass in semanticPasses)
             pass.Analyze(project);
 
-        return new SemanticAnalysisResult(symbolTableMap, controlFlowGraphMap);
+        return new SemanticAnalysisResult(symbolTableMap, metadataProviderMap, controlFlowGraphMap);
     }
 
     private List<ISemanticPass> CreateSemanticPasses(

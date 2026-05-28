@@ -16,7 +16,7 @@ public class ThisInStaticMethodsTests
             namespace Test1;
 
             public type Test {
-                public static test(): Test {
+                public static test(): Test* {
                     return this;
                 }
             }
@@ -39,7 +39,7 @@ public class ThisInStaticMethodsTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(85, 5, 16), new SourcePosition(89, 5, 20))),
+                new SourceSpan(new SourcePosition(86, 5, 16), new SourcePosition(90, 5, 20))),
             "The 'this' keyword cannot be used in a static method.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

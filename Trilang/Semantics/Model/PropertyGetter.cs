@@ -2,10 +2,9 @@ using Trilang.Metadata;
 
 namespace Trilang.Semantics.Model;
 
+// TODO: merge with PropertySetter
 public class PropertyGetter : ISemanticNode
 {
-    private BlockStatement? body;
-
     public PropertyGetter(SourceSpan? sourceSpan, AccessModifier accessModifier, BlockStatement? body)
     {
         SourceSpan = sourceSpan;
@@ -31,13 +30,11 @@ public class PropertyGetter : ISemanticNode
 
     public BlockStatement? Body
     {
-        get => body;
+        get;
         set
         {
-            body = value;
-
-            if (body is not null)
-                body.Parent = this;
+            field = value;
+            field?.Parent = this;
         }
     }
 

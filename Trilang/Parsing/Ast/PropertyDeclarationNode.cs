@@ -2,7 +2,6 @@ using Trilang.Parsing.Formatters;
 
 namespace Trilang.Parsing.Ast;
 
-// TODO: don't generate backing field if it's not needed
 public class PropertyDeclarationNode : ISyntaxNode
 {
     public PropertyDeclarationNode(SourceSpan sourceSpan, string name, IInlineTypeNode type)

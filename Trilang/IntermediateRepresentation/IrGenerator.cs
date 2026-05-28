@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using static Trilang.Semantics.Model.BinaryExpressionKind;
@@ -12,12 +13,12 @@ public class IrGenerator
     private readonly TypeLayoutGenerator layoutGenerator;
     private readonly IrDiscoveryPhase discoveryPhase;
 
-    public IrGenerator(ISet<string> directives, CompilationContext compilationContext)
+    public IrGenerator(ISet<string> directives, DiagnosticCollection diagnostics, CompilationContext compilationContext)
     {
         this.compilationContext = compilationContext;
         ssaTransformer = new SsaTransformer();
         layoutGenerator = new TypeLayoutGenerator(compilationContext.BuiltInTypes);
-        discoveryPhase = new IrDiscoveryPhase(directives);
+        discoveryPhase = new IrDiscoveryPhase(directives, diagnostics, compilationContext);
     }
 
     public IReadOnlyList<IrFunction> Generate(IEnumerable<SemanticTree> semanticTrees)

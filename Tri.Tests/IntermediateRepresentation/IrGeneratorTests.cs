@@ -1,3 +1,4 @@
+using Trilang.Compilation.Diagnostics;
 using Trilang.IntermediateRepresentation;
 using Trilang.IntermediateRepresentation.Instructions;
 using static Tri.Tests.Helpers;
@@ -29,7 +30,7 @@ public class IrGeneratorTests
               """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         var expected =
@@ -65,7 +66,7 @@ public class IrGeneratorTests
               """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         var expected =
@@ -95,7 +96,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -133,7 +134,7 @@ public class IrGeneratorTests
               """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         var expected =
@@ -167,7 +168,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -200,7 +201,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -233,7 +234,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -265,7 +266,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -293,7 +294,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -322,7 +323,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -351,7 +352,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -380,7 +381,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -417,7 +418,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -456,7 +457,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -496,7 +497,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -536,7 +537,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -579,7 +580,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -622,7 +623,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -669,7 +670,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -726,7 +727,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -775,7 +776,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -822,7 +823,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -862,7 +863,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -909,7 +910,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -963,7 +964,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1029,7 +1030,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1098,7 +1099,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1194,7 +1195,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1280,7 +1281,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1317,7 +1318,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1353,7 +1354,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1387,7 +1388,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1420,7 +1421,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1451,7 +1452,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1480,7 +1481,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1511,7 +1512,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1544,7 +1545,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
@@ -1586,7 +1587,7 @@ public class IrGeneratorTests
             """;
         var (tree, diagnostics, compilationContext) = Lower(CreateFile(code));
 
-        var ir = new IrGenerator(new HashSet<string>(), compilationContext);
+        var ir = new IrGenerator(new HashSet<string>(), new DiagnosticCollection(), compilationContext);
         var functions = ir.Generate([tree]);
 
         const string expected =
