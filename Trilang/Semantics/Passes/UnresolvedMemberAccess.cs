@@ -28,7 +28,7 @@ internal class UnresolvedMemberAccess : ISemanticPass
         => nameof(UnresolvedMemberAccess);
 
     public IEnumerable<string> DependsOn
-        => [nameof(TypeChecker)];
+        => [nameof(Binder)];
 
     private sealed class UnresolvedMemberAccessVisitor : Visitor
     {

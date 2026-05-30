@@ -164,5 +164,5 @@ internal class ControlFlowAnalyzer : ISemanticPass
 
     public string Name => nameof(ControlFlowAnalyzer);
 
-    public IEnumerable<string> DependsOn => [nameof(TypeChecker)];
+    public IEnumerable<string> DependsOn => [nameof(Binder)];
 }

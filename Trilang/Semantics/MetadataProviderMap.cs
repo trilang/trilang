@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Providers;
 
-namespace Trilang.Semantics.Passes;
+namespace Trilang.Semantics;
 
 public class MetadataProviderMap
 {

@@ -1,7 +1,7 @@
 using Trilang.Semantics.Model;
 using Trilang.Symbols;
 
-namespace Trilang.Semantics.Passes;
+namespace Trilang.Semantics;
 
 // TODO: add only unique tables?
 public class SymbolTableMap

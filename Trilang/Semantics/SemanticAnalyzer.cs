@@ -59,7 +59,7 @@ public class SemanticAnalyzer
             new SymbolFinder(options.Directives, symbolTableMap),
             new ThisInStaticMethods(options.Directives, options.Diagnostics),
             new ThisOutsideOfType(options.Directives, options.Diagnostics),
-            new TypeChecker(
+            new Binder(
                 options.Directives,
                 options.Diagnostics,
                 symbolTableMap,

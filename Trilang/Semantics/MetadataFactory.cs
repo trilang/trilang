@@ -3,7 +3,7 @@ using Trilang.Metadata;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Providers;
 
-namespace Trilang.Semantics.Passes;
+namespace Trilang.Semantics;
 
 internal class MetadataFactory
 {

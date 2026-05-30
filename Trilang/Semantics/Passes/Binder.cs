@@ -10,7 +10,7 @@ using static Trilang.Semantics.Model.UnaryExpressionKind;
 
 namespace Trilang.Semantics.Passes;
 
-internal class TypeChecker : ISemanticPass
+internal class Binder : ISemanticPass
 {
     private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
@@ -18,7 +18,7 @@ internal class TypeChecker : ISemanticPass
     private readonly MetadataProviderMap metadataProviderMap;
     private readonly CompilationContext compilationContext;
 
-    public TypeChecker(
+    public Binder(
         ISet<string> directives,
         DiagnosticCollection diagnostics,
         SymbolTableMap symbolTableMap,
@@ -46,7 +46,7 @@ internal class TypeChecker : ISemanticPass
             tree.Accept(visitor);
     }
 
-    public string Name => nameof(TypeChecker);
+    public string Name => nameof(Binder);
 
     public IEnumerable<string> DependsOn => [nameof(MetadataGenerator)];
 
@@ -363,7 +363,7 @@ internal class TypeChecker : ISemanticPass
             //     var a: Point = Point(test);
             // }
             var aggregate = (AggregateMetadata)node.Member.Reference;
-            var function = TryResolveSingleMember(aggregate);
+            var function = TryResolveSingleFunction(aggregate);
             for (var i = 0; i < node.Parameters.Count; i++)
             {
                 var parameter = node.Parameters[i];
@@ -377,7 +377,7 @@ internal class TypeChecker : ISemanticPass
             ResolveFunction(node);
         }
 
-        private static IFunctionMetadata? TryResolveSingleMember(AggregateMetadata aggregate)
+        private static IFunctionMetadata? TryResolveSingleFunction(AggregateMetadata aggregate)
         {
             if (aggregate.Members.Count != 1)
                 return null;

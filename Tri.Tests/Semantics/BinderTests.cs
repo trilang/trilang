@@ -8,7 +8,7 @@ using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
-public class TypeCheckerTests
+public class BinderTests
 {
     [Test]
     public void SetMetadataForFunctionReturnTypeTest()

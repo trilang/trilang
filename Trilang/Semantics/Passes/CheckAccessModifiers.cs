@@ -26,7 +26,7 @@ internal class CheckAccessModifiers : Visitor, ISemanticPass
 
     public IEnumerable<string> DependsOn =>
     [
-        nameof(TypeChecker),
+        nameof(Binder),
         nameof(MemberAccessKindAnalyser),
     ];
 

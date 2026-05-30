@@ -26,7 +26,7 @@ internal class RestrictFieldAccess : ISemanticPass
 
     public string Name => nameof(RestrictFieldAccess);
 
-    public IEnumerable<string> DependsOn => [nameof(TypeChecker)];
+    public IEnumerable<string> DependsOn => [nameof(Binder)];
 
     private sealed class RestrictFieldAccessVisitor : Visitor
     {

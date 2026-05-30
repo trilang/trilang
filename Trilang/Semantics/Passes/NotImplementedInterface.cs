@@ -28,7 +28,7 @@ internal class NotImplementedInterface : ISemanticPass
 
     public IEnumerable<string> DependsOn =>
     [
-        nameof(TypeChecker),
+        nameof(Binder),
         nameof(PrivateInterfaceProperties),
     ];
 

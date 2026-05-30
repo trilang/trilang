@@ -28,7 +28,7 @@ internal class CheckStaticAndInstanceMembersAccess : ISemanticPass
 
     public string Name => nameof(CheckStaticAndInstanceMembersAccess);
 
-    public IEnumerable<string> DependsOn => [nameof(TypeChecker)];
+    public IEnumerable<string> DependsOn => [nameof(Binder)];
 
     private sealed class CheckStaticAndInstanceMembersAccessVisitor : Visitor
     {
