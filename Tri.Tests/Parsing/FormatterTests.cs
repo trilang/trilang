@@ -1009,7 +1009,7 @@ public class FormatterTests
                                 default,
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode(default, "x"),
-                                new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 0)
+                                new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                             ),
                             new BlockStatementNode(default, [
                                 new ReturnStatementNode(
@@ -1066,7 +1066,7 @@ public class FormatterTests
                                 default,
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode(default, "x"),
-                                new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 0)
+                                new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                             ),
                             new BlockStatementNode(default, [
                                 new ReturnStatementNode(
@@ -1146,8 +1146,8 @@ public class FormatterTests
                                 default,
                                 new MemberAccessExpressionNode(default, "add"),
                                 [
-                                    new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 1),
-                                    new LiteralExpressionNode(default, LiteralExpressionKind.Integer, 2),
+                                    new LiteralExpressionNode(default, LiteralExpressionKind.I32, 1),
+                                    new LiteralExpressionNode(default, LiteralExpressionKind.I32, 2),
                                 ]
                             )
                         )
@@ -1200,7 +1200,7 @@ public class FormatterTests
                                 default,
                                 kind,
                                 new MemberAccessExpressionNode(default, "x"),
-                                LiteralExpressionNode.Integer(default, 1)
+                                new LiteralExpressionNode(default, LiteralExpressionKind.I32, 1)
                             )
                         )
                     ])
@@ -1240,7 +1240,7 @@ public class FormatterTests
                                 default,
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode(default, "x"),
-                                LiteralExpressionNode.Integer(default, 0)
+                                new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                             ),
                             new BlockStatementNode(default)
                         )
@@ -1282,7 +1282,7 @@ public class FormatterTests
                                 default,
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode(default, "x"),
-                                LiteralExpressionNode.Integer(default, 0)
+                                new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                             ),
                             new BlockStatementNode(default, [
                                 new BreakNode(default)
@@ -1327,7 +1327,7 @@ public class FormatterTests
                                 default,
                                 BinaryExpressionKind.LessThan,
                                 new MemberAccessExpressionNode(default, "x"),
-                                LiteralExpressionNode.Integer(default, 0)
+                                new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                             ),
                             new BlockStatementNode(default, [
                                 new ContinueNode(default)
@@ -1368,7 +1368,7 @@ public class FormatterTests
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
-                            LiteralExpressionNode.Integer(default, 0)
+                            new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                         )
                     ])
                 ),
@@ -1406,7 +1406,7 @@ public class FormatterTests
                             new ArrayAccessExpressionNode(
                                 default,
                                 new MemberAccessExpressionNode(default, "x"),
-                                LiteralExpressionNode.Integer(default, 0)
+                                new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                             )
                         )
                     ])
@@ -1554,7 +1554,7 @@ public class FormatterTests
                                 default,
                                 AccessModifier.Private,
                                 new BlockStatementNode(default, [
-                                    new ReturnStatementNode(default, LiteralExpressionNode.Integer(default, 0))
+                                    new ReturnStatementNode(default, new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0))
                                 ])
                             ),
                             new PropertySetterNode(
@@ -1679,7 +1679,7 @@ public class FormatterTests
                                 default,
                                 AccessModifier.Private,
                                 new BlockStatementNode(default, [
-                                    new ReturnStatementNode(default, LiteralExpressionNode.Integer(default, 0))
+                                    new ReturnStatementNode(default, new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0))
                                 ])
                             ),
                             new PropertySetterNode(default, AccessModifier.Private, null)),
@@ -1852,7 +1852,7 @@ public class FormatterTests
                             default,
                             "x",
                             new TypeRefNode(default, null, ["i32"]),
-                            LiteralExpressionNode.Integer(default, 0)
+                            new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                         )
                     ]))
             ]);
@@ -1888,7 +1888,7 @@ public class FormatterTests
                             default,
                             "x",
                             new FunctionTypeNode(default, [], new TypeRefNode(default, null, ["void"])),
-                            LiteralExpressionNode.Integer(default, 0)
+                            new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                         )
                     ]))
             ]);
@@ -1928,7 +1928,7 @@ public class FormatterTests
                                 [new TypeRefNode(default, null, ["i32"]), new TypeRefNode(default, null, ["f64"])],
                                 new TypeRefNode(default, null, ["void"])
                             ),
-                            LiteralExpressionNode.Integer(default, 0)
+                            new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                         )
                     ]))
             ]);
@@ -2043,7 +2043,7 @@ public class FormatterTests
                                 ],
                                 []
                             ),
-                            LiteralExpressionNode.Integer(default, 0)
+                            new LiteralExpressionNode(default, LiteralExpressionKind.I32, 0)
                         )
                     ])
                 )
@@ -2207,8 +2207,8 @@ public class FormatterTests
                                     default,
                                     new MemberAccessExpressionNode(default, "Point"),
                                     [
-                                        LiteralExpressionNode.Integer(default, 1),
-                                        LiteralExpressionNode.Integer(default, 2)
+                                        new LiteralExpressionNode(default, LiteralExpressionKind.I32, 1),
+                                        new LiteralExpressionNode(default, LiteralExpressionKind.I32, 2)
                                     ]
                                 )
                             )
@@ -2432,8 +2432,8 @@ public class FormatterTests
                         new ReturnStatementNode(
                             default,
                             new TupleExpressionNode(default, [
-                                LiteralExpressionNode.True(default),
-                                LiteralExpressionNode.Integer(default, 1)
+                                new LiteralExpressionNode(default, LiteralExpressionKind.Boolean, true),
+                                new LiteralExpressionNode(default, LiteralExpressionKind.I32, 1)
                             ])
                         )
                     ]))
@@ -2473,7 +2473,7 @@ public class FormatterTests
                                 new ArrayAccessExpressionNode(
                                     default,
                                     new MemberAccessExpressionNode(default, "i32"),
-                                    LiteralExpressionNode.Integer(default, 10)
+                                    new LiteralExpressionNode(default, LiteralExpressionKind.I32, 10)
                                 )
                             )
                         )
@@ -2791,6 +2791,48 @@ public class FormatterTests
     }
 
     [Test]
+    [TestCase(LiteralExpressionKind.I8)]
+    [TestCase(LiteralExpressionKind.I16)]
+    [TestCase(LiteralExpressionKind.I64)]
+    [TestCase(LiteralExpressionKind.U8)]
+    [TestCase(LiteralExpressionKind.U16)]
+    [TestCase(LiteralExpressionKind.U32)]
+    [TestCase(LiteralExpressionKind.U64)]
+    public void FormatNumberTest(LiteralExpressionKind kind)
+    {
+        var tree = new SyntaxTree(
+            file,
+            new NamespaceNode(default, ["Test1"]),
+            [],
+            [
+                new FunctionDeclarationNode(
+                    default,
+                    AccessModifier.Public,
+                    "test",
+                    [],
+                    new TypeRefNode(default, null, ["void"]),
+                    new BlockStatementNode(default, [
+                        new ReturnStatementNode(
+                            default,
+                            new LiteralExpressionNode(default, kind, 1)
+                        )
+                    ])
+                )
+            ]);
+        var formatted = tree.ToString();
+        var expected =
+            $$"""
+              namespace Test1;
+
+              public test(): void {
+                  return 1{{kind.ToString().ToLowerInvariant()}};
+              }
+              """;
+
+        Assert.That(formatted, Is.EqualTo(expected));
+    }
+
+    [Test]
     public void FormatFloatingNumberTest()
     {
         var tree = new SyntaxTree(
@@ -2807,7 +2849,7 @@ public class FormatterTests
                     new BlockStatementNode(default, [
                         new ReturnStatementNode(
                             default,
-                            LiteralExpressionNode.Float(default, 3.14)
+                            new LiteralExpressionNode(default, LiteralExpressionKind.F64, 3.14)
                         )
                     ])
                 )

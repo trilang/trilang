@@ -53,12 +53,6 @@ internal class Token : IEquatable<Token>
     public static Token CreateId(SourceSpan sourceSpan, string value)
         => new Token(sourceSpan, TokenKind.Identifier, value);
 
-    public static Token CreateInteger(SourceSpan sourceSpan, int value)
-        => new Token(sourceSpan, TokenKind.Integer, value);
-
-    public static Token CreateFloat(SourceSpan sourceSpan, double value)
-        => new Token(sourceSpan, TokenKind.Float, value);
-
     public static Token CreateChar(SourceSpan sourceSpan, string value)
         => new Token(sourceSpan, TokenKind.Char, value);
 
@@ -68,6 +62,9 @@ internal class Token : IEquatable<Token>
     public static Token Create(SourceSpan sourceSpan, TokenKind kind)
         => new Token(sourceSpan, kind, null);
 
+    public static Token Create(SourceSpan sourceSpan, TokenKind kind, object? value)
+        => new Token(sourceSpan, kind, value);
+
     public bool Is(TokenKind kind)
         => Kind == kind;
 
@@ -76,29 +73,4 @@ internal class Token : IEquatable<Token>
     public TokenKind Kind { get; }
 
     public object? Value { get; }
-
-    public string Identifier
-        => Kind == TokenKind.Identifier && Value is not null
-            ? (string)Value
-            : throw new InvalidOperationException();
-
-    public int Integer
-        => Kind == TokenKind.Integer && Value is not null
-            ? (int)Value
-            : throw new InvalidOperationException();
-
-    public double Float
-        => Kind == TokenKind.Float && Value is not null
-            ? (double)Value
-            : throw new InvalidOperationException();
-
-    public string String
-        => Kind == TokenKind.String && Value is not null
-            ? (string)Value
-            : throw new InvalidOperationException();
-
-    public string Char
-        => Kind == TokenKind.Char && Value is not null
-            ? (string)Value
-            : throw new InvalidOperationException();
 }

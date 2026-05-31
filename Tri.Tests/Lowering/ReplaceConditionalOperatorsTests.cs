@@ -122,7 +122,7 @@ public class ReplaceConditionalOperatorsTests
                             new Label("if_0_then"),
                             new ReturnStatement(
                                 null,
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32,
                                 }
@@ -132,7 +132,7 @@ public class ReplaceConditionalOperatorsTests
                         new Label("if_0_end"),
                         new ReturnStatement(
                             null,
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.I32, 0)
                             {
                                 ReturnTypeMetadata = builtInTypes.I32,
                             }
@@ -281,7 +281,7 @@ public class ReplaceConditionalOperatorsTests
                             new Label("if_0_then"),
                             new ReturnStatement(
                                 null,
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32,
                                 }
@@ -291,7 +291,7 @@ public class ReplaceConditionalOperatorsTests
                         new Label("if_0_end"),
                         new ReturnStatement(
                             null,
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.I32, 0)
                             {
                                 ReturnTypeMetadata = builtInTypes.I32,
                             }
@@ -492,7 +492,7 @@ public class ReplaceConditionalOperatorsTests
                             new Label("if_0_then"),
                             new ReturnStatement(
                                 null,
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32,
                                 }
@@ -502,7 +502,7 @@ public class ReplaceConditionalOperatorsTests
                         new Label("if_0_end"),
                         new ReturnStatement(
                             null,
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
+                            new LiteralExpression(null, LiteralExpressionKind.I32, 0)
                             {
                                 ReturnTypeMetadata = builtInTypes.I32,
                             }

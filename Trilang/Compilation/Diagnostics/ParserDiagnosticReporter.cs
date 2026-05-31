@@ -100,4 +100,10 @@ internal readonly record struct ParserDiagnosticReporter(DiagnosticCollection Di
             DiagnosticId.P0016ExpectedNamespace,
             new SourceLocation(File, span),
             "Expected a namespace.");
+
+    public void InvalidNumber(SourceSpan span)
+        => Diagnostics.Error(
+            DiagnosticId.P0017InvalidNumber,
+            new SourceLocation(File, span),
+            "Invalid number.");
 }

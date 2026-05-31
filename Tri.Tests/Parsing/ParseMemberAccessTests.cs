@@ -39,7 +39,7 @@ public class ParseMemberAccessTests
                         ArrayAccess
                           MemberAccess
                             Name: x
-                          Literal: Integer = 0
+                          Literal: I32 = 0
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -79,7 +79,7 @@ public class ParseMemberAccessTests
                         ArrayAccess
                           MemberAccess
                             Name: x
-                          Literal: Integer = 0
+                          Literal: I32 = 0
             """;
 
         var diagnostic = new Diagnostic(
@@ -120,8 +120,8 @@ public class ParseMemberAccessTests
                           ArrayAccess
                             MemberAccess
                               Name: x
-                            Literal: Integer = 0
-                          Literal: Integer = 1
+                            Literal: I32 = 0
+                          Literal: I32 = 1
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -159,9 +159,9 @@ public class ParseMemberAccessTests
                                 MemberAccess
                                   Name: a
                                 Name: b
-                              Literal: Integer = 0
+                              Literal: I32 = 0
                             Name: c
-                          Literal: Integer = 1
+                          Literal: I32 = 1
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -196,8 +196,8 @@ public class ParseMemberAccessTests
                           ArrayAccess
                             MemberAccess
                               Name: a
-                            Literal: Integer = 0
-                          Literal: Integer = 1
+                            Literal: I32 = 0
+                          Literal: I32 = 1
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -344,9 +344,9 @@ public class ParseMemberAccessTests
                             MemberAccess
                               Name: f
                             Parameters
-                              Literal: Integer = 1
+                              Literal: I32 = 1
                           Parameters
-                            Literal: Integer = 2
+                            Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -418,7 +418,7 @@ public class ParseMemberAccessTests
                             ArrayAccess
                               MemberAccess
                                 Name: i32
-                              Literal: Integer = 0
+                              Literal: I32 = 0
                             Name: size
             """;
 
@@ -452,7 +452,7 @@ public class ParseMemberAccessTests
                       ReturnStatement
                         Call
                           MemberAccess
-                            Literal: Integer = 1
+                            Literal: I32 = 1
                             Name: toString
             """;
 
@@ -485,10 +485,10 @@ public class ParseMemberAccessTests
                     Statements
                       ReturnStatement
                         BinaryExpression: Addition
-                          Literal: Integer = 1
+                          Literal: I32 = 1
                           Call
                             MemberAccess
-                              Literal: Integer = 2
+                              Literal: I32 = 2
                               Name: toString
             """;
 

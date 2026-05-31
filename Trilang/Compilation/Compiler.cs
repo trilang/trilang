@@ -6,7 +6,6 @@ using Trilang.Metadata;
 using Trilang.OutputFormats.Elf;
 using Trilang.Parsing;
 using Trilang.Semantics;
-using Trilang.Semantics.Passes;
 using Trilang.Semantics.Passes.ControlFlow;
 
 namespace Trilang.Compilation;

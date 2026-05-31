@@ -201,8 +201,16 @@ internal class ConvertToSemanticTree : INodeTransformer<ISemanticNode>
         var kind = node.Kind switch
         {
             Parsing.Ast.LiteralExpressionKind.Unknown => LiteralExpressionKind.Unknown,
-            Parsing.Ast.LiteralExpressionKind.Integer => LiteralExpressionKind.Integer,
-            Parsing.Ast.LiteralExpressionKind.Float => LiteralExpressionKind.Float,
+            Parsing.Ast.LiteralExpressionKind.I8 => LiteralExpressionKind.I8,
+            Parsing.Ast.LiteralExpressionKind.I16 => LiteralExpressionKind.I16,
+            Parsing.Ast.LiteralExpressionKind.I32 => LiteralExpressionKind.I32,
+            Parsing.Ast.LiteralExpressionKind.I64 => LiteralExpressionKind.I64,
+            Parsing.Ast.LiteralExpressionKind.U8 => LiteralExpressionKind.U8,
+            Parsing.Ast.LiteralExpressionKind.U16 => LiteralExpressionKind.U16,
+            Parsing.Ast.LiteralExpressionKind.U32 => LiteralExpressionKind.U32,
+            Parsing.Ast.LiteralExpressionKind.U64 => LiteralExpressionKind.U64,
+            Parsing.Ast.LiteralExpressionKind.F32 => LiteralExpressionKind.F32,
+            Parsing.Ast.LiteralExpressionKind.F64 => LiteralExpressionKind.F64,
             Parsing.Ast.LiteralExpressionKind.Boolean => LiteralExpressionKind.Boolean,
             Parsing.Ast.LiteralExpressionKind.String => LiteralExpressionKind.String,
             Parsing.Ast.LiteralExpressionKind.Char => LiteralExpressionKind.Char,

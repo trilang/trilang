@@ -260,7 +260,7 @@ public class ReplaceIfDirectivesTests
                         ),
                         new ReturnStatement(
                             null,
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                            new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                             {
                                 ReturnTypeMetadata = builtInTypes.I32,
                             }
@@ -353,7 +353,7 @@ public class ReplaceIfDirectivesTests
                         ),
                         new ReturnStatement(
                             null,
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
+                            new LiteralExpression(null, LiteralExpressionKind.I32, 2)
                             {
                                 ReturnTypeMetadata = builtInTypes.I32
                             }
@@ -446,7 +446,7 @@ public class ReplaceIfDirectivesTests
                         ),
                         new ReturnStatement(
                             null,
-                            new LiteralExpression(null, LiteralExpressionKind.Integer, 2)
+                            new LiteralExpression(null, LiteralExpressionKind.I32, 2)
                             {
                                 ReturnTypeMetadata = builtInTypes.I32,
                             }

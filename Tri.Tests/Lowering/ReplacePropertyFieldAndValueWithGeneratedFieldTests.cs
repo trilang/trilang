@@ -311,7 +311,7 @@ public class ReplacePropertyFieldAndValueWithGeneratedFieldTests
         var expectedGetterBody = new BlockStatement(null, [
             new ReturnStatement(
                 null,
-                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
+                new LiteralExpression(null, LiteralExpressionKind.I32, 0)
                 {
                     ReturnTypeMetadata = builtInTypes.I32,
                 })

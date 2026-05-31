@@ -43,37 +43,56 @@ internal class Lexer
             if (char.IsDigit(c))
             {
                 var length = 0;
-                var integerPart = 0;
                 while (code.Length > position.Index + length && char.IsDigit(code[position.Index + length]))
-                {
-                    integerPart = integerPart * 10 + (code[position.Index + length] - '0');
-                    length++;
-                }
-
-                if (code.Length > position.Index + length + 1 &&
-                    code[position.Index + length] == '.' &&
-                    char.IsDigit(code[position.Index + length + 1]))
-                {
                     length++;
 
-                    var fractionalPart = 0.0;
-                    var divisor = 10.0;
+                var isFloating = code.Length > position.Index + length + 1 &&
+                                 code[position.Index + length] == '.' &&
+                                 char.IsDigit(code[position.Index + length + 1]);
+
+                if (isFloating)
+                {
+                    length++;
 
                     while (code.Length > position.Index + length && char.IsDigit(code[position.Index + length]))
-                    {
-                        fractionalPart += (code[position.Index + length] - '0') / divisor;
-                        divisor *= 10.0;
                         length++;
-                    }
-
-                    var floatNumber = integerPart + fractionalPart;
-                    tokens.Add(Token.CreateFloat(position.Build(length), floatNumber));
                 }
-                else
+
+                var numberLength = length;
+                var numberKind = isFloating ? TokenKind.NumberF64 : TokenKind.Number;
+                var suffixStart = position.Index + length;
+
+                if (suffixStart + 2 < code.Length)
                 {
-                    tokens.Add(Token.CreateInteger(position.Build(length), integerPart));
+                    var c1 = code[suffixStart];
+                    var c2 = code[suffixStart + 1];
+                    var c3 = suffixStart + 3 < code.Length ? code[suffixStart + 2] : '\0';
+
+                    (numberKind, var suffixLength) = (c1, c2, c3) switch
+                    {
+                        ('i', '8', _) => (TokenKind.NumberI8, 2),
+                        ('i', '1', '6') => (TokenKind.NumberI16, 3),
+                        ('i', '3', '2') => (TokenKind.NumberI32, 3),
+                        ('i', '6', '4') => (TokenKind.NumberI64, 3),
+
+                        ('u', '8', _) => (TokenKind.NumberU8, 2),
+                        ('u', '1', '6') => (TokenKind.NumberU16, 3),
+                        ('u', '3', '2') => (TokenKind.NumberU32, 3),
+                        ('u', '6', '4') => (TokenKind.NumberU64, 3),
+
+                        ('f', '3', '2') => (TokenKind.NumberF32, 3),
+                        ('f', '6', '4') => (TokenKind.NumberF64, 3),
+
+                        _ => (numberKind, 0)
+                    };
+
+                    length += suffixLength;
                 }
 
+                var number = code.Substring(position.Index, numberLength);
+                var numberToken = Token.Create(position.Build(length), numberKind, number);
+
+                tokens.Add(numberToken);
                 continue;
             }
 
@@ -86,7 +105,7 @@ internal class Lexer
                     length++;
                 }
 
-                var id = code.Substring(position.Index, length);
+                var id = code.AsSpan(position.Index, length);
                 var sourceSpan = position.Build(length);
 
                 tokens.Add(id switch
@@ -116,7 +135,7 @@ internal class Lexer
                     "use" => Token.Create(sourceSpan, TokenKind.Use),
                     "namespace" => Token.Create(sourceSpan, TokenKind.Namespace),
 
-                    _ => Token.CreateId(sourceSpan, id),
+                    _ => Token.CreateId(sourceSpan, id.ToString()),
                 });
 
                 continue;

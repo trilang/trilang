@@ -457,9 +457,16 @@ internal class Binder : ISemanticPass
 
             node.ReturnTypeMetadata = node.Kind switch
             {
-                // TODO: other types
-                LiteralExpressionKind.Integer => builtInTypes.I32,
-                LiteralExpressionKind.Float => builtInTypes.F64,
+                LiteralExpressionKind.I8 => builtInTypes.I8,
+                LiteralExpressionKind.I16 => builtInTypes.I16,
+                LiteralExpressionKind.I32 => builtInTypes.I32,
+                LiteralExpressionKind.I64 => builtInTypes.I64,
+                LiteralExpressionKind.U8 => builtInTypes.U8,
+                LiteralExpressionKind.U16 => builtInTypes.U16,
+                LiteralExpressionKind.U32 => builtInTypes.U32,
+                LiteralExpressionKind.U64 => builtInTypes.U64,
+                LiteralExpressionKind.F32 => builtInTypes.F32,
+                LiteralExpressionKind.F64 => builtInTypes.F64,
                 LiteralExpressionKind.Boolean => builtInTypes.Bool,
                 LiteralExpressionKind.String => builtInTypes.String,
                 LiteralExpressionKind.Char => builtInTypes.Char,

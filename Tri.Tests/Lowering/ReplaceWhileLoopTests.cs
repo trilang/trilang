@@ -59,7 +59,7 @@ public class ReplaceWhileLoopTests
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
+                                new LiteralExpression(null, LiteralExpressionKind.I32, 0)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32
                                 }
@@ -81,7 +81,7 @@ public class ReplaceWhileLoopTests
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Read,
                                     },
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                    new LiteralExpression(null, LiteralExpressionKind.I32, 10)
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32
                                     }
@@ -116,7 +116,7 @@ public class ReplaceWhileLoopTests
                                                 Reference = parameterMetadata,
                                                 AccessKind = MemberAccessKind.Read,
                                             },
-                                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                             {
                                                 ReturnTypeMetadata = builtInTypes.I32
                                             }
@@ -215,7 +215,7 @@ public class ReplaceWhileLoopTests
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
+                                new LiteralExpression(null, LiteralExpressionKind.I32, 0)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32
                                 }
@@ -237,7 +237,7 @@ public class ReplaceWhileLoopTests
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Read,
                                     },
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                    new LiteralExpression(null, LiteralExpressionKind.I32, 10)
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32
                                     }
@@ -290,7 +290,7 @@ public class ReplaceWhileLoopTests
                                                 Reference = parameterMetadata,
                                                 AccessKind = MemberAccessKind.Read,
                                             },
-                                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                             {
                                                 ReturnTypeMetadata = builtInTypes.I32
                                             }
@@ -391,7 +391,7 @@ public class ReplaceWhileLoopTests
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
+                                new LiteralExpression(null, LiteralExpressionKind.I32, 0)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32
                                 }
@@ -413,7 +413,7 @@ public class ReplaceWhileLoopTests
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Read,
                                     },
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                    new LiteralExpression(null, LiteralExpressionKind.I32, 10)
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32
                                     }
@@ -448,7 +448,7 @@ public class ReplaceWhileLoopTests
                                                 Reference = parameterMetadata,
                                                 AccessKind = MemberAccessKind.Read,
                                             },
-                                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                             {
                                                 ReturnTypeMetadata = builtInTypes.I32
                                             }
@@ -471,7 +471,7 @@ public class ReplaceWhileLoopTests
                                             Reference = parameterMetadata,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 5)
+                                        new LiteralExpression(null, LiteralExpressionKind.I32, 5)
                                         {
                                             ReturnTypeMetadata = builtInTypes.I32
                                         }
@@ -575,7 +575,7 @@ public class ReplaceWhileLoopTests
                                     Reference = parameterMetadata,
                                     AccessKind = MemberAccessKind.Write,
                                 },
-                                new LiteralExpression(null, LiteralExpressionKind.Integer, 0)
+                                new LiteralExpression(null, LiteralExpressionKind.I32, 0)
                                 {
                                     ReturnTypeMetadata = builtInTypes.I32
                                 }
@@ -597,7 +597,7 @@ public class ReplaceWhileLoopTests
                                         Reference = parameterMetadata,
                                         AccessKind = MemberAccessKind.Read,
                                     },
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 10)
+                                    new LiteralExpression(null, LiteralExpressionKind.I32, 10)
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32
                                     }
@@ -632,7 +632,7 @@ public class ReplaceWhileLoopTests
                                                 Reference = parameterMetadata,
                                                 AccessKind = MemberAccessKind.Read,
                                             },
-                                            new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                            new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                             {
                                                 ReturnTypeMetadata = builtInTypes.I32
                                             }
@@ -655,7 +655,7 @@ public class ReplaceWhileLoopTests
                                             Reference = parameterMetadata,
                                             AccessKind = MemberAccessKind.Read,
                                         },
-                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 5)
+                                        new LiteralExpression(null, LiteralExpressionKind.I32, 5)
                                         {
                                             ReturnTypeMetadata = builtInTypes.I32
                                         }

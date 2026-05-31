@@ -6,10 +6,20 @@ internal enum TokenKind
     EndOfFile,
 
     Identifier,
-    Integer,
-    Float,
     String,
     Char,
+
+    Number,
+    NumberI8,
+    NumberI16,
+    NumberI32,
+    NumberI64,
+    NumberU8,
+    NumberU16,
+    NumberU32,
+    NumberU64,
+    NumberF32,
+    NumberF64,
 
     // Symbols
     Colon,
@@ -91,8 +101,7 @@ internal static class TokenKindExtensions
             TokenKind.Unsupported => "<UnsupportedToken>",
             TokenKind.EndOfFile => "<EOF>",
             TokenKind.Identifier => "<Identifier>",
-            TokenKind.Integer => "<Integer>",
-            TokenKind.Float => "<Float>",
+            TokenKind.Number => "<Number>",
             TokenKind.String => "<String>",
             TokenKind.Char => "<Char>",
             TokenKind.Colon => ":",

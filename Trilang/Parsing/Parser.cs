@@ -1065,12 +1065,12 @@ public class Parser
         if (id is not null)
             return new MemberAccessExpressionNode(member.SourceSpan.Combine(idSpan), member, id);
 
-        var (hasInteger, number) = context.Reader.Match(Integer);
+        var (hasInteger, number) = context.Reader.Match(Number);
         if (hasInteger)
             return new MemberAccessExpressionNode(
                 member.SourceSpan.Combine(number.SourceSpan),
                 member,
-                number.Integer.ToString());
+                number.Value!.ToString()!);
 
         var result = new FakeExpressionNode(context.Reader.Token.SourceSpan);
         context.Diagnostics.ExpectedIdentifier(result.SourceSpan);
@@ -1257,31 +1257,37 @@ public class Parser
 
     private LiteralExpressionNode? TryParseLiteral(ParserContext context)
     {
-        var (hasInteger, token) = context.Reader.Match(Integer);
-        if (hasInteger)
-            return LiteralExpressionNode.Integer(token.SourceSpan, token.Integer);
+        var token = context.Reader.Token;
+        var result = token.Kind switch
+        {
+            Number => LiteralExpressionNode.I32(context.Diagnostics, token),
 
-        var (hasFloat, floatToken) = context.Reader.Match(Float);
-        if (hasFloat)
-            return LiteralExpressionNode.Float(floatToken.SourceSpan, floatToken.Float);
+            NumberI8 => LiteralExpressionNode.I8(context.Diagnostics, token),
+            NumberI16 => LiteralExpressionNode.I16(context.Diagnostics, token),
+            NumberI32 => LiteralExpressionNode.I32(context.Diagnostics, token),
+            NumberI64 => LiteralExpressionNode.I64(context.Diagnostics, token),
 
-        var (hasTrue, trueToken) = context.Reader.Match(True);
-        if (hasTrue)
-            return LiteralExpressionNode.True(trueToken.SourceSpan);
+            NumberU8 => LiteralExpressionNode.U8(context.Diagnostics, token),
+            NumberU16 => LiteralExpressionNode.U16(context.Diagnostics, token),
+            NumberU32 => LiteralExpressionNode.U32(context.Diagnostics, token),
+            NumberU64 => LiteralExpressionNode.U64(context.Diagnostics, token),
 
-        var (hasFalse, falseToken) = context.Reader.Match(False);
-        if (hasFalse)
-            return LiteralExpressionNode.False(falseToken.SourceSpan);
+            NumberF32 => LiteralExpressionNode.F32(context.Diagnostics, token),
+            NumberF64 => LiteralExpressionNode.F64(context.Diagnostics, token),
 
-        var (hasString, stringToken) = context.Reader.Match(TokenKind.String);
-        if (hasString)
-            return LiteralExpressionNode.String(stringToken.SourceSpan, stringToken.String);
+            True => LiteralExpressionNode.True(token.SourceSpan),
+            False => LiteralExpressionNode.False(token.SourceSpan),
 
-        var (hasChar, charToken) = context.Reader.Match(TokenKind.Char);
-        if (hasChar)
-            return LiteralExpressionNode.Char(charToken.SourceSpan, charToken.Char);
+            TokenKind.String => LiteralExpressionNode.String(token.SourceSpan, (string)token.Value!),
+            TokenKind.Char => LiteralExpressionNode.Char(token.SourceSpan, (string)token.Value!),
 
-        return null;
+            _ => null,
+        };
+
+        if (result is not null)
+            context.Reader.Advance();
+
+        return result;
     }
 
     private FakeTypeNode ParseFakeType(ParserContext context, params Span<TokenKind> tokenKinds)
@@ -1630,6 +1636,6 @@ public class Parser
         if (!hasToken)
             return default;
 
-        return (token.SourceSpan, token.Identifier);
+        return (token.SourceSpan, (string)token.Value!);
     }
 }

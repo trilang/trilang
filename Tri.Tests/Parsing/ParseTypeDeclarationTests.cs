@@ -674,7 +674,7 @@ public class ParseTypeDeclarationTests
                         Statements
                           Variable: x
                             TypeRef: i32
-                            Literal: Integer = 1
+                            Literal: I32 = 1
             """;
 
         var diagnostic = new[]

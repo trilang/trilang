@@ -473,7 +473,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     AccessKind = MemberAccessKind.Read,
                                 },
                                 [
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                    new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32,
                                     }
@@ -619,7 +619,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                     null,
                                     tmpVariable.Name,
                                     new TypeRef(null, null, ["i32"]) { Metadata = builtInTypes.I32 },
-                                    new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                    new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                     {
                                         ReturnTypeMetadata = builtInTypes.I32,
                                     }
@@ -832,7 +832,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                             },
                                             []
                                         ),
-                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                        new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                         {
                                             ReturnTypeMetadata = builtInTypes.I32,
                                         }
@@ -1002,7 +1002,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
                                             },
                                             []
                                         ),
-                                        new LiteralExpression(null, LiteralExpressionKind.Integer, 1)
+                                        new LiteralExpression(null, LiteralExpressionKind.I32, 1)
                                         {
                                             ReturnTypeMetadata = builtInTypes.I32,
                                         }

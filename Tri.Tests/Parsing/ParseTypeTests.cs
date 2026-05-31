@@ -621,7 +621,7 @@ public class ParseTypeTests
                             TypeRef: i32
                             TypeRef: i32
                           TypeRef: void
-                        Literal: Integer = 0
+                        Literal: I32 = 0
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);

@@ -413,6 +413,35 @@ public class BinderTests
     }
 
     [Test]
+    public void LiteralByteTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(): i8 {
+                return 1i8;
+            }
+            """);
+        var (project, diagnostics) = Parse(file);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var returnNode = semanticTree.Find<ReturnStatement>()!;
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(
+            returnNode.Expression!.ReturnTypeMetadata,
+            Is.EqualTo(compilationContext.BuiltInTypes.I8).Using(new MetadataComparer()));
+    }
+
+    [Test]
     public void LiteralFloatTest()
     {
         var file = CreateFile(

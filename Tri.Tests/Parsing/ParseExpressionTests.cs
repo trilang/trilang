@@ -32,7 +32,7 @@ public class ParseExpressionTests
                     Statements
                       Variable: x
                         TypeRef: i32
-                        Literal: Integer = 5
+                        Literal: I32 = 5
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -65,7 +65,7 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: i32
                         UnaryExpression: UnaryPlus
-                          Literal: Integer = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -98,7 +98,7 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: i32
                         UnaryExpression: UnaryMinus
-                          Literal: Integer = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -131,7 +131,7 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: i32
                         UnaryExpression: LogicalNot
-                          Literal: Integer = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -164,7 +164,7 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: i32
                         UnaryExpression: BitwiseNot
-                          Literal: Integer = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -274,7 +274,7 @@ public class ParseExpressionTests
                         TypeRef: i32
                         UnaryExpression: BitwiseNot
                           UnaryExpression: UnaryPlus
-                            Literal: Integer = 2
+                            Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -312,8 +312,8 @@ public class ParseExpressionTests
                        Variable: x
                          TypeRef: i32
                          BinaryExpression: {kind}
-                           Literal: Integer = 2
-                           Literal: Integer = 2
+                           Literal: I32 = 2
+                           Literal: I32 = 2
              """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -346,8 +346,8 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: i32
                         BinaryExpression: BitwiseAnd
-                          Literal: Integer = 2
-                          Literal: Integer = 2
+                          Literal: I32 = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -380,8 +380,8 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: i32
                         BinaryExpression: BitwiseOr
-                          Literal: Integer = 2
-                          Literal: Integer = 2
+                          Literal: I32 = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -414,8 +414,8 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: i32
                         BinaryExpression: BitwiseXor
-                          Literal: Integer = 2
-                          Literal: Integer = 2
+                          Literal: I32 = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -584,8 +584,8 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: bool
                         BinaryExpression: LessThan
-                          Literal: Integer = 2
-                          Literal: Integer = 2
+                          Literal: I32 = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
@@ -618,8 +618,8 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: bool
                         BinaryExpression: LessThanOrEqual
-                          Literal: Integer = 2
-                          Literal: Integer = 2
+                          Literal: I32 = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -652,8 +652,8 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: bool
                         BinaryExpression: GreaterThan
-                          Literal: Integer = 2
-                          Literal: Integer = 2
+                          Literal: I32 = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -686,8 +686,8 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: bool
                         BinaryExpression: GreaterThanOrEqual
-                          Literal: Integer = 2
-                          Literal: Integer = 2
+                          Literal: I32 = 2
+                          Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -721,7 +721,7 @@ public class ParseExpressionTests
                         BinaryExpression: Assignment
                           MemberAccess
                             Name: x
-                          Literal: Integer = 1
+                          Literal: I32 = 1
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -764,7 +764,7 @@ public class ParseExpressionTests
                           BinaryExpression: {{kind}}
                             MemberAccess
                               Name: x
-                            Literal: Integer = 1
+                            Literal: I32 = 1
               """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -798,9 +798,9 @@ public class ParseExpressionTests
                         TypeRef: i32
                         BinaryExpression: Multiplication
                           BinaryExpression: Addition
-                            Literal: Integer = 1
-                            Literal: Integer = 2
-                          Literal: Integer = 3
+                            Literal: I32 = 1
+                            Literal: I32 = 2
+                          Literal: I32 = 3
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -837,7 +837,7 @@ public class ParseExpressionTests
                       Variable: x
                         TypeRef: i32
                         BinaryExpression: Multiplication
-                          Literal: Integer = 2
+                          Literal: I32 = 2
                           MemberAccess
                             Name: y
             """;
@@ -886,11 +886,11 @@ public class ParseExpressionTests
                                     Literal: Boolean = True
                                     BinaryExpression: LessThan
                                       BinaryExpression: Addition
-                                        Literal: Integer = 1
+                                        Literal: I32 = 1
                                         BinaryExpression: Multiplication
-                                          Literal: Integer = 2
-                                          Literal: Integer = 3
-                                      Literal: Integer = 10
+                                          Literal: I32 = 2
+                                          Literal: I32 = 3
+                                      Literal: I32 = 10
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -924,8 +924,8 @@ public class ParseExpressionTests
                       ReturnStatement
                         TupleExpression
                           Expressions
-                            Literal: Integer = 1
-                            Literal: Integer = 2
+                            Literal: I32 = 1
+                            Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -959,8 +959,8 @@ public class ParseExpressionTests
                       ReturnStatement
                         TupleExpression
                           Expressions
-                            Literal: Integer = 1
-                            Literal: Integer = 2
+                            Literal: I32 = 1
+                            Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -1002,7 +1002,7 @@ public class ParseExpressionTests
                           ArrayAccess
                             MemberAccess
                               Name: i32
-                            Literal: Integer = 10
+                            Literal: I32 = 10
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -1243,7 +1243,7 @@ public class ParseExpressionTests
                   BlockStatement
                     Statements
                       ReturnStatement
-                        Literal: Float = 3.14
+                        Literal: F64 = 3.14
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);

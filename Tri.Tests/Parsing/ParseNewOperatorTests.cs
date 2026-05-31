@@ -73,8 +73,8 @@ public class ParseNewOperatorTests
                             MemberAccess
                               Name: Point
                             Parameters
-                              Literal: Integer = 1
-                              Literal: Integer = 2
+                              Literal: I32 = 1
+                              Literal: I32 = 2
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -152,7 +152,7 @@ public class ParseNewOperatorTests
                             MemberAccess
                               Name: Point
                             Parameters
-                              Literal: Integer = 1
+                              Literal: I32 = 1
                               FakeExpression
             """;
 

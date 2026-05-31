@@ -2,7 +2,6 @@ using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics;
 using Trilang.Semantics.Model;
-using Trilang.Semantics.Passes;
 using Trilang.Semantics.Providers;
 
 namespace Trilang.IntermediateRepresentation;

@@ -472,8 +472,19 @@ public partial class Formatter : INodeVisitor
     {
         switch (node.Kind)
         {
-            case LiteralExpressionKind.Integer:
-            case LiteralExpressionKind.Float:
+            case LiteralExpressionKind.I8:
+            case LiteralExpressionKind.I16:
+            case LiteralExpressionKind.I64:
+            case LiteralExpressionKind.U8:
+            case LiteralExpressionKind.U16:
+            case LiteralExpressionKind.U32:
+            case LiteralExpressionKind.U64:
+            case LiteralExpressionKind.F32:
+                writer.Write(node.Value.ToString()!);
+                writer.Write(node.Kind.ToString().ToLowerInvariant());
+                break;
+            case LiteralExpressionKind.I32:
+            case LiteralExpressionKind.F64:
                 writer.Write(node.Value.ToString()!);
                 break;
             case LiteralExpressionKind.Boolean:

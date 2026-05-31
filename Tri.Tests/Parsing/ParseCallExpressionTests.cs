@@ -69,9 +69,9 @@ public class ParseCallExpressionTests
                           MemberAccess
                             Name: sum
                           Parameters
-                            Literal: Integer = 1
-                            Literal: Integer = 2
-                            Literal: Integer = 3
+                            Literal: I32 = 1
+                            Literal: I32 = 2
+                            Literal: I32 = 3
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);
@@ -105,14 +105,14 @@ public class ParseCallExpressionTests
                       Variable: x
                         TypeRef: i32
                         BinaryExpression: Addition
-                          Literal: Integer = 1
+                          Literal: I32 = 1
                           Call
                             MemberAccess
                               Name: sum
                             Parameters
-                              Literal: Integer = 1
-                              Literal: Integer = 2
-                              Literal: Integer = 3
+                              Literal: I32 = 1
+                              Literal: I32 = 2
+                              Literal: I32 = 3
             """;
 
         Assert.That(tree.Dump(), Is.EqualTo(expected).NoClip);

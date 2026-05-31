@@ -38,7 +38,7 @@ public class ParseLoopTests
                         BinaryExpression: GreaterThan
                           MemberAccess
                             Name: x
-                          Literal: Integer = 0
+                          Literal: I32 = 0
                         BlockStatement
             """;
 
@@ -78,7 +78,7 @@ public class ParseLoopTests
                         BinaryExpression: GreaterThan
                           MemberAccess
                             Name: x
-                          Literal: Integer = 0
+                          Literal: I32 = 0
                         BlockStatement
             """;
 
@@ -167,7 +167,7 @@ public class ParseLoopTests
                         BinaryExpression: GreaterThan
                           MemberAccess
                             Name: x
-                          Literal: Integer = 0
+                          Literal: I32 = 0
                         BlockStatement
             """;
 
@@ -213,7 +213,7 @@ public class ParseLoopTests
                         BinaryExpression: GreaterThan
                           MemberAccess
                             Name: x
-                          Literal: Integer = 0
+                          Literal: I32 = 0
                         BlockStatement
                           Statements
                             FakeStatement
@@ -275,7 +275,7 @@ public class ParseLoopTests
                         BinaryExpression: GreaterThan
                           MemberAccess
                             Name: x
-                          Literal: Integer = 0
+                          Literal: I32 = 0
                         BlockStatement
                           Statements
                             Break
@@ -318,7 +318,7 @@ public class ParseLoopTests
                         BinaryExpression: GreaterThan
                           MemberAccess
                             Name: x
-                          Literal: Integer = 0
+                          Literal: I32 = 0
                         BlockStatement
                           Statements
                             Continue
