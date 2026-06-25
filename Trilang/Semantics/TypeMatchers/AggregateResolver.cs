@@ -1,44 +1,22 @@
 using System.Diagnostics.CodeAnalysis;
+using Trilang.Metadata;
+using Trilang.Semantics.TypeMatchers.AggregateResults;
 
-namespace Trilang.Metadata.Aggregate;
+namespace Trilang.Semantics.TypeMatchers;
 
-public class AggregateMetadata : IMetadata
+public class AggregateResolver
 {
-    public static readonly AggregateMetadata Empty = new AggregateMetadata([]);
+    private readonly TypeMatcher typeMatcher;
 
-    private readonly List<IMetadata> members;
+    public AggregateResolver(TypeMatcher typeMatcher)
+        => this.typeMatcher = typeMatcher;
 
-    public AggregateMetadata(IEnumerable<IMetadata> members)
-        => this.members = [..members];
-
-    public IMetadata this[int index]
-        => members[index];
-
-    public AggregateMetadata Combine(AggregateMetadata other)
-    {
-        if (IsEmpty)
-            return other;
-
-        if (other.IsEmpty)
-            return this;
-
-        var combined = new List<IMetadata>(members);
-        combined.AddRange(other.members);
-
-        return new AggregateMetadata(combined);
-    }
-
-    public IEnumerable<IFunctionMetadata> MatchFunction(IEnumerable<ITypeMetadata> actualParameters)
-        => members
-            .OfType<IFunctionMetadata>()
-            .Where(x => x.Type.ParameterTypes.SequenceEqual(actualParameters));
-
-    public IResolutionResult<IMetadata> ResolveSingle()
-        => members switch
+    public IResolutionResult<IMetadata> ResolveSingle(AggregateMetadata aggregate)
+        => aggregate.Members switch
         {
             [] => NoMatch<IMetadata>.ForMember(),
             [var single] => new SuccessfulMatch<IMetadata>(single),
-            _ => MultipleMatches<IMetadata>.ForMember(members),
+            _ => MultipleMatches<IMetadata>.ForMember(aggregate.Members),
         };
 
     private static IMetadata GetType(IMetadata metadata)
@@ -72,15 +50,17 @@ public class AggregateMetadata : IMetadata
         return false;
     }
 
-    public IResolutionResult<IMetadata> ResolveFunction(IReadOnlyList<ITypeMetadata> actualParameters)
-        => members switch
+    public IResolutionResult<IMetadata> ResolveFunction(
+        AggregateMetadata aggregate,
+        IReadOnlyList<ITypeMetadata> actualParameters)
+        => aggregate.Members switch
         {
             [INamedMetadata named]
-                => named.GetMembers(ConstructorMetadata.Name).members switch
+                => named.GetMembers(ConstructorMetadata.Name).Members switch
                 {
                     [] => NoMatch<IFunctionMetadata>.ForFunction(),
                     [ConstructorMetadata ctor] => ResolveSingleFunction(ctor, actualParameters),
-                    [.. var ctors] => ResolveMultipleFunction(ctors, actualParameters),
+                    var ctors => ResolveMultipleFunction(ctors, actualParameters),
                 },
 
             [IFunctionMetadata function]
@@ -92,10 +72,10 @@ public class AggregateMetadata : IMetadata
             [var single]
                 => new NotFunction(GetType(single)),
 
-            _ => ResolveMultipleFunction(members, actualParameters),
+            _ => ResolveMultipleFunction(aggregate.Members, actualParameters),
         };
 
-    private static IResolutionResult<IFunctionMetadata> ResolveSingleFunction(
+    private IResolutionResult<IFunctionMetadata> ResolveSingleFunction(
         IFunctionMetadata function,
         IReadOnlyList<ITypeMetadata> actualParameters)
     {
@@ -109,24 +89,28 @@ public class AggregateMetadata : IMetadata
             return MissingArgument<IFunctionMetadata>.ForFunction(function, expectedCount, actualCount);
 
         var mismatches = new List<ArgumentMismatchDetail>();
+        var conversions = new List<ConversionMatchDetails>();
         for (var i = 0; i < Math.Min(expectedCount, actualCount); i++)
         {
             var actual = actualParameters[i];
             var expected = function.Type.ParameterTypes[i];
-            if (actual.IsInvalid || expected.IsInvalid)
-                continue;
-
-            if (!expected.Equals(actual))
+            var result = typeMatcher.Match(actual, expected);
+            if (result is FailedMatch)
                 mismatches.Add(new ArgumentMismatchDetail(i, expected, actual));
+            else if (result is ImplicitConversion implicitConversion)
+                conversions.Add(new ConversionMatchDetails(i, implicitConversion.Target));
         }
 
         if (mismatches.Count > 0)
             return ArgumentMismatch<IFunctionMetadata>.ForFunction(mismatches);
 
+        if (conversions.Count > 0)
+            return new ConversionMatch<IFunctionMetadata>(function, conversions);
+
         return new SuccessfulMatch<IFunctionMetadata>(function);
     }
 
-    private static IResolutionResult<IMetadata> ResolveSingleFunctionType(
+    private IResolutionResult<IMetadata> ResolveSingleFunctionType(
         IMetadata single,
         FunctionTypeMetadata function,
         IReadOnlyList<ITypeMetadata> actualParameters)
@@ -145,10 +129,8 @@ public class AggregateMetadata : IMetadata
         {
             var actual = actualParameters[i];
             var expected = function.ParameterTypes[i];
-            if (actual.IsInvalid || expected.IsInvalid)
-                continue;
-
-            if (!expected.Equals(actual))
+            var result = typeMatcher.Match(actual, expected);
+            if (result is FailedMatch or ImplicitConversion)
                 mismatches.Add(new ArgumentMismatchDetail(i, expected, actual));
         }
 
@@ -181,9 +163,9 @@ public class AggregateMetadata : IMetadata
         };
     }
 
-    public IResolutionResult<IGenericMetadata> ResolveGeneric(int actual)
+    public IResolutionResult<IGenericMetadata> ResolveGeneric(AggregateMetadata aggregate, int actual)
     {
-        if (members is [var candidate])
+        if (aggregate.Members is [var candidate])
         {
             if (candidate is not IGenericMetadata type)
                 return new NotGeneric(candidate);
@@ -199,7 +181,7 @@ public class AggregateMetadata : IMetadata
             return new SuccessfulMatch<IGenericMetadata>(type);
         }
 
-        var candidates = members
+        var candidates = aggregate.Members
             .OfType<IGenericMetadata>()
             .Where(x => x.GenericArguments.Count == actual)
             .ToArray();
@@ -210,21 +192,5 @@ public class AggregateMetadata : IMetadata
             [var single] => new SuccessfulMatch<IGenericMetadata>(single),
             _ => MultipleMatches<IGenericMetadata>.ForGeneric(candidates),
         };
-    }
-
-    public SourceLocation? Definition
-        => null;
-
-    public bool IsInvalid
-        => false;
-
-    public IReadOnlyList<IMetadata> Members
-        => members;
-
-    public bool IsEmpty
-        => members.Count == 0;
-
-    public void Freeze()
-    {
     }
 }

@@ -20,7 +20,4 @@ public static class AccessModifierMetadataExtensions
 
             _ => throw new ArgumentOutOfRangeException(nameof(accessModifier), accessModifier, null)
         };
-
-    public static AccessModifierMetadata? ToMetadata(this AccessModifier? accessModifier)
-        => accessModifier?.ToMetadata();
 }

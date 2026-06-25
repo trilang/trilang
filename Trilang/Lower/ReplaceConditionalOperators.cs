@@ -4,34 +4,23 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Lower;
 
-internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
+internal class ReplaceConditionalOperators : Transformer
 {
-    private readonly BuiltInTypes builtInTypes;
     private int conditionCounter;
 
-    public ReplaceConditionalOperators(BuiltInTypes builtInTypes)
+    public ReplaceConditionalOperators(ISet<string> directives, BuiltInTypes builtInTypes)
+        : base(directives, builtInTypes)
     {
-        this.builtInTypes = builtInTypes;
         conditionCounter = 0;
     }
 
-    public ISemanticNode TransformArrayAccess(ArrayAccessExpression node)
-    {
-        var member = (IAccessExpression)node.Member.Transform(this);
-        var index = (IExpression)node.Index.Transform(this);
-        if (ReferenceEquals(member, node.Member) && ReferenceEquals(index, node.Index))
-            return node;
-
-        return new ArrayAccessExpression(null, member, index)
-        {
-            ReturnTypeMetadata = node.ReturnTypeMetadata,
-        };
-    }
-
-    public ISemanticNode TransformArrayType(ArrayType node)
+    public override ISemanticNode TransformAlias(AliasDeclaration node)
         => node;
 
-    public ISemanticNode TransformBinaryExpression(BinaryExpression node)
+    public override ISemanticNode TransformArrayType(ArrayType node)
+        => node;
+
+    public override ISemanticNode TransformBinaryExpression(BinaryExpression node)
     {
         var left = (IExpression)node.Left.Transform(this);
         var right = (IExpression)node.Right.Transform(this);
@@ -158,316 +147,36 @@ internal class ReplaceConditionalOperators : ITransformer<ISemanticNode>
         };
     }
 
-    public ISemanticNode TransformBlock(BlockStatement node)
-    {
-        for (var i = 0; i < node.Statements.Count; i++)
-        {
-            var odlStatement = node.Statements[i];
-            var newStatement = (IStatement)odlStatement.Transform(this);
-            if (ReferenceEquals(newStatement, odlStatement))
-                continue;
-
-            node.Replace(odlStatement, newStatement);
-        }
-
-        return node;
-    }
-
-    public ISemanticNode TransformBreak(Break node)
+    public override ISemanticNode TransformDiscriminatedUnion(DiscriminatedUnion node)
         => node;
 
-    public ISemanticNode TransformCall(CallExpression node)
-    {
-        var member = (IAccessExpression)node.Member.Transform(this);
-
-        var changed = false;
-        var parameters = new IExpression[node.Parameters.Count];
-        for (var i = 0; i < parameters.Length; i++)
-        {
-            parameters[i] = (IExpression)node.Parameters[i].Transform(this);
-
-            if (ReferenceEquals(node.Parameters[i], parameters[i]))
-                changed = true;
-        }
-
-        if (ReferenceEquals(member, node.Member) && !changed)
-            return node;
-
-        return new CallExpression(null, member, parameters);
-    }
-
-    public ISemanticNode TransformCast(CastExpression node)
-    {
-        var expression = (IExpression)node.Expression.Transform(this);
-        if (ReferenceEquals(expression, node.Expression))
-            return node;
-
-        return new CastExpression(null, node.Type, expression);
-    }
-
-    public ISemanticNode TransformConstructor(ConstructorDeclaration node)
-    {
-        node.Body.Transform(this);
-
-        return node;
-    }
-
-    public ISemanticNode TransformContinue(Continue node)
+    public override ISemanticNode TransformFunctionType(FunctionType node)
         => node;
 
-    public ISemanticNode TransformDiscriminatedUnion(DiscriminatedUnion node)
+    public override ISemanticNode TransformGenericType(GenericApplication node)
         => node;
 
-    public ISemanticNode TransformExpressionBlock(ExpressionBlock node)
+    public override ISemanticNode TransformGenericExpression(GenericExpression node)
         => node;
 
-    public ISemanticNode TransformExpressionStatement(ExpressionStatement node)
-    {
-        var expression = (IExpression)node.Expression.Transform(this);
-        if (ReferenceEquals(expression, node.Expression))
-            return node;
-
-        return new ExpressionStatement(null, expression);
-    }
-
-    public ISemanticNode TransformFakeDeclaration(FakeDeclaration node)
+    public override ISemanticNode TransformInterface(Interface node)
         => node;
 
-    public ISemanticNode TransformFakeExpression(FakeExpression node)
+    public override ISemanticNode TransformInterfaceProperty(InterfaceProperty node)
         => node;
 
-    public ISemanticNode TransformFakeStatement(FakeStatement node)
+    public override ISemanticNode TransformInterfaceMethod(InterfaceMethod node)
         => node;
 
-    public ISemanticNode TransformFakeType(FakeType node)
+    public override ISemanticNode TransformParameter(Parameter node)
         => node;
 
-    public ISemanticNode TransformFunction(FunctionDeclaration node)
-    {
-        node.Body.Transform(this);
-
-        return node;
-    }
-
-    public ISemanticNode TransformFunctionType(FunctionType node)
+    public override ISemanticNode TransformPointer(PointerType node)
         => node;
 
-    public ISemanticNode TransformGenericType(GenericApplication node)
+    public override ISemanticNode TransformTupleType(TupleType node)
         => node;
 
-    public ISemanticNode TransformGenericExpression(GenericExpression node)
+    public override ISemanticNode TransformTypeNode(TypeRef node)
         => node;
-
-    public ISemanticNode TransformGoTo(GoTo node)
-        => node;
-
-    public ISemanticNode TransformIfDirective(IfDirective node)
-        => node;
-
-    public ISemanticNode TransformIf(IfStatement node)
-    {
-        var condition = (IExpression)node.Condition.Transform(this);
-        var then = (BlockStatement)node.Then.Transform(this);
-        var @else = (BlockStatement?)node.Else?.Transform(this);
-
-        if (ReferenceEquals(condition, node.Condition))
-            return node;
-
-        return new IfStatement(null, condition, then, @else);
-    }
-
-    public ISemanticNode TransformInterface(Interface node)
-        => node;
-
-    public ISemanticNode TransformInterfaceProperty(InterfaceProperty node)
-        => node;
-
-    public ISemanticNode TransformInterfaceMethod(InterfaceMethod node)
-        => node;
-
-    public ISemanticNode TransformAsExpression(IsExpression node)
-    {
-        var expression = (IExpression)node.Expression.Transform(this);
-        if (ReferenceEquals(expression, node.Expression))
-            return node;
-
-        return new IsExpression(null, expression, node.Type, builtInTypes);
-    }
-
-    public ISemanticNode TransformLabel(Label node)
-        => node;
-
-    public ISemanticNode TransformLiteral(LiteralExpression node)
-        => node;
-
-    public ISemanticNode TransformMemberAccess(MemberAccessExpression node)
-    {
-        if (node.IsFirstMember)
-            return node;
-
-        var member = (IExpression)node.Member.Transform(this);
-        if (ReferenceEquals(member, node.Member))
-            return node;
-
-        return new MemberAccessExpression(null, member, node.Name)
-        {
-            Reference = node.Reference,
-        };
-    }
-
-    public ISemanticNode TransformMethod(MethodDeclaration node)
-    {
-        node.Body.Transform(this);
-
-        return node;
-    }
-
-    public ISemanticNode TransformNamespace(Namespace node)
-        => node;
-
-    public ISemanticNode TransformNewObject(NewObjectExpression node)
-    {
-        var member = (IAccessExpression)node.Member.Transform(this);
-        if (ReferenceEquals(member, node.Member))
-            return node;
-
-        return new NewObjectExpression(null, member)
-        {
-            Metadata = node.Metadata,
-        };
-    }
-
-    public ISemanticNode TransformNull(NullExpression node)
-        => node;
-
-    public ISemanticNode TransformParameter(Parameter node)
-        => node;
-
-    public ISemanticNode TransformPointer(PointerType node)
-        => node;
-
-    public ISemanticNode TransformProperty(PropertyDeclaration node)
-    {
-        node.Getter?.Transform(this);
-        node.Setter?.Transform(this);
-
-        return node;
-    }
-
-    public ISemanticNode TransformGetter(PropertyGetter node)
-    {
-        node.Body?.Transform(this);
-
-        return node;
-    }
-
-    public ISemanticNode TransformSetter(PropertySetter node)
-    {
-        node.Body?.Transform(this);
-
-        return node;
-    }
-
-    public ISemanticNode TransformReturn(ReturnStatement node)
-    {
-        if (node.Expression is null)
-            return node;
-
-        var expression = (IExpression)node.Expression.Transform(this);
-        if (ReferenceEquals(expression, node.Expression))
-            return node;
-
-        return new ReturnStatement(null, expression);
-    }
-
-    public ISemanticNode TransformTree(SemanticTree node)
-    {
-        node.Namespace.Transform(this);
-
-        foreach (var use in node.UseNodes)
-            use.Transform(this);
-
-        foreach (var declaration in node.Declarations)
-            declaration.Transform(this);
-
-        return node;
-    }
-
-    public ISemanticNode TransformTuple(TupleExpression node)
-    {
-        var changed = false;
-        var expressions = new IExpression[node.Expressions.Count];
-        for (var i = 0; i < expressions.Length; i++)
-        {
-            if (ReferenceEquals(node.Expressions[i], expressions[i]))
-                changed = true;
-
-            expressions[i] = (IExpression)node.Expressions[i].Transform(this);
-        }
-
-        if (!changed)
-            return node;
-
-        return new TupleExpression(null, expressions)
-        {
-            ReturnTypeMetadata = node.ReturnTypeMetadata,
-        };
-    }
-
-    public ISemanticNode TransformTupleType(TupleType node)
-        => node;
-
-    public ISemanticNode TransformTypeAlias(AliasDeclaration node)
-        => node;
-
-    public ISemanticNode TransformType(TypeDeclaration node)
-    {
-        foreach (var constructor in node.Constructors)
-            constructor.Transform(this);
-
-        foreach (var method in node.Methods)
-            method.Transform(this);
-
-        foreach (var property in node.Properties)
-            property.Transform(this);
-
-        return node;
-    }
-
-    public ISemanticNode TransformTypeNode(TypeRef node)
-        => node;
-
-    public ISemanticNode TransformUnaryExpression(UnaryExpression node)
-    {
-        var operand = (IExpression)node.Operand.Transform(this);
-        if (ReferenceEquals(operand, node.Operand))
-            return node;
-
-        return new UnaryExpression(null, node.Kind, operand)
-        {
-            ReturnTypeMetadata = node.ReturnTypeMetadata,
-        };
-    }
-
-    public ISemanticNode TransformUse(Use node)
-        => node;
-
-    public ISemanticNode TransformVariable(VariableDeclaration node)
-    {
-        var expression = (IExpression)node.Expression.Transform(this);
-        if (ReferenceEquals(expression, node.Expression))
-            return node;
-
-        return new VariableDeclaration(null, node.Name, node.Type, expression);
-    }
-
-    public ISemanticNode TransformWhile(While node)
-    {
-        var condition = (IExpression)node.Condition.Transform(this);
-        var body = (BlockStatement)node.Body.Transform(this);
-        if (ReferenceEquals(condition, node.Condition))
-            return node;
-
-        return new While(null, condition, body);
-    }
 }

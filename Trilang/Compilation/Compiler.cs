@@ -141,7 +141,7 @@ public class Compiler
     {
         var lowering = new Lowering(diagnostics, compilationContext.BuiltInTypes, metadataProviderMap);
         foreach (var compilationUnit in project.SourceFiles)
-            lowering.Lower(
+            compilationUnit.SemanticTree = lowering.Lower(
                 compilationUnit.SemanticTree!,
                 new LoweringOptions(options.Directives, controlFlowGraphs));
     }

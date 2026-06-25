@@ -2,7 +2,7 @@ using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Semantics.Providers;
 
-namespace Trilang.Semantics.Passes;
+namespace Trilang.Semantics;
 
 internal class TypeArgumentMap
 {

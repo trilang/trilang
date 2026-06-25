@@ -55,6 +55,7 @@ public readonly record struct DiagnosticId(DiagnosticCategory Category, int Id)
     public static readonly DiagnosticId S0030NonGenericMember = ForSemantic(30);
     public static readonly DiagnosticId S0031ExpectedConstructor = ForSemantic(31);
     public static readonly DiagnosticId S0032UnresolvedMembers = ForSemantic(32);
+    public static readonly DiagnosticId S0033InvalidOperandForCompoundAssignment = ForSemantic(33);
 
     public static readonly DiagnosticId C0001DuplicateDependency = ForCompiler(1);
     public static readonly DiagnosticId C0002CyclicDependency = ForCompiler(2);

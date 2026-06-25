@@ -378,4 +378,10 @@ public readonly record struct SemanticDiagnosticReporter(DiagnosticCollection Di
              Unresolved members:
              {string.Join("\n", members.Select(x => $"- {x}"))}
              """);
+
+    public void InvalidOperandForCompoundAssignment(BinaryExpression node)
+        => Diagnostics.Error(
+            DiagnosticId.S0033InvalidOperandForCompoundAssignment,
+            node.GetLocation(),
+            "Cannot apply a compound assignment to this expression.");
 }

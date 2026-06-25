@@ -29,7 +29,7 @@ public class IsExpression : IExpression
         => visitor.VisitIsExpression(this, context);
 
     public T Transform<T>(ITransformer<T> transformer)
-        => transformer.TransformAsExpression(this);
+        => transformer.TransformIsExpression(this);
 
     public IExpression Clone()
         => new IsExpression(SourceSpan, Expression.Clone(), Type.Clone(), builtInTypes);

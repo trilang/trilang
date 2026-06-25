@@ -40,9 +40,17 @@ public class SemanticAnalyzer
     {
         var semanticPasses = new ISemanticPass[]
         {
+            new Binder(
+                options.Directives,
+                options.Diagnostics,
+                symbolTableMap,
+                metadataProviderMap,
+                compilationContext),
             new BreakContinueWithinLoop(options.Directives, options.Diagnostics),
             new CheckAccessModifiers(options.Directives, options.Diagnostics),
             new CheckStaticAndInstanceMembersAccess(options.Directives, options.Diagnostics),
+            new CompoundAssignmentTargetValidation(options.Directives, options.Diagnostics),
+            new CyclicAlias(options.Diagnostics, compilationContext),
             new ControlFlowAnalyzer(options.Directives, controlFlowGraphMap),
             new MemberAccessKindAnalyser(options.Directives),
             new MetadataGenerator(
@@ -53,18 +61,11 @@ public class SemanticAnalyzer
                 compilationContext),
             new MissingReturnStatement(options.Diagnostics, controlFlowGraphMap, compilationContext),
             new NotImplementedInterface(options.Directives, options.Diagnostics),
-            new CyclicAlias(options.Diagnostics, compilationContext),
             new PrivateInterfaceProperties(options.Diagnostics, compilationContext),
             new RestrictFieldAccess(options.Directives, options.Diagnostics),
             new SymbolFinder(options.Directives, symbolTableMap),
             new ThisInStaticMethods(options.Directives, options.Diagnostics),
             new ThisOutsideOfType(options.Directives, options.Diagnostics),
-            new Binder(
-                options.Directives,
-                options.Diagnostics,
-                symbolTableMap,
-                metadataProviderMap,
-                compilationContext),
             new UnresolvedMemberAccess(options.Directives, options.Diagnostics),
             new VariableUsedBeforeDeclared(options.Directives, options.Diagnostics, symbolTableMap),
         };

@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Numerics;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Lexing;

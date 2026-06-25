@@ -1,5 +1,4 @@
 using System.Text;
-using Trilang.Metadata.Aggregate;
 
 namespace Trilang.Metadata;
 

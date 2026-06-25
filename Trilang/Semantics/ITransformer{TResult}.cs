@@ -4,7 +4,7 @@ namespace Trilang.Semantics;
 
 public interface ITransformer<out TResult>
 {
-    TResult TransformTypeAlias(AliasDeclaration node);
+    TResult TransformAlias(AliasDeclaration node);
 
     TResult TransformArrayAccess(ArrayAccessExpression node);
 
@@ -58,7 +58,7 @@ public interface ITransformer<out TResult>
 
     TResult TransformInterfaceMethod(InterfaceMethod node);
 
-    TResult TransformAsExpression(IsExpression node);
+    TResult TransformIsExpression(IsExpression node);
 
     TResult TransformLabel(Label node);
 

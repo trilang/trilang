@@ -1,4 +1,6 @@
-namespace Trilang.Metadata.Aggregate;
+using Trilang.Metadata;
+
+namespace Trilang.Semantics.TypeMatchers.AggregateResults;
 
 public sealed class NoMatch<T> : IResolutionResult<T> where T : IMetadata
 {

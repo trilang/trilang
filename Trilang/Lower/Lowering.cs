@@ -21,17 +21,19 @@ public class Lowering
         this.metadataProviderMap = metadataProviderMap;
     }
 
-    public void Lower(SemanticTree tree, LoweringOptions options)
+    public SemanticTree Lower(SemanticTree tree, LoweringOptions options)
     {
         // TODO: immutable tree?
         tree.Accept(new ReplaceIfDirectives(options.Directives));
         new AddImplicitReturnStatements(builtInTypes).InsertReturnStatements(options.ControlFlowGraphs);
         tree.Accept(new AddThisInLocalMemberAccess(options.Directives, diagnostics, builtInTypes, metadataProviderMap));
-        tree.Transform(new ReplaceCompoundAssignments(builtInTypes));
-        tree.Transform(new ReplacePropertyFieldAndValueWithGeneratedField(diagnostics, builtInTypes, metadataProviderMap));
-        tree.Transform(new ReplaceGettersAndSettersWithMethodCalls(builtInTypes));
-        tree.Transform(new ReplaceConditionalOperators(builtInTypes));
+        tree = (SemanticTree)tree.Transform(new ReplaceCompoundAssignments(options.Directives, builtInTypes));
+        tree = (SemanticTree)tree.Transform(new ReplacePropertyFieldAndValueWithGeneratedField(options.Directives, diagnostics, builtInTypes, metadataProviderMap));
+        tree = (SemanticTree)tree.Transform(new ReplaceGettersAndSettersWithMethodCalls(options.Directives, builtInTypes));
+        tree = (SemanticTree)tree.Transform(new ReplaceConditionalOperators(options.Directives, builtInTypes));
         tree.Accept(new ReplaceWhileLoop(options.Directives));
         tree.Accept(new RewriteIfStatement(options.Directives));
+
+        return tree;
     }
 }

@@ -1,6 +1,6 @@
 using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
-using Trilang.Metadata.Aggregate;
+using Trilang.Metadata;
 using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;

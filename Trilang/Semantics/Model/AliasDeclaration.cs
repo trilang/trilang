@@ -34,7 +34,7 @@ public class AliasDeclaration : IGenericDeclaration
         => visitor.VisitAlias(this, context);
 
     public T Transform<T>(ITransformer<T> transformer)
-        => transformer.TransformTypeAlias(this);
+        => transformer.TransformAlias(this);
 
     public ISemanticNode? Parent { get; set; }
 

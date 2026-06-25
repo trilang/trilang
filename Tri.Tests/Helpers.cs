@@ -63,7 +63,7 @@ public static class Helpers
 
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var lowering = new Trilang.Lower.Lowering(diagnostics, compilationContext.BuiltInTypes, metadataProviderMap);
-        lowering.Lower(semanticTree, new LoweringOptions(directivesSet, cfgs));
+        semanticTree = lowering.Lower(semanticTree, new LoweringOptions(directivesSet, cfgs));
 
         return (semanticTree, diagnostics, compilationContext);
     }

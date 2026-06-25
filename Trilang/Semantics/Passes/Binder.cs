@@ -2,10 +2,10 @@ using System.Diagnostics;
 using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
-using Trilang.Metadata.Aggregate;
 using Trilang.Semantics.Model;
 using Trilang.Semantics.Providers;
-using static Trilang.Semantics.Model.BinaryExpressionKind;
+using Trilang.Semantics.TypeMatchers;
+using Trilang.Semantics.TypeMatchers.AggregateResults;
 using static Trilang.Semantics.Model.UnaryExpressionKind;
 
 namespace Trilang.Semantics.Passes;
@@ -34,50 +34,60 @@ internal class Binder : ISemanticPass
 
     public void Analyze(Project project)
     {
-        var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
-        var visitor = new TypeCheckerVisitor(
+        var transformer = new BinderTransformer(
             directives,
             diagnostics,
             symbolTableMap,
             metadataProviderMap,
             compilationContext);
 
-        foreach (var tree in semanticTrees)
-            tree.Accept(visitor);
+        foreach (var sourceFile in project.SourceFiles)
+            sourceFile.SemanticTree = (SemanticTree)sourceFile.SemanticTree!.Transform(transformer);
     }
 
     public string Name => nameof(Binder);
 
-    public IEnumerable<string> DependsOn => [nameof(MetadataGenerator)];
+    public IEnumerable<string> DependsOn =>
+    [
+        nameof(CompoundAssignmentTargetValidation),
+        nameof(CyclicAlias),
+        nameof(MetadataGenerator)
+    ];
 
-    private sealed class TypeCheckerVisitor : Visitor
+    private sealed class BinderTransformer : Transformer
     {
         private readonly SemanticDiagnosticReporter diagnostics;
         private readonly SymbolTableMap symbolTableMap;
         private readonly MetadataProviderMap metadataProviderMap;
         private readonly CompilationContext compilationContext;
-        private readonly BuiltInTypes builtInTypes;
+        private readonly TypeMatcher typeMatcher;
+        private readonly UnaryTypeMatcher unaryTypeMatcher;
+        private readonly BinaryTypeMatcher binaryTypeMatcher;
+        private readonly AggregateResolver aggregateResolver;
 
-        public TypeCheckerVisitor(
+        public BinderTransformer(
             ISet<string> directives,
             SemanticDiagnosticReporter diagnostics,
             SymbolTableMap symbolTableMap,
             MetadataProviderMap metadataProviderMap,
             CompilationContext compilationContext)
-            : base(directives)
+            : base(directives, compilationContext.BuiltInTypes)
         {
             this.diagnostics = diagnostics;
             this.symbolTableMap = symbolTableMap;
             this.metadataProviderMap = metadataProviderMap;
             this.compilationContext = compilationContext;
-            builtInTypes = compilationContext.BuiltInTypes;
+            typeMatcher = new TypeMatcher(builtInTypes);
+            unaryTypeMatcher = new UnaryTypeMatcher(typeMatcher);
+            binaryTypeMatcher = new BinaryTypeMatcher(typeMatcher);
+            aggregateResolver = new AggregateResolver(typeMatcher);
         }
 
         private void ResolveSingle(IExpression member)
         {
             if (member is IAccessExpression { Reference: AggregateMetadata aggregate } accessExpression)
             {
-                var result = aggregate.ResolveSingle();
+                var result = aggregateResolver.ResolveSingle(aggregate);
                 if (result is NoMatch<IMetadata>)
                     diagnostics.NoMemberFound(accessExpression);
                 else if (result is MultipleMatches<IMetadata> multipleMembers)
@@ -87,14 +97,19 @@ internal class Binder : ISemanticPass
             }
         }
 
-        private void ResolveFunction(CallExpression node)
+        private (IAccessExpression, bool, IExpression[]) ResolveFunction(
+            CallExpression node,
+            IAccessExpression member,
+            IExpression[] parameters)
         {
-            var aggregate = (AggregateMetadata)node.Member.Reference!;
-            var result = aggregate.ResolveFunction(node.Parameters.Select(x => x.ReturnTypeMetadata!).ToArray());
+            var isChanged = false;
+            var aggregate = (AggregateMetadata)member.Reference!;
+            var parameterTypes = parameters.Select(x => x.ReturnTypeMetadata!).ToArray();
+            var result = aggregateResolver.ResolveFunction(aggregate, parameterTypes);
             if (result is ExtraArgument<IFunctionMetadata> extraArgument)
             {
                 foreach (var position in extraArgument.Positions)
-                    diagnostics.ExtraArgument(node.Parameters[position]);
+                    diagnostics.ExtraArgument(parameters[position]);
             }
             else if (result is MissingArgument<IFunctionMetadata> missingArgument)
             {
@@ -104,22 +119,36 @@ internal class Binder : ISemanticPass
             else if (result is ArgumentMismatch<IFunctionMetadata> argumentMismatch)
             {
                 foreach (var detail in argumentMismatch.Mismatches)
-                    diagnostics.TypeMismatch(node.Parameters[detail.Position], detail.Expected, detail.Actual);
+                    diagnostics.TypeMismatch(parameters[detail.Position], detail.Expected, detail.Actual);
             }
             else if (result is NotFunction notFunction)
             {
-                diagnostics.ExpectedFunction(node.Member, notFunction.Candidate);
+                diagnostics.ExpectedFunction(member, notFunction.Candidate);
             }
             else if (result is NoMatch<IFunctionMetadata>)
             {
-                diagnostics.NoSuitableOverload(node.Member);
+                diagnostics.NoSuitableOverload(member);
             }
             else if (result is MultipleMatches<IFunctionMetadata> multipleOverloads)
             {
-                diagnostics.MultipleCandidates(node.Member, multipleOverloads.Candidates);
+                diagnostics.MultipleCandidates(member, multipleOverloads.Candidates);
+            }
+            else if (result is ConversionMatch<IFunctionMetadata> conversionMatch)
+            {
+                foreach (var conversion in conversionMatch.Conversions)
+                {
+                    parameters[conversion.Position] = new CastExpression(
+                        null,
+                        GetInlineType(conversion.Target),
+                        parameters[conversion.Position]);
+
+                    isChanged = true;
+                }
             }
 
-            node.Member.Reference = result.Member;
+            member.Reference = result.Member;
+
+            return (member, isChanged, parameters);
         }
 
         private void ResolveFunction(IExpression node, FunctionTypeMetadata functionType)
@@ -129,7 +158,7 @@ internal class Binder : ISemanticPass
 
             var parameters = functionType.ParameterTypes;
             var aggregate = (AggregateMetadata)accessExpression.Reference!;
-            var result = aggregate.ResolveFunction(parameters);
+            var result = aggregateResolver.ResolveFunction(aggregate, parameters);
             if (result is ExtraArgument<IFunctionMetadata> extraArgument)
             {
                 foreach (var position in extraArgument.Positions)
@@ -145,7 +174,7 @@ internal class Binder : ISemanticPass
                 foreach (var detail in argumentMismatch.Mismatches)
                     diagnostics.TypeMismatch(accessExpression, detail.Expected, detail.Actual);
             }
-            else if (result is NoMatch<IFunctionMetadata>)
+            else if (result is NoMatch<IFunctionMetadata> or ConversionMatch<IFunctionMetadata>)
             {
                 diagnostics.NoSuitableOverload(accessExpression);
             }
@@ -160,7 +189,7 @@ internal class Binder : ISemanticPass
         private IGenericMetadata ResolveGeneric(GenericExpression node)
         {
             var aggregate = node.Member.Reference as AggregateMetadata;
-            var result = aggregate!.ResolveGeneric(node.GenericArguments.Count);
+            var result = aggregateResolver.ResolveGeneric(aggregate!, node.GenericArguments.Count);
             if (result is ExtraArgument<IGenericMetadata> extraArgument)
             {
                 foreach (var position in extraArgument.Positions)
@@ -197,16 +226,103 @@ internal class Binder : ISemanticPass
                 ResolveSingle(expression);
         }
 
-        public override void VisitCast(CastExpression node)
+        private IInlineType GetInlineType(ITypeMetadata type)
         {
-            base.VisitCast(node);
+            if (type is AliasMetadata aliasMetadata)
+            {
+                var (package, parts) = GetNamespaceParts(aliasMetadata);
 
-            ResolveExpression(node.Expression, node.ReturnTypeMetadata);
+                return aliasMetadata.IsGeneric
+                    ? throw new InvalidOperationException("Cannot get inline type of generic alias")
+                    : new TypeRef(null, package, parts);
+            }
+
+            if (type is ArrayMetadata arrayMetadata)
+                return new ArrayType(null, GetInlineType(arrayMetadata.ItemMetadata!));
+
+            if (type is DiscriminatedUnionMetadata discriminatedUnionMetadata)
+                return new DiscriminatedUnion(
+                    null,
+                    discriminatedUnionMetadata.Types.Select(GetInlineType).ToArray());
+
+            if (type is FunctionTypeMetadata functionTypeMetadata)
+                return new FunctionType(
+                    null,
+                    functionTypeMetadata.ParameterTypes.Select(GetInlineType).ToArray(),
+                    GetInlineType(functionTypeMetadata.ReturnType));
+
+            if (type is GenericApplicationMetadata genericApplicationMetadata)
+                return new GenericApplication(
+                    null,
+                    (TypeRef)GetInlineType(genericApplicationMetadata.OpenGeneric),
+                    genericApplicationMetadata.Arguments.Select(GetInlineType).ToArray());
+
+            if (type is InterfaceMetadata interfaceMetadata)
+                return new Interface(
+                    null,
+                    interfaceMetadata.Properties
+                        .Select(x => new InterfaceProperty(
+                            null,
+                            x.Name,
+                            GetInlineType(x.Type),
+                            x.GetterModifier.ToSemanticModel(),
+                            x.SetterModifier.ToSemanticModel()))
+                        .ToArray(),
+                    interfaceMetadata.Methods
+                        .Select(x => new InterfaceMethod(
+                            null,
+                            x.Name,
+                            x.Type.ParameterTypes.Select(GetInlineType).ToArray(),
+                            GetInlineType(x.Type.ReturnType)))
+                        .ToArray());
+
+            if (type is PointerMetadata pointerMetadata)
+                return new PointerType(null, GetInlineType(pointerMetadata.Type));
+
+            if (type is TupleMetadata tupleMetadata)
+                return new TupleType(null, tupleMetadata.Types.Select(GetInlineType).ToArray());
+
+            if (type is TypeArgumentMetadata typeArgumentMetadata)
+                return new TypeRef(null, null, [typeArgumentMetadata.Name]);
+
+            if (type is TypeMetadata typeMetadata)
+            {
+                var (package, parts) = GetNamespaceParts(typeMetadata);
+
+                return typeMetadata.IsGeneric
+                    ? throw new InvalidOperationException("Cannot get inline type of generic type")
+                    : new TypeRef(null, package, parts);
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(type));
         }
 
-        public override void VisitArrayAccess(ArrayAccessExpression node)
+        private (string?, IReadOnlyList<string>) GetNamespaceParts(INamedMetadata type)
         {
-            base.VisitArrayAccess(node);
+            var parts = new List<string>();
+
+            var current = type.Namespace;
+            while (current is NamespaceMetadata ns)
+            {
+                parts.Add(ns.Name);
+                current = ns.Parent;
+            }
+
+            parts.Add(type.Name);
+
+            // TODO: introduce package namespace type?
+            var package = current is NamespaceMetadata { Name: "" } packageNamespace
+                ? compilationContext.Packages
+                    .FirstOrDefault(x => x.Namespace == packageNamespace)
+                    ?.Name
+                : null;
+
+            return (package, parts);
+        }
+
+        public override ISemanticNode TransformArrayAccess(ArrayAccessExpression node)
+        {
+            node = (ArrayAccessExpression)base.TransformArrayAccess(node);
 
             ResolveSingle(node.Member);
             ResolveSingle(node.Index);
@@ -235,116 +351,79 @@ internal class Binder : ISemanticPass
 
             if (!Equals(node.Index.ReturnTypeMetadata, builtInTypes.I32))
                 diagnostics.TypeMismatch(node.Index, builtInTypes.I32, node.Index.ReturnTypeMetadata);
+
+            return node;
         }
 
-        public override void VisitBinaryExpression(BinaryExpression node)
+        public override ISemanticNode TransformBinaryExpression(BinaryExpression node)
         {
-            base.VisitBinaryExpression(node);
+            var left = (IExpression)node.Left.Transform(this);
+            var right = (IExpression)node.Right.Transform(this);
 
-            Debug.Assert(node.Kind != BinaryExpressionKind.Unknown);
-            Debug.Assert(node.Left.ReturnTypeMetadata is not null);
-            Debug.Assert(node.Right.ReturnTypeMetadata is not null);
+            ResolveSingle(left);
+            ResolveSingle(right);
 
-            ResolveSingle(node.Left);
-            ResolveSingle(node.Right);
+            var result = binaryTypeMatcher.Match(
+                node.Kind,
+                left.ReturnTypeMetadata,
+                right.ReturnTypeMetadata);
 
-            // TODO: more complex logic
-            if (node.Kind is Addition or Subtraction or Multiplication or Division or Modulus &&
-                ((Equals(node.Left.ReturnTypeMetadata, builtInTypes.I8) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I8)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I16) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I16)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I32) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I32)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I64) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I64)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U8) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U8)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U16) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U16)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U32) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U32)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U64) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U64)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.F32) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.F32)) ||
-                 (Equals(node.Left.ReturnTypeMetadata, builtInTypes.F64) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.F64))))
+            if (result is SuccessMatch)
             {
-                node.ReturnTypeMetadata = node.Left.ReturnTypeMetadata;
+                if (node.Kind.IsArithmetic() ||
+                    node.Kind.IsBitwise() ||
+                    node.Kind.IsAssignment() ||
+                    node.Kind.IsArithmeticCompoundAssignment() ||
+                    node.Kind.IsBitwiseCompoundAssignment())
+                {
+                    node.ReturnTypeMetadata = left.ReturnTypeMetadata;
+                }
+                else if (node.Kind.IsConditional() || node.Kind.IsEquality() || node.Kind.IsRelational())
+                {
+                    node.ReturnTypeMetadata = builtInTypes.Bool;
+                }
             }
-            else if (node.Kind is BitwiseAnd or BitwiseOr or BitwiseXor &&
-                     ((Equals(node.Left.ReturnTypeMetadata, builtInTypes.I8) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I8)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I16) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I16)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I32) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I32)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I64) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I64)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U8) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U8)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U16) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U16)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U32) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U32)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U64) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U64))))
+            else if (result is InvalidMatch)
             {
-                node.ReturnTypeMetadata = node.Left.ReturnTypeMetadata;
+                node.ReturnTypeMetadata = TypeMetadata.InvalidType;
             }
-            else if (node.Kind is ConditionalAnd or ConditionalOr &&
-                     Equals(node.Left.ReturnTypeMetadata, builtInTypes.Bool) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.Bool))
-            {
-                node.ReturnTypeMetadata = builtInTypes.Bool;
-            }
-            else if (node.Kind is Equality or Inequality or
-                         LessThan or LessThanOrEqual or
-                         GreaterThan or GreaterThanOrEqual &&
-                     ((Equals(node.Left.ReturnTypeMetadata, builtInTypes.I8) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I8)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I16) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I16)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I32) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I32)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.I64) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.I64)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U8) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U8)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U16) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U16)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U32) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U32)) ||
-                      (Equals(node.Left.ReturnTypeMetadata, builtInTypes.U64) && Equals(node.Right.ReturnTypeMetadata, builtInTypes.U64))))
-            {
-                node.ReturnTypeMetadata = builtInTypes.Bool;
-            }
-            else if (node.Kind is Assignment or AdditionAssignment or
-                         SubtractionAssignment or MultiplicationAssignment or
-                         DivisionAssignment or ModulusAssignment &&
-                     node.Left is MemberAccessExpression or ArrayAccessExpression &&
-                     Equals(node.Left.ReturnTypeMetadata, node.Right.ReturnTypeMetadata))
-            {
-                node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
-            }
-            else if (node.Kind is AdditionAssignment or SubtractionAssignment or MultiplicationAssignment or DivisionAssignment or ModulusAssignment &&
-                     node.Left is MemberAccessExpression &&
-                     (Equals(node.Right.ReturnTypeMetadata, builtInTypes.I8) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.I16) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.I32) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.I64) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.U8) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.U16) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.U32) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.U64) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.F32) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.F64)))
-            {
-                node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
-            }
-            else if (node.Kind is BitwiseAndAssignment or BitwiseOrAssignment or BitwiseXorAssignment &&
-                     node.Left is MemberAccessExpression &&
-                     (Equals(node.Right.ReturnTypeMetadata, builtInTypes.I8) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.I16) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.I32) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.I64) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.U8) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.U16) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.U32) ||
-                      Equals(node.Right.ReturnTypeMetadata, builtInTypes.U64)))
-            {
-                node.ReturnTypeMetadata = node.Right.ReturnTypeMetadata;
-            }
-            else
+            else if (result is FailedMatch)
             {
                 node.ReturnTypeMetadata = TypeMetadata.InvalidType;
                 diagnostics.IncompatibleBinaryOperand(node);
             }
+            else if (result is BinaryImplicitConversion binaryImplicitConversion)
+            {
+                if (binaryImplicitConversion.Left is not null)
+                {
+                    left = new CastExpression(null, GetInlineType(binaryImplicitConversion.Left), left);
+                    node.ReturnTypeMetadata = binaryImplicitConversion.Left;
+                }
+                else if (binaryImplicitConversion.Right is not null)
+                {
+                    right = new CastExpression(null, GetInlineType(binaryImplicitConversion.Right), right);
+                    node.ReturnTypeMetadata = binaryImplicitConversion.Right;
+                }
+            }
+
+            if (left == node.Left && right == node.Right)
+                return node;
+
+            return new BinaryExpression(node.SourceSpan, node.Kind, left, right)
+            {
+                ReturnTypeMetadata = node.ReturnTypeMetadata,
+            };
         }
 
-        public override void VisitCall(CallExpression node)
+        public override ISemanticNode TransformCall(CallExpression node)
         {
-            base.VisitCall(node);
+            var member = (IAccessExpression)node.Member.Transform(this);
+            var (isChanged, parameters) = TransformNodes(node.Parameters);
 
-            if (node.Member.Reference!.IsInvalid)
+            if (member.Reference!.IsInvalid)
             {
-                node.Member.Reference = InvalidMemberMetadata.Instance;
-                return;
+                member.Reference = InvalidMemberMetadata.Instance;
+                return node;
             }
 
             // resolve call parameters
@@ -362,11 +441,11 @@ internal class Binder : ISemanticPass
             // public main(): void {
             //     var a: Point = Point(test);
             // }
-            var aggregate = (AggregateMetadata)node.Member.Reference;
+            var aggregate = (AggregateMetadata)member.Reference;
             var function = TryResolveSingleFunction(aggregate);
-            for (var i = 0; i < node.Parameters.Count; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
-                var parameter = node.Parameters[i];
+                var parameter = parameters[i];
                 var returnType = function is not null && i < function.Type.ParameterTypes.Count
                     ? function.Type.ParameterTypes[i]
                     : null;
@@ -374,7 +453,12 @@ internal class Binder : ISemanticPass
                 ResolveExpression(parameter, returnType);
             }
 
-            ResolveFunction(node);
+            (member, isChanged, parameters) = ResolveFunction(node, member, parameters);
+
+            if (member == node.Member && !isChanged)
+                return node;
+
+            return new CallExpression(node.SourceSpan, member, parameters);
         }
 
         private static IFunctionMetadata? TryResolveSingleFunction(AggregateMetadata aggregate)
@@ -398,23 +482,37 @@ internal class Binder : ISemanticPass
             return null;
         }
 
-        public override void VisitExpressionBlock(ExpressionBlock node)
-            => Debug.Fail("Expression blocks are not supported");
-
-        public override void VisitExpressionStatement(ExpressionStatement node)
+        public override ISemanticNode TransformCast(CastExpression node)
         {
-            base.VisitExpressionStatement(node);
+            node = (CastExpression)base.TransformCast(node);
 
-            ResolveSingle(node.Expression);
+            ResolveExpression(node.Expression, node.ReturnTypeMetadata);
+
+            return node;
         }
 
-        public override void VisitGenericExpression(GenericExpression node)
+        public override ISemanticNode TransformExpressionBlock(ExpressionBlock node)
         {
-            base.VisitGenericExpression(node);
+            Debug.Fail("Expression blocks are not supported");
+            return node;
+        }
+
+        public override ISemanticNode TransformExpressionStatement(ExpressionStatement node)
+        {
+            node = (ExpressionStatement)base.TransformExpressionStatement(node);
+
+            ResolveSingle(node.Expression);
+
+            return node;
+        }
+
+        public override ISemanticNode TransformGenericExpression(GenericExpression node)
+        {
+            node = (GenericExpression)base.TransformGenericExpression(node);
 
             var result = ResolveGeneric(node);
             if (result.IsInvalid)
-                return;
+                return node;
 
             var provider = metadataProviderMap.Get(node);
             var factory = new MetadataFactory(builtInTypes, diagnostics, provider);
@@ -432,28 +530,39 @@ internal class Binder : ISemanticPass
             node.Member.Reference = new AggregateMetadata([
                 genericApplication.ClosedGeneric!
             ]);
+
+            return node;
         }
 
-        public override void VisitIf(IfStatement node)
+        public override ISemanticNode TransformIf(IfStatement node)
         {
-            base.VisitIf(node);
+            node = (IfStatement)base.TransformIf(node);
 
             ResolveSingle(node.Condition);
 
             if (!Equals(node.Condition.ReturnTypeMetadata, builtInTypes.Bool))
-                diagnostics.TypeMismatch(node.Condition, builtInTypes.Bool, node.Condition.ReturnTypeMetadata);
+            {
+                diagnostics.TypeMismatch(
+                    node.Condition,
+                    builtInTypes.Bool,
+                    node.Condition.ReturnTypeMetadata);
+            }
+
+            return node;
         }
 
-        public override void VisitIsExpression(IsExpression node)
+        public override ISemanticNode TransformIsExpression(IsExpression node)
         {
-            base.VisitIsExpression(node);
+            node = (IsExpression)base.TransformIsExpression(node);
 
             ResolveSingle(node.Expression);
+
+            return node;
         }
 
-        public override void VisitLiteral(LiteralExpression node)
+        public override ISemanticNode TransformLiteral(LiteralExpression node)
         {
-            base.VisitLiteral(node);
+            node = (LiteralExpression)base.TransformLiteral(node);
 
             node.ReturnTypeMetadata = node.Kind switch
             {
@@ -473,19 +582,22 @@ internal class Binder : ISemanticPass
 
                 _ => throw new ArgumentOutOfRangeException(nameof(node.Kind), $"Unsupported literal expression kind: {node.Kind}"),
             };
+
+            return node;
         }
 
-        public override void VisitMemberAccess(MemberAccessExpression node)
+        public override ISemanticNode TransformMemberAccess(MemberAccessExpression node)
         {
             if (node.IsFirstMember)
             {
                 VisitFirstMemberAccess(node);
-                return;
+                return node;
             }
 
-            VisitNestedMemberAccess(node);
-
+            node = VisitNestedMemberAccess(node);
             Debug.Assert(node.Reference is not null);
+
+            return node;
         }
 
         private void VisitFirstMemberAccess(MemberAccessExpression node)
@@ -534,38 +646,47 @@ internal class Binder : ISemanticPass
             }
         }
 
-        private void VisitNestedMemberAccess(MemberAccessExpression node)
+        private MemberAccessExpression VisitNestedMemberAccess(MemberAccessExpression node)
         {
-            node.Member!.Accept(this);
+            var member = (IExpression)node.Member!.Transform(this);
 
-            if (node.Member is MemberAccessExpression { Reference: NamespaceMetadata ns })
+            if (member is MemberAccessExpression { Reference: NamespaceMetadata ns })
             {
                 var provider = new MetadataProvider(compilationContext, ns);
                 var result = provider.QueryTypes(new ByName(node.Name));
                 if (result.IsSuccess)
                 {
                     node.Reference = new AggregateMetadata([result.Types[0]]);
-                    return;
+                    return node;
                 }
 
                 var @namespace = ns.GetNamespace(node.Name);
                 if (@namespace is not null)
                 {
                     node.Reference = @namespace;
-                    return;
+                    return node;
                 }
 
                 diagnostics.UnknownSymbol(node);
                 node.Reference = InvalidMemberMetadata.Instance;
-                return;
+                return node;
             }
 
-            ResolveSingle(node.Member);
+            ResolveSingle(member);
 
-            var returnTypeMetadata = node.Member.ReturnTypeMetadata!;
+            var returnTypeMetadata = member.ReturnTypeMetadata!;
             node.Reference = returnTypeMetadata.IsInvalid
                 ? InvalidMemberMetadata.Instance
                 : returnTypeMetadata.GetMembers(node.Name);
+
+            if (node.Member == member)
+                return node;
+
+            return new MemberAccessExpression(node.SourceSpan, member, node.Name)
+            {
+                AccessKind = node.AccessKind,
+                Reference = node.Reference,
+            };
         }
 
         private static IMetadata GetSymbolMetadata(ISemanticNode node)
@@ -586,16 +707,16 @@ internal class Binder : ISemanticPass
                 _ => throw new InvalidOperationException(),
             };
 
-        public override void VisitNewObject(NewObjectExpression node)
+        public override ISemanticNode TransformNewObject(NewObjectExpression node)
         {
-            base.VisitNewObject(node);
+            node = (NewObjectExpression)base.TransformNewObject(node);
 
             if (node.Member is CallExpression call)
             {
                 if (call.Reference!.IsInvalid)
                 {
                     node.ReturnTypeMetadata = TypeMetadata.InvalidType;
-                    return;
+                    return node;
                 }
 
                 if (call.Reference is not ConstructorMetadata ctor)
@@ -603,7 +724,7 @@ internal class Binder : ISemanticPass
                     node.ReturnTypeMetadata = TypeMetadata.InvalidType;
                     diagnostics.ExpectedConstructor(node.Member, call.Reference!);
 
-                    return;
+                    return node;
                 }
 
                 var provider = metadataProviderMap.Get(node);
@@ -619,7 +740,7 @@ internal class Binder : ISemanticPass
                 {
                     node.ReturnTypeMetadata = TypeMetadata.InvalidType;
 
-                    return;
+                    return node;
                 }
 
                 node.ReturnTypeMetadata = arrayAccess.ReturnTypeMetadata;
@@ -631,18 +752,20 @@ internal class Binder : ISemanticPass
                 node.ReturnTypeMetadata = TypeMetadata.InvalidType;
                 diagnostics.ExpectedCtorOrArray(node);
             }
+
+            return node;
         }
 
-        public override void VisitReturn(ReturnStatement node)
+        public override ISemanticNode TransformReturn(ReturnStatement node)
         {
-            base.VisitReturn(node);
+            node = (ReturnStatement)base.TransformReturn(node);
 
             if (node.Expression is not null)
                 ResolveSingle(node.Expression);
 
             var expressionType = node.Expression?.ReturnTypeMetadata ?? builtInTypes.Void;
             if (expressionType.IsInvalid)
-                return;
+                return node;
 
             var method = node.FindInParent<MethodDeclaration>();
             if (method is not null)
@@ -651,7 +774,7 @@ internal class Binder : ISemanticPass
                 if (!methodReturnType.IsInvalid && !Equals(methodReturnType, expressionType))
                     diagnostics.ReturnTypeMismatch(node, methodReturnType, expressionType);
 
-                return;
+                return node;
             }
 
             var constructor = node.FindInParent<ConstructorDeclaration>();
@@ -660,7 +783,7 @@ internal class Binder : ISemanticPass
                 if (!Equals(builtInTypes.Void, expressionType))
                     diagnostics.ReturnTypeMismatch(node, builtInTypes.Void, expressionType);
 
-                return;
+                return node;
             }
 
             var function = node.FindInParent<FunctionDeclaration>();
@@ -670,7 +793,7 @@ internal class Binder : ISemanticPass
                 if (!functionReturnType.IsInvalid && !Equals(functionReturnType, expressionType))
                     diagnostics.ReturnTypeMismatch(node, functionReturnType, expressionType);
 
-                return;
+                return node;
             }
 
             var getter = node.FindInParent<PropertyGetter>();
@@ -680,7 +803,7 @@ internal class Binder : ISemanticPass
                 if (!getterReturnType.IsInvalid && !Equals(getterReturnType, expressionType))
                     diagnostics.ReturnTypeMismatch(node, getterReturnType, expressionType);
 
-                return;
+                return node;
             }
 
             var setter = node.FindInParent<PropertySetter>();
@@ -689,13 +812,15 @@ internal class Binder : ISemanticPass
                 if (!Equals(builtInTypes.Void, expressionType))
                     diagnostics.ReturnTypeMismatch(node, builtInTypes.Void, expressionType);
 
-                return;
+                return node;
             }
+
+            return node;
         }
 
-        public override void VisitTuple(TupleExpression node)
+        public override ISemanticNode TransformTuple(TupleExpression node)
         {
-            base.VisitTuple(node);
+            node = (TupleExpression)base.TransformTuple(node);
 
             foreach (var expression in node.Expressions)
                 ResolveSingle(expression);
@@ -709,103 +834,90 @@ internal class Binder : ISemanticPass
             var tuple = metadataFactory.CreateTupleMetadata(null, types);
 
             node.ReturnTypeMetadata = tuple;
+
+            return node;
         }
 
-        public override void VisitUnaryExpression(UnaryExpression node)
+        public override ISemanticNode TransformUnaryExpression(UnaryExpression node)
         {
-            base.VisitUnaryExpression(node);
-
-            Debug.Assert(node.Kind != UnaryExpressionKind.Unknown);
-            Debug.Assert(node.Operand.ReturnTypeMetadata is not null);
+            node = (UnaryExpression)base.TransformUnaryExpression(node);
 
             ResolveSingle(node.Operand);
 
-            // TODO: more complex logic
-            if (node.Kind == UnaryMinus &&
-                (Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I8) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I16) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I32) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I64) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U8) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U16) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U32) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U64) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.F32) ||
-                 Equals(node.Operand.ReturnTypeMetadata, builtInTypes.F64)))
+            var result = unaryTypeMatcher.Match(node.Kind, node.Operand.ReturnTypeMetadata);
+            if (result is FailedMatch)
+            {
+                node.ReturnTypeMetadata = TypeMetadata.InvalidType;
+                diagnostics.IncompatibleUnaryOperand(node);
+                return node;
+            }
+
+            if (result is not SuccessMatch)
+                return node;
+
+            if (node.Kind is UnaryMinus or UnaryPlus or BitwiseNot)
             {
                 node.ReturnTypeMetadata = node.Operand.ReturnTypeMetadata;
             }
-            else if (node.Kind == UnaryPlus &&
-                     (Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I8) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I16) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I32) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I64) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U8) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U16) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U32) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U64) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.F32) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.F64)))
-            {
-                node.ReturnTypeMetadata = node.Operand.ReturnTypeMetadata;
-            }
-            else if (node.Kind == LogicalNot && Equals(node.Operand.ReturnTypeMetadata, builtInTypes.Bool))
+            else if (node.Kind is LogicalNot)
             {
                 node.ReturnTypeMetadata = builtInTypes.Bool;
-            }
-            else if (node.Kind == BitwiseNot &&
-                     (Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I8) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I16) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I32) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.I64) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U8) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U16) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U32) ||
-                      Equals(node.Operand.ReturnTypeMetadata, builtInTypes.U64)))
-            {
-                node.ReturnTypeMetadata = node.Operand.ReturnTypeMetadata;
             }
             else if (node.Kind == AddressOf)
             {
                 var provider = metadataProviderMap.Get(node);
                 var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
-                var pointer = metadataFactory.CreatePointer(null, node.Operand.ReturnTypeMetadata);
+                var pointer = metadataFactory.CreatePointer(null, node.Operand.ReturnTypeMetadata!);
                 node.ReturnTypeMetadata = pointer;
             }
             else if (node is { Kind: Dereference, Operand.ReturnTypeMetadata: PointerMetadata pointer })
             {
                 node.ReturnTypeMetadata = pointer.Type;
             }
-            else
+
+            return node;
+        }
+
+        public override ISemanticNode TransformVariable(VariableDeclaration node)
+        {
+            var type = (IInlineType)node.Type.Transform(this);
+            var expression = (IExpression)node.Expression.Transform(this);
+
+            Debug.Assert(expression.ReturnTypeMetadata is not null);
+            Debug.Assert(type.Metadata is not null);
+
+            ResolveExpression(expression, type.Metadata);
+
+            var result = typeMatcher.Match(expression.ReturnTypeMetadata, type.Metadata);
+            if (result is FailedMatch)
+                diagnostics.TypeMismatch(expression, type.Metadata, expression.ReturnTypeMetadata);
+            else if (result is ImplicitConversion implicitConversion)
+                expression = new CastExpression(null, GetInlineType(implicitConversion.Target), expression);
+
+            if (type == node.Type && expression == node.Expression)
+                return node;
+
+            return new VariableDeclaration(node.SourceSpan, node.Name, type, expression)
             {
-                node.ReturnTypeMetadata = TypeMetadata.InvalidType;
-                diagnostics.IncompatibleUnaryOperand(node);
-            }
+                Metadata = node.Metadata,
+            };
         }
 
-        public override void VisitVariable(VariableDeclaration node)
+        public override ISemanticNode TransformWhile(While node)
         {
-            base.VisitVariable(node);
-
-            Debug.Assert(node.Expression.ReturnTypeMetadata is not null);
-            Debug.Assert(node.Type.Metadata is not null);
-
-            ResolveExpression(node.Expression, node.Type.Metadata);
-
-            if (!node.Expression.ReturnTypeMetadata.IsInvalid &&
-                !node.Type.Metadata.IsInvalid &&
-                !node.Expression.ReturnTypeMetadata.Equals(node.Type.Metadata))
-                diagnostics.TypeMismatch(node.Expression, node.Type.Metadata, node.Expression.ReturnTypeMetadata);
-        }
-
-        public override void VisitWhile(While node)
-        {
-            base.VisitWhile(node);
+            node = (While)base.TransformWhile(node);
 
             ResolveSingle(node.Condition);
 
             if (!Equals(node.Condition.ReturnTypeMetadata, builtInTypes.Bool))
-                diagnostics.TypeMismatch(node.Condition, builtInTypes.Bool, node.Condition.ReturnTypeMetadata);
+            {
+                diagnostics.TypeMismatch(
+                    node.Condition,
+                    builtInTypes.Bool,
+                    node.Condition.ReturnTypeMetadata);
+            }
+
+            return node;
         }
     }
 }

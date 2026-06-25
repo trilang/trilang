@@ -1,4 +1,6 @@
-namespace Trilang.Metadata.Aggregate;
+using Trilang.Metadata;
+
+namespace Trilang.Semantics.TypeMatchers.AggregateResults;
 
 public interface IResolutionResult<out T> where T : IMetadata
 {

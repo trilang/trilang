@@ -44,7 +44,7 @@ internal class MemberAccessKindAnalyser : ISemanticPass
                     return MemberAccessKind.Read;
                 }
 
-                if (parent is BinaryExpression { IsCompoundAssignment: true } compound)
+                if (parent is BinaryExpression compound && compound.Kind.IsCompoundAssignment())
                 {
                     if (ReferenceEquals(compound.Left, node))
                         return MemberAccessKind.ReadWrite;

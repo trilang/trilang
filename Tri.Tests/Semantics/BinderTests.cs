@@ -721,6 +721,36 @@ public class BinderTests
     }
 
     [Test]
+    public void BinaryExpressionWithCastTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public main(): i32 {
+                return 1 + 2i8;
+            }
+            """);
+        var (project, diagnostics) = Parse(file);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var binaryNode = semanticTree.Find<BinaryExpression>()!;
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(binaryNode.Right, Is.InstanceOf<CastExpression>());
+        Assert.That(
+            binaryNode.ReturnTypeMetadata,
+            Is.EqualTo(compilationContext.BuiltInTypes.I32).Using(new MetadataComparer()));
+    }
+
+    [Test]
     public void LogicalNotIncorrectOperandTest()
     {
         var file = CreateFile(
@@ -893,6 +923,33 @@ public class BinderTests
             "Type mismatch: expected 'i32', got 'bool'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+    }
+
+    [Test]
+    public void VariableDeclarationImplicitCastTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public main(): void {
+                var a: i32 = 1i8;
+            }
+            """);
+        var (project, diagnostics) = Parse(file);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var variable = semanticTree.Find<VariableDeclaration>()!;
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(variable.Expression, Is.InstanceOf<CastExpression>());
     }
 
     [Test]
@@ -3043,5 +3100,236 @@ public class BinderTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
+    }
+
+    [Test]
+    public void BinaryExpressionWithLeftImplicitConversionTest()
+    {
+        var (project, diagnostics) = Parse(
+            CreateFile(
+                """
+                namespace Test1;
+
+                public test(a: i8, b: i32): i32 {
+                    return a + b;
+                }
+                """));
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var binExp = semanticTree.Find<BinaryExpression>()!;
+        var left = (CastExpression)binExp.Left;
+        var expectedTypeRef = new TypeRef(null, null, ["i32"]);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(left.Type, Is.EqualTo(expectedTypeRef).Using(SemanticComparer.Instance));
+    }
+
+    [Test]
+    public void BinaryExpressionWithRightImplicitConversionTest()
+    {
+        var (project, diagnostics) = Parse(
+            CreateFile(
+                """
+                namespace Test1;
+
+                public test(a: i32, b: i8): i32 {
+                    return a + b;
+                }
+                """));
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var binExp = semanticTree.Find<BinaryExpression>()!;
+        var right = (CastExpression)binExp.Right;
+        var expectedTypeRef = new TypeRef(null, null, ["i32"]);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(right.Type, Is.EqualTo(expectedTypeRef).Using(SemanticComparer.Instance));
+    }
+
+    [Test]
+    public void VariableWithImplicitConversionTest()
+    {
+        var (project, diagnostics) = Parse(
+            CreateFile(
+                """
+                namespace Test1;
+
+                public test(): void {
+                    var a: i32 = 1i8;
+                }
+                """));
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var varDecl = semanticTree.Find<VariableDeclaration>()!;
+        var exp = (CastExpression)varDecl.Expression;
+        var expectedTypeRef = new TypeRef(null, null, ["i32"]);
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(exp.Type, Is.EqualTo(expectedTypeRef).Using(SemanticComparer.Instance));
+    }
+
+    [Test]
+    public void CallWithImplicitConversionTest()
+    {
+        var (project, diagnostics) = Parse(
+            CreateFile(
+                """
+                namespace Test1;
+
+                public test(a: i32): void { }
+
+                public main(): void {
+                    test(1i8);
+                }
+                """));
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var callExp = semanticTree.Find<CallExpression>()!;
+        var exp = (CastExpression)callExp.Parameters[0];
+        var expectedTypeRef = new TypeRef(null, null, ["i32"]);
+        var expectedRootNs = RootNamespaceMetadata.Create(builtInTypes);
+        var expectedPackageNs = NamespaceMetadata.CreateForPackage();
+        var expectedTest1 = expectedPackageNs.CreateChild(["Test1"]);
+        var expectedFunction = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "test",
+            [new ParameterMetadata(null, "a", builtInTypes.I32),],
+            new FunctionTypeMetadata(null, [builtInTypes.I32], builtInTypes.Void)
+            {
+                Namespace = expectedRootNs,
+            })
+        {
+            Namespace = expectedTest1,
+        };
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(exp.Type, Is.EqualTo(expectedTypeRef).Using(SemanticComparer.Instance));
+        Assert.That(callExp.Reference, Is.EqualTo(expectedFunction).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void CallWithMultipleImplicitConversionsTest()
+    {
+        var (project, diagnostics) = Parse(
+            CreateFile(
+                """
+                namespace Test1;
+
+                public test(a: i32, b: i32): void { }
+
+                public main(): void {
+                    test(1i8, 2i8);
+                }
+                """));
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var callExp = semanticTree.Find<CallExpression>()!;
+        var exp = (CastExpression)callExp.Parameters[0];
+        var expectedTypeRef = new TypeRef(null, null, ["i32"]);
+        var expectedRootNs = RootNamespaceMetadata.Create(builtInTypes);
+        var expectedPackageNs = NamespaceMetadata.CreateForPackage();
+        var expectedTest1 = expectedPackageNs.CreateChild(["Test1"]);
+        var expectedFunction = new FunctionMetadata(
+            null,
+            AccessModifierMetadata.Public,
+            "test",
+            [
+                new ParameterMetadata(null, "a", builtInTypes.I32),
+                new ParameterMetadata(null, "b", builtInTypes.I32),
+            ],
+            new FunctionTypeMetadata(
+                null,
+                [builtInTypes.I32, builtInTypes.I32],
+                builtInTypes.Void)
+            {
+                Namespace = expectedRootNs,
+            })
+        {
+            Namespace = expectedTest1,
+        };
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+        Assert.That(exp.Type, Is.EqualTo(expectedTypeRef).Using(SemanticComparer.Instance));
+        Assert.That(callExp.Reference, Is.EqualTo(expectedFunction).Using(new MetadataComparer()));
+    }
+
+    [Test]
+    public void CallWithPossibleConversionAndMultipleOverloadsTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            public test(a: i32, b: i32): void { }
+            public test(a: i32, b: bool): void { }
+
+            public main(): void {
+                test(1i8, 2i8);
+            }
+            """);
+        var (project, diagnostics) = Parse(file);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var diagnostic = new Diagnostic(
+            DiagnosticId.S0023NoSuitableOverload,
+            DiagnosticSeverity.Error,
+            new SourceLocation(
+                file,
+                new SourceSpan(new SourcePosition(122, 7, 5), new SourcePosition(126, 7, 9))),
+            "No suitable overload found.");
+
+        var semanticTree = project.SourceFiles.Single().SemanticTree!;
+        var callExp = semanticTree.Find<CallExpression>()!;
+
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+        Assert.That(callExp.Reference, Is.EqualTo(FunctionMetadata.Invalid).Using(new MetadataComparer()));
     }
 }

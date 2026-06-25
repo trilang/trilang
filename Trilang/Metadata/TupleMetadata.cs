@@ -1,5 +1,3 @@
-using Trilang.Metadata.Aggregate;
-
 namespace Trilang.Metadata;
 
 public class TupleMetadata : IAnonymousTypeMetadata

@@ -10,7 +10,6 @@ public class PropertyGetter : ISemanticNode
         SourceSpan = sourceSpan;
         AccessModifier = accessModifier;
         Body = body;
-        Body?.Parent = this;
     }
 
     public void Accept(IVisitor visitor)
