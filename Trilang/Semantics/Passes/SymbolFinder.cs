@@ -111,7 +111,7 @@ internal class SymbolFinder : ISemanticPass
             map.Add(node, context);
 
             var child = context.CreateChild();
-            child.AddId(MemberAccessExpression.This, node.Parent!);
+            node.ThisSymbol = child.AddId(MemberAccessExpression.This);
 
             foreach (var parameter in node.Parameters)
                 parameter.Accept(this, child);
@@ -274,12 +274,12 @@ internal class SymbolFinder : ISemanticPass
         {
             map.Add(node, context);
 
-            context.AddId(node.Name, node);
+            node.Symbol = context.AddId(node.Name);
 
             node.ReturnType.Accept(this, context);
 
             var child = context.CreateChild();
-            child.AddId(MemberAccessExpression.This, node.Parent!);
+            node.ThisSymbol = child.AddId(MemberAccessExpression.This);
 
             foreach (var parameter in node.Parameters)
                 parameter.Accept(this, child);
@@ -311,7 +311,7 @@ internal class SymbolFinder : ISemanticPass
         {
             map.Add(node, context);
 
-            context.AddId(node.Name, node);
+            node.Symbol = context.AddId(node.Name);
 
             node.Type.Accept(this, context);
         }
@@ -327,7 +327,7 @@ internal class SymbolFinder : ISemanticPass
         {
             map.Add(node, context);
 
-            context.AddId(node.Name, node);
+            node.Symbol = context.AddId(node.Name);
 
             node.Type.Accept(this, context);
             node.Getter?.Accept(this, context);
@@ -339,7 +339,7 @@ internal class SymbolFinder : ISemanticPass
             map.Add(node, context);
 
             var child = context.CreateChild();
-            child.AddId(MemberAccessExpression.Field, node.Parent!);
+            node.FieldSymbol = child.AddId(MemberAccessExpression.Field);
 
             if (node.Body is not null)
                 VisitBlockWithoutScope(node.Body, child);
@@ -350,8 +350,8 @@ internal class SymbolFinder : ISemanticPass
             map.Add(node, context);
 
             var child = context.CreateChild();
-            child.AddId(MemberAccessExpression.Field, node.Parent!);
-            child.AddId(MemberAccessExpression.Value, node.Parent!);
+            node.FieldSymbol = child.AddId(MemberAccessExpression.Field);
+            node.ValueSymbol = child.AddId(MemberAccessExpression.Value);
 
             if (node.Body is not null)
                 VisitBlockWithoutScope(node.Body, child);
@@ -424,7 +424,7 @@ internal class SymbolFinder : ISemanticPass
         {
             map.Add(node, context);
 
-            context.AddId(node.Name, node);
+            node.Symbol = context.AddId(node.Name);
 
             node.Type.Accept(this, context);
             node.Expression.Accept(this, context);

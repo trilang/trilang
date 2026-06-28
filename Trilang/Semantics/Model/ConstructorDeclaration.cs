@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -41,4 +42,6 @@ public class ConstructorDeclaration : ISemanticNode
     public BlockStatement Body { get; }
 
     public ConstructorMetadata? Metadata { get; set; }
+
+    public IdSymbol? ThisSymbol { get; set; }
 }

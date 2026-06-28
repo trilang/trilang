@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -54,4 +55,8 @@ public class MethodDeclaration : ISemanticNode
     public BlockStatement Body { get; }
 
     public MethodMetadata? Metadata { get; set; }
+
+    public IdSymbol? Symbol { get; set; }
+
+    public IdSymbol? ThisSymbol { get; set; }
 }

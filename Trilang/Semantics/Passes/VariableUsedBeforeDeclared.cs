@@ -1,5 +1,6 @@
 using Trilang.Compilation;
 using Trilang.Compilation.Diagnostics;
+using Trilang.Metadata;
 using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics.Passes;
@@ -30,7 +31,7 @@ internal class VariableUsedBeforeDeclared : ISemanticPass
 
     public string Name => nameof(VariableUsedBeforeDeclared);
 
-    public IEnumerable<string> DependsOn => [nameof(MetadataGenerator)];
+    public IEnumerable<string> DependsOn => [nameof(Binder), nameof(MetadataGenerator)];
 
     private sealed class VariableUsedBeforeDeclaredVisitor : Visitor
     {
@@ -70,12 +71,7 @@ internal class VariableUsedBeforeDeclared : ISemanticPass
             if (!node.IsFirstMember || node.IsThis || node.IsField || node.IsValue)
                 return;
 
-            var symbolTable = symbolTableMap.Get(node);
-            var symbols = symbolTable.GetId(node.Name);
-            if (symbols is [])
-                return;
-
-            if (!symbols.Any(x => x.Node is VariableDeclaration))
+            if (node.Reference is not VariableMetadata)
                 return;
 
             for (var i = scopes.Count - 1; i >= 0; i--)

@@ -38,10 +38,10 @@ public class SymbolFinderTests
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(
             functionBodySymbolTable.Ids,
-            Contains.Item(new IdSymbol(a.Name, a)));
+            Contains.Item(new IdSymbol(a.Name)).Using(IdSymbolComparer.Instance));
         Assert.That(
             functionBodySymbolTable.Ids,
-            Contains.Item(new IdSymbol(b.Name, b)));
+            Contains.Item(new IdSymbol(b.Name)).Using(IdSymbolComparer.Instance));
     }
 
     [Test]
@@ -106,10 +106,10 @@ public class SymbolFinderTests
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(
             functionBodySymbolTable.Ids,
-            Contains.Item(new IdSymbol(a.Name, a)));
+            Contains.Item(new IdSymbol(a.Name)).Using(IdSymbolComparer.Instance));
         Assert.That(
             functionBodySymbolTable.Ids,
-            Contains.Item(new IdSymbol(b.Name, b)));
+            Contains.Item(new IdSymbol(b.Name)).Using(IdSymbolComparer.Instance));
     }
 
     [Test]
@@ -134,15 +134,25 @@ public class SymbolFinderTests
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var diagnostic = new Diagnostic(
-            DiagnosticId.S0002AlreadyDefined,
-            DiagnosticSeverity.Error,
-            new SourceLocation(
-                file,
-                new SourceSpan(new SourcePosition(64, 5, 5), new SourcePosition(79, 5, 20))),
-            "The 'a' variable is already defined.");
+        var diagnostic = new[]
+        {
+            new Diagnostic(
+                DiagnosticId.S0002AlreadyDefined,
+                DiagnosticSeverity.Error,
+                new SourceLocation(
+                    file,
+                    new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(59, 4, 20))),
+                "The 'a' variable is already defined."),
+            new Diagnostic(
+                DiagnosticId.S0002AlreadyDefined,
+                DiagnosticSeverity.Error,
+                new SourceLocation(
+                    file,
+                    new SourceSpan(new SourcePosition(64, 5, 5), new SourcePosition(79, 5, 20))),
+                "The 'a' variable is already defined."),
+        };
 
-        Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
+        Assert.That(diagnostics.Diagnostics, Is.EqualTo(diagnostic));
     }
 
     [Test]
@@ -176,7 +186,7 @@ public class SymbolFinderTests
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             thenSymbolTable.Ids,
-            Contains.Item(new IdSymbol(a.Name, a)));
+            Contains.Item(new IdSymbol(a.Name)).Using(IdSymbolComparer.Instance));
     }
 
     [Test]
@@ -214,13 +224,13 @@ public class SymbolFinderTests
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             thenSymbolTable.Ids,
-            Contains.Item(new IdSymbol(a.Name, a)));
+            Contains.Item(new IdSymbol(a.Name)).Using(IdSymbolComparer.Instance));
 
         var elseSymbolTable = map.Get(ifStatement.Else!);
         Assert.That(elseSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             elseSymbolTable.Ids,
-            Contains.Item(new IdSymbol(b.Name, b)));
+            Contains.Item(new IdSymbol(b.Name)).Using(IdSymbolComparer.Instance));
     }
 
     [Test]
@@ -261,19 +271,19 @@ public class SymbolFinderTests
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             functionBodySymbolTable.Ids,
-            Contains.Item(new IdSymbol(a1.Name, a1)));
+            Contains.Item(new IdSymbol(a1.Name)).Using(IdSymbolComparer.Instance));
 
         var thenSymbolTable = map.Get(ifStatement.Then);
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             thenSymbolTable.Ids,
-            Contains.Item(new IdSymbol(a2.Name, a2)));
+            Contains.Item(new IdSymbol(a2.Name)).Using(IdSymbolComparer.Instance));
 
         var elseSymbolTable = map.Get(ifStatement.Else!);
         Assert.That(elseSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             elseSymbolTable.Ids,
-            Contains.Item(new IdSymbol(a3.Name, a3)));
+            Contains.Item(new IdSymbol(a3.Name)).Using(IdSymbolComparer.Instance));
     }
 
     [Test]
@@ -329,16 +339,15 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
-        var type = semanticTree.Find<TypeDeclaration>()!;
         var ctor = semanticTree.Find<ConstructorDeclaration>()!;
         var parameter = ctor.Parameters[0];
 
         var ctorSymbolTable = map.Get(ctor.Body);
         Assert.That(ctorSymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(ctorSymbolTable.Ids, Contains.Item(new IdSymbol("this", type)));
+        Assert.That(ctorSymbolTable.Ids, Contains.Item(new IdSymbol("this")).Using(IdSymbolComparer.Instance));
         Assert.That(
             ctorSymbolTable.Ids,
-            Contains.Item(new IdSymbol(parameter.Name, parameter)));
+            Contains.Item(new IdSymbol(parameter.Name)).Using(IdSymbolComparer.Instance));
     }
 
     [Test]
@@ -363,16 +372,15 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
-        var type = semanticTree.Find<TypeDeclaration>()!;
         var method = semanticTree.Find<MethodDeclaration>()!;
         var parameter = method.Parameters[0];
 
         var methodSymbolTable = map.Get(method.Body);
         Assert.That(methodSymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(methodSymbolTable.Ids, Contains.Item(new IdSymbol("this", type)));
+        Assert.That(methodSymbolTable.Ids, Contains.Item(new IdSymbol("this")).Using(IdSymbolComparer.Instance));
         Assert.That(
             methodSymbolTable.Ids,
-            Contains.Item(new IdSymbol(parameter.Name, parameter)));
+            Contains.Item(new IdSymbol(parameter.Name)).Using(IdSymbolComparer.Instance));
     }
 
     [Test]
@@ -442,16 +450,16 @@ public class SymbolFinderTests
         Assert.That(typeSymbolTable.Ids, Has.Count.EqualTo(4));
         Assert.That(
             typeSymbolTable.Ids,
-            Contains.Item(new IdSymbol("x", type.Properties[0])));
+            Contains.Item(new IdSymbol("x")).Using(IdSymbolComparer.Instance));
         Assert.That(
             typeSymbolTable.Ids,
-            Contains.Item(new IdSymbol("y", type.Properties[1])));
+            Contains.Item(new IdSymbol("y")).Using(IdSymbolComparer.Instance));
         Assert.That(
             typeSymbolTable.Ids,
-            Contains.Item(new IdSymbol("toString", type.Methods[0])));
+            Contains.Item(new IdSymbol("toString")).Using(IdSymbolComparer.Instance));
         Assert.That(
             typeSymbolTable.Ids,
-            Contains.Item(new IdSymbol("distance", type.Methods[1])));
+            Contains.Item(new IdSymbol("distance")).Using(IdSymbolComparer.Instance));
     }
 
     [Test]
@@ -484,20 +492,38 @@ public class SymbolFinderTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
-        var property = semanticTree.Find<PropertyDeclaration>()!;
         var getter = semanticTree.Find<PropertyGetter>();
         Assert.That(getter, Is.Not.Null);
 
         var getterSymbolTable = map.Get(getter.Body!);
         Assert.That(getterSymbolTable.Ids, Has.Count.EqualTo(1));
-        Assert.That(getterSymbolTable.Ids, Contains.Item(new IdSymbol("field", property)));
+        Assert.That(getterSymbolTable.Ids, Contains.Item(new IdSymbol("field")).Using(IdSymbolComparer.Instance));
 
         var setter = semanticTree.Find<PropertySetter>();
         Assert.That(setter, Is.Not.Null);
 
         var setterSymbolTable = map.Get(setter.Body!);
         Assert.That(setterSymbolTable.Ids, Has.Count.EqualTo(2));
-        Assert.That(setterSymbolTable.Ids, Contains.Item(new IdSymbol("field", property)));
-        Assert.That(setterSymbolTable.Ids, Contains.Item(new IdSymbol("value", property)));
+        Assert.That(setterSymbolTable.Ids, Contains.Item(new IdSymbol("field")).Using(IdSymbolComparer.Instance));
+        Assert.That(setterSymbolTable.Ids, Contains.Item(new IdSymbol("value")).Using(IdSymbolComparer.Instance));
+    }
+
+    private sealed class IdSymbolComparer : IComparer<IdSymbol>
+    {
+        public static readonly IdSymbolComparer Instance = new IdSymbolComparer();
+
+        public int Compare(IdSymbol? x, IdSymbol? y)
+        {
+            if (ReferenceEquals(x, y))
+                return 0;
+
+            if (y is null)
+                return 1;
+
+            if (x is null)
+                return -1;
+
+            return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
+        }
     }
 }

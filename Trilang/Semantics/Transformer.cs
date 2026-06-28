@@ -125,6 +125,7 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         return new ConstructorDeclaration(node.SourceSpan, node.AccessModifier, parameters, body)
         {
             Metadata = node.Metadata,
+            ThisSymbol = node.ThisSymbol,
         };
     }
 
@@ -326,6 +327,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         return new MethodDeclaration(node.SourceSpan, node.AccessModifier, node.IsStatic, node.Name, parameters, returnType, body)
         {
             Metadata = node.Metadata,
+            Symbol = node.Symbol,
+            ThisSymbol = node.ThisSymbol,
         };
     }
 
@@ -357,6 +360,7 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         return new Parameter(node.SourceSpan, node.Name, type)
         {
             Metadata = node.Metadata,
+            Symbol = node.Symbol,
         };
     }
 
@@ -383,6 +387,7 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         return new PropertyDeclaration(node.SourceSpan, node.Name, type, getter, setter)
         {
             Metadata = node.Metadata,
+            Symbol = node.Symbol,
         };
     }
 
@@ -395,6 +400,7 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         return new PropertyGetter(node.SourceSpan, node.AccessModifier, body)
         {
             Metadata = node.Metadata,
+            FieldSymbol = node.FieldSymbol,
         };
     }
 
@@ -407,6 +413,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         return new PropertySetter(node.SourceSpan, node.AccessModifier, body)
         {
             Metadata = node.Metadata,
+            FieldSymbol = node.FieldSymbol,
+            ValueSymbol = node.ValueSymbol,
         };
     }
 
@@ -498,6 +506,7 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         return new VariableDeclaration(node.SourceSpan, node.Name, type, expression)
         {
             Metadata = node.Metadata,
+            Symbol = node.Symbol,
         };
     }
 

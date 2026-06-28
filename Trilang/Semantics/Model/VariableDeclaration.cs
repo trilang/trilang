@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -35,4 +36,6 @@ public class VariableDeclaration : IStatement
     public IExpression Expression { get; }
 
     public VariableMetadata? Metadata { get; set; }
+
+    public IdSymbol? Symbol { get; set; }
 }

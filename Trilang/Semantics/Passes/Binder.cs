@@ -51,7 +51,8 @@ internal class Binder : ISemanticPass
     [
         nameof(CompoundAssignmentTargetValidation),
         nameof(CyclicAlias),
-        nameof(MetadataGenerator)
+        nameof(MetadataGenerator),
+        nameof(VariableDuplicate),
     ];
 
     private sealed class BinderTransformer : Transformer
@@ -423,37 +424,38 @@ internal class Binder : ISemanticPass
             if (member.Reference!.IsInvalid)
             {
                 member.Reference = InvalidMemberMetadata.Instance;
-                return node;
             }
-
-            // resolve call parameters
-            // it tries to "pre-resolve" the function of the call
-            // to help resolve the correct overload in parameters.
-            // for example:
-            //
-            // public type Point {
-            //     public constructor(callback: (i32) => void) { }
-            // }
-            //
-            // public test(p: i32): void { }
-            // public test(p: bool): void { }
-            //
-            // public main(): void {
-            //     var a: Point = Point(test);
-            // }
-            var aggregate = (AggregateMetadata)member.Reference;
-            var function = TryResolveSingleFunction(aggregate);
-            for (var i = 0; i < parameters.Length; i++)
+            else
             {
-                var parameter = parameters[i];
-                var returnType = function is not null && i < function.Type.ParameterTypes.Count
-                    ? function.Type.ParameterTypes[i]
-                    : null;
+                // resolve call parameters
+                // it tries to "pre-resolve" the function of the call
+                // to help resolve the correct overload in parameters.
+                // for example:
+                //
+                // public type Point {
+                //     public constructor(callback: (i32) => void) { }
+                // }
+                //
+                // public test(p: i32): void { }
+                // public test(p: bool): void { }
+                //
+                // public main(): void {
+                //     var a: Point = Point(test);
+                // }
+                var aggregate = (AggregateMetadata)member.Reference;
+                var function = TryResolveSingleFunction(aggregate);
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    var parameter = parameters[i];
+                    var returnType = function is not null && i < function.Type.ParameterTypes.Count
+                        ? function.Type.ParameterTypes[i]
+                        : null;
 
-                ResolveExpression(parameter, returnType);
+                    ResolveExpression(parameter, returnType);
+                }
+
+                (member, isChanged, parameters) = ResolveFunction(node, member, parameters);
             }
-
-            (member, isChanged, parameters) = ResolveFunction(node, member, parameters);
 
             if (member == node.Member && !isChanged)
                 return node;
@@ -607,20 +609,7 @@ internal class Binder : ISemanticPass
             var symbols = symbolTable.GetId(node.Name);
             if (symbols is not [])
             {
-                if (node.IsThis)
-                {
-                    var type = ((TypeDeclaration)symbols[0].Node).Metadata!;
-                    var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
-                    var pointer = metadataFactory.CreatePointer(null, type);
-                    node.Reference = new AggregateMetadata([
-                        new ParameterMetadata(null, MemberAccessExpression.This, pointer)
-                    ]);
-
-                    return;
-                }
-
-                node.Reference = new AggregateMetadata(symbols.Select(x => GetSymbolMetadata(x.Node)));
-
+                node.Reference = new AggregateMetadata(symbols.Select(x => x.Metadata!));
                 return;
             }
 
@@ -688,24 +677,6 @@ internal class Binder : ISemanticPass
                 Reference = node.Reference,
             };
         }
-
-        private static IMetadata GetSymbolMetadata(ISemanticNode node)
-            => node switch
-            {
-                PropertyDeclaration propertyDeclarationNode
-                    => propertyDeclarationNode.Metadata!,
-
-                VariableDeclaration variableStatementNode
-                    => variableStatementNode.Metadata!,
-
-                Parameter parameterNode
-                    => parameterNode.Metadata!,
-
-                MethodDeclaration methodNode
-                    => methodNode.Metadata!,
-
-                _ => throw new InvalidOperationException(),
-            };
 
         public override ISemanticNode TransformNewObject(NewObjectExpression node)
         {

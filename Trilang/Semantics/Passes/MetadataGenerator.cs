@@ -11,7 +11,6 @@ internal class MetadataGenerator : ISemanticPass
 {
     private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
     private readonly MetadataProviderMap metadataProviderMap;
     private readonly CompilationContext compilationContext;
 
@@ -23,13 +22,11 @@ internal class MetadataGenerator : ISemanticPass
     public MetadataGenerator(
         ISet<string> directives,
         DiagnosticCollection diagnostics,
-        SymbolTableMap symbolTableMap,
         MetadataProviderMap metadataProviderMap,
         CompilationContext compilationContext)
     {
         this.directives = directives;
         this.diagnostics = diagnostics.ForSemantic();
-        this.symbolTableMap = symbolTableMap;
         this.metadataProviderMap = metadataProviderMap;
         this.compilationContext = compilationContext;
 
@@ -71,12 +68,7 @@ internal class MetadataGenerator : ISemanticPass
         PopulateTypes();
         PopulateFunctions();
 
-        var visitor = new MetadataGeneratorVisitor(
-            directives,
-            diagnostics,
-            symbolTableMap,
-            this);
-
+        var visitor = new MetadataGeneratorVisitor(directives, this);
         foreach (var semanticTree in semanticTrees)
             semanticTree.Accept(visitor);
 
@@ -237,17 +229,22 @@ internal class MetadataGenerator : ISemanticPass
                 // TODO: add in a constructor?
                 type.AddProperty(propertyMetadata);
                 property.Metadata = propertyMetadata;
+                property.Symbol!.Metadata = propertyMetadata;
 
                 if (propertyMetadata.Getter is not null)
                 {
                     type.AddMethod(propertyMetadata.Getter);
                     property.Getter?.Metadata = propertyMetadata.Getter;
+                    property.Setter?.FieldSymbol!.Metadata = propertyMetadata.Type;
                 }
 
                 if (propertyMetadata.Setter is not null)
                 {
                     type.AddMethod(propertyMetadata.Setter);
                     property.Setter?.Metadata = propertyMetadata.Setter;
+                    property.Setter?.FieldSymbol!.Metadata = propertyMetadata.Type;
+                    // the `value` parameter
+                    property.Setter?.ValueSymbol!.Metadata = propertyMetadata.Setter.Parameters[0];
                 }
             }
 
@@ -283,6 +280,10 @@ internal class MetadataGenerator : ISemanticPass
 
                     type.AddConstructor(constructorMetadata);
                     constructor.Metadata = constructorMetadata;
+                    constructor.ThisSymbol!.Metadata = new ParameterMetadata(
+                        null,
+                        MemberAccessExpression.This,
+                        metadataFactory.CreatePointer(null, type));
                 }
             }
             else
@@ -322,6 +323,11 @@ internal class MetadataGenerator : ISemanticPass
 
                 type.AddMethod(methodMetadata);
                 method.Metadata = methodMetadata;
+                method.Symbol!.Metadata = methodMetadata;
+                method.ThisSymbol!.Metadata = new ParameterMetadata(
+                    null,
+                    MemberAccessExpression.This,
+                    metadataFactory.CreatePointer(null, type));
             }
         }
     }
@@ -346,6 +352,7 @@ internal class MetadataGenerator : ISemanticPass
 
             result[i] = parameterMetadata;
             parameter.Metadata = parameterMetadata;
+            parameter.Symbol!.Metadata = parameterMetadata;
         }
 
         return result!;
@@ -466,6 +473,7 @@ internal class MetadataGenerator : ISemanticPass
                 }
 
                 functionParameter.Metadata = parameter;
+                functionParameter.Symbol!.Metadata = parameter;
                 metadata.AddParameter(parameter);
             }
 
@@ -638,19 +646,11 @@ internal class MetadataGenerator : ISemanticPass
 
     private sealed class MetadataGeneratorVisitor : Visitor
     {
-        private readonly SemanticDiagnosticReporter diagnostics;
-        private readonly SymbolTableMap symbolTableMap;
         private readonly MetadataGenerator generator;
 
-        public MetadataGeneratorVisitor(
-            ISet<string> directives,
-            SemanticDiagnosticReporter diagnostics,
-            SymbolTableMap symbolTableMap,
-            MetadataGenerator generator)
+        public MetadataGeneratorVisitor(ISet<string> directives, MetadataGenerator generator)
             : base(directives)
         {
-            this.diagnostics = diagnostics;
-            this.symbolTableMap = symbolTableMap;
             this.generator = generator;
         }
 
@@ -740,21 +740,10 @@ internal class MetadataGenerator : ISemanticPass
 
             Debug.Assert(node.Type.Metadata is not null);
 
-            var symbolTable = symbolTableMap.Get(node);
             var metadata = new VariableMetadata(node.GetLocation(), node.Name, node.Type.Metadata);
 
-            // TODO: optimize? it will query the same symbols in the same scope multiple times
-            var symbols = symbolTable.GetId(node.Name);
-
-            // we don't need to check all symbols, just the first one
-            // all other will be checked in other passes of the tree
-            if (symbols[0].Node != node)
-            {
-                metadata.MarkAsInvalid();
-                diagnostics.VariableAlreadyDefined(node);
-            }
-
             node.Metadata = metadata;
+            node.Symbol!.Metadata = metadata;
         }
     }
 
@@ -785,7 +774,11 @@ internal class MetadataGenerator : ISemanticPass
         public override void VisitTree(SemanticTree node)
         {
             // at this point, we add this file is in a root namespace
-            map.Add(node, new MetadataProvider(compilationContext, compilationContext.CurrentPackage!.Namespace));
+            var metadataProvider = new MetadataProvider(
+                compilationContext,
+                compilationContext.CurrentPackage!.Namespace);
+
+            map.Add(node, metadataProvider);
 
             base.VisitTree(node);
         }

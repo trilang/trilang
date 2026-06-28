@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -31,4 +32,6 @@ public class Parameter : ISemanticNode
     public IInlineType Type { get; }
 
     public ParameterMetadata? Metadata { get; set; }
+
+    public IdSymbol? Symbol { get; set; }
 }

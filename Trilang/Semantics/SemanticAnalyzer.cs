@@ -56,7 +56,6 @@ public class SemanticAnalyzer
             new MetadataGenerator(
                 options.Directives,
                 options.Diagnostics,
-                symbolTableMap,
                 metadataProviderMap,
                 compilationContext),
             new MissingReturnStatement(options.Diagnostics, controlFlowGraphMap, compilationContext),
@@ -67,6 +66,7 @@ public class SemanticAnalyzer
             new ThisInStaticMethods(options.Directives, options.Diagnostics),
             new ThisOutsideOfType(options.Directives, options.Diagnostics),
             new UnresolvedMemberAccess(options.Directives, options.Diagnostics),
+            new VariableDuplicate(options.Directives, options.Diagnostics),
             new VariableUsedBeforeDeclared(options.Directives, options.Diagnostics, symbolTableMap),
         };
 

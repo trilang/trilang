@@ -1,5 +1,3 @@
-using Trilang.Semantics.Model;
-
 namespace Trilang.Symbols;
 
 public class SymbolTable
@@ -26,8 +24,13 @@ public class SymbolTable
         return parent?.GetId(name) ?? [];
     }
 
-    public void AddId(string name, ISemanticNode node)
-        => ids.Add(new IdSymbol(name, node));
+    public IdSymbol AddId(string name)
+    {
+        var idSymbol = new IdSymbol(name);
+        ids.Add(idSymbol);
+
+        return idSymbol;
+    }
 
     public SymbolTable CreateChild()
         => new SymbolTable(this);

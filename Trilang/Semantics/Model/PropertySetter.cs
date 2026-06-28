@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -39,4 +40,8 @@ public class PropertySetter : ISemanticNode
     }
 
     public MethodMetadata? Metadata { get; set; }
+
+    public IdSymbol? FieldSymbol { get; set; }
+
+    public IdSymbol? ValueSymbol { get; set; }
 }
