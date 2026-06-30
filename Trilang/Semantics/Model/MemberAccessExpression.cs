@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Trilang.Metadata;
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -36,11 +38,17 @@ public class MemberAccessExpression : IAccessExpression
         {
             Reference = Reference,
             AccessKind = AccessKind,
+            SymbolTable = SymbolTable,
+            MetadataProvider = MetadataProvider,
         };
 
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; set; }
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public IExpression? Member { get; set; }
 

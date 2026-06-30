@@ -9,22 +9,17 @@ internal class VariableUsedBeforeDeclared : ISemanticPass
 {
     private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
 
-    public VariableUsedBeforeDeclared(
-        ISet<string> directives,
-        DiagnosticCollection diagnostics,
-        SymbolTableMap symbolTableMap)
+    public VariableUsedBeforeDeclared(ISet<string> directives, DiagnosticCollection diagnostics)
     {
         this.directives = directives;
         this.diagnostics = diagnostics.ForSemantic();
-        this.symbolTableMap = symbolTableMap;
     }
 
     public void Analyze(Project project)
     {
         var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!);
-        var visitor = new VariableUsedBeforeDeclaredVisitor(directives, diagnostics, symbolTableMap);
+        var visitor = new VariableUsedBeforeDeclaredVisitor(directives, diagnostics);
         foreach (var tree in semanticTrees)
             tree.Accept(visitor);
     }
@@ -37,16 +32,13 @@ internal class VariableUsedBeforeDeclared : ISemanticPass
     {
         private readonly List<HashSet<string>> scopes;
         private readonly SemanticDiagnosticReporter diagnostics;
-        private readonly SymbolTableMap symbolTableMap;
 
         public VariableUsedBeforeDeclaredVisitor(
             ISet<string> directives,
-            SemanticDiagnosticReporter diagnostics,
-            SymbolTableMap symbolTableMap)
+            SemanticDiagnosticReporter diagnostics)
             : base(directives)
         {
             this.diagnostics = diagnostics;
-            this.symbolTableMap = symbolTableMap;
             scopes = [];
         }
 

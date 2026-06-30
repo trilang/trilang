@@ -1,4 +1,6 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -25,11 +27,19 @@ public class CallExpression : IAccessExpression
         => transformer.TransformCall(this);
 
     public IExpression Clone()
-        => new CallExpression(SourceSpan, (IAccessExpression)Member.Clone(), Parameters.Select(x => x.Clone()).ToArray());
+        => new CallExpression(SourceSpan, (IAccessExpression)Member.Clone(), Parameters.Select(x => x.Clone()).ToArray())
+        {
+            SymbolTable = SymbolTable,
+            MetadataProvider = MetadataProvider,
+        };
 
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public IAccessExpression Member { get; }
 

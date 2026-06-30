@@ -1,4 +1,6 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -32,11 +34,19 @@ public class IsExpression : IExpression
         => transformer.TransformIsExpression(this);
 
     public IExpression Clone()
-        => new IsExpression(SourceSpan, Expression.Clone(), Type.Clone(), builtInTypes);
+        => new IsExpression(SourceSpan, Expression.Clone(), Type.Clone(), builtInTypes)
+        {
+            SymbolTable = SymbolTable,
+            MetadataProvider = MetadataProvider,
+        };
 
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public IExpression Expression { get; }
 

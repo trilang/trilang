@@ -1,4 +1,5 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Providers;
 using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
@@ -34,6 +35,10 @@ public class ConstructorDeclaration : ISemanticNode
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public AccessModifier AccessModifier { get; }
 

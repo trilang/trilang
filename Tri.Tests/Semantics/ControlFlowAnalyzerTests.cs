@@ -26,7 +26,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -40,9 +40,9 @@ public class ControlFlowAnalyzerTests
         ]);
         var expected = new ControlFlowGraph(entry, entry);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -65,7 +65,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -89,9 +89,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -116,7 +116,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -146,9 +146,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -173,7 +173,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -201,9 +201,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -226,7 +226,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -252,9 +252,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -279,7 +279,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -311,9 +311,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -336,7 +336,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -359,9 +359,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -386,7 +386,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -417,9 +417,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -442,7 +442,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -465,9 +465,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, endBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -492,7 +492,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -523,9 +523,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, outerEndBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -550,7 +550,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -579,9 +579,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, loopendBlock);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 
@@ -610,7 +610,7 @@ public class ControlFlowAnalyzerTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (_, _, graphs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(
                 new HashSet<string>(),
@@ -640,9 +640,9 @@ public class ControlFlowAnalyzerTests
 
         var expected = new ControlFlowGraph(entry, end0Block);
 
-        Assert.That(graphs.Functions, Has.Count.EqualTo(1));
+        Assert.That(semanticAnalysisResult.ControlFlowGraphs.Functions, Has.Count.EqualTo(1));
         Assert.That(
-            graphs.Functions.First().Value,
+            semanticAnalysisResult.ControlFlowGraphs.Functions.First().Value,
             Is.EqualTo(expected).Using(ControlFlowGraphComparer.Instance));
     }
 }

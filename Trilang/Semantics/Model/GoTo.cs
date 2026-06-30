@@ -1,3 +1,6 @@
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
+
 namespace Trilang.Semantics.Model;
 
 public class GoTo : IStatement
@@ -17,6 +20,10 @@ public class GoTo : IStatement
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan => null;
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public string Label { get; }
 }

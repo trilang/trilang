@@ -1,5 +1,6 @@
 namespace Trilang.Semantics.Model;
 
+// TODO: remove unnecessary methods
 public interface IBlock
 {
     void Add(IStatement declaration);

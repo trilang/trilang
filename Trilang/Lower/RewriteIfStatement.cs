@@ -47,12 +47,20 @@ internal class RewriteIfStatement : Visitor
         if (thenBlock.Statements is not [GoTo])
         {
             generateThenBlock = true;
-            thenBlock.Insert(0, new Label(thenBlockName));
+            thenBlock.Insert(0, new Label(thenBlockName)
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            });
 
             if (thenBlock.Statements[^1] is not GoTo)
             {
                 generateEndBlock = true;
-                thenBlock.Add(new GoTo(endBlockName));
+                thenBlock.Add(new GoTo(endBlockName)
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                });
             }
         }
 
@@ -61,12 +69,20 @@ internal class RewriteIfStatement : Visitor
             if (elseBlock.Statements is not [GoTo])
             {
                 generateElseBlock = true;
-                elseBlock.Insert(0, new Label(elseBlockName));
+                elseBlock.Insert(0, new Label(elseBlockName)
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                });
 
                 if (elseBlock.Statements[^1] is not GoTo)
                 {
                     generateEndBlock = true;
-                    elseBlock.Add(new GoTo(endBlockName));
+                    elseBlock.Add(new GoTo(endBlockName)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    });
                 }
             }
         }
@@ -74,16 +90,52 @@ internal class RewriteIfStatement : Visitor
         {
             elseBlock = new BlockStatement(null, [
                 new GoTo(endBlockName)
-            ]);
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                }
+            ])
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            };
             generateEndBlock = true;
         }
 
         var newIf = new IfStatement(
             null,
             node.Condition,
-            generateThenBlock ? new BlockStatement(null, [new GoTo(thenBlockName)]) : thenBlock,
-            generateElseBlock ? new BlockStatement(null, [new GoTo(elseBlockName)]) : elseBlock
-        );
+            generateThenBlock
+                ? new BlockStatement(null, [
+                    new GoTo(thenBlockName)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    }
+                ])
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                }
+                : thenBlock,
+            generateElseBlock
+                ? new BlockStatement(null, [
+                    new GoTo(elseBlockName)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    }
+                ])
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                }
+                : elseBlock
+        )
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
         parentBlock.Replace(node, newIf);
 
         if (generateEndBlock)

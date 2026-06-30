@@ -45,9 +45,9 @@ public class Compiler
 
             Parse(diagnostics, project);
 
-            var (_, metadataProviderMap, controlFlowGraphs) = SemanticAnalysis(project, diagnostics, compilationContext, options);
+            var semanticAnalysisResult = SemanticAnalysis(project, diagnostics, compilationContext, options);
 
-            Lower(diagnostics, compilationContext, project, controlFlowGraphs, metadataProviderMap, options);
+            Lower(diagnostics, compilationContext, project, semanticAnalysisResult.ControlFlowGraphs, options);
 
             functions.AddRange(GenerateIr(diagnostics, compilationContext, project, options));
 
@@ -136,10 +136,9 @@ public class Compiler
         CompilationContext compilationContext,
         Project project,
         ControlFlowGraphMap controlFlowGraphs,
-        MetadataProviderMap metadataProviderMap,
         CompilerOptions options)
     {
-        var lowering = new Lowering(diagnostics, compilationContext.BuiltInTypes, metadataProviderMap);
+        var lowering = new Lowering(diagnostics, compilationContext.BuiltInTypes);
         foreach (var compilationUnit in project.SourceFiles)
             compilationUnit.SemanticTree = lowering.Lower(
                 compilationUnit.SemanticTree!,

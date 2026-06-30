@@ -1,3 +1,6 @@
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
+
 namespace Trilang.Semantics.Model;
 
 public interface ISemanticNode
@@ -11,4 +14,8 @@ public interface ISemanticNode
     ISemanticNode? Parent { get; set; }
 
     SourceSpan? SourceSpan { get; }
+
+    SymbolTable? SymbolTable { get; }
+
+    IMetadataProvider? MetadataProvider { get; }
 }

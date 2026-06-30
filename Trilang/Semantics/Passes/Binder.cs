@@ -14,33 +14,21 @@ internal class Binder : ISemanticPass
 {
     private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly SymbolTableMap symbolTableMap;
-    private readonly MetadataProviderMap metadataProviderMap;
     private readonly CompilationContext compilationContext;
 
     public Binder(
         ISet<string> directives,
         DiagnosticCollection diagnostics,
-        SymbolTableMap symbolTableMap,
-        MetadataProviderMap metadataProviderMap,
         CompilationContext compilationContext)
     {
         this.directives = directives;
         this.diagnostics = diagnostics.ForSemantic();
-        this.symbolTableMap = symbolTableMap;
-        this.metadataProviderMap = metadataProviderMap;
         this.compilationContext = compilationContext;
     }
 
     public void Analyze(Project project)
     {
-        var transformer = new BinderTransformer(
-            directives,
-            diagnostics,
-            symbolTableMap,
-            metadataProviderMap,
-            compilationContext);
-
+        var transformer = new BinderTransformer(directives, diagnostics, compilationContext);
         foreach (var sourceFile in project.SourceFiles)
             sourceFile.SemanticTree = (SemanticTree)sourceFile.SemanticTree!.Transform(transformer);
     }
@@ -52,14 +40,13 @@ internal class Binder : ISemanticPass
         nameof(CompoundAssignmentTargetValidation),
         nameof(CyclicAlias),
         nameof(MetadataGenerator),
+        nameof(SymbolFinder),
         nameof(VariableDuplicate),
     ];
 
     private sealed class BinderTransformer : Transformer
     {
         private readonly SemanticDiagnosticReporter diagnostics;
-        private readonly SymbolTableMap symbolTableMap;
-        private readonly MetadataProviderMap metadataProviderMap;
         private readonly CompilationContext compilationContext;
         private readonly TypeMatcher typeMatcher;
         private readonly UnaryTypeMatcher unaryTypeMatcher;
@@ -69,15 +56,12 @@ internal class Binder : ISemanticPass
         public BinderTransformer(
             ISet<string> directives,
             SemanticDiagnosticReporter diagnostics,
-            SymbolTableMap symbolTableMap,
-            MetadataProviderMap metadataProviderMap,
             CompilationContext compilationContext)
             : base(directives, compilationContext.BuiltInTypes)
         {
             this.diagnostics = diagnostics;
-            this.symbolTableMap = symbolTableMap;
-            this.metadataProviderMap = metadataProviderMap;
             this.compilationContext = compilationContext;
+
             typeMatcher = new TypeMatcher(builtInTypes);
             unaryTypeMatcher = new UnaryTypeMatcher(typeMatcher);
             binaryTypeMatcher = new BinaryTypeMatcher(typeMatcher);
@@ -140,8 +124,12 @@ internal class Binder : ISemanticPass
                 {
                     parameters[conversion.Position] = new CastExpression(
                         null,
-                        GetInlineType(conversion.Target),
-                        parameters[conversion.Position]);
+                        GetInlineType(node, conversion.Target),
+                        parameters[conversion.Position])
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    };
 
                     isChanged = true;
                 }
@@ -227,7 +215,7 @@ internal class Binder : ISemanticPass
                 ResolveSingle(expression);
         }
 
-        private IInlineType GetInlineType(ITypeMetadata type)
+        private IInlineType GetInlineType(ISemanticNode node, ITypeMetadata type)
         {
             if (type is AliasMetadata aliasMetadata)
             {
@@ -235,28 +223,48 @@ internal class Binder : ISemanticPass
 
                 return aliasMetadata.IsGeneric
                     ? throw new InvalidOperationException("Cannot get inline type of generic alias")
-                    : new TypeRef(null, package, parts);
+                    : new TypeRef(null, package, parts)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    };
             }
 
             if (type is ArrayMetadata arrayMetadata)
-                return new ArrayType(null, GetInlineType(arrayMetadata.ItemMetadata!));
+                return new ArrayType(null, GetInlineType(node, arrayMetadata.ItemMetadata!))
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
 
             if (type is DiscriminatedUnionMetadata discriminatedUnionMetadata)
                 return new DiscriminatedUnion(
                     null,
-                    discriminatedUnionMetadata.Types.Select(GetInlineType).ToArray());
+                    discriminatedUnionMetadata.Types.Select(x => GetInlineType(node, x)).ToArray())
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
 
             if (type is FunctionTypeMetadata functionTypeMetadata)
                 return new FunctionType(
                     null,
-                    functionTypeMetadata.ParameterTypes.Select(GetInlineType).ToArray(),
-                    GetInlineType(functionTypeMetadata.ReturnType));
+                    functionTypeMetadata.ParameterTypes.Select(x => GetInlineType(node, x)).ToArray(),
+                    GetInlineType(node, functionTypeMetadata.ReturnType))
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
 
             if (type is GenericApplicationMetadata genericApplicationMetadata)
                 return new GenericApplication(
                     null,
-                    (TypeRef)GetInlineType(genericApplicationMetadata.OpenGeneric),
-                    genericApplicationMetadata.Arguments.Select(GetInlineType).ToArray());
+                    (TypeRef)GetInlineType(node, genericApplicationMetadata.OpenGeneric),
+                    genericApplicationMetadata.Arguments.Select(x => GetInlineType(node, x)).ToArray())
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
 
             if (type is InterfaceMetadata interfaceMetadata)
                 return new Interface(
@@ -265,26 +273,50 @@ internal class Binder : ISemanticPass
                         .Select(x => new InterfaceProperty(
                             null,
                             x.Name,
-                            GetInlineType(x.Type),
+                            GetInlineType(node, x.Type),
                             x.GetterModifier.ToSemanticModel(),
-                            x.SetterModifier.ToSemanticModel()))
+                            x.SetterModifier.ToSemanticModel())
+                        {
+                            SymbolTable = node.SymbolTable,
+                            MetadataProvider = node.MetadataProvider,
+                        })
                         .ToArray(),
                     interfaceMetadata.Methods
                         .Select(x => new InterfaceMethod(
                             null,
                             x.Name,
-                            x.Type.ParameterTypes.Select(GetInlineType).ToArray(),
-                            GetInlineType(x.Type.ReturnType)))
-                        .ToArray());
+                            x.Type.ParameterTypes.Select(x => GetInlineType(node, x)).ToArray(),
+                            GetInlineType(node, x.Type.ReturnType))
+                        {
+                            SymbolTable = node.SymbolTable,
+                            MetadataProvider = node.MetadataProvider,
+                        })
+                        .ToArray())
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
 
             if (type is PointerMetadata pointerMetadata)
-                return new PointerType(null, GetInlineType(pointerMetadata.Type));
+                return new PointerType(null, GetInlineType(node, pointerMetadata.Type))
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
 
             if (type is TupleMetadata tupleMetadata)
-                return new TupleType(null, tupleMetadata.Types.Select(GetInlineType).ToArray());
+                return new TupleType(null, tupleMetadata.Types.Select(x => GetInlineType(node, x)).ToArray())
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
 
             if (type is TypeArgumentMetadata typeArgumentMetadata)
-                return new TypeRef(null, null, [typeArgumentMetadata.Name]);
+                return new TypeRef(null, null, [typeArgumentMetadata.Name])
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
 
             if (type is TypeMetadata typeMetadata)
             {
@@ -292,7 +324,11 @@ internal class Binder : ISemanticPass
 
                 return typeMetadata.IsGeneric
                     ? throw new InvalidOperationException("Cannot get inline type of generic type")
-                    : new TypeRef(null, package, parts);
+                    : new TypeRef(null, package, parts)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    };
             }
 
             throw new ArgumentOutOfRangeException(nameof(type));
@@ -336,7 +372,7 @@ internal class Binder : ISemanticPass
             }
             else if (node.Member.Reference is TypeMetadata type)
             {
-                var provider = metadataProviderMap.Get(node);
+                var provider = node.MetadataProvider!;
                 var factory = new MetadataFactory(builtInTypes, diagnostics, provider);
                 var array = factory.CreateArrayMetadata(node.GetLocation(), type);
                 var pointer = factory.CreatePointer(null, array);
@@ -397,12 +433,20 @@ internal class Binder : ISemanticPass
             {
                 if (binaryImplicitConversion.Left is not null)
                 {
-                    left = new CastExpression(null, GetInlineType(binaryImplicitConversion.Left), left);
+                    left = new CastExpression(null, GetInlineType(node, binaryImplicitConversion.Left), left)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    };
                     node.ReturnTypeMetadata = binaryImplicitConversion.Left;
                 }
                 else if (binaryImplicitConversion.Right is not null)
                 {
-                    right = new CastExpression(null, GetInlineType(binaryImplicitConversion.Right), right);
+                    right = new CastExpression(null, GetInlineType(node, binaryImplicitConversion.Right), right)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    };
                     node.ReturnTypeMetadata = binaryImplicitConversion.Right;
                 }
             }
@@ -413,6 +457,8 @@ internal class Binder : ISemanticPass
             return new BinaryExpression(node.SourceSpan, node.Kind, left, right)
             {
                 ReturnTypeMetadata = node.ReturnTypeMetadata,
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
             };
         }
 
@@ -460,7 +506,11 @@ internal class Binder : ISemanticPass
             if (member == node.Member && !isChanged)
                 return node;
 
-            return new CallExpression(node.SourceSpan, member, parameters);
+            return new CallExpression(node.SourceSpan, member, parameters)
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            };
         }
 
         private static IFunctionMetadata? TryResolveSingleFunction(AggregateMetadata aggregate)
@@ -516,7 +566,7 @@ internal class Binder : ISemanticPass
             if (result.IsInvalid)
                 return node;
 
-            var provider = metadataProviderMap.Get(node);
+            var provider = node.MetadataProvider!;
             var factory = new MetadataFactory(builtInTypes, diagnostics, provider);
             var genericApplication = factory.CreateGenericApplication(
                 node.GetLocation(),
@@ -604,9 +654,7 @@ internal class Binder : ISemanticPass
 
         private void VisitFirstMemberAccess(MemberAccessExpression node)
         {
-            var metadataProvider = metadataProviderMap.Get(node);
-            var symbolTable = symbolTableMap.Get(node);
-            var symbols = symbolTable.GetId(node.Name);
+            var symbols = node.SymbolTable!.GetId(node.Name);
             if (symbols is not [])
             {
                 node.Reference = new AggregateMetadata(symbols.Select(x => x.Metadata!));
@@ -614,6 +662,7 @@ internal class Binder : ISemanticPass
             }
 
             // static access
+            var metadataProvider = node.MetadataProvider!;
             var function = metadataProvider.FindFunctions(node.Name);
             var types = metadataProvider.QueryTypes(new ByName(node.Name));
             var openGenerics = metadataProvider.QueryTypes(new GetOpenGeneric(node.Name));
@@ -675,6 +724,8 @@ internal class Binder : ISemanticPass
             {
                 AccessKind = node.AccessKind,
                 Reference = node.Reference,
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
             };
         }
 
@@ -698,7 +749,7 @@ internal class Binder : ISemanticPass
                     return node;
                 }
 
-                var provider = metadataProviderMap.Get(node);
+                var provider = node.MetadataProvider!;
                 var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
                 var pointer = metadataFactory.CreatePointer(null, ctor.Type.ReturnType);
                 node.ReturnTypeMetadata = pointer;
@@ -796,7 +847,7 @@ internal class Binder : ISemanticPass
             foreach (var expression in node.Expressions)
                 ResolveSingle(expression);
 
-            var metadataProvider = metadataProviderMap.Get(node);
+            var metadataProvider = node.MetadataProvider!;
             var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
 
             // we can't generate metadata for this tuple in GenerateMetadata
@@ -836,7 +887,7 @@ internal class Binder : ISemanticPass
             }
             else if (node.Kind == AddressOf)
             {
-                var provider = metadataProviderMap.Get(node);
+                var provider = node.MetadataProvider!;
                 var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, provider);
                 var pointer = metadataFactory.CreatePointer(null, node.Operand.ReturnTypeMetadata!);
                 node.ReturnTypeMetadata = pointer;
@@ -861,9 +912,17 @@ internal class Binder : ISemanticPass
 
             var result = typeMatcher.Match(expression.ReturnTypeMetadata, type.Metadata);
             if (result is FailedMatch)
+            {
                 diagnostics.TypeMismatch(expression, type.Metadata, expression.ReturnTypeMetadata);
+            }
             else if (result is ImplicitConversion implicitConversion)
-                expression = new CastExpression(null, GetInlineType(implicitConversion.Target), expression);
+            {
+                expression = new CastExpression(null, GetInlineType(node, implicitConversion.Target), expression)
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
+            }
 
             if (type == node.Type && expression == node.Expression)
                 return node;
@@ -871,6 +930,8 @@ internal class Binder : ISemanticPass
             return new VariableDeclaration(node.SourceSpan, node.Name, type, expression)
             {
                 Metadata = node.Metadata,
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
             };
         }
 

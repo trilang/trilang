@@ -1,4 +1,6 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -33,11 +35,17 @@ public class InterfaceProperty : ISemanticNode
         => new InterfaceProperty(SourceSpan, Name, Type.Clone(), GetterModifier, SetterModifier)
         {
             Metadata = Metadata,
+            SymbolTable = SymbolTable,
+            MetadataProvider = MetadataProvider,
         };
 
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public string Name { get; }
 

@@ -3,7 +3,6 @@ using Trilang.Semantics.Model;
 
 namespace Trilang.Semantics;
 
-// TODO: fix symbol table!!!
 // TODO: create a full copy?
 internal abstract class Transformer : ITransformer<ISemanticNode>
 {
@@ -40,6 +39,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new AliasDeclaration(node.SourceSpan, node.AccessModifier, node.Name, genericArguments, type)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -53,6 +54,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new ArrayAccessExpression(node.SourceSpan, member, index)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
             Reference = node.Reference,
         };
@@ -66,6 +69,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new ArrayType(node.SourceSpan, inlineType)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -79,6 +84,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new BinaryExpression(node.SourceSpan, node.Kind, left, right)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -89,7 +96,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (!isChanged)
             return node;
 
-        return new BlockStatement(node.SourceSpan, statements);
+        return new BlockStatement(node.SourceSpan, statements)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformBreak(Break node)
@@ -102,7 +113,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (member == node.Member && !isChanged)
             return node;
 
-        return new CallExpression(node.SourceSpan, member, parameters);
+        return new CallExpression(node.SourceSpan, member, parameters)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformCast(CastExpression node)
@@ -112,7 +127,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (type == node.Type && expression == node.Expression)
             return node;
 
-        return new CastExpression(node.SourceSpan, type, expression);
+        return new CastExpression(node.SourceSpan, type, expression)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformConstructor(ConstructorDeclaration node)
@@ -124,6 +143,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new ConstructorDeclaration(node.SourceSpan, node.AccessModifier, parameters, body)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
             ThisSymbol = node.ThisSymbol,
         };
@@ -140,6 +161,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new DiscriminatedUnion(node.SourceSpan, types)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -150,7 +173,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (!isChanged)
             return node;
 
-        return new ExpressionBlock(statements);
+        return new ExpressionBlock(statements)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformExpressionStatement(ExpressionStatement node)
@@ -159,7 +186,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (expression == node.Expression)
             return node;
 
-        return new ExpressionStatement(node.SourceSpan, expression);
+        return new ExpressionStatement(node.SourceSpan, expression)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformFakeDeclaration(FakeDeclaration node)
@@ -184,6 +215,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new FunctionDeclaration(node.SourceSpan, node.AccessModifier, node.Name, parameters, returnType, body)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -197,6 +230,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new FunctionType(node.SourceSpan, parameters, returnType)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -210,6 +245,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new GenericApplication(node.SourceSpan, type, genericArguments)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -221,7 +258,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (member == node.Member && !isChanged)
             return node;
 
-        return new GenericExpression(node.SourceSpan, member, genericArguments);
+        return new GenericExpression(node.SourceSpan, member, genericArguments)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformGoTo(GoTo node)
@@ -235,7 +276,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (!isThenChanged && !isElseChanged)
             return node;
 
-        return new IfDirective(node.SourceSpan, node.DirectiveName, thenStatements, elseStatements);
+        return new IfDirective(node.SourceSpan, node.DirectiveName, thenStatements, elseStatements)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformIf(IfStatement node)
@@ -246,7 +291,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (condition == node.Condition && then == node.Then && @else == node.Else)
             return node;
 
-        return new IfStatement(node.SourceSpan, condition, then, @else);
+        return new IfStatement(node.SourceSpan, condition, then, @else)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformInterface(Interface node)
@@ -258,6 +307,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new Interface(node.SourceSpan, properties, methods)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -270,6 +321,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new InterfaceProperty(node.SourceSpan, node.Name, type, node.GetterModifier, node.SetterModifier)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -283,6 +336,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new InterfaceMethod(node.SourceSpan, node.Name, parameters, returnType)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -294,7 +349,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (expression == node.Expression && type == node.Type)
             return node;
 
-        return new IsExpression(node.SourceSpan, expression, type, builtInTypes);
+        return new IsExpression(node.SourceSpan, expression, type, builtInTypes)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformLabel(Label node)
@@ -311,6 +370,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new MemberAccessExpression(node.SourceSpan, member, node.Name)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             AccessKind = node.AccessKind,
             Reference = node.Reference,
         };
@@ -326,6 +387,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new MethodDeclaration(node.SourceSpan, node.AccessModifier, node.IsStatic, node.Name, parameters, returnType, body)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
             Symbol = node.Symbol,
             ThisSymbol = node.ThisSymbol,
@@ -343,6 +406,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new NewObjectExpression(node.SourceSpan, member)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
             Metadata = node.Metadata,
         };
@@ -359,6 +424,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new Parameter(node.SourceSpan, node.Name, type)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
             Symbol = node.Symbol,
         };
@@ -372,6 +439,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new PointerType(node.SourceSpan, type)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -386,6 +455,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new PropertyDeclaration(node.SourceSpan, node.Name, type, getter, setter)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
             Symbol = node.Symbol,
         };
@@ -399,6 +470,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new PropertyGetter(node.SourceSpan, node.AccessModifier, body)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
             FieldSymbol = node.FieldSymbol,
         };
@@ -412,6 +485,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new PropertySetter(node.SourceSpan, node.AccessModifier, body)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
             FieldSymbol = node.FieldSymbol,
             ValueSymbol = node.ValueSymbol,
@@ -424,7 +499,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (expression == node.Expression)
             return node;
 
-        return new ReturnStatement(node.SourceSpan, expression);
+        return new ReturnStatement(node.SourceSpan, expression)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformTree(SemanticTree node)
@@ -435,7 +514,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (node.Namespace == ns && !isUsesChanged && !isDeclarationsChanged)
             return node;
 
-        return new SemanticTree(node.SourceFile, node.SourceSpan, ns, uses, declarations);
+        return new SemanticTree(node.SourceFile, node.SourceSpan, ns, uses, declarations)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
     }
 
     public virtual ISemanticNode TransformTuple(TupleExpression node)
@@ -446,6 +529,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new TupleExpression(node.SourceSpan, expressions)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -458,6 +543,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new TupleType(node.SourceSpan, types)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -474,6 +561,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new TypeDeclaration(node.SourceSpan, node.AccessModifier, node.Name, genericArguments, interfaces, properties, constructors, methods)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
         };
     }
@@ -489,6 +578,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new UnaryExpression(node.SourceSpan, node.Kind, operand)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             ReturnTypeMetadata = node.ReturnTypeMetadata,
         };
     }
@@ -505,6 +596,8 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
 
         return new VariableDeclaration(node.SourceSpan, node.Name, type, expression)
         {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
             Metadata = node.Metadata,
             Symbol = node.Symbol,
         };
@@ -517,7 +610,11 @@ internal abstract class Transformer : ITransformer<ISemanticNode>
         if (condition == node.Condition && body == node.Body)
             return node;
 
-        var loop = new While(node.SourceSpan, condition, body);
+        var loop = new While(node.SourceSpan, condition, body)
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
         var breakNodes = body.Where<Break>();
         foreach (var breakNode in breakNodes)
             if (breakNode.LoopNode == node)

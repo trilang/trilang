@@ -11,16 +11,8 @@ public class SemanticAnalyzer
 {
     public SemanticAnalysisResult Analyze(Project project, SemanticAnalysisOptions options)
     {
-        var symbolTableMap = new SymbolTableMap();
-        var metadataProviderMap = new MetadataProviderMap();
         var controlFlowGraphMap = new ControlFlowGraphMap();
-        var semanticPasses = CreateSemanticPasses(
-            options,
-            symbolTableMap,
-            metadataProviderMap,
-            controlFlowGraphMap,
-            options.CompilationContext);
-
+        var semanticPasses = CreateSemanticPasses(options, controlFlowGraphMap, options.CompilationContext);
         var converter = new ConvertToSemanticTree(options.CompilationContext.BuiltInTypes);
         foreach (var sourceFile in project.SourceFiles)
             sourceFile.SemanticTree = (SemanticTree)sourceFile.SyntaxTree!.Transform(converter);
@@ -28,24 +20,17 @@ public class SemanticAnalyzer
         foreach (var pass in semanticPasses)
             pass.Analyze(project);
 
-        return new SemanticAnalysisResult(symbolTableMap, metadataProviderMap, controlFlowGraphMap);
+        return new SemanticAnalysisResult(controlFlowGraphMap);
     }
 
     private List<ISemanticPass> CreateSemanticPasses(
         SemanticAnalysisOptions options,
-        SymbolTableMap symbolTableMap,
-        MetadataProviderMap metadataProviderMap,
         ControlFlowGraphMap controlFlowGraphMap,
         CompilationContext compilationContext)
     {
         var semanticPasses = new ISemanticPass[]
         {
-            new Binder(
-                options.Directives,
-                options.Diagnostics,
-                symbolTableMap,
-                metadataProviderMap,
-                compilationContext),
+            new Binder(options.Directives, options.Diagnostics, compilationContext),
             new BreakContinueWithinLoop(options.Directives, options.Diagnostics),
             new CheckAccessModifiers(options.Directives, options.Diagnostics),
             new CheckStaticAndInstanceMembersAccess(options.Directives, options.Diagnostics),
@@ -53,21 +38,17 @@ public class SemanticAnalyzer
             new CyclicAlias(options.Diagnostics, compilationContext),
             new ControlFlowAnalyzer(options.Directives, controlFlowGraphMap),
             new MemberAccessKindAnalyser(options.Directives),
-            new MetadataGenerator(
-                options.Directives,
-                options.Diagnostics,
-                metadataProviderMap,
-                compilationContext),
+            new MetadataGenerator(options.Directives, options.Diagnostics, compilationContext),
             new MissingReturnStatement(options.Diagnostics, controlFlowGraphMap, compilationContext),
             new NotImplementedInterface(options.Directives, options.Diagnostics),
             new PrivateInterfaceProperties(options.Diagnostics, compilationContext),
             new RestrictFieldAccess(options.Directives, options.Diagnostics),
-            new SymbolFinder(options.Directives, symbolTableMap),
+            new SymbolFinder(options.Directives),
             new ThisInStaticMethods(options.Directives, options.Diagnostics),
             new ThisOutsideOfType(options.Directives, options.Diagnostics),
             new UnresolvedMemberAccess(options.Directives, options.Diagnostics),
             new VariableDuplicate(options.Directives, options.Diagnostics),
-            new VariableUsedBeforeDeclared(options.Directives, options.Diagnostics, symbolTableMap),
+            new VariableUsedBeforeDeclared(options.Directives, options.Diagnostics),
         };
 
         return GetSortedPasses(semanticPasses);

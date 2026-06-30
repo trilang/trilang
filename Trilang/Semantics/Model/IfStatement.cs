@@ -1,3 +1,6 @@
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
+
 namespace Trilang.Semantics.Model;
 
 public class IfStatement : IStatement
@@ -30,6 +33,10 @@ public class IfStatement : IStatement
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public IExpression Condition { get; }
 

@@ -1,4 +1,6 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -31,11 +33,17 @@ public class GenericApplication : IInlineType
         => new GenericApplication(SourceSpan, Type, TypeArguments.Select(t => t.Clone()).ToArray())
         {
             Metadata = Metadata,
+            SymbolTable = SymbolTable,
+            MetadataProvider = MetadataProvider,
         };
 
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan { get; }
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public TypeRef Type { get; }
 

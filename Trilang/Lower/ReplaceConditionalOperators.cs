@@ -36,11 +36,15 @@ internal class ReplaceConditionalOperators : Transformer
                     new TypeRef(null, null, [builtInTypes.Bool.Name])
                     {
                         Metadata = builtInTypes.Bool,
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
                     },
                     left
                 )
                 {
                     Metadata = variableMetadata,
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
                 },
                 new IfStatement(
                     null,
@@ -48,6 +52,8 @@ internal class ReplaceConditionalOperators : Transformer
                     {
                         AccessKind = MemberAccessKind.Read,
                         Reference = variableMetadata,
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
                     },
                     new BlockStatement(null, [
                         new ExpressionStatement(
@@ -59,21 +65,49 @@ internal class ReplaceConditionalOperators : Transformer
                                 {
                                     AccessKind = MemberAccessKind.Write,
                                     Reference = variableMetadata,
+                                    SymbolTable = node.SymbolTable,
+                                    MetadataProvider = node.MetadataProvider,
                                 },
                                 right
                             )
+                            {
+                                SymbolTable = node.SymbolTable,
+                                MetadataProvider = node.MetadataProvider,
+                            }
                         )
+                        {
+                            SymbolTable = node.SymbolTable,
+                            MetadataProvider = node.MetadataProvider,
+                        }
                     ])
-                ),
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    }
+                )
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                },
                 new ExpressionStatement(
                     null,
                     new MemberAccessExpression(null, variableName)
                     {
                         AccessKind = MemberAccessKind.Read,
                         Reference = variableMetadata,
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
                     }
-                ),
-            ]);
+                )
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                },
+            ])
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            };
 
             return result;
         }
@@ -89,11 +123,15 @@ internal class ReplaceConditionalOperators : Transformer
                     new TypeRef(null, null, [builtInTypes.Bool.Name])
                     {
                         Metadata = builtInTypes.Bool,
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
                     },
                     left
                 )
                 {
                     Metadata = variableMetadata,
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
                 },
                 new IfStatement(
                     null,
@@ -104,10 +142,14 @@ internal class ReplaceConditionalOperators : Transformer
                         {
                             AccessKind = MemberAccessKind.Read,
                             Reference = variableMetadata,
+                            SymbolTable = node.SymbolTable,
+                            MetadataProvider = node.MetadataProvider,
                         }
                     )
                     {
                         ReturnTypeMetadata = builtInTypes.Bool,
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
                     },
                     new BlockStatement(null, [
                         new ExpressionStatement(
@@ -119,21 +161,49 @@ internal class ReplaceConditionalOperators : Transformer
                                 {
                                     AccessKind = MemberAccessKind.Write,
                                     Reference = variableMetadata,
+                                    SymbolTable = node.SymbolTable,
+                                    MetadataProvider = node.MetadataProvider,
                                 },
                                 right
                             )
+                            {
+                                SymbolTable = node.SymbolTable,
+                                MetadataProvider = node.MetadataProvider,
+                            }
                         )
+                        {
+                            SymbolTable = node.SymbolTable,
+                            MetadataProvider = node.MetadataProvider,
+                        }
                     ])
-                ),
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    }
+                )
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                },
                 new ExpressionStatement(
                     null,
                     new MemberAccessExpression(null, variableName)
                     {
                         AccessKind = MemberAccessKind.Read,
                         Reference = variableMetadata,
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
                     }
-                ),
-            ]);
+                )
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                },
+            ])
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            };
 
             return result;
         }
@@ -144,6 +214,8 @@ internal class ReplaceConditionalOperators : Transformer
         return new BinaryExpression(null, node.Kind, left, right)
         {
             ReturnTypeMetadata = node.ReturnTypeMetadata,
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
         };
     }
 

@@ -47,11 +47,15 @@ internal class ReplaceCompoundAssignments : Transformer
             right = new BinaryExpression(null, kind, read, right)
             {
                 ReturnTypeMetadata = node.ReturnTypeMetadata,
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
             };
 
             return new BinaryExpression(null, Assignment, write, right)
             {
                 ReturnTypeMetadata = node.ReturnTypeMetadata,
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
             };
         }
 
@@ -61,6 +65,8 @@ internal class ReplaceCompoundAssignments : Transformer
         return new BinaryExpression(null, node.Kind, left, right)
         {
             ReturnTypeMetadata = node.ReturnTypeMetadata,
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
         };
     }
 

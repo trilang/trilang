@@ -8,19 +8,16 @@ namespace Trilang.Lower;
 internal class ReplacePropertyFieldAndValueWithGeneratedField : Transformer
 {
     private readonly DiagnosticCollection diagnostics;
-    private readonly MetadataProviderMap metadataProviderMap;
     private FieldMetadata? currentField;
     private MethodMetadata? currentSetter;
 
     public ReplacePropertyFieldAndValueWithGeneratedField(
         ISet<string> directives,
         DiagnosticCollection diagnostics,
-        BuiltInTypes builtInTypes,
-        MetadataProviderMap metadataProviderMap)
+        BuiltInTypes builtInTypes)
         : base(directives, builtInTypes)
     {
         this.diagnostics = diagnostics;
-        this.metadataProviderMap = metadataProviderMap;
     }
 
     public override ISemanticNode TransformAlias(AliasDeclaration node)
@@ -63,19 +60,23 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : Transformer
 
         if (node.IsField)
         {
-            var metadataProvider = metadataProviderMap.Get(node);
+            var metadataProvider = node.MetadataProvider!;
             var metadataFactory = new MetadataFactory(builtInTypes, diagnostics.ForSemantic(), metadataProvider);
             var pointer = metadataFactory.CreatePointer(null, currentField!.DeclaringType);
             var thisMember = new MemberAccessExpression(null, MemberAccessExpression.This)
             {
                 Reference = new ParameterMetadata(null, MemberAccessExpression.This, pointer),
                 AccessKind = MemberAccessKind.Read,
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
             };
 
             return new MemberAccessExpression(null, thisMember, currentField.Name)
             {
                 Reference = currentField,
                 AccessKind = node.AccessKind,
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
             };
         }
 
@@ -87,6 +88,8 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : Transformer
             {
                 Reference = parameter,
                 AccessKind = node.AccessKind,
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
             };
         }
 
@@ -128,6 +131,8 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : Transformer
         return new PropertyDeclaration(node.SourceSpan, node.Name, node.Type, getter, setter)
         {
             Metadata = node.Metadata,
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
         };
     }
 
@@ -147,6 +152,8 @@ internal class ReplacePropertyFieldAndValueWithGeneratedField : Transformer
         return new PropertySetter(node.SourceSpan, node.AccessModifier, body)
         {
             Metadata = node.Metadata,
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
         };
     }
 

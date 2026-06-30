@@ -36,9 +36,15 @@ internal class ReplaceGettersAndSettersWithMethodCalls : Transformer
                     {
                         Reference = propertyMetadata.Setter,
                         AccessKind = MemberAccessKind.Read,
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
                     },
                     [right]
-                );
+                )
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                };
             }
 
             var name = $"<>_tmp_set{tempVariableCounter++}";
@@ -55,6 +61,8 @@ internal class ReplaceGettersAndSettersWithMethodCalls : Transformer
                     right)
                 {
                     Metadata = variableMetadata,
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
                 },
                 new ExpressionStatement(
                     null,
@@ -64,24 +72,42 @@ internal class ReplaceGettersAndSettersWithMethodCalls : Transformer
                         {
                             Reference = propertyMetadata.Setter,
                             AccessKind = MemberAccessKind.Read,
+                            SymbolTable = node.SymbolTable,
+                            MetadataProvider = node.MetadataProvider,
                         },
                         [
                             new MemberAccessExpression(null, name)
                             {
                                 Reference = variableMetadata,
                                 AccessKind = MemberAccessKind.Read,
+                                SymbolTable = node.SymbolTable,
+                                MetadataProvider = node.MetadataProvider,
                             }
                         ]
                     )
-                ),
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    }
+                )
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                },
                 new ExpressionStatement(
                     null,
                     new MemberAccessExpression(null, name)
                     {
                         Reference = variableMetadata,
                         AccessKind = MemberAccessKind.Read,
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
                     }
                 )
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                }
             ]);
         }
 
@@ -91,6 +117,8 @@ internal class ReplaceGettersAndSettersWithMethodCalls : Transformer
         return new BinaryExpression(null, node.Kind, left, right)
         {
             ReturnTypeMetadata = node.ReturnTypeMetadata,
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
         };
     }
 
@@ -132,9 +160,15 @@ internal class ReplaceGettersAndSettersWithMethodCalls : Transformer
                 {
                     Reference = propertyMetadata.Getter,
                     AccessKind = MemberAccessKind.Read,
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
                 },
                 []
-            );
+            )
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            };
         }
 
         if (ReferenceEquals(member, node.Member))
@@ -144,6 +178,8 @@ internal class ReplaceGettersAndSettersWithMethodCalls : Transformer
         {
             Reference = node.Reference,
             AccessKind = node.AccessKind,
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
         };
     }
 

@@ -57,13 +57,15 @@ public static class Helpers
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
 
         var semantic = new SemanticAnalyzer();
-        var (_, metadataProviderMap, cfgs) = semantic.Analyze(
+        var semanticAnalysisResult = semantic.Analyze(
             project,
             new SemanticAnalysisOptions(directivesSet, diagnostics, compilationContext));
 
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
-        var lowering = new Trilang.Lower.Lowering(diagnostics, compilationContext.BuiltInTypes, metadataProviderMap);
-        semanticTree = lowering.Lower(semanticTree, new LoweringOptions(directivesSet, cfgs));
+        var lowering = new Trilang.Lower.Lowering(diagnostics, compilationContext.BuiltInTypes);
+        semanticTree = lowering.Lower(
+            semanticTree,
+            new LoweringOptions(directivesSet, semanticAnalysisResult.ControlFlowGraphs));
 
         return (semanticTree, diagnostics, compilationContext);
     }

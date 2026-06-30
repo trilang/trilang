@@ -36,21 +36,57 @@ internal class ReplaceWhileLoop : Visitor
 
         var newBlock = new BlockStatement(null, [
             // this 'goto' statement is needed to handle transition from the previous block correctly
-            new GoTo(loopStart),
-            new Label(loopStart),
+            new GoTo(loopStart)
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            },
+            new Label(loopStart)
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            },
             new IfStatement(
                 null,
                 node.Condition,
                 new BlockStatement(null, [
                     ..node.Body.Statements,
-                    new GoTo(loopStart),
-                ]),
-                new BlockStatement(null, [
-                    new GoTo(loopEnd),
+                    new GoTo(loopStart)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    },
                 ])
-            ),
-            new Label(loopEnd),
-        ]);
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                },
+                new BlockStatement(null, [
+                    new GoTo(loopEnd)
+                    {
+                        SymbolTable = node.SymbolTable,
+                        MetadataProvider = node.MetadataProvider,
+                    },
+                ])
+                {
+                    SymbolTable = node.SymbolTable,
+                    MetadataProvider = node.MetadataProvider,
+                }
+            )
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            },
+            new Label(loopEnd)
+            {
+                SymbolTable = node.SymbolTable,
+                MetadataProvider = node.MetadataProvider,
+            },
+        ])
+        {
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
+        };
 
         var parentBlock = (BlockStatement)node.Parent!;
         parentBlock.Replace(node, newBlock);

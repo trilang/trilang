@@ -11,7 +11,6 @@ internal class MetadataGenerator : ISemanticPass
 {
     private readonly ISet<string> directives;
     private readonly SemanticDiagnosticReporter diagnostics;
-    private readonly MetadataProviderMap metadataProviderMap;
     private readonly CompilationContext compilationContext;
 
     private readonly HashSet<TypeDeclaration> typesToProcess;
@@ -22,12 +21,10 @@ internal class MetadataGenerator : ISemanticPass
     public MetadataGenerator(
         ISet<string> directives,
         DiagnosticCollection diagnostics,
-        MetadataProviderMap metadataProviderMap,
         CompilationContext compilationContext)
     {
         this.directives = directives;
         this.diagnostics = diagnostics.ForSemantic();
-        this.metadataProviderMap = metadataProviderMap;
         this.compilationContext = compilationContext;
 
         typesToProcess = [];
@@ -79,23 +76,19 @@ internal class MetadataGenerator : ISemanticPass
 
     private void CreateNamespaces(SemanticTree[] treesToAnalyze)
     {
-        var visitor = new NamespaceMetadataGenerator(
-            directives,
-            metadataProviderMap,
-            compilationContext);
-
         foreach (var tree in treesToAnalyze)
+        {
+            var @namespace = compilationContext.CurrentPackage!.Namespace.CreateChild(tree.Namespace.Parts);
+            var metadataProvider = new MetadataProvider(compilationContext, @namespace);
+            var visitor = new SetMetadataProvider(directives, metadataProvider);
+
             tree.Accept(visitor);
+        }
     }
 
     private void AddUses(SemanticTree[] treesToAnalyze)
     {
-        var addNamespaceUses = new AddNamespaceUses(
-            directives,
-            diagnostics,
-            metadataProviderMap,
-            compilationContext);
-
+        var addNamespaceUses = new AddNamespaceUses(directives, diagnostics, compilationContext);
         foreach (var tree in treesToAnalyze)
             tree.Accept(addNamespaceUses);
     }
@@ -141,17 +134,20 @@ internal class MetadataGenerator : ISemanticPass
 
             var node = (TypeDeclaration)symbol.Node;
             var metadata = new TypeMetadata(node.GetLocation(), node.Name);
+            var metadataProvider = node.MetadataProvider!;
 
             // create a new provider for generic
             if (node.IsGeneric)
-                metadataProviderMap.Add(
-                    node,
-                    new GenericMetadataProvider(metadataProviderMap.Get(node), metadata));
+            {
+                metadataProvider = new GenericMetadataProvider(metadataProvider, metadata);
+
+                var visitor = new SetMetadataProvider(directives, metadataProvider);
+                node.Accept(visitor);
+            }
 
             foreach (var genericArgument in node.GenericArguments)
                 metadata.AddGenericArgument(CreateTypeArgumentMetadata(metadata, genericArgument));
 
-            var metadataProvider = metadataProviderMap.Get(node);
             var query = Query.From(node);
             var result = metadataProvider.QueryTypes(query);
             if (result.IsSuccess || result.IsMultipleTypesFound)
@@ -178,7 +174,7 @@ internal class MetadataGenerator : ISemanticPass
         {
             var type = node.Metadata!;
             var root = node.GetRoot();
-            var metadataProvider = metadataProviderMap.Get(node);
+            var metadataProvider = node.MetadataProvider!;
             var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
 
             foreach (var @interface in node.Interfaces)
@@ -370,7 +366,7 @@ internal class MetadataGenerator : ISemanticPass
             var genericApplication = (GenericApplication)symbol.Node;
             ResolveInlineType(genericApplication);
 
-            var metadataProvider = metadataProviderMap.Get(genericApplication);
+            var metadataProvider = genericApplication.MetadataProvider!;
             var factory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
             var metadata = (GenericApplicationMetadata)factory.Create(genericApplication);
 
@@ -388,17 +384,20 @@ internal class MetadataGenerator : ISemanticPass
 
             var node = (AliasDeclaration)symbol.Node;
             var metadata = new AliasMetadata(node.GetLocation(), node.Name);
+            var metadataProvider = node.MetadataProvider!;
 
             // create a new provider for generic
             if (node.IsGeneric)
-                metadataProviderMap.Add(
-                    node,
-                    new GenericMetadataProvider(metadataProviderMap.Get(node), metadata));
+            {
+                metadataProvider = new GenericMetadataProvider(metadataProvider, metadata);
+
+                var visitor = new SetMetadataProvider(directives, metadataProvider);
+                node.Accept(visitor);
+            }
 
             foreach (var genericArgument in node.GenericArguments)
                 metadata.AddGenericArgument(CreateTypeArgumentMetadata(metadata, genericArgument));
 
-            var metadataProvider = metadataProviderMap.Get(node);
             var query = Query.From(node);
             var result = metadataProvider.QueryTypes(query);
             if (result.IsSuccess || result.IsMultipleTypesFound)
@@ -431,7 +430,7 @@ internal class MetadataGenerator : ISemanticPass
     {
         foreach (var function in functions)
         {
-            var metadataProvider = metadataProviderMap.Get(function);
+            var metadataProvider = function.MetadataProvider!;
             var metadata = new FunctionMetadata(
                 function.GetLocation(),
                 function.AccessModifier.ToMetadata(),
@@ -455,7 +454,7 @@ internal class MetadataGenerator : ISemanticPass
         {
             var root = function.GetRoot();
             var metadata = function.Metadata!;
-            var metadataProvider = metadataProviderMap.Get(function);
+            var metadataProvider = function.MetadataProvider!;
             var metadataFactory = new MetadataFactory(builtInTypes, diagnostics, metadataProvider);
 
             foreach (var functionParameter in function.Parameters)
@@ -488,7 +487,7 @@ internal class MetadataGenerator : ISemanticPass
         foreach (var function in functionsToProcess)
         {
             var metadata = function.Metadata!;
-            var metadataProvider = metadataProviderMap.Get(function);
+            var metadataProvider = function.MetadataProvider!;
             var functions = metadataProvider.FindFunctions(function.Name);
 
             // TODO: report all duplicates?
@@ -525,7 +524,7 @@ internal class MetadataGenerator : ISemanticPass
         ResolveInlineType(inlineType);
 
         var builtInTypes = compilationContext.BuiltInTypes;
-        var metadataProvider = metadataProviderMap.Get(inlineType);
+        var metadataProvider = inlineType.MetadataProvider!;
         var result = metadataProvider.QueryTypes(Query.From(inlineType));
         var metadata = default(ITypeMetadata);
 
@@ -584,7 +583,7 @@ internal class MetadataGenerator : ISemanticPass
                 if (argument.Metadata is null)
                     GetOrCreateType(argument);
 
-            var metadataProvider = metadataProviderMap.Get(genericApplication);
+            var metadataProvider = genericApplication.MetadataProvider!;
             var getOpenGeneric = new GetOpenGeneric(
                 genericApplication.Type.Name,
                 genericApplication.TypeArguments.Count);
@@ -747,58 +746,379 @@ internal class MetadataGenerator : ISemanticPass
         }
     }
 
-    private sealed class NamespaceMetadataGenerator : Visitor
+    private sealed class SetMetadataProvider : Visitor
     {
-        private readonly MetadataProviderMap map;
-        private readonly CompilationContext compilationContext;
+        private readonly IMetadataProvider metadataProvider;
 
-        public NamespaceMetadataGenerator(
-            ISet<string> directives,
-            MetadataProviderMap map,
-            CompilationContext compilationContext)
+        public SetMetadataProvider(ISet<string> directives, IMetadataProvider metadataProvider)
             : base(directives)
         {
-            this.map = map;
-            this.compilationContext = compilationContext;
+            this.metadataProvider = metadataProvider;
+        }
+
+        public override void VisitAlias(AliasDeclaration node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitAlias(node);
+        }
+
+        public override void VisitArrayAccess(ArrayAccessExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitArrayAccess(node);
+        }
+
+        public override void VisitArrayType(ArrayType node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitArrayType(node);
+        }
+
+        public override void VisitBinaryExpression(BinaryExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitBinaryExpression(node);
+        }
+
+        public override void VisitBlock(BlockStatement node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitBlock(node);
+        }
+
+        public override void VisitBreak(Break node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitBreak(node);
+        }
+
+        public override void VisitCall(CallExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitCall(node);
+        }
+
+        public override void VisitCast(CastExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitCast(node);
+        }
+
+        public override void VisitConstructor(ConstructorDeclaration node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitConstructor(node);
+        }
+
+        public override void VisitContinue(Continue node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitContinue(node);
+        }
+
+        public override void VisitDiscriminatedUnion(DiscriminatedUnion node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitDiscriminatedUnion(node);
+        }
+
+        public override void VisitExpressionBlock(ExpressionBlock node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitExpressionBlock(node);
+        }
+
+        public override void VisitExpressionStatement(ExpressionStatement node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitExpressionStatement(node);
+        }
+
+        public override void VisitFakeDeclaration(FakeDeclaration node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitFakeDeclaration(node);
+        }
+
+        public override void VisitFakeExpression(FakeExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitFakeExpression(node);
+        }
+
+        public override void VisitFakeStatement(FakeStatement node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitFakeStatement(node);
+        }
+
+        public override void VisitFakeType(FakeType node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitFakeType(node);
+        }
+
+        public override void VisitFunction(FunctionDeclaration node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitFunction(node);
+        }
+
+        public override void VisitFunctionType(FunctionType node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitFunctionType(node);
+        }
+
+        public override void VisitGenericType(GenericApplication node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitGenericType(node);
+        }
+
+        public override void VisitGenericExpression(GenericExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitGenericExpression(node);
+        }
+
+        public override void VisitGoTo(GoTo node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitGoTo(node);
+        }
+
+        public override void VisitIfDirective(IfDirective node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitIfDirective(node);
+        }
+
+        public override void VisitIf(IfStatement node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitIf(node);
+        }
+
+        public override void VisitInterface(Interface node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitInterface(node);
+        }
+
+        public override void VisitInterfaceProperty(InterfaceProperty node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitInterfaceProperty(node);
+        }
+
+        public override void VisitInterfaceMethod(InterfaceMethod node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitInterfaceMethod(node);
+        }
+
+        public override void VisitIsExpression(IsExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitIsExpression(node);
+        }
+
+        public override void VisitLabel(Label node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitLabel(node);
+        }
+
+        public override void VisitLiteral(LiteralExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitLiteral(node);
+        }
+
+        public override void VisitMemberAccess(MemberAccessExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitMemberAccess(node);
+        }
+
+        public override void VisitMethod(MethodDeclaration node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitMethod(node);
         }
 
         public override void VisitNamespace(Namespace node)
         {
-            var @namespace = compilationContext.CurrentPackage!.Namespace.CreateChild(node.Parts);
-
-            map.Add(node.Parent!, new MetadataProvider(compilationContext, @namespace));
+            node.MetadataProvider = metadataProvider;
 
             base.VisitNamespace(node);
         }
 
+        public override void VisitNewObject(NewObjectExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitNewObject(node);
+        }
+
+        public override void VisitNull(NullExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitNull(node);
+        }
+
+        public override void VisitParameter(Parameter node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitParameter(node);
+        }
+
+        public override void VisitPointer(PointerType node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitPointer(node);
+        }
+
+        public override void VisitProperty(PropertyDeclaration node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitProperty(node);
+        }
+
+        public override void VisitGetter(PropertyGetter node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitGetter(node);
+        }
+
+        public override void VisitSetter(PropertySetter node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitSetter(node);
+        }
+
+        public override void VisitReturn(ReturnStatement node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitReturn(node);
+        }
+
         public override void VisitTree(SemanticTree node)
         {
-            // at this point, we add this file is in a root namespace
-            var metadataProvider = new MetadataProvider(
-                compilationContext,
-                compilationContext.CurrentPackage!.Namespace);
-
-            map.Add(node, metadataProvider);
+            node.MetadataProvider = metadataProvider;
 
             base.VisitTree(node);
+        }
+
+        public override void VisitTuple(TupleExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitTuple(node);
+        }
+
+        public override void VisitTupleType(TupleType node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitTupleType(node);
+        }
+
+        public override void VisitType(TypeDeclaration node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitType(node);
+        }
+
+        public override void VisitTypeRef(TypeRef node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitTypeRef(node);
+        }
+
+        public override void VisitUnaryExpression(UnaryExpression node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitUnaryExpression(node);
+        }
+
+        public override void VisitUse(Use node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitUse(node);
+        }
+
+        public override void VisitVariable(VariableDeclaration node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitVariable(node);
+        }
+
+        public override void VisitWhile(While node)
+        {
+            node.MetadataProvider = metadataProvider;
+
+            base.VisitWhile(node);
         }
     }
 
     private sealed class AddNamespaceUses : Visitor
     {
         private readonly SemanticDiagnosticReporter diagnostics;
-        private readonly MetadataProviderMap map;
         private readonly CompilationContext compilationContext;
 
         public AddNamespaceUses(
             ISet<string> directives,
             SemanticDiagnosticReporter diagnostics,
-            MetadataProviderMap map,
             CompilationContext compilationContext)
             : base(directives)
         {
             this.diagnostics = diagnostics;
-            this.map = map;
             this.compilationContext = compilationContext;
         }
 
@@ -816,7 +1136,7 @@ internal class MetadataGenerator : ISemanticPass
             }
 
             // we know it always be MetadataProvider
-            var provider = (MetadataProvider)map.Get(node);
+            var provider = (MetadataProvider)node.MetadataProvider!;
             provider.AddUse(namespaceResult.Namespace);
 
             base.VisitUse(node);

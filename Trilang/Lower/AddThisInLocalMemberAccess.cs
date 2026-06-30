@@ -9,17 +9,14 @@ internal class AddThisInLocalMemberAccess : Visitor
 {
     private readonly DiagnosticCollection diagnostics;
     private readonly BuiltInTypes builtInTypes;
-    private readonly MetadataProviderMap metadataProviderMap;
 
     public AddThisInLocalMemberAccess(
         ISet<string> directives,
         DiagnosticCollection diagnostics,
-        BuiltInTypes builtInTypes,
-        MetadataProviderMap metadataProviderMap) : base(directives)
+        BuiltInTypes builtInTypes) : base(directives)
     {
         this.diagnostics = diagnostics;
         this.builtInTypes = builtInTypes;
-        this.metadataProviderMap = metadataProviderMap;
     }
 
     public override void VisitMemberAccess(MemberAccessExpression node)
@@ -36,7 +33,7 @@ internal class AddThisInLocalMemberAccess : Visitor
             return;
 
         var parent = node.FindInParent<TypeDeclaration>()!;
-        var metadataProvider = metadataProviderMap.Get(node);
+        var metadataProvider = node.MetadataProvider!;
         var metadataFactory = new MetadataFactory(builtInTypes, diagnostics.ForSemantic(), metadataProvider);
         var pointer = metadataFactory.CreatePointer(null, parent.Metadata!);
 
@@ -44,6 +41,8 @@ internal class AddThisInLocalMemberAccess : Visitor
         {
             Reference = new ParameterMetadata(null, MemberAccessExpression.This, pointer),
             AccessKind = MemberAccessKind.Read,
+            SymbolTable = node.SymbolTable,
+            MetadataProvider = node.MetadataProvider,
         };
     }
 }

@@ -1,4 +1,6 @@
 using Trilang.Metadata;
+using Trilang.Semantics.Providers;
+using Trilang.Symbols;
 
 namespace Trilang.Semantics.Model;
 
@@ -59,6 +61,10 @@ public class ExpressionBlock : IExpression, IBlock
     public ISemanticNode? Parent { get; set; }
 
     public SourceSpan? SourceSpan => null;
+
+    public SymbolTable? SymbolTable { get; set; }
+
+    public IMetadataProvider? MetadataProvider { get; set; }
 
     public IReadOnlyList<IStatement> Statements
         => statements;

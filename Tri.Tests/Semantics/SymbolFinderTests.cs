@@ -25,7 +25,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -34,7 +34,7 @@ public class SymbolFinderTests
         var a = function.Parameters[0];
         var b = function.Parameters[1];
 
-        var functionBodySymbolTable = map.Get(function.Body);
+        var functionBodySymbolTable = function.Body.SymbolTable!;
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(
             functionBodySymbolTable.Ids,
@@ -92,7 +92,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -102,7 +102,7 @@ public class SymbolFinderTests
         var a = variables[0];
         var b = variables[1];
 
-        var functionBodySymbolTable = map.Get(function.Body);
+        var functionBodySymbolTable = function.Body.SymbolTable!;
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(
             functionBodySymbolTable.Ids,
@@ -174,7 +174,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -182,7 +182,7 @@ public class SymbolFinderTests
         var ifStatement = semanticTree.Find<IfStatement>()!;
         var a = semanticTree.Find<VariableDeclaration>()!;
 
-        var thenSymbolTable = map.Get(ifStatement.Then);
+        var thenSymbolTable = ifStatement.Then.SymbolTable!;
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             thenSymbolTable.Ids,
@@ -210,7 +210,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -220,13 +220,13 @@ public class SymbolFinderTests
         var a = variables[0];
         var b = variables[1];
 
-        var thenSymbolTable = map.Get(ifStatement.Then);
+        var thenSymbolTable = ifStatement.Then.SymbolTable!;
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             thenSymbolTable.Ids,
             Contains.Item(new IdSymbol(a.Name)).Using(IdSymbolComparer.Instance));
 
-        var elseSymbolTable = map.Get(ifStatement.Else!);
+        var elseSymbolTable = ifStatement.Else!.SymbolTable!;
         Assert.That(elseSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             elseSymbolTable.Ids,
@@ -255,7 +255,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -267,19 +267,19 @@ public class SymbolFinderTests
         var a2 = variables[1];
         var a3 = variables[2];
 
-        var functionBodySymbolTable = map.Get(function.Body);
+        var functionBodySymbolTable = function.Body.SymbolTable!;
         Assert.That(functionBodySymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             functionBodySymbolTable.Ids,
             Contains.Item(new IdSymbol(a1.Name)).Using(IdSymbolComparer.Instance));
 
-        var thenSymbolTable = map.Get(ifStatement.Then);
+        var thenSymbolTable = ifStatement.Then.SymbolTable!;
         Assert.That(thenSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             thenSymbolTable.Ids,
             Contains.Item(new IdSymbol(a2.Name)).Using(IdSymbolComparer.Instance));
 
-        var elseSymbolTable = map.Get(ifStatement.Else!);
+        var elseSymbolTable = ifStatement.Else!.SymbolTable!;
         Assert.That(elseSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(
             elseSymbolTable.Ids,
@@ -334,7 +334,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -342,7 +342,7 @@ public class SymbolFinderTests
         var ctor = semanticTree.Find<ConstructorDeclaration>()!;
         var parameter = ctor.Parameters[0];
 
-        var ctorSymbolTable = map.Get(ctor.Body);
+        var ctorSymbolTable = ctor.Body.SymbolTable!;
         Assert.That(ctorSymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(ctorSymbolTable.Ids, Contains.Item(new IdSymbol("this")).Using(IdSymbolComparer.Instance));
         Assert.That(
@@ -367,7 +367,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -375,7 +375,7 @@ public class SymbolFinderTests
         var method = semanticTree.Find<MethodDeclaration>()!;
         var parameter = method.Parameters[0];
 
-        var methodSymbolTable = map.Get(method.Body);
+        var methodSymbolTable = method.Body.SymbolTable!;
         Assert.That(methodSymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(methodSymbolTable.Ids, Contains.Item(new IdSymbol("this")).Using(IdSymbolComparer.Instance));
         Assert.That(
@@ -440,13 +440,13 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var type = semanticTree.Find<TypeDeclaration>()!;
-        var typeSymbolTable = map.Get(type);
+        var typeSymbolTable = type.SymbolTable!;
         Assert.That(typeSymbolTable.Ids, Has.Count.EqualTo(4));
         Assert.That(
             typeSymbolTable.Ids,
@@ -487,7 +487,7 @@ public class SymbolFinderTests
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
         var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
         var semantic = new SemanticAnalyzer();
-        var (map, _, _) = semantic.Analyze(
+        semantic.Analyze(
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
@@ -495,14 +495,14 @@ public class SymbolFinderTests
         var getter = semanticTree.Find<PropertyGetter>();
         Assert.That(getter, Is.Not.Null);
 
-        var getterSymbolTable = map.Get(getter.Body!);
+        var getterSymbolTable = getter.Body!.SymbolTable!;
         Assert.That(getterSymbolTable.Ids, Has.Count.EqualTo(1));
         Assert.That(getterSymbolTable.Ids, Contains.Item(new IdSymbol("field")).Using(IdSymbolComparer.Instance));
 
         var setter = semanticTree.Find<PropertySetter>();
         Assert.That(setter, Is.Not.Null);
 
-        var setterSymbolTable = map.Get(setter.Body!);
+        var setterSymbolTable = setter.Body!.SymbolTable!;
         Assert.That(setterSymbolTable.Ids, Has.Count.EqualTo(2));
         Assert.That(setterSymbolTable.Ids, Contains.Item(new IdSymbol("field")).Using(IdSymbolComparer.Instance));
         Assert.That(setterSymbolTable.Ids, Contains.Item(new IdSymbol("value")).Using(IdSymbolComparer.Instance));

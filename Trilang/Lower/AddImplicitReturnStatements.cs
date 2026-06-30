@@ -32,7 +32,14 @@ internal class AddImplicitReturnStatements
                     continue;
 
                 if (block.Next.Count == 0)
-                    block.BlockNode.Add(new ReturnStatement(null));
+                {
+                    var returnStatement = new ReturnStatement(null)
+                    {
+                        SymbolTable = block.BlockNode.SymbolTable,
+                        MetadataProvider = block.BlockNode.MetadataProvider,
+                    };
+                    block.BlockNode.Add(returnStatement);
+                }
 
                 foreach (var next in block.Next)
                     q.Enqueue(next);
