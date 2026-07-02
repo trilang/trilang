@@ -27,9 +27,9 @@ public class ReplacePropertyFieldAndValueWithGeneratedFieldTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var exampleType = new TypeMetadata(null, "Example")
+        var exampleType = new TypeMetadata(null, AccessModifierMetadata.Public, "Example")
         {
             Namespace = test1Ns,
         };
@@ -93,9 +93,9 @@ public class ReplacePropertyFieldAndValueWithGeneratedFieldTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var exampleType = new TypeMetadata(null, "Example")
+        var exampleType = new TypeMetadata(null, AccessModifierMetadata.Public, "Example")
         {
             Namespace = test1Ns,
         };
@@ -178,9 +178,9 @@ public class ReplacePropertyFieldAndValueWithGeneratedFieldTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var exampleType = new TypeMetadata(null, "Example")
+        var exampleType = new TypeMetadata(null, AccessModifierMetadata.Public, "Example")
         {
             Namespace = test1Ns,
         };
@@ -283,9 +283,9 @@ public class ReplacePropertyFieldAndValueWithGeneratedFieldTests
 
         var builtInTypes = new BuiltInTypes();
         var expectedRootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var expectedPackageNs = NamespaceMetadata.CreateForPackage();
+        var expectedPackageNs = new PackageMetadata("test").Namespace;
         var expectedTest1Ns = expectedPackageNs.CreateChild(["Test1"]);
-        var expectedExampleType = new TypeMetadata(null, "Example")
+        var expectedExampleType = new TypeMetadata(null, AccessModifierMetadata.Public, "Example")
         {
             Namespace = expectedTest1Ns,
         };
@@ -363,9 +363,9 @@ public class ReplacePropertyFieldAndValueWithGeneratedFieldTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var exampleType = new TypeMetadata(null, "Example")
+        var exampleType = new TypeMetadata(null, AccessModifierMetadata.Public, "Example")
         {
             Namespace = test1Ns,
         };

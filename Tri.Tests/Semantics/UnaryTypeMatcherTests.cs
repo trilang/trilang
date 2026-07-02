@@ -489,7 +489,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false);
 
         var result = matcher.Match(UnaryMinus, alias);
 
@@ -502,7 +502,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyFloat", [], builtInTypes.F64, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyFloat", [], builtInTypes.F64, false);
 
         var result = matcher.Match(UnaryPlus, alias);
 
@@ -515,7 +515,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyBool", [], builtInTypes.Bool, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyBool", [], builtInTypes.Bool, false);
 
         var result = matcher.Match(LogicalNot, alias);
 
@@ -528,7 +528,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyInt", [], builtInTypes.I64, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyInt", [], builtInTypes.I64, false);
 
         var result = matcher.Match(BitwiseNot, alias);
 
@@ -541,7 +541,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyString", [], builtInTypes.String, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyString", [], builtInTypes.String, false);
 
         var result = matcher.Match(UnaryMinus, alias);
 
@@ -554,7 +554,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyString", [], builtInTypes.String, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyString", [], builtInTypes.String, false);
 
         var result = matcher.Match(UnaryPlus, alias);
 
@@ -567,7 +567,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyInt", [], builtInTypes.I32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyInt", [], builtInTypes.I32, false);
 
         var result = matcher.Match(LogicalNot, alias);
 
@@ -580,7 +580,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyFloat", [], builtInTypes.F32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyFloat", [], builtInTypes.F32, false);
 
         var result = matcher.Match(BitwiseNot, alias);
 
@@ -594,7 +594,7 @@ public class UnaryTypeMatcherTests
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
         var pointer = new PointerMetadata(null, builtInTypes.I32);
-        var alias = new AliasMetadata(null, "MyPointer", [], pointer, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyPointer", [], pointer, false);
 
         var result = matcher.Match(Dereference, alias);
 
@@ -607,7 +607,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var alias = new AliasMetadata(null, "MyType", [], builtInTypes.String, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyType", [], builtInTypes.String, false);
 
         var result = matcher.Match(AddressOf, alias);
 
@@ -620,7 +620,7 @@ public class UnaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new UnaryTypeMatcher(typeMatcher);
-        var invalidAlias = new AliasMetadata(null, "InvalidAlias", [], builtInTypes.I32, false);
+        var invalidAlias = new AliasMetadata(null, AccessModifierMetadata.Public, "InvalidAlias", [], builtInTypes.I32, false);
         invalidAlias.MarkAsInvalid();
 
         var result = matcher.Match(UnaryMinus, invalidAlias);

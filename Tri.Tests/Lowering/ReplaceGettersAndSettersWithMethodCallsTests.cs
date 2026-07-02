@@ -26,9 +26,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test");
+        var packageNs = package.Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var point = new TypeMetadata(null, "Point")
+        var point = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = test1Ns,
         };
@@ -159,9 +160,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test");
+        var packageNs = package.Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var pointType = new TypeMetadata(null, "Point")
+        var pointType = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = test1Ns,
         };
@@ -187,7 +189,7 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
         var xBackingField = new FieldMetadata(pointType, $"<>_{xProperty.Name}", xProperty.Type);
         pointType.AddField(xBackingField);
 
-        var testType = new TypeMetadata(null, "Test")
+        var testType = new TypeMetadata(null, AccessModifierMetadata.Public, "Test")
         {
             Namespace = test1Ns,
         };
@@ -364,9 +366,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test");
+        var packageNs = package.Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var point = new TypeMetadata(null, "Point")
+        var point = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = test1Ns,
         };
@@ -511,9 +514,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test");
+        var packageNs = package.Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var point = new TypeMetadata(null, "Point")
+        var point = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = test1Ns,
         };
@@ -693,10 +697,12 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test");
+        var packageNs = package.Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
         var point = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "Point",
             [],
             [],
@@ -874,9 +880,10 @@ public class ReplaceGettersAndSettersWithMethodCallsTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test");
+        var packageNs = package.Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var point = new TypeMetadata(null, "Point")
+        var point = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = test1Ns,
         };

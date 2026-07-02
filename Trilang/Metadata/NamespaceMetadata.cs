@@ -9,17 +9,18 @@ public class NamespaceMetadata : INamespaceMetadata
     private readonly List<FunctionMetadata> functions;
     private bool isFrozen;
 
-    private NamespaceMetadata(NamespaceMetadata? parent, string name)
+    private NamespaceMetadata(NamespaceMetadata? parent, string name, PackageMetadata package)
     {
         Parent = parent;
         Name = name;
+        Package = package;
         children = [];
         types = [];
         functions = [];
     }
 
-    public static NamespaceMetadata CreateForPackage()
-        => new NamespaceMetadata(null, string.Empty);
+    public static NamespaceMetadata CreateForPackage(PackageMetadata package)
+        => new NamespaceMetadata(null, string.Empty, package);
 
     public override string ToString()
     {
@@ -38,7 +39,7 @@ public class NamespaceMetadata : INamespaceMetadata
         {
             if (!current.children.TryGetValue(part, out var child))
             {
-                child = new NamespaceMetadata(current, part);
+                child = new NamespaceMetadata(current, part, Package);
                 current.children.Add(child.Name, child);
             }
 
@@ -120,6 +121,8 @@ public class NamespaceMetadata : INamespaceMetadata
     public NamespaceMetadata? Parent { get; }
 
     public string Name { get; }
+
+    public PackageMetadata Package { get; }
 
     public IReadOnlyCollection<ITypeMetadata> Types
         => types;

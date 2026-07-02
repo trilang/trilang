@@ -630,9 +630,9 @@ public class NamespaceTests
 
         var expectedBuiltInTypes = new BuiltInTypes();
         var rootNs = RootNamespaceMetadata.Create(expectedBuiltInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var ns1Ns = packageNs.CreateChild(["NS1"]);
-        var myType = new AliasMetadata(null, "MyType", [], expectedBuiltInTypes.I32, false)
+        var myType = new AliasMetadata(null, AccessModifierMetadata.Public, "MyType", [], expectedBuiltInTypes.I32, false)
         {
             Namespace = ns1Ns,
         };
@@ -864,9 +864,9 @@ public class NamespaceTests
 
         var expectedBuiltInTypes = new BuiltInTypes();
         var rootNs = RootNamespaceMetadata.Create(expectedBuiltInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var ns1Ns = packageNs.CreateChild(["NS1"]);
-        var myType = new AliasMetadata(null, "MyType", [], expectedBuiltInTypes.I32, false)
+        var myType = new AliasMetadata(null, AccessModifierMetadata.Public, "MyType", [], expectedBuiltInTypes.I32, false)
         {
             Namespace = ns1Ns,
         };

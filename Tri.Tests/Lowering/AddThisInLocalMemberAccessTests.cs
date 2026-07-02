@@ -27,9 +27,10 @@ public class AddThisInLocalMemberAccessTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test");
+        var packageNs = package.Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var typeMetadata = new TypeMetadata(null, "Test")
+        var typeMetadata = new TypeMetadata(null, AccessModifierMetadata.Public, "Test")
         {
             Namespace = test1Ns,
         };
@@ -102,9 +103,10 @@ public class AddThisInLocalMemberAccessTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test");
+        var packageNs = package.Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var typeMetadata = new TypeMetadata(null, "Test")
+        var typeMetadata = new TypeMetadata(null, AccessModifierMetadata.Public, "Test")
         {
             Namespace = test1Ns,
         };

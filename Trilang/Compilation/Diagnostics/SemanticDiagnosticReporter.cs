@@ -194,6 +194,12 @@ public readonly record struct SemanticDiagnosticReporter(DiagnosticCollection Di
             node.GetLocation(),
             $"The '{function.Name}' function is not accessible.");
 
+    public void TypeNotAccessible(ISemanticNode node, ITypeMetadata type)
+        => Diagnostics.Error(
+            DiagnosticId.S0014MemberNotAccessible,
+            node.GetLocation(),
+            $"The '{type}' type is not accessible.");
+
     // TODO: highlight a function name
     public void NotAllPathsReturnValue(IMetadata function)
         => Diagnostics.Error(

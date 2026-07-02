@@ -338,23 +338,18 @@ internal class Binder : ISemanticPass
         {
             var parts = new List<string>();
 
-            var current = type.Namespace;
-            while (current is NamespaceMetadata ns)
+            var current = type.Namespace as NamespaceMetadata;
+            while (current is not null)
             {
-                parts.Add(ns.Name);
-                current = ns.Parent;
+                parts.Add(current.Name);
+                current = current.Parent;
             }
 
             parts.Add(type.Name);
 
-            // TODO: introduce package namespace type?
-            var package = current is NamespaceMetadata { Name: "" } packageNamespace
-                ? compilationContext.Packages
-                    .FirstOrDefault(x => x.Namespace == packageNamespace)
-                    ?.Name
-                : null;
+            var packageName = current?.Package.Name;
 
-            return (package, parts);
+            return (packageName, parts);
         }
 
         public override ISemanticNode TransformArrayAccess(ArrayAccessExpression node)

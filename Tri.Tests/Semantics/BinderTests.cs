@@ -185,7 +185,7 @@ public class BinderTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
-        var expected = new TypeMetadata(null, "Point")
+        var expected = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = test1Ns,
         };
@@ -259,7 +259,7 @@ public class BinderTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
-        var expected = new AliasMetadata(null, "MyInt", [], compilationContext.BuiltInTypes.I32, false)
+        var expected = new AliasMetadata(null, AccessModifierMetadata.Public, "MyInt", [], compilationContext.BuiltInTypes.I32, false)
         {
             Namespace = test1Ns,
         };
@@ -1142,7 +1142,7 @@ public class BinderTests
         {
             Namespace = compilationContext.RootNamespace,
         };
-        var expected = new AliasMetadata(null, "Point", [], interfaceType, false)
+        var expected = new AliasMetadata(null, AccessModifierMetadata.Public, "Point", [], interfaceType, false)
         {
             Namespace = test1Ns,
         };
@@ -1734,9 +1734,9 @@ public class BinderTests
         var call = semanticTree.Find<CallExpression>()!;
         var expectedBuiltInTypes = new BuiltInTypes();
         var expectedRoot = RootNamespaceMetadata.Create(expectedBuiltInTypes);
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1Ns = expectedPackage.CreateChild(["Test1"]);
-        var expectedType = new TypeMetadata(null, "Point", [], [], [], [], [], [], false, false)
+        var expectedType = new TypeMetadata(null, AccessModifierMetadata.Public, "Point", [], [], [], [], [], [], false, false)
         {
             Namespace = expectedTest1Ns,
         };
@@ -1860,7 +1860,7 @@ public class BinderTests
         {
             Namespace = compilationContext.RootNamespace,
         };
-        var alias = new AliasMetadata(null, "DU", [], du, false)
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "DU", [], du, false)
         {
             Namespace = test1Ns,
         };
@@ -2572,7 +2572,7 @@ public class BinderTests
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var members = semanticTree.Where<MemberAccessExpression>().ToArray();
         var calls = semanticTree.Where<CallExpression>().ToArray();
-        var type = new TypeMetadata(null, "Test");
+        var type = new TypeMetadata(null, AccessModifierMetadata.Public, "Test");
         var method1 = new MethodMetadata(
             null,
             type,
@@ -2630,7 +2630,7 @@ public class BinderTests
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var members = semanticTree.Where<MemberAccessExpression>().ToArray();
         var calls = semanticTree.Where<CallExpression>().ToArray();
-        var type = new TypeMetadata(null, "Test")
+        var type = new TypeMetadata(null, AccessModifierMetadata.Public, "Test")
         {
             Namespace = compilationContext.RootNamespace,
         };
@@ -3220,7 +3220,7 @@ public class BinderTests
         var exp = (CastExpression)callExp.Parameters[0];
         var expectedTypeRef = new TypeRef(null, null, ["i32"]);
         var expectedRootNs = RootNamespaceMetadata.Create(builtInTypes);
-        var expectedPackageNs = NamespaceMetadata.CreateForPackage();
+        var expectedPackageNs = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackageNs.CreateChild(["Test1"]);
         var expectedFunction = new FunctionMetadata(
             null,
@@ -3268,7 +3268,7 @@ public class BinderTests
         var exp = (CastExpression)callExp.Parameters[0];
         var expectedTypeRef = new TypeRef(null, null, ["i32"]);
         var expectedRootNs = RootNamespaceMetadata.Create(builtInTypes);
-        var expectedPackageNs = NamespaceMetadata.CreateForPackage();
+        var expectedPackageNs = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackageNs.CreateChild(["Test1"]);
         var expectedFunction = new FunctionMetadata(
             null,

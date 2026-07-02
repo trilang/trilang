@@ -37,8 +37,7 @@ internal class MetadataGenerator : ISemanticPass
     {
         var semanticTrees = project.SourceFiles.Select(x => x.SemanticTree!).ToArray();
 
-        var packageNamespace = NamespaceMetadata.CreateForPackage();
-        var currentPackage = new PackageMetadata(project.Name, packageNamespace);
+        var currentPackage = new PackageMetadata(project.Name);
         compilationContext.AddPackage(currentPackage);
 
         foreach (var dependency in project.Dependencies)
@@ -71,7 +70,7 @@ internal class MetadataGenerator : ISemanticPass
 
         CreateClosedGenericTypes();
 
-        Debug.Assert(packageNamespace.Types.Count == 0, "Package namespace should be empty");
+        Debug.Assert(currentPackage.Namespace.Types.Count == 0, "Package namespace should be empty");
     }
 
     private void CreateNamespaces(SemanticTree[] treesToAnalyze)
@@ -133,7 +132,8 @@ internal class MetadataGenerator : ISemanticPass
                 continue;
 
             var node = (TypeDeclaration)symbol.Node;
-            var metadata = new TypeMetadata(node.GetLocation(), node.Name);
+            var accessModifier = node.AccessModifier.ToMetadata();
+            var metadata = new TypeMetadata(node.GetLocation(), accessModifier, node.Name);
             var metadataProvider = node.MetadataProvider!;
 
             // create a new provider for generic
@@ -383,7 +383,8 @@ internal class MetadataGenerator : ISemanticPass
                 continue;
 
             var node = (AliasDeclaration)symbol.Node;
-            var metadata = new AliasMetadata(node.GetLocation(), node.Name);
+            var accessModifier = node.AccessModifier.ToMetadata();
+            var metadata = new AliasMetadata(node.GetLocation(), accessModifier, node.Name);
             var metadataProvider = node.MetadataProvider!;
 
             // create a new provider for generic

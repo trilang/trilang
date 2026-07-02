@@ -49,7 +49,7 @@ public class BinaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new BinaryTypeMatcher(typeMatcher);
-        var invalidType = new TypeMetadata(null, "invalid", [], [], [], [], [], [], true, false);
+        var invalidType = new TypeMetadata(null, AccessModifierMetadata.Public, "invalid", [], [], [], [], [], [], true, false);
         invalidType.MarkAsInvalid();
 
         var result = matcher.Match(Addition, invalidType, builtInTypes.I32);
@@ -63,7 +63,7 @@ public class BinaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new BinaryTypeMatcher(typeMatcher);
-        var invalidType = new TypeMetadata(null, "invalid", [], [], [], [], [], [], true, false);
+        var invalidType = new TypeMetadata(null, AccessModifierMetadata.Public, "invalid", [], [], [], [], [], [], true, false);
         invalidType.MarkAsInvalid();
 
         var result = matcher.Match(Addition, builtInTypes.I32, invalidType);
@@ -77,7 +77,7 @@ public class BinaryTypeMatcherTests
         var builtInTypes = new BuiltInTypes();
         var typeMatcher = new TypeMatcher(builtInTypes);
         var matcher = new BinaryTypeMatcher(typeMatcher);
-        var invalidType = new TypeMetadata(null, "invalid", [], [], [], [], [], [], true, false);
+        var invalidType = new TypeMetadata(null, AccessModifierMetadata.Public, "invalid", [], [], [], [], [], [], true, false);
         invalidType.MarkAsInvalid();
 
         var result = matcher.Match(Addition, invalidType, invalidType);

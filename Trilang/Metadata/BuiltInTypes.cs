@@ -4,22 +4,22 @@ public class BuiltInTypes
 {
     public BuiltInTypes()
     {
-        Void = new TypeMetadata(null, "void", [], [], [], [], [], [], true, false);
+        Void = new TypeMetadata(null, AccessModifierMetadata.Public, "void", [], [], [], [], [], [], true, false);
         VoidPointer = new PointerMetadata(null, Void);
-        Null = new TypeMetadata(null, "null", [], [], [], [], [], [], true, false);
-        I8 = new TypeMetadata(null, "i8", [], [], [], [], [], [], true, false);
-        I16 = new TypeMetadata(null, "i16", [], [], [], [], [], [], true, false);
-        I32 = new TypeMetadata(null, "i32", [], [], [], [], [], [], true, false);
-        I64 = new TypeMetadata(null, "i64", [], [], [], [], [], [], true, false);
-        U8 = new TypeMetadata(null, "u8", [], [], [], [], [], [], true, false);
-        U16 = new TypeMetadata(null, "u16", [], [], [], [], [], [], true, false);
-        U32 = new TypeMetadata(null, "u32", [], [], [], [], [], [], true, false);
-        U64 = new TypeMetadata(null, "u64", [], [], [], [], [], [], true, false);
-        F32 = new TypeMetadata(null, "f32", [], [], [], [], [], [], true, false);
-        F64 = new TypeMetadata(null, "f64", [], [], [], [], [], [], true, false);
-        Char = new TypeMetadata(null, "char", [], [], [], [], [], [], true, false);
-        Bool = new TypeMetadata(null, "bool", [], [], [], [], [], [], true, false);
-        String = new TypeMetadata(null, "string", [], [], [], [], [], [], false, false);
+        Null = new TypeMetadata(null, AccessModifierMetadata.Public, "null", [], [], [], [], [], [], true, false);
+        I8 = new TypeMetadata(null, AccessModifierMetadata.Public, "i8", [], [], [], [], [], [], true, false);
+        I16 = new TypeMetadata(null, AccessModifierMetadata.Public, "i16", [], [], [], [], [], [], true, false);
+        I32 = new TypeMetadata(null, AccessModifierMetadata.Public, "i32", [], [], [], [], [], [], true, false);
+        I64 = new TypeMetadata(null, AccessModifierMetadata.Public, "i64", [], [], [], [], [], [], true, false);
+        U8 = new TypeMetadata(null, AccessModifierMetadata.Public, "u8", [], [], [], [], [], [], true, false);
+        U16 = new TypeMetadata(null, AccessModifierMetadata.Public, "u16", [], [], [], [], [], [], true, false);
+        U32 = new TypeMetadata(null, AccessModifierMetadata.Public, "u32", [], [], [], [], [], [], true, false);
+        U64 = new TypeMetadata(null, AccessModifierMetadata.Public, "u64", [], [], [], [], [], [], true, false);
+        F32 = new TypeMetadata(null, AccessModifierMetadata.Public, "f32", [], [], [], [], [], [], true, false);
+        F64 = new TypeMetadata(null, AccessModifierMetadata.Public, "f64", [], [], [], [], [], [], true, false);
+        Char = new TypeMetadata(null, AccessModifierMetadata.Public, "char", [], [], [], [], [], [], true, false);
+        Bool = new TypeMetadata(null, AccessModifierMetadata.Public, "bool", [], [], [], [], [], [], true, false);
+        String = new TypeMetadata(null, AccessModifierMetadata.Public, "string", [], [], [], [], [], [], false, false);
     }
 
     public void Freeze()

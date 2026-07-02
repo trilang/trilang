@@ -73,6 +73,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
     private bool CompareAliasMetadata(AliasMetadata x, AliasMetadata y)
     {
+        if (x.AccessModifier != y.AccessModifier)
+            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
+
         if (x.Name != y.Name)
             throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
 
@@ -318,6 +321,9 @@ internal class MetadataComparer : IEqualityComparer<IMetadata>
 
     private bool CompareTypeMetadata(TypeMetadata x, TypeMetadata y)
     {
+        if (x.AccessModifier != y.AccessModifier)
+            throw new Exception($"AccessModifier doesn't match. {x.AccessModifier} != {y.AccessModifier}.");
+
         if (x.Name != y.Name)
             throw new Exception($"Name doesn't match. {x.Name} != {y.Name}.");
 

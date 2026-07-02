@@ -42,6 +42,58 @@ public static class Helpers
         return (project, diagnostics);
     }
 
+    public static DiagnosticCollection Parse(params IEnumerable<Project> projects)
+    {
+        var diagnostics = new DiagnosticCollection();
+        foreach (var compilationUnit in projects.SelectMany(x => x.SourceFiles))
+        {
+            var parser = new Parser();
+            var parserOptions = new ParserOptions(diagnostics);
+            parser.Parse(compilationUnit, parserOptions);
+        }
+
+        return diagnostics;
+    }
+
+    public static (BuiltInTypes, RootNamespaceMetadata, CompilationContext) Semantic(
+        DiagnosticCollection diagnostics,
+        Project project)
+    {
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        return (builtInTypes, rootNamespace, compilationContext);
+    }
+
+    public static void Semantic(DiagnosticCollection diagnostics, params IEnumerable<Project> projects)
+    {
+        var compilationContexts = new List<CompilationContext>();
+        var builtInTypes = new BuiltInTypes();
+        foreach (var project in projects)
+        {
+            var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+            var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+            foreach (var dependencyInfo in project.Dependencies)
+            {
+                var dependency = compilationContexts.Single(x => x.CurrentPackage!.Name == dependencyInfo.Name);
+                rootNamespace.AddImported(dependency.RootNamespace);
+                compilationContext.AddPackage(dependency.CurrentPackage!);
+            }
+
+            var semanticAnalyzer = new SemanticAnalyzer();
+            semanticAnalyzer.Analyze(
+                project,
+                new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+            compilationContexts.Add(compilationContext);
+        }
+    }
+
     public static (SemanticTree, DiagnosticCollection, CompilationContext) Lower(SourceFile file)
         => Lower(file, []);
 

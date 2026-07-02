@@ -4,6 +4,7 @@ using Trilang.Compilation.Diagnostics;
 using Trilang.Metadata;
 using Trilang.Parsing;
 using Trilang.Semantics;
+using static Tri.Tests.Helpers;
 
 namespace Tri.Tests.Semantics;
 
@@ -12,7 +13,6 @@ public class MultiprojectTests
     [Test]
     public void AnalyzeMultipleProjectsTest()
     {
-        var diagnostics = new DiagnosticCollection();
         var project3 = new Project(
             "test3",
             string.Empty,
@@ -59,35 +59,11 @@ public class MultiprojectTests
             [project2.ToProjectInfo()]);
 
         var projects = (Project[])[project3, project2, project1];
-        foreach (var compilationUnit in projects.SelectMany(x => x.SourceFiles))
-        {
-            var parser = new Parser();
-            var parserOptions = new ParserOptions(diagnostics);
-            parser.Parse(compilationUnit, parserOptions);
-        }
+        var diagnostics = Parse(projects);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
 
-        var compilationContexts = new List<CompilationContext>();
-        var builtInTypes = new BuiltInTypes();
-        foreach (var project in projects)
-        {
-            var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-            var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
-            foreach (var dependencyInfo in project.Dependencies)
-            {
-                var dependency = compilationContexts.Single(x => x.CurrentPackage!.Name == dependencyInfo.Name);
-                rootNamespace.AddImported(dependency.RootNamespace);
-                compilationContext.AddPackage(dependency.CurrentPackage!);
-            }
-
-            var semanticAnalyzer = new SemanticAnalyzer();
-            semanticAnalyzer.Analyze(
-                project,
-                new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
-
-            compilationContexts.Add(compilationContext);
-        }
+        Semantic(diagnostics, projects);
 
         Assert.That(diagnostics.Diagnostics, Is.Empty);
     }

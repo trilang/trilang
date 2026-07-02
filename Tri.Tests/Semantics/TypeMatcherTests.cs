@@ -123,7 +123,7 @@ public class TypeMatcherTests
     public void InvalidActualReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var invalidType = new TypeMetadata(null, "invalid", [], [], [], [], [], [], true, false);
+        var invalidType = new TypeMetadata(null, AccessModifierMetadata.Public, "invalid", [], [], [], [], [], [], true, false);
         invalidType.MarkAsInvalid();
         var typeMatcher = new TypeMatcher(builtInTypes);
 
@@ -136,7 +136,7 @@ public class TypeMatcherTests
     public void InvalidExpectedReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var invalidType = new TypeMetadata(null, "invalid", [], [], [], [], [], [], true, false);
+        var invalidType = new TypeMetadata(null, AccessModifierMetadata.Public, "invalid", [], [], [], [], [], [], true, false);
         invalidType.MarkAsInvalid();
         var typeMatcher = new TypeMatcher(builtInTypes);
 
@@ -149,7 +149,7 @@ public class TypeMatcherTests
     public void BothInvalidReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var invalidType = new TypeMetadata(null, "invalid", [], [], [], [], [], [], true, false);
+        var invalidType = new TypeMetadata(null, AccessModifierMetadata.Public, "invalid", [], [], [], [], [], [], true, false);
         invalidType.MarkAsInvalid();
         var typeMatcher = new TypeMatcher(builtInTypes);
 
@@ -162,7 +162,7 @@ public class TypeMatcherTests
     public void AliasToSameUnderlyingTypeReturnsSuccessfulMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias = new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias, builtInTypes.I32);
@@ -174,7 +174,7 @@ public class TypeMatcherTests
     public void UnderlyingTypeToAliasReturnsSuccessfulMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias = new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(builtInTypes.I32, alias);
@@ -186,8 +186,8 @@ public class TypeMatcherTests
     public void AliasToAliasSameUnderlyingTypeReturnsSuccessfulMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias1 = new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false);
-        var alias2 = new AliasMetadata(null, "AnotherI32", [], builtInTypes.I32, false);
+        var alias1 = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false);
+        var alias2 = new AliasMetadata(null, AccessModifierMetadata.Public, "AnotherI32", [], builtInTypes.I32, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias1, alias2);
@@ -199,7 +199,7 @@ public class TypeMatcherTests
     public void AliasToDifferentTypeReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias = new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias, builtInTypes.Bool);
@@ -211,7 +211,7 @@ public class TypeMatcherTests
     public void AliasToConvertibleTypeReturnsConversionMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias = new AliasMetadata(null, "MyI8", [], builtInTypes.I8, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI8", [], builtInTypes.I8, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias, builtInTypes.I16);
@@ -225,7 +225,7 @@ public class TypeMatcherTests
     public void AliasToLargerTypeReturnsConversionMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias = new AliasMetadata(null, "MyI16", [], builtInTypes.I16, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI16", [], builtInTypes.I16, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias, builtInTypes.I64);
@@ -239,7 +239,7 @@ public class TypeMatcherTests
     public void AliasToSmallerTypeReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias = new AliasMetadata(null, "MyI64", [], builtInTypes.I64, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI64", [], builtInTypes.I64, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias, builtInTypes.I8);
@@ -251,9 +251,9 @@ public class TypeMatcherTests
     public void AliasToInvalidTypeReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var invalidType = new TypeMetadata(null, "invalid", [], [], [], [], [], [], true, false);
+        var invalidType = new TypeMetadata(null, AccessModifierMetadata.Public, "invalid", [], [], [], [], [], [], true, false);
         invalidType.MarkAsInvalid();
-        var alias = new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias, invalidType);
@@ -265,9 +265,9 @@ public class TypeMatcherTests
     public void InvalidAliasToTypeReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var invalidType = new TypeMetadata(null, "invalid", [], [], [], [], [], [], true, false);
+        var invalidType = new TypeMetadata(null, AccessModifierMetadata.Public, "invalid", [], [], [], [], [], [], true, false);
         invalidType.MarkAsInvalid();
-        var alias = new AliasMetadata(null, "MyI32", [], invalidType, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], invalidType, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias, builtInTypes.I32);
@@ -279,7 +279,7 @@ public class TypeMatcherTests
     public void AliasToNullReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias = new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(alias, null);
@@ -291,7 +291,7 @@ public class TypeMatcherTests
     public void NullToAliasReturnsFailedMatch()
     {
         var builtInTypes = new BuiltInTypes();
-        var alias = new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false);
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false);
         var typeMatcher = new TypeMatcher(builtInTypes);
 
         var result = typeMatcher.Match(null, alias);
@@ -352,7 +352,7 @@ public class TypeMatcherTests
     {
         var builtInTypes = new BuiltInTypes();
         var du = new DiscriminatedUnionMetadata(null, [
-            new AliasMetadata(null, "MyI32", [], builtInTypes.I32, false),
+            new AliasMetadata(null, AccessModifierMetadata.Public, "MyI32", [], builtInTypes.I32, false),
             builtInTypes.Null,
         ]);
         var typeMatcher = new TypeMatcher(builtInTypes);

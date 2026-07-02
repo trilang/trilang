@@ -46,9 +46,9 @@ public class MetadataGeneratorTests
                 compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
-        var expected = new TypeMetadata(null, "Point")
+        var expected = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = expectedTest1,
         };
@@ -116,6 +116,47 @@ public class MetadataGeneratorTests
     }
 
     [Test]
+    public void GenerateMetadataForPrivateTypeTest()
+    {
+        var file = CreateFile(
+            """
+            namespace Test1;
+
+            private type Point {}
+            """);
+        var (project, diagnostics) = Parse(file);
+
+        var builtInTypes = new BuiltInTypes();
+        var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
+        var compilationContext = new CompilationContext(builtInTypes, rootNamespace);
+        var semantic = new SemanticAnalyzer();
+        semantic.Analyze(
+            project,
+            new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
+
+        var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
+        var expectedPackage = new PackageMetadata("test").Namespace;
+        var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
+        var expected = new TypeMetadata(null, AccessModifierMetadata.Private, "Point")
+        {
+            Namespace = expectedTest1,
+        };
+
+        expected.AddConstructor(new ConstructorMetadata(
+            null,
+            expected,
+            AccessModifierMetadata.Public,
+            [],
+            CreateFunctionType([], expected, expectedRoot)));
+
+        Assert.That(diagnostics.Diagnostics, Is.Empty);
+
+        var test1Ns = compilationContext.FindNamespace("test", ["Test1"]).Namespace!;
+        var actual = test1Ns.FindType("Point");
+        Assert.That(actual, Is.EqualTo(expected).Using(new MetadataComparer()));
+    }
+
+    [Test]
     public void GenerateMetadataForPropertyTest()
     {
         var file = CreateFile(
@@ -138,10 +179,11 @@ public class MetadataGeneratorTests
 
         var expectedBuiltInTypes = new BuiltInTypes();
         var expectedRoot = RootNamespaceMetadata.Create(expectedBuiltInTypes);
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var typeMetadata = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "Test",
             [],
             [],
@@ -205,7 +247,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var package = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test").Namespace;
         var test1Namespace = package.CreateChild(["Test1"]);
         var interfaceMetadata = new InterfaceMetadata(null)
         {
@@ -213,6 +255,7 @@ public class MetadataGeneratorTests
         };
         var expected = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "Point",
             [],
             [interfaceMetadata],
@@ -369,9 +412,9 @@ public class MetadataGeneratorTests
             project,
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
-        var expected = new AliasMetadata(null, "MyInt", [], compilationContext.BuiltInTypes.I32, false)
+        var expected = new AliasMetadata(null, AccessModifierMetadata.Public, "MyInt", [], compilationContext.BuiltInTypes.I32, false)
         {
             Namespace = expectedTest1,
         };
@@ -588,9 +631,9 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var package = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test").Namespace;
         var test1Namespace = package.CreateChild(["Test1"]);
-        var expectedType = new TypeMetadata(null, "Point")
+        var expectedType = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = test1Namespace,
         };
@@ -602,7 +645,7 @@ public class MetadataGeneratorTests
                 [],
                 CreateFunctionType([], expectedType, ns)));
 
-        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType, false)
+        var expectedAlias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyPoint", [], expectedType, false)
         {
             Namespace = test1Namespace,
         };
@@ -637,9 +680,9 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
-        var expectedType = new TypeMetadata(null, "Point")
+        var expectedType = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = expectedTest1,
         };
@@ -651,7 +694,7 @@ public class MetadataGeneratorTests
                 [],
                 CreateFunctionType([], expectedType, expectedRoot)));
 
-        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedType, false)
+        var expectedAlias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyPoint", [], expectedType, false)
         {
             Namespace = expectedTest1,
         };
@@ -686,9 +729,9 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var package = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test").Namespace;
         var test1Namespace = package.CreateChild(["Test1"]);
-        var expectedType = new TypeMetadata(null, "Point")
+        var expectedType = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = test1Namespace,
         };
@@ -701,7 +744,7 @@ public class MetadataGeneratorTests
                 CreateFunctionType([], expectedType, ns)));
 
         var expectedArrayType = CreateArrayMetadata(expectedType, ns);
-        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType, false)
+        var expectedAlias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyPoint", [], expectedArrayType, false)
         {
             Namespace = test1Namespace,
         };
@@ -737,9 +780,9 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
-        var expectedType = new TypeMetadata(null, "Point")
+        var expectedType = new TypeMetadata(null, AccessModifierMetadata.Public, "Point")
         {
             Namespace = expectedTest1,
         };
@@ -752,7 +795,7 @@ public class MetadataGeneratorTests
                 CreateFunctionType([], expectedType, expectedRoot)));
 
         var expectedArrayType = CreateArrayMetadata(expectedType, expectedRoot);
-        var expectedAlias = new AliasMetadata(null, "MyPoint", [], expectedArrayType, false)
+        var expectedAlias = new AliasMetadata(null, AccessModifierMetadata.Public, "MyPoint", [], expectedArrayType, false)
         {
             Namespace = expectedTest1,
         };
@@ -792,7 +835,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var expectedInterface = new InterfaceMetadata(null)
         {
@@ -815,7 +858,7 @@ public class MetadataGeneratorTests
                 AccessModifierMetadata.Public,
                 null));
 
-        var expectedAlias = new AliasMetadata(null, "Point", [], expectedInterface, false)
+        var expectedAlias = new AliasMetadata(null, AccessModifierMetadata.Public, "Point", [], expectedInterface, false)
         {
             Namespace = expectedTest1,
         };
@@ -855,7 +898,7 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var du = new DiscriminatedUnionMetadata(null, [
             new InterfaceMetadata(null)
@@ -868,7 +911,7 @@ public class MetadataGeneratorTests
         {
             Namespace = expectedRoot,
         };
-        var alias = new AliasMetadata(null, "DU", [], du, false)
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "DU", [], du, false)
         {
             Namespace = expectedTest1,
         };
@@ -903,10 +946,10 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var tuple = CreateTupleMetadata([compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.F64], expectedRoot);
-        var alias = new AliasMetadata(null, "Tuple", [], tuple, false)
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "Tuple", [], tuple, false)
         {
             Namespace = expectedTest1,
         };
@@ -941,11 +984,11 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var nestedTuple = CreateTupleMetadata([compilationContext.BuiltInTypes.F64, compilationContext.BuiltInTypes.Bool], expectedRoot);
         var tuple = CreateTupleMetadata([compilationContext.BuiltInTypes.I32, nestedTuple], expectedRoot);
-        var alias = new AliasMetadata(null, "Tuple", [], tuple, false)
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "Tuple", [], tuple, false)
         {
             Namespace = expectedTest1,
         };
@@ -983,14 +1026,14 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var du = new DiscriminatedUnionMetadata(null, [compilationContext.BuiltInTypes.Bool, compilationContext.BuiltInTypes.I8])
         {
             Namespace = expectedRoot,
         };
         var tuple = CreateTupleMetadata([compilationContext.BuiltInTypes.I32, du], expectedRoot);
-        var alias = new AliasMetadata(null, "Tuple", [], tuple, false)
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "Tuple", [], tuple, false)
         {
             Namespace = expectedTest1,
         };
@@ -1028,14 +1071,14 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var tuple = CreateTupleMetadata([compilationContext.BuiltInTypes.F64, compilationContext.BuiltInTypes.Bool], expectedRoot);
         var du = new DiscriminatedUnionMetadata(null, [compilationContext.BuiltInTypes.I32, tuple])
         {
             Namespace = expectedRoot,
         };
-        var alias = new AliasMetadata(null, "Tuple", [], du, false)
+        var alias = new AliasMetadata(null, AccessModifierMetadata.Public, "Tuple", [], du, false)
         {
             Namespace = expectedTest1,
         };
@@ -1073,9 +1116,9 @@ public class MetadataGeneratorTests
             new SemanticAnalysisOptions(new HashSet<string>(), diagnostics, compilationContext));
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
-        var expected = new TypeMetadata(null, "Test")
+        var expected = new TypeMetadata(null, AccessModifierMetadata.Public, "Test")
         {
             Namespace = expectedTest1,
         };
@@ -1227,11 +1270,12 @@ public class MetadataGeneratorTests
 
         var expectedBuiltInTypes = new BuiltInTypes();
         var expectedRoot = RootNamespaceMetadata.Create(expectedBuiltInTypes);
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
 
         var openList = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "List",
             [new TypeArgumentMetadata(null, "T")],
             [],
@@ -1258,6 +1302,7 @@ public class MetadataGeneratorTests
 
         var closedList = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "List",
             [expectedBuiltInTypes.I32],
             [],
@@ -1604,13 +1649,13 @@ public class MetadataGeneratorTests
         var type = test1Ns.FindType("Test<>");
         var typeArgumentMetadata = new TypeArgumentMetadata(null, "T");
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var package = NamespaceMetadata.CreateForPackage();
+        var package = new PackageMetadata("test").Namespace;
         var test1Namespace = package.CreateChild(["Test1"]);
         var du = new DiscriminatedUnionMetadata(null, [compilationContext.BuiltInTypes.I32, typeArgumentMetadata])
         {
             Namespace = ns,
         };
-        var expected = new AliasMetadata(null, "Test", [typeArgumentMetadata], du, false)
+        var expected = new AliasMetadata(null, AccessModifierMetadata.Public, "Test", [typeArgumentMetadata], du, false)
         {
             Namespace = test1Namespace,
         };
@@ -1646,12 +1691,13 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Test<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
                 new DiscriminatedUnionMetadata(null, [compilationContext.BuiltInTypes.I32, new TypeArgumentMetadata(null, "T")])
@@ -1669,6 +1715,7 @@ public class MetadataGeneratorTests
             Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [compilationContext.BuiltInTypes.I32],
                 new DiscriminatedUnionMetadata(null, [compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32])
@@ -1713,12 +1760,13 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Test<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
                 CreateFunctionType([], new TypeArgumentMetadata(null, "T"), expectedRoot),
@@ -1733,6 +1781,7 @@ public class MetadataGeneratorTests
             Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [compilationContext.BuiltInTypes.I32],
                 CreateFunctionType([], compilationContext.BuiltInTypes.I32, expectedRoot),
@@ -1774,7 +1823,7 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Test<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var openInterface = new InterfaceMetadata(null)
         {
@@ -1787,7 +1836,7 @@ public class MetadataGeneratorTests
             new TypeArgumentMetadata(null, "T"),
             AccessModifierMetadata.Public,
             null));
-        var openAlias = new AliasMetadata(null, "Test", [new TypeArgumentMetadata(null, "T")], openInterface, false)
+        var openAlias = new AliasMetadata(null, AccessModifierMetadata.Public, "Test", [new TypeArgumentMetadata(null, "T")], openInterface, false)
         {
             Namespace = expectedTest1,
         };
@@ -1803,7 +1852,7 @@ public class MetadataGeneratorTests
             compilationContext.BuiltInTypes.I32,
             AccessModifierMetadata.Public,
             null));
-        var closedAlias = new AliasMetadata(null, "Test", [compilationContext.BuiltInTypes.I32], closedInterface, true)
+        var closedAlias = new AliasMetadata(null, AccessModifierMetadata.Public, "Test", [compilationContext.BuiltInTypes.I32], closedInterface, true)
         {
             Namespace = expectedRoot,
         };
@@ -1845,12 +1894,13 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Test<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
                 CreateTupleMetadata([compilationContext.BuiltInTypes.I32, new TypeArgumentMetadata(null, "T")], expectedRoot),
@@ -1865,6 +1915,7 @@ public class MetadataGeneratorTests
             Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [compilationContext.BuiltInTypes.I32],
                 CreateTupleMetadata([compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.I32], expectedRoot),
@@ -1906,11 +1957,12 @@ public class MetadataGeneratorTests
         var actual = compilationContext.RootNamespace.FindType("Test<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var typeArgumentMetadata = new TypeArgumentMetadata(null, "T");
         var openGeneric = new AliasMetadata(
             null,
+            AccessModifierMetadata.Public,
             "Test",
             [typeArgumentMetadata],
             CreateArrayMetadata(typeArgumentMetadata, expectedRoot),
@@ -1921,6 +1973,7 @@ public class MetadataGeneratorTests
         };
         var closedGeneric = new AliasMetadata(
             null,
+            AccessModifierMetadata.Public,
             "Test",
             [compilationContext.BuiltInTypes.I32],
             CreateArrayMetadata(compilationContext.BuiltInTypes.I32, expectedRoot),
@@ -1967,9 +2020,9 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Test<i32>");
 
         var nsRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var nsPackage = NamespaceMetadata.CreateForPackage();
+        var nsPackage = new PackageMetadata("test").Namespace;
         var nsTest1 = nsPackage.CreateChild(["Test1"]);
-        var openList = new TypeMetadata(null, "List", [new TypeArgumentMetadata(null, "T")], [], [], [], [], [], false, false)
+        var openList = new TypeMetadata(null, AccessModifierMetadata.Public, "List", [new TypeArgumentMetadata(null, "T")], [], [], [], [], [], false, false)
         {
             Namespace = nsTest1,
         };
@@ -1985,7 +2038,7 @@ public class MetadataGeneratorTests
                 [],
                 CreateFunctionType([], openGenericApplication, nsRoot)));
 
-        var closedList = new TypeMetadata(null, "List", [compilationContext.BuiltInTypes.I32], [], [], [], [], [], false, true)
+        var closedList = new TypeMetadata(null, AccessModifierMetadata.Public, "List", [compilationContext.BuiltInTypes.I32], [], [], [], [], [], false, true)
         {
             Namespace = nsRoot,
         };
@@ -2006,6 +2059,7 @@ public class MetadataGeneratorTests
             null,
             new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
                 openGenericApplication,
@@ -2020,6 +2074,7 @@ public class MetadataGeneratorTests
             Namespace = nsRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [compilationContext.BuiltInTypes.I32],
                 closedGenericApplication,
@@ -2062,10 +2117,11 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Test<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var openList = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "List",
             [new TypeArgumentMetadata(null, "T2")],
             [],
@@ -2092,6 +2148,7 @@ public class MetadataGeneratorTests
 
         var closedList = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "List",
             [compilationContext.BuiltInTypes.I32],
             [],
@@ -2121,6 +2178,7 @@ public class MetadataGeneratorTests
             null,
             new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [new TypeArgumentMetadata(null, "T")],
                 new GenericApplicationMetadata(null, openList, [new TypeArgumentMetadata(null, "T")])
@@ -2138,6 +2196,7 @@ public class MetadataGeneratorTests
             Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [compilationContext.BuiltInTypes.I32],
                 closedGenericApplication,
@@ -2180,10 +2239,11 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Test<i32, bool>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var openList = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "List",
             [new TypeArgumentMetadata(null, "X1"), new TypeArgumentMetadata(null, "X2")],
             [],
@@ -2210,6 +2270,7 @@ public class MetadataGeneratorTests
 
         var closedList = new TypeMetadata(
             null,
+            AccessModifierMetadata.Public,
             "List",
             [compilationContext.BuiltInTypes.Bool, compilationContext.BuiltInTypes.I32],
             [],
@@ -2243,6 +2304,7 @@ public class MetadataGeneratorTests
             null,
             new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [new TypeArgumentMetadata(null, "T1"), new TypeArgumentMetadata(null, "T2")],
                 new GenericApplicationMetadata(
@@ -2264,6 +2326,7 @@ public class MetadataGeneratorTests
             Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Test",
                 [compilationContext.BuiltInTypes.I32, compilationContext.BuiltInTypes.Bool],
                 closedGenericApplication,
@@ -2306,16 +2369,18 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Alias2<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var openAlias2 = new AliasMetadata(
             null,
+            AccessModifierMetadata.Public,
             "Alias2",
             [new TypeArgumentMetadata(null, "T1")],
             new GenericApplicationMetadata(
                 null,
                 new AliasMetadata(
                     null,
+                    AccessModifierMetadata.Public,
                     "Alias1",
                     [new TypeArgumentMetadata(null, "T1")],
                     new DiscriminatedUnionMetadata(
@@ -2342,12 +2407,14 @@ public class MetadataGeneratorTests
 
         var closedAlias2 = new AliasMetadata(
             null,
+            AccessModifierMetadata.Public,
             "Alias2",
             [compilationContext.BuiltInTypes.I32],
             new GenericApplicationMetadata(
                 null,
                 new AliasMetadata(
                     null,
+                    AccessModifierMetadata.Public,
                     "Alias1",
                     [new TypeArgumentMetadata(null, "T1")],
                     new DiscriminatedUnionMetadata(
@@ -2367,6 +2434,7 @@ public class MetadataGeneratorTests
                 Namespace = expectedRoot,
                 ClosedGeneric = new AliasMetadata(
                     null,
+                    AccessModifierMetadata.Public,
                     "Alias1",
                     [compilationContext.BuiltInTypes.I32],
                     new DiscriminatedUnionMetadata(
@@ -2425,18 +2493,20 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Alias2<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Alias2",
                 [new TypeArgumentMetadata(null, "T1")],
                 new GenericApplicationMetadata(
                     null,
                     new AliasMetadata(
                         null,
+                        AccessModifierMetadata.Public,
                         "Alias1",
                         [new TypeArgumentMetadata(null, "T2")],
                         new DiscriminatedUnionMetadata(
@@ -2467,12 +2537,14 @@ public class MetadataGeneratorTests
             Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Alias2",
                 [compilationContext.BuiltInTypes.I32],
                 new GenericApplicationMetadata(
                     null,
                     new AliasMetadata(
                         null,
+                        AccessModifierMetadata.Public,
                         "Alias1",
                         [new TypeArgumentMetadata(null, "T2")],
                         new DiscriminatedUnionMetadata(
@@ -2493,6 +2565,7 @@ public class MetadataGeneratorTests
                     Namespace = expectedRoot,
                     ClosedGeneric = new AliasMetadata(
                         null,
+                        AccessModifierMetadata.Public,
                         "Alias1",
                         [compilationContext.BuiltInTypes.I32],
                         new DiscriminatedUnionMetadata(
@@ -2547,18 +2620,20 @@ public class MetadataGeneratorTests
         var type = compilationContext.RootNamespace.FindType("Alias2<i32>");
 
         var expectedRoot = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var expectedPackage = NamespaceMetadata.CreateForPackage();
+        var expectedPackage = new PackageMetadata("test").Namespace;
         var expectedTest1 = expectedPackage.CreateChild(["Test1"]);
         var expected = new GenericApplicationMetadata(
             null,
             new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Alias2",
                 [new TypeArgumentMetadata(null, "T1")],
                 new GenericApplicationMetadata(
                     null,
                     new AliasMetadata(
                         null,
+                        AccessModifierMetadata.Public,
                         "Alias1",
                         [new TypeArgumentMetadata(null, "T1")],
                         new DiscriminatedUnionMetadata(
@@ -2589,12 +2664,14 @@ public class MetadataGeneratorTests
             Namespace = expectedRoot,
             ClosedGeneric = new AliasMetadata(
                 null,
+                AccessModifierMetadata.Public,
                 "Alias2",
                 [compilationContext.BuiltInTypes.I32],
                 new GenericApplicationMetadata(
                     null,
                     new AliasMetadata(
                         null,
+                        AccessModifierMetadata.Public,
                         "Alias1",
                         [new TypeArgumentMetadata(null, "T1")],
                         new DiscriminatedUnionMetadata(
@@ -2615,6 +2692,7 @@ public class MetadataGeneratorTests
                     Namespace = expectedRoot,
                     ClosedGeneric = new AliasMetadata(
                         null,
+                        AccessModifierMetadata.Public,
                         "Alias1",
                         [compilationContext.BuiltInTypes.I32],
                         new DiscriminatedUnionMetadata(
@@ -2753,7 +2831,7 @@ public class MetadataGeneratorTests
         var semanticTree = project.SourceFiles.Single().SemanticTree!;
         var methods = semanticTree.Where<MethodDeclaration>().ToArray();
         var ns = RootNamespaceMetadata.Create(new BuiltInTypes());
-        var type = new TypeMetadata(null, "Test")
+        var type = new TypeMetadata(null, AccessModifierMetadata.Public, "Test")
         {
             Namespace = ns,
         };

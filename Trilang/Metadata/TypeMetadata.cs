@@ -16,6 +16,7 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
 
     public TypeMetadata(
         SourceLocation? definition,
+        AccessModifierMetadata accessModifier,
         string name,
         IEnumerable<ITypeMetadata> genericArguments,
         IEnumerable<InterfaceMetadata> interfaces,
@@ -27,6 +28,7 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
         bool isCompilerGenerated)
     {
         Definition = definition;
+        AccessModifier = accessModifier;
         Name = name;
         this.genericArguments = [.. genericArguments];
         this.interfaces = [.. interfaces];
@@ -38,13 +40,13 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
         IsCompilerGenerated = isCompilerGenerated;
     }
 
-    public TypeMetadata(SourceLocation? definition, string name)
-        : this(definition, name, [], [], [], [], [], [], false, false)
+    public TypeMetadata(SourceLocation? definition, AccessModifierMetadata accessModifier, string name)
+        : this(definition, accessModifier, name, [], [], [], [], [], [], false, false)
     {
     }
 
     public static TypeMetadata Invalid(string name)
-        => new TypeMetadata(null, name, [], [], [], [], [], [], false, true) { IsInvalid = true };
+        => new TypeMetadata(null, AccessModifierMetadata.Public, name, [], [], [], [], [], [], false, true) { IsInvalid = true };
 
     public override string ToString()
     {
@@ -199,6 +201,8 @@ public class TypeMetadata : IGenericMetadata, INamedMetadata
             field = value;
         }
     }
+
+    public AccessModifierMetadata AccessModifier { get; }
 
     public string Name { get; }
 

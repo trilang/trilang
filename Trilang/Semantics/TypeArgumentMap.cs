@@ -88,6 +88,7 @@ internal class TypeArgumentMap
     {
         var metadata = new AliasMetadata(
             type.Definition,
+            type.AccessModifier,
             type.Name,
             [],
             null,
@@ -228,6 +229,7 @@ internal class TypeArgumentMap
     {
         var metadata = new TypeMetadata(
             type.Definition,
+            type.AccessModifier,
             type.Name,
             [],
             [],

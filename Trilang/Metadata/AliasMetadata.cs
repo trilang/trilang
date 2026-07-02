@@ -7,19 +7,21 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
     private readonly List<ITypeMetadata> genericArguments;
     private bool isFrozen;
 
-    public AliasMetadata(SourceLocation? definition, string name)
-        : this(definition, name, [], null, false)
+    public AliasMetadata(SourceLocation? definition, AccessModifierMetadata accessModifier, string name)
+        : this(definition, accessModifier, name, [], null, false)
     {
     }
 
     public AliasMetadata(
         SourceLocation? definition,
+        AccessModifierMetadata accessModifier,
         string name,
         IEnumerable<ITypeMetadata> genericArguments,
         ITypeMetadata? type,
         bool isCompilerGenerated)
     {
         Definition = definition;
+        AccessModifier = accessModifier;
         Name = name;
         this.genericArguments = [.. genericArguments];
         Type = type;
@@ -127,6 +129,8 @@ public class AliasMetadata : IGenericMetadata, INamedMetadata
             field = value;
         }
     }
+
+    public AccessModifierMetadata AccessModifier { get; }
 
     public string Name { get; }
 

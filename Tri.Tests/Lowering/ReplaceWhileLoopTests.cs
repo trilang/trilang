@@ -28,7 +28,7 @@ public class ReplaceWhileLoopTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNamespace = NamespaceMetadata.CreateForPackage();
+        var packageNamespace = new PackageMetadata("test").Namespace;
         var test1Ns = packageNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
         var expected = new SemanticTree(
@@ -184,7 +184,7 @@ public class ReplaceWhileLoopTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNamespace = NamespaceMetadata.CreateForPackage();
+        var packageNamespace = new PackageMetadata("test").Namespace;
         var test1Ns = packageNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
         var expected = new SemanticTree(
@@ -360,7 +360,7 @@ public class ReplaceWhileLoopTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNamespace = NamespaceMetadata.CreateForPackage();
+        var packageNamespace = new PackageMetadata("test").Namespace;
         var test1Ns = packageNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
         var expected = new SemanticTree(
@@ -544,7 +544,7 @@ public class ReplaceWhileLoopTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNamespace = NamespaceMetadata.CreateForPackage();
+        var packageNamespace = new PackageMetadata("test").Namespace;
         var test1Ns = packageNamespace.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(null, "a", builtInTypes.I32);
         var expected = new SemanticTree(

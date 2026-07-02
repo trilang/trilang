@@ -32,7 +32,7 @@ public class SemanticAnalyzer
         {
             new Binder(options.Directives, options.Diagnostics, compilationContext),
             new BreakContinueWithinLoop(options.Directives, options.Diagnostics),
-            new CheckAccessModifiers(options.Directives, options.Diagnostics),
+            new CheckAccessModifiers(options.Directives, options.Diagnostics, compilationContext),
             new CheckStaticAndInstanceMembersAccess(options.Directives, options.Diagnostics),
             new CompoundAssignmentTargetValidation(options.Directives, options.Diagnostics),
             new CyclicAlias(options.Diagnostics, compilationContext),

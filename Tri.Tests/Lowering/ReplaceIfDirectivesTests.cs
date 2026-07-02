@@ -30,9 +30,9 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var type1Metadata = new TypeMetadata(null, "Type1")
+        var type1Metadata = new TypeMetadata(null, AccessModifierMetadata.Public, "Type1")
         {
             Namespace = test1Ns,
         };
@@ -44,7 +44,7 @@ public class ReplaceIfDirectivesTests
                 [],
                 CreateFunctionType([], type1Metadata, rootNamespace)));
 
-        var type3Metadata = new TypeMetadata(null, "Type3")
+        var type3Metadata = new TypeMetadata(null, AccessModifierMetadata.Public, "Type3")
         {
             Namespace = test1Ns,
         };
@@ -99,9 +99,9 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var type2Metadata = new TypeMetadata(null, "Type2")
+        var type2Metadata = new TypeMetadata(null, AccessModifierMetadata.Public, "Type2")
         {
             Namespace = test1Ns,
         };
@@ -113,7 +113,7 @@ public class ReplaceIfDirectivesTests
                 [],
                 CreateFunctionType([], type2Metadata, rootNamespace)));
 
-        var type3Metadata = new TypeMetadata(null, "Type3")
+        var type3Metadata = new TypeMetadata(null, AccessModifierMetadata.Public, "Type3")
         {
             Namespace = test1Ns,
         };
@@ -164,9 +164,9 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
-        var typeMetadata = new TypeMetadata(null, "Type3")
+        var typeMetadata = new TypeMetadata(null, AccessModifierMetadata.Public, "Type3")
         {
             Namespace = test1Ns,
         };
@@ -215,7 +215,7 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,
@@ -308,7 +308,7 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,
@@ -401,7 +401,7 @@ public class ReplaceIfDirectivesTests
 
         var builtInTypes = new BuiltInTypes();
         var rootNamespace = RootNamespaceMetadata.Create(builtInTypes);
-        var packageNs = NamespaceMetadata.CreateForPackage();
+        var packageNs = new PackageMetadata("test").Namespace;
         var test1Ns = packageNs.CreateChild(["Test1"]);
         var parameterMetadata = new ParameterMetadata(
             null,

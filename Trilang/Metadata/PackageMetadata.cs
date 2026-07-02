@@ -5,11 +5,11 @@ public class PackageMetadata
     private readonly HashSet<PackageMetadata> dependencies;
     private bool isFrozen;
 
-    public PackageMetadata(string name, NamespaceMetadata @namespace)
+    public PackageMetadata(string name)
     {
         dependencies = [];
         Name = name;
-        Namespace = @namespace;
+        Namespace = NamespaceMetadata.CreateForPackage(this);
     }
 
     public void AddDependency(PackageMetadata dependency)
