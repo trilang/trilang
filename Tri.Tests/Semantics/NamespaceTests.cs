@@ -1005,7 +1005,7 @@ public class NamespaceTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file2,
-                new SourceSpan(new SourcePosition(44, 4, 5), new SourcePosition(54, 4, 15))),
+                new SourceSpan(new SourcePosition(48, 4, 9), new SourcePosition(54, 4, 15))),
             "Unknown symbol: 'MyType'.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

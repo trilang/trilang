@@ -1340,7 +1340,7 @@ public class BinderTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(89, 7, 9), new SourcePosition(95, 7, 15))),
+                new SourceSpan(new SourcePosition(94, 7, 14), new SourcePosition(95, 7, 15))),
             "The member was not found.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1445,7 +1445,7 @@ public class BinderTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(95, 8, 12), new SourcePosition(98, 8, 15))),
+                new SourceSpan(new SourcePosition(97, 8, 14), new SourcePosition(98, 8, 15))),
             "The member was not found.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1699,7 +1699,7 @@ public class BinderTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(107, 8, 25), new SourcePosition(115, 8, 33))),
+                new SourceSpan(new SourcePosition(109, 8, 27), new SourcePosition(115, 8, 33))),
             "'x' is not generic.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -2343,7 +2343,7 @@ public class BinderTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(69, 4, 12), new SourcePosition(72, 4, 15))),
+                new SourceSpan(new SourcePosition(71, 4, 14), new SourcePosition(72, 4, 15))),
             "The member was not found.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -2961,7 +2961,7 @@ public class BinderTests
                 DiagnosticSeverity.Error,
                 new SourceLocation(
                     file,
-                    new SourceSpan(new SourcePosition(279, 13, 10), new SourcePosition(288, 13, 19))),
+                    new SourceSpan(new SourcePosition(281, 13, 12), new SourcePosition(288, 13, 19))),
                 """
                 Multiple members found:
                 - method1: (bool) => void

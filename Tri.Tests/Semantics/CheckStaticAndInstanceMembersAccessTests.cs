@@ -41,7 +41,7 @@ public class CheckStaticAndInstanceMembersAccessTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(91, 8, 5), new SourcePosition(97, 8, 11))),
+                new SourceSpan(new SourcePosition(96, 8, 10), new SourcePosition(97, 8, 11))),
             "The instance method 's' cannot be called as a static one.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -80,7 +80,7 @@ public class CheckStaticAndInstanceMembersAccessTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(105, 8, 5), new SourcePosition(108, 8, 8))),
+                new SourceSpan(new SourcePosition(107, 8, 7), new SourcePosition(108, 8, 8))),
             "The static method 's' cannot be called as an instance one.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

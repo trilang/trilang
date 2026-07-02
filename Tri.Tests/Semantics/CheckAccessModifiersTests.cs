@@ -663,7 +663,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(108, 8, 12), new SourcePosition(111, 8, 15))),
+                new SourceSpan(new SourcePosition(110, 8, 14), new SourcePosition(111, 8, 15))),
             "The 'x' property doesn't have a getter.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -702,7 +702,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(102, 8, 5), new SourcePosition(105, 8, 8))),
+                new SourceSpan(new SourcePosition(104, 8, 7), new SourcePosition(105, 8, 8))),
             "The 'x' property doesn't have a setter.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -743,7 +743,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(148, 10, 12), new SourcePosition(151, 10, 15))),
+                new SourceSpan(new SourcePosition(150, 10, 14), new SourcePosition(151, 10, 15))),
             "The getter of 'x' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -784,7 +784,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(142, 10, 5), new SourcePosition(145, 10, 8))),
+                new SourceSpan(new SourcePosition(144, 10, 7), new SourcePosition(145, 10, 8))),
             "The setter of 'x' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -900,7 +900,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 project2.SourceFiles.First().File,
-                new SourceSpan(new SourcePosition(105, 7, 16), new SourcePosition(108, 7, 19))),
+                new SourceSpan(new SourcePosition(107, 7, 18), new SourcePosition(108, 7, 19))),
             "The getter of 'x' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -952,7 +952,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 project2.SourceFiles.First().File,
-                new SourceSpan(new SourcePosition(99, 7, 9), new SourcePosition(102, 7, 12))),
+                new SourceSpan(new SourcePosition(101, 7, 11), new SourcePosition(102, 7, 12))),
             "The setter of 'x' is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1037,7 +1037,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 project2.SourceFiles.First().File,
-                new SourceSpan(new SourcePosition(99, 7, 9), new SourcePosition(107, 7, 17))),
+                new SourceSpan(new SourcePosition(101, 7, 11), new SourcePosition(107, 7, 17))),
             "The 'method' method is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
@@ -1078,7 +1078,7 @@ public class CheckAccessModifiersTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(152, 10, 21), new SourcePosition(162, 10, 31))),
+                new SourceSpan(new SourcePosition(154, 10, 23), new SourcePosition(162, 10, 31))),
             "The 'toString' method is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));

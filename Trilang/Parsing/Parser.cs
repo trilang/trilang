@@ -1063,14 +1063,11 @@ public class Parser
 
         var (idSpan, id) = TryParseId(context);
         if (id is not null)
-            return new MemberAccessExpressionNode(member.SourceSpan.Combine(idSpan), member, id);
+            return new MemberAccessExpressionNode(idSpan, member, id);
 
         var (hasInteger, number) = context.Reader.Match(Number);
         if (hasInteger)
-            return new MemberAccessExpressionNode(
-                member.SourceSpan.Combine(number.SourceSpan),
-                member,
-                number.Value!.ToString()!);
+            return new MemberAccessExpressionNode(number.SourceSpan, member, number.Value!.ToString()!);
 
         var result = new FakeExpressionNode(context.Reader.Token.SourceSpan);
         context.Diagnostics.ExpectedIdentifier(result.SourceSpan);

@@ -37,7 +37,7 @@ public class RestrictFieldAccessTests
             DiagnosticSeverity.Error,
             new SourceLocation(
                 file,
-                new SourceSpan(new SourcePosition(76, 4, 12), new SourcePosition(92, 4, 28))),
+                new SourceSpan(new SourcePosition(85, 4, 21), new SourcePosition(92, 4, 28))),
             "The 'context' field is not accessible.");
 
         Assert.That(diagnostics.Diagnostics, Is.EqualTo([diagnostic]));
